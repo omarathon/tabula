@@ -15,10 +15,10 @@ class Views extends Object with Logging with ImplicitConversions {
     
     @Bean def freemarkerConfigurer = new FreeMarkerConfigurer {
         setTemplateLoaderPath("/WEB-INF/freemarker/")
-        setFreemarkerSettings(Map(
-            "default_encoding" -> "UTF-8",
-            "output_encoding" -> "UTF-8"
-        ))
+        setFreemarkerSettings(new Properties{
+        	setProperty("default_encoding", "UTF-8")
+        	setProperty("output_encoding", "UTF-8")
+        })
     }
     
 	@Bean def viewResolver = new org.springframework.web.servlet.view.UrlBasedViewResolver {

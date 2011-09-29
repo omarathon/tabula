@@ -11,11 +11,5 @@ import scala.collection.mutable
  */
 trait ImplicitConversions {
   
-	// Implicitly convert a Map to a Properties where it fits
-  	implicit def ScalaMapAsProperties(map:Map[String,String]) : java.util.Properties = map match {
-	  case _ => new java.util.Properties {
-	    putAll(map)
-	  }
-	}
 	
 }
