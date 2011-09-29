@@ -1,0 +1,7 @@
+<jboss-web>
+   <class-loading> 
+      <loader-repository> 
+      dot.com:loader=courses_war
+      </loader-repository> 
+   </class-loading>
+</jboss-web> 

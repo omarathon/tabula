@@ -1,0 +1,5 @@
+/bin
+/dist
+/target
+/hs_err*
+local.properties

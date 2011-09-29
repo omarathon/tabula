@@ -1,0 +1,476 @@
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+    version="2.0">
+        
+  <display-name>Sitebuilder tags</display-name>
+  <tlib-version>1.1</tlib-version>
+  <short-name>Sitebuilder</short-name>
+
+
+  <tag>
+    <description>
+      Display any errors occured whilst loading the content.
+    </description>
+    <name>contentLoaderException</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.ContentLoaderExceptionsTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>contentException</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Retrieve the user with the specified userId.
+    </description>
+    <name>user</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.UserTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>userId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Print out the specified date in the standard format.
+    </description>
+    <name>date</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.DateTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>date</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>includeTime</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>readable</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Print out the specified dateTime in the standard format.
+    </description>
+    <name>dateTime</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.DateTimeTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>date</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>includeTime</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>readable</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>showYear</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Print out a readable time string given the number of seconds.
+    </description>
+    <name>timeFromSeconds</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.TimeFromSecondsTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>value</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Only parse the body for users that have the specified permissions for the current page.
+      If result is specified, then always include the body, but make the decision available via the result parameter.
+    </description>
+    <name>permissions</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PermissionsTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>user</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>activityName</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>result</name>
+      <required>false</required>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Determines the real lastModifiedDate of the current page and exposes it under an attribute called lastModifiedDate
+    </description>
+    <name>determineLastModifiedDate</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.DetermineLastModifiedDateTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Determines the last modified date of file backing the current page and exposes it under an attribute called fileLastModifiedDate
+    </description>
+    <name>determineFileLastModifiedDate</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.DetermineFileLastModifiedDateTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  
+  <tag>
+    <description>
+      Sort the specified List of PagePermission objects.
+    </description>
+    <name>permissionSorter</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PagePermissionSorterTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>permissions</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Render the subject of the specified permission.
+    </description>
+    <name>permissionSubjectRenderer</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PermissionSubjectRendererTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>subject</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>typeVar</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Groups by the last updated date
+    </description>
+    <name>lastUpdatedGrouper</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.LastUpdatedGrouperTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>pages</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>start</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>end</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Display the file size of the specified page.
+    </description>
+    <name>fileSize</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.FileSizeTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Display an image file's dimensions, or nothing if the file isn't an image.
+    </description>
+    <name>imageFileDimensions</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.ImageFileDimensionsTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>multiplySymbol</name>
+      <required>false</required>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Render the specified mimeType as an id.
+    </description>
+    <name>mimeTypeId</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.MimeTypeIdTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>mimeType</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+
+  <tag>
+    <description>
+      Locate the help text.
+    </description>
+    <name>helpText</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.HelpTextTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>key</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Last part of a page's URL
+    </description>
+    <name>urlSuffix</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.UrlSuffixTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Determine the preferred ContentFetcher to edit.
+    </description>
+    <name>preferredContentFetcher</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PreferredContentFetcherTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>content</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Output a readable representation of the content fetcher
+    </description>
+    <name>contentFetcher</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.ReadableContentFetcherTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>contentFetcher</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Locate the next and previous page
+    </description>
+    <name>pageIterator</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.IteratorTag</tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+  <tag>
+    <description>
+      Escapes special characters
+      except for entities other than amp,
+      such as copy and any numerical entity.
+    </description>
+    <name>lenientEscape</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.LenientEscapeTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>value</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Provides a BreadCrumbs object in result, which can be used in the
+      tag body to render a hierarchical bread crumb trail.
+    </description>
+    <name>pageBreadCrumbs</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PageBreadCrumbsTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>result</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Rewrites the body of the tag with relative URLs replaced with
+      absolute URLs, using the given Page as the original relative base
+      and the baseName as the new start of the absolute URLs.
+    </description>
+    <name>urlRewriter</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.UrlRewriterTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>baseName</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Returns the viewing permissions of a page as a string
+    </description>
+    <name>permissionsString</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PermissionsStringTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>page</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <description>
+      Returns a css-friendly representation of the mime-type for a file name
+    </description>
+    <name>mimeId</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.MimeTypeIdFromFileTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>fileName</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  
+  <tag>
+    <description>
+        Prints an InputStream or Reader to the page output.
+    </description>
+    <name>printStream</name>
+    <tag-class>uk.ac.warwick.sbr.web.tags.PrintStreamTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+        <description>Either an InputStream or a Reader</description>
+        <name>source</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  
+  <tag>
+    <description>
+      Render the &lt;body&gt; of the specified content key of the specified page.
+    </description>
+  	<name>renderContent</name>
+  	<tag-class>uk.ac.warwick.sbr.web.tags.ContentRendererTag</tag-class>
+  	<body-content>JSP</body-content>
+  	<attribute>
+      <description>The page to render</description>
+  		<name>page</name>
+  		<required>true</required>
+  		<rtexprvalue>true</rtexprvalue>
+  	</attribute>
+  	<attribute>
+      <description>The content key to render</description>
+  		<name>contentKey</name>
+  		<required>true</required>
+  		<rtexprvalue>true</rtexprvalue>
+  	</attribute>
+  </tag>
+  
+  <function>
+    <description>
+      Outputs the given requested URL, optionally with query parameters appended.
+    </description>
+    <name>requestedUrl</name>
+    <function-class>uk.ac.warwick.sbr.web.tags.RequestedUrlFunction</function-class>
+    <function-signature>java.lang.String requestedUrl(java.lang.String)</function-signature>
+    <example>
+      ${sbr:requestedUrl(query)}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+      Outputs ".070403120202" timestamp for appending to js and css urls.
+    </description>
+    <name>timestampSuffix</name>
+    <function-class>uk.ac.warwick.sbr.web.tags.TimestampSuffixTag</function-class>
+    <function-signature>java.lang.String timestampSuffix()</function-signature>
+    <example>
+      ${sbr:timestampSuffix()}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+      converts a relative resource URL into an absolute, timestamped one 
+    </description>
+    <name>apache</name>
+    <function-class>uk.ac.warwick.sbr.web.tags.ApacheUrlGenerator</function-class>
+    <function-signature>java.lang.String generateUrl(java.lang.String, java.lang.String, boolean, uk.ac.warwick.sbr.SiteBuilderRequestInfo, boolean, boolean)</function-signature>
+    <example>
+      ${sbr:apache("/static_war/foo.js","static0",true,info,false, false)}
+    </example>
+  </function>
+  
+  <function>
+    <name>pl</name>
+    <function-class>uk.ac.warwick.sbr.web.tags.Pluraliser</function-class>
+    <function-signature>java.lang.String plural(int, java.lang.String, java.lang.String)</function-signature>
+    <example>
+      ${sbr:pl(pageCount,"page","pages")}
+    </example>
+  </function>
+  
+</taglib>
