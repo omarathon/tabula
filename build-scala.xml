@@ -1,0 +1,112 @@
+<!--
+
+  generic Scala project buildfile
+
+-->
+<project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="package">
+
+  <macrodef name="assert-dir-exists" description="Asserts that a given variable name is set and the value is a file/directory that exists">
+	<attribute name="var" />
+  	<sequential>
+  	  <fail unless="@{var}" message="@{var} is not set - check your local.properties" />
+  	  <available type="dir" file="${@{var}}" property="@{var}.available" />
+  	  <fail unless="@{var}.available" message="@{var} is set but ${@{var}} is not a directory." />
+  	</sequential>
+  </macrodef>
+
+  <property file="build.properties" />
+  <property file="local.properties" />
+  <property name="scala-library.jar" value="${scala.lib}/scala-library.jar" />
+  <property name="scala-compiler.jar" value="${scala.lib}/scala-compiler.jar" />
+
+  <property name="src.scala" value="src/main/scala" />
+	
+  <path id="build.classpath">
+    <fileset dir="lib/runtime" includes="**/*.jar" />
+    <fileset dir="lib/build" includes="**/*.jar" />
+  </path>
+  
+  <taskdef resource="scala/tools/ant/antlib.xml">
+    <classpath refid="build.classpath" />
+  </taskdef>
+  
+  <target name="-checks">
+  </target>
+  
+  <target name="clean">
+    <delete dir="target" />
+  </target>
+  
+  <target name="compile" depends="-checks">
+    <mkdir dir="target/${war.name}/WEB-INF/classes" />
+    <scalac srcdir="${src.scala}" destdir="target/${war.name}/WEB-INF/classes" classpathref="build.classpath" />
+  </target>
+
+  <target name="package" depends="compile">
+    
+    <copy todir="target/${war.name}">
+      <fileset dir="src/main/webapp"/>
+    </copy>
+    
+    <copy todir="target/${war.name}/WEB-INF/classes">
+      <fileset dir="src/main/resources" />
+    </copy>
+    
+    <mkdir dir="target/${war.name}/WEB-INF/lib"/>
+    <copy todir="target/${war.name}/WEB-INF/lib" flatten="true">
+      <fileset dir="lib/runtime" includes="**/*.jar" />
+    </copy>
+    
+    <mkdir dir="dist"/>
+    <war warfile="dist/${war.name}" basedir="target/${war.name}" />
+    <length file="dist/${war.name}" property="war.length" />
+    <echo message="Generated WAR of ${war.length} bytes" />
+    
+  </target>
+	
+  <!-- Copy unpacked war directory to deploy.dir -->
+  <target name="dev-deploy-unpacked" depends="package">
+  	<assert-dir-exists var="deploy.dir" />
+    <sync todir="${deploy.dir}/${war.name}">
+      <fileset dir="target/${war.name}" />
+    </sync>
+  	<touch file="${deploy.dir}/${war.name}/WEB-INF/web.xml" />
+  </target>
+	
+  <target name="dev-deploy-views">
+  	<assert-dir-exists var="deploy.dir" />
+    <sync todir="${deploy.dir}/${war.name}/WEB-INF/freemarker">
+      <fileset dir="src/main/webapp/WEB-INF/freemarker" />
+    </sync>
+  </target>
+
+  <target name="test" depends="compile">
+    <path id="test.classpath">
+      <path refid="build.classpath" />
+      <fileset dir="lib/test" includes="**/*.jar" />
+      <path location="target/${war.name}" />
+      <path location="target/${war.name}/WEB-INF/classes" />
+      <path location="target/test" />
+    </path>
+    
+    <mkdir dir="target/test" />
+    <scalac srcdir="src/test/scala" destdir="target/test" classpathref="test.classpath" deprecation="true">
+      <include name="**/*.scala" />
+    </scalac>
+    
+    <mkdir dir="target/test-results" />
+    <junit printsummary="withOutAndErr">
+      <classpath refid="test.classpath" />
+      <formatter type="xml" />
+      <batchtest todir="target/test-results">
+        <fileset dir="target/test">
+          <include name="**/*TestCase.class"/>
+          <include name="**/*Test.class"/> 
+          <include name="**/*Tests.class"/>
+          <exclude name="**/Abstract*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+</project>

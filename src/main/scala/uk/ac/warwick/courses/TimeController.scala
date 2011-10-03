@@ -12,24 +12,18 @@ import java.util.Date
 
 @Controller
 class TimeController {
-	
-	var timeWelcome = "Hello"
-	
-	val c = Calendar getInstance
-		
-	@RequestMapping(value=Array("/time"))
-	def showTime = new ModelAndView("time/view") {
-		addObject("time", new Date)
-		addObject("timeWelcome", timeWelcome)
-	}
-	
-	@RequestMapping(value=Array("/"))
-	def showTime(writer:Writer) = {
-	  writer.write("Bam!")
-	}
-	
-	def setTimeWelcome(x:String) = { 
-	  timeWelcome = x 
-	} 
-	
+
+  var timeWelcome = "Hello"
+
+  @RequestMapping(value = Array("/time"))
+  def showTime = new ModelAndView("time/view") {
+    addObject("time", new Date)
+    addObject("timeWelcome", timeWelcome)
+
+  }
+
+  def setTimeWelcome(x: String) = {
+    timeWelcome = x
+  }
+
 }

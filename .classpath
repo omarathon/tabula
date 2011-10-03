@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="src/test/resources"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jms-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.M2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="src" path="src/main/scala"/>
 	<classpathentry kind="src" path="src/test/scala"/>
-	<classpathentry kind="src" path="src/main/webapp"/>
-	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
@@ -16,21 +33,6 @@
 	<classpathentry kind="lib" path="lib/test/junit-4.4.jar"/>
 	<classpathentry kind="lib" path="lib/test/objenesis-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/scalatest-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-api-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-core-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-extras-2.2.2.jar"/>
@@ -47,5 +49,7 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-beanutils-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-digester-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
+	<classpathentry kind="lib" path="src/main/resources"/>
+	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

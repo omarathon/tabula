@@ -1,7 +1,7 @@
 <#assign fmt=JspTaglibs["/WEB-INF/tld/fmt.tld"]>
 
-<h1>The extraordinary time-teller</h1>
+<h2>The extraordinary time-telling controller</h2>
 
 <p>
-  ${timeWelcome} <@fmt.formatDate value="${time}" type="time" />
+  ${timeWelcome} <@fmt.formatDate value=time type="time" />
 </p>
