@@ -10,7 +10,7 @@
   
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>uk.ac.warwick.courses.config.Application</param-value>
+    <param-value>uk.ac.warwick.courses.config</param-value>
   </context-param> 
  
   <listener>

@@ -5,13 +5,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import uk.ac.warwick.courses.TimeController
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 
 @Configuration
 @EnableScheduling
 @EnableTransactionManagement
-@Import(Array(
-  classOf[Views],
-  classOf[Mvc]))
+@Profile(Array("dev","production"))
 class Web {
   
   @Bean def timeController = new TimeController

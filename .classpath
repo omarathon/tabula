@@ -19,6 +19,11 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.M2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.M2.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.M2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
+	<classpathentry kind="lib" path="lib/build/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="lib/build/jta-spec1_0_1.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/dom4j-1.6.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="src" path="src/main/scala"/>
@@ -30,7 +35,6 @@
 	<classpathentry kind="lib" path="lib/test/jmock-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-cglib-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/junit-4.4.jar"/>
 	<classpathentry kind="lib" path="lib/test/objenesis-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/scalatest-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-api-2.2.2.jar"/>
@@ -45,7 +49,6 @@
 	<classpathentry kind="lib" path="lib/runtime/cglib/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/build/slf4j-api-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/asm-3.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/cglib-nodep-2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-beanutils-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-digester-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>

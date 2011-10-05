@@ -6,13 +6,13 @@
 <tiles-definitions>
 
   <definition name="base" template="/WEB-INF/freemarker/layouts/base.ftl">
-    <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
+    <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
   
   <definition name="none" template="/WEB-INF/freemarker/layouts/none.ftl">
-    <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
+    <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
   
 </tiles-definitions>
