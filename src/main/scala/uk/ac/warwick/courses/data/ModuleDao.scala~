@@ -1,0 +1,19 @@
+package uk.ac.warwick.courses.data
+import org.springframework.stereotype.Repository
+import org.hibernate.SessionFactory
+import model.Module
+
+trait ModuleDao {
+  def saveOrUpdate(module:Any)
+  def getByCode(code:String):Module
+}
+
+@Repository
+class ModuleDaoImpl(sessionFactory:SessionFactory) extends Object with ModuleDao {
+  
+  def saveOrUpdate(module:Module) = session.saveOrUpdate(module)
+  def getByCode(code:String) = session.find("select from Module as module where code = ?", code)
+
+  private def session = sessionFactory.getCurrentSession
+  
+}
