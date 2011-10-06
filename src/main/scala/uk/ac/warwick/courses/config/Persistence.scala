@@ -17,17 +17,17 @@ class Persistence extends Object with Logging {
 
 	@Autowired var dataSourceConfig:DatasourceConfig = null
   
-    @Bean def sessionFactory:SessionFactory = {
-    	new AnnotationSessionFactoryBuilder()
+	@Bean def sessionFactory:SessionFactory = {
+		new AnnotationSessionFactoryBuilder()
 			.setDataSource(dataSourceConfig.dataSource)
 			.setAnnotatedClasses(
-			    classOf[Module],
-			    classOf[Department],
-			    classOf[Assignment]
+				classOf[Module],
+				classOf[Department],
+				classOf[Assignment]
 			)
 			//.setAnnotatedPackages("uk.ac.warwick.courses.data.model")
 			.buildSessionFactory()
-    }
+	}
 	
 	@Bean def transactionManager:HibernateTransactionManager = new HibernateTransactionManager {
 		setSessionFactory(sessionFactory)
