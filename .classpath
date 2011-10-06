@@ -20,10 +20,16 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.M2.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.M2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
-	<classpathentry kind="lib" path="lib/build/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
 	<classpathentry kind="lib" path="lib/build/jta-spec1_0_1.jar"/>
 	<classpathentry kind="lib" path="lib/test/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-dbcp/commons-dbcp-1.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-dbcp/commons-pool-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/slf4j-log4j12-1.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/hibernate-validator-4.2.0.Final.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/hibernate-validator-annotation-processor-4.2.0.Final.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="src" path="src/main/scala"/>

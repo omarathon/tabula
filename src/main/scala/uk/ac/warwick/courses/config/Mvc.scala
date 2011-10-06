@@ -24,10 +24,10 @@ class Mvc extends WebMvcConfigurerAdapter with EnvironmentAwareness {
 	    cfg.enable()
 	  }
 	
-	  
-	override def configureInterceptors(cfg:InterceptorConfigurer) = 
-	  cfg.addInterceptor(new OpenSessionInViewInterceptor)
-	
+//	  
+//	override def configureInterceptors(cfg:InterceptorConfigurer) = 
+//	  cfg.addInterceptor(new OpenSessionInViewInterceptor)
+//	
 	  	
 	
 }

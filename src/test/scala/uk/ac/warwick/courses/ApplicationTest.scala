@@ -32,8 +32,7 @@ class ApplicationTest extends ShouldMatchersForJUnit {
     
     def session = sessionFactory.getCurrentSession
     
-    @Transactional
-    @Test def persistentClasses:Unit = {
+    @Transactional @Test def hibernatePersistence = {
 	  val assignment = new Assignment
 	  assignment.name = "Cake Studies 1"
 	  session.save(assignment)

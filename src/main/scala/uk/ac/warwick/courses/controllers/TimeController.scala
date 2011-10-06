@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses
+package uk.ac.warwick.courses.controllers
 
 import java.util.Calendar
 import org.springframework.stereotype.Controller
