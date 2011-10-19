@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired
 
 trait ModuleDao {
   def saveOrUpdate(module:Module)
-  def getByCode(code:String):Module
+  def getByCode(code:String): Option[Module]
 }
 
 @Repository
-class ModuleDaoImpl @Autowired()(sessionFactory:SessionFactory) extends Object with ModuleDao {
+class ModuleDaoImpl @Autowired()(val sessionFactory:SessionFactory) extends ModuleDao with Daoisms {
   
   def saveOrUpdate(module:Module) = session.saveOrUpdate(module)
-  def getByCode(code:String) = session.find("select from Module as module where code = ?", code, new StringType) match {
-    case list:List[Module] if !list.isEmpty => list.get(0).asInstanceOf[Module]
+  
+  def getByCode(code:String) = option[Module] { 
+    session.createQuery("from Module m where code = :code").setString("code",code).uniqueResult
   }
-
-  private def session = sessionFactory.getCurrentSession
+    
   
 }

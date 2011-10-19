@@ -1,41 +1,39 @@
 <#assign tiles=JspTaglibs["http://tiles.apache.org/tags-tiles"]>
+<#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
 <!doctype html>
 <html lang="en-GB">
 	<head>		  
-		  <title>{title}</title>
+		  <title>Assignments</title>
 		
 		  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 		  <meta charset="utf-8">
 		  <meta name="robots" content="noindex,nofollow">
 
-		  <link rel="stylesheet" href="/courses/static/css/concat6.css" type="text/css">
-		  <link rel="stylesheet" title="No Accessibility" href="/courses/static/css/noaccessibility.css" type="text/css">
-		  <link rel="alternate stylesheet" title="Show Accessibility" href="/courses/static/css/showaccessibility.css" type="text/css">
+		  <link rel="stylesheet" href="/static/css/concat6.css" type="text/css">
+		  <link rel="stylesheet" href="/static/css/main.css" type="text/css">
+		  <link rel="stylesheet" title="No Accessibility" href="/static/css/noaccessibility.css" type="text/css">
+		  <link rel="alternate stylesheet" title="Show Accessibility" href="/static/css/showaccessibility.css" type="text/css">
 		  
 		  <!--[if lt IE 8]>
-			  <link rel="stylesheet" href="/courses/static/css/ielt8.css" type="text/css">
+			  <link rel="stylesheet" href="/static/css/ielt8.css" type="text/css">
 		  <![endif]-->
 		  <!--[if lt IE 9]>
 		  	<style type="text/css">
 		 		#container {
-					behavior: url(/courses/static/css/pie.htc);
+					behavior: url(/static/css/pie.htc);
 		 		}
 		  	</style>
 		  <![endif]-->
 		  
-		  <!-- Uncomment this if the site is non-Warwick branded
-			<link rel="stylesheet" href="/courses/static/css/non-branded.css" type="text/css">
-		   -->
-		  
-		  <link rel="stylesheet" href="/courses/static/css/fonts/standard.css" type="text/css">
+		  <link rel="stylesheet" href="/static/css/fonts/standard.css" type="text/css">
 		
-		  <script type="text/javascript" src="/courses/static/js/id6scripts.js"></script>
+		  <script type="text/javascript" src="/static/js/id6scripts.js"></script>
 
 	</head>
 	<body class="horizontal-nav layout-100">
 		<div id="container">
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
-			<div id="header" class="header-small" data-type="image">
+			<div id="header" class="header-medium" data-type="image">
 			
 				<div id="masthead" class="transparent"> <!-- optional: class="transparent" -->
 					<div class="access-info">
@@ -47,7 +45,7 @@
 						<!-- The on-hover class here specifies that the links should only be displayed on hover -->
 						<div id="warwick-logo-container" class="on-hover">
 							<a id="warwick-logo-link" href="http://www.warwick.ac.uk" title="University of Warwick homepage">
-								<img id="warwick-logo" src="images/logo.png" alt="University of Warwick">
+								<img id="warwick-logo" src="/static/images/logo.png" alt="University of Warwick">
 							</a>
 			
 							<div id="warwick-site-links">
@@ -69,9 +67,14 @@
 					<div id="utility-container">
 						<div id="utility-bar">
 							<ul>
-								<li>{UTILITY</li>
-								<li class="spacer">|</li>
-								<li>BAR}</li>
+								<li>
+								<#if user?? && user.foundUser>
+									Sign in as ${user.fullName}.
+									<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
+								<#else>
+								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+								</#if>
+								</li>
 							</ul>
 						</div>
 					
@@ -89,7 +92,7 @@
 											<ul id="search-index-menu" style="display: none"></ul>
 										</li>
 									</ul>
-									<input autocomplete="off" id="search-box" class="large" placeholder="Type your search here" name="q" /><input alt="Search" id="search-button" type="image" src="images/shim.gif" title="Click here to search" />
+									<input autocomplete="off" id="search-box" class="large" placeholder="Type your search here" name="q" /><input alt="Search" id="search-button" type="image" src="/static/images/shim.gif" title="Click here to search" />
 									<div id="search-suggestions" style="display: none"></div>
 								</form>
 							</div>
@@ -101,11 +104,11 @@
 					<div class="content">
 						<div id="site-header-container">
 							<h1 id="site-header">
-								<span id="current-site-header"><a accesskey="1" title="{SITE DESCRIPTION} home page [1]" href="#">{SITE DESCRIPTION}</a></span>
+								<span id="current-site-header">Assignments</span>
 							</h1>
 							
 							<h2 id="strapline">
-								<!-- If header has a strapline, put it here (if slideshow, put the first slide's strapline here) -->
+								Yeah, assignments.
 							</h2>
 						</div>
 						
@@ -127,7 +130,7 @@
 				<li class="section selected-section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
-							<a href="#">{SELECTED SECTION}</a>										
+							<a href="#">{THIS SECTION}</a>										
 						</div>
 						<!-- 
 						<div class="description rendered-link-content">
@@ -197,58 +200,6 @@
 		<div id="after-primary-navigation"></div>
 	</div>
 	
-	<!-- Don't include the secondary navigation if you're on the homepage or if it would be empty -->
-	<div id="secondary-navigation-wrapper">
-		<div id="before-secondary-navigation"></div>
-		
-		<div id="secondary-navigation-container">
-			<ul id="secondary-navigation">
-				<li class="breadcrumb rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{BREADCRUMB PAGE}</a>
-							<span class="breadcrumb-icon">&raquo;</span>
-						</div>
-					</div>
-				</li><li class="current-page selected-section breadcrumb rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{CURRENT PAGE}</a>
-							<!-- Don't show the breadcrumb icon on the current page if there are no children -->
-							<span class="breadcrumb-icon">&raquo;</span>
-						</div>
-					</div>
-				</li><li class="protected rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{PROTECTED CHILD}</a>
-							<img src="images/shim.gif" alt="" title="Protected content" class="padlock" />
-						</div>
-					</div>
-				</li><li class="rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{CHILD PAGE}</a>
-						</div>
-					</div>
-				</li><li class="rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{CHILD PAGE}</a>
-						</div>
-					</div>
-				</li><li class="rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{CHILD PAGE}</a>
-						</div>
-					</div>
-				</li>
-			</ul>
-		</div>
-		
-		<div id="after-secondary-navigation"></div>
-	</div>
 </div>
 			
 				<div id="content-wrapper">					     
@@ -260,7 +211,6 @@
 								alt="University of Warwick">
 			
 							<h1>
-								{PAGE TITLE}
 								<span id="after-page-title"></span>
 							</h1>
 			
@@ -293,7 +243,7 @@
 					
 					<div id="common-footer">
 						<div id="page-footer-elements" class="nofollow">
-							<span class="footer-left">{FOOTER INFORMATION}</span> <span class="footer-right">Last revised: {LAST REVISED}</span>
+							<span class="footer-left"></span> <span class="footer-right"></span>
 							
 							<div style="clear:both;"></div>
 						</div>
@@ -301,16 +251,18 @@
 						<div id="footer-utility">
 							<ul>
 								<li id="sign-inout-link">
-				          			{UTILITY FOOTER}
+				          			
 			          			</li>
 			          			<li class="spacer">|</li>
 		          			
+		          				<!--
 			          			<li id="powered-by-link">
-			          				Powered by <a href="#" title="More information about {APP}">{APP}</a>
+			          				Powered by <a href="#" title="More information about {APP}">APP</a>
 			          			</li>
+			          			-->
 			          			<li class="spacer">|</li>
 			          
-			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; {YEAR}</a></li>
+			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; ${.now?string("yyyy")}</a></li>
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>
 			          			<li class="spacer">|</li>

@@ -1,0 +1,8 @@
+<jboddddss-web>
+   <class-loading> 
+      <loader-repository>
+      uk.ac.warwick.courses:archive=courses_war
+      <loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+      </loader-repository> 
+   </class-loading>
+</jboss-web> 

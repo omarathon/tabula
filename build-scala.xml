@@ -28,6 +28,7 @@
 	
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="build.classpath" />
   <taskdef resource="scala/tools/ant/antlib.xml" classpathref="build.classpath" />
+  <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties" classpath="lib/runtime/aspectj/aspectjtools.jar" />
   
   <target name="-checks">
   </target>
@@ -39,7 +40,16 @@
   
   <target name="compile" depends="-checks" description="Compile source files into target directory">
     <mkdir dir="target/${war.name}/WEB-INF/classes" />
-    <scalac srcdir="${src.scala}" destdir="target/${war.name}/WEB-INF/classes" classpathref="build.classpath" />
+  	<mkdir dir="target/unwoven" />
+  	<mkdir dir="target/log" />
+    <scalac srcdir="${src.scala}" destdir="target/unwoven" classpathref="build.classpath" />
+  	<iajc
+        inpath="target/unwoven"
+        destdir="target/${war.name}/WEB-INF/classes" 
+        classpathref="build.classpath"
+        aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.M2.jar"
+    	  log="target/log/iajc.log"
+        verbose="false" />
   </target>
 
   <target name="package" depends="compile" description="Compile and package application into a WAR file">
@@ -80,6 +90,13 @@
     </sync>
   </target>
 	
+  <target name="dev-deploy-static">
+  	<assert-dir-exists var="deploy.dir" />
+    <sync todir="${deploy.dir}/${war.name}/static">
+      <fileset dir="src/main/webapp/static" />
+    </sync>
+  </target>
+	
   <target name="list-runtime-jars" description="Print sorted list of runtime jars, to check for duplicates.">
   	<pathconvert pathsep="&#xA;" property="jars" refid="runtime.jars" preserveduplicates="true">
   	    <mapper type="flatten" />
@@ -93,7 +110,7 @@
       <path location="src/test/resources" />
       <path refid="build.classpath" />
       <fileset dir="lib/test" includes="**/*.jar" />
-      <path location="target/${war.name}" />
+      <path location="src/main/webapp" />
       <path location="target/${war.name}/WEB-INF/classes" />
       <path location="target/test" />
     </path>
@@ -117,6 +134,36 @@
         </fileset>
       </batchtest>
     </junit>
+  </target>
+
+  <!--
+  See hib-build.cfg.xml for rant on why this doesn't work very well and
+  why we should probably just delete it
+  -->
+  <target name="generate-ddl" depends="compile">
+  	
+  	<!-- Hibernate tool only seems able to load classes from jars, so jar up the classes
+  		for it to find the annotation entities -->
+  	<jar basedir="target/${war.name}/WEB-INF/classes" file="target/all-classes.jar" />
+  	
+  	<path id="hbm.classpath">
+  		<path refid="build.classpath" />
+  		<fileset file="target/all-classes.jar" />
+  	</path>
+  	<taskdef name="hibernate"
+        classname="org.hibernate.tool.ant.HibernateToolTask"
+        classpathref="hbm.classpath"/>
+  	
+  	<mkdir dir="target/ddl" />
+  	<hibernate destdir="target/ddl">
+  	  <annotationconfiguration configurationfile="hib-build.cfg.xml"/>
+  	  <hbm2ddl export="false"
+  	  	create="true"
+  		delimiter=";"
+  		format="true"
+  	  	outputfilename="schema.sql"
+  	  />
+  	</hibernate>
   </target>
 
 </project>

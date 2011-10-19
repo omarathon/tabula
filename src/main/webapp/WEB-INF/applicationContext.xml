@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
+		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
+
+	<!-- fire up annotation driven everything -->
+	<context:spring-configured />
+	<context:annotation-config />
+	<context:component-scan base-package="uk.ac.warwick.courses.web.controllers" />
+	<context:component-scan base-package="uk.ac.warwick.courses.services" />
+	<context:component-scan base-package="uk.ac.warwick.courses.data" />
+	
+	<!-- make properties available as ${..} tokens -->
+	<context:property-placeholder location="
+		classpath:/courses.properties,
+		classpath:/courses-private.properties" />
+	
+	<mvc:annotation-driven  />
+	<tx:annotation-driven />
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<!-- get app server to handle static content -->
+	<mvc:default-servlet-handler />
+	
+	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
+		<mapping>
+			<filter ref="ssoClientFilter" />
+			<url-pattern>/*</url-pattern>
+			<excluded-url-pattern>/static/*</excluded-url-pattern>
+			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+		</mapping>
+		<mapping>
+			<filter ref="forceLoginFilter" />
+			<filter ref="sysadminGroupFilter" />
+			<url-pattern>/sysadmin/*</url-pattern>
+		</mapping>
+	</filter-stack>
+	
+	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
+		p:detectAnonymousOnCampusUsers="true"
+		p:userLookup-ref="userLookup"
+		p:configLocation="/sso-config.xml" />
+		
+	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
+	
+	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
+		p:group="in-courses-sysadmins"
+		p:groupService-ref="groupService" />
+	
+	<bean id="userLookup" class="uk.ac.warwick.userlookup.UserLookup"
+		p:groupServiceLocation="https://webgroups.warwick.ac.uk/" />
+	<util:property-path id="groupService" path="userLookup.groupService"/>
+
+	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
+		p:templateLoaderPath="/WEB-INF/freemarker/"
+		p:configuration-ref="freemarkerConfiguration" />
+		
+	<bean id="freemarkerConfiguration" class="uk.ac.warwick.courses.web.views.ScalaFreemarkerConfiguration" />
+	<bean class="org.springframework.web.context.support.ServletContextAttributeExporter">
+		<property name="attributes"><map>
+			<entry key="freemarkerConfiguration" value-ref="freemarkerConfiguration" />
+		</map></property>
+	</bean>
+			
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver" />
+  	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+		p:dataSource-ref="dataSource"
+		p:packagesToScan="uk.ac.warwick.courses.data.model"
+		p:hibernateProperties-ref="hibernateProperties">
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+		p:sessionFactory-ref="sessionFactory" />
+	
+	<beans profile="dev,production">
+	
+		<!-- @Scheduled -->
+		<task:annotation-driven/>
+	
+		<bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource"
+			p:driverClassName="oracle.jdbc.OracleDriver"
+			p:url="${courses.datasource.url}"
+			p:username="${courses.datasource.username}"
+			p:password="${courses.datasource.password}"
+		/>
+		<util:properties id="hibernateProperties">
+			<prop key="hibernate.jdbc.batch_size">20</prop>
+			<prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+		</util:properties>
+		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
+			p:definitions="/WEB-INF/defs/views.xml"
+			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory" />
+	</beans>
+	
+	<beans profile="test">
+		<jdbc:embedded-database id="dataSource" />
+
+		<bean class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
+			c:dataSource-ref="dataSource"
+			p:scripts="schema.sql,data.sql" />
+		
+		<util:properties id="hibernateProperties">
+			<prop key="hibernate.jdbc.batch_size">20</prop>
+			<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+			<prop key="hibernate.hbm2ddl.auto">create</prop>
+		</util:properties>
+	</beans>
+
+</beans>

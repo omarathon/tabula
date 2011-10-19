@@ -175,13 +175,12 @@ ol ol {
   margin-bottom: 0;
 }
 /** End Baseline **/
-body {
+body,html {
   margin: 0px;
   padding: 0px;
   /* Default site background colour */
-
-  background: #d3d3d3;
 }
+  
 #container {
   margin-left: auto;
   margin-right: auto;

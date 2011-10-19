@@ -21,9 +21,11 @@ import org.springframework.context.annotation.ComponentScan
 import uk.ac.warwick.courses.data.model.Assignment
 import org.springframework.test.context.transaction.TransactionConfiguration
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.model.Module
+import scala.collection.JavaConversions._
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(loader=classOf[AnnotationConfigContextLoader])
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml", "/WEB-INF/*-context.xml"))
 @TransactionConfiguration()
 @ActiveProfiles(Array("test"))
 class ApplicationTest extends ShouldMatchersForJUnit {
@@ -45,9 +47,10 @@ class ApplicationTest extends ShouldMatchersForJUnit {
 	  fetchedAssignment.name should be("Cake Studies 1")
 	}
     
-}
-
-object ApplicationTest {
-  @ComponentScan(Array("uk.ac.warwick.courses.config"))
-  @Configuration class ContextConfiguration
+    @Transactional @Test def getModules = {
+      val modules = session.createCriteria(classOf[Module]).list
+      modules.size should be (2)
+      modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
+    }
+    
 }
