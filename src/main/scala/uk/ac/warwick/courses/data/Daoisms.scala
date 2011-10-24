@@ -9,7 +9,7 @@ trait Daoisms {
    * Returns Some(obj) if it matches the expected type, otherwise None.
    * Useful for converting the value from .uniqueResult into an Option.
    */
-  def option[D](obj:Any) = obj match {
+  def option[D<:Any](obj:Any) = obj match {
     case obj:D => Some(obj)
     case _ => None
   }

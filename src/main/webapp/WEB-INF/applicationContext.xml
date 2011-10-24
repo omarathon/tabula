@@ -32,9 +32,27 @@
 		classpath:/courses.properties,
 		classpath:/courses-private.properties" />
 	
-	<mvc:annotation-driven  />
+	<!-- validation -->
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+	
+	<mvc:interceptors>
+		<mvc:interceptor><mvc:mapping path="/**"/>
+			<bean class="uk.ac.warwick.courses.system.CurrentUserInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor><mvc:mapping path="/**"/>
+			<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<mvc:annotation-driven validator="validator">
+		<mvc:argument-resolvers>
+			<bean class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
+		</mvc:argument-resolvers>
+	</mvc:annotation-driven>
+	
 	<tx:annotation-driven />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	
 	
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
@@ -45,6 +63,7 @@
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
 		<mapping>
 			<filter ref="forceLoginFilter" />
@@ -66,6 +85,7 @@
 	
 	<bean id="userLookup" class="uk.ac.warwick.userlookup.UserLookup"
 		p:groupServiceLocation="https://webgroups.warwick.ac.uk/" />
+		
 	<util:property-path id="groupService" path="userLookup.groupService"/>
 
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
@@ -79,12 +99,21 @@
 		</map></property>
 	</bean>
 			
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver" />
+	<bean id="redirectViewResolver" class="uk.ac.warwick.courses.web.views.RedirectViewResolver" 
+		p:toplevelUrl="${toplevel.url}"
+		p:order="1" />
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver"
+		p:order="2" />
   	
+  	<bean id="hibernateLifecycle" class="uk.ac.warwick.courses.data.HibernateLifecycle" />
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan="uk.ac.warwick.courses.data.model"
 		p:hibernateProperties-ref="hibernateProperties">
+		<property name="eventListeners"><map>
+			<entry key="pre-load" value-ref="hibernateLifecycle" />
+			<entry key="post-load" value-ref="hibernateLifecycle"/>
+		</map></property>
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"

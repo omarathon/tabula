@@ -14,14 +14,19 @@ import uk.ac.warwick.util.web.Uri
 class DepartmentInfo(val name:String, val code:String, val faculty:String)
 class ModuleInfo(val name:String, val code:String, val group:String)
 
-trait DepartmentFetcher {
+/**
+ * Retrieves department and module information from an external location.
+ */
+trait ModuleImporter {
     def getModules(deptCode:String):Seq[ModuleInfo]
 	def getDepartments:Seq[DepartmentInfo]
 }
 
-
+/**
+ * Retrieves department and module information from Webgroups.
+ */
 @Service
-class DepartmentFetcherImpl extends DepartmentFetcher with Logging {  
+class ModuleImporterImpl extends ModuleImporter with Logging {  
   
 	// TODO try dispatch.databinder.net - wraps httpclient in a scala way
     val client = new DefaultHttpClient

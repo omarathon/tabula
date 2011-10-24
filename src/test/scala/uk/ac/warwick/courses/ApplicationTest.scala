@@ -23,12 +23,10 @@ import org.springframework.test.context.transaction.TransactionConfiguration
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.courses.data.model.Module
 import scala.collection.JavaConversions._
+import uk.ac.warwick.courses.data.model.Department
+import javax.validation.Validation
 
-@RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml", "/WEB-INF/*-context.xml"))
-@TransactionConfiguration()
-@ActiveProfiles(Array("test"))
-class ApplicationTest extends ShouldMatchersForJUnit {
+class ApplicationTest extends AppContextTestBase with ShouldMatchersForJUnit {
     
     @Autowired var sessionFactory:SessionFactory = null
     
@@ -46,6 +44,28 @@ class ApplicationTest extends ShouldMatchersForJUnit {
 	  val fetchedAssignment = session.get(classOf[Assignment], assignment.id).asInstanceOf[Assignment]
 	  fetchedAssignment.name should be("Cake Studies 1")
 	}
+    
+    /*
+     * A post-load event in Department makes sure that a null owners
+     * property is replaced with a new empty group on load.
+     */
+    @Transactional @Test def departmentLoadEvent {
+      val dept = new Department
+      dept.code = "ch"
+      dept.owners = null
+      session.save(dept)
+      
+      val id = dept.id
+      
+      session.flush
+      session.clear
+      
+      session.load(classOf[Department], id) match {
+        case loadedDepartment:Department => loadedDepartment.owners should not be(null)
+        case _ => fail("Department not found")
+      }
+      
+    }    
     
     @Transactional @Test def getModules = {
       val modules = session.createCriteria(classOf[Module]).list

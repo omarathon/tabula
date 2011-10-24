@@ -15,7 +15,7 @@ import org.springframework.web.context.ServletContextAware
 class ScalaFreemarkerConfiguration extends Configuration with ServletContextAware {
   //Default constructor initialzation
   this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
-  this.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER)
+  this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
   
   val wrapper = new ScalaBeansWrapper
   wrapper.setMethodsShadowItems(false) // do not lookup method first.

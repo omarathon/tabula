@@ -1,0 +1,36 @@
+#!/opt/coolstack/bin/ruby 
+
+require 'deployer'
+
+def print_usage
+  puts "  Usage: deploy.rb {run | status | haenable}"
+  puts "         deploy.rb {hahide | haexclusive | redeploy} jboss_instance_name"
+  puts ""
+  puts "   hahide:      remove this jboss from port balancing"
+  puts "   haexclusive: make this jboss handle all requests"
+  puts "   haenable:    reset so all jbosses are handling requests"
+  puts "   redeploy:    redeploy this jboss (you should use hahide first!!)"
+end
+
+deployer = YAML.load_file('deployer.yaml')
+deployer.init
+
+# "run" was previously the default and only script behaviour
+if ARGV[0] == "run"
+  deployer.run
+elsif ARGV[0] == "status"
+  deployer.print_status
+elsif ARGV[0] == "redeploy"
+  deployer.deploy_war_to ARGV[1]
+elsif ARGV[0] == "hahide"
+  deployer.hide_jboss ARGV[1]
+elsif ARGV[0] == "haexclusive"
+  deployer.use_this_jboss_only ARGV[1]
+elsif ARGV[0] == "haenable"
+  deployer.use_all_jbosses
+elsif ARGV[0] =~ /^(usage|--help|-\?)$/
+  print_usage
+else
+  puts "You're doing it wrong!\n\n"
+  print_usage
+end

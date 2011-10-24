@@ -18,6 +18,11 @@
   <property file="local.properties" />
   
   <property name="src.scala" value="src/main/scala" />
+  <property name="src.java" value="src/main/java" />
+  <path id="java+scala.srcpath">
+  	<path path="${src.scala}" />
+  	<path path="${src.java}" />
+  </path>
 	
   <fileset id="runtime.jars" dir="lib/runtime" includes="**/*.jar" />
 	
@@ -42,7 +47,15 @@
     <mkdir dir="target/${war.name}/WEB-INF/classes" />
   	<mkdir dir="target/unwoven" />
   	<mkdir dir="target/log" />
-    <scalac srcdir="${src.scala}" destdir="target/unwoven" classpathref="build.classpath" />
+    <scalac deprecation="on" unchecked="on"
+    	srcref="java+scala.srcpath"
+    	destdir="target/unwoven" classpathref="build.classpath" />
+  	<path id="build+built.classpath">
+  		<path refid="build.classpath" />
+  		<fileset dir="target/unwoven" />
+  	</path>
+  	<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" />
+  	
   	<iajc
         inpath="target/unwoven"
         destdir="target/${war.name}/WEB-INF/classes" 
@@ -116,12 +129,16 @@
     </path>
     
     <mkdir dir="target/test" />
-    <scalac srcdir="src/test/scala" destdir="target/test" classpathref="test.classpath" deprecation="true">
-      <include name="**/*.scala" />
-    </scalac>
-    
+    <scalac srcdir="src/test/scala" destdir="target/test" classpathref="test.classpath" deprecation="true" />
+  	<path id="test+built.classpath">
+  	  		<path refid="test.classpath" />
+  	  		<fileset dir="target/test" />
+  	</path>
+  	<javac srcdir="src/test/scala" destdir="target/test" classpathref="test+built.classpath" />
+  	
     <mkdir dir="target/test-results" />
-    <junit>
+    <junit fork="true" haltonfailure="yes">
+      <jvmarg value="-XX:MaxPermSize=512M" />
       <classpath refid="test.classpath" />
       <formatter type="xml" />
       <formatter type="plain" usefile="no" />

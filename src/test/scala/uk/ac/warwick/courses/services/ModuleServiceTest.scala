@@ -22,17 +22,6 @@ class ModuleServiceTest extends TestBase {
          
          val dao = mock[DepartmentDao]
          expecting {
-		      val chemistry = new Department
-		      chemistry.code = "ch"
-		      chemistry.name = "Chemistry"
-		      
-//		      val physics = new Department
-//		      physics.code = "ph"
-//		      physics.name = "Phygsics"
-		      //physics.code must be matching("ph")
-		      
-		      //physics must have ('code("ph"))
-		        
 			  one(dao).save(departmentLike("ch","Chemistry"))
 			  one(dao).save(departmentLike("ph","Physics"))
 			  never(dao).save(departmentLike("in","IT Services"))
@@ -41,7 +30,7 @@ class ModuleServiceTest extends TestBase {
 			  will(returnValue(None))
 		 }
          
-		 moduleService.departmentFetcher = mockDepartmentFetcher
+		 moduleService.moduleImporter = mockModuleImporter
 		 moduleService.departmentDao = dao
 		 moduleService.importDepartments
 	  
@@ -52,8 +41,8 @@ class ModuleServiceTest extends TestBase {
 			      hasProperty("name",equalTo(name))
 			  )
     
-	def mockDepartmentFetcher = {
-	  val fetcher = mock[DepartmentFetcher]
+	def mockModuleImporter = {
+	  val fetcher = mock[ModuleImporter]
 	  expecting {
 	    one(fetcher).getDepartments
 	    will(returnValue(List(

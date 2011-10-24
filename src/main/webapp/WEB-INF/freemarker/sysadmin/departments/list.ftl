@@ -5,7 +5,7 @@
 
 <ul class="department-list">
 <#list departments as department>
-  <li><a href="/sysadmin/departments/${department.code}">${department.name} (${department.code})</a></li>
+  <li><a href="/sysadmin/departments/${department.code}/">${department.name} (${department.code})</a></li>
 </#list>
 </ul>
 

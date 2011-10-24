@@ -16,10 +16,10 @@ import org.springframework.scheduling.annotation.Async
 
 @Service
 class ModuleService extends Logging  {
-    @Autowired var moduleDao:ModuleDao = null
-    @Autowired var departmentDao:DepartmentDao = null
-    @Autowired var groupService:GroupService = null
-    @Autowired var departmentFetcher:DepartmentFetcher = null
+    @Autowired var moduleImporter:ModuleImporter =_
+    @Autowired var moduleDao:ModuleDao =_
+    @Autowired var departmentDao:DepartmentDao =_
+    @Autowired var groupService:GroupService =_
   
     @Scheduled(cron="0 */6 * * * *") //6 hours
     @Transactional
@@ -37,7 +37,7 @@ class ModuleService extends Logging  {
     def importModules {
       logger.info("Importing modules")
       for (dept <- allDepartments) {
-        for (mod <- departmentFetcher.getModules(dept.code)) {
+        for (mod <- moduleImporter.getModules(dept.code)) {
           moduleDao.getByCode(mod.code) match {
             case None => {
               logger.debug("Mod code " + mod.code + " not found in database, so inserting")
@@ -49,9 +49,15 @@ class ModuleService extends Logging  {
       }
     }
     
+    @Transactional
+    def addOwner(dept:Department, owner:String) = dept.owners.addUser(owner)
+    
+    @Transactional
+    def removeOwner(dept:Department, owner:String) = dept.owners.removeUser(owner)
+    
     def importDepartments {
       logger.info("Importing departments")
-      for (dept <- departmentFetcher.getDepartments) {
+      for (dept <- moduleImporter.getDepartments) {
         dept.faculty match {
           case "Service/Admin" => logger.debug("Skipping Service/Admin department " + dept.code)
           case _ => {

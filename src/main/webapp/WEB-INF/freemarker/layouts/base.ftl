@@ -3,7 +3,7 @@
 <!doctype html>
 <html lang="en-GB">
 	<head>		  
-		  <title>Assignments</title>
+		  <title>Coursework</title>
 		
 		  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 		  <meta charset="utf-8">
@@ -104,11 +104,11 @@
 					<div class="content">
 						<div id="site-header-container">
 							<h1 id="site-header">
-								<span id="current-site-header">Assignments</span>
+								<span id="current-site-header">Coursework submission</span>
 							</h1>
 							
 							<h2 id="strapline">
-								Yeah, assignments.
+								
 							</h2>
 						</div>
 						
@@ -120,12 +120,13 @@
 			</div>
 			
 			<div id="navigation-and-content">
-				<div id="navigation" class="horizontal">
+			
+			
+	<div id="navigation" class="horizontal">
 	<div id="primary-navigation-wrapper">
 		<div id="before-primary-navigation"></div>
 		
 		<div id="primary-navigation-container" class="fixed-width">
-			<!-- The class here should be cols-6 for 6 or fewer links or cols-7 for 7 or more -->
 			<ul id="primary-navigation" class="cols-6">
 				<li class="section selected-section rendered-link">
 					<div class="link-content">
@@ -205,10 +206,6 @@
 				<div id="content-wrapper">					     
 					<div id="main-content">
 						<div id="page-title"> <!-- optional: class="site-root" (will hide the title using CSS) -->
-							<!-- logo to display when printing -->
-							<img id="print-logo"
-								src="images/warwick_uni_black.gif"
-								alt="University of Warwick">
 			
 							<h1>
 								<span id="after-page-title"></span>
@@ -251,18 +248,14 @@
 						<div id="footer-utility">
 							<ul>
 								<li id="sign-inout-link">
-				          			
+				          			<#if user?? && user.foundUser>
+										<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
+									<#else>
+									    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+									</#if>
 			          			</li>
 			          			<li class="spacer">|</li>
-		          			
-		          				<!--
-			          			<li id="powered-by-link">
-			          				Powered by <a href="#" title="More information about {APP}">APP</a>
-			          			</li>
-			          			-->
-			          			<li class="spacer">|</li>
-			          
-			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; ${.now?string("yyyy")}</a></li>
+			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; 2011</a></li>
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>
 			          			<li class="spacer">|</li>
