@@ -14,14 +14,18 @@ import uk.ac.warwick.userlookup.GroupService
 import org.springframework.scheduling.annotation.Async
 
 
+/**
+ * Handles data about modules and departments
+ */
 @Service
-class ModuleService extends Logging  {
+class ModuleAndDepartmentService extends Logging  {
+  
     @Autowired var moduleImporter:ModuleImporter =_
     @Autowired var moduleDao:ModuleDao =_
     @Autowired var departmentDao:DepartmentDao =_
     @Autowired var groupService:GroupService =_
   
-    @Scheduled(cron="0 */6 * * * *") //6 hours
+    @Scheduled(cron="0 0 7,14 * * *")
     @Transactional
     def importData {
       importDepartments
@@ -32,7 +36,10 @@ class ModuleService extends Logging  {
     def allDepartments = departmentDao.allDepartments
     
     @Transactional(readOnly=true)
-    def getDepartmentByCode(code:String) = departmentDao.getDepartmentByCode(code)
+    def getDepartmentByCode(code:String) = departmentDao.getByCode(code)
+    
+    @Transactional(readOnly=true)
+    def getModuleByCode(code:String) = moduleDao.getByCode(code)
     
     def importModules {
       logger.info("Importing modules")
@@ -56,12 +63,13 @@ class ModuleService extends Logging  {
     def removeOwner(dept:Department, owner:String) = dept.owners.removeUser(owner)
     
     def importDepartments {
+      // TODO throttle?
       logger.info("Importing departments")
       for (dept <- moduleImporter.getDepartments) {
         dept.faculty match {
           case "Service/Admin" => logger.debug("Skipping Service/Admin department " + dept.code)
           case _ => {
-            departmentDao.getDepartmentByCode(dept.code) match {
+            departmentDao.getByCode(dept.code) match {
               case None => departmentDao save newDepartmentFrom(dept)
               case Some(dept) => { logger.debug("Skipping " + dept.code + " as it is already in the database") }
             }

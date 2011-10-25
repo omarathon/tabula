@@ -19,8 +19,11 @@ class Assignment extends GeneratedId {
 	@BeanProperty var name:String =_
 	@BeanProperty var active:Boolean =_
 	
+	
+	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var openDate:DateTime =_
+	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var closeDate:DateTime =_
 	

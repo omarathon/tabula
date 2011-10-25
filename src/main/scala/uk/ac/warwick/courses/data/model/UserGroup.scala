@@ -28,6 +28,7 @@ import java.{util => jutil}
 @Entity
 class UserGroup extends GeneratedId {
   
+	// Not created by Spring but @Autowiring works thanks to compile-time weaving.
 	@Autowired @transient private var groupService:GroupService =_
   
 	@BeanProperty var baseWebgroup:String =_
@@ -55,7 +56,7 @@ class UserGroup extends GeneratedId {
 	 * Could implement as `members.contains(user)`
 	 * but this is more efficient
 	 */
-	def includes(user:String) =
+	def includes (user:String) =
 	  !(excludeUsers contains user) && 
 	  (
 	    (includeUsers contains user) ||

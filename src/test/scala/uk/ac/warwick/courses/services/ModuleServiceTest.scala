@@ -12,10 +12,10 @@ import uk.ac.warwick.courses.TestBase
 
 class ModuleServiceTest extends TestBase {
   
-    var moduleService:ModuleService = null;
+    var moduleService:ModuleAndDepartmentService = null;
   
     @Before def before {
-		moduleService = new ModuleService
+		moduleService = new ModuleAndDepartmentService
     }
     
     @Test def moduleServiceImport {
@@ -26,7 +26,7 @@ class ModuleServiceTest extends TestBase {
 			  one(dao).save(departmentLike("ph","Physics"))
 			  never(dao).save(departmentLike("in","IT Services"))
 			  
-			  allowing(dao).getDepartmentByCode(anyString)
+			  allowing(dao).getByCode(anyString)
 			  will(returnValue(None))
 		 }
          

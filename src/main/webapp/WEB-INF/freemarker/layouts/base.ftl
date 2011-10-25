@@ -259,7 +259,7 @@
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>
 			          			<li class="spacer">|</li>
-			          			<li id="accessibility-link"><a href="http://go.warwick.ac.uk/accessibility" title="Accessibility information [0]" accesskey="0">Accessibility</a></li>
+			          			<li id="accessibility-link"> <a href="http://go.warwick.ac.uk/accessibility" title="Accessibility information [0]" accesskey="0">Accessibility</a></li>
 		          			</ul>
 		          				      					
 	      					<div style="clear:both;"></div>

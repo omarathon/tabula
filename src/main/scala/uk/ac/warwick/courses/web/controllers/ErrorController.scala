@@ -6,12 +6,14 @@ import org.springframework.web.servlet.ModelAndView
 import uk.ac.warwick.util.core.ExceptionUtils
 import javax.servlet.ServletException
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.ExceptionHandler
 
 @Controller
 class ErrorController {
 
   // TODO some extra error reporting
-   
+  
+  @ExceptionHandler
   @RequestMapping(Array("/error"))
   def generalError(mav:ModelAndView, request:HttpServletRequest) = {
     request.getAttribute("javax.servlet.error.exception") match {
@@ -25,8 +27,7 @@ class ErrorController {
   
   @RequestMapping(Array("/error/404"))
   def pageNotFound(@RequestHeader("X-Requested-Uri") requestedUri:String) = {
-    new ModelAndView("errors/404")
-    	.addObject("requestedUri", requestedUri)
+    Mav("errors/404", "requestedUri"->requestedUri)
   }
   
 }

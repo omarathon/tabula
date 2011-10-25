@@ -14,9 +14,9 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
     @Autowired var securityService:SecurityService =_
   
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
-	  val currentUser = SSOClientFilter.getUserFromRequest(request) match {
+	  val currentUser:CurrentUser = SSOClientFilter.getUserFromRequest(request) match {
 	    case user:User if user.isFoundUser => new CurrentUser(user, isSysadmin(user))
-	    case _ => NoCurrentUser
+	    case _ => NoCurrentUser()
 	  }
 	  request.setAttribute(CurrentUser.keyName, currentUser)
 	  true //allow request to continue

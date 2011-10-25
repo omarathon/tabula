@@ -51,7 +51,6 @@
     <servlet-name>freemarkerServlet</servlet-name>
     <servlet-class>uk.ac.warwick.courses.web.views.CustomFreemarkerServlet</servlet-class>
     <init-param><param-name>TemplatePath</param-name><param-value>/</param-value></init-param>
-    <init-param><param-name>NoCache</param-name><param-value>true</param-value></init-param>
     <init-param><param-name>ContentType</param-name><param-value>text/html</param-value></init-param>
     <init-param><param-name>default_encoding</param-name><param-value>UTF-8</param-value></init-param>
     <init-param><param-name>output_encoding</param-name><param-value>UTF-8</param-value></init-param>

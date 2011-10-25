@@ -24,6 +24,8 @@ class Department extends GeneratedId with PostLoadBehaviour {
 	@JoinColumn(name="ownersgroup_id")
 	@BeanProperty var owners:UserGroup = new UserGroup
 	
+	def isOwnedBy(userId:String) = owners.includes(userId)
+	
 	def addOwner(owner:String) = ensureOwners.addUser(owner)
 	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
 	
@@ -38,6 +40,5 @@ class Department extends GeneratedId with PostLoadBehaviour {
 	}
 	
 	override def toString = "Department("+code+")"
-	
 	
 }

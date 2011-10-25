@@ -32,8 +32,35 @@
 		classpath:/courses.properties,
 		classpath:/courses-private.properties" />
 	
+	<!-- 
+		Map certain exceptions straight to views.
+		If we need to do extra stuff here or add stuff to the model, implement a custom HandlerExceptionResolver.	
+	-->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+		  <map>
+		    <entry key="uk.ac.warwick.courses.PermissionDeniedException" value="errors/permissionDenied" />
+		    <entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
+		  </map>
+		</property>
+	</bean>
+	
 	<!-- validation -->
 	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+	
+	<bean id="typeConverter"
+      class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+      <description>
+      	Converts arguments in various places.
+      	Useful to convert @PathVariable arguments from String to the object it represents.
+      </description>
+	    <property name="converters">
+	        <list>
+	            <bean class="uk.ac.warwick.courses.data.convert.DepartmentCodeConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.ModuleCodeConverter"/>
+	        </list>
+	    </property>
+	</bean>
 	
 	<mvc:interceptors>
 		<mvc:interceptor><mvc:mapping path="/**"/>
@@ -43,7 +70,7 @@
 			<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
 		</mvc:interceptor>
 	</mvc:interceptors>
-	<mvc:annotation-driven validator="validator">
+	<mvc:annotation-driven validator="validator" conversion-service="typeConverter">
 		<mvc:argument-resolvers>
 			<bean class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
 		</mvc:argument-resolvers>
@@ -119,11 +146,13 @@
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 	
-	<beans profile="dev,production">
-	
+	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
+	</beans>
 	
+	<beans profile="dev,production">
+		
 		<bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource"
 			p:driverClassName="oracle.jdbc.OracleDriver"
 			p:url="${courses.datasource.url}"

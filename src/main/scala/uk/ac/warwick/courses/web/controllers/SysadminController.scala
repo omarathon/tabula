@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.web.controllers
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.courses.services.ModuleService
+import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,6 +16,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.web.forms.DepartmentRemoveOwnerForm
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.data.model.Department
 
 package sysadmin {
 
@@ -23,71 +24,58 @@ package sysadmin {
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends Logging {
 
-	@Autowired var moduleService:ModuleService = null
+	@Autowired var moduleService:ModuleAndDepartmentService = null
   
 	@RequestMapping(Array("/home"))
 	def home = "sysadmin/home"
 	  
 	@RequestMapping(Array("/departments/"))
-	def departments = new ModelAndView("sysadmin/departments/list")
-		.addObject("departments", moduleService.allDepartments)
+	def departments = Mav("sysadmin/departments/list",
+			"departments" -> moduleService.allDepartments
+	)
 	
-	@RequestMapping(Array("/departments/{deptcode}/"))
-	def department(@PathVariable deptcode:String) = {
-		moduleService.getDepartmentByCode(deptcode) match {
-		  case Some(dept) => {
-			  	new ModelAndView("sysadmin/departments/single")
-			  		.addObject("department", dept)
-		  }
-		  case None => throw new IllegalArgumentException
-		}
+	@RequestMapping(Array("/departments/{dept}/"))
+	def department(@PathVariable dept:Department) = {
+  		Mav("sysadmin/departments/single",
+  					  "department" -> dept)
 	}
 	
 	// Department owners
 	
-	@RequestMapping(value=Array("/departments/{deptcode}/owners"), method=Array(RequestMethod.GET))
-	def viewDepartmentOwners(@PathVariable deptcode:String) = {
-		moduleService.getDepartmentByCode(deptcode) match {
-		  case Some(dept) => {
-			  	new ModelAndView("sysadmin/departments/owners")
-			  		.addObject("department", dept)
-			  		.addObject("owners", dept.owners)
-		  }
-		  case None => throw new IllegalArgumentException
-		}
+	@RequestMapping(value=Array("/departments/{dept}/owners"), method=Array(RequestMethod.GET))
+	def viewDepartmentOwners(@PathVariable dept:Department) = {
+		Mav("sysadmin/departments/owners",
+			  		  "department" -> dept,
+			  		  "owners" -> dept.owners)
 	}
 	
-	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("deptcode")deptcode:String) = {
-	  val dept = moduleService.getDepartmentByCode(deptcode).get
+	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
 	  new DepartmentAddOwnerForm(dept.owners.members)
 	}
 	
-	@RequestMapping(value=Array("/departments/{deptcode}/owners/add"), method=Array(RequestMethod.GET))
-	def addDeptOwnerForm(@PathVariable deptcode:String, @ModelAttribute("addOwner") form:DepartmentAddOwnerForm, errors:Errors):ModelAndView = {
-		val dept = moduleService.getDepartmentByCode(deptcode).get
+	@RequestMapping(value=Array("/departments/{dept}/owners/add"), method=Array(RequestMethod.GET))
+	def addDeptOwnerForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:DepartmentAddOwnerForm, errors:Errors):ModelAndView = {
 		new ModelAndView("sysadmin/departments/owners/add")
 			.addObject("department", dept)
 	}
 	
-	@RequestMapping(value=Array("/departments/{deptcode}/owners/add"), method=Array(RequestMethod.POST))
-	def addDeptOwner(@PathVariable deptcode:String, @Valid @ModelAttribute("addOwner") form:DepartmentAddOwnerForm, errors:Errors):ModelAndView  = {
+	@RequestMapping(value=Array("/departments/{dept}/owners/add"), method=Array(RequestMethod.POST))
+	def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:DepartmentAddOwnerForm, errors:Errors):ModelAndView  = {
 		if (errors.hasErrors) {
-		  return addDeptOwnerForm(deptcode, form, errors)
+		  return addDeptOwnerForm(dept, form, errors)
 		} else {
 		  logger.info("Passed validation, saving owner")
-		  val dept = moduleService.getDepartmentByCode(deptcode).get
 		  moduleService.addOwner(dept, form.getUsercode())
 		  return redirectToDeptOwners(dept.code)
 		}
 	}
 	
-	@RequestMapping(value=Array("/departments/{deptcode}/owners/delete"), method=Array(RequestMethod.POST))
-	def addDeptOwner(@PathVariable deptcode:String, @Valid @ModelAttribute("removeOwner") form:DepartmentRemoveOwnerForm, errors:Errors):ModelAndView  = {
+	@RequestMapping(value=Array("/departments/{dept}/owners/delete"), method=Array(RequestMethod.POST))
+	def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:DepartmentRemoveOwnerForm, errors:Errors):ModelAndView  = {
 		if (errors.hasErrors) {
-		  return viewDepartmentOwners(deptcode)
+		  return viewDepartmentOwners(dept)
 		} else {
 		  logger.info("Passed validation, saving owner")
-		  val dept = moduleService.getDepartmentByCode(deptcode).get
 		  moduleService.removeOwner(dept, form.getUsercode())
 		  return redirectToDeptOwners(dept.code)
 		}

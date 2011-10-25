@@ -10,7 +10,7 @@ import java.util.{List => JList}
 
 trait DepartmentDao {
   def allDepartments: Seq[Department]
-  def getDepartmentByCode(code:String): Option[Department]
+  def getByCode(code:String): Option[Department]
   def save(department:Department)
 }
 @Repository
@@ -22,7 +22,7 @@ class DepartmentDaoImpl @Autowired()(val sessionFactory:SessionFactory) extends 
     	.list.asInstanceOf[JList[Department]]
   
   // Fetches modules eagerly
-  def getDepartmentByCode(code:String) = option[Department](
+  def getByCode(code:String) = option[Department](
       session.createQuery("from Department d left join fetch d.modules where d.code = :code").setString("code",code).uniqueResult
   )
     
