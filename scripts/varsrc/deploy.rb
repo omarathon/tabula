@@ -64,7 +64,9 @@ class Deployment
     log ""
     puts "***********************************************************"
     status="#{@build_status}. \n   "
-    status += "scheduler: #{@scheduler_jboss.state}  #{@scheduler_jboss.deployment_state} " 
+    unless @scheduler_jboss.nil?
+      status += "scheduler: #{@scheduler_jboss.state}  #{@scheduler_jboss.deployment_state} "
+    end 
     all_jbosses.each { |jboss| status += "#{jboss.name}: #{jboss.state} #{jboss.deployment_state}. " }
     status +="\n   "
     @apaches.each{ |apache| status +="#{apache.name}: #{apache.state} "}
@@ -94,7 +96,7 @@ class Deployment
     #gets apaches whose preconditions aren't ok, and checks that collection is empty.
     return false unless static_preconditions_ok?
     return false unless @apaches.reject{|a| a.preconditions_ok? }.empty?
-    return false unless @scheduler_jboss.preconditions_ok?
+    return false unless @scheduler_jboss.nil? or @scheduler_jboss.preconditions_ok?
     return false unless all_jbosses.reject{|j| j.preconditions_ok? }.empty?
     return true
   end
