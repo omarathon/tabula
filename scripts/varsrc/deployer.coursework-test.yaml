@@ -20,7 +20,7 @@ archive_dir: "/var/src/archive"
 repository: "git"
 build_user: "build"
 ant_path: "ant"
-ant_package_target: "clean package"
+ant_package_target: "package"
 jbosses: 
   coursework-test:
   - !ruby/object:Jboss 
