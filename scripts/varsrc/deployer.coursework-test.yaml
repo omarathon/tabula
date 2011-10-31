@@ -1,7 +1,7 @@
 --- !ruby/object:Deployment 
 apaches: 
 - !ruby/object:Apache 
-  name: courses-test
+  name: coursework-test
   port_balancer: !ruby/object:LoadBalancedPortTracker 
     balanced_ports: 
     - "8080"
@@ -22,7 +22,7 @@ build_user: "build"
 ant_path: "ant"
 ant_package_target: "clean package"
 jbosses: 
-  courses-test:
+  coursework-test:
   - !ruby/object:Jboss 
     deployment_state: old
     name: courses-primary
