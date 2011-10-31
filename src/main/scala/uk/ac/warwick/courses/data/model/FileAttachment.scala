@@ -11,9 +11,9 @@ import javax.persistence.CascadeType
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
   
-    @ManyToOne(cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
-	@JoinColumn(name="assignment_id")
-	@BeanProperty var assignment:Assignment = null
+    @ManyToOne(cascade=Array(CascadeType.ALL))
+	@JoinColumn(name="submission_id")
+	@BeanProperty var submission:Submission = null
 	
 	@BeanProperty var name:String = null
 	

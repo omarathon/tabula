@@ -41,6 +41,8 @@ class ModuleAndDepartmentService extends Logging  {
     @Transactional(readOnly=true)
     def getModuleByCode(code:String) = moduleDao.getByCode(code)
     
+    def departmentsOwnedBy(usercode:String) = departmentDao.getByOwner(usercode)
+    
     def importModules {
       logger.info("Importing modules")
       for (dept <- allDepartments) {

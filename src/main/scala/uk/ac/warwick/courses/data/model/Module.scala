@@ -11,6 +11,10 @@ import javax.persistence.CascadeType
 import javax.persistence.JoinColumn
 import javax.persistence.NamedQuery
 import javax.persistence.NamedQueries
+import javax.persistence.OneToMany
+import collection.JavaConversions._
+import org.hibernate.annotations.FetchMode
+import javax.persistence.FetchType
 
 @Entity
 @NamedQueries(Array(
@@ -26,5 +30,17 @@ class Module extends GeneratedId {
 	@JoinColumn(name="department_id")
 	@BeanProperty var department:Department = _
 	
+	@OneToMany(mappedBy="module", fetch=FetchType.LAZY)
+	@BeanProperty var assignments:java.util.List[Assignment] = List()
+	
+	// TODO add UserGroup for people who can submit. Defaults to source webgroup
+	
 	@BeanProperty var active:Boolean = _
+}
+
+object Module {
+	def nameFromWebgroupName(groupName:String) = groupName.indexOf("-") match {
+		case -1 => groupName
+		case i:Int => groupName.substring(i+1)
+	}
 }

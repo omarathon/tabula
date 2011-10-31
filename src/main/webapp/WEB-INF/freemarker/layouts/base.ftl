@@ -9,8 +9,8 @@
 		  <meta charset="utf-8">
 		  <meta name="robots" content="noindex,nofollow">
 
-		  <link rel="stylesheet" href="/static/css/concat6.css" type="text/css">
-		  <link rel="stylesheet" href="/static/css/main.css" type="text/css">
+		  <@stylesheet "/static/css/concat6.css" />
+		  <#include "_styles.ftl" />
 		  <link rel="stylesheet" title="No Accessibility" href="/static/css/noaccessibility.css" type="text/css">
 		  <link rel="alternate stylesheet" title="Show Accessibility" href="/static/css/showaccessibility.css" type="text/css">
 		  
@@ -28,9 +28,12 @@
 		  <link rel="stylesheet" href="/static/css/fonts/standard.css" type="text/css">
 		
 		  <script type="text/javascript" src="/static/js/id6scripts.js"></script>
+		  <script type="text/javascript" src="/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+		  <script type="text/javascript" src="/static/libs/anytime/anytimec.js"></script>
+		  <script type="text/javascript" src="/static/js/main.js"></script>
 
 	</head>
-	<body class="horizontal-nav layout-100">
+	<body class="horizontal-nav layout-100 coursework-page">
 		<div id="container">
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="header-medium" data-type="image">
@@ -45,7 +48,7 @@
 						<!-- The on-hover class here specifies that the links should only be displayed on hover -->
 						<div id="warwick-logo-container" class="on-hover">
 							<a id="warwick-logo-link" href="http://www.warwick.ac.uk" title="University of Warwick homepage">
-								<img id="warwick-logo" src="/static/images/logo.png" alt="University of Warwick">
+								<img id="warwick-logo" src="<@url resource="/static/images/logo.png" />" alt="University of Warwick">
 							</a>
 			
 							<div id="warwick-site-links">
@@ -259,7 +262,7 @@
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>
 			          			<li class="spacer">|</li>
-			          			<li id="accessibility-link"> <a href="http://go.warwick.ac.uk/accessibility" title="Accessibility information [0]" accesskey="0">Accessibility</a></li>
+			          			<li id="accessibility-link"><a href="http://go.warwick.ac.uk/accessibility" title="Accessibility information [0]" accesskey="0">Accessibility</a></li>
 		          			</ul>
 		          				      					
 	      					<div style="clear:both;"></div>

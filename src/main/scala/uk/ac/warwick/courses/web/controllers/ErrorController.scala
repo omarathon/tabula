@@ -13,7 +13,6 @@ class ErrorController {
 
   // TODO some extra error reporting
   
-  @ExceptionHandler
   @RequestMapping(Array("/error"))
   def generalError(mav:ModelAndView, request:HttpServletRequest) = {
     request.getAttribute("javax.servlet.error.exception") match {

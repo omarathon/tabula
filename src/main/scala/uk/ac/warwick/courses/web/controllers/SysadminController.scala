@@ -20,6 +20,10 @@ import uk.ac.warwick.courses.data.model.Department
 
 package sysadmin {
 
+/**
+ * Screens for application sysadmins, i.e. the web development and content teams.
+ */
+  
 @Controller
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends Logging {
@@ -50,7 +54,7 @@ class SysadminController extends Logging {
 	}
 	
 	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
-	  new DepartmentAddOwnerForm(dept.owners.members)
+		new DepartmentAddOwnerForm(dept.owners.members)
 	}
 	
 	@RequestMapping(value=Array("/departments/{dept}/owners/add"), method=Array(RequestMethod.GET))

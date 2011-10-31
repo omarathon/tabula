@@ -60,7 +60,7 @@
         inpath="target/unwoven"
         destdir="target/${war.name}/WEB-INF/classes" 
         classpathref="build.classpath"
-        aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.M2.jar"
+        aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"
     	  log="target/log/iajc.log"
         verbose="false" />
   </target>
@@ -135,6 +135,7 @@
   	  		<fileset dir="target/test" />
   	</path>
   	<javac srcdir="src/test/scala" destdir="target/test" classpathref="test+built.classpath" />
+  	
   	
     <mkdir dir="target/test-results" />
     <junit fork="true" haltonfailure="yes">

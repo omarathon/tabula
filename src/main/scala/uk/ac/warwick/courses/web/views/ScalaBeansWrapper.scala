@@ -29,25 +29,23 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
       case sseq: scala.Seq[_] => super.wrap(new JList(sseq))
       case scol: scala.Collection[_] => super.wrap(JCollection(scol))
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
+      case directive: TemplateDirectiveModel => wrapByParent(directive)
+      case method: TemplateMethodModel => wrapByParent(method)
       case sobj: ScalaObject => new ScalaHashModel(this, sobj)
       case _ => super.wrap(obj)
     }     
   }
 }
 
-/*
- * ScalaHashModel is supposed to wrap a ScalaObject to allow Freemarker to use the scala-style
- * getters like .name rather than .getName(). However it seems to fail in for a ScalaObject
- * that doesn't have these getters - most prominently where you've extended a Java object.
- * So I've just removed it for now, as most of our stuff uses @BeanProperty and so has javabean
- * getters on them anyway.
- * 
- * Might be fixable if it can be taught to look for .getX as well as .x
- */
 
 /** A model that will expose all Scala getters that has zero parameters
  * to the FM Hash#get method so can retrieve it without calling with parenthesis. */
 
+/**
+ * Also understands regular JavaBean getters, useful when a Java bean has been extended
+ * in Scala to implement ScalaObject. If both getter type is present, one will overwrite
+ * the other in the map but this doesn't really matter as they do the same thing
+ */
 class ScalaHashModel(wrapper: ObjectWrapper, sobj: ScalaObject) extends TemplateHashModel{
   type Getter = () => AnyRef
   

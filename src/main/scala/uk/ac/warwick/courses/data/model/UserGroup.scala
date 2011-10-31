@@ -66,7 +66,7 @@ class UserGroup extends GeneratedId {
 	def members =
 	  (includeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 	  
-	private def webgroupMembers:List[String] = baseWebgroup match {
+	def webgroupMembers:List[String] = baseWebgroup match {
 	  case webgroup:String => groupService.getUserCodesInGroup(webgroup).asScala.toList
 	  case _ => Nil
 	}

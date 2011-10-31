@@ -4,6 +4,10 @@ import freemarker.template.TemplateDateModel
 import freemarker.template.Configuration
 import freemarker.template.TemplateExceptionHandler
 import org.springframework.web.context.ServletContextAware
+import collection.JavaConversions._
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Required
+import collection.mutable
 
 /**
  * Adapted from http://code.google.com/p/sweetscala
@@ -16,6 +20,7 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
   //Default constructor initialzation
   this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
   this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
+  this.setAutoIncludes(List( "/WEB-INF/freemarker/prelude.ftl" ))
   
   val wrapper = new ScalaBeansWrapper
   wrapper.setMethodsShadowItems(false) // do not lookup method first.
@@ -23,6 +28,11 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
   wrapper.setUseCache(true) //do caching by default.
   wrapper.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY); //don't expose method, but properties only
   this.setObjectWrapper(wrapper)  
+  
+  @Required 
+  def setSharedVariables(vars:java.util.Map[String,Any]) {
+    for ((key,value) <- vars) this.setSharedVariable(key,value)
+  }
   
   override def setServletContext(ctx:javax.servlet.ServletContext) =
     	setServletContextForTemplateLoading(ctx, "/")

@@ -21,7 +21,10 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
   logger.info("Creating custom freemarker servlet")
   
   /**
-   * Add items to the model that should be available to every Freemarker view
+   * Add items to the model that should be available to every Freemarker view.
+   * 
+   * Items that don't rely on the current request state should be set in the configuration
+   * as a shared variable.
    */
   override def preTemplateProcess(req:HttpServletRequest,res:HttpServletResponse,template:Template,data:TemplateModel) = {
 	val model = data.asInstanceOf[SimpleHash]

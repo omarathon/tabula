@@ -14,6 +14,12 @@ class CustomValidationTest extends TestBase {
   
 	/**
 	 * Check that custom annotation stuff is applied.
+	 * 
+	 * There was a problem with it working on a Scala object at first
+	 * but it was because the annotation was on a constructor arg, and
+	 * it was being applied to that instead of the property. There are
+	 * some Scala meta-annotations to tell the compiler where to attach
+	 * the annotation, or you can just not use the constructor like that.
 	 */
 	@Test def customValidationConstraints {
       val factory = Validation.buildDefaultValidatorFactory
@@ -22,11 +28,8 @@ class CustomValidationTest extends TestBase {
 	  val scalaObj = new TestValidScalaObject("ron")
 	  val javaObj = new TestValidJavaObject("ron")
 	  
-      val javaViolations = validator.validate(javaObj)
-      javaViolations.size should be(1)
-      
-      val scalaViolations = validator.validate(scalaObj)
-      scalaViolations.size should be(1)
+      validator.validate(javaObj) should not be('empty)
+      validator.validate(scalaObj) should not be('empty)
     }
 	
 	@Test def userIsUnique {

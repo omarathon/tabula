@@ -11,7 +11,7 @@ package object convert
   @unchecked
   implicit def optionToThrowingOption[T](option:Option[T]) = new {
     def getOrDie:T = option match {
-	  case None => throw new ItemNotFoundException(option) 
+	  case None => throw new ItemNotFoundException() 
 	  case Some(t:T) => t
 	}
   }
