@@ -172,13 +172,10 @@
 	
 		<bean class="uk.ac.warwick.courses.system.DatabaseEncodingChecker" />
 		
-		<bean id="dataSource" class="uk.ac.warwick.courses.system.DataSourceFactory"
-			p:driverClass="oracle.jdbc.OracleDriver"
-			p:url="${courses.datasource.url}"
-			p:user="${courses.datasource.username}"
-			p:password="${courses.datasource.password}"
-			p:properties-ref="jdbcProperties"
-			 />
+		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		   <property name="jndiName" value="java:/CoursesDS"/>
+	    </bean>
+	    
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
