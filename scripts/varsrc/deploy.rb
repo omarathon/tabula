@@ -13,8 +13,14 @@ def log(string)
   puts "[#{Time.now.iso8601}] #{string}"
 end
 
-class SitebuilderDeployment
+class Deployment
   attr_reader :jbosses, :scheduler_jboss, :apaches
+
+  def self.from_yaml_file(filename)
+     deployer = YAML.load_file(filename)
+     deployer.init
+     deployer
+  end
 
   # NOTE this doesn't run when loading from YAML
   def initialize(lockfile,jboss_instances,jboss_scheduler_instance,apache_instances,notification_emails)
@@ -27,10 +33,13 @@ class SitebuilderDeployment
   end
   
   def init
-    log "Pumping JBosses full of fun"
+    log "Initialising"
+    war_name = @war_name || @app
+    log "WAR name: #{war_name}"
     @jbosses.each do |name, group|
        group.each do |jboss|
          jboss.group_name = name
+         jboss.war_name = war_name
        end
     end  
   end
@@ -75,7 +84,7 @@ class SitebuilderDeployment
     	return false
     end 
     
-    arch_dir = "/var/src/arch"
+    arch_dir = "/var/src/archive"
     
     unless File.exists? arch_dir and File.can_write_to? arch_dir
     	log "Can't write to #{arch_dir}"
@@ -100,45 +109,61 @@ class SitebuilderDeployment
      @build_status= 'building war'
      print_status
      
-     arch_dir = "/var/src/arch"
+     arch_dir = @archive_dir || "/var/src/arch"
      checkout = "#{@checkout_base}/#{@app}"
      
      # Checkout the source
+  
      
-     checkout_backup = "#{@checkout_base}/#{@app}-old"
-     temp_checkout_base = "/tmp"
-     temp_checkout = "#{temp_checkout_base}/#{@app}"
+     case @repository
+     when "git"
+        # Git. Don't checkout afresh each time; do it in place.
+        # If we need access to the previous checkout, we should just
+        # store the commit ID in a file somewhere.
+        # Assumes there's a cloned repo in #{checkout}; Puppet should ensure this.
+        log "Performing a Git hard reset and a pull"
+        system("cd #{checkout} ; git reset --hard HEAD; git pull")
+     else
+        # CVS.
+
+        checkout_backup = "#{@checkout_base}/#{@app}-old"
+        temp_checkout_base = "/tmp"
+        temp_checkout = "#{temp_checkout_base}/#{@app}"
      
-     log "Checking out source into #{temp_checkout_base}"
+        log "Checking out source into #{temp_checkout_base}"
      
-     if File.exists? temp_checkout
-     	log "Removing old directory from #{temp_checkout}"
-     	FileUtils.rm_rf temp_checkout
+        if File.exists? temp_checkout
+           log "Removing old directory from #{temp_checkout}"
+           FileUtils.rm_rf temp_checkout
+        end
+     
+        if File.exists? checkout_backup
+           log "Removing old directory from #{checkout_backup}"
+     	   FileUtils.rm_rf checkout_backup
+        end
+
+        # TODO find a way to do this without a system call
+        system("cd #{temp_checkout_base} ; /usr/local/bin/cvs -d:ext:build@byngo:/cvsrep -Q get #{@app}")
+        raise "Couldn't checkout from CVS" unless $? == 0
+
+        log "Moving new sources into #{@checkout_base}"
+     
+        if File.exists? checkout
+           FileUtils.mv checkout, checkout_backup
+        end
+     
+        FileUtils.mv temp_checkout, checkout
      end
-     
-     if File.exists? checkout_backup
-     	log "Removing old directory from #{checkout_backup}"
-     	FileUtils.rm_rf checkout_backup
-     end
-     
-     # TODO find a way to do this without a system call
-     system("cd #{temp_checkout_base} ; /usr/local/bin/cvs -d:ext:build@byngo:/cvsrep -Q get #{@app}")
-     raise "Couldn't checkout from CVS" unless $? == 0
-     
-     log "Moving new sources into #{@checkout_base}"
-     
-     if File.exists? checkout
-     	FileUtils.mv checkout, checkout_backup
-     end
-     
-     FileUtils.mv temp_checkout, checkout
      
 	 # Build the application
 	 
 	 log "Building app in #{checkout}"
 	 
+         ant = @ant_path || "/usr/local/ant/bin/ant"
+         ant_target = @ant_package_target || "build-war"
+
 	 # TODO find a way to do this without a system call
-	 system("cd #{checkout} ; /usr/local/ant/bin/ant -q build-war")
+	 system("cd #{checkout} ; #{ant} -q #{ant_target}")
 	 raise "Ant build failed: giving up" unless $? == 0
 	 
 	 built_war = "#{checkout}/dist/#{@app}.war"
@@ -175,10 +200,14 @@ class SitebuilderDeployment
   end
 
   def deploy_war_to_scheduler
-     # no need to monkey with apache
-     @scheduler_jboss.deploy(@warfile, self)
-     @build_status='deploying war'
-     print_status
+     if @scheduler_jboss.nil?
+        log "No scheduler JBoss defined, skipping this step"
+     else
+        # no need to monkey with apache
+        @scheduler_jboss.deploy(@warfile, self)
+        @build_status='deploying war'
+        print_status
+     end
   end
 
   def deploy_war
@@ -262,6 +291,10 @@ class SitebuilderDeployment
   
   def static_preconditions_ok?
   	log "Checking preconditions for static deploy"
+        if @apache_htdocs.nil?
+           log "apache_htdocs not specified, assuming no static Apache content for this app"
+        else 
+
 	static_war_file = "#{@apache_htdocs}/static_war"
 	temporary_dir = "#{@apache_htdocs}/static_war.new"
   	backup_dir = "#{@apache_htdocs}/static_war.last"
@@ -287,11 +320,18 @@ class SitebuilderDeployment
 			return false
 		end
 	end
+
+        end
 	
 	true
   end
 
   def deploy_static
+
+	if @apache_htdocs.nil?
+		log "Skipping deploy_static as apache_htdocs is not specified"
+		return
+	end
 
 	static_war_src = "#{@checkout_base}/#{@app}/target/static_war"
 	
@@ -356,19 +396,17 @@ end
 
 
 class Jboss
-  attr_accessor :name, :group_name, :state, :deployment_state,:port
+  attr_accessor :name, :group_name, :state, :deployment_state,:port,:war_name
 
   def initialize(instance_name,port)
     @name= instance_name
     @state= "running"
     @deployment_state= 'old'
     @port=port
-	
-	
   end
   
   def war_path
-  	"/usr/local/jboss/server/#{@name}/deploy/sitebuilder2.war"
+  	"/usr/local/jboss/server/#{@name}/deploy/#{war_name}.war"
   end
   
   def preconditions_ok? 
@@ -410,7 +448,11 @@ class Jboss
   def start
     
     instance = @name
-    test_page = "/sitebuilder2/render/renderPage.htm?sbrPage=%s" % @test_page
+
+    # test_page is for Sitebuilder compatibility - 
+    # other apps should specify test_path
+    test_path = @test_path || ("/sitebuilder2/render/renderPage.htm?sbrPage=%s" % @test_page)
+
   	retries = 6
   	
   	jboss_run = "sudo /etc/local.d/jboss_run.sh"
@@ -450,8 +492,8 @@ class Jboss
 
 	def do_restart_jboss_ubuntu
 		log "Restarting instance: #{@name}"
-		system("sudo nohup /usr/local/jboss/bin/run.sh -b 0.0.0.0 -c #{@name}")
-		log "Waiting for startup..."
+		worked = system("sudo nohup /usr/local/jboss/bin/run.sh -b 0.0.0.0 -c #{@name} &")
+		log "Waiting for startup (system call returned #{worked})..."
 	end
 	
 	case @mode
@@ -469,21 +511,21 @@ class Jboss
 	while retries > 0
 		sleep(15)
 		
-		log "Fetching test page #{test_page} (#{retries} attempts left)"
+		log "Fetching test page #{test_path} (#{retries} attempts left)"
 		
 		res = Net::HTTP.start("localhost", @port) {|http|
-          	http.get(test_page)
-        }
+			http.get(test_path)
+        	}
         
-        if (res.code.to_i != 200)
-          	log "[NOT OK] #{test_page} got #{res.code} expected 200"
-          	retries = retries - 1
-          	
-          	raise "Couldn't fetch test page!" unless retries > 0
-        else
-          	log "[OK]     #{test_page} got #{res.code}"
-          	break
-        end
+		if (res.code.to_i != 200)
+		  	log "[NOT OK] #{test_path} got #{res.code} expected 200"
+		  	retries = retries - 1
+		  	
+		  	raise "Couldn't fetch test page!" unless retries > 0
+		else
+		  	log "[OK]     #{test_path} got #{res.code}"
+		  	break
+		end
 	end
 	
 	log "Done. Jboss [#{@name}] has been restarted."
@@ -671,8 +713,7 @@ class File
 end
 
 
-deployer = YAML.load_file('deployer.yaml')
-deployer.init
+deployer = Deployment.from_yaml_file('deployer.yaml')
 
 # "run" was previously the default and only script behaviour
 if ARGV[0] == "run"

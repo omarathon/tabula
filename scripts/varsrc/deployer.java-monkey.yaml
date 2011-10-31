@@ -1,0 +1,58 @@
+--- !ruby/object:Deployment 
+apaches: 
+- !ruby/object:Apache 
+  name: java-monkey
+  port_balancer: !ruby/object:LoadBalancedPortTracker 
+    balanced_ports: 
+    - "8080"
+    - "8080"
+    balancer_port: "8080"
+    current_port: "8080"
+  remotehost: 
+  apache_dir: "/etc/apache2"
+  rewrite_map: "/etc/apache2/proxy_port.map"
+  restart_command: "echo 'not restarting apache' "
+  state: balanced
+build_status: starting
+#apache_htdocs: "/www/sb-dev/apache"
+app: "courses"
+checkout_base: "/var/src/checkout"
+archive_dir: "/var/src/archive"
+repository: "git"
+build_user: "nick"
+ant_path: "ant"
+ant_package_target: "clean package"
+scheduler_jboss: !ruby/object:Jboss 
+  deployment_state: old
+  name: courses
+  port: "8080"
+  state: running
+  mode: ubuntu
+  stop_command: "/usr/local/jboss/bin/shutdown.sh -s localhost:1099 && sleep 5 #"  
+  test_path: /courses/module/ch155
+  requests: 
+    /courses/module/ch155: 200
+jbosses: 
+  java-monkey:
+  - !ruby/object:Jboss 
+    deployment_state: old
+    name: courses
+    port: "8080"
+    state: running
+    mode: ubuntu
+    stop_command: "/usr/local/jboss/bin/shutdown.sh -s localhost:1099 && sleep 5 #"  
+    test_path: /courses/module/ch155
+    requests: 
+       /courses/module/ch155: 200
+  - !ruby/object:Jboss 
+    deployment_state: old
+    name: courses
+    port: "8080"
+    state: running
+    mode: ubuntu
+    stop_command: "/usr/local/jboss/bin/shutdown.sh -s localhost:1099 && sleep 5 #"  
+    test_path: /courses/module/ch155
+    requests: 
+       /courses/module/ch155: 200
+lockfile: /tmp/courses_deploy.running
+notification_emails: n.howes@warwick.ac.uk

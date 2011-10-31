@@ -111,7 +111,7 @@
 	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
 		p:detectAnonymousOnCampusUsers="true"
 		p:userLookup-ref="userLookup"
-		p:configLocation="/sso-config.xml" />
+		p:configLocation="/courses-sso-config.xml" />
 		
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
 	
