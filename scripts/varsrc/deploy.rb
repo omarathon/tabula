@@ -520,11 +520,12 @@ class Jboss
 			  http.get(test_path)
         	  }
         rescue Errno::ECONNREFUSED => e
-          log "Connection refused, still restarting?"
-          res = nil
+          res = class << res
+            def code() "connection refused" end
+          end
         end
         
-		if (res.nil? or res.code.to_i != 200)
+		if (res.code.to_i != 200)
 		  	log "[NOT OK] #{test_path} got #{res.code} expected 200"
 		  	retries = retries - 1
 		  	
