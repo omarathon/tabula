@@ -9,7 +9,7 @@ class DiagnosticController {
 	val startTime = System.currentTimeMillis
 	
 	@RequestMapping(Array("/up")) def test(out:Writer) =
-		out.write(String.valueOf((System.currentTimeMillis - startTime)*0.001))
+		out.write(String.valueOf(((System.currentTimeMillis - startTime)*0.001).toLong))
 	
 	
 }

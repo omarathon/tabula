@@ -30,9 +30,9 @@ jbosses:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s jboss:"  
-    test_path: /courses/module/ch155
+    test_path: /courses/test/up
     requests: 
-       /courses/module/ch155: 200
+       /courses/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
     name: courses-secondary
@@ -40,8 +40,8 @@ jbosses:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s jboss:"  
-    test_path: /courses/module/ch155
+    test_path: /courses/test/up
     requests: 
-       /courses/module/ch155: 200
+       /courses/test/up: 200
 lockfile: /tmp/courses_deploy.running
 notification_emails: n.howes@warwick.ac.uk
