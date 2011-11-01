@@ -8,6 +8,8 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.Module
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 @Controller class HomeController {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
@@ -15,13 +17,16 @@ import uk.ac.warwick.courses.data.model.Module
   
 	@RequestMapping(Array("/"))	def home(user:CurrentUser) =
 	  Mav("home/view",
-	      "moduleWebgroups" -> filterGroups(groupService.getGroupsForUser(user.idForPermissions))
+	      "moduleWebgroups" -> groupsForUser(user)
 	      )
+	      
+	def groupsForUser(user:CurrentUser) = 
+		if (user.loggedIn) filterGroups(groupService.getGroupsForUser(user.idForPermissions))
+		else Nil
 	      
 	/**
 	 * Filter groups down to module types,
-	 * sort by name,
-	 * map t
+	 * sort by name
 	 */
 	def filterGroups(groups:Seq[Group]) = groups
 		.filter { "Module" equals _.getType }

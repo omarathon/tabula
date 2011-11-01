@@ -91,15 +91,25 @@
 	
 	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter"
 		p:encoding="UTF-8" p:forceEncoding="true" />
+		
+	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
 	
 	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>
 			<filter ref="characterEncodingFilter" />
-			<filter ref="ssoClientFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
+		</mapping>
+		<mapping>
+			<filter ref="ssoClientFilter" />
+			<filter ref="oAuthFilter" />
+			<url-pattern>/*</url-pattern>
+			<excluded-url-pattern>/static/*</excluded-url-pattern>
+			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+			<excluded-url-pattern>*.ftl</excluded-url-pattern>
+			<excluded-url-pattern>/test/*</excluded-url-pattern>
 		</mapping>
 		<mapping>
 			<filter ref="forceLoginFilter" />
