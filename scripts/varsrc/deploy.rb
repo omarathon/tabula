@@ -515,11 +515,16 @@ class Jboss
 		
 		log "Fetching test page #{test_path} (#{retries} attempts left)"
 		
-		res = Net::HTTP.start("localhost", @port) {|http|
-			http.get(test_path)
-        	}
+		begin
+		  res = Net::HTTP.start("localhost", @port) {|http|
+			  http.get(test_path)
+        	  }
+        rescue Errno::ECONNREFUSED => e
+          log "Connection refused, still restarting?"
+          res = nil
+        end
         
-		if (res.code.to_i != 200)
+		if (res.nil? or res.code.to_i != 200)
 		  	log "[NOT OK] #{test_path} got #{res.code} expected 200"
 		  	retries = retries - 1
 		  	
