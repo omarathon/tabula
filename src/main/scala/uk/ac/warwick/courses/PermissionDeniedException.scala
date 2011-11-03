@@ -18,4 +18,4 @@ import uk.ac.warwick.courses.actions.Action
 class PermissionDeniedException(
     val user:CurrentUser, 
     val action:Action, 
-    cause:Throwable = null ) extends RuntimeException(cause)
+    cause:Throwable = null ) extends RuntimeException(cause) with UserError

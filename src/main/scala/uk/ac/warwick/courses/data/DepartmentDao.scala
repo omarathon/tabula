@@ -16,7 +16,7 @@ trait DepartmentDao {
   def getByOwner(user:String):Seq[Department]
 }
 @Repository
-class DepartmentDaoImpl @Autowired()(val sessionFactory:SessionFactory) extends DepartmentDao with Daoisms {
+class DepartmentDaoImpl extends DepartmentDao with Daoisms {
   
   def allDepartments: Seq[Department] = 
     session.createCriteria(classOf[Department])

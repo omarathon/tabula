@@ -4,6 +4,8 @@ import org.scalatest.junit.JUnitSuite
 import org.specs.mock.JMocker.`with`
 import org.hamcrest.Matchers._
 import org.hamcrest.Matcher
+import org.scalatest.BeforeAndAfter
+import org.specs.specification.DefaultExampleExpectationsListener
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   

@@ -1,27 +1,24 @@
 package uk.ac.warwick.courses.web.controllers
-import org.springframework.web.bind.annotation.RequestMapping
+import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import javax.servlet.http.HttpServletRequest
-import org.springframework.web.servlet.ModelAndView
-import uk.ac.warwick.util.core.ExceptionUtils
-import javax.servlet.ServletException
 import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
+import uk.ac.warwick.courses.system.ExceptionResolver
 
 @Controller
 class ErrorController {
 
-  // TODO some extra error reporting
+  // TODO some extra error reporting 
+  val logger = Logger.getLogger("Exceptions")
+  
+  @Autowired var exceptionResolver:ExceptionResolver =_
   
   @RequestMapping(Array("/error"))
-  def generalError(mav:ModelAndView, request:HttpServletRequest) = {
-    request.getAttribute("javax.servlet.error.exception") match {
-      case exception:Exception => {
-        mav.addObject("originalException")
-        mav.addObject("exception", ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] )))
-      }
-    }
-    "errors/500"
+  def generalError(request:HttpServletRequest):ModelAndView = {
+	exceptionResolver.doResolve(request.getAttribute("javax.servlet.error.exception").asInstanceOf[Throwable])
   }
   
   @RequestMapping(Array("/error/404"))

@@ -46,3 +46,12 @@ background-image: -webkit-gradient(
 	padding: 1em 0;
 	margin: 0.5em 0;
 }
+
+.dev {
+	color: #ccc;
+}
+
+.admin-flash {
+	padding: 1em;
+	background: #eec;
+}

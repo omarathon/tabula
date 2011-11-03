@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.helpers
 
 
 package javaconversions {
-
+	
 /** Convert scala.Collection to java.util.Collection.
  * Note that java's iterator' remove method will not be implemented. */
 class JCollection[A](col: scala.Iterable[A]) extends java.util.AbstractCollection[A]{
@@ -17,6 +17,11 @@ class JCollection[A](col: scala.Iterable[A]) extends java.util.AbstractCollectio
 /** Campanion class */
 object JCollection{
   def apply[A](col: scala.Iterable[A]) = new JCollection(col)
+  
+  def contains[T](item:T, collection:Any) = collection match {
+	  case collection: JCollection[_] => collection.contains(item)
+	  case seq: Seq[_] => seq.contains(item)
+  }
 }
 
 /** Convert scala.Seq to java.util.List */

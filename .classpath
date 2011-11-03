@@ -22,10 +22,10 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RC1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.beans-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.RC1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.core-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.1.0.RC1.jar"/>
@@ -34,8 +34,8 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RC1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web-sources-3.1.0.RC1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web.servlet-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjrt.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjtools.jar"/>
@@ -54,18 +54,19 @@
 	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/jta-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-library.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/jackson-all-1.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/mockito-all-1.9.0-rc1.jar" sourcepath="lib/src/mockito-all-1.9.0-rc1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-cglib-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-	<classpathentry kind="src" path="src/main/scala"/>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/scala"/>
 	<classpathentry kind="src" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/test/jmock-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/jmock-cglib-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/objenesis-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/scalatest-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-api-2.2.2.jar"/>

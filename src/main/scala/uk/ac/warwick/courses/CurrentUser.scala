@@ -10,23 +10,32 @@ import uk.ac.warwick.userlookup.AnonymousUser
  * one representation of a user (when masquerading).
  */
 class CurrentUser(val realUser:User, val sysadmin:Boolean, val apparentUser:User) {
-    var sysadminEnabled = false
+	def this(realUser:User, sysadmin:Boolean) = this(realUser, sysadmin, realUser)
 
-    def this(realUser:User, sysadmin:Boolean) = this(realUser, sysadmin, realUser)
+	var sysadminEnabled = false
   
 	def loggedIn = realUser.isLoggedIn
-	
 	def idForPermissions = apparentUser.getUserId()
 	
+	def apparentId = apparentUser.getUserId
+	def realId = realUser.getUserId
+	def masquerading = !apparentId.equals(realId)
+	
 	override def toString = {
-      val builder = new StringBuilder
-      
+      val builder = new StringBuilder("User ")
+      builder append idForPermissions
+      if (masquerading) {
+    	  builder append " (really " 
+    	  builder append realUser.getUserId
+    	  builder append ")"
+      }
+      if (sysadminEnabled) builder append " +GodMode"
       builder.toString
     }
 }
 
 object CurrentUser {
-  val keyName = "CurrentUser"
+	val keyName = "CurrentUser"
 }
 
 object NoCurrentUser {

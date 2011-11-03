@@ -36,7 +36,7 @@
 	<body class="horizontal-nav layout-100 coursework-page">
 		<div id="container">
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
-			<div id="header" class="header-medium" data-type="image">
+			<div id="header" class="header-small" data-type="image">
 			
 				<div id="masthead" class="transparent"> <!-- optional: class="transparent" -->
 					<div class="access-info">
@@ -107,7 +107,7 @@
 					<div class="content">
 						<div id="site-header-container">
 							<h1 id="site-header">
-								<span id="current-site-header">Coursework submission</span>
+								<span id="current-site-header"><a href="<@url page="/" />">Coursework submission</a></span>
 							</h1>
 							
 							<h2 id="strapline">

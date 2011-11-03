@@ -1,32 +1,27 @@
 package uk.ac.warwick.courses.data
 import org.hibernate.SessionFactory
-
 import scala.reflect.Manifest
+import org.springframework.beans.factory.annotation.Autowired
+import scala.annotation.target.field
 
 trait Daoisms {
+  type AutowiredField = Autowired @field
   
-  val sessionFactory:SessionFactory
+	
+  @AutowiredField var sessionFactory:SessionFactory = _
   protected def session = sessionFactory.getCurrentSession
   
   /**
    * Returns Some(obj) if it matches the expected type, otherwise None.
-   * Useful for converting the value from .uniqueResult into an Option.
+   * Useful for converting the value from .uniqueResult into a typed Option.
    * 
-   * Messed around a bit with some Scala type features here. As the JVM
-   * doesn't know what generics are, regular checks against type D aren't
-   * actually checked. Scala adds a thing called a Manifest which can store
-   * all this stuff, so if one is passed in to the method call, it can ask
-   * the Manifest all sorts of things about the type.
-   * 
-   * It would be painful to have to pass in the Manifest when calling the
-   * method so we can use another Scala feature, implicit parameters. When
-   * a Manifest is defined as implicit it will be automatically added by
-   * the compiler.
+   * An implicit Manifest object is supplied by the Scala compiler, which
+   * holds detailed information about the type D which is otherwise missing
+   * from the JVM bytecode.
    */
-  def option[D] (obj:Any) (implicit m:Manifest[D]) :Option[D] = 
-    if (m.erasure.isInstance(obj)) {
-    	Some(obj.asInstanceOf[D])
-    } else {
-    	None
-    }
+  def option[D] (obj:Any): Option[D] = obj match {
+	  case a:D => Some[D](a)
+	  case _ => None
+  }
+
 }

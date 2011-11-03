@@ -13,7 +13,7 @@ class DaoTests extends AppContextTestBase with ShouldMatchersForJUnit {
 	@Test def findDeptOwners {
 	  val jeffsDepts = deptDao.getByOwner("cusfal")
 	  jeffsDepts.size should be (1)
-	  jeffsDepts.first.name should be ("Computer Science")
+	  jeffsDepts.head.name should be ("Computer Science")
 	  
 	  val ronsDepts = deptDao.getByOwner("cuswizard")
 	  ronsDepts should be ('empty)

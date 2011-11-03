@@ -1,7 +1,7 @@
-package uk.ac.warwick.courses.audit
+package uk.ac.warwick.courses.events
 import org.joda.time.DateTime
 
-class Event(
+case class Event(
     val name:String,
     val user:String,
     val realUser:String,

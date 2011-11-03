@@ -20,11 +20,21 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
   val configName = "courses.properties"
   val profilesProperty = "spring.profiles.active"
+	  
+  // TODO 
+  val mappings = Map(
+		  "dev" -> Array("dev"),
+		  "scheduler" -> Array("scheduler")
+  )
+  
+  def resolve(profiles:String) = {
+	  profiles.split(",")
+  }
   
   override def initialize(ctx:ConfigurableWebApplicationContext) = {
     logger.info("Initialising context")
     if (config.containsProperty(profilesProperty)) {
-      val profiles = config.getProperty(profilesProperty).toString.split(",")
+      val profiles = resolve(config.getProperty(profilesProperty).toString)
       ctx.getEnvironment().setActiveProfiles(profiles:_*)
     }
   }

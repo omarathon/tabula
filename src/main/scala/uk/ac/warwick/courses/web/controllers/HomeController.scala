@@ -11,26 +11,31 @@ import uk.ac.warwick.courses.data.model.Module
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-@Controller class HomeController {
+@Controller class HomeController extends Controllerism {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
 	@Autowired var groupService: GroupService =_
   
-	@RequestMapping(Array("/"))	def home(user:CurrentUser) =
-	  Mav("home/view",
-	      "moduleWebgroups" -> groupsForUser(user)
-	      )
-	      
-	def groupsForUser(user:CurrentUser) = 
-		if (user.loggedIn) filterGroups(groupService.getGroupsForUser(user.idForPermissions))
-		else Nil
-	      
-	/**
-	 * Filter groups down to module types,
-	 * sort by name
-	 */
-	def filterGroups(groups:Seq[Group]) = groups
-		.filter { "Module" equals _.getType }
-		.map {(g:Group)=> (Module.nameFromWebgroupName(g.getName), g) }
-		.sortBy { _._1 }
+	@RequestMapping(Array("/"))	def home(user:CurrentUser) = {
+	  if (user.loggedIn) {
+		  val moduleWebgroups = moduleService.modulesAttendedBy(user.idForPermissions)//groupsFor(user),
+		  val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
+		  if (moduleWebgroups.isEmpty && ownedDepartments.size == 1) {
+		 	  debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
+		 	  Mav("redirect:/admin/department/%s/".format(ownedDepartments.head.code))
+		  } else {
+			  Mav("home/view",
+			      "moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
+			      "ownedDepartments" -> ownedDepartments
+			      )
+		  }
+	  } else {
+	 	  Mav("home/view")
+	  }
+	}
+	 
+	def webgroupsToMap(groups:Seq[Group]) = groups
+			.map {(g:Group)=> (Module.nameFromWebgroupName(g.getName), g) }
+			.sortBy { _._1 }
+	
 		
 }

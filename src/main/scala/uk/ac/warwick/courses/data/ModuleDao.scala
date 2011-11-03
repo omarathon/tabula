@@ -11,7 +11,7 @@ trait ModuleDao {
 }
 
 @Repository
-class ModuleDaoImpl @Autowired()(val sessionFactory:SessionFactory) extends ModuleDao with Daoisms {
+class ModuleDaoImpl extends ModuleDao with Daoisms {
   
   def saveOrUpdate(module:Module) = session.saveOrUpdate(module)
   

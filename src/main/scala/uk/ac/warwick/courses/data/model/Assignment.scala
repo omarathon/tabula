@@ -12,7 +12,6 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.CascadeType
 import org.hibernate.annotations.Type
-import uk.ac.warwick.courses.web.forms.AddAssignmentForm
 import javax.persistence.FetchType
 import javax.persistence.OrderBy
 import javax.persistence.Column
@@ -61,8 +60,6 @@ class Assignment extends GeneratedId {
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY)
 	@OrderBy("date")
 	@BeanProperty var submissions:java.util.Set[Submission] =_
-	
-	
 	
 }
 

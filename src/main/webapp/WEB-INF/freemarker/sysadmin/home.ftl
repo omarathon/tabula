@@ -3,7 +3,7 @@
 
 <h1>Sys admin</h1>
 
-<p><a href="/sysadmin/departments">List all departments in the system</a></p>
+<p><a href="/sysadmin/departments/">List all departments in the system</a></p>
 
 <p>
 <@form.form method="post" action="/sysadmin/import">

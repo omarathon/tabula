@@ -35,17 +35,30 @@
 		classpath:/courses.properties,
 		classpath:/courses-private.properties" />
 	
-	<!-- 
-		Map certain exceptions straight to views.
-		If we need to do extra stuff here or add stuff to the model, implement a custom HandlerExceptionResolver.	
-	-->
-	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-		<property name="exceptionMappings">
-		  <map>
-		    <entry key="uk.ac.warwick.courses.PermissionDeniedException" value="errors/permissionDenied" />
-		    <entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
-		    <entry key="java.lang.Exception" value="errors/500" />
-		  </map>
+	<bean class="uk.ac.warwick.courses.events.EventLoggingAspect" factory-method="aspectOf">
+		<property name="listener">
+			<bean class="uk.ac.warwick.courses.events.CompositeEventListener">
+				<constructor-arg>
+					<list>
+						<bean class="uk.ac.warwick.courses.events.Log4JEventListener" />
+					</list>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- Catches all exceptions that go through Spring.
+		If an exception escapes Spring, it will go to the handler in web.xml,
+		which is served by the ErrorController at /error/, which delegates to this.
+		So this should be handling all exceptions.
+	 -->
+	<bean class="uk.ac.warwick.courses.system.ExceptionResolver" p:order="0"
+		p:defaultView="errors/500">
+		<property name="viewMappings">
+			<map>
+				<entry key="uk.ac.warwick.courses.PermissionDeniedException" value="errors/permissionDenied" />
+				<entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
+			</map>
 		</property>
 	</bean>
 	
@@ -74,16 +87,21 @@
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
+			<bean class="uk.ac.warwick.courses.system.RequestInfoInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
 			<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
 		</mvc:interceptor>
 	</mvc:interceptors>
+	
 	<mvc:annotation-driven validator="validator" conversion-service="typeConverter">
 		<mvc:argument-resolvers>
 			<bean class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
 		</mvc:argument-resolvers>
 	</mvc:annotation-driven>
 	
-	<tx:annotation-driven />
+	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
 	<!-- get app server to handle static content -->
@@ -115,6 +133,7 @@
 			<filter ref="forceLoginFilter" />
 			<filter ref="sysadminGroupFilter" />
 			<url-pattern>/sysadmin/*</url-pattern>
+			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 	

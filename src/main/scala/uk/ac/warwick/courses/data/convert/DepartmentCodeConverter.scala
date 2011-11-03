@@ -9,6 +9,6 @@ class DepartmentCodeConverter extends Converter[String, Department] {
   
   @Autowired var service:ModuleAndDepartmentService =_
   
-  override def convert(code:String) = service.getDepartmentByCode(code).getOrDie
+  override def convert(code:String) = service.getDepartmentByCode(code).orNull
   
 }

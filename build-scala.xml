@@ -47,7 +47,7 @@
     <mkdir dir="target/${war.name}/WEB-INF/classes" />
   	<mkdir dir="target/unwoven" />
   	<mkdir dir="target/log" />
-    <scalac deprecation="on" unchecked="on"
+    <scalac deprecation="on" unchecked="on" 
     	srcref="java+scala.srcpath"
     	destdir="target/unwoven" classpathref="build.classpath" />
   	<path id="build+built.classpath">
@@ -61,9 +61,10 @@
         destdir="target/${war.name}/WEB-INF/classes" 
         classpathref="build.classpath"
         aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"
-    	  log="target/log/iajc.log"
-        verbose="false" />
-  	
+    	  log="target/log/iajc.log" />
+  	<fail message="iajc errors" taskname="iajc">
+  	    <condition><resourcecontains resource="target/log/iajc.log" substring="[error]"/></condition>
+  	</fail>
   </target>
 
   <target name="package" depends="compile" description="Compile and package application into a WAR file">

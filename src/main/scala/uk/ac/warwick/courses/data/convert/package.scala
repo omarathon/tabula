@@ -8,11 +8,11 @@ package object convert
    * Adds a method getOrDie to an Option object which will throw
    * a custom exception if it's None
    */
-  @unchecked
-  implicit def optionToThrowingOption[T](option:Option[T]) = new {
+  @SuppressWarnings(Array("unchecked"))
+  implicit def optionToThrowingOption[T](option:Option[T])(implicit m:Manifest[T]) = new {
     def getOrDie:T = option match {
-	  case None => throw new ItemNotFoundException() 
-	  case Some(t:T) => t
+      case Some(t:Any) if m.erasure.isInstance(t) => t.asInstanceOf[T]
+	  case _ => throw new ItemNotFoundException() 
 	}
   }
 }

@@ -1,0 +1,26 @@
+package uk.ac.warwick.courses.validators;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+
+public class SpelAssertValidator implements ConstraintValidator<SpelAssert, Object> {
+
+	@Autowired private ExpressionParser parser;
+	private Expression expression;
+	
+	@Override
+	public void initialize(SpelAssert annotation) {
+		expression = parser.parseExpression(annotation.value());
+	}
+
+	@Override
+	public boolean isValid(Object object, ConstraintValidatorContext ctx) {
+		if (object == null) return true;
+		else return expression.getValue(object, Boolean.class);
+	}
+
+}

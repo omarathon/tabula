@@ -2,6 +2,8 @@
 
 <p>There has been some kind of dreadful error.</p>
 
-<p>
-
-</p>
+<div class="dev">
+<#if exception??>
+${exception.class.name}
+</#if>
+</div>

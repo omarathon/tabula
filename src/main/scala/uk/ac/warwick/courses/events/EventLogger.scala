@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.audit
+package uk.ac.warwick.courses.events
 import java.io.StringWriter
 import org.apache.log4j.Logger
 import org.codehaus.jackson.map.ObjectMapper
@@ -9,7 +9,7 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.stereotype.Service
 
 @Service
-class EventLogger @Autowired()(val sessionFactory:SessionFactory) extends Daoisms {
+class EventLogger extends Daoisms {
 	
 	var logger = Logger.getLogger("AUDIT")
 	val json = new ObjectMapper

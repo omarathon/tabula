@@ -12,7 +12,9 @@ import uk.ac.warwick.courses.data.ModuleDao
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.userlookup.GroupService
 import org.springframework.scheduling.annotation.Async
-
+import collection.JavaConverters._
+import uk.ac.warwick.userlookup.Group
+import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 
 /**
  * Handles data about modules and departments
@@ -20,16 +22,13 @@ import org.springframework.scheduling.annotation.Async
 @Service
 class ModuleAndDepartmentService extends Logging  {
   
-    @Autowired var moduleImporter:ModuleImporter =_
     @Autowired var moduleDao:ModuleDao =_
     @Autowired var departmentDao:DepartmentDao =_
     @Autowired var groupService:GroupService =_
   
     @Scheduled(cron="0 0 7,14 * * *")
-    @Transactional
     def importData {
-      importDepartments
-      importModules
+      new ImportModulesCommand().apply()
     }
     
     @Transactional(readOnly=true)
@@ -43,20 +42,14 @@ class ModuleAndDepartmentService extends Logging  {
     
     def departmentsOwnedBy(usercode:String) = departmentDao.getByOwner(usercode)
     
-    def importModules {
-      logger.info("Importing modules")
-      for (dept <- allDepartments) {
-        for (mod <- moduleImporter.getModules(dept.code)) {
-          moduleDao.getByCode(mod.code) match {
-            case None => {
-              logger.debug("Mod code " + mod.code + " not found in database, so inserting")
-              moduleDao.saveOrUpdate(newModuleFrom(mod, dept))
-            }
-            case Some(module) => { }
-          }
-        }
-      }
-    }
+    /**
+     * Modules that this user is attending.
+     * TODO assumes webgroup = module attendance.
+     */
+    def modulesAttendedBy(usercode:String) = groupService.getGroupsForUser(usercode).asScala
+		.filter { "Module" equals _.getType }
+		
+    
     
     @Transactional
     def addOwner(dept:Department, owner:String) = dept.owners.addUser(owner)
@@ -64,36 +57,6 @@ class ModuleAndDepartmentService extends Logging  {
     @Transactional
     def removeOwner(dept:Department, owner:String) = dept.owners.removeUser(owner)
     
-    def importDepartments {
-      // TODO throttle?
-      logger.info("Importing departments")
-      for (dept <- moduleImporter.getDepartments) {
-        dept.faculty match {
-          case "Service/Admin" => logger.debug("Skipping Service/Admin department " + dept.code)
-          case _ => {
-            departmentDao.getByCode(dept.code) match {
-              case None => departmentDao save newDepartmentFrom(dept)
-              case Some(dept) => { logger.debug("Skipping " + dept.code + " as it is already in the database") }
-            }
-          }
-        }
-      }
-    }
     
-    private def newModuleFrom(m:ModuleInfo, dept:Department): Module = {
-      val module = new Module
-      module.code = m.code
-      module.name = m.name
-      module.webgroup = m.group
-      module.department = dept
-      module
-    }
-    
-    private def newDepartmentFrom(d:DepartmentInfo): Department = {
-      val department = new Department
-      department.code = d.code
-      department.name = d.name
-      department
-    }
 
 }

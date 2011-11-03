@@ -25,12 +25,22 @@ import uk.ac.warwick.courses.data.model.Module
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.Department
 import javax.validation.Validation
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 
 class ApplicationTest extends AppContextTestBase with ShouldMatchersForJUnit {
     
     @Autowired var sessionFactory:SessionFactory = null
     
     def session = sessionFactory.getCurrentSession
+    
+    @Autowired var annotationMapper:RequestMappingHandlerMapping =_
+    
+    @Test def handlerMappings = {
+    	annotationMapper.getHandlerMethods.size should not be (0)
+    	for ((info,method) <- annotationMapper.getHandlerMethods()) {
+    		
+    	}
+    }
     
     @Transactional @Test def hibernatePersistence = {
 	  val assignment = new Assignment
