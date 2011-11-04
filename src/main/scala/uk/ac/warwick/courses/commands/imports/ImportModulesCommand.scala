@@ -1,18 +1,14 @@
 package uk.ac.warwick.courses.commands.imports
 
-import uk.ac.warwick.courses.commands.Command
-import uk.ac.warwick.courses.commands.Description
-import uk.ac.warwick.courses.services.ModuleAndDepartmentService
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.services.ModuleImporter
-import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.courses.services._
+import uk.ac.warwick.courses.commands._
+import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.services.DepartmentInfo
-import uk.ac.warwick.courses.data.model.Department
-import uk.ac.warwick.courses.services.ModuleInfo
-import uk.ac.warwick.courses.data.model.Module
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
+
 
 @Configurable
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {

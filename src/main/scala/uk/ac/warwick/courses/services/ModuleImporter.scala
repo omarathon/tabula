@@ -11,8 +11,8 @@ import org.w3c.dom.NodeList
 import org.springframework.util.StringUtils._
 import uk.ac.warwick.util.web.Uri
 
-class DepartmentInfo(val name:String, val code:String, val faculty:String)
-class ModuleInfo(val name:String, val code:String, val group:String)
+case class DepartmentInfo(val name:String, val code:String, val faculty:String)
+case class ModuleInfo(val name:String, val code:String, val group:String)
 
 /**
  * Retrieves department and module information from an external location.

@@ -5,7 +5,7 @@ import org.junit.Test
 import uk.ac.warwick.courses.TestBase
 import uk.ac.warwick.courses.Mockito
 import collection.JavaConversions._
-import uk.ac.warwick.courses.commands.NullCommand
+import uk.ac.warwick.courses.commands._
 
 class EventLoggingAspectTest extends TestBase with Mockito {
 	

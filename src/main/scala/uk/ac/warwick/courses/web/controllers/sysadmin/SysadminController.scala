@@ -26,6 +26,13 @@ class BaseSysadminController extends Controllerism {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
 	
 	def redirectToDeptOwners(deptcode:String) = new ModelAndView("redirect:/sysadmin/departments/"+deptcode+"/owners/")
+	
+	@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners"), method=Array(RequestMethod.GET))
+	def viewDepartmentOwners(@PathVariable dept:Department) = 
+		Mav("sysadmin/departments/owners",
+			  		  "department" -> dept,
+			  		  "owners" -> dept.owners)
+	
 }
 	
 @Controller
@@ -51,24 +58,19 @@ class SysadminController extends BaseSysadminController {
 		  moduleService.importData
 		  "sysadmin/importdone"
 	}
+
 }
 
 object SysadminController {
 	
 	@Controller 
+	@RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
 	class RemoveDeptOwnerController extends BaseSysadminController {
 		@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
 			new RemoveDeptOwnerCommand(dept)
 		}
 		
-		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners"), method=Array(RequestMethod.GET))
-		def viewDepartmentOwners(@PathVariable dept:Department) = {
-			Mav("sysadmin/departments/owners",
-				  		  "department" -> dept,
-				  		  "owners" -> dept.owners)
-		}
-		
-		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/delete"), method=Array(RequestMethod.POST))
+		@RequestMapping(method=Array(RequestMethod.POST))
 		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors):ModelAndView  = {
 			if (errors.hasErrors) {
 			  return viewDepartmentOwners(dept)
@@ -82,25 +84,25 @@ object SysadminController {
 	
 	
 	@Controller 
+	@RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
 	class AddDeptOwnerController extends BaseSysadminController {
 	
 		@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
 			new AddDeptOwnerCommand(dept)
 		}
 		
-		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/add"), method=Array(RequestMethod.GET))
+		@RequestMapping(method=Array(RequestMethod.GET))
 		def addDeptOwnerForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView = {
-			new ModelAndView("sysadmin/departments/owners/add")
-				.addObject("department", dept)
+			Mav("sysadmin/departments/owners/add",
+				"department" -> dept)
 		}
 		
-		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/add"), method=Array(RequestMethod.POST))
+		@RequestMapping(method=Array(RequestMethod.POST))
 		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView  = {
 			if (errors.hasErrors) {
 			  return addDeptOwnerForm(dept, form, errors)
 			} else {
 			  logger.info("Passed validation, saving owner")
-			  //moduleService.addOwner(dept, form.getUsercode())
 			  form.apply()
 			  return redirectToDeptOwners(dept.code)
 			}
