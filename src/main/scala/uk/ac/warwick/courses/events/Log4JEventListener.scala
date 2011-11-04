@@ -9,6 +9,9 @@ class Log4JEventListener extends EventListener {
 	
 	val logger = Logger.getLogger("uk.ac.warwick.courses.AUDIT")
 	
+	val QUOTE = "\""
+	val ESCQUOTE = "\\"
+	
 	override def beforeCommand(command: Describable) {
 		val s = generateMessage(command, "pre-event")
 		logger.info(s.toString)
@@ -45,7 +48,14 @@ class Log4JEventListener extends EventListener {
 		val description = new DescriptionImpl
 		command.describe(description)
 		for ((key,value) <- description.allProperties)
-			s ++= " " ++ key ++ "=" ++ value.toString
+			s ++= " " ++ key ++ "=" ++ quote(value.toString)
+	}
+	
+	def quote(value:String) = {
+		if (value.contains(" ") || value.contains(QUOTE))
+			QUOTE + value.replace(QUOTE, ESCQUOTE) + QUOTE
+		else
+			value
 	}
 
 }
