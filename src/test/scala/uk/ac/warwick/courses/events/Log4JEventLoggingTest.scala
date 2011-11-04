@@ -25,9 +25,12 @@ class Log4JEventLoggingTest extends TestBase {
 	
 	@Test def writesLogs {
 		val writer = new StringWriter
+		val command = new NullCommand().describedAs {(d) =>
+			d.properties("mykey" -> "jibberjabber")
+		}
 		appender.setWriter(writer)
-		listener.afterCommand(new NullCommand, null)
-		writer.toString should include ("event=NullCommand")
+		listener.afterCommand(command, null)
+		writer.toString should include ("event=NullCommand mykey=jibberjabber")
 	}
 	
 }

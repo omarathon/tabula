@@ -40,7 +40,7 @@ trait Unaudited { self: Command[_] =>
 abstract class Description {
 	protected var map = mutable.Map[String,Any]()
 	def properties(props: Pair[String,Any]*) = {
-		map ++ props
+		map ++= props
 		this
 	}
 	def properties(otherMap: Map[String,Any]) = {
