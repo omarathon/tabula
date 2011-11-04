@@ -61,14 +61,14 @@ object SysadminController {
 			new RemoveDeptOwnerCommand(dept)
 		}
 		
-		@RequestMapping(value=Array("/departments/{dept}/owners"), method=Array(RequestMethod.GET))
+		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners"), method=Array(RequestMethod.GET))
 		def viewDepartmentOwners(@PathVariable dept:Department) = {
 			Mav("sysadmin/departments/owners",
 				  		  "department" -> dept,
 				  		  "owners" -> dept.owners)
 		}
 		
-		@RequestMapping(value=Array("/departments/{dept}/owners/delete"), method=Array(RequestMethod.POST))
+		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/delete"), method=Array(RequestMethod.POST))
 		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors):ModelAndView  = {
 			if (errors.hasErrors) {
 			  return viewDepartmentOwners(dept)
@@ -88,13 +88,13 @@ object SysadminController {
 			new AddDeptOwnerCommand(dept)
 		}
 		
-		@RequestMapping(value=Array("/departments/{dept}/owners/add"), method=Array(RequestMethod.GET))
+		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/add"), method=Array(RequestMethod.GET))
 		def addDeptOwnerForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView = {
 			new ModelAndView("sysadmin/departments/owners/add")
 				.addObject("department", dept)
 		}
 		
-		@RequestMapping(value=Array("/departments/{dept}/owners/add"), method=Array(RequestMethod.POST))
+		@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners/add"), method=Array(RequestMethod.POST))
 		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView  = {
 			if (errors.hasErrors) {
 			  return addDeptOwnerForm(dept, form, errors)
