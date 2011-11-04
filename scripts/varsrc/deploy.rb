@@ -123,8 +123,8 @@ class Deployment
         # If we need access to the previous checkout, we should just
         # store the commit ID in a file somewhere.
         # Assumes there's a cloned repo in #{checkout}; Puppet should ensure this.
-        log "Performing a Git hard reset and a pull"
-        system("cd #{checkout} ; git reset --hard HEAD; git pull")
+        log "Performing a Git hard reset, clean, and a pull"
+        system("cd #{checkout} ; git reset --hard HEAD; git clean -fdx; git pull")
      else
         # CVS.
 
