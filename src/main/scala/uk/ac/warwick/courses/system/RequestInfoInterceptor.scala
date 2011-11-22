@@ -20,8 +20,10 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 		true
 	}
 	
-	override def afterCompletion(request:HttpServletRequest , response:HttpServletResponse , handler:Object, ex:Exception) {
-		RequestInfo.close
-	}
+//	
+//	
+//	override def afterCompletion(request:HttpServletRequest , response:HttpServletResponse , handler:Object, ex:Exception) {
+//		RequestInfo.close
+//	}
     
 }

@@ -63,7 +63,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
       val module = new Module
       module.code = m.code
       module.name = m.name
-      module.webgroup = m.group
+      module.members.baseWebgroup = m.group
       module.department = dept
       module
     }

@@ -35,7 +35,7 @@ create table Module (
     active number(1,0) not null,
     code nvarchar2(255),
     name nvarchar2(255),
-    webgroup nvarchar2(255),
+    membersgroup_id nvarchar2(255),
     department_id nvarchar2(255),
     CONSTRAINT "MODULE_PK" PRIMARY KEY ("ID"),
 	CONSTRAINT "MODULE_CODE" UNIQUE ("CODE")

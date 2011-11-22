@@ -29,11 +29,16 @@ class SecurityService extends Logging {
 	def checkSysadmin(user:CurrentUser, action:Action):Boolean = user.sysadminEnabled
 	
 	def checkGroup(user:CurrentUser, action:Action):Boolean = action match {
+		
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
 	  case View(department:Department) => checkGroup(user, Manage(department))
-	  case View(module:Module) => checkGroup(user, View(module.department)) 
-	  case View(assignment:Assignment) => false
-	  case Submit(assignment:Assignment) => false
+	  
+	  case View(module:Module) => module.getMembers().includes(user.apparentId) || 
+	  							  checkGroup(user, View(module.department))
+	  							  
+	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
+	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
+	  
 	  case _ => throw new IllegalArgumentException()
 	}
 	

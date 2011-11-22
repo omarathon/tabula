@@ -15,6 +15,7 @@ import javax.persistence.OneToMany
 import collection.JavaConversions._
 import org.hibernate.annotations.FetchMode
 import javax.persistence.FetchType
+import javax.persistence.OneToOne
 
 @Entity
 @NamedQueries(Array(
@@ -24,7 +25,10 @@ import javax.persistence.FetchType
 class Module extends GeneratedId {
 	@BeanProperty var code:String = _
 	@BeanProperty var name:String = _
-	@BeanProperty var webgroup:String = _
+	
+	@OneToOne(cascade=Array(CascadeType.ALL))
+	@JoinColumn(name="membersgroup_id")
+	@BeanProperty var members:UserGroup = new UserGroup
 	
 	@ManyToOne(cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
 	@JoinColumn(name="department_id")
