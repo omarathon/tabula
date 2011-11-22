@@ -10,6 +10,7 @@ import freemarker.template.SimpleHash
 import freemarker.template.Configuration
 import javax.servlet.ServletConfig
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.RequestInfo
 
 /**
  * FreemarkerServlet which adds some useful model stuff to every request.
@@ -28,7 +29,10 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
    */
   override def preTemplateProcess(req:HttpServletRequest,res:HttpServletResponse,template:Template,data:TemplateModel) = {
 	val model = data.asInstanceOf[SimpleHash]
-	model.put("user", SSOClientFilter.getUserFromRequest(req))
+	val info = RequestInfo.fromThread.get
+	model.put("info", info)
+	//model.put("user", SSOClientFilter.getUserFromRequest(req))
+	model.put("user", info.user)
 	true
   }
   

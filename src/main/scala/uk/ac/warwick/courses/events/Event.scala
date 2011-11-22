@@ -3,9 +3,8 @@ import org.joda.time.DateTime
 
 case class Event(
     val name:String,
-    val user:String,
-    val realUser:String,
-    val item:String,
-    val extra:Map[String,String],
+    val userId:String,
+    val realUserId:String,
+    val extra:Map[String,Any],
 	val date:DateTime=new DateTime
 )

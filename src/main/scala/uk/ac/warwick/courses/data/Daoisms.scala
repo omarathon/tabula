@@ -19,9 +19,14 @@ trait Daoisms {
    * holds detailed information about the type D which is otherwise missing
    * from the JVM bytecode.
    */
-  def option[D] (obj:Any): Option[D] = obj match {
-	  case a:D => Some[D](a)
+  def option[D] (obj:Any)(implicit m:Manifest[D]) : Option[D] = obj match {
+	  case a:Any if m.erasure.isInstance(a) => Some(a.asInstanceOf[D])
 	  case _ => None
   }
+  
+  // type-safe session.get. returns an Option object, which will match None if
+  // null was returned.
+  protected def getById[D](id:String)(implicit m:Manifest[D]) : Option[D] =
+	  Option(session.get(m.erasure.getName(), id).asInstanceOf[D])
 
 }

@@ -71,7 +71,7 @@
 						<div id="utility-bar">
 							<ul>
 								<li>
-								<#if user?? && user.foundUser>
+								<#if user?? && user.loggedIn>
 									Sign in as ${user.fullName}.
 									<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
 								<#else>
@@ -251,7 +251,7 @@
 						<div id="footer-utility">
 							<ul>
 								<li id="sign-inout-link">
-				          			<#if user?? && user.foundUser>
+				          			<#if user?? && user.loggedIn>
 										<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
 									<#else>
 									    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>

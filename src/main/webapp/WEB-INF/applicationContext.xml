@@ -41,11 +41,14 @@
 				<constructor-arg>
 					<list>
 						<bean class="uk.ac.warwick.courses.events.Log4JEventListener" />
+						<bean class="uk.ac.warwick.courses.events.DatabaseEventListener" />
 					</list>
 				</constructor-arg>
 			</bean>
 		</property>
 	</bean>
+	
+	<bean id="json" class="uk.ac.warwick.courses.JsonObjectMapperFactory" />
 	
 	<!-- Catches all exceptions that go through Spring.
 		If an exception escapes Spring, it will go to the handler in web.xml,
@@ -76,6 +79,7 @@
 	            <bean class="uk.ac.warwick.courses.system.ScalaCollectionConverter" />
 	            <bean class="uk.ac.warwick.courses.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.ModuleCodeConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.AssignmentIdConverter"/>
 	        </list>
 	    </property>
 	</bean>

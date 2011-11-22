@@ -27,7 +27,7 @@ class BaseSysadminController extends Controllerism {
 	
 	def redirectToDeptOwners(deptcode:String) = new ModelAndView("redirect:/sysadmin/departments/"+deptcode+"/owners/")
 	
-	@RequestMapping(value=Array("/sysadmin/departments/{dept}/owners"), method=Array(RequestMethod.GET))
+	
 	def viewDepartmentOwners(@PathVariable dept:Department) = 
 		Mav("sysadmin/departments/owners",
 			  		  "department" -> dept,
@@ -41,6 +41,9 @@ class SysadminController extends BaseSysadminController {
   
 	@RequestMapping(Array("/home"))
 	def home = "sysadmin/home"
+		
+	@RequestMapping(value=Array("/departments/{dept}/owners/"), method=Array(RequestMethod.GET))
+	def departmentOwners(@PathVariable dept:Department) = viewDepartmentOwners(dept)
 	  
 	@RequestMapping(Array("/departments/"))
 	def departments = Mav("sysadmin/departments/list",

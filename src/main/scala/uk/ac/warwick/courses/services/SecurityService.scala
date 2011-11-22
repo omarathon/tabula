@@ -31,7 +31,7 @@ class SecurityService extends Logging {
 	def checkGroup(user:CurrentUser, action:Action):Boolean = action match {
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
 	  case View(department:Department) => checkGroup(user, Manage(department))
-	  case View(module:Module) => checkGroup(user, View(module.department))
+	  case View(module:Module) => checkGroup(user, View(module.department)) 
 	  case View(assignment:Assignment) => false
 	  case Submit(assignment:Assignment) => false
 	  case _ => throw new IllegalArgumentException()

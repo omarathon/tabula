@@ -4,6 +4,7 @@ import org.apache.log4j.Logger
 import uk.ac.warwick.courses.commands.Describable
 import uk.ac.warwick.courses.commands.DescriptionImpl
 import uk.ac.warwick.courses.RequestInfo
+import uk.ac.warwick.courses.commands.Description
 
 class Log4JEventListener extends EventListener {
 	
@@ -12,44 +13,43 @@ class Log4JEventListener extends EventListener {
 	val QUOTE = "\""
 	val ESCQUOTE = "\\"+QUOTE
 	
-	override def beforeCommand(command: Describable) {
-		val s = generateMessage(command, "pre-event")
+	override def beforeCommand(event:Event) {
+		val s = generateMessage(event, "pre-event")
 		logger.info(s.toString)
 	}
 
-	override def afterCommand(command: Describable, returnValue: Any) {
-		val s = generateMessage(command)
+	override def afterCommand(event:Event, returnValue: Any) {
+		val s = generateMessage(event)
 		logger.info(s.toString)
 	}
 
-	override def onException(command: Describable, exception: Throwable) {
-		val s = generateMessage(command, "failed-event")
+	override def onException(event:Event, exception: Throwable) {
+		val s = generateMessage(event, "failed-event")
 		logger.info(s.toString)
 	}
 	
-	def generateMessage(command:Describable, eventStage:String="event") = {
+	def generateMessage(event:Event, eventStage:String="event") = {
 		val s = new StringBuilder
-		s ++= eventStage ++ "=" ++ command.eventName
-		RequestInfo.fromThread match {
-			case Some(info) => {
-				val user = info.user
-				s ++= " user=" ++ user.apparentId
-				if (user.masquerading) {
-					s ++= " realUser=" ++ user.realId
-				}
+		s ++= eventStage ++ "=" ++ event.name
+		if (event.userId != null) {
+			s ++= " user=" ++ userString(event.userId)
+			if (event.realUserId != event.userId) {
+				s ++= " realUser=" ++ userString(event.userId)
 			}
-			case None => /* no requestinfo, ok if it's a scheduled job? */
 		}
-		describe(command, s)
+		describe(event, s)
 		s
 	}
 	
-	def describe(command:Describable, s:StringBuilder) = {
-		val description = new DescriptionImpl
-		command.describe(description)
-		for ((key,value) <- description.allProperties)
-			s ++= " " ++ key ++ "=" ++ quote(value.toString)
+	def userString(id:String) = id match {
+		case string:String => string
+		case _ => "null"
 	}
+	
+	// only supports DescriptionImpl
+	def describe(event:Event, s:StringBuilder) = 
+		for ((key,value) <- event.extra)
+			s ++= " " ++ key ++ "=" ++ quote(value.toString)
 	
 	def quote(value:String) = {
 		if (value.contains(" ") || value.contains(QUOTE))

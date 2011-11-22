@@ -16,13 +16,11 @@ import uk.ac.warwick.courses.validators.SpelAssert.List
 import uk.ac.warwick.courses.validators.SpelAssert
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
-import uk.ac.warwick.courses.events.EventName
 
 @SpelAssert.List(Array(
 	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
 ))
 @Configurable
-@EventName("AddAssignment")
 class AddAssignmentCommand(val module:Module=null) extends Command[Assignment] with Daoisms {
 	
 	@NotEmpty

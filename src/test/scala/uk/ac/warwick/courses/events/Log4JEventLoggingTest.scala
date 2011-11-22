@@ -1,13 +1,15 @@
 package uk.ac.warwick.courses.events
-import uk.ac.warwick.courses.TestBase
+import java.io.StringWriter
 import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
 import org.apache.log4j.WriterAppender
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.io.StringWriter
+import uk.ac.warwick.courses.commands.DescriptionImpl
 import uk.ac.warwick.courses.commands.NullCommand
-import org.apache.log4j.PatternLayout
+import uk.ac.warwick.courses.TestBase
+import org.joda.time.DateTime
 
 class Log4JEventLoggingTest extends TestBase {
 
@@ -29,8 +31,14 @@ class Log4JEventLoggingTest extends TestBase {
 			d.properties("mykey" -> "jibberjabber")
 		}
 		appender.setWriter(writer)
-		listener.afterCommand(command, null)
-		writer.toString should include ("event=NullCommand mykey=jibberjabber")
+		
+		val description = new DescriptionImpl
+		command.describe(description)
+		
+		val event = new Event(command.eventName, null, null, description.allProperties.toMap, new DateTime) 
+		
+		listener.afterCommand(event, null)
+		writer.toString should include ("event=Null mykey=jibberjabber")
 	}
 	
 }

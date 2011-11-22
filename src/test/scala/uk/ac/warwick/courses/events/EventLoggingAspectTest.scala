@@ -6,8 +6,11 @@ import uk.ac.warwick.courses.TestBase
 import uk.ac.warwick.courses.Mockito
 import collection.JavaConversions._
 import uk.ac.warwick.courses.commands._
+import org.mockito.Matchers.{eq => isEq}
 
 class EventLoggingAspectTest extends TestBase with Mockito {
+	
+	
 	
 	val aspect = Aspects.aspectOf(classOf[EventLoggingAspect])
 	
@@ -21,8 +24,8 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 		
 		command()
 
-		there was one(listener).beforeCommand(command)
-		there was one(listener).afterCommand(command, null)
+		there was one(listener).beforeCommand(any[Event])
+		there was one(listener).afterCommand(any[Event], isEq(null))
 	}
 	
 	@Test def exceptionHandlerCalled {
@@ -38,10 +41,10 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 			fail("didn't throw an exception")
 		} catch {
 			case npe:NullPointerException =>
-				there was one(listener).onException(command, npe)
+				there was one(listener).onException(any[Event], isEq(npe))
 		}
 		
-		there was one(listener).beforeCommand(command)
+		there was one(listener).beforeCommand(any[Event])
 	}
 	
 }

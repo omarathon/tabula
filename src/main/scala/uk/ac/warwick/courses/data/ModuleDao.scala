@@ -18,6 +18,5 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
   def getByCode(code:String) = option[Module] { 
     session.createQuery("from Module m where code = :code").setString("code",code).uniqueResult
   }
-    
   
 }

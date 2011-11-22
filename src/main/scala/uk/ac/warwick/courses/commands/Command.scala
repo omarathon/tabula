@@ -1,6 +1,5 @@
 package uk.ac.warwick.courses.commands
 import collection.mutable
-import uk.ac.warwick.courses.events.EventName
 
 trait Describable {
 	def describe(d:Description)
@@ -16,10 +15,7 @@ trait Describable {
  */
 trait Command[R] extends Describable {
 	def apply(): R
-	lazy val eventName = getClass.getAnnotation(classOf[EventName]) match {
-		case annotation:EventName => annotation.value
-		case _ => getClass.getSimpleName
-	}
+	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
 
 /**
@@ -50,6 +46,13 @@ abstract class Description {
 	def property(prop: Pair[String,Any]) = {
 		map += prop
 		this
+	}
+	
+	// delegate equality to the underlying map
+	override def hashCode = map.hashCode
+	override def equals(that:Any) = that match {
+		case d:Description => map.equals(d.map)
+		case _ => false
 	}
 }
 

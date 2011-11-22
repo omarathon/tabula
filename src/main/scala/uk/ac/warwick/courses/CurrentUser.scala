@@ -21,6 +21,8 @@ class CurrentUser(val realUser:User, val sysadmin:Boolean, val apparentUser:User
 	def realId = realUser.getUserId
 	def masquerading = !apparentId.equals(realId)
 	
+	def fullName = apparentUser.getFullName
+	
 	override def toString = {
       val builder = new StringBuilder("User ")
       builder append idForPermissions

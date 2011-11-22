@@ -5,3 +5,4 @@ drop table fileattachment;
 drop table usergroup;
 drop table usergroupexclude;
 drop table usergroupinclude;
+drop table auditevent;
