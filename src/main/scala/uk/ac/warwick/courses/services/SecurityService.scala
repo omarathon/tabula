@@ -40,6 +40,7 @@ class SecurityService extends Logging {
 	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  
 	  case _ => throw new IllegalArgumentException()
+	   
 	}
 	
 	/**

@@ -9,6 +9,7 @@ import javax.persistence._
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.{util => jutil}
+import org.springframework.beans.factory.annotation.Configurable
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -26,6 +27,7 @@ import java.{util => jutil}
  * not to allow a webgroup to be used, and only allow included users.
  */
 @Entity
+@Configurable
 class UserGroup extends GeneratedId {
   
 	// Not created by Spring but @Autowiring works thanks to compile-time weaving.

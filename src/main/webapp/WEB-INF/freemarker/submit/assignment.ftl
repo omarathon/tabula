@@ -3,13 +3,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<h1>
-<#if assignment.active>
-	<a href="${assignment.id}">${assignment.name}</a>
-<#else>
-	${assignment.name}
-</#if>
-</h1>
+<h1>${assignment.name}</h1>
 
 <#if assignment.active> <#-- TODO and not already submitted! -->
 	<@f.form method="post" action="/module/${module.code}/${assignment.id}" commandName="submitAssignment">

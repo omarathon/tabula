@@ -11,6 +11,7 @@ create table Assignment (
     module_id nvarchar2(255),
     CONSTRAINT "ASSIGNMENT_PK" PRIMARY KEY ("ID")
 );
+CREATE INDEX "IDX_ASSIGNMENT_MODULE" ON ASSIGNMENT("MODULE_ID")
 
 create table Department (
     id nvarchar2(255) not null,
@@ -20,14 +21,13 @@ create table Department (
     CONSTRAINT "DEPARTMENT_PK" PRIMARY KEY ("ID")
 );
 
-CREATE INDEX IDX_MODULE_DEPT ON MODULE(DEPARTMENT_ID);
 
 create table FileAttachment (
     id nvarchar2(255) not null,
     data blob,
     name nvarchar2(255),
     submission_id nvarchar2(255),
-   CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
+    CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
 );
 
 create table Module (
@@ -40,32 +40,33 @@ create table Module (
     CONSTRAINT "MODULE_PK" PRIMARY KEY ("ID"),
 	CONSTRAINT "MODULE_CODE" UNIQUE ("CODE")
 );
+CREATE INDEX IDX_MODULE_DEPT ON MODULE(DEPARTMENT_ID);
 
 create table Submission (
     id nvarchar2(255) not null,
-    date timestamp,
+    submitted_date timestamp,
     universityId nvarchar2(255) not null,
     userId nvarchar2(255) not null,
     assignment_id nvarchar2(255),
-    primary key (id)
+    constraint "SUBMISSION_PK" PRIMARY KEY ("ID")
 );
+create index idx_submission_assignment on SUBMISSION("ASSIGNMENT_ID");
+create index idx_submission_user on SUBMISSION("USERID");
 
 create table UserGroup (
     id nvarchar2(255) not null,
     baseWebgroup nvarchar2(255),
     CONSTRAINT "USERGROUP_PK" PRIMARY KEY ("ID")
 );
-
 create table UserGroupExclude (
     group_id nvarchar2(255) not null,
     usercode nvarchar2(255)
 );
-
 create table UserGroupInclude (
     group_id nvarchar2(255) not null,
     usercode nvarchar2(255)
+    
 );
-
 CREATE INDEX IDX_USERGROUPINC ON USERGROUPINCLUDE(GROUP_ID);
 CREATE INDEX IDX_USERGROUPINC ON USERGROUPEXCLUDE(GROUP_ID);
 
@@ -77,5 +78,18 @@ create table AuditEvent (
 	masquerade_user_id nvarchar2(255) not null,
 	data nvarchar2(4000) not null
 );
-
 create index idx_auditeventdate on auditevent(eventdate);
+
+create table formfield (
+    id nvarchar2(255) not null,
+    assignment_id nvarchar2(255) not null,
+    name nvarchar2(255) not null,
+    position number(3,0) not null,
+    label nvarchar2(255) not null,
+    instructions nvarchar2(4000),
+    fieldtype nvarchar2(255) not null,
+    required number(1,0) not null,
+    properties nvarchar2(4000) not null,
+    CONSTRAINT "formfield_pk" PRIMARY KEY ("ID")
+);
+create index idx_formfieldassignment on formfield(assignment_id);

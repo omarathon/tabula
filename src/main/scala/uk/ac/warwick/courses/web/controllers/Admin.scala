@@ -14,6 +14,7 @@ import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.actions.Manage
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.commands.assignments.AddAssignmentCommand
+import collection.JavaConversions._
 
 /**
  * Screens for department and module admins.
@@ -31,10 +32,10 @@ class AdminController extends Controllerism {
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
 	def adminDepartment(@PathVariable dept: Department, user: CurrentUser): ModelAndView = {
-		securityService.check(user, Manage(dept))
+		mustBeAbleTo(Manage(dept))
 		Mav("admin/department",
 			"department" -> dept,
-			"modules" -> dept.modules)
+			"modules" -> dept.modules.sortBy{ (module) => (module.assignments.isEmpty, module.code) })
 	}
 	
 }
@@ -51,7 +52,7 @@ object AdminController {
 		@RequestMapping(value = Array("/admin/module/{module}/assignments/new"), method = Array(RequestMethod.GET))
 		def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
 				@ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors): ModelAndView = {
-			securityService.check(user, Manage(module.department))
+			mustBeAbleTo(Manage(module))
 			Mav("admin/assignments/new",
 				"department" -> module.department,
 				"module" -> module)
@@ -60,7 +61,7 @@ object AdminController {
 		@RequestMapping(value = Array("/admin/module/{module}/assignments/new"), method = Array(RequestMethod.POST))
 		def addAssignmentSubmit(user: CurrentUser, @PathVariable module: Module,
 				@Valid @ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors): ModelAndView = {
-			securityService.check(user, Manage(module.department))
+			mustBeAbleTo(Manage(module))
 			if (errors.hasErrors) {
 				addAssignmentForm(user, module, form, errors)
 			} else {

@@ -16,7 +16,7 @@ import uk.ac.warwick.courses.actions.View
 @Controller
 class SubmissionController extends Controllerism with DateTimeOrdering {
   
-	@RequestMapping(Array("/module/{module}"))
+	@RequestMapping(Array("/module/{module}/"))
 	def viewModule(@PathVariable module:Module) = {
 		mustBeAbleTo(View(module))
 		Mav("submit/module", 

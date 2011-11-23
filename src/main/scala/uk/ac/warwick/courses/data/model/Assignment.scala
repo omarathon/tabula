@@ -58,7 +58,7 @@ class Assignment extends GeneratedId {
 	@BeanProperty var module:Module =_
 	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY)
-	@OrderBy("date")
+	@OrderBy("submittedDate")
 	@BeanProperty var submissions:java.util.Set[Submission] =_
 	
 }

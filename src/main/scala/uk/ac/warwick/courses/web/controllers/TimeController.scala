@@ -19,7 +19,6 @@ class TimeController {
   def showTime = new ModelAndView("time/view") {
     addObject("time", new Date)
     addObject("timeWelcome", timeWelcome)
-
   }
 
   def setTimeWelcome(x: String) = {

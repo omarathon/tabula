@@ -19,7 +19,7 @@ class Submission extends GeneratedId {
 	@BeanProperty var assignment:Assignment = _
   
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var date:DateTime =_
+	@BeanProperty var submittedDate:DateTime =_
 	
 	@NotNull
 	@BeanProperty var userId:String =_
