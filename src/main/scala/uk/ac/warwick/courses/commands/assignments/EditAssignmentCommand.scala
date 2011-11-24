@@ -26,13 +26,13 @@ class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssign
 	this.copyFrom(assignment)
 	
 	@Transactional
-	def apply:Assignment = {
+	override def apply:Assignment = {
 	  copyTo(assignment)
 	  session.save(assignment)
 	  assignment
 	}
 	
-	def describe(d:Description) = d.properties(
+	override def describe(d:Description) = d.properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate

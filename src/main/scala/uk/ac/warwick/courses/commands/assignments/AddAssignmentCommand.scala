@@ -27,7 +27,7 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
     closeDate = openDate.plusWeeks(2)
 	
 	@Transactional
-	def apply:Assignment = {
+	override def apply:Assignment = {
 	  val assignment = new Assignment(module)
 	  copyTo(assignment)
 	  assignment.active = false
@@ -35,7 +35,7 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	  assignment
 	}
 	
-	def describe(d:Description) = d.properties(
+	override def describe(d:Description) = d.properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate

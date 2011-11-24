@@ -5,8 +5,9 @@ import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.Daoisms
+import uk.ac.warwick.courses.commands.Command
 
-abstract class ModifyAssignmentCommand extends Daoisms  {
+abstract class ModifyAssignmentCommand extends Command[Assignment] with Daoisms  {
 	
 	@NotEmpty
 	@BeanProperty var name:String = _
