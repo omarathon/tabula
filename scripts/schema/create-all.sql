@@ -1,7 +1,7 @@
 
 create table Assignment (
     id nvarchar2(255) not null,
-    academicYear number(10,0) not null,
+    academicYear number(4,0) not null,
     active number(1,0) not null,
     attachmentLimit number(10,0) not null,
     closeDate timestamp,
@@ -44,6 +44,7 @@ CREATE INDEX IDX_MODULE_DEPT ON MODULE(DEPARTMENT_ID);
 
 create table Submission (
     id nvarchar2(255) not null,
+    submitted number(1,0) not null,
     submitted_date timestamp,
     universityId nvarchar2(255) not null,
     userId nvarchar2(255) not null,

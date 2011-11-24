@@ -6,6 +6,9 @@ import org.hamcrest.Matchers._
 import org.hamcrest.Matcher
 import org.scalatest.BeforeAndAfter
 import org.specs.specification.DefaultExampleExpectationsListener
+import org.joda.time.ReadableInstant
+import org.joda.time.DateTimeUtils
+import org.joda.time.DateTime
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
@@ -18,4 +21,14 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
    */
   def withArg[T](matcher:Matcher[T]*) = `with`( allOf( matcher:_* ) )
 
+  def withFakeTime(when:ReadableInstant)(fn:()=>Unit) = 
+	  try {
+	 	  DateTimeUtils.setCurrentMillisFixed(when.getMillis)
+	 	  fn()
+	  } finally {
+	 	  DateTimeUtils.setCurrentMillisSystem
+	  }
+	   
+  def dateTime(year:Int, month:Int) = new DateTime(year,month,1,0,0,0)
+  
 }

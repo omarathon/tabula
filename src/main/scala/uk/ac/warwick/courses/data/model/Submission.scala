@@ -18,6 +18,8 @@ class Submission extends GeneratedId {
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
   
+	@BeanProperty var submitted:Boolean = false
+	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var submittedDate:DateTime =_
 	
