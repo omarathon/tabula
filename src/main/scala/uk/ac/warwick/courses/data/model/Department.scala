@@ -9,9 +9,10 @@ import javax.persistence.OneToOne
 import javax.persistence.PostLoad
 import uk.ac.warwick.courses.data.PostLoadBehaviour
 import javax.persistence.CascadeType
+import uk.ac.warwick.courses.actions._
 
 @Entity @AccessType("field")
-class Department extends GeneratedId with PostLoadBehaviour {
+class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
   
 	@BeanProperty var code:String = null
 	

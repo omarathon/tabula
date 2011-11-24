@@ -11,7 +11,7 @@
 	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/hibernate-validator-4.2.0.Final.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/hibernate-validator-annotation-processor-4.2.0.Final.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate-validator/validation-api-1.0.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/hibernate-jpa-2.0-api-1.0.1.Final.jar" sourcepath="/home/nick/.m2/repository/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.1.Final/hibernate-jpa-2.0-api-1.0.1.Final-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/c3p0/c3p0-0.9.1.2.jar" sourcepath="lib/src/c3p0-0.9.1.2.src.zip"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-arm_2.9.1-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/sso-client/sso-client-1.85a.jar"/>
@@ -37,7 +37,6 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web.servlet-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjrt.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjtools.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/warwickutils-all.jar" sourcepath="/utils/src"/>
 	<classpathentry kind="lib" path="lib/runtime/ehcache/ehcache-core-1.7.0.jar"/>
@@ -87,7 +86,6 @@
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/webapp"/>
-	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="src" output="bin/java" path="src/main/java"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

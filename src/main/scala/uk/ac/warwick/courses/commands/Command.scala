@@ -26,9 +26,9 @@ trait Command[R] extends Describable {
  * methods on Command via "self" (as you would "this"), but here
  * it's just to enforce the class type.
  */
-trait Unaudited { self: Command[_] =>
-	
-}
+//trait Unaudited { self: Command[_] =>
+//	
+//}
 
 /**
  * Object for a Command to describe what it's just done.

@@ -33,12 +33,14 @@ class SecurityService extends Logging {
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
 	  case View(department:Department) => checkGroup(user, Manage(department))
 	  
+	  case Manage(module:Module) => checkGroup(user, Manage(module.department))
 	  case View(module:Module) => module.getMembers().includes(user.apparentId) || 
 	  							  checkGroup(user, View(module.department))
 	  							  
 	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  
+	  case action:Action => throw new IllegalArgumentException(action.toString)
 	  case _ => throw new IllegalArgumentException()
 	   
 	}

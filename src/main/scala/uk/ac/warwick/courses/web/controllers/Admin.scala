@@ -12,9 +12,12 @@ import javax.validation.Valid
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.actions.Manage
+import uk.ac.warwick.courses.actions.View
 import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.commands.assignments.AddAssignmentCommand
+import uk.ac.warwick.courses.commands.assignments._
 import collection.JavaConversions._
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.ItemNotFoundException
 
 /**
  * Screens for department and module admins.
@@ -26,9 +29,10 @@ class AdminController extends Controllerism {
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
 	@RequestMapping(Array("/admin/"))
-	def homeScreen(user: CurrentUser) =
+	def homeScreen(user: CurrentUser) = {
 		Mav("admin/home",
 			"ownedDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions))
+	}
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
 	def adminDepartment(@PathVariable dept: Department, user: CurrentUser): ModelAndView = {
@@ -65,11 +69,49 @@ object AdminController {
 			if (errors.hasErrors) {
 				addAssignmentForm(user, module, form, errors)
 			} else {
-				form.apply()
+				form.apply
 				Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
 			}
 		}
 
+	}
+	
+	@Controller
+	class EditAssignmentController extends Controllerism {
+		
+		@ModelAttribute("editAssignment") def formObject(@PathVariable("assignment") assignment: Assignment) =
+			new EditAssignmentCommand(definitely(assignment))
+		
+		@RequestMapping(value=Array("/admin/module/{module}/assignments/edit/{assignment}"), method=Array(RequestMethod.GET))
+		def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
+				@ModelAttribute("editAssignment") form:EditAssignmentCommand, errors: Errors) = {
+			
+			if (assignment.module != module) throw new ItemNotFoundException
+			mustBeAbleTo(Manage(module))
+			Mav("admin/assignments/edit",
+				"department" -> module.department,
+				"module" -> module,
+				"assignment" -> assignment
+			)
+			
+		}
+		
+		@RequestMapping(value = Array("/admin/module/{module}/assignments/edit/{assignment}"), method = Array(RequestMethod.POST))
+		def submit(
+				@PathVariable module: Module,
+				@PathVariable assignment:Assignment,
+				@Valid @ModelAttribute("editAssignment") form: EditAssignmentCommand, errors: Errors): ModelAndView = {
+			
+			mustBeAbleTo(Manage(module))
+			if (errors.hasErrors) {
+				showForm(module, assignment, form, errors)
+			} else {
+				form.apply
+				Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+			}
+			
+		}
+		
 	}
 
 }

@@ -13,10 +13,11 @@ import collection.JavaConversions._
  */
 object Mav {
   /**
-   * Invoking this object as though it's a function will call apply().
+   * apply() is called when you call the object like Mav(..)
    * 
-   * As Map() accepts a repeated list of Pairs we can tell it to pass those through as a list of arguments 
-   * by using (objects:_*)
+   * objects is a repeated list of Pairs. The Map()
+   * constructor accepts the same kind of pair list, so "objects:_*" is used to pass the argument
+   * list through as separate arguments rather than as a single list argument.
    */
   def apply(view:String, objects:Pair[String,_]*) = new ModelAndView(view).addAllObjects(Map(objects:_*))
   

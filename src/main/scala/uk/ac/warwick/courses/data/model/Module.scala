@@ -16,13 +16,14 @@ import collection.JavaConversions._
 import org.hibernate.annotations.FetchMode
 import javax.persistence.FetchType
 import javax.persistence.OneToOne
+import uk.ac.warwick.courses.actions._
 
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name="module.code", query="select m from Module m where code = :code"),
 	new NamedQuery(name="module.department", query="select m from Module m where department = :department")
 ))
-class Module extends GeneratedId {
+class Module extends GeneratedId with Viewable with Manageable {
 	@BeanProperty var code:String = _
 	@BeanProperty var name:String = _
 	
@@ -30,11 +31,11 @@ class Module extends GeneratedId {
 	@JoinColumn(name="membersgroup_id")
 	@BeanProperty var members:UserGroup = new UserGroup
 	
-	@ManyToOne(cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
+	@ManyToOne
 	@JoinColumn(name="department_id")
 	@BeanProperty var department:Department = _
 	
-	@OneToMany(mappedBy="module", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="module", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@BeanProperty var assignments:java.util.List[Assignment] = List()
 	
 	// TODO add UserGroup for people who can submit. Defaults to source webgroup

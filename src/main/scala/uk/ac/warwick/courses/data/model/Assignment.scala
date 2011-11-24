@@ -15,9 +15,10 @@ import org.hibernate.annotations.Type
 import javax.persistence.FetchType
 import javax.persistence.OrderBy
 import javax.persistence.Column
+import uk.ac.warwick.courses.actions._
 
 @Entity @AccessType("field")
-class Assignment extends GeneratedId {
+class Assignment extends GeneratedId with Viewable {
 	def this(_module:Module) {
 	  this()
 	  this.module = _module

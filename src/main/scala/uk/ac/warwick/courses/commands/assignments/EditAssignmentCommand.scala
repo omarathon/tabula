@@ -21,16 +21,13 @@ import uk.ac.warwick.courses.commands.Description
 	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
 ))
 @Configurable
-class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentCommand {
+class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssignmentCommand {
 	
-	openDate = new DateTime().withTime(12,0,0,0)
-    closeDate = openDate.plusWeeks(2)
+	this.copyFrom(assignment)
 	
 	@Transactional
 	def apply:Assignment = {
-	  val assignment = new Assignment(module)
 	  copyTo(assignment)
-	  assignment.active = false
 	  session.save(assignment)
 	  assignment
 	}

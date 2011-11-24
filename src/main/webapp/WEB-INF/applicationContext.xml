@@ -99,9 +99,10 @@
 		</mvc:interceptor>
 	</mvc:interceptors>
 	
+	
 	<mvc:annotation-driven validator="validator" conversion-service="typeConverter">
 		<mvc:argument-resolvers>
-			<bean class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
+			<bean id="currentUserArgumentResolver" class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
 		</mvc:argument-resolvers>
 	</mvc:annotation-driven>
 	
