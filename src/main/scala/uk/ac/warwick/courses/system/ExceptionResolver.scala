@@ -35,14 +35,14 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var viewMappings:JMap[String,String] = Map[String,String]()
 	
 	override def resolveException(request:HttpServletRequest, response:HttpServletResponse, obj:Any, e:Exception):ModelAndView = {
-		doResolve(e)
+		doResolve(e).toModelAndView
 	}
 	
 	/**
 	 * Simpler interface for ErrorController to delegate to, which is called when an exception
 	 * happens beyond Spring's grasp.
 	 */
-	def doResolve(e:Throwable) = {
+	def doResolve(e:Throwable):Mav = {
 		e match {
 	      case exception:Throwable => handle(exception)
 	      case _ => handleNull
@@ -50,12 +50,12 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	}
 	
 	private def handle(exception:Throwable) = {
-		val mav = Mav(defaultView)
-		
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] ))
-		
-		mav.addObject("originalException", exception)
-	    mav.addObject("exception", interestingException)
+
+		val mav = Mav(defaultView,
+			"originalException" -> exception,
+			"exception" -> interestingException
+		)
 		
 		// User errors should just be debug logged.
 		interestingException match {
@@ -64,7 +64,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		}
 	    
 	    viewMappings.get(interestingException.getClass.getName) match {
-			case view:String => mav.setViewName(view)
+			case view:String => { mav.viewName = view }
 			case null => //keep defaultView
 		}
 	    

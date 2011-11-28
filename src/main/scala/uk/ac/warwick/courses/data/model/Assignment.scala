@@ -16,7 +16,7 @@ import uk.ac.warwick.courses.data.model.forms.FormField
 import org.hibernate.annotations.IndexColumn
 
 @Entity @AccessType("field")
-class Assignment extends GeneratedId with Viewable {
+class Assignment() extends GeneratedId with Viewable {
 	def this(_module:Module) {
 	  this()
 	  this.module = _module

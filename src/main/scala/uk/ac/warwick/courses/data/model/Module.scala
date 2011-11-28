@@ -38,8 +38,6 @@ class Module extends GeneratedId with Viewable with Manageable {
 	@OneToMany(mappedBy="module", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@BeanProperty var assignments:java.util.List[Assignment] = List()
 	
-	// TODO add UserGroup for people who can submit. Defaults to source webgroup
-	
 	@BeanProperty var active:Boolean = _
 }
 

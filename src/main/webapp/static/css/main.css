@@ -33,6 +33,10 @@ background-image: -webkit-gradient(
 );
 }
 
+.flush-content #content-wrapper {
+	padding: 0px;
+	margin: 0px;
+}
 
 .error { 
 	color: crimson;

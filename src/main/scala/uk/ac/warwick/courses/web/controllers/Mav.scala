@@ -1,6 +1,39 @@
 package uk.ac.warwick.courses.web.controllers
 import org.springframework.web.servlet.ModelAndView
 import collection.JavaConversions._
+import collection.mutable
+
+class Mav(var viewName:String) {
+	var map = mutable.Map[String,Any]()
+	var classes:Array[String] = Array()
+	
+	def addObjects(items:Pair[String,Any]*) = {
+		map ++= items
+		this
+	}
+	
+	def bodyClasses(c:String*) = {
+	 	classes = c.toArray
+	 	this
+	}
+	
+	def layout(name:String) = {
+		map += "renderLayout" -> name
+		this
+	}
+	
+	def toModel = {
+		map ++ Map(
+			"bodyClasses" -> classes.mkString(" ")
+		)
+	}
+	
+	def toModelAndView = {
+		val mav = new ModelAndView(viewName)
+		mav.addAllObjects(toModel)
+		mav
+	}
+}
 
 /**
  * ModelAndView builder. Takes a viewname and then any number of Pair objects (which awesomely can be
@@ -19,6 +52,6 @@ object Mav {
    * constructor accepts the same kind of pair list, so "objects:_*" is used to pass the argument
    * list through as separate arguments rather than as a single list argument.
    */
-  def apply(view:String, objects:Pair[String,_]*) = new ModelAndView(view).addAllObjects(Map(objects:_*))
-  
+  def apply(view:String, objects:Pair[String,_]*) = new Mav(view).addObjects(objects:_*)
+
 }

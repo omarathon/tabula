@@ -99,13 +99,27 @@
 		</mvc:interceptor>
 	</mvc:interceptors>
 	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
 	
-	<mvc:annotation-driven validator="validator" conversion-service="typeConverter">
-		<mvc:argument-resolvers>
-			<bean id="currentUserArgumentResolver" class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
-		</mvc:argument-resolvers>
-	</mvc:annotation-driven>
+	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
+		p:conversionService-ref="typeConverter"
+		p:validator-ref="validator"
+	/>
 	
+	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.courses.system.HandlerAdapter" p:order="0"
+		p:webBindingInitializer-ref="webBindingInitializer">
+		<property name="customArgumentResolvers">
+			<list>
+				<bean class="uk.ac.warwick.courses.system.CurrentUserMethodArgumentResolver" />
+			</list>
+		</property>
+		<property name="customPreReturnValueHandlers">
+			<list>
+				<bean class="uk.ac.warwick.courses.system.MavReturnValueHandler" />
+			</list>
+		</property>
+	</bean>
+		
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	

@@ -17,7 +17,7 @@ class ErrorController {
   @Autowired var exceptionResolver:ExceptionResolver =_
   
   @RequestMapping(Array("/error"))
-  def generalError(request:HttpServletRequest):ModelAndView = {
+  def generalError(request:HttpServletRequest):Mav = {
 	exceptionResolver.doResolve(request.getAttribute("javax.servlet.error.exception").asInstanceOf[Throwable])
   }
   

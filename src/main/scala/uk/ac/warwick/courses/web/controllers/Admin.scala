@@ -35,7 +35,7 @@ class AdminController extends Controllerism {
 	}
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
-	def adminDepartment(@PathVariable dept: Department, user: CurrentUser): ModelAndView = {
+	def adminDepartment(@PathVariable dept: Department, user: CurrentUser) = {
 		mustBeAbleTo(Manage(dept))
 		Mav("admin/department",
 			"department" -> dept,
@@ -55,22 +55,24 @@ object AdminController {
 
 		@RequestMapping(value = Array("/admin/module/{module}/assignments/new"), method = Array(RequestMethod.GET))
 		def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
-				@ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors): ModelAndView = {
+				@ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors) = {
 			mustBeAbleTo(Manage(module))
 			Mav("admin/assignments/new",
 				"department" -> module.department,
 				"module" -> module)
+				.bodyClasses("flush-content")
 		}
 
 		@RequestMapping(value = Array("/admin/module/{module}/assignments/new"), method = Array(RequestMethod.POST))
 		def addAssignmentSubmit(user: CurrentUser, @PathVariable module: Module,
-				@Valid @ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors): ModelAndView = {
+				@Valid @ModelAttribute("addAssignment") form: AddAssignmentCommand, errors: Errors) = {
 			mustBeAbleTo(Manage(module))
 			if (errors.hasErrors) {
 				addAssignmentForm(user, module, form, errors)
 			} else {
 				form.apply
 				Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+					
 			}
 		}
 
@@ -92,7 +94,7 @@ object AdminController {
 				"department" -> module.department,
 				"module" -> module,
 				"assignment" -> assignment
-			)
+				).bodyClasses("flush-content")
 			
 		}
 		
@@ -100,7 +102,7 @@ object AdminController {
 		def submit(
 				@PathVariable module: Module,
 				@PathVariable assignment:Assignment,
-				@Valid @ModelAttribute("editAssignment") form: EditAssignmentCommand, errors: Errors): ModelAndView = {
+				@Valid @ModelAttribute("editAssignment") form: EditAssignmentCommand, errors: Errors) = {
 			
 			mustBeAbleTo(Manage(module))
 			if (errors.hasErrors) {

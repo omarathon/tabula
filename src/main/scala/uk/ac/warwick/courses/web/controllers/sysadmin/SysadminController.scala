@@ -25,7 +25,7 @@ import uk.ac.warwick.courses.commands.departments.AddDeptOwnerCommand
 class BaseSysadminController extends Controllerism {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
 	
-	def redirectToDeptOwners(deptcode:String) = new ModelAndView("redirect:/sysadmin/departments/"+deptcode+"/owners/")
+	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")
 	
 	
 	def viewDepartmentOwners(@PathVariable dept:Department) = 
@@ -74,13 +74,13 @@ object SysadminController {
 		}
 		
 		@RequestMapping(method=Array(RequestMethod.POST))
-		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors):ModelAndView  = {
+		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors)  = {
 			if (errors.hasErrors) {
-			  return viewDepartmentOwners(dept)
+			  viewDepartmentOwners(dept)
 			} else {
 			  logger.info("Passed validation, removing owner")
 			  form.apply()
-			  return redirectToDeptOwners(dept.code)
+			  redirectToDeptOwners(dept.code)
 			}
 		}
 	}
@@ -95,19 +95,19 @@ object SysadminController {
 		}
 		
 		@RequestMapping(method=Array(RequestMethod.GET))
-		def addDeptOwnerForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView = {
+		def showForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors) = {
 			Mav("sysadmin/departments/owners/add",
 				"department" -> dept)
 		}
 		
 		@RequestMapping(method=Array(RequestMethod.POST))
-		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors):ModelAndView  = {
+		def submit(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors)  = {
 			if (errors.hasErrors) {
-			  return addDeptOwnerForm(dept, form, errors)
+			  showForm(dept, form, errors)
 			} else {
 			  logger.info("Passed validation, saving owner")
 			  form.apply()
-			  return redirectToDeptOwners(dept.code)
+			  redirectToDeptOwners(dept.code)
 			}
 		}
 	}
