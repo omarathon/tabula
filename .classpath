@@ -23,7 +23,7 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.beans-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RC1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.context-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.core-sources-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.RC1.jar"/>
@@ -51,7 +51,7 @@
 	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/javassist-3.12.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/dependencies/jta-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/scala-library.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/scala-library.jar" sourcepath="/home/nick/.m2/repository/org/scala-lang/scala-library/2.9.1/scala-library-2.9.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/test/mockito-all-1.9.0-rc1.jar" sourcepath="lib/src/mockito-all-1.9.0-rc1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-cglib-1.0.1.jar"/>

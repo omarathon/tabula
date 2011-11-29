@@ -37,8 +37,8 @@ class Submission extends GeneratedId {
 	@NotNull
 	@BeanProperty var universityId:String =_
 	
-	@OneToMany(mappedBy="submission", fetch=FetchType.LAZY)
-	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
+//	@OneToMany(mappedBy="submission", fetch=FetchType.LAZY)
+//	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
 	
 	
   

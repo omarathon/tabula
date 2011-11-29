@@ -8,6 +8,7 @@ create table Assignment (
     fileExtensions nvarchar2(255),
     name nvarchar2(255),
     openDate timestamp,
+    resultspublished number(1,0) not null,
     module_id nvarchar2(255),
     CONSTRAINT "ASSIGNMENT_PK" PRIMARY KEY ("ID")
 );
@@ -26,7 +27,6 @@ create table FileAttachment (
     id nvarchar2(255) not null,
     data blob,
     name nvarchar2(255),
-    submission_id nvarchar2(255),
     CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
 );
 
@@ -36,6 +36,7 @@ create table Module (
     code nvarchar2(255),
     name nvarchar2(255),
     membersgroup_id nvarchar2(255),
+    participantsgroup_id nvarchar2(255),
     department_id nvarchar2(255),
     CONSTRAINT "MODULE_PK" PRIMARY KEY ("ID"),
 	CONSTRAINT "MODULE_CODE" UNIQUE ("CODE")

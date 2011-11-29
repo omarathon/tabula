@@ -104,7 +104,7 @@
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
-	/>
+	/> 
 	
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.courses.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
@@ -199,6 +199,7 @@
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan="uk.ac.warwick.courses.data.model"
+		p:lobHandler-ref="lobHandler"
 		p:hibernateProperties-ref="hibernateProperties">
 		<property name="eventListeners"><map>
 			<entry key="pre-load" value-ref="hibernateLifecycle" />
@@ -210,11 +211,14 @@
 		p:sessionFactory-ref="sessionFactory" />
 		
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
 	</beans>
+	
 	
 	<beans profile="dev,production">
 	
@@ -222,6 +226,12 @@
 		
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/CoursesDS"/>
+	    </bean>
+	    
+	    <bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
+	    	<property name="nativeJdbcExtractor">
+	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
+	    	</property>
 	    </bean>
 	    
 		<util:properties id="jdbcProperties">
@@ -239,6 +249,8 @@
 	
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
+		
+		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 
 		<bean class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
 			c:dataSource-ref="dataSource"

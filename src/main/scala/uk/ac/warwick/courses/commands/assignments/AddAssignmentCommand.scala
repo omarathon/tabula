@@ -14,10 +14,9 @@ import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.validators.SpelAssert.List
 import uk.ac.warwick.courses.validators.SpelAssert
-import uk.ac.warwick.courses.commands.Command
-import uk.ac.warwick.courses.commands.Description
+import uk.ac.warwick.courses.commands._
 
-@SpelAssert.List(Array(
+@SpelAssert.List(Array( 
 	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
 ))
 @Configurable

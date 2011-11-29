@@ -66,5 +66,7 @@ class Assignment() extends GeneratedId with Viewable {
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY)
 	@IndexColumn(name="position")
 	@BeanProperty var fields:java.util.List[FormField] =_
+	
+	@BeanProperty var resultsPublished:Boolean = false
 }
 

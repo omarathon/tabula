@@ -15,7 +15,10 @@
 	<#else>
 		<#list module.assignments as assignment>
 		<div class="assignment-info">
-			<h3><a href="<@url page="/admin/module/${module.code}/assignments/edit/${assignment.id}" />">${assignment.name}</a></h3>
+			<h3>${assignment.name} 
+			<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/edit/${assignment.id}" />">edit</a>
+			<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/feedback/${assignment.id}" />">feedback</a>
+			</h3>
 		</div>
 		</#list>
 		<p><a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a></p>

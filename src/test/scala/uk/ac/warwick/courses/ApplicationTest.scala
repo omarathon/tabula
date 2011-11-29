@@ -27,11 +27,7 @@ import uk.ac.warwick.courses.data.model.Department
 import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 
-class ApplicationTest extends AppContextTestBase with ShouldMatchersForJUnit {
-    
-    @Autowired var sessionFactory:SessionFactory = null
-    
-    def session = sessionFactory.getCurrentSession
+class ApplicationTest extends AppContextTestBase {
     
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_
     

@@ -23,13 +23,17 @@ import uk.ac.warwick.courses.actions._
 	new NamedQuery(name="module.code", query="select m from Module m where code = :code"),
 	new NamedQuery(name="module.department", query="select m from Module m where department = :department")
 ))
-class Module extends GeneratedId with Viewable with Manageable {
+class Module extends GeneratedId with Viewable with Manageable with Participatable {
 	@BeanProperty var code:String = _
 	@BeanProperty var name:String = _
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="membersgroup_id")
 	@BeanProperty var members:UserGroup = new UserGroup
+	
+	@OneToOne(cascade=Array(CascadeType.ALL))
+	@JoinColumn(name="participantsgroup_id")
+	@BeanProperty var participants:UserGroup = new UserGroup
 	
 	@ManyToOne
 	@JoinColumn(name="department_id")

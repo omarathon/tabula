@@ -28,7 +28,7 @@ class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssign
 	@Transactional
 	override def apply:Assignment = {
 	  copyTo(assignment)
-	  session.save(assignment)
+	  session.save(assignment) 
 	  assignment
 	}
 	

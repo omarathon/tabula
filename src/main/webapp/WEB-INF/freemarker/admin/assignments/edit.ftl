@@ -5,6 +5,7 @@
 
 <@f.form method="post" action="/admin/module/${module.code}/assignments/edit/${assignment.id}" commandName="editAssignment">
 
+<#--
 <div id="form-editor-sidebar">
 
 <@f.errors cssClass="error form-errors">
@@ -27,7 +28,10 @@
 
 </div>
 <div class="form-editor-tab" id="form-editor-formprops">
+-->
+
 <#include "_fields.ftl" />
+<#--
 </div>
 
 </div>
@@ -36,7 +40,7 @@
 <div id="form-editor-canvas">
 
 </div>
-
+-->
 <input type="submit" value="Save">
 </@f.form>
 
