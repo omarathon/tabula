@@ -11,7 +11,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import javax.validation.Validation
-import uk.ac.warwick.courses.validators.SpelAssert.List
 import uk.ac.warwick.courses.TestBase
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.support.AnnotationConfigContextLoader
@@ -47,7 +46,7 @@ class SpelAssertValidatorTest extends TestBase {
   }
 
   // SpEL seems to understand how to compare Joda Time objects, which is nice 
-  @SpelAssert.List(Array(
+  @SpelAsserts(Array(
       new SpelAssert(value="5 < 7"), // will never fail - just checking multiple asserts works
       new SpelAssert(value="openDate < closeDate")
   ))

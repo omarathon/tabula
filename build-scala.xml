@@ -47,7 +47,7 @@
     <mkdir dir="target/${war.name}/WEB-INF/classes" />
   	<mkdir dir="target/unwoven" />
   	<mkdir dir="target/log" />
-    <scalac deprecation="on" unchecked="on" 
+    <scalac deprecation="on" unchecked="on" optimise="yes"
     	srcref="java+scala.srcpath"
     	destdir="target/unwoven" classpathref="build.classpath" />
   	<path id="build+built.classpath">
@@ -60,7 +60,7 @@
         inpath="target/unwoven"
         destdir="target/${war.name}/WEB-INF/classes" 
         classpathref="build.classpath"
-  		verbose="true"
+  		verbose="false"
         aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"
     	  log="target/log/iajc.log" />
   	<!-- bamboo's ant doesn't have resourcecontains

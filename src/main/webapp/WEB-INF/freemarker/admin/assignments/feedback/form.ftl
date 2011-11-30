@@ -8,7 +8,7 @@
 <h1>Submit feedback for ${assignment.name}</h1>
 
  
-<@spring.bind path="uploadedFile">
+<@spring.bind path="file">
 <#if status.value??>
 <h2>Upload received (but discarded)</h2>
 <#if status.value.empty>
@@ -30,11 +30,17 @@ Student university number
 </div>
 
 <div>
-<@f.label path="uploadedFile">
-<@f.errors path="uploadedFile" cssClass="error" />
+<@f.label path="file">
+<@f.errors path="file" cssClass="error" />
 File
 </@f.label>
-<input type="file" name="uploadedFile" >
+<input type="file" name="file" >
+
+<#if addFeedbackCommand.fileAttachment??>
+<input type="hidden" name="fileAttachment" value="${addFeedbackCommand.fileAttachment.id}">
+${addFeedbackCommand.fileAttachment.name} (remove)
+</#if>
+
 </div>
 
 <input type="submit" value="Submit">

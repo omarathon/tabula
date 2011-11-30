@@ -12,11 +12,12 @@ import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.validators.SpelAssert.List
-import uk.ac.warwick.courses.validators.SpelAssert
+import uk.ac.warwick.courses.validators._
+import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.commands._
+import org.springframework.validation.Errors
 
-@SpelAssert.List(Array( 
+@SpelAsserts(Array( 
 	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
 ))
 @Configurable
@@ -28,6 +29,7 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	@Transactional
 	override def apply:Assignment = {
 	  val assignment = new Assignment(module)
+	  assignment.addDefaultFields
 	  copyTo(assignment)
 	  assignment.active = false
 	  session.save(assignment)
@@ -39,5 +41,11 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 		"openDate" -> openDate,
 		"closeDate" -> closeDate
 	)
-	
+
+}
+
+class AddAssignmentValidator extends ClassValidator[AddAssignmentCommand] {
+	override def valid(cmd:AddAssignmentCommand, errors:Errors) = {
+		
+	}
 }

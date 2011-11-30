@@ -4,7 +4,7 @@
 
 <h1>Create a new assignment for ${module.code?upper_case}</h1>
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName="addAssignment">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName="addAssignmentCommand">
 <@f.errors cssClass="error form-errors">
 
 </@f.errors>

@@ -7,11 +7,11 @@ import org.joda.time.DateTimeConstants._
 class AssignmentTest extends TestBase {
 	@Test def academicYear {
 		
-		withFakeTime(dateTime(2011,NOVEMBER)) { ()=>
+		withFakeTime(dateTime(2011,NOVEMBER)) {
 			new Assignment().academicYear should be (2011)
 		}
 		
-		withFakeTime(dateTime(2011,MAY)) { ()=>
+		withFakeTime(dateTime(2011,MAY)) { 
 			new Assignment().academicYear should be (2010)
 		}
 	}

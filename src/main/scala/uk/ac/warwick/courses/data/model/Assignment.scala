@@ -12,8 +12,14 @@ import uk.ac.warwick.courses.actions._
 import org.joda.time.DateTimeConstants._
 import javax.persistence.FetchType
 import javax.persistence.CascadeType
-import uk.ac.warwick.courses.data.model.forms.FormField
 import org.hibernate.annotations.IndexColumn
+import collection.JavaConversions._
+import collection.mutable
+import uk.ac.warwick.courses.data.model.forms._
+import uk.ac.warwick.courses.AcademicYear
+import java.util.ArrayList
+import java.util.{List => JList}
+import java.util.{Set => JSet}
 
 @Entity @AccessType("field")
 class Assignment() extends GeneratedId with Viewable {
@@ -22,13 +28,17 @@ class Assignment() extends GeneratedId with Viewable {
 	  this.module = _module
 	}
 	
-	var academicYear:Int = {
-		val now = new DateTime
-		if (now.getMonthOfYear() >= AUGUST) {
-			now.getYear()
-		} else {
-			now.getYear() - 1
-		}
+	var academicYear:Int = AcademicYear.guessByDate(new DateTime).startYear
+	
+	def addDefaultFields {
+		val pretext = new CommentField(this)
+		pretext.value = ""
+			
+		val file = new FileField(this)
+		
+		fields.addAll(List(
+			pretext, file
+		))
 	}
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
@@ -55,17 +65,17 @@ class Assignment() extends GeneratedId with Viewable {
 	
 	def submittable = active && isBetweenDates()
 		
-	@ManyToOne(cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
+	@ManyToOne
 	@JoinColumn(name="module_id")
 	@BeanProperty var module:Module =_
 	
-	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@OrderBy("submittedDate")
-	@BeanProperty var submissions:java.util.Set[Submission] =_
+	@BeanProperty var submissions:JSet[Submission] =_
 	
-	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@IndexColumn(name="position")
-	@BeanProperty var fields:java.util.List[FormField] =_
+	@BeanProperty var fields:JList[FormField] = new ArrayList
 	
 	@BeanProperty var resultsPublished:Boolean = false
 }

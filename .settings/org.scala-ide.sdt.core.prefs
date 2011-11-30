@@ -1,4 +1,4 @@
-#Tue Nov 22 11:00:58 GMT 2011
+#Tue Nov 29 11:50:58 GMT 2011
 Xcheck-null=false
 Xcheckinit=false
 Xdisable-assertions=false
@@ -21,6 +21,7 @@ Yself-in-annots=false
 Ystruct-dispatch=poly-cache
 Ywarn-dead-code=false
 buildmanager=sbt
+compileorder=Mixed
 deprecation=false
 eclipse.preferences.version=1
 explaintypes=false

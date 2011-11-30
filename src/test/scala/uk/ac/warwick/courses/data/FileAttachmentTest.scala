@@ -14,12 +14,12 @@ class FileAttachmentTest extends AppContextTestBase {
 	
 	@Transactional
 	@Test def save {
-		val attachment = new FileAttachment
+		val attachment = new FileAttachment("file.txt")
 		val string = "Doe, a deer, a female deer"
 		val bytes = string.getBytes("UTF-8")
 		attachment.uploadedDataLength = bytes.length
 		attachment.uploadedData = new ByteArrayInputStream(bytes)
-		dao.save(attachment)
+		dao.saveTemporary(attachment)
 		
 		attachment.id should not be (null)
 		

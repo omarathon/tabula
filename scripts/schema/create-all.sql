@@ -27,6 +27,8 @@ create table FileAttachment (
     id nvarchar2(255) not null,
     data blob,
     name nvarchar2(255),
+    "temporary" number(1,0) not null,
+    dateUploaded timestamp not null,
     CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
 );
 
@@ -42,6 +44,16 @@ create table Module (
 	CONSTRAINT "MODULE_CODE" UNIQUE ("CODE")
 );
 CREATE INDEX IDX_MODULE_DEPT ON MODULE(DEPARTMENT_ID);
+
+create table Feedback (
+	id nvarchar2(255) not null,
+	uploaderid nvarchar(255) not null,
+	uploaded_date timestamp not null,
+	universityId nvarchar(255) not null,
+	assignment_id nvarchar(255) not null,
+	CONSTRAINT "FEEDBACK_PK" PRIMARY KEY ("ID")
+)
+CREATE INDEX IDX_FEEDBACK_ASSIGNMENT ON FEEDBACK(ASSIGNMENT_ID);
 
 create table Submission (
     id nvarchar2(255) not null,

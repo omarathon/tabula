@@ -33,7 +33,7 @@
 		  <script type="text/javascript" src="/static/js/main.js"></script>
 
 	</head>
-	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses}">
+	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses?default('')}">
 		<div id="container">
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="header-small" data-type="image">

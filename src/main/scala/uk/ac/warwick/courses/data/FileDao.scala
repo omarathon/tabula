@@ -5,10 +5,17 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class FileDao extends Daoisms {
-	def save(file:FileAttachment) = {
+	def saveTemporary(file:FileAttachment) = {
 		if (file.data == null && file.uploadedData != null) {
 			file.data = session.getLobHelper.createBlob(file.uploadedData, file.uploadedDataLength)
 		}
 		session.save(file)
 	}
+	
+	def makePermanent(file:FileAttachment) = {
+		//file.temporary = false
+		session.update(file)
+	}
+	
+	def getFileById(id:String) = getById[FileAttachment](id)
 }

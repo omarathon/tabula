@@ -27,12 +27,5 @@ public @interface SpelAssert {
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     String value();
-    
-    @Target( ElementType.TYPE )
-    @Retention( RetentionPolicy.RUNTIME )
-    @Documented
-    public @interface List {
-      SpelAssert[] value();
-    }
 
 }

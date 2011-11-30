@@ -27,7 +27,7 @@
 	<context:component-scan base-package="uk.ac.warwick.courses.services" />
 	<context:component-scan base-package="uk.ac.warwick.courses.data" />
 	
-	<bean class="org.springframework.context.support.ResourceBundleMessageSource"
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
 		p:basename="messages" />
 	
 	<!-- make properties available as ${..} tokens -->
@@ -66,7 +66,8 @@
 	</bean>
 	
 	<!-- validation -->
-	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"  />
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" 
+		p:validationMessageSource-ref="messageSource" />
 	
 	<bean id="typeConverter"
       class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
@@ -80,6 +81,7 @@
 	            <bean class="uk.ac.warwick.courses.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.AssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>
 	        </list>
 	    </property>
 	</bean>
@@ -239,7 +241,7 @@
 		</util:properties>
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</prop>
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
 		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"

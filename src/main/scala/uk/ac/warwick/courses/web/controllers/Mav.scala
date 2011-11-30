@@ -5,7 +5,7 @@ import collection.mutable
 
 class Mav(var viewName:String) {
 	var map = mutable.Map[String,Any]()
-	var classes:Array[String] = Array()
+	var classes:List[String] = Nil
 	
 	def addObjects(items:Pair[String,Any]*) = {
 		map ++= items
@@ -13,7 +13,7 @@ class Mav(var viewName:String) {
 	}
 	
 	def bodyClasses(c:String*) = {
-	 	classes = c.toArray
+	 	classes = c.toList
 	 	this
 	}
 	
@@ -23,11 +23,14 @@ class Mav(var viewName:String) {
 	}
 	
 	def toModel = {
-		map ++ Map(
-			"bodyClasses" -> classes.mkString(" ")
-		)
+		map ++ bodyClassesItem
 	}
 	
+	private def bodyClassesItem = classes match {
+		case Nil => Nil
+		case _ => List("bodyClasses" -> classes.mkString(" "))
+	}
+		
 	def toModelAndView = {
 		val mav = new ModelAndView(viewName)
 		mav.addAllObjects(toModel)

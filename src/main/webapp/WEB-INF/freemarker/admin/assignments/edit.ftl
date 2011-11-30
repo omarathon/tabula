@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/edit/${assignment.id}" commandName="editAssignment">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/edit/${assignment.id}" commandName="editAssignmentCommand">
 
 <#--
 <div id="form-editor-sidebar">

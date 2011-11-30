@@ -12,50 +12,76 @@ import javax.persistence.DiscriminatorColumn
 import javax.persistence.DiscriminatorValue
 import org.springframework.validation.Validator
 import org.springframework.validation.Errors
+import scala.annotation.target.field
+import scala.reflect.BeanProperty
+import collection.mutable
+import org.hibernate.annotations.ForceDiscriminator
+import org.hibernate.annotations.DiscriminatorOptions
 
 @Entity @AccessType("field")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="fieldtype")
-abstract class FormField extends GeneratedId /*with Validator*/ {
+//@DiscriminatorOptions(force=false)
+abstract class FormField(
+		
+		@BeanProperty
+		@(ManyToOne @field)
+		@(JoinColumn @field)(name="assignment_id")
+		var assignment:Assignment
+		
+	) extends GeneratedId {
+
+	private def this() = this(null)
 	
-	@ManyToOne
-	@JoinColumn(name="assignment_id")
-	var assignment:Assignment =_
-	
-	var name:String =_
-	var label:String =_
-	var instructions:String =_
-	var required:Boolean =_
+	@BeanProperty var name:String =_
+	@BeanProperty var label:String =_
+	@BeanProperty var instructions:String =_
+	@BeanProperty var required:Boolean =_
 	
 	@Column(name="properties")
-	var propertiesString:String =_
+	@BeanProperty var propertiesString:String =_
+	@transient @BeanProperty var properties:collection.Map[String,Any] = mutable.Map()
+	
+	def isReadOnly = false
+	final def readOnly = isReadOnly
 	
 	// list position
-	var position:Int =_
+	@BeanProperty var position:Int =_
 	
-//	def supports(cls:Class[_]) = class
-//	def validate(self:Any, errors:Errors) {
-//		
-//	}
+}
+
+trait SimpleValue[T] { self:FormField =>
+	def value_=(value:T) { properties += "value" -> value }
+	def setValue(value:T) = value_=(value)
+	
+	def value = properties("value")
+	def getValue() = value
+}
+
+@DiscriminatorValue("comment")
+class CommentField(assignment:Assignment) extends FormField(assignment) with SimpleValue[String]  {
+	override def isReadOnly = true
+	
+	
 }
 
 @DiscriminatorValue("text")
-class TextField extends FormField {
+class TextField(assignment:Assignment) extends FormField(assignment)  {
 	
 }
 
 @DiscriminatorValue("textarea")
-class TextareaField extends FormField {
+class TextareaField(assignment:Assignment) extends FormField(assignment) {
 	
 }
 
 @DiscriminatorValue("checkbox")
-class CheckboxField extends FormField {
+class CheckboxField(assignment:Assignment) extends FormField(assignment) {
 	
 }
 
-@DiscriminatorValue("select")
-class SelectField extends FormField {
+@DiscriminatorValue("file")
+class FileField(assignment:Assignment) extends FormField(assignment) {
 	
 }
 
