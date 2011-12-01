@@ -51,7 +51,7 @@
   		<path refid="build.classpath" />
   		<path location="target/unwoven" />
   	</path>
-    <scalac deprecation="on" unchecked="on" optimise="yes" debuginfo="yes"
+    <scalac deprecation="on" unchecked="on"  
     	srcref="java+scala.srcpath"
     	destdir="target/unwoven" classpathref="build+built.classpath" />
   	<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" />
@@ -63,7 +63,7 @@
   		verbose="false"
         aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"
     	  log="target/log/iajc.log" />
-  	<!-- bamboo's ant doesn't have resourcecontains
+	<!-- bamboo's ant doesn't have resourcecontains
   	<fail message="iajc errors" taskname="iajc">
   	    <condition><resourcecontains resource="target/log/iajc.log" substring="[error]"/></condition>
   	</fail>
