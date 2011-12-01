@@ -24,6 +24,10 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 		
 			val module = new Module
 			modules.saveOrUpdate(module)
+			session.flush // get out of my car, get into my database
+			
+			module.id should not be (null)
+			
 			val command = new AddAssignmentCommand(module)
 			
 			command.name = "Assignment name"
@@ -33,6 +37,7 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 			
 			assignment.fields.size should be (2)
 			assignment.fields.get(0) should have('class(classOf[CommentField]))
+			assignment.fields.get(0).propertiesMap("value") should be("")
 			assignment.fields.get(1) should have('class(classOf[FileField]))
 		
 		}
