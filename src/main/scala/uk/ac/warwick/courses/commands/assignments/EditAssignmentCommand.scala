@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.commands.assignments;
 
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
-import org.hibernate.validator.constraints.NotEmpty
+import org.hibernate.validator.constraints.NotEmpty 
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
