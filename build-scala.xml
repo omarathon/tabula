@@ -29,7 +29,6 @@
   <path id="build.classpath">
     <fileset dir="lib/runtime" includes="**/*.jar" />
     <fileset dir="lib/build" includes="**/*.jar" />
-  	<path location="target/unwoven" />
   </path>
 	
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="build.classpath" />
@@ -48,13 +47,13 @@
     <mkdir dir="target/${war.name}/WEB-INF/classes" />
   	<mkdir dir="target/unwoven" />
   	<mkdir dir="target/log" />
-    <scalac deprecation="on" unchecked="on" optimise="yes"
-    	srcref="java+scala.srcpath"
-    	destdir="target/unwoven" classpathref="build.classpath" />
   	<path id="build+built.classpath">
   		<path refid="build.classpath" />
-  		<fileset dir="target/unwoven" />
+  		<path location="target/unwoven" />
   	</path>
+    <scalac deprecation="on" unchecked="on" optimise="yes" debuginfo="yes"
+    	srcref="java+scala.srcpath"
+    	destdir="target/unwoven" classpathref="build+built.classpath" />
   	<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" />
   	
   	<iajc
