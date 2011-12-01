@@ -5,7 +5,6 @@ import scala.annotation.target.field
 import scala.reflect.BeanProperty
 
 import org.codehaus.jackson.map.ObjectMapper
-import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 
@@ -13,14 +12,11 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.GeneratedId
-import uk.ac.warwick.courses.data.PostLoadBehaviour
-import uk.ac.warwick.courses.data.PreSaveBehaviour
 
 @Configurable
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="fieldtype")
-//@DiscriminatorOptions(force=false)
 abstract class FormField (
 		
 		@BeanProperty
@@ -39,10 +35,9 @@ abstract class FormField (
 	@BeanProperty var instructions:String =_
 	@BeanProperty var required:Boolean =_
 	
-	@NotNull
-	@Column(name="properties")
-	@AccessType("property")
-	def getProperties = {
+	@Basic(optional=false)
+	@Access(AccessType.PROPERTY)
+	def getProperties() = {
 		// TODO cache the string value.
 		json.writeValueAsString(propertiesMap)
 	}
