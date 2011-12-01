@@ -34,7 +34,7 @@ trait Command[R] extends Describable {
  * Object for a Command to describe what it's just done.
  */
 abstract class Description {
-	protected var map = mutable.Map[String,Any]()
+	protected var map = Map[String,Any]()
 	def properties(props: Pair[String,Any]*) = {
 		map ++= props
 		this

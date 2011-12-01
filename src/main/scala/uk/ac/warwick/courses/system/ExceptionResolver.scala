@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.ServletException
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.Ordered
-import uk.ac.warwick.courses.web.controllers.Mav
 import uk.ac.warwick.util.core.ExceptionUtils
 import java.util.{Map => JMap}
 import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.courses.UserError
+import uk.ac.warwick.courses.web.Mav
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.

@@ -9,7 +9,7 @@ import org.specs.mock.JMocker
 
 class TimeControllerTest extends JUnitSuite with ShouldMatchersForJUnit {
 	@Test def works {
-		controller.showTime.getModel.get("timeWelcome") should be ("Yo")
+		controller.showTime.toModel("timeWelcome") should be ("Yo")
 	} 
 	
 	def controller = new TimeController {

@@ -1,8 +1,18 @@
-package uk.ac.warwick.courses.web.controllers
+package uk.ac.warwick.courses.web
 import org.springframework.web.servlet.ModelAndView
 import collection.JavaConversions._
 import collection.mutable
 
+/**
+ * Scala-y modelandview object. There is a return value processor
+ * that teaches Spring what to do with a Mav returned from a controller
+ * method, so you can return these from methods.
+ * 
+ * Mav("my/viewname", 
+ *   "objName" -> obj, 
+ *   "user" -> myUser
+ *   )
+ */
 class Mav(var viewName:String) {
 	var map = mutable.Map[String,Any]()
 	var classes:List[String] = Nil
@@ -42,10 +52,6 @@ class Mav(var viewName:String) {
  * ModelAndView builder. Takes a viewname and then any number of Pair objects (which awesomely can be
  * created with the syntax a->b).
  * 
- * Mav("my/viewname", 
- *   "objName" -> obj, 
- *   "user" -> myUser
- *   )
  */
 object Mav {
   /**

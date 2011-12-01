@@ -9,12 +9,36 @@ trait PreLoadBehaviour {
   def preLoad 
 }
 
-class HibernateLifecycle extends PostLoadEventListener with PreLoadEventListener {
+trait PreSaveBehaviour {
+  def preSave(newRecord:Boolean)
+}
+
+trait PostLoadBehaviour {
+  def postLoad
+}
+
+class HibernateLifecycle extends PostLoadEventListener with PreLoadEventListener with PreInsertEventListener with PreUpdateEventListener {
 	override def onPostLoad(event: PostLoadEvent) {
 	  event.getEntity match {
 	    case listener:PostLoadBehaviour => listener.postLoad
 	    case _ =>
 	  }
+	}
+	
+	override def onPreInsert(event: PreInsertEvent) = {
+	  event.getEntity match {
+	    case listener:PreSaveBehaviour => listener.preSave(true)
+	    case _ =>
+	  }
+	  false
+	}
+	
+	override def onPreUpdate(event: PreUpdateEvent) = {
+	  event.getEntity match {
+	    case listener:PreSaveBehaviour => listener.preSave(false)
+	    case _ =>
+	  }
+	  false
 	}
 	
 	override def onPreLoad(event: PreLoadEvent) {

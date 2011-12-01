@@ -11,6 +11,7 @@ import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.courses.data.model.forms._
+import uk.ac.warwick.courses.data.model.Assignment
 
 class AddAssignmentCommandTest extends AppContextTestBase {
 	
@@ -18,6 +19,7 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 	
 	@Transactional
 	@Test def add {
+
 		withUser("abc") {
 		
 			val module = new Module

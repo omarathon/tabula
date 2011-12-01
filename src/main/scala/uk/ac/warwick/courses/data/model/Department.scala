@@ -7,7 +7,7 @@ import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.PostLoad
-import uk.ac.warwick.courses.data.PostLoadBehaviour
+import uk.ac.warwick.courses.data._
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.actions._
 

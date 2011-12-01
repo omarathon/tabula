@@ -99,7 +99,7 @@ create table formfield (
     assignment_id nvarchar2(255) not null,
     name nvarchar2(255) not null,
     position number(3,0) not null,
-    label nvarchar2(255) not null,
+    label nvarchar2(255),
     instructions nvarchar2(4000),
     fieldtype nvarchar2(255) not null,
     required number(1,0) not null,

@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.courses.system.ExceptionResolver
+import uk.ac.warwick.courses.web.Mav
 
 @Controller
-class ErrorController {
+class ErrorController extends Controllerism {
 
-  // TODO some extra error reporting 
-  val logger = Logger.getLogger("Exceptions")
+  override val loggerName = "Exceptions"
   
   @Autowired var exceptionResolver:ExceptionResolver =_
   

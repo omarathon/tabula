@@ -32,9 +32,11 @@ class Assignment() extends GeneratedId with Viewable {
 	
 	def addDefaultFields {
 		val pretext = new CommentField(this)
+		pretext.name = "pretext"
 		pretext.value = ""
 			
 		val file = new FileField(this)
+		file.name = "upload"
 		
 		fields.addAll(List(
 			pretext, file

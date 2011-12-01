@@ -1,9 +1,13 @@
 package uk.ac.warwick.courses.data.model
-import javax.persistence.Entity
-import java.util.{List=>JList}
+import java.util.{List => JList}
+
+import scala.collection.JavaConversions._
+
 import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
-import collection.JavaConversions._
+
+import javax.persistence.Entity
+
 
 @Entity @AccessType("field")
 class Feedback extends GeneratedId {

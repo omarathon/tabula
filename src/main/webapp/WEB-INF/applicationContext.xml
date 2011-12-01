@@ -206,6 +206,8 @@
 		<property name="eventListeners"><map>
 			<entry key="pre-load" value-ref="hibernateLifecycle" />
 			<entry key="post-load" value-ref="hibernateLifecycle"/>
+			<entry key="pre-update" value-ref="hibernateLifecycle"/>
+			<entry key="pre-insert" value-ref="hibernateLifecycle"/>
 		</map></property>
 	</bean>
 	

@@ -4,8 +4,8 @@ import org.springframework.validation.Validator
 import org.springframework.validation.Errors
 
 /**
- * Version of Validator that handles the supports() method for you
- * 
+ * Version of Validator that handles the supports() method for you,
+ * using an implicit ClassManifest to work out what T is.
  */
 abstract class ClassValidator[T] extends Validator {
 
