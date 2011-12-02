@@ -20,7 +20,7 @@ class JsonTest extends TestBase {
 	}
 	
 	// bug in scala jackson module
-	@Test(expected=classOf[ArrayIndexOutOfBoundsException]) def mutableMapFails {
+	@Test/*(expected=classOf[ArrayIndexOutOfBoundsException])*/ def mutableMapWorks {
 		m.writeValueAsString(MutableMap()) should be("{}")
 	}
 }

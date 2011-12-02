@@ -57,9 +57,9 @@
 	<classpathentry kind="lib" path="lib/test/jmock-cglib-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-all-1.9.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/scalabeans-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-library.jar" sourcepath="/home/nick/.m2/repository/org/scala-lang/scala-library/2.9.1/scala-library-2.9.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>
