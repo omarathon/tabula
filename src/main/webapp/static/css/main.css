@@ -75,14 +75,14 @@ background-image: -webkit-gradient(
 .actions a {
 	text-decoration: none;
 	white-space: nowrap;
-	background: #66959E;
+	background: #6594d1;
 	color: white;
 	border-radius: 5px;
 	padding: 0 4px;
 }
 
 .actions a:hover {
-	background-color: #06456E;
+	background-color: #2c5893;
 }
 
 .submit-buttons input {
