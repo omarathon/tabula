@@ -1,4 +1,6 @@
 drop table module;
+drop table feedback;
+drop table submission;
 drop table department;
 drop table assignment;
 drop table fileattachment;
