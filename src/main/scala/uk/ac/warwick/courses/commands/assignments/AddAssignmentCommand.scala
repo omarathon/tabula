@@ -31,8 +31,8 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	  val assignment = new Assignment(module)
 	  assignment.addDefaultFields
 	  copyTo(assignment)
-	  assignment.active = false
-	  session.save(assignment)
+	  assignment.active = true
+	  service.save(assignment)
 	  assignment
 	}
 	

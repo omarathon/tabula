@@ -29,6 +29,7 @@ public class UniqueUsercodeValidator implements ConstraintValidator<UniqueUserco
 		collectionName = annotation.collectionName();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isValid(Object form, ConstraintValidatorContext ctx) {
 		BeanWrapper bean = new BeanWrapperImpl(form);

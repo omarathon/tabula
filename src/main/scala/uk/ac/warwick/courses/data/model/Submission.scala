@@ -10,16 +10,18 @@ import javax.persistence.ManyToOne
 import javax.persistence.CascadeType
 import javax.persistence.OneToMany
 import javax.persistence.FetchType
+import javax.persistence.Column
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId {
   
-	@ManyToOne(cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
+	@ManyToOne(optional=false, cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
   
 	@BeanProperty var submitted:Boolean = false
 	
+	@Column(name="submitted_date")
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var submittedDate:DateTime =_
 	

@@ -140,12 +140,12 @@ class AddFeedback extends Controllerism {
 	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddFeedbackCommand(assignment, user)
 	
-	validatesWith { (cmd:AddFeedbackCommand, errors:Errors) =>
-		
+	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
+		command.validation(errors)
 	}
 	
-	def onBind(form:AddFeedbackCommand) {
-		form.onBind
+	def onBind(command:AddFeedbackCommand) {
+		command.onBind
 	}
 	
 	@RequestMapping(method=Array(RequestMethod.GET))
@@ -159,7 +159,6 @@ class AddFeedback extends Controllerism {
 			"module" -> module,
 			"assignment" -> assignment
 			)
-		
 	}
 	
 	@RequestMapping(method = Array(RequestMethod.POST))
@@ -169,13 +168,12 @@ class AddFeedback extends Controllerism {
 			@Valid form:AddFeedbackCommand, errors: Errors) = {
 		onBind(form)
 		mustBeAbleTo(Participate(module))
-//		if (errors.hasErrors) {
+		if (errors.hasErrors) {
 			showForm(module, assignment, form, errors)
-//		} else {
-//			form.apply
-//			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
-//		}
-		
+		} else {
+			form.apply
+			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+		}
 	}
 	
 }

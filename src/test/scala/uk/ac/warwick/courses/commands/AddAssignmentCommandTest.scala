@@ -31,15 +31,26 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 			val command = new AddAssignmentCommand(module)
 			
 			command.name = "Assignment name"
-			val assignment = command.apply
+			val assignmentNew = command.apply
 			
 			session.flush
+			session.clear
+			
+			val assignment = session.get(classOf[Assignment], assignmentNew.id).asInstanceOf[Assignment]
 			
 			assignment.fields.size should be (2)
 			assignment.fields.get(0) should have('class(classOf[CommentField]))
+			assignment.fields.get(0).template should be ("comment")
 			assignment.fields.get(0).propertiesMap("value") should be("")
 			assignment.fields.get(1) should have('class(classOf[FileField]))
+			assignment.fields.get(1).assignment should be(assignment)
+			assignment.fields.get(1).position should be(1)
+			assignment.fields.get(1).template should be("file")
 		
+//			val q = session.createSQLQuery("select position from formfield where fieldtype=:d")
+//			q.setString("d", "upload")
+//			val position = q.uniqueResult()
+//			position should be (1)
 		}
 	}
 }

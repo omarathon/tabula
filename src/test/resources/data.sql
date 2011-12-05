@@ -1,3 +1,7 @@
+--alter table formfield add column 
+--    position integer not null
+--;
+
 create table auditevent (
 	eventdate timestamp,
 	eventType varchar(255) not null,

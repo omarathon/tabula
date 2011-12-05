@@ -27,10 +27,14 @@ create table FileAttachment (
     id nvarchar2(255) not null,
     data blob,
     name nvarchar2(255),
-    "temporary" number(1,0) not null,
+    temporary number(1,0) not null,
+    feedback_id nvarchar2(255),
+    submission_id nvarchar2(255),
     dateUploaded timestamp not null,
     CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
 );
+create index fileattachment_feedback on fileattachment("feedback_id");
+create index fileattachment_submission on fileattachment("submission_id");
 
 create table Module (
     id nvarchar2(255) not null,
@@ -47,12 +51,12 @@ CREATE INDEX IDX_MODULE_DEPT ON MODULE(DEPARTMENT_ID);
 
 create table Feedback (
 	id nvarchar2(255) not null,
-	uploaderid nvarchar(255) not null,
+	uploaderid nvarchar2(255) not null,
 	uploaded_date timestamp not null,
-	universityId nvarchar(255) not null,
-	assignment_id nvarchar(255) not null,
+	universityId nvarchar2(255) not null,
+	assignment_id nvarchar2(255) not null,
 	CONSTRAINT "FEEDBACK_PK" PRIMARY KEY ("ID")
-)
+);
 CREATE INDEX IDX_FEEDBACK_ASSIGNMENT ON FEEDBACK(ASSIGNMENT_ID);
 
 create table Submission (

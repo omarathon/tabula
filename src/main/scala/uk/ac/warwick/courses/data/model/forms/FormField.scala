@@ -1,34 +1,36 @@
 package uk.ac.warwick.courses.data.model.forms
 import java.io.StringReader
-
 import scala.annotation.target.field
 import scala.reflect.BeanProperty
-
 import org.codehaus.jackson.map.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.GeneratedId
+import java.lang.Integer
+import org.hibernate.annotations.Type
 
 @Configurable
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="fieldtype")
-abstract class FormField (
-		
-		@BeanProperty
-		@(ManyToOne @field)
-		@(JoinColumn @field)(name="assignment_id")
-		var assignment:Assignment
-		
-	) extends GeneratedId /*with PreSaveBehaviour with PostLoadBehaviour*/ {
+abstract class FormField extends GeneratedId /*with PreSaveBehaviour with PostLoadBehaviour*/ {
 
-	private def this() = this(null)
+	def this(a:Assignment) = {
+		this()
+		assignment = a
+	}
 	
 	@Autowired @transient var json:ObjectMapper =_
+	
+//	var fieldType:String =_
+	
+	@BeanProperty
+	@ManyToOne
+	@(JoinColumn @field)(name="assignment_id", updatable=false, nullable=false)
+	var assignment:Assignment =_
 	
 	@BeanProperty var name:String =_
 	@BeanProperty var label:String =_
@@ -52,8 +54,10 @@ abstract class FormField (
 	def isReadOnly = false
 	final def readOnly = isReadOnly
 	
-	// list position
-	@BeanProperty var position:Int =_
+	@Type(`type`="int")
+	@BeanProperty var position:Integer = 0
+	
+	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value
 	
 //	override def preSave(newRecord:Boolean) {
 //		properties = json.writeValueAsString(properties)
@@ -72,29 +76,34 @@ trait SimpleValue[T] { self:FormField =>
 	def getValue() = value
 }
 
+@Entity 
 @DiscriminatorValue("comment")
-class CommentField(assignment:Assignment) extends FormField(assignment) with SimpleValue[String]  {
+class CommentField extends FormField with SimpleValue[String]  {
 	override def isReadOnly = true
 	
 	
 }
 
+@Entity 
 @DiscriminatorValue("text")
-class TextField(assignment:Assignment) extends FormField(assignment)  {
+class TextField extends FormField  {
 	
 }
 
+@Entity 
 @DiscriminatorValue("textarea")
-class TextareaField(assignment:Assignment) extends FormField(assignment) {
+class TextareaField extends FormField {
 	
 }
 
+@Entity 
 @DiscriminatorValue("checkbox")
-class CheckboxField(assignment:Assignment) extends FormField(assignment) {
+class CheckboxField extends FormField {
 	
 }
 
+@Entity 
 @DiscriminatorValue("file")
-class FileField(assignment:Assignment) extends FormField(assignment) {
+class FileField extends FormField {
 	
 }

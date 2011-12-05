@@ -46,9 +46,15 @@ background-image: -webkit-gradient(
 #navigation { display: none; }
 
 .module-info {
-	border-bottom: 1px solid #999;
-	padding: 0.5em 0;
+	border: 1px solid #999;
+	padding: 0.5em;
 	margin: 0.5em 0;
+}
+
+.assignment-info {
+	border: 1px solid #99c;
+	padding: 0.5em;
+	margin-bottom: 0.5em;
 }
 
 .dev {
@@ -58,4 +64,28 @@ background-image: -webkit-gradient(
 .admin-flash {
 	padding: 1em;
 	background: #eec;
+}
+
+.submit-buttons {
+	padding: 1em 0;
+	margin: 1em 0;
+	border-top: 1px solid #EEE;
+}
+
+.actions a {
+	text-decoration: none;
+	white-space: nowrap;
+	background: #66959E;
+	color: white;
+	border-radius: 5px;
+	padding: 0 4px;
+}
+
+.actions a:hover {
+	background-color: #06456E;
+}
+
+.submit-buttons input {
+	padding: 0.5em;
+	font-size: 120%;
 }

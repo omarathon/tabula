@@ -27,5 +27,6 @@ public @interface SpelAssert {
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     String value();
+    String targetProperty() default "";
 
 }

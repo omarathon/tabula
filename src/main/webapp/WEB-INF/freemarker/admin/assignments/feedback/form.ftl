@@ -7,20 +7,6 @@
 
 <h1>Submit feedback for ${assignment.name}</h1>
 
- 
-<@spring.bind path="file">
-<#if status.value??>
-<h2>Upload received (but discarded)</h2>
-<#if status.value.empty>
-<h2>File was empty (or no file was uploaded)</h2>
-<#else>
-<h2>File size: ${status.value.size} bytes</h2>
-<h2>File name: <code>${status.value.originalFilename}</code></h2>
-</#if>
-</#if>
-</@spring.bind>
-
-
 <div>
 <@f.label path="uniNumber">
 <@f.errors path="uniNumber" cssClass="error" />
@@ -30,20 +16,47 @@ Student university number
 </div>
 
 <div>
-<@f.label path="file">
-<@f.errors path="file" cssClass="error" />
+
+<#-- TODO Move this macro to a shared place -->
+<#macro filewidget basename>
+<@f.errors path="${basename}" cssClass="error" />
+<@f.errors path="${basename}.upload" cssClass="error" />
+<@f.errors path="${basename}.attached" cssClass="error" />
+<@f.label path="${basename}.upload">
 File
 </@f.label>
-<input type="file" name="file" >
 
-<#if addFeedbackCommand.fileAttachment??>
-<input type="hidden" name="fileAttachment" value="${addFeedbackCommand.fileAttachment.id}">
-${addFeedbackCommand.fileAttachment.name} (remove)
+<#if addFeedbackCommand[basename].uploaded>
+<#assign uploadedId=addFeedbackCommand[basename].attached.id />
+<div id="attachment-${uploadedId}">
+<input type="hidden" name="file.attached" value="${uploadedId}">
+${addFeedbackCommand[basename].attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
+</div>
+<div id="upload-${uploadedId}" style="display:none">
+<input type="file" name="${basename}.upload" >
+</div>
+<script>
+jQuery(function($){
+$('#remove-attachment-${uploadedId}').click(function(ev){
+  ev.preventDefault();
+  $('#attachment-${uploadedId}').remove(); 
+  $('#upload-${uploadedId}').show();
+  return false;
+});
+});
+</script>
+<#else>
+<input type="file" name="${basename}.upload" >
 </#if>
 
-</div>
+</#macro>
 
+<@filewidget "file" />
+
+</div>
+<div class="submit-buttons">
 <input type="submit" value="Submit">
+</div>
 </@f.form>
 
 </#escape>

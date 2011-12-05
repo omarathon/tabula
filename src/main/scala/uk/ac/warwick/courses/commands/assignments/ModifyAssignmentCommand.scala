@@ -1,13 +1,17 @@
 package uk.ac.warwick.courses.commands.assignments
 import scala.reflect.BeanProperty
-import org.springframework.format.annotation.DateTimeFormat
 import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.commands.Command
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.courses.services.AssignmentService
 
-abstract class ModifyAssignmentCommand extends Command[Assignment] with Daoisms  {
+abstract class ModifyAssignmentCommand extends Command[Assignment]  {
+	
+	@Autowired var service:AssignmentService =_
 	
 	@NotEmpty
 	@BeanProperty var name:String = _

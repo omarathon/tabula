@@ -20,6 +20,7 @@ import uk.ac.warwick.courses.AcademicYear
 import java.util.ArrayList
 import java.util.{List => JList}
 import java.util.{Set => JSet}
+import javax.persistence.OrderColumn
 
 @Entity @AccessType("field")
 class Assignment() extends GeneratedId with Viewable {
@@ -31,17 +32,16 @@ class Assignment() extends GeneratedId with Viewable {
 	var academicYear:Int = AcademicYear.guessByDate(new DateTime).startYear
 	
 	def addDefaultFields {
-		val pretext = new CommentField(this)
+		val pretext = new CommentField
 		pretext.name = "pretext"
 		pretext.value = ""
-			
-		val file = new FileField(this)
+		
+		val file = new FileField
 		file.name = "upload"
 		
-		fields.addAll(List(
-			pretext, file
-		))
+		addFields(pretext, file)
 	}
+
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
 	var fileExtensions:Seq[String] = _
@@ -73,12 +73,26 @@ class Assignment() extends GeneratedId with Viewable {
 	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@OrderBy("submittedDate")
-	@BeanProperty var submissions:JSet[Submission] =_
+	@BeanProperty var submissions:JList[Submission] =_
 	
+	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	@BeanProperty var feedbacks:JList[Feedback] =_
+	
+	/**
+	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
+	 */
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@IndexColumn(name="position")
 	@BeanProperty var fields:JList[FormField] = new ArrayList
 	
 	@BeanProperty var resultsPublished:Boolean = false
+	
+	def addField(field:FormField) {
+		field.assignment = this
+		field.position = fields.length
+		fields.add(field)
+	}
+	
+	def addFields(fields:FormField*) = for(field<-fields) addField(field)
 }
 

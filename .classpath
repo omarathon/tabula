@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" output="bin/java" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
@@ -85,7 +86,6 @@
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/webapp"/>
-	<classpathentry kind="src" output="bin/java" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

@@ -15,44 +15,38 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.FileDao
 import uk.ac.warwick.courses.CurrentUser
 import java.io.File
+import org.springframework.validation.Errors
 
 
 /**
  * Command which (currently) adds a single piece of feedback for one assignment
  */
 @Configurable
-@SpelAsserts(Array(
-	new SpelAssert(value="filePresent", message="{file.missing}")
-))
 class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[Feedback] with Daoisms {
 	
-  @Autowired var fileDao:FileDao =_
-	
-  @BeanProperty var file:MultipartFile =_
-  @BeanProperty var fileAttachment:FileAttachment = _
-  def isFilePresent = (file != null && !file.isEmpty()) ||
-  					fileAttachment != null
-  
   @NotEmpty
   @BeanProperty var uniNumber:String =_
+	
+  @BeanProperty var file:UploadedFile = new UploadedFile
+			
+  // called manually by controller
+  def validation(errors:Errors) = {
+	  if (file isMissing) errors.rejectValue("file", "file.missing")
+  }
   
   @Transactional
-  def onBind = {
-	  if (fileAttachment == null && file != null && !file.isEmpty()) {
-	 	  fileAttachment = new FileAttachment
-	 	  fileAttachment.name = new File(file.getOriginalFilename()).getName
-	 	  fileAttachment.uploadedData = file.getInputStream
-	 	  fileAttachment.uploadedDataLength = file.getSize
-	 	  fileDao.saveTemporary(fileAttachment)
-	  }
+  def onBind {
+	file.onBind
   }
   
   @Transactional
   override def apply() = {
+	  file.attached.temporary = false
 	  val feedback = new Feedback
+	  feedback.assignment = assignment
 	  feedback.uploaderId = submitter.apparentId
 	  feedback.universityId = uniNumber
-	  feedback.attachments add fileAttachment
+	  feedback addAttachment file.attached
 	  session.save(feedback)
 	  feedback
   }
