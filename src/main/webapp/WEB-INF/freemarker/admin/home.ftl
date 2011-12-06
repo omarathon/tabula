@@ -5,11 +5,11 @@
 <#if ownedDepartments?size gt 1>
 <p>You are an administrator for multiple departments. Please choose a department to manage.</p>
 </#if>
-<#list ownedDepartments as department>
 <ul>
+<#list ownedDepartments as department>
 <li><a href="<@url page="/admin/department/${department.code}/"/>">Manage ${department.name}</a></li>
-</ul>
 </#list>
+</ul>
 <#else>
 
 Nope

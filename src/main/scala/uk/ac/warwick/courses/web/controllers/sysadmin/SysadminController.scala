@@ -1,22 +1,21 @@
 package uk.ac.warwick.courses.web.controllers
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.bind.annotation.PathVariable
-import org.hibernate.Hibernate
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.InitBinder
-import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.ModelAttribute
-import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.courses.helpers.Logging
-import uk.ac.warwick.courses.data.model.Department
-import uk.ac.warwick.courses.commands.departments.RemoveDeptOwnerCommand
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+
+import javax.validation.Valid
 import uk.ac.warwick.courses.commands.departments.AddDeptOwnerCommand
+import uk.ac.warwick.courses.commands.departments.RemoveDeptOwnerCommand
+import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.services.ModuleAndDepartmentService
+import uk.ac.warwick.courses.validators.UniqueUsercode
+import uk.ac.warwick.courses.web.controllers.Controllerism
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -110,6 +109,12 @@ object SysadminController {
 			  redirectToDeptOwners(dept.code)
 			}
 		}
+	}
+	
+	@Controller
+	@RequestMapping(Array("/sysadmin/masquerade"))
+	class MasqueradeController extends BaseSysadminController {
+		
 	}
 	
 }

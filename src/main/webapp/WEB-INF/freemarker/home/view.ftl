@@ -11,13 +11,11 @@
 </#list>
 </#if>
 
-<h1>
 <#if user.loggedIn && user.firstName??>
-Hello ${user.firstName}
+<h1>Hello ${user.firstName}</h1>
 <#else>
-Hello
+<h1>Hello</h1>
 </#if>
-</h1>
 
 <p>This is the in-development coursework submission application.
 	It isn't quite ready for use yet, but you can keep up with news about by
