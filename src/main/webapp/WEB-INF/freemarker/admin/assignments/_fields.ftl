@@ -1,20 +1,12 @@
 <#macro datefield path label>
-<div>
-<@f.label path=path>
-<@f.errors path=path cssClass="error" />
-${label}
-</@f.label>
+<@form.labelled_row path label>
 <@f.input path=path cssClass="date-time-picker" />
-</div>
+</@form.labelled_row>
 </#macro>
 
-<div>
-<@f.label path="name">
-<@f.errors path="name" cssClass="error" />
-Assignment name
-</@f.label>
+<@form.labelled_row "name" "Assignment name">
 <@f.input path="name" />
-</div>
+</@form.labelled_row>
 
 <@datefield path="openDate" label="Open date" />
 <@datefield path="closeDate" label="Close date" />

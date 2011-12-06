@@ -13,7 +13,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@Autowired var service:AssignmentService =_
 	
-	@NotEmpty
+	@NotEmpty(message="{NotEmpty.assignmentName}")
 	@BeanProperty var name:String = _
 	
     @DateTimeFormat(style = "MM")

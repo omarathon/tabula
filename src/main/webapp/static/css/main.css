@@ -72,6 +72,16 @@ background-image: -webkit-gradient(
 	border-top: 1px solid #EEE;
 }
 
+.form-row {
+	clear:left;
+	margin-bottom: 0.5em;
+}
+
+.form-row label {
+	width:190px;
+	float:left;
+}
+
 .actions a {
 	text-decoration: none;
 	white-space: nowrap;

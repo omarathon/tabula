@@ -41,7 +41,9 @@
 
 </div>
 -->
+<div class="submit-buttons actions">
 <input type="submit" value="Save">
+</div>
 </@f.form>
 
 </#escape>
