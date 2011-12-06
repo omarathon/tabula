@@ -8,14 +8,13 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.validation.Valid
 import uk.ac.warwick.courses.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.courses.commands.departments.RemoveDeptOwnerCommand
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.validators.UniqueUsercode
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import org.springframework.web.bind.annotation.RequestMethod
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.

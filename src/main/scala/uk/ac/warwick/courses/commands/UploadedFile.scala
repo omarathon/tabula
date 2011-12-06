@@ -23,13 +23,16 @@ class UploadedFile {
   @BeanProperty var upload:MultipartFile =_
   @BeanProperty var attached:FileAttachment = _
   
+  def isMissing = !isExists
   def isExists = (upload != null && !upload.isEmpty()) ||
   					attached != null
-  def isMissing = !isExists
   					
   def isUploaded = attached != null
   					
   def onBind {
+	  if (attached != null && !attached.temporary) {
+	 	  throw new IllegalStateException("Not a temporary file")
+	  } 
 	  if (attached == null && upload != null && !upload.isEmpty()) {
 	 	  attached = new FileAttachment
 	 	  attached.name = new File(upload.getOriginalFilename()).getName
