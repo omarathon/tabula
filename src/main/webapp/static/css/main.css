@@ -49,12 +49,14 @@ background-image: -webkit-gradient(
 	border: 1px solid #999;
 	padding: 0.5em;
 	margin: 0.5em 0;
+	background-color: #eee;
 }
 
 .assignment-info {
 	border: 1px solid #99c;
 	padding: 0.5em;
 	margin-bottom: 0.5em;
+	background-color: #fff;
 }
 
 .dev {

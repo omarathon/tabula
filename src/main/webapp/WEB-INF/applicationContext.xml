@@ -97,7 +97,12 @@
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
-			<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
+			<bean class="uk.ac.warwick.courses.system.ConditionalInterceptor"
+				p:excludePath="/static/*">
+				<constructor-arg>
+					<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
+				</constructor-arg>
+			</bean>
 		</mvc:interceptor>
 	</mvc:interceptors>
 	
@@ -234,7 +239,8 @@
 	    
 	    <bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
 	    	<property name="nativeJdbcExtractor">
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
+	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
+	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
 	    	</property>
 	    </bean>
 	    

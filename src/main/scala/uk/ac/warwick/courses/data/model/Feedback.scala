@@ -27,7 +27,7 @@ class Feedback extends GeneratedId {
 	
 	var universityId:String =_
 	
-	@OneToMany(mappedBy="feedback", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	@OneToMany(mappedBy="feedback", fetch=FetchType.LAZY)
 	var attachments:JList[FileAttachment] = ArrayList()
 	
 	def addAttachment(attachment:FileAttachment) {
