@@ -16,6 +16,7 @@ import java.io.OutputStream
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.util.FileCopyUtils
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Screens for department and module admins.
@@ -161,6 +162,7 @@ class AddFeedback extends Controllerism {
 			)
 	}
 	
+	@Transactional
 	@RequestMapping(method = Array(RequestMethod.POST))
 	def submit(
 			@PathVariable module:Module,
