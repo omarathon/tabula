@@ -15,6 +15,7 @@ import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.validators.UniqueUsercode
 import org.springframework.web.bind.annotation.RequestMethod
+import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -56,7 +57,7 @@ class SysadminController extends BaseSysadminController {
 	
 	@RequestMapping(value=Array("/import"), method=Array(RequestMethod.POST))
 	def importModules = {
-		  moduleService.importData
+		  new ImportModulesCommand().apply()
 		  "sysadmin/importdone"
 	}
 

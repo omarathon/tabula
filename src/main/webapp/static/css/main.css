@@ -59,6 +59,20 @@ background-image: -webkit-gradient(
 	background-color: #fff;
 }
 
+.assignment-info .name {
+	width: 18em;
+	float:left;
+}
+.assignment-info .stats {
+	font-size: 0.85em;
+	width: 17em;
+	float:left;
+}
+.assignment-info .actions {
+	float: right;
+}
+.end-assignment-info { clear: both; }
+
 .dev {
 	color: #ccc;
 }
