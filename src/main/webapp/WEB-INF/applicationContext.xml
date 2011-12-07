@@ -250,6 +250,7 @@
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
 			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</prop>
+			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
 		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
