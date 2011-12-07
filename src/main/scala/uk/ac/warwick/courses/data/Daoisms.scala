@@ -4,6 +4,10 @@ import scala.reflect.Manifest
 import org.springframework.beans.factory.annotation.Autowired
 import scala.annotation.target.field
 
+/**
+ * A trait for DAO classes to mix in to get useful things
+ * like the current session.
+ */
 trait Daoisms {
   type AutowiredField = Autowired @field
   

@@ -59,6 +59,8 @@ class Assignment() extends GeneratedId with Viewable {
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var closeDate:DateTime =_
 	
+	var collectMarks:Boolean =_
+	
 	/**
 	 * Returns whether we're between the opening and closing dates
 	 */

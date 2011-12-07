@@ -5,7 +5,7 @@
 </#macro>
 
 <@form.labelled_row "name" "Assignment name">
-<@f.input path="name" />
+<@f.input path="name" cssClass="text" />
 </@form.labelled_row>
 
 <@datefield path="openDate" label="Open date" />

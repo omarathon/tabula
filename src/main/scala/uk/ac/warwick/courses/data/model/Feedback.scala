@@ -32,6 +32,7 @@ class Feedback extends GeneratedId {
 	
 	def addAttachment(attachment:FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+		attachment.temporary = false
 		attachment.feedback = this
 		attachments.add(attachment)
 	}

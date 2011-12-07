@@ -1,6 +1,7 @@
 package uk.ac.warwick.courses
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
+import java.beans.PropertyEditorSupport
 
 class AcademicYear(val startYear:Int) {
 	val endYear = startYear+1
@@ -8,6 +9,22 @@ class AcademicYear(val startYear:Int) {
 	
 	override def toString = "%s/%s".format(toDigits(startYear), toDigits(endYear))
 	private def toDigits(year:Int) = year.toString.substring(2)
+}
+
+/**
+ * Stores academic year as the 4-digit starting year.
+ */
+class AcademicYearEditor extends PropertyEditorSupport {
+	override def getAsText = getValue() match {
+		case year:AcademicYear => year.startYear.toString
+		case _ => ""
+	}
+	
+	override def setAsText(year:String) = try {
+		setValue(new AcademicYear(year.toInt))
+	} catch {
+		case e:NumberFormatException => setValue(null)
+	}
 }
 
 object AcademicYear {

@@ -25,11 +25,7 @@ class ModuleAndDepartmentService extends Logging  {
     @Autowired var moduleDao:ModuleDao =_
     @Autowired var departmentDao:DepartmentDao =_
     @Autowired var groupService:GroupService =_
-  
-    @Scheduled(cron="0 0 7,14 * * *")
-    def importData {
-      new ImportModulesCommand().apply()
-    }
+
     
     @Transactional(readOnly=true)
     def allDepartments = departmentDao.allDepartments

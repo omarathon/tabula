@@ -10,6 +10,7 @@ create table Assignment (
     openDate timestamp,
     resultspublished number(1,0) not null,
     module_id nvarchar2(255),
+    collectMarks number(1,0) not null,
     CONSTRAINT "ASSIGNMENT_PK" PRIMARY KEY ("ID")
 );
 CREATE INDEX "IDX_ASSIGNMENT_MODULE" ON ASSIGNMENT("MODULE_ID");
@@ -33,8 +34,9 @@ create table FileAttachment (
     dateUploaded timestamp not null,
     CONSTRAINT "FILEATTACHMENT_PK" PRIMARY KEY ("ID")
 );
-create index fileattachment_feedback on fileattachment("feedback_id");
-create index fileattachment_submission on fileattachment("submission_id");
+create index fileattachment_feedback on fileattachment(feedback_id);
+create index fileattachment_submission on fileattachment(submission_id);
+create index fileattachment_temporary on fileattachment(temporary, dateUploaded);
 
 create table Module (
     id nvarchar2(255) not null,

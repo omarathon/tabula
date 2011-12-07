@@ -22,15 +22,19 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     @DateTimeFormat(style = "MM")
 	@BeanProperty var closeDate:DateTime = openDate.plusWeeks(2)
 	
+	@BeanProperty var collectMarks:Boolean = false
+	
 	def copyTo(assignment:Assignment) {
 		assignment.name = name
 	    assignment.openDate = openDate
 	    assignment.closeDate = closeDate
+	    assignment.collectMarks = collectMarks
 	}
 	
 	def copyFrom(assignment:Assignment) {
 		name = assignment.name
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
+		collectMarks = assignment.collectMarks
 	}
 }

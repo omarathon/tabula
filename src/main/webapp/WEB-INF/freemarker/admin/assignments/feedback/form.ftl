@@ -8,7 +8,7 @@
 <h1>Submit feedback for ${assignment.name}</h1>
 
 <@form.labelled_row "uniNumber" "Student university number">
-<@f.input path="uniNumber" />
+<@f.input path="uniNumber" cssClass="text" />
 </@form.labelled_row>
 
 <@form.filewidget "file" />

@@ -97,8 +97,7 @@
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
-			<bean class="uk.ac.warwick.courses.system.ConditionalInterceptor"
-				p:excludePath="/static/*">
+			<bean class="uk.ac.warwick.courses.system.ConditionalInterceptor" p:excludePath="/static/*">
 				<constructor-arg>
 					<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
 				</constructor-arg>
@@ -106,13 +105,13 @@
 		</mvc:interceptor>
 	</mvc:interceptors>
 	
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.courses.system.CommonPropertyEditors" />
 	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
-	/> 
-	
+		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" /> 
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.courses.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">

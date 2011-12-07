@@ -1,22 +1,19 @@
 package uk.ac.warwick.courses.commands.assignments
 
-import java.util.{List => JList}
 import scala.reflect.BeanInfo
 import scala.reflect.BeanProperty
 import org.hibernate.validator.constraints.NotEmpty
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.courses.validators._
+import org.springframework.validation.Errors
 import uk.ac.warwick.courses.commands._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.FileDao
 import uk.ac.warwick.courses.CurrentUser
-import java.io.File
-import org.springframework.validation.Errors
-
+import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.courses.UniversityId
+import collection.JavaConversions._
 
 /**
  * Command which (currently) adds a single piece of feedback for one assignment
@@ -32,6 +29,18 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   // called manually by controller
   def validation(errors:Errors) = {
 	  if (file isMissing) errors.rejectValue("file", "file.missing")
+	  
+	  if (hasText(uniNumber)){
+	 	  if (!UniversityId.isValid(uniNumber)) {
+	 		  errors.rejectValue("uniNumber", "uniNumber.invalid")
+	 	  } else {
+	 	 	  // Reject if feedback for this student is already uploaded
+	 	 	  assignment.feedbacks.find { _.universityId == uniNumber } match {
+	 	 	 	  case Some(feedback) => errors.rejectValue("uniNumber", "uniNumber.duplicate.feedback")
+	 	 	 	  case None => {}
+	 	 	  }
+	 	  }
+	  }
   }
   
   @Transactional
