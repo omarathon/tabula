@@ -31,8 +31,8 @@ class FileAttachment extends GeneratedId {
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var dateUploaded:DateTime = new DateTime
 	
-	@Lob 
-	@Basic(fetch=FetchType.LAZY)
+	@Lob @Basic(fetch=FetchType.LAZY)
+	@Column(updatable=false, nullable=false)
 	@BeanProperty var data:Blob = null 
 	
 	@BeanProperty var name:String = _

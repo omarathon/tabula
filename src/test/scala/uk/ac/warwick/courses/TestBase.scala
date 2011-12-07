@@ -8,6 +8,8 @@ import org.scalatest.junit.JUnitSuite
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.specs.mock.JMocker.`with`
 import uk.ac.warwick.userlookup.User
+import org.springframework.util.FileCopyUtils
+import org.springframework.core.io.ClassPathResource
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
@@ -30,18 +32,26 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
 	   
   def dateTime(year:Int, month:Int) = new DateTime(year,month,1,0,0,0)
   
+  var currentUser:CurrentUser = null
+  
   def withUser(code:String)(fn: =>Unit) {
 	  val requestInfo = RequestInfo.fromThread match {
 	 	  case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
-	 	  case None => new RequestInfo(new CurrentUser(new User(code), false))
+	 	  case None => {
+	 	 	  currentUser = new CurrentUser(new User(code), false)
+	 		  new RequestInfo(currentUser)
+	 	  }
 	  }
 	   
 	  try {
 	 	  RequestInfo.open(requestInfo)
 	 	  fn
 	  } finally {
+	 	  currentUser = null
 	 	  RequestInfo.close
 	  }
   } 
+  
+  def resourceAsBytes(path:String):Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
   
 }

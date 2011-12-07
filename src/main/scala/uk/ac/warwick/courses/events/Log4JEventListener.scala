@@ -49,8 +49,10 @@ class Log4JEventListener extends EventListener {
 	// only supports DescriptionImpl
 	def describe(event:Event, s:StringBuilder) = 
 		for ((key,value) <- event.extra)
-			s ++= " " ++ key ++ "=" ++ quote(value.toString)
+			s ++= " " ++ key ++ "=" ++ quote(stringOf(value))
 	
+	private def stringOf(obj:Any) = if (obj == null) "(null)" else obj.toString
+			
 	def quote(value:String) = {
 		if (value.contains(" ") || value.contains(QUOTE))
 			QUOTE + value.replace(QUOTE, ESCQUOTE) + QUOTE

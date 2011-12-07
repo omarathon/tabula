@@ -47,7 +47,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	  feedback.uploaderId = submitter.apparentId
 	  feedback.universityId = uniNumber
 	  feedback addAttachment file.attached
-	  session.save(feedback)
+	  session.saveOrUpdate(feedback)
 	  feedback
   }
 

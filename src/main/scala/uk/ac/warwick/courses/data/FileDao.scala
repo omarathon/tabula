@@ -9,7 +9,10 @@ class FileDao extends Daoisms {
 		if (file.data == null && file.uploadedData != null) {
 			file.data = session.getLobHelper.createBlob(file.uploadedData, file.uploadedDataLength)
 		}
-		session.save(file)
+		session.saveOrUpdate(file)
+		// HFC-38 Trying to induce Hibernate to not explode with BLOBS
+		session.flush
+		session.refresh(file)
 	}
 	
 	def makePermanent(file:FileAttachment) = {
