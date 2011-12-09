@@ -3,12 +3,19 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import java.beans.PropertyEditorSupport
 
-class AcademicYear(val startYear:Int) {
+case class AcademicYear(val startYear:Int) {
 	val endYear = startYear+1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
 	
 	override def toString = "%s/%s".format(toDigits(startYear), toDigits(endYear))
 	private def toDigits(year:Int) = year.toString.substring(2)
+	
+	// properties for binding to dropdown box
+	def getStoreValue = startYear
+	def getLabel = toString
+	
+	def previous = new AcademicYear(startYear-1)
+	def next = new AcademicYear(startYear+1)
 }
 
 /**
@@ -28,11 +35,12 @@ class AcademicYearEditor extends PropertyEditorSupport {
 }
 
 object AcademicYear {
+	
 	def guessByDate(now:DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {
-			new AcademicYear(now.getYear())
+			new AcademicYear(now.getYear() + 1)
 		} else {
-			new AcademicYear(now.getYear() - 1)
+			new AcademicYear(now.getYear())
 		}
 	}
 }

@@ -30,6 +30,8 @@
 <div class="form-editor-tab" id="form-editor-formprops">
 -->
 
+<#assign newRecord=false />
+
 <#include "_fields.ftl" />
 <#--
 </div>

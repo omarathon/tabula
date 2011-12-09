@@ -12,5 +12,5 @@ class CleanupTemporaryFilesCommand extends Command[Unit] {
 	@Transactional
 	override def apply = dao.deleteOldTemporaryFiles
 	
-	override def describe(d:Description)
+	override def describe(d:Description) {}
 }

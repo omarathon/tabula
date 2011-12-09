@@ -7,11 +7,12 @@ package uk.ac.warwick.courses.web.views
 import freemarker.ext.beans.{ BeansWrapper }
 import freemarker.ext.util.{ ModelCache, ModelFactory }
 import freemarker.template._
-import scala.collection.{ mutable }
+import scala.collection.mutable
 import java.{ util=>jutil }
 import freemarker.template.DefaultObjectWrapper
 import uk.ac.warwick.courses.helpers.javaconversions._
 import scala.util.matching.Regex
+import freemarker.ext.beans.BeanModel
 
 /** A implemenation of BeansWrapper that support native Scala basic and collection types
  * in Freemarker template engine. 
@@ -31,7 +32,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
       case directive: TemplateDirectiveModel => wrapByParent(directive)
       case method: TemplateMethodModel => wrapByParent(method)
-      case sobj: ScalaObject => new ScalaHashModel(this, sobj)
+      case sobj: ScalaObject => new ScalaHashModel(sobj, this)
       case _ => super.wrap(obj)
     }     
   }
@@ -46,7 +47,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
  * in Scala to implement ScalaObject. If both getter type is present, one will overwrite
  * the other in the map but this doesn't really matter as they do the same thing
  */
-class ScalaHashModel(wrapper: ObjectWrapper, sobj: ScalaObject) extends TemplateHashModel{
+class ScalaHashModel(sobj: ScalaObject, wrapper: ScalaBeansWrapper) extends BeanModel(sobj,wrapper) {
   type Getter = () => AnyRef
   
   val gettersCache = new mutable.HashMap[Class[_], mutable.HashMap[String, Getter]] 
@@ -77,11 +78,11 @@ class ScalaHashModel(wrapper: ObjectWrapper, sobj: ScalaObject) extends Template
       }
     }
   }
-  def get(key: String) : TemplateModel = getters.get(key) match {
+  override def get(key: String) : TemplateModel = getters.get(key) match {
     case Some(getter) => wrapper.wrap(getter())
     case None => throw new TemplateModelException(key+" not found in object "+sobj)
   }
-  def isEmpty = false
+  override def isEmpty = false
 }
 
 

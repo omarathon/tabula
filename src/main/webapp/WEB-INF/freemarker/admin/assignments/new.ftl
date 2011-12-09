@@ -9,6 +9,8 @@
 
 </@f.errors>
 
+<#assign newRecord=true />
+
 <#include "_fields.ftl" />
 
 <div class="submit-buttons actions">

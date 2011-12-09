@@ -8,6 +8,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.AcademicYear
 
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
@@ -22,6 +23,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     @DateTimeFormat(style = "MM")
 	@BeanProperty var closeDate:DateTime = openDate.plusWeeks(2)
 	
+	@BeanProperty var academicYear:AcademicYear = _
+	
 	@BeanProperty var collectMarks:Boolean = false
 	
 	def copyTo(assignment:Assignment) {
@@ -29,6 +32,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    assignment.openDate = openDate
 	    assignment.closeDate = closeDate
 	    assignment.collectMarks = collectMarks
+	    assignment.academicYear = academicYear
 	}
 	
 	def copyFrom(assignment:Assignment) {
@@ -36,5 +40,6 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
 		collectMarks = assignment.collectMarks
+		academicYear = assignment.academicYear
 	}
 }

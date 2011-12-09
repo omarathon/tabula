@@ -49,6 +49,7 @@ class ApplicationTest extends AppContextTestBase {
 	  
 	  val fetchedAssignment = session.get(classOf[Assignment], assignment.id).asInstanceOf[Assignment]
 	  fetchedAssignment.name should be("Cake Studies 1")
+	  fetchedAssignment.academicYear should be(assignment.academicYear)
 	}
     
     /*

@@ -8,11 +8,11 @@ class AssignmentTest extends TestBase {
 	@Test def academicYear {
 		
 		withFakeTime(dateTime(2011,NOVEMBER)) {
-			new Assignment().academicYear should be (2011)
+			new Assignment().academicYear.startYear should be (2012)
 		}
 		
 		withFakeTime(dateTime(2011,MAY)) { 
-			new Assignment().academicYear should be (2010)
+			new Assignment().academicYear.startYear should be (2011)
 		}
 	}
 	

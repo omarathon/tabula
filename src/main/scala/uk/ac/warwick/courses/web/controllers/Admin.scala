@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.util.FileCopyUtils
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.WebDataBinder
+import org.joda.time.DateTime
+import uk.ac.warwick.courses.AcademicYear
 
 /**
  * Screens for department and module admins.
@@ -49,6 +52,19 @@ class AdminHome extends Controllerism {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
 class AddAssignment extends Controllerism {
 
+	@ModelAttribute("guessedAcademicYear") def guessedYear = AcademicYear.guessByDate(DateTime.now)
+	
+	@ModelAttribute("academicYearChoices") def academicYearChoices:java.util.List[AcademicYear] = {
+		val thisYear = guessedYear
+		List(
+			thisYear.previous.previous,
+			thisYear.previous,
+			thisYear,
+			thisYear.next,
+			thisYear.next.next
+		)
+	}
+	
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
 		new AddAssignmentCommand(definitely(module))
 
@@ -80,6 +96,12 @@ class AddAssignment extends Controllerism {
 @RequestMapping(value=Array("/admin/module/{module}/assignments/edit/{assignment}"))
 class EditAssignment extends Controllerism {
 	
+	validatesWith{ (form:EditAssignmentCommand, errors:Errors) =>
+		if (form.academicYear != form.assignment.academicYear) {
+			errors.rejectValue("academicYear", "academicYear.immutable")
+		}
+	}
+	
 	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
 		new EditAssignmentCommand(definitely(assignment))
 	
@@ -94,7 +116,6 @@ class EditAssignment extends Controllerism {
 			"module" -> module,
 			"assignment" -> assignment
 			)
-		
 	}
 	
 	@RequestMapping(method = Array(RequestMethod.POST))

@@ -1,7 +1,7 @@
-package uk.ac.warwick.courses.helpers
+package uk.ac.warwick.courses.helpers.javaconversions
 
 
-package javaconversions {
+//package javaconversions {
 	
 /** Convert scala.Collection to java.util.Collection.
  * Note that java's iterator' remove method will not be implemented. */
@@ -57,4 +57,4 @@ object JMap{
   }
 }
 
-}
+//}

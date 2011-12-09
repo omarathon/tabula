@@ -1,6 +1,10 @@
 package uk.ac.warwick.courses.data.model
+import java.util.ArrayList
+import java.util.{List => JList}
+import scala.collection.JavaConversions._
 import scala.reflect._
 import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.IndexColumn
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence.Entity
@@ -9,18 +13,10 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
 import uk.ac.warwick.courses.actions._
-import org.joda.time.DateTimeConstants._
-import javax.persistence.FetchType
-import javax.persistence.CascadeType
-import org.hibernate.annotations.IndexColumn
-import collection.JavaConversions._
-import collection.mutable
 import uk.ac.warwick.courses.data.model.forms._
 import uk.ac.warwick.courses.AcademicYear
-import java.util.ArrayList
-import java.util.{List => JList}
-import java.util.{Set => JSet}
-import javax.persistence.OrderColumn
+import javax.persistence.FetchType
+import javax.persistence.CascadeType
 
 @Entity @AccessType("field")
 class Assignment() extends GeneratedId with Viewable {
@@ -29,7 +25,8 @@ class Assignment() extends GeneratedId with Viewable {
 	  this.module = _module
 	}
 	
-	var academicYear:Int = AcademicYear.guessByDate(new DateTime).startYear
+	@Type(`type`="uk.ac.warwick.courses.data.model.AcademicYearUserType")
+	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
 	
 	def addDefaultFields {
 		val pretext = new CommentField

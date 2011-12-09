@@ -77,7 +77,6 @@
       </description>
 	    <property name="converters">
 	        <list>
-	            <bean class="uk.ac.warwick.courses.system.ScalaCollectionConverter" />
 	            <bean class="uk.ac.warwick.courses.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.AssignmentIdConverter"/>
@@ -227,6 +226,9 @@
 		<task:annotation-driven/>
 	</beans>
 	
+	<beans profile="web">
+		
+	</beans>
 	
 	<beans profile="dev,production">
 	
