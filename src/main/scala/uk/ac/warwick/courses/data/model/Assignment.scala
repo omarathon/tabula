@@ -29,7 +29,7 @@ class Assignment() extends GeneratedId with Viewable {
 	
 	@Basic @Type(`type`="uk.ac.warwick.courses.data.model.AcademicYearUserType")
 	@Column(nullable=false)
-	var academicYear:AcademicYear = _
+	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime())
 	
 	def addDefaultFields {
 		val pretext = new CommentField
