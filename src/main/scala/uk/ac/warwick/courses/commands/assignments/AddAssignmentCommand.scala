@@ -25,7 +25,7 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	
 	openDate = new DateTime().withTime(12,0,0,0)
     closeDate = openDate.plusWeeks(2)
-	
+    
 	@Transactional
 	override def apply:Assignment = {
 	  val assignment = new Assignment(module)

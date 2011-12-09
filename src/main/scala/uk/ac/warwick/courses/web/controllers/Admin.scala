@@ -1,25 +1,24 @@
 package uk.ac.warwick.courses.web.controllers
 import scala.collection.JavaConversions._
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.FileCopyUtils
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.commands.assignments._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.data.FileDao
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
+import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
-import java.io.OutputStream
-import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.courses.data.FileDao
-import org.springframework.util.FileCopyUtils
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.WebDataBinder
-import org.joda.time.DateTime
-import uk.ac.warwick.courses.AcademicYear
+import uk.ac.warwick.courses.services.AssignmentService
 
 /**
  * Screens for department and module admins.
@@ -51,11 +50,11 @@ class AdminHome extends Controllerism {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
 class AddAssignment extends Controllerism {
-
-	@ModelAttribute("guessedAcademicYear") def guessedYear = AcademicYear.guessByDate(DateTime.now)
 	
+	@Autowired var assignmentService:AssignmentService =_
+
 	@ModelAttribute("academicYearChoices") def academicYearChoices:java.util.List[AcademicYear] = {
-		val thisYear = guessedYear
+		val thisYear = AcademicYear.guessByDate(DateTime.now)
 		List(
 			thisYear.previous.previous,
 			thisYear.previous,
@@ -63,6 +62,13 @@ class AddAssignment extends Controllerism {
 			thisYear.next,
 			thisYear.next.next
 		)
+	}
+	
+	validatesWith { (cmd:AddAssignmentCommand, errors:Errors) =>
+		assignmentService.getAssignmentByNameYearModule(cmd.name, cmd.academicYear, cmd.module) match {
+			case Some(assignment) => errors.rejectValue("name", "name.duplicate.assignment", Array(cmd.name), "")
+			case None => 
+		}
 	}
 	
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =

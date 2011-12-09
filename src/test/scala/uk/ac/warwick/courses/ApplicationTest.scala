@@ -41,6 +41,7 @@ class ApplicationTest extends AppContextTestBase {
     @Transactional @Test def hibernatePersistence = {
 	  val assignment = new Assignment
 	  assignment.name = "Cake Studies 1"
+	  assignment.academicYear = new AcademicYear(2009)
 	  session.save(assignment)
 	  assignment.id should not be (null)
 	  

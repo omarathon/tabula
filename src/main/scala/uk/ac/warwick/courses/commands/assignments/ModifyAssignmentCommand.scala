@@ -23,7 +23,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     @DateTimeFormat(style = "MM")
 	@BeanProperty var closeDate:DateTime = openDate.plusWeeks(2)
 	
-	@BeanProperty var academicYear:AcademicYear = _
+	@BeanProperty var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
 	
 	@BeanProperty var collectMarks:Boolean = false
 	

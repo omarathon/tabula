@@ -17,6 +17,8 @@ import uk.ac.warwick.courses.data.model.forms._
 import uk.ac.warwick.courses.AcademicYear
 import javax.persistence.FetchType
 import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Basic
 
 @Entity @AccessType("field")
 class Assignment() extends GeneratedId with Viewable {
@@ -25,8 +27,9 @@ class Assignment() extends GeneratedId with Viewable {
 	  this.module = _module
 	}
 	
-	@Type(`type`="uk.ac.warwick.courses.data.model.AcademicYearUserType")
-	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
+	@Basic @Type(`type`="uk.ac.warwick.courses.data.model.AcademicYearUserType")
+	@Column(nullable=false)
+	var academicYear:AcademicYear = _
 	
 	def addDefaultFields {
 		val pretext = new CommentField

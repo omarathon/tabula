@@ -149,6 +149,25 @@
   	<javac srcdir="src/test/scala" destdir="target/test" classpathref="test+built.classpath" />
   	
   	
+  	<if>
+  		<isset property="test.name" />
+  		<then>
+  			<echo message="Running one test - ${test.name}" />
+			<fileset id="test.fileset" dir="target/test">
+	          <include name="**/${test.name}.class"/>
+	        </fileset>
+  		</then>
+		<else>
+			<echo message="Running all tests" />
+  			<fileset id="test.fileset" dir="target/test">
+	          <include name="**/*TestCase.class"/>
+	          <include name="**/*Test.class"/> 
+	          <include name="**/*Tests.class"/>
+	          <exclude name="**/Abstract*.class"/>
+	        </fileset>
+		</else>
+  	</if>
+  	
     <mkdir dir="target/test-results" />
     <junit fork="true" haltonfailure="yes">
       <jvmarg value="-XX:MaxPermSize=512M" />
@@ -156,12 +175,7 @@
       <formatter type="xml" />
       <formatter type="plain" usefile="no" />
       <batchtest todir="target/test-results">
-        <fileset dir="target/test">
-          <include name="**/*TestCase.class"/>
-          <include name="**/*Test.class"/> 
-          <include name="**/*Tests.class"/>
-          <exclude name="**/Abstract*.class"/>
-        </fileset>
+        <fileset refid="test.fileset"/>
       </batchtest>
     </junit>
   </target>
