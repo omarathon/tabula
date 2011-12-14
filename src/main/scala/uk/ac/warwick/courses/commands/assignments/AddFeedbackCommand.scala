@@ -14,12 +14,16 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.courses.UniversityId
 import collection.JavaConversions._
+import uk.ac.warwick.courses.services.ZipService
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * Command which (currently) adds a single piece of feedback for one assignment
  */
 @Configurable
 class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[Feedback] with Daoisms {
+
+  @Autowired var zipService:ZipService =_
 	
   @NotEmpty
   @BeanProperty var uniNumber:String =_
@@ -57,11 +61,16 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	  feedback.universityId = uniNumber
 	  feedback addAttachment file.attached
 	  session.saveOrUpdate(feedback)
+	  
+	  // delete feedback zip for this assignment, since it'll now be different.
+	  // TODO should really do this in a more general place, like a save listener for Feedback objects
+	  zipService.invalidateFeedbackZip(assignment)
+	  
 	  feedback
   }
 
-  def describe(d: Description) = d.properties(
-		 "assignment" -> assignment.id
+  def describe(d: Description) = d.assignment(assignment).properties(
+	  "studentId" -> uniNumber
   )
 
 }

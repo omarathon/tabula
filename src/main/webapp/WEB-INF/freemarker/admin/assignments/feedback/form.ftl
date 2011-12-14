@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/feedback/${assignment.id}" commandName="addFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/new" commandName="addFeedbackCommand">
 
 <h1>Submit feedback for ${assignment.name}</h1>
 

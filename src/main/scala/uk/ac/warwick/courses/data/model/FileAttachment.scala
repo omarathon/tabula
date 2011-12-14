@@ -15,7 +15,7 @@ import javax.persistence._
 class FileAttachment extends GeneratedId {
 	
 	// optional link to a Submission
-    @ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="submission_id")
 	@BeanProperty var submission:Submission = null
 	
@@ -36,7 +36,7 @@ class FileAttachment extends GeneratedId {
 	@BeanProperty var data:Blob = null 
 	
 	@BeanProperty var name:String = _
-	
+			
 	def this(n:String) { 
 		this()
 		name = n 

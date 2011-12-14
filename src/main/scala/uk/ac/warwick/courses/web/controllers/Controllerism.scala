@@ -2,17 +2,18 @@ package uk.ac.warwick.courses.web.controllers
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.WebDataBinder
-
 import uk.ac.warwick.courses.actions.Action
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.services.SecurityService
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.RequestInfo
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.Module
+import uk.ac.warwick.courses.data.model.Feedback
 
 /**
  * Useful traits for all controllers to have.
@@ -29,7 +30,19 @@ trait Controllerism extends ValidatesCommand with Logging {
   
   def requestInfo = RequestInfo.fromThread
   def user = requestInfo.get.user
-  def mustBeAbleTo(action:Action) = securityService.check(user, action)
+  def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
+  
+  def mustBeLinked(assignment:Assignment, module:Module) = 
+	 if (assignment.module.id != module.id) {
+		logger.info("Not displaying assignment as it doesn't belong to specified module")
+  		throw new ItemNotFoundException(assignment)
+	 }
+  
+  def mustBeLinked(feedback:Feedback, assignment:Assignment) = 
+	 if (feedback.assignment.id != assignment.id) {
+		logger.info("Not displaying feedback as it doesn't belong to specified assignment")
+  		throw new ItemNotFoundException(feedback)
+	 }
   
   /**
    * Returns an object if it is non-null and not None. Otherwise

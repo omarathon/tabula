@@ -36,7 +36,7 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	  assignment
 	}
 	
-	override def describe(d:Description) = d.properties(
+	override def describe(d:Description) = d.module(module).properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate

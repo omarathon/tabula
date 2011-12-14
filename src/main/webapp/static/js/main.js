@@ -5,4 +5,8 @@ jQuery(function($){
 		firstDOW: 1
 	});
 	
+	$('a.long-running').click(function(event){
+		
+	});
+	
 })

@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Module
-import collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.Assignment
+import collection.JavaConversions._
 import uk.ac.warwick.courses.commands.assignments._
 import org.joda.time.DateTime
-import uk.ac.warwick.courses.helpers.DateTimeOrdering
+import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.actions.View
@@ -20,7 +20,7 @@ import javax.validation.Valid
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
-class ModuleController extends Controllerism with DateTimeOrdering {
+class ModuleController extends Controllerism {
   
 	def viewModule(@PathVariable module:Module) = {
 		mustBeAbleTo(View(module))

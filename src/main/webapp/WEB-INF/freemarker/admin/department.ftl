@@ -19,15 +19,19 @@
 		<div class="assignment-info">
 			<h3 class="name">${assignment.name}</h3>
 			<div class="stats">
-			    <@warwick.formatDate value=assignment.openDate pattern="d MMMM yyyy HH:mm:ss" /> -
-			    <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm:ss (z)" />
+			    <@warwick.formatDate value=assignment.openDate pattern="d MMMM yyyy HH:mm" /> -<br>
+			    <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm (z)" />
 				<br>
 				${assignment.submissions?size} submissions,
 				${assignment.feedbacks?size} feedback.
 			</div>
 			<div class="actions">
-				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/edit/${assignment.id}" />">edit details</a>
-				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/feedback/${assignment.id}" />">return feedback</a>
+				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
+				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/new" />">return feedback</a>
+				<br>
+				<#if assignment.feedbacks?size gt 0>
+				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
+				</#if>
 			</div>
 			<div class="end-assignment-info"></div>
 		</div>

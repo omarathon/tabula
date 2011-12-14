@@ -1,5 +1,6 @@
 package uk.ac.warwick.courses.commands
 import collection.mutable
+import uk.ac.warwick.courses.data.model._
 
 trait Describable {
 	def describe(d:Description)
@@ -45,6 +46,23 @@ abstract class Description {
 	}
 	def property(prop: Pair[String,Any]) = {
 		map += prop
+		this
+	}
+	
+	def feedback(feedback:Feedback) = {
+		map += "feedback" -> feedback.id
+		if (feedback.assignment != null) assignment(feedback.assignment)
+		this
+	}
+	
+	def assignment(assignment:Assignment) = {
+		map += "assignment" -> assignment.id
+		if (assignment.module != null) module(assignment.module)
+		this
+	}
+	
+	def module(module:Module) = {
+		map += "module" -> module.id
 		this
 	}
 	

@@ -14,11 +14,16 @@ import uk.ac.warwick.courses.commands.assignments._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.data.FileDao
+import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
-import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.services.fileserver.FileServer
+import uk.ac.warwick.courses.services.fileserver.RenderableAttachment
+import uk.ac.warwick.courses.data.FeedbackDao
+import uk.ac.warwick.courses.commands.feedback.AdminGetSingleFeedbackCommand
+import uk.ac.warwick.courses.commands.feedback.AdminGetAllFeedbackCommand
 
 /**
  * Screens for department and module admins.
@@ -99,7 +104,7 @@ class AddAssignment extends Controllerism {
 }
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/edit/{assignment}"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/edit"))
 class EditAssignment extends Controllerism {
 	
 	validatesWith{ (form:EditAssignmentCommand, errors:Errors) =>
@@ -143,17 +148,21 @@ class EditAssignment extends Controllerism {
 }
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/feedback/{assignment}/download/{feedbackId}/{filename}"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadFeedback extends Controllerism {
-	@Autowired var fileDao:FileDao =_
+	@Autowired var feedbackDao:FeedbackDao =_
+	@Autowired var fileServer:FileServer =_
 	
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable feedbackId:String, @PathVariable filename:String, response:HttpServletResponse) {
-		fileDao.getFileById(feedbackId) match {
-			case Some(file) => {
-				//if (file.name != filename) throw new ItemNotFoundException
-				response.addHeader("Content-Disposition", "attachment")
-				FileCopyUtils.copy(file.dataStream, response.getOutputStream)
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(Manage(module))
+
+		feedbackDao.getFeedback(feedbackId) match {
+			case Some(feedback) => {
+				mustBeLinked(feedback, assignment)
+				val renderable = new AdminGetSingleFeedbackCommand(feedback).apply()
+				fileServer.serve(renderable, response)
 			}
 			case None => throw new ItemNotFoundException
 		}
@@ -161,7 +170,31 @@ class DownloadFeedback extends Controllerism {
 }
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/feedback/{assignment}"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
+class DownloadAllFeedback extends Controllerism {
+	@Autowired var fileServer:FileServer =_
+	@RequestMapping
+	def download(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable filename:String, response:HttpServletResponse) {
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(Manage(module))
+		val renderable = new AdminGetAllFeedbackCommand(assignment).apply()
+		fileServer.serve(renderable, response)
+	}
+}
+
+@Controller
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
+class ListFeedback extends Controllerism {
+	@RequestMapping(method=Array(RequestMethod.GET))
+	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(Manage(module))
+		Mav("admin/assignments/feedback/list")
+	}
+}
+
+@Controller
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
 class AddFeedback extends Controllerism {
 	
 	@ModelAttribute

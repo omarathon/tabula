@@ -23,7 +23,7 @@ class EventLoggingAspect {
 	
 	@Around("applyCommand(callee)")
 	def aroundApplyCommand(jp:ProceedingJoinPoint, callee:Describable):Any = {
-		val event = createEvent(callee)
+		val event = Event.fromDescribable(callee)
 		try {
 			listener.beforeCommand(event)
 			val result = jp.proceed
@@ -37,33 +37,4 @@ class EventLoggingAspect {
 		}
 	}
 	
-	def createEvent(describable:Describable) = {
-		val description = new DescriptionImpl
-		describable.describe(description)
-		val (apparentId, realUserId) = getUser match {
-			case Some(user) => (user.apparentId, user.realId)
-			case None => (null, null)
-		}
-		new Event(
-			describable.eventName,
-			apparentId,
-			realUserId,
-			description.allProperties.toMap
-		)
-	}
-	
-	def getUser = RequestInfo.fromThread match {
-		case Some(info) => Some(info.user)
-		case None => None
-	}
-	
-//	
-//	@Before("applyCommand(callee)")
-//    def beforeAdviceApplyCommand(callee: Describable) = listener.beforeCommand(callee)
-//	
-//    @AfterReturning(pointcut="applyCommand(callee)", returning="returnValue")
-//    def startExecution(callee: Describable, returnValue:Any) = listener.afterCommand(callee, returnValue)
-//    	
-//    @AfterThrowing(pointcut="applyCommand(callee)", throwing="exception")
-//    def startExecution(callee: Describable, exception:Throwable) = listener.onException(callee, exception)
 }

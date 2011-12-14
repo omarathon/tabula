@@ -31,7 +31,7 @@ class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssign
 	  assignment
 	}
 	
-	override def describe(d:Description) = d.properties(
+	override def describe(d:Description) = d.assignment(assignment).properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate

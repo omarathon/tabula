@@ -16,6 +16,7 @@
 
   <property file="build.properties" />
   <property file="local.properties" />
+  <property name="log4j.configuration" value="build-log4j.properties" />
   
   <property name="src.scala" value="src/main/scala" />
   <property name="src.java" value="src/main/java" />
@@ -34,6 +35,7 @@
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="build.classpath" />
   <taskdef resource="scala/tools/ant/antlib.xml" classpathref="build.classpath" />
   <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties" classpath="lib/runtime/aspectj/aspectjtools.jar" />
+  <taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="build.classpath" />
   
   <target name="-checks">
   </target>
@@ -69,12 +71,17 @@
   	</fail>
   	-->
   </target>
-
-  <target name="package" depends="compile" description="Compile and package application into a WAR file">
-    
-    <copy todir="target/${war.name}">
+	
+  <target name="compile-scripts">
+  	<copy todir="target/${war.name}">
       <fileset dir="src/main/webapp"/>
     </copy>
+  	<lesscss todir="target/${war.name}/static">
+		<fileset dir="target/${war.name}/static" includes="**/*.less" excludes="**/*.inc.less"/>
+	</lesscss>
+  </target>
+
+  <target name="package" depends="compile,compile-scripts" description="Compile and package application into a WAR file">
     
     <copy todir="target/${war.name}/WEB-INF/classes">
       <fileset dir="src/main/resources" />
@@ -115,10 +122,10 @@
     </sync>
   </target>
 	
-  <target name="dev-deploy-static">
+  <target name="dev-deploy-static" depends="compile-scripts">
   	<assert-dir-exists var="deploy.dir" />
     <sync todir="${deploy.dir}/${war.name}/static">
-      <fileset dir="src/main/webapp/static" />
+      <fileset dir="target/${war.name}/static" />
     </sync>
   </target>
 	
@@ -136,6 +143,7 @@
       <path refid="build.classpath" />
       <fileset dir="lib/test" includes="**/*.jar" />
       <path location="src/main/webapp" />
+      <path location="src/main/resources" />
       <path location="target/${war.name}/WEB-INF/classes" />
       <path location="target/test" />
     </path>

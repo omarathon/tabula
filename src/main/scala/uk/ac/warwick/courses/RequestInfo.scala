@@ -14,7 +14,10 @@ package uk.ac.warwick.courses
  * for things like the current user in situations like audit logging,
  * where it isn't appropriate to pass the user in to the method.
  */
-class RequestInfo(val user:CurrentUser)
+class RequestInfo(
+		val user:CurrentUser, 
+		val ajax:Boolean=false
+		)
 
 object RequestInfo {
 	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {

@@ -23,12 +23,12 @@ class SecurityService extends Logging {
 	 * In Java we'd define an interface for a PermissionChecker with one method,
 	 * but we'll just define a type alias so we can implement each check as a single method.
 	 */
-	type PermissionChecker = (CurrentUser, Action) => Boolean
+	type PermissionChecker = (CurrentUser, Action[_]) => Boolean
 	val checks = List[PermissionChecker](checkSysadmin _, checkGroup _)
 	
-	def checkSysadmin(user:CurrentUser, action:Action):Boolean = user.sysadminEnabled
+	def checkSysadmin(user:CurrentUser, action:Action[_]):Boolean = user.sysadminEnabled
 	
-	def checkGroup(user:CurrentUser, action:Action):Boolean = action match {
+	def checkGroup(user:CurrentUser, action:Action[_]):Boolean = action match {
 		
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
 	  case View(department:Department) => checkGroup(user, Manage(department))
@@ -37,11 +37,11 @@ class SecurityService extends Logging {
 	  case Manage(module:Module) => checkGroup(user, Manage(module.department))
 	  case View(module:Module) => module.getMembers().includes(user.apparentId) || 
 	  							  checkGroup(user, View(module.department))
-	  							  
+	  
 	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  
-	  case action:Action => throw new IllegalArgumentException(action.toString)
+	  case action:Action[_] => throw new IllegalArgumentException(action.toString)
 	  case _ => throw new IllegalArgumentException()
 	   
 	}
@@ -51,7 +51,7 @@ class SecurityService extends Logging {
 	 * specified by the Action.
 	 */
 	@Transactional(readOnly=true)
-	def can(user:CurrentUser, action:Action):Boolean = {
+	def can(user:CurrentUser, action:Action[_]):Boolean = {
 		// loop through checks, seeing if any of them return true.
 	    val canDo:Boolean = checks.find{ _(user,action) }.isDefined
 	    if (debugEnabled) logger.debug("can "+user+" do "+action+"? " + (if(canDo) "Yes" else "NO"))
@@ -60,7 +60,7 @@ class SecurityService extends Logging {
 	
 	
 	
-	def check(user:CurrentUser, action:Action) = can(user,action) match {
+	def check(user:CurrentUser, action:Action[_]) = can(user,action) match {
 	  case true => {} //continue
 	  case false => throw new PermissionDeniedException(user, action)
 	}
