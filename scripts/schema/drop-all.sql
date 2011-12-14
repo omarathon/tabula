@@ -3,6 +3,7 @@ drop table feedback;
 drop table submission;
 drop table department;
 drop table assignment;
+drop table formfield;
 drop table fileattachment;
 drop table usergroup;
 drop table usergroupexclude;
