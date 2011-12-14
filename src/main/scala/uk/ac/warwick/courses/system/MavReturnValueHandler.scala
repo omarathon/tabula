@@ -15,7 +15,6 @@ import uk.ac.warwick.courses.web.Mav
 class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging with Ordered {
 
 	override def supportsReturnType(methodParam: MethodParameter) = {
-		logger.info("Does this suppor the type")
 		classOf[Mav] isAssignableFrom methodParam.getMethod.getReturnType
 	}
 
