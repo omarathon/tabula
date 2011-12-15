@@ -18,7 +18,7 @@
 </#if>
 
 <p>This is the in-development coursework submission application.
-	It isn't quite ready for use yet, but you can keep up with news about by
+	It isn't quite ready for use yet, but you can keep up with news about it by
 	going to <a href="http://go.warwick.ac.uk/amupdates">go.warwick.ac.uk/amupdates</a>.</p>
 
 <#if moduleWebgroups?? && moduleWebgroups?size gt 0>
