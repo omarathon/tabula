@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.web.controllers
+package uk.ac.warwick.courses.web.controllers.sysadmin
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Controller
@@ -16,6 +16,11 @@ import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.validators.UniqueUsercode
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
+import org.springframework.web.bind.annotation.RequestParam
+import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.Cookie
+import uk.ac.warwick.courses.web.controllers.Controllerism
+import uk.ac.warwick.courses.web.Mav
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -26,8 +31,7 @@ class BaseSysadminController extends Controllerism {
 	
 	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")
 	
-	
-	def viewDepartmentOwners(@PathVariable dept:Department) = 
+	def viewDepartmentOwners(@PathVariable dept:Department) : Mav = 
 		Mav("sysadmin/departments/owners",
 			  		  "department" -> dept,
 			  		  "owners" -> dept.owners)
@@ -38,7 +42,7 @@ class BaseSysadminController extends Controllerism {
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
   
-	@RequestMapping(Array("/home"))
+	@RequestMapping
 	def home = "sysadmin/home"
 		
 	@RequestMapping(value=Array("/departments/{dept}/owners/"), method=Array(RequestMethod.GET))
@@ -63,60 +67,54 @@ class SysadminController extends BaseSysadminController {
 
 }
 
-object SysadminController {
 	
-	@Controller 
-	@RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
-	class RemoveDeptOwnerController extends BaseSysadminController {
-		@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
-			new RemoveDeptOwnerCommand(dept)
-		}
-		
-		@RequestMapping(method=Array(RequestMethod.POST))
-		def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors)  = {
-			if (errors.hasErrors) {
-			  viewDepartmentOwners(dept)
-			} else {
-			  logger.info("Passed validation, removing owner")
-			  form.apply()
-			  redirectToDeptOwners(dept.code)
-			}
-		}
+
+
+@Controller 
+@RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
+class RemoveDeptOwnerController extends BaseSysadminController {
+	@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
+		new RemoveDeptOwnerCommand(dept)
 	}
 	
-	
-	@Controller 
-	@RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
-	class AddDeptOwnerController extends BaseSysadminController {
-	
-		@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
-			new AddDeptOwnerCommand(dept)
-		}
-		
-		@RequestMapping(method=Array(RequestMethod.GET))
-		def showForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors) = {
-			Mav("sysadmin/departments/owners/add",
-				"department" -> dept)
-		}
-		
-		@RequestMapping(method=Array(RequestMethod.POST))
-		def submit(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors)  = {
-			if (errors.hasErrors) {
-			  showForm(dept, form, errors)
-			} else {
-			  logger.info("Passed validation, saving owner")
-			  form.apply()
-			  redirectToDeptOwners(dept.code)
-			}
+	@RequestMapping(method=Array(RequestMethod.POST))
+	def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors)  = {
+		if (errors.hasErrors) {
+		  viewDepartmentOwners(dept)
+		} else {
+		  logger.info("Passed validation, removing owner")
+		  form.apply()
+		  redirectToDeptOwners(dept.code)
 		}
 	}
-	
-	@Controller
-	@RequestMapping(Array("/sysadmin/masquerade"))
-	class MasqueradeController extends BaseSysadminController {
-		
-	}
-	
 }
+
+
+@Controller 
+@RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
+class AddDeptOwnerController extends BaseSysadminController {
+
+	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
+		new AddDeptOwnerCommand(dept)
+	}
+	
+	@RequestMapping(method=Array(RequestMethod.GET))
+	def showForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors) = {
+		Mav("sysadmin/departments/owners/add",
+			"department" -> dept)
+	}
+	
+	@RequestMapping(method=Array(RequestMethod.POST))
+	def submit(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors)  = {
+		if (errors.hasErrors) {
+		  showForm(dept, form, errors)
+		} else {
+		  logger.info("Passed validation, saving owner")
+		  form.apply()
+		  redirectToDeptOwners(dept.code)
+		}
+	}
+}
+
 
 

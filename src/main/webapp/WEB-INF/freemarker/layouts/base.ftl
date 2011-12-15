@@ -35,6 +35,11 @@
 	</head>
 	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses?default('')}">
 		<div id="container">
+			<#if user.masquerading>
+			<div id="masquerade-notice">
+			Masquerading as <strong>${user.apparentUser.fullName}</strong>.
+			</div>
+			</#if>
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="header-small" data-type="image">
 			
