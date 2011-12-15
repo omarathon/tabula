@@ -371,7 +371,9 @@
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/services/ZipService.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/services/ZipCreator.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/services/ZipService.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/data/model/GeneratedId.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/services/ZipService.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/data/model/Assignment.scala
+/home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/helpers/Logging.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala
+/home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/ValidatesCommand.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/Cookies.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/Mav.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/MasqueradeController.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/web/controllers/sysadmin/SysadminController.scala

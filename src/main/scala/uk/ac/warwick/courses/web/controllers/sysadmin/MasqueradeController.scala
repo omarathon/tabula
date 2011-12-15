@@ -26,6 +26,6 @@ class MasqueradeController extends BaseSysadminController {
 	}
 	
 	@RequestMapping(method=Array(RequestMethod.POST),params=Array("action=remove"))
-	def remove(response:HttpServletResponse) = submit(null, response)
+	def remove(response:HttpServletResponse) = submit(null, response).addObjects("actionMessage"->"removed")
 	
 }

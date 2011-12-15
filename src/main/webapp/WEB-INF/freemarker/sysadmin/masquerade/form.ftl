@@ -14,6 +14,10 @@
 
 <#else>
 
+<#if actionMessage = "removed">
+<p>You are no longer masquerading.</p>
+</#if>
+
 <div>
 <@form.form method="post" action="/sysadmin/masquerade">
   User ID: <input type="text" name="usercode" />
