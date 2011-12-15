@@ -94,8 +94,8 @@ create table AuditEvent (
 	eventdate timestamp,
 	eventType nvarchar2(255) not null,
 	eventStage nvarchar2(64) not null,
-	real_user_id nvarchar2(255) not null,
-	masquerade_user_id nvarchar2(255) not null,
+	real_user_id nvarchar2(255),
+	masquerade_user_id nvarchar2(255),
 	data nvarchar2(4000) not null
 );
 create index idx_auditeventdate on auditevent(eventdate);
