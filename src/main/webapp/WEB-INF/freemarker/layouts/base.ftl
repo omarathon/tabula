@@ -37,7 +37,7 @@
 		<div id="container">
 			<#if user.masquerading>
 			<div id="masquerade-notice">
-			Masquerading as <strong>${user.apparentUser.fullName}</strong>.
+			Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/sysadmin/masquerade"/>">Change</a>
 			</div>
 			</#if>
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
@@ -78,7 +78,7 @@
 								<li>
 								<#if user?? && user.loggedIn>
 									Sign in as ${user.fullName}.
-									<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
+									<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}/" />">Sign out</a>
 								<#else>
 								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 								</#if>
@@ -121,7 +121,11 @@
 						</div>
 						
 						<div id="custom-header">
-							<!-- Enter any custom header content here -->
+							<div class="actions">
+							<#if user.sysadmin>
+								<a href="<@url page="/sysadmin/" />">Sysadmin</a>
+							</#if>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -257,7 +261,7 @@
 							<ul>
 								<li id="sign-inout-link">
 				          			<#if user?? && user.loggedIn>
-										<a class="sso-link" href="<@sso.logoutlink />">Sign out</a>
+										<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}/" />">Sign out</a>
 									<#else>
 									    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 									</#if>

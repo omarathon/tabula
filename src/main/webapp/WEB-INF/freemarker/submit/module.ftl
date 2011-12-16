@@ -24,13 +24,10 @@
 
 </#list>
 <#else>
-<p>
-	<!-- Sorry about this nonsense paragraph. -->
-	This is where you would be able to submit coursework for this module if any courseworks had
-	been set up here. If you think you have an assignment to submit for this module, the
-	person setting the coursework may not yet be using this website to accept submissions and you
-	should check with them where you should be submitting your coursework.
-</p>
+<p>It seems that you're on this module, but no assignments have been set up here.</p>
+	
+<p>See your module tutor if you have an assignment to submit and aren't sure how you
+should be submitting it.</p>
 </#if>
 
 </#escape>

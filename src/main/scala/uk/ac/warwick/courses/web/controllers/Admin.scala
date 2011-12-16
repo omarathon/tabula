@@ -77,7 +77,7 @@ class AddAssignment extends Controllerism {
 	}
 	
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
-		new AddAssignmentCommand(definitely(module))
+		new AddAssignmentCommand(mandatory(module))
 
 	@RequestMapping(method = Array(RequestMethod.GET))
 	def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
@@ -114,7 +114,7 @@ class EditAssignment extends Controllerism {
 	}
 	
 	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
-		new EditAssignmentCommand(definitely(assignment))
+		new EditAssignmentCommand(mandatory(assignment))
 	
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 

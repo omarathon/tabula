@@ -14,7 +14,7 @@
 
 <#else>
 
-<#if actionMessage = "removed">
+<#if actionMessage?default('') = "removed">
 <p>You are no longer masquerading.</p>
 </#if>
 

@@ -49,7 +49,7 @@ trait Controllerism extends ValidatesCommand with Logging {
    * it throws an ItemNotFoundException, which should get picked
    * up by an exception handler to display a 404 page.
    */
-  def definitely[T](something:Any)(implicit m:Manifest[T]):T = something match {
+  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
 	  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 	  case None => throw new ItemNotFoundException()
 	  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]

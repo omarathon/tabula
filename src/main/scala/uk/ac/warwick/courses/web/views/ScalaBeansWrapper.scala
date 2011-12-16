@@ -26,6 +26,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
   override def wrap(obj: Object): TemplateModel = {
     obj match {
       case Some(x:Object) => wrap(x)
+      case None => null
       case smap: scala.collection.Map[_,_] => super.wrap(JMap(smap))
       case sseq: scala.Seq[_] => super.wrap(new JList(sseq))
       case scol: scala.Collection[_] => super.wrap(JCollection(scol))
@@ -34,10 +35,9 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
       case method: TemplateMethodModel => wrapByParent(method)
       case sobj: ScalaObject => new ScalaHashModel(sobj, this)
       case _ => super.wrap(obj)
-    }     
+    }
   }
 }
-
 
 /** A model that will expose all Scala getters that has zero parameters
  * to the FM Hash#get method so can retrieve it without calling with parenthesis. */

@@ -12,9 +12,9 @@
 </#if>
 
 <#if user.loggedIn && user.firstName??>
-<h1>Hello ${user.firstName}</h1>
+<h1>Hello, ${user.firstName}.</h1>
 <#else>
-<h1>Hello</h1>
+<h1>Hello.</h1>
 </#if>
 
 <p>This is the in-development coursework submission application.
@@ -22,9 +22,10 @@
 	going to <a href="http://go.warwick.ac.uk/amupdates">go.warwick.ac.uk/amupdates</a>.</p>
 
 <#if moduleWebgroups?? && moduleWebgroups?size gt 0>
+<p>These are the modules we think you're enrolled in.</p>
 <#list moduleWebgroups as pair>
 <div>
-${pair._1}
+<a href="<@url page='/module/${pair._1}/' />">${pair._1?upper_case}</a>
 </div>
 </#list>
 </#if>

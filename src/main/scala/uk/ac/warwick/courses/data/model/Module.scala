@@ -46,7 +46,7 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 }
 
 object Module {
-	def nameFromWebgroupName(groupName:String) = groupName.indexOf("-") match {
+	def nameFromWebgroupName(groupName:String) : String = groupName.indexOf("-") match {
 		case -1 => groupName
 		case i:Int => groupName.substring(i+1)
 	}

@@ -5,6 +5,8 @@
 
 <p><a href="/sysadmin/departments/">List all departments in the system</a></p>
 
+<p><a href="/sysadmin/masquerade/">Masquerade</a></p>
+
 <p>
 <@form.form method="post" action="/sysadmin/import">
   <input type="submit" value="Run department/module import">

@@ -186,6 +186,7 @@
 		<property name="sharedVariables">
 			<map>
 				<entry key="url"><bean class="uk.ac.warwick.courses.web.views.UrlMethodModel" /></entry>
+				<entry key="rootUrl" value="${toplevel.url}" />
 			</map>
 		</property>
 	</bean>

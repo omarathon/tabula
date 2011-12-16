@@ -1,0 +1,1 @@
+No frills template. ${unspecifiedVal?default('Unspecified value')}. ${specifiedValue}

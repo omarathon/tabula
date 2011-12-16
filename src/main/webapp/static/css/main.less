@@ -1,5 +1,8 @@
 @import "css3.less";
 
+#container {
+  .box-shadow(0,0,48px, rgba(0,0,0,0.4));
+}
 
 .box-style {
 	border: 1px solid #ddd;
@@ -7,8 +10,12 @@
 	.border-radius(8px);
 }
 
-#header {
-	
+#page-header {
+	.vertical-gradient(#696, #363);
+}
+
+#custom-header {
+    text-align:right;
 }
 
 html {
@@ -114,18 +121,29 @@ input.date-time-picker:focus {
 	margin-left: 16.5em;
 }
 
-.actions a {
-	text-decoration: none;
-	white-space: nowrap;
-	background: #6594d1;
-	color: white;
-	border-radius: 5px;
-	padding: 0 4px;
+.actions {
+	a {
+		text-decoration: none;
+		white-space: nowrap;
+		background: #CCC;
+		color: #333;
+		text-shadow: 0 1px 0 #fff;
+		border-radius: 3px;
+		padding: 2px 7px;
+		border: 1px solid #999;
+		&:hover {
+			background-color: #2c5893;
+			color: white;
+			text-shadow: none;
+		}
+		
+		#page-header & {
+			background: #666;
+			text-shadow: 0 1px 0 #000;
+		}
+	}
 }
 
-.actions a:hover {
-	background-color: #2c5893;
-}
 
 .submit-buttons input {
 	padding: 0.5em;
