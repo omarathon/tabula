@@ -1,7 +1,11 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign form=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
-<h1>Sys admin</h1>
+<h1>Web system administrating system screen page</h1>
+
+<#if user.masquerading>
+<p>Oh, hello ${user.fullName}. <em>Or should I say, ${user.realUser.fullName}?!</em></p>
+</#if>
 
 <p><a href="/sysadmin/departments/">List all departments in the system</a></p>
 
