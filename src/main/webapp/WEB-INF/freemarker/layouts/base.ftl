@@ -77,7 +77,7 @@
 							<ul>
 								<li>
 								<#if user?? && user.loggedIn>
-									Sign in as ${user.fullName}.
+									Signed in as ${user.fullName}.
 									<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}/" />">Sign out</a>
 								<#else>
 								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
