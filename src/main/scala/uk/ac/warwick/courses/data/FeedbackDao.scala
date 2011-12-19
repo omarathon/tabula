@@ -20,6 +20,6 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 			session.createCriteria(clazz)
 				.add(is eq("universityId", uniId))
 				.add(is eq("assignment", assignment))
-				.uniqueResult()
+				.uniqueResult() 
 		)
 }

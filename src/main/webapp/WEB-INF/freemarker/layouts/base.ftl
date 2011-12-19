@@ -37,7 +37,7 @@
 		<div id="container">
 			<#if user.masquerading>
 			<div id="masquerade-notice">
-			Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/sysadmin/masquerade"/>">Change</a>
+			Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/admin/masquerade"/>">Change</a>
 			</div>
 			</#if>
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
@@ -124,6 +124,9 @@
 							<div class="actions">
 							<#if user.sysadmin>
 								<a href="<@url page="/sysadmin/" />">Sysadmin</a>
+							</#if>
+							<#if user.masquerader || user.sysadmin>
+								<a href="<@url page="/admin/masquerade" />">Masquerade</a>
 							</#if>
 							</div>
 						</div>

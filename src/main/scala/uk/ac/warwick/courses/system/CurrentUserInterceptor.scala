@@ -19,8 +19,15 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
 	  val currentUser:CurrentUser = request.getAttribute("SSO_USER") match {
 	    case user:User if user.isFoundUser => {
-	    	val sysadmin = isSysadmin(user)
-	    	new CurrentUser(user, sysadmin, apparentUser(request, user, sysadmin))
+	    	val sysadmin = securityService.isSysadmin(user.getUserId()) 
+	    	val god = sysadmin && godCookieExists(request)
+	    	val masquerader = securityService.isMasquerader(user.getUserId)
+	    	new CurrentUser(
+	    			realUser=user, 
+	    			apparentUser=apparentUser(request, user, sysadmin), 
+	    			sysadmin=sysadmin, 
+	    			masquerader=masquerader, 
+	    			god=god)
 	    }
 	    case _ => NoCurrentUser()
 	  }
@@ -28,7 +35,8 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	  true //allow request to continue
 	}
     
-    private def isSysadmin(user:User) = securityService.isSysadmin(user.getUserId()) 
+    private def godCookieExists(request:HttpServletRequest):Boolean = 
+    	request.getCookies().getBoolean("coursesGodMode", false)
     
     // masquerade support
     private def apparentUser(request:HttpServletRequest, realUser:User, sysadmin:Boolean):User = 

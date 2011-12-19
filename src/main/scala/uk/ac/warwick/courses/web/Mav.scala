@@ -63,4 +63,6 @@ object Mav {
    */
   def apply(view:String, objects:Pair[String,_]*) = new Mav(view).addObjects(objects:_*)
 
+  //def apply(what:String) = null
+  
 }

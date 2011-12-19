@@ -25,6 +25,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@BeanProperty var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
 	
+	def getAcademicYearString = if (academicYear != null) academicYear.toString() else ""
+	
 	@BeanProperty var collectMarks:Boolean = false
 	
 	def copyTo(assignment:Assignment) {

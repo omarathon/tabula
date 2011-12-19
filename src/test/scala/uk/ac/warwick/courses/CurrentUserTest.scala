@@ -14,8 +14,6 @@ class CurrentUserTest extends TestBase {
 	}
 	
 	private def user(code:String, masqCode:String, sysadEnabled:Boolean) = {
-		val user = new CurrentUser(new User(code), true, new User(masqCode))
-		user.sysadminEnabled = sysadEnabled
-		user
+		new CurrentUser(new User(code), new User(masqCode), sysadmin=true, god=sysadEnabled)
 	}
 }

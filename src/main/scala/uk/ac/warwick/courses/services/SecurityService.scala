@@ -17,7 +17,9 @@ import uk.ac.warwick.courses.helpers.Logging
 class SecurityService extends Logging {
 	@Autowired var groupService:GroupService =_
   
-	def isSysadmin(usercode:String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-courses-sysadmins") 
+	def isSysadmin(usercode:String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-courses-sysadmins")
+	// excludes sysadmins, though they can also masquerade
+	def isMasquerader(usercode:String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-courses-hasmasque")
 	
 	/*
 	 * In Java we'd define an interface for a PermissionChecker with one method,
@@ -26,7 +28,7 @@ class SecurityService extends Logging {
 	type PermissionChecker = (CurrentUser, Action[_]) => Boolean
 	val checks = List[PermissionChecker](checkSysadmin _, checkGroup _)
 	
-	def checkSysadmin(user:CurrentUser, action:Action[_]):Boolean = user.sysadminEnabled
+	def checkSysadmin(user:CurrentUser, action:Action[_]):Boolean = user.god
 	
 	def checkGroup(user:CurrentUser, action:Action[_]):Boolean = action match {
 		
@@ -40,6 +42,8 @@ class SecurityService extends Logging {
 	  
 	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
+	  
+	  case Masquerade() => user.sysadmin || user.masquerader
 	  
 	  case action:Action[_] => throw new IllegalArgumentException(action.toString)
 	  case _ => throw new IllegalArgumentException()

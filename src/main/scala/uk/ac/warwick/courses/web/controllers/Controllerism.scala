@@ -22,6 +22,8 @@ trait Controllerism extends ValidatesCommand with Logging {
 	
   // make Mav available to controllers without needing to import
   val Mav = uk.ac.warwick.courses.web.Mav
+  
+  def Redirect(path:String) = Mav("redirect:" + path)
 	
   @Autowired
   @BeanProperty var securityService:SecurityService =_
@@ -31,6 +33,8 @@ trait Controllerism extends ValidatesCommand with Logging {
   def requestInfo = RequestInfo.fromThread
   def user = requestInfo.get.user
   def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
+  
+  def ajax = requestInfo.get.ajax
   
   def mustBeLinked(assignment:Assignment, module:Module) = 
 	 if (assignment.module.id != module.id) {

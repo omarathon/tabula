@@ -24,8 +24,8 @@
 <#else>
 
 	<@form.labelled_row "academicYear" "Academic year">
-	<@spring.bind path="academicYear">
-	<span class="uneditable-value">${status.value}<span class="hint">(can't be changed)<span></span>
+	<@spring.bind path="academicYearString">
+	<span class="uneditable-value">${status.value} <span class="hint">(can't be changed)<span></span>
 	</@spring.bind>
 	</@form.labelled_row>
 

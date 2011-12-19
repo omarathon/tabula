@@ -38,7 +38,8 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
 	  val requestInfo = RequestInfo.fromThread match {
 	 	  case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 	 	  case None => {
-	 	 	  currentUser = new CurrentUser(new User(code), false)
+	 	 	  val user = new User(code)
+	 	 	  currentUser = new CurrentUser(user, user)
 	 		  new RequestInfo(currentUser)
 	 	  }
 	  }

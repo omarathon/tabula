@@ -15,7 +15,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
 		request.getAttribute(CurrentUser.keyName) match {
-		 	case user:CurrentUser => RequestInfo.open(new RequestInfo(user))
+		 	case user:CurrentUser => RequestInfo.open(new RequestInfo(user=user))
 		}
 		true
 	}

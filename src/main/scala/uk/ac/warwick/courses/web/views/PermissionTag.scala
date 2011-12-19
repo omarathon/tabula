@@ -6,7 +6,6 @@ import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateModel
 import uk.ac.warwick.courses.actions.Action
 import uk.ac.warwick.courses.services.SecurityService
-import uk.ac.warwick.courses.actions.ActionTarget
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.helpers.Logging
 
@@ -22,7 +21,7 @@ class PermissionTag[A <: Action[_] : ClassManifest] extends TemplateDirectiveMod
 			loopVars:Array[TemplateModel],
 			body:TemplateDirectiveBody) = {
 		
-		val item = params.get("object").asInstanceOf[ActionTarget]
+		val item = params.get("object")
 		val currentUser = params.get("user").asInstanceOf[CurrentUser]
 		val action = Action.of[A](item)
 		

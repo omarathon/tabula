@@ -25,5 +25,9 @@ object RequestInfo {
 	}
 	def fromThread = threadLocal.get
 	def open(info:RequestInfo) = threadLocal.set(Some(info))
+	/*threadLocal.get match {
+		case None => threadLocal.set(Some(info))
+		case Some(info) => throw new IllegalStateException("RequestInfo already set")
+	}*/
 	def close = threadLocal.remove
 }

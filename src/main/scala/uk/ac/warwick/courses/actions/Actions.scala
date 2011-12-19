@@ -1,19 +1,17 @@
 package uk.ac.warwick.courses.actions
 import uk.ac.warwick.courses.data.model.Assignment
 
-abstract class Action[T<:ActionTarget] {
-	def item:T
-}
+sealed abstract class Action[T]
 
 case class View(val item:Viewable) extends Action[Viewable]
 case class Submit(val item:Assignment) extends Action[Assignment]
 case class Participate(val item:Participatable) extends Action[Participatable]
 case class Manage(val item:Manageable) extends Action[Manageable]
+case class Masquerade() extends Action[Unit]
 
-trait ActionTarget
-trait Viewable extends ActionTarget
-trait Manageable extends ActionTarget
-trait Participatable extends ActionTarget
+trait Viewable
+trait Manageable
+trait Participatable
 
 
 /// all neat and tidy... then this
@@ -36,12 +34,13 @@ object Action {
 	 * doesn't check at compile time that the item you're passing in matches
 	 * the type expected for the action type!
 	 */
-	def of[A<:Action[_]] (item:ActionTarget) (implicit m:ClassManifest[A]) = {
+	def of[A<:Action[_]] (item:Any) (implicit m:ClassManifest[A]) = {
 		m match {
 			case m if manifest <:< manifest[View] => View(item.asInstanceOf[Viewable])
 			case m if manifest <:< manifest[Submit] => Submit(item.asInstanceOf[Assignment])
 			case m if manifest <:< manifest[Participate] => Participate(item.asInstanceOf[Participatable])
 			case m if manifest <:< manifest[Manage] => Manage(item.asInstanceOf[Manageable])
+			case m if manifest <:< manifest[Masquerade] => Masquerade()
 		}
 	}
 }

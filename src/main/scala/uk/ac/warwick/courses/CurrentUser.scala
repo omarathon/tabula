@@ -9,11 +9,13 @@ import uk.ac.warwick.userlookup.AnonymousUser
  * things on top of the regular SSO user, and even store more than
  * one representation of a user (when masquerading).
  */
-class CurrentUser(val realUser:User, val sysadmin:Boolean, val apparentUser:User) {
-	def this(realUser:User, sysadmin:Boolean) = this(realUser, sysadmin, realUser)
-
-	var sysadminEnabled = false
-  
+class CurrentUser(
+		val realUser:User, 
+		val apparentUser:User, 
+		val sysadmin:Boolean=false, 
+		val masquerader:Boolean=false, 
+		val god:Boolean=false) {
+	
 	def loggedIn = realUser.isLoggedIn
 	def idForPermissions = apparentUser.getUserId()
 	
@@ -33,7 +35,7 @@ class CurrentUser(val realUser:User, val sysadmin:Boolean, val apparentUser:User
     	  builder append realUser.getUserId
     	  builder append ")"
       }
-      if (sysadminEnabled) builder append " +GodMode"
+      if (god) builder append " +GodMode"
       builder.toString
     }
 }
@@ -43,5 +45,8 @@ object CurrentUser {
 }
 
 object NoCurrentUser {
-	def apply() = new CurrentUser(new AnonymousUser, false)
+	def apply() = {
+		val anon = new AnonymousUser
+		new CurrentUser(realUser=anon, apparentUser=anon)
+	}
 }
