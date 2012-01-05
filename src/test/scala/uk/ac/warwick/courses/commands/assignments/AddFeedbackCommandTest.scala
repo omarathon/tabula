@@ -8,6 +8,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.mock.web.MockMultipartFile
 import collection.JavaConversions._
+import org.springframework.validation.BindException
 
 class AddFeedbackCommandTest extends AppContextTestBase {
 	
@@ -39,8 +40,12 @@ class AddFeedbackCommandTest extends AppContextTestBase {
 			val assignment = new Assignment
 			session.save(assignment)
 			val command = new AddFeedbackCommand(assignment, currentUser)
-			command.archive = new MockMultipartFile("feedback.zip", feedbackZip)
+			command.archive = new MockMultipartFile("archive", "feedback.zip", "application/unknown", feedbackZip)
+			val errors = new BindException(command,"command")
 			command.onBind
+			command.validation(errors)
+			println(errors)
+			errors.hasErrors should be (false)
 			
 			command.items.size should be(2)
 			command.unrecognisedFiles.size should be(1)

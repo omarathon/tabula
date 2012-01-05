@@ -30,7 +30,7 @@ class UploadedFile {
   @BeanProperty var upload:JList[MultipartFile] = ArrayList()
   
   // files that have been persisted - can be represented in forms by ID
-  @BeanProperty var attached:JList[FileAttachment] = LazyLists.simpleFactory()
+  @BeanProperty var attached:JList[FileAttachment] = ArrayList()//LazyLists.simpleFactory()
   
   def isMissing = !isExists
   def isExists = hasUploads || hasAttachments
@@ -46,7 +46,9 @@ class UploadedFile {
 		  } 
 	  }
 	  if (shouldPersist) {
-	 	  attached = for (item <- upload) yield {
+	 	  attached.clear()
+	 	  // convert MultipartFiles into FileAttachments
+	 	  val newAttachments = for (item <- upload) yield {
 	 	 	  val a = new FileAttachment
 		 	  a.name = new File(item.getOriginalFilename()).getName
 		 	  a.uploadedData = item.getInputStream
@@ -54,7 +56,13 @@ class UploadedFile {
 		 	  fileDao.saveTemporary(a)
 		 	  a
 	 	  }
+	 	  attached.addAll(newAttachments)
+	  } else {
+	 	  // sometimes we manually add FileAttachments with uploaded data to persist
+	 	  for (item <- attached if item.uploadedData != null) 
+ 	 	 	  fileDao.saveTemporary(item)
 	  }
+	  
   }
   
   /**

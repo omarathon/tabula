@@ -86,9 +86,9 @@ trait Controllerism extends ValidatesCommand with Logging {
 	 	  }
 	  }
 	  binder.setDisallowedFields(disallowedFields:_*)
-	  binding(binder)
+	  binding(binder, binder.getTarget)
   }
-  def binding(binder:WebDataBinder) {}
+  def binding[T](binder:WebDataBinder, target:T) {}
   
 
 }

@@ -13,27 +13,32 @@ import freemarker.template.DefaultObjectWrapper
 import scala.util.matching.Regex
 import freemarker.ext.beans.BeanModel
 import uk.ac.warwick.courses.helpers.javaconversions._
+import uk.ac.warwick.courses.helpers.Logging
+import scala.collection.JavaConversions
 
 /** A implemenation of BeansWrapper that support native Scala basic and collection types
  * in Freemarker template engine.
  */
-class ScalaBeansWrapper extends DefaultObjectWrapper { 
-  def wrapByParent(obj: AnyRef) = super.wrap(obj)
+class ScalaBeansWrapper extends DefaultObjectWrapper with Logging { 
+  
+  def superWrap(obj:Object): TemplateModel = {
+	super.wrap(obj)
+  }
   
   override def wrap(obj: Object): TemplateModel = {
     obj match {
       case Some(x:Object) => wrap(x)
       case None => null
-      case jcol: java.util.Collection[_] => super.wrap(jcol)
-      case jmap: java.util.Map[_,_] => super.wrap(jmap)
-      case smap: scala.collection.Map[_,_] => super.wrap(JMap(smap))
-      case sseq: scala.Seq[_] => super.wrap(new JList(sseq))
-      case scol: scala.Collection[_] => super.wrap(JCollection(scol))
+      case jcol: java.util.Collection[_] => superWrap(jcol)
+      case jmap: java.util.Map[_,_] => superWrap(jmap)
+      case smap: scala.collection.Map[_,_] => superWrap(JMap(smap))
+      case sseq: scala.Seq[_] => superWrap(JList(sseq))
+      case scol: scala.Collection[_] => superWrap(JCollection(scol))
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
-      case directive: TemplateDirectiveModel => wrapByParent(directive)
-      case method: TemplateMethodModel => wrapByParent(method)
+      case directive: TemplateDirectiveModel => superWrap(directive)
+      case method: TemplateMethodModel => superWrap(method)
       case sobj: ScalaObject => new ScalaHashModel(sobj, this)
-      case _ => super.wrap(obj)
+      case _ => superWrap(obj)
     }
   }
 }
@@ -77,9 +82,12 @@ class ScalaHashModel(sobj: ScalaObject, wrapper: ScalaBeansWrapper) extends Bean
       }
     }
   }
-  override def get(key: String) : TemplateModel = getters.get(key) match {
-    case Some(getter) => wrapper.wrap(getter())
-    case None => throw new TemplateModelException(key+" not found in object "+sobj)
+  override def get(key: String) : TemplateModel = {
+	  val x = key
+	  getters.get(key) match {
+	    case Some(getter) => wrapper.wrap(getter())
+	    case None => throw new TemplateModelException(key+" not found in object "+sobj)
+	  }
   }
   override def isEmpty = false
 }

@@ -84,6 +84,11 @@
 	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>
 	        </list>
 	    </property>
+	    <property name="formatters">
+	    	<list>
+	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>
+	        </list>
+	    </property>
 	</bean>
 	
 	<mvc:interceptors>
