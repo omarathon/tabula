@@ -10,15 +10,12 @@ import freemarker.template._
 import scala.collection.mutable
 import java.{ util=>jutil }
 import freemarker.template.DefaultObjectWrapper
-import uk.ac.warwick.courses.helpers.javaconversions._
 import scala.util.matching.Regex
 import freemarker.ext.beans.BeanModel
+import uk.ac.warwick.courses.helpers.javaconversions._
 
 /** A implemenation of BeansWrapper that support native Scala basic and collection types
- * in Freemarker template engine. 
- * 
- * Extends from SimpleObjectWrapper instead of ObjectWrapper because we don't need default
- * not found types to create Jython implementation (which ObjectWrapper will do).
+ * in Freemarker template engine.
  */
 class ScalaBeansWrapper extends DefaultObjectWrapper { 
   def wrapByParent(obj: AnyRef) = super.wrap(obj)
@@ -27,6 +24,8 @@ class ScalaBeansWrapper extends DefaultObjectWrapper {
     obj match {
       case Some(x:Object) => wrap(x)
       case None => null
+      case jcol: java.util.Collection[_] => super.wrap(jcol)
+      case jmap: java.util.Map[_,_] => super.wrap(jmap)
       case smap: scala.collection.Map[_,_] => super.wrap(JMap(smap))
       case sseq: scala.Seq[_] => super.wrap(new JList(sseq))
       case scol: scala.Collection[_] => super.wrap(JCollection(scol))

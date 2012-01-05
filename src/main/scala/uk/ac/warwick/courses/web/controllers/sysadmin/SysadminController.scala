@@ -26,7 +26,7 @@ import uk.ac.warwick.courses.web.Mav
  * Screens for application sysadmins, i.e. the web development and content teams.
  */
 
-class BaseSysadminController extends Controllerism {
+abstract class BaseSysadminController extends Controllerism {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
 	
 	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")

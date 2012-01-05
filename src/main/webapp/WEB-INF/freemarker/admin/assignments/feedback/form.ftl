@@ -11,7 +11,7 @@
 <@f.input path="uniNumber" cssClass="text" />
 </@form.labelled_row>
 
-<@form.filewidget "file" />
+<@form.filewidget basename="file"  />
 
 <div class="submit-buttons">
 <input type="submit" value="Submit">

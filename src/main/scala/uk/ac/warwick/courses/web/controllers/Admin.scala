@@ -193,51 +193,6 @@ class ListFeedback extends Controllerism {
 	}
 }
 
-@Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
-class AddFeedback extends Controllerism {
-	
-	@ModelAttribute
-	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
-		new AddFeedbackCommand(assignment, user)
-	
-	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
-		command.validation(errors)
-	}
-	
-	def onBind(command:AddFeedbackCommand) {
-		command.onBind
-	}
-	
-	@RequestMapping(method=Array(RequestMethod.GET))
-	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			@ModelAttribute form:AddFeedbackCommand, errors: Errors) = {
-		onBind(form)
-		if (assignment.module != module) throw new ItemNotFoundException
-		mustBeAbleTo(Participate(module))
-		Mav("admin/assignments/feedback/form",
-			"department" -> module.department,
-			"module" -> module,
-			"assignment" -> assignment
-			)
-	}
-	
-	@Transactional
-	@RequestMapping(method = Array(RequestMethod.POST))
-	def submit(
-			@PathVariable module:Module,
-			@PathVariable assignment:Assignment,
-			@Valid form:AddFeedbackCommand, errors: Errors) = {
-		onBind(form)
-		mustBeAbleTo(Participate(module))
-		if (errors.hasErrors) {
-			showForm(module, assignment, form, errors)
-		} else {
-			form.apply
-			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
-		}
-	}
-	
-}
+
 
 

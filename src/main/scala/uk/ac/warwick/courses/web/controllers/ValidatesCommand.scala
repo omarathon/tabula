@@ -4,6 +4,14 @@ import org.springframework.validation.Validator
 import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.helpers.ClassValidator
 
+/**
+ * Methods for setting custom validator stuff.
+ * 
+ * Note that on its own, this just sets a validator property but doesn't
+ * configure any validation to happen automatically. It's best to use this
+ * by extending Controllerism instead, as that sets up the data binder to
+ * use this validator for commands marked with @Valid.
+ */
 trait ValidatesCommand {
 
   @BeanProperty var validator:Validator =_

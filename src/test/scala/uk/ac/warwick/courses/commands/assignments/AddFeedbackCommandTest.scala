@@ -7,6 +7,7 @@ import org.junit.Test
 import uk.ac.warwick.courses.data.model.Assignment
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.mock.web.MockMultipartFile
+import collection.JavaConversions._
 
 class AddFeedbackCommandTest extends AppContextTestBase {
 	
@@ -22,11 +23,27 @@ class AddFeedbackCommandTest extends AppContextTestBase {
 			session.save(assignment)
 			val command = new AddFeedbackCommand(assignment, currentUser)
 			command.uniNumber = "1234567"
-			command.file.upload = new MockMultipartFile("feedback.docx", feedbackDocument)
+			command.file.upload = List(new MockMultipartFile("feedback.docx", feedbackDocument))
 			command.onBind
 			val feedback = command.apply
 			feedback.attachments.get(0).data.length should be (feedbackDocument.length)
 		}
 		
+	}
+	
+	@Transactional
+	@Test def addZip {
+		withUser("abc") {
+			val feedbackZip = resourceAsBytes("feedback1.zip")
+			
+			val assignment = new Assignment
+			session.save(assignment)
+			val command = new AddFeedbackCommand(assignment, currentUser)
+			command.archive = new MockMultipartFile("feedback.zip", feedbackZip)
+			command.onBind
+			
+			command.items.size should be(2)
+			command.unrecognisedFiles.size should be(1)
+		}
 	}
 }

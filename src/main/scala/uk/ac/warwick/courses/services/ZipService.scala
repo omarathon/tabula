@@ -1,21 +1,19 @@
 package uk.ac.warwick.courses.services
+import java.io.Closeable
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
-import java.io.OutputStream
-import java.nio.ByteBuffer
 import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-import scala.collection.JavaConversions._
+import java.util.zip.ZipInputStream
+import scala.collection.JavaConversions.asScalaBuffer
+import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
+import javax.persistence.Entity
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.helpers.Logging
-import collection.mutable.{Seq => MSeq}
-import scala.collection.mutable.ListBuffer
-import java.io.Closeable
+import org.apache.commons.io.input.BoundedInputStream
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -66,4 +64,36 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		)
 	}
 	
+}
+
+/**
+ * InputStream to read a single zip entry from a parent input stream.
+ */
+class ZipEntryInputStream(val zip:InputStream, val entry:ZipEntry)
+		extends BoundedInputStream(zip, entry.getCompressedSize) {
+	setPropagateClose(false)
+}
+
+object Zips {
+	
+   def each(zip:ZipInputStream)(fn: (ZipEntry)=>Unit):Unit = map(zip)(fn)
+   
+   /**
+    * Provides an iterator for ZipEntry items which will be closed when you're done with them.
+    * The object returned from the function is converted to a list to guarantee that it's evaluated before closing.
+    */
+   def iterator[T](zip:ZipInputStream)(fn: (Iterator[ZipEntry])=>Iterator[T]): List[T] = ensureClose(zip) {
+	   fn( Iterator.continually{zip.getNextEntry}.takeWhile{_ != null} ).toList
+   }
+   
+   def map[T](zip:ZipInputStream)(fn: (ZipEntry)=>T): Seq[T] = ensureClose(zip) {
+	  Iterator.continually{zip.getNextEntry}.takeWhile{_ != null}.map { (item) =>
+	 	  val t = fn(item)
+	 	  zip.closeEntry
+	 	  t
+	  }.toList // use toList to evaluate items now, before we actually close the stream
+   }
+
+   def ensureClose[T](c:Closeable)(fn: =>T): T = try { fn } finally { c.close }
+   
 }

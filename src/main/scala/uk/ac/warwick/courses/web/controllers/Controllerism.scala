@@ -14,6 +14,8 @@ import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.model.Feedback
+import javax.annotation.Resource
+import org.springframework.beans.factory.annotation.Required
 
 /**
  * Useful traits for all controllers to have.
@@ -22,6 +24,8 @@ trait Controllerism extends ValidatesCommand with Logging {
 	
   // make Mav available to controllers without needing to import
   val Mav = uk.ac.warwick.courses.web.Mav
+  
+  @Required @Resource(name="validator") var globalValidator:Validator =_
   
   def Redirect(path:String) = Mav("redirect:" + path)
 	
@@ -60,6 +64,18 @@ trait Controllerism extends ValidatesCommand with Logging {
 	  case _ => throw new ItemNotFoundException()
   }
   
+  def compositeValidator:Validator = {
+	  if (validator != null) {
+	 	  if (keepOriginalValidator) {
+	 	 	  new CompositeValidator(validator, globalValidator)
+	 	  } else {
+	 		  validator
+	 	  }
+	  } else {
+	 	  globalValidator
+	  }
+  }
+  
   @InitBinder def _binding(binder:WebDataBinder) = {
 	  if (validator != null) {
 	 	  if (keepOriginalValidator) {
@@ -73,5 +89,6 @@ trait Controllerism extends ValidatesCommand with Logging {
 	  binding(binder)
   }
   def binding(binder:WebDataBinder) {}
+  
 
 }

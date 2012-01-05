@@ -35,6 +35,8 @@ class UserGroup extends GeneratedId {
   
 	@BeanProperty var baseWebgroup:String =_
 	
+	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
+	
 	@ElementCollection @Column(name="usercode")
 	@JoinTable(name="UserGroupInclude", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")

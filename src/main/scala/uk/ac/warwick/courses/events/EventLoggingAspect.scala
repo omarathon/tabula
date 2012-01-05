@@ -13,28 +13,19 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import uk.ac.warwick.courses.commands.DescriptionImpl
 import uk.ac.warwick.courses.RequestInfo
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 
 @Aspect
-class EventLoggingAspect {
+class EventLoggingAspect extends EventHandling {
+	
 	@BeanProperty var listener:EventListener = _
 	
 	@Pointcut("execution(* uk.ac.warwick.courses.commands.Command.apply(..)) && target(callee)")
 	def applyCommand(callee:Describable): Unit = {}
 	
 	@Around("applyCommand(callee)")
-	def aroundApplyCommand(jp:ProceedingJoinPoint, callee:Describable):Any = {
-		val event = Event.fromDescribable(callee)
-		try {
-			listener.beforeCommand(event)
-			val result = jp.proceed
-			listener.afterCommand(event, result)
-			return result
-		} catch {
-			case e:Throwable => {
-				listener.onException(event, e)
-				throw e
-			}
-		}
-	}
+	def aroundApplyCommand(jp:ProceedingJoinPoint, callee:Describable):Any = 
+		recordEvent(callee) { jp.proceed }
 	
 }
