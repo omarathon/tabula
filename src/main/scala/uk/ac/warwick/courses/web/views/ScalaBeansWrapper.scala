@@ -32,7 +32,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
       case jcol: java.util.Collection[_] => superWrap(jcol)
       case jmap: java.util.Map[_,_] => superWrap(jmap)
       case smap: scala.collection.Map[_,_] => superWrap(JMap(smap))
-      case sseq: scala.Seq[_] => superWrap(JList(sseq))
+      case sseq: scala.Seq[_] => superWrap(new JList(sseq))
       case scol: scala.Collection[_] => superWrap(JCollection(scol))
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
       case directive: TemplateDirectiveModel => superWrap(directive)
