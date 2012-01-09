@@ -4,6 +4,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.{List => JList}
 import scala.collection.JavaConversions._
+import collection.JavaConverters._
 import scala.reflect.BeanInfo
 import scala.reflect.BeanProperty
 import org.apache.commons.collections.list.LazyList
@@ -18,7 +19,6 @@ import uk.ac.warwick.courses.commands._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.FileDao
-import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.ZipEntryInputStream
 import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.services.Zips
@@ -28,15 +28,9 @@ import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import java.util.HashMap
 import scala.util.matching.Regex
-import uk.ac.warwick.courses.helpers.ArrayList
-import uk.ac.warwick.courses.helpers.ArrayList
-import uk.ac.warwick.courses.helpers.LazyLists
-import uk.ac.warwick.courses.helpers.Logging
-import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.courses.helpers.NoUser
-import uk.ac.warwick.courses.helpers.FoundUser
 import uk.ac.warwick.courses.services.UserLookupService
 
 class FeedbackItem {
@@ -56,7 +50,7 @@ class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
  * Command which (currently) adds a single piece of feedback for one assignment
  */
 @Configurable
-class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[Feedback] with Daoisms with Logging {
+class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[List[Feedback]] with Daoisms with Logging {
 	
   val directoryPattern = new Regex("""(\d{7})/([^/]+)""")
   val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
@@ -181,20 +175,38 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   }
   
   @Transactional
-  override def apply() = {
-	  val feedback = new Feedback
-	  feedback.assignment = assignment
-	  feedback.uploaderId = submitter.apparentId
-	  feedback.universityId = uniNumber
-	  for (attachment <- file.attached) 
-		  feedback addAttachment attachment
-	  session.saveOrUpdate(feedback)
+  override def apply(): List[Feedback] = {
 	  
-	  // delete feedback zip for this assignment, since it'll now be different.
-	  // TODO should really do this in a more general place, like a save listener for Feedback objects
-	  zipService.invalidateFeedbackZip(assignment)
+	  def saveFeedback(uniNumber:String, file:UploadedFile)= {
+	 	  val feedback = new Feedback
+		  feedback.assignment = assignment
+		  feedback.uploaderId = submitter.apparentId
+		  feedback.universityId = uniNumber
+		  for (attachment <- file.attached) 
+			  feedback addAttachment attachment
+		  session.saveOrUpdate(feedback)
+		  
+		  feedback
+	  }
 	  
-	  feedback
+	  if (items != null && !items.isEmpty()) {
+	 	  
+	 	  val feedbacks = items.map { (item) =>
+	 	 	  saveFeedback(item.uniNumber, item.file)
+	 	  }
+	 	  zipService.invalidateFeedbackZip(assignment)
+	 	  feedbacks.toList
+	 	  
+	  } else {
+	  
+	 	  val feedback = saveFeedback(uniNumber, file)
+		  
+		  // delete feedback zip for this assignment, since it'll now be different.
+		  // TODO should really do this in a more general place, like a save listener for Feedback objects
+		  zipService.invalidateFeedbackZip(assignment)
+		  
+		  List(feedback)
+  	  }
   }
   
   def filenameOf(entry:ZipEntry):String = {

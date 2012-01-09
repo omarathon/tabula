@@ -15,7 +15,7 @@
 
 <div class="submit-buttons actions">
 <input type="submit" value="Create">
-or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
+or <a href="<@routes.depthome module=module />">Cancel</a>
 </div>
 
 </@f.form>

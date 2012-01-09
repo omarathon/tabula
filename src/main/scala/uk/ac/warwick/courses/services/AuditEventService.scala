@@ -56,12 +56,12 @@ class AuditEventService extends Daoisms {
 		if (event.extra != null) {
 			val data = new StringWriter()
 			json.writeValue(data, event.extra)
-			query.setString("data", data.toString);
+			query.setString("data", data.toString)
 		}
 		query.executeUpdate()
 	}
 
-	def listRecent(start:Int, count:Int):JList[AuditEvent] = {
+	def listRecent(start:Int, count:Int) : JList[AuditEvent] = {
 		val jdbc = new JdbcTemplate(dataSource)
 		val query = session.createSQLQuery(listSql)
 		query.setFirstResult(start)

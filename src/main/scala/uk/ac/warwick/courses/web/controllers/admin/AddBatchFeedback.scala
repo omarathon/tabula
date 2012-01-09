@@ -59,8 +59,8 @@ class AddBatchFeedback extends Controllerism {
 			Mav("admin/assignments/feedback/zipreview")
 		} else {
 			// do apply, redirect back
-			//cmd.apply()
-			Mav("admin/assignments/feedback/zipreview")
+			cmd.apply()
+			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
 		}
 	}
 	

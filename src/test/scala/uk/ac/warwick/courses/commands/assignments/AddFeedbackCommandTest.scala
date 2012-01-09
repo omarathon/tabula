@@ -36,8 +36,9 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			command.uniNumber = "1234567"
 			command.file.upload = List(new MockMultipartFile("feedback.docx", feedbackDocument))
 			command.onBind
-			val feedback = command.apply
-			feedback.attachments.get(0).data.length should be (feedbackDocument.length)
+			val feedbacks = command.apply
+			feedbacks.size should be (1)
+			feedbacks(0).attachments.get(0).data.length should be (feedbackDocument.length)
 		}
 		
 	}
