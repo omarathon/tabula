@@ -20,6 +20,7 @@ import java.sql.Connection
 import org.hibernate.dialect.Oracle10gDialect
 import org.springframework.transaction.annotation.Transactional
 import collection.JavaConversions._
+import org.springframework.jdbc.core.JdbcTemplate
 
 @Component
 class AuditEventService extends Daoisms {
@@ -61,7 +62,7 @@ class AuditEventService extends Daoisms {
 	}
 
 	def listRecent(start:Int, count:Int):JList[AuditEvent] = {
-		val jdbc = new SimpleJdbcTemplate(dataSource)
+		val jdbc = new JdbcTemplate(dataSource)
 		val query = session.createSQLQuery(listSql)
 		query.setFirstResult(start)
 		query.setMaxResults(count)
