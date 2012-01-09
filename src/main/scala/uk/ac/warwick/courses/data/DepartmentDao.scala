@@ -19,9 +19,9 @@ trait DepartmentDao {
 class DepartmentDaoImpl extends DepartmentDao with Daoisms {
   
   def allDepartments: Seq[Department] = 
-    session.createCriteria(classOf[Department])
+    session.newCriteria[Department]
     	.addOrder(Order.asc("code"))
-    	.list.asInstanceOf[JList[Department]]
+    	.list
   
   // Fetches modules eagerly
   def getByCode(code:String) = option[Department](

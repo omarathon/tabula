@@ -4,6 +4,7 @@ import uk.ac.warwick.courses.data.model._
 
 trait Describable {
 	def describe(d:Description)
+	def describeResult(d:Description) {}
 	val eventName:String
 }
 
@@ -18,18 +19,6 @@ trait Command[R] extends Describable {
 	def apply(): R
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
-
-/**
- * Trait that can only be applied to a Command, which marks it
- * out of the audit log (the default is to audit).
- * 
- * The self type declaration is ostensibly to allow you to access
- * methods on Command via "self" (as you would "this"), but here
- * it's just to enforce the class type.
- */
-//trait Unaudited { self: Command[_] =>
-//	
-//}
 
 /**
  * Object for a Command to describe what it's just done.

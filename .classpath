@@ -63,6 +63,7 @@
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/build/lesscss-engine-1.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>

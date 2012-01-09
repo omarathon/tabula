@@ -25,9 +25,9 @@ class AddFeedback extends Controllerism {
 	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddFeedbackCommand(assignment, user)
 	
-	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
-		command.validation(errors)
-	}
+//	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
+//		command.validation(errors)
+//	}
 	
 	def onBind(command:AddFeedbackCommand) {
 		command.onBind
@@ -36,9 +36,9 @@ class AddFeedback extends Controllerism {
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute form:AddFeedbackCommand, errors: Errors) = {
-		onBind(form)
-		if (assignment.module != module) throw new ItemNotFoundException
+		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
+		onBind(form)
 		Mav("admin/assignments/feedback/form",
 			"department" -> module.department,
 			"module" -> module,
@@ -52,8 +52,11 @@ class AddFeedback extends Controllerism {
 			@PathVariable module:Module,
 			@PathVariable assignment:Assignment,
 			@Valid form:AddFeedbackCommand, errors: Errors) = {
-		onBind(form)
+		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
+		form.preExtractValidation(errors)
+		onBind(form)
+		form.postExtractValidation(errors)
 		if (errors.hasErrors) {
 			showForm(module, assignment, form, errors)
 		} else {

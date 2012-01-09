@@ -37,16 +37,16 @@
 		classpath:/courses-private.properties" />
 	
 	<bean class="uk.ac.warwick.courses.events.EventLoggingAspect" factory-method="aspectOf">
-		<property name="listener">
-			<bean class="uk.ac.warwick.courses.events.CompositeEventListener">
-				<constructor-arg>
-					<list>
-						<bean class="uk.ac.warwick.courses.events.Log4JEventListener" />
-						<bean class="uk.ac.warwick.courses.events.DatabaseEventListener" />
-					</list>
-				</constructor-arg>
-			</bean>
-		</property>
+		<property name="listener" ref="eventListener" />
+	</bean>
+	
+	<bean id="eventListener" class="uk.ac.warwick.courses.events.CompositeEventListener">
+		<constructor-arg>
+			<list>
+				<bean class="uk.ac.warwick.courses.events.Log4JEventListener" />
+				<bean class="uk.ac.warwick.courses.events.DatabaseEventListener" />
+			</list>
+		</constructor-arg>
 	</bean>
 	
 	<bean id="json" class="uk.ac.warwick.courses.JsonObjectMapperFactory" />

@@ -1,5 +1,4 @@
 package uk.ac.warwick.courses.data.model
-import java.util.ArrayList
 import java.util.{List => JList}
 import scala.collection.JavaConversions._
 import scala.reflect._
@@ -20,6 +19,7 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import javax.persistence.FetchType
 import javax.persistence.CascadeType
+import uk.ac.warwick.courses.helpers.ArrayList
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -90,7 +90,7 @@ class Assignment() extends GeneratedId with Viewable {
 	@BeanProperty var submissions:JList[Submission] =_
 	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
-	@BeanProperty var feedbacks:JList[Feedback] =_
+	@BeanProperty var feedbacks:JList[Feedback] = ArrayList()
 	
 	def mostRecentFeedbackUpload = feedbacks.maxBy{_.uploadedDate}.uploadedDate
 	
@@ -99,7 +99,7 @@ class Assignment() extends GeneratedId with Viewable {
 	 */
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@IndexColumn(name="position")
-	@BeanProperty var fields:JList[FormField] = new ArrayList
+	@BeanProperty var fields:JList[FormField] = ArrayList()
 	
 	@BeanProperty var resultsPublished:Boolean = false
 	

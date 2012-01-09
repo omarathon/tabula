@@ -4,10 +4,17 @@
   .box-shadow(0,0,48px, rgba(0,0,0,0.4));
 }
 
-.box-style {
+.box-style() {
 	border: 1px solid #ddd;
 	border-bottom: 1px solid #888;
 	.border-radius(8px);
+}
+
+.warning-box-style() {
+	.border-radius(8px);
+	padding: 0.5em;
+	.vertical-gradient(#ffffcc, #ffee99);
+	border: 1px solid #ffcc66;
 }
 
 #page-header {
@@ -159,7 +166,6 @@ ul.file-list {
   padding: 0;
   margin: 0;
   list-style: none;
-  margin-bottom: 1em;
   li {
     padding-left: 20px;
     margin: 0;
@@ -179,4 +185,8 @@ ul.file-list {
 	padding: 0.3em;
 	text-align: center;
 	.vertical-gradient(#ffff99, #ffcc66);
+}
+
+.unrecognised-files {
+    .warning-box-style;
 }

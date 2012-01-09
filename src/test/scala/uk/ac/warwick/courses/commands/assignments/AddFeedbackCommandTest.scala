@@ -42,8 +42,9 @@ class AddFeedbackCommandTest extends AppContextTestBase {
 			val command = new AddFeedbackCommand(assignment, currentUser)
 			command.archive = new MockMultipartFile("archive", "feedback.zip", "application/unknown", feedbackZip)
 			val errors = new BindException(command,"command")
+			command.preExtractValidation(errors)
 			command.onBind
-			command.validation(errors)
+			command.postExtractValidation(errors)
 			println(errors)
 			errors.hasErrors should be (false)
 			

@@ -39,6 +39,14 @@ class FeedbackItem {
     @BeanProperty var file:UploadedFile = new UploadedFile
 }
 
+// Purely to generate an audit log event
+class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
+	def apply() {}
+	def describe(d:Description) = d.assignment(cmd.assignment).properties(
+			"archive" -> cmd.archive.getOriginalFilename()
+		)
+}
+
 /**
  * Command which (currently) adds a single piece of feedback for one assignment
  */
@@ -64,14 +72,17 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   @BeanProperty var confirmed:Boolean = false
   /* ---- */
   
-  // called manually by controller
-  def validation(errors:Errors) = {
+  def preExtractValidation(errors:Errors) = {
 	  if (archive != null) {
 	 	  logger.info("file name is " + archive.getOriginalFilename())
 	 	  if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 	 	 	  errors.rejectValue("archive", "archive.notazip")
 	 	  }
-	  } else if (items != null && !items.isEmpty()) {
+	  }
+  }
+  
+  def postExtractValidation(errors:Errors) = {
+	  if (items != null && !items.isEmpty()) {
 	 	  for (i <- 0 until items.length) {
 	 	 	  val item = items.get(i)
 	 	 	  errors.pushNestedPath("items["+i+"]")
@@ -104,9 +115,6 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   def onBind {
 	file.onBind
 	
-	// any files that we don't understand will go in here to be displayed to the user.
-	unrecognisedFiles.clear()
-	
 	// ZIP has been uploaded. unpack it
 	if (archive != null) {
 		val zip = new ZipInputStream(archive.getInputStream)
@@ -129,6 +137,8 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
 		var itemMap = new HashMap[String,FeedbackItem]()
+
+		unrecognisedFiles.clear()
 		
 		def putItem(number:String, name:String, file:UploadedFile) {
 			if (itemMap.containsKey(number)) {
@@ -150,6 +160,9 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		}
 		
 		items = itemMap.values().toList
+		
+		// this do-nothing command is to generate an audit event to record the unzipping
+		new ExtractFeedbackZip(this).apply()
 		
 	} else if (items != null) {
 		for (item <- items if item.file != null) item.file.onBind

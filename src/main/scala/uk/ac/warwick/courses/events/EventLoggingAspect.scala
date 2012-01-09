@@ -16,10 +16,8 @@ import uk.ac.warwick.courses.RequestInfo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 
-@Aspect
+@Configurable @Aspect
 class EventLoggingAspect extends EventHandling {
-	
-	@BeanProperty var listener:EventListener = _
 	
 	@Pointcut("execution(* uk.ac.warwick.courses.commands.Command.apply(..)) && target(callee)")
 	def applyCommand(callee:Describable): Unit = {}

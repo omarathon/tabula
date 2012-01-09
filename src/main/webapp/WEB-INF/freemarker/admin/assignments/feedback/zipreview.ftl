@@ -12,7 +12,8 @@
 </@spring.bind>
 
 <#if addFeedbackCommand.unrecognisedFiles?size gt 0>
-<p>There were some files in the zip which I didn't understand, and will be ignored:</p>
+<div class="unrecognised-files">
+<div>There were some files in the zip which I didn't understand, and will be ignored:</div>
 <ul class="file-list">
 <#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
 <li>
@@ -22,6 +23,7 @@
 </li>
 </#list>
 </ul>
+</div>
 </#if>
 
 <table class="batch-feedback-summary">

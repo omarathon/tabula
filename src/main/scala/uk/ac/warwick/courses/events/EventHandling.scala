@@ -8,13 +8,14 @@ import scala.reflect.BeanProperty
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling {
-	var listener:EventListener
-	
+	@Autowired @BeanProperty var listener:EventListener = _
+
 	def recordEvent[T](d:Describable)(f: =>T): T = {
 		val event = Event.fromDescribable(d)
 		try {
 			listener.beforeCommand(event)
 			val result = f
+			
 			listener.afterCommand(event, result)
 			return result
 		} catch {

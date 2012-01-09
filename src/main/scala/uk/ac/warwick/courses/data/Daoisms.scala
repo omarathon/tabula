@@ -3,6 +3,8 @@ import org.hibernate.SessionFactory
 import scala.reflect.Manifest
 import org.springframework.beans.factory.annotation.Autowired
 import scala.annotation.target.field
+import javax.sql.DataSource
+import org.hibernate.Session
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -11,9 +13,18 @@ import scala.annotation.target.field
 trait Daoisms {
   type AutowiredField = Autowired @field
   
-	
+  @AutowiredField var dataSource:DataSource =_
   @AutowiredField var sessionFactory:SessionFactory = _
+
   protected def session = sessionFactory.getCurrentSession
+  
+  /*
+   * Adds a method to Session which returns a wrapped Criteria that works
+   * better with Scala's generics support.
+   */
+  implicit def niceCriteriaCreator(session:Session) = new {
+	def newCriteria[T](implicit m:Manifest[T]) = new ScalaCriteria[T](session.createCriteria(m.erasure))
+  }
   
   /**
    * Returns Some(obj) if it matches the expected type, otherwise None.

@@ -24,9 +24,9 @@ class AddBatchFeedback extends Controllerism {
 	
 	def onBind(cmd:AddFeedbackCommand) = cmd.onBind
 	
-	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
-		command.validation(errors)
-	}
+//	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
+//		command.validation(errors)
+//	}
 	
 //	override def binding(binder:WebDataBinder, command:AddFeedbackCommand) {
 //		command.onBind
@@ -45,11 +45,12 @@ class AddBatchFeedback extends Controllerism {
 	@RequestMapping(method=Array(RequestMethod.POST), params=Array("!confirm"))
 	def confirmBatchUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
-		cmd.onBind
-		validator.validate(cmd, errors)
+		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
 			uploadZipForm(module,assignment,cmd)
 		} else {
+			cmd.onBind
+			cmd.postExtractValidation(errors)
 			mustBeLinked(assignment,module)
 			mustBeAbleTo(Participate(module))
 			Mav("admin/assignments/feedback/zipreview")
@@ -59,11 +60,18 @@ class AddBatchFeedback extends Controllerism {
 	@RequestMapping(method=Array(RequestMethod.POST), params=Array("confirm=true"))
 	def doUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
-		cmd.onBind
-		validator.validate(cmd, errors)
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
-		Mav("admin/assignments/feedback/zipreview")
+		cmd.preExtractValidation(errors)
+		cmd.onBind
+		cmd.postExtractValidation(errors)
+		if (errors.hasErrors) {
+			Mav("admin/assignments/feedback/zipreview")
+		} else {
+			// do apply, redirect back
+			//cmd.apply()
+			Mav("admin/assignments/feedback/zipreview")
+		}
 	}
 	
 	

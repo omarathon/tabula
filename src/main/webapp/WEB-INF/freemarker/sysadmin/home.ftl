@@ -11,6 +11,8 @@
 
 <p><a href="/sysadmin/masquerade/">Masquerade</a></p>
 
+<p><a href="/sysadmin/audit/list">List audit events</a></p>
+
 <p>
 <@form.form method="post" action="/sysadmin/import">
   <input type="submit" value="Run department/module import">
