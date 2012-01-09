@@ -176,14 +176,20 @@
 	
 	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
 		p:group="in-courses-sysadmins"
-		p:groupService-ref="groupService" />
+		p:groupService="#{realUserLookup.groupService}" />
+		<!-- FIXME groupservice wont be switched out for a maintenance version -->
 	
-	<bean id="userLookup" class="uk.ac.warwick.userlookup.UserLookup"
+	<bean id="userLookup" class="uk.ac.warwick.courses.services.SwappableUserLookupService">
+		<constructor-arg ref="realUserLookup" />
+	</bean>
+	
+	<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 		p:ssosUrl="${ssoclient.ssos.url}"
 		p:groupServiceLocation="${ssoclient.webgroups.url}" />
-		
-	<util:property-path id="groupService" path="userLookup.groupService"/>
-
+	
+	<!-- <util:property-path id="groupService" path="userLookup.groupService"/> -->
+ 	
+ 	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
@@ -239,6 +245,10 @@
 	</beans>
 	
 	<beans profile="dev,production">
+	
+		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
+			p:ssosUrl="${ssoclient.ssos.url}"
+			p:groupServiceLocation="${ssoclient.webgroups.url}" />
 	
 		<bean class="uk.ac.warwick.courses.system.DatabaseEncodingChecker" />
 		

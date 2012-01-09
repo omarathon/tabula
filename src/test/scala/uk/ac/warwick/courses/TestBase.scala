@@ -10,6 +10,9 @@ import org.specs.mock.JMocker.`with`
 import uk.ac.warwick.userlookup.User
 import org.springframework.util.FileCopyUtils
 import org.springframework.core.io.ClassPathResource
+import org.specs.mock.JMocker._
+import org.specs.mock.JMocker.{expect => expecting}
+import uk.ac.warwick.userlookup.UserLookupInterface
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
@@ -54,5 +57,7 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   } 
   
   def resourceAsBytes(path:String):Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
+  
+  
   
 }

@@ -9,13 +9,23 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.mock.web.MockMultipartFile
 import collection.JavaConversions._
 import org.springframework.validation.BindException
+import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.userlookup.UserLookup
+import uk.ac.warwick.userlookup.UserLookupBackend
+import uk.ac.warwick.courses.services.SwappableUserLookupService
+import uk.ac.warwick.courses.services.UserLookupService
+import org.junit.Before
+import uk.ac.warwick.userlookup.User
+import org.specs.mock.ClassMocker
+import uk.ac.warwick.courses.LenientUserLookup
 
-class AddFeedbackCommandTest extends AppContextTestBase {
+class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with LenientUserLookup {
 	
 	@Autowired var modules:ModuleDao =_
 	
 	@Transactional
 	@Test def add {
+		
 
 		withUser("abc") {
 			val feedbackDocument = resourceAsBytes("feedback.docx")

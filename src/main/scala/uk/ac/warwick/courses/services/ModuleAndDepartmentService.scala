@@ -24,7 +24,8 @@ class ModuleAndDepartmentService extends Logging  {
   
     @Autowired var moduleDao:ModuleDao =_
     @Autowired var departmentDao:DepartmentDao =_
-    @Autowired var groupService:GroupService =_
+    @Autowired var userLookup:UserLookupService =_
+	def groupService = userLookup.getGroupService
 
     
     @Transactional(readOnly=true)

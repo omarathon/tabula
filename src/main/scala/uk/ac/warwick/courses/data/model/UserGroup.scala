@@ -10,6 +10,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.{util => jutil}
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.courses.services.UserLookupService
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -31,7 +32,8 @@ import org.springframework.beans.factory.annotation.Configurable
 class UserGroup extends GeneratedId {
   
 	// Not created by Spring but @Autowiring works thanks to compile-time weaving.
-	@Autowired @transient private var groupService:GroupService =_
+	@Autowired @transient private var userLookup:UserLookupService =_
+	def groupService = userLookup.getGroupService
   
 	@BeanProperty var baseWebgroup:String =_
 	

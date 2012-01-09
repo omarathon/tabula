@@ -11,10 +11,11 @@ import uk.ac.warwick.courses.services.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.web.Cookies._
 import uk.ac.warwick.userlookup.UserLookup 
+import uk.ac.warwick.userlookup.UserLookupInterface
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
     @Autowired var securityService:SecurityService =_
-    @Autowired var userLookup:UserLookup =_
+    @Autowired var userLookup:UserLookupInterface =_
   
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
 	  val currentUser:CurrentUser = request.getAttribute("SSO_USER") match {

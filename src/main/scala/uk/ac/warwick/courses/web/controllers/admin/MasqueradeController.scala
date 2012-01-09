@@ -19,12 +19,13 @@ import uk.ac.warwick.courses.helpers.NoUser
 import org.springframework.web.bind.annotation.ModelAttribute
 import collection.JavaConversions._
 import java.util.HashMap
+import uk.ac.warwick.userlookup.UserLookupInterface
 
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends Controllerism {
 	
-	@Autowired var userLookup:UserLookup =_
+	@Autowired var userLookup:UserLookupInterface =_
 	
 	private def checkPermissions() = mustBeAbleTo(Masquerade())
 	

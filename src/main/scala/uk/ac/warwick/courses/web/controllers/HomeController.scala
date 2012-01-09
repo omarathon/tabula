@@ -10,10 +10,12 @@ import collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.Module
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import uk.ac.warwick.courses.services.UserLookupService
 
 @Controller class HomeController extends Controllerism {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
-	@Autowired var groupService: GroupService =_
+	@Autowired var userLookup:UserLookupService =_
+	def groupService = userLookup.getGroupService
   
 	@RequestMapping(Array("/"))	def home(user:CurrentUser) = {
 	  if (user.loggedIn) {

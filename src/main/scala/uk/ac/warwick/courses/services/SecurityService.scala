@@ -15,7 +15,9 @@ import uk.ac.warwick.courses.helpers.Logging
  */
 @Service
 class SecurityService extends Logging {
-	@Autowired var groupService:GroupService =_
+	@Autowired var userLookup:UserLookupService =_
+	
+	def groupService = userLookup.getGroupService
   
 	def isSysadmin(usercode:String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-courses-sysadmins")
 	// excludes sysadmins, though they can also masquerade

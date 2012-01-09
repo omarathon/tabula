@@ -37,6 +37,7 @@ import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.helpers.NoUser
 import uk.ac.warwick.courses.helpers.FoundUser
+import uk.ac.warwick.courses.services.UserLookupService
 
 class FeedbackItem {
 	@BeanProperty var uniNumber:String =_
@@ -62,7 +63,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
 	
   @Autowired var zipService:ZipService =_
-  @Autowired var userLookup:UserLookupInterface =_
+  @Autowired var userLookup:UserLookupService =_
 	
   /* for single upload */
   @BeanProperty var uniNumber:String =_
