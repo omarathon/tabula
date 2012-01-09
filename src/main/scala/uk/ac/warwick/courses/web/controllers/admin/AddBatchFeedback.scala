@@ -24,19 +24,9 @@ class AddBatchFeedback extends Controllerism {
 	
 	def onBind(cmd:AddFeedbackCommand) = cmd.onBind
 	
-//	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
-//		command.validation(errors)
-//	}
-	
-//	override def binding(binder:WebDataBinder, command:AddFeedbackCommand) {
-//		command.onBind
-//		//cmd.onBind
-//	}
-	
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def uploadZipForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand):Mav = {
-		//cmd.onBind
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/feedback/zipform")

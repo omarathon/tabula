@@ -40,6 +40,7 @@
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/CurrentUser.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/data/model/Feedback.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/data/Daoisms.scala
+/home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/helpers/UserExtractor.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/data/model/Assignment.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/UniversityId.scala
 /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/assignments/AddFeedbackCommand.scala -> /home/nick/workspace/courses/src/main/scala/uk/ac/warwick/courses/commands/Command.scala

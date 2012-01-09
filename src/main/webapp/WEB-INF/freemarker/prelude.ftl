@@ -4,4 +4,5 @@
 <#macro script path><script src="<@url resource=path/>" type="text/javascript"></script></#macro>
 <#import "formatters.ftl" as fmt />
 <#import "forms.ftl" as form />
+<#import "routes.ftl" as routes />
 </#compress>

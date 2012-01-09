@@ -33,6 +33,10 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.helpers.LazyLists
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.userlookup.UserLookup
+import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.courses.helpers.NoUser
+import uk.ac.warwick.courses.helpers.FoundUser
 
 class FeedbackItem {
 	@BeanProperty var uniNumber:String =_
@@ -55,9 +59,10 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	
   val directoryPattern = new Regex("""(\d{7})/([^/]+)""")
   val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
-  val anyFilePattern = new Regex(""".+([^/]+)""")
+  val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
 	
   @Autowired var zipService:ZipService =_
+  @Autowired var userLookup:UserLookupInterface =_
 	
   /* for single upload */
   @BeanProperty var uniNumber:String =_
@@ -100,6 +105,11 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	 	  if (!UniversityId.isValid(uniNumber)) {
 	 		  errors.rejectValue("uniNumber", "uniNumber.invalid")
 	 	  } else {
+	 	 	  userLookup.getUserByWarwickUniId(uniNumber) match {
+	 	 	 	  case FoundUser(u) => 
+	 	 	 	  case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
+	 	 	  }
+	 	 	  
 	 	 	  // Reject if feedback for this student is already uploaded
 	 	 	  assignment.feedbacks.find { _.universityId == uniNumber } match {
 	 	 	 	  case Some(feedback) => errors.rejectValue("uniNumber", "uniNumber.duplicate.feedback")

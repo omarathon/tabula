@@ -45,6 +45,7 @@
 -->
 <div class="submit-buttons actions">
 <input type="submit" value="Save">
+or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 

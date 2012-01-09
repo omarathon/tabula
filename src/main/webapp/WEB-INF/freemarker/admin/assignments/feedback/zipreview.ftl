@@ -1,14 +1,27 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-
 <#escape x as x?html>
 
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" commandName="addFeedbackCommand">
+<#assign commandName="addFeedbackCommand" />
+
+<@spring.bind path=commandName>
+<#assign hasErrors=status.errors.allErrors?size gt 0 />
+</@spring.bind>
+
+<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" commandName=commandName>
 
 <h1>Submit feedback for ${assignment.name}</h1>
 
 <@spring.bind path="items">
-<p>I've unpacked your zip file and I found feedback for ${status.value?size} students.</p>
+<p>
+	I've unpacked your zip file and I found feedback for ${status.value?size} students.
+
+	<#if hasErrors>
+	However, there were some problems with its contents, which are shown below.
+	You'll need to correct these problems with the zip and try again.
+	</#if>
+
+</p>
 </@spring.bind>
 
 <#if addFeedbackCommand.unrecognisedFiles?size gt 0>
@@ -37,13 +50,12 @@
 	<tr>
 	<@spring.nestedPath path="items[${item_index}]">
 		<@f.hidden path="uniNumber" />
-		<@spring.bind path="uniNumber">
 		<td>
-		
+			<@f.errors path="uniNumber" cssClass="error" />
+			<@spring.bind path="uniNumber">
 			${status.value}
-			
+			</@spring.bind>
 		</td>
-		</@spring.bind>
 		<#noescape>
 		<@spring.bind path="file.attached" htmlEscape="false">
 		<td>
@@ -64,8 +76,13 @@
 </table>
 
 <div class="submit-buttons">
+<#if hasErrors>
+<input type="submit" value="Confirm" disabled="true">
+<#else>
 <input type="hidden" name="confirm" value="true">
 <input type="submit" value="Confirm">
+</#if>
+or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 

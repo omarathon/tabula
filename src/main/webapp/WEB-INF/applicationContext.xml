@@ -179,7 +179,8 @@
 		p:groupService-ref="groupService" />
 	
 	<bean id="userLookup" class="uk.ac.warwick.userlookup.UserLookup"
-		p:groupServiceLocation="https://webgroups.warwick.ac.uk/" />
+		p:ssosUrl="${ssoclient.ssos.url}"
+		p:groupServiceLocation="${ssoclient.webgroups.url}" />
 		
 	<util:property-path id="groupService" path="userLookup.groupService"/>
 
