@@ -38,8 +38,8 @@ class AuditEventService extends Daoisms {
 		a.eventDate = new DateTime(array(0))
 		a.eventStage = array(1).toString
 		a.eventType = array(2).toString
-		a.masqueradeUserId = array(3).toString
-		a.userId = array(4).toString
+		a.masqueradeUserId = array(3).asInstanceOf[String]
+		a.userId = array(4).asInstanceOf[String]
 		a.data = array(5).toString
 		a
 	}
