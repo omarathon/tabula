@@ -7,7 +7,7 @@
 
 <#if feedback??>
 
-	<h2>Feedback for ${feedback.universityId}</h2>
+	<h2>Feedback for ${user.universityId}</h2>
 	
 	<p>
 		Your feedback consists of ${feedback.attachments?size} files,
@@ -15,6 +15,8 @@
 	</p>
 
 <#else>
+
+	<h2>${user.fullName} (${user.universityId})</h2>
 
 	<p>
 		If you've submitted your assignment, you should be able to access your
