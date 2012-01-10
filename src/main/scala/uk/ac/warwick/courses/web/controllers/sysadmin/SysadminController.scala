@@ -19,14 +19,14 @@ import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 import org.springframework.web.bind.annotation.RequestParam
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.Cookie
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
  */
 
-abstract class BaseSysadminController extends Controllerism {
+abstract class BaseSysadminController extends BaseController {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
 	
 	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")

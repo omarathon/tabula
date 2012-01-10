@@ -1,21 +1,17 @@
 package uk.ac.warwick.courses.web.controllers.sysadmin
 
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.courses.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.courses.data.Daoisms
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
-import org.springframework.jdbc.`object`.MappingSqlQuery
-import java.sql.ResultSet
-import org.joda.time.DateTime
-import org.springframework.jdbc.core.RowMapper
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.courses.services.AuditEventService
+import uk.ac.warwick.courses.web.controllers.BaseController
+import uk.ac.warwick.courses.web.Mav
 
 @Controller
-class AuditLogController extends Controllerism with Daoisms {
+class AuditLogController extends BaseController {
 
 	@Autowired var auditEventService:AuditEventService =_
 	

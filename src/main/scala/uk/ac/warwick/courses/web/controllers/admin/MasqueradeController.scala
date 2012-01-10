@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.courses.web.Cookies._
 import uk.ac.warwick.courses.web.Cookie
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.courses.actions.Masquerade
@@ -23,7 +23,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
-class MasqueradeController extends Controllerism {
+class MasqueradeController extends BaseController {
 	
 	@Autowired var userLookup:UserLookupInterface =_
 	

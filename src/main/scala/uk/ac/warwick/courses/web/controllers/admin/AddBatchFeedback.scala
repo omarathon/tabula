@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.web.controllers.admin
 
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import uk.ac.warwick.courses.web.controllers.BaseController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,7 +18,7 @@ import javax.validation.Valid
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
-class AddBatchFeedback extends Controllerism {
+class AddBatchFeedback extends BaseController {
 	@ModelAttribute def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddFeedbackCommand(assignment, user)
 	

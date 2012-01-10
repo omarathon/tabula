@@ -10,7 +10,7 @@ import uk.ac.warwick.courses.system.ExceptionResolver
 import uk.ac.warwick.courses.web.Mav
 
 @Controller
-class ErrorController extends Controllerism {
+class ErrorController extends BaseController {
 
   override val loggerName = "Exceptions"
   

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod._
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
-class ModuleController extends Controllerism {
+class ModuleController extends BaseController {
   
 	@RequestMapping
 	def viewModule(@PathVariable module:Module) = {
@@ -32,7 +32,7 @@ class ModuleController extends Controllerism {
 
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
-class AssignmentController extends Controllerism {
+class AssignmentController extends BaseController {
 	
 	@Autowired var feedbackDao:FeedbackDao =_
 	

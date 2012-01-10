@@ -30,7 +30,7 @@ import uk.ac.warwick.courses.commands.feedback.AdminGetAllFeedbackCommand
  */
 
 @Controller
-class AdminHome extends Controllerism {
+class AdminHome extends BaseController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
@@ -54,7 +54,7 @@ class AdminHome extends Controllerism {
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
-class AddAssignment extends Controllerism {
+class AddAssignment extends BaseController {
 	
 	@Autowired var assignmentService:AssignmentService =_
 
@@ -105,7 +105,7 @@ class AddAssignment extends Controllerism {
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/edit"))
-class EditAssignment extends Controllerism {
+class EditAssignment extends BaseController {
 	
 	validatesWith{ (form:EditAssignmentCommand, errors:Errors) =>
 		if (form.academicYear != form.assignment.academicYear) {
@@ -149,7 +149,7 @@ class EditAssignment extends Controllerism {
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
-class DownloadFeedback extends Controllerism {
+class DownloadFeedback extends BaseController {
 	@Autowired var feedbackDao:FeedbackDao =_
 	@Autowired var fileServer:FileServer =_
 	
@@ -171,7 +171,7 @@ class DownloadFeedback extends Controllerism {
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
-class DownloadAllFeedback extends Controllerism {
+class DownloadAllFeedback extends BaseController {
 	@Autowired var fileServer:FileServer =_
 	@RequestMapping
 	def download(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable filename:String, response:HttpServletResponse) {
@@ -184,7 +184,7 @@ class DownloadAllFeedback extends Controllerism {
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
-class ListFeedback extends Controllerism {
+class ListFeedback extends BaseController {
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
 		mustBeLinked(assignment, module)

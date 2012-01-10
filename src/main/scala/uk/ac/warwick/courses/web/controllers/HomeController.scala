@@ -12,7 +12,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import uk.ac.warwick.courses.services.UserLookupService
 
-@Controller class HomeController extends Controllerism {
+@Controller class HomeController extends BaseController {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
 	@Autowired var userLookup:UserLookupService =_
 	def groupService = userLookup.getGroupService

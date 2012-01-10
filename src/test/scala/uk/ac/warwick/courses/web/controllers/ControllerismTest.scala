@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 
 class ControllerismTest extends TestBase {
 	@Test def validatesWith {
-		val controller = new Controllerism {
+		val controller = new BaseController {
 			validatesWith[String] { (cmd:String, errors:Errors) =>
 				if (cmd != "hello") errors.reject("nope")
 			}

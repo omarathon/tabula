@@ -3,7 +3,7 @@ package uk.ac.warwick.courses.web.controllers.admin
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.courses.web.controllers.Controllerism
+import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.commands.assignments.AddFeedbackCommand
 import javax.validation.Valid
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
-class AddFeedback extends Controllerism {
+class AddFeedback extends BaseController {
 	
 	@ModelAttribute
 	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 

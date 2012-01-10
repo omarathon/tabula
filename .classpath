@@ -73,7 +73,7 @@
 	<classpathentry kind="lib" path="lib/test/objenesis-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/scalatest-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-api-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-core-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-core-2.2.2.jar" sourcepath="/home/nick/.m2/repository/org/apache/tiles/tiles-core/2.2.2/tiles-core-2.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-extras-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-freemarker-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-servlet-2.2.2.jar"/>

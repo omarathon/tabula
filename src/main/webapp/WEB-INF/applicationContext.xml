@@ -235,6 +235,8 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
+	
+	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
@@ -272,9 +274,19 @@
 			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
+		
 		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
 			p:definitions="/WEB-INF/defs/views.xml"
-			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory" />
+			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory">
+			<property name="tilesProperties">
+				<props>
+					<prop key="#{T(org.apache.tiles.definition.DefinitionsFactory).DEFINITION_DAO_INIT_PARAM}">
+						org.apache.tiles.definition.dao.ResolvingLocaleUrlDefinitionDAO
+					</prop>
+				</props>
+			</property>
+		</bean>
+			
 	</beans>
 	
 	<beans profile="test">

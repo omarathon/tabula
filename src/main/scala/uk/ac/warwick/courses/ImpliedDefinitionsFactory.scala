@@ -18,7 +18,7 @@ import scala.collection.mutable
  * 
  * e.g. "time/view" will use a body template of /WEB-INF/freemarker/time/view.ftl
  */
-class ImpliedDefinitionsFactory extends UrlDefinitionsFactory with Logging {
+class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging {
 
   /*
    * Return a definition if found in XML. Otherwise if it doesn't start with /,

@@ -17,12 +17,14 @@ import uk.ac.warwick.courses.data.model.Feedback
 import javax.annotation.Resource
 import org.springframework.beans.factory.annotation.Required
 import uk.ac.warwick.courses.events.EventHandling
+import org.springframework.stereotype.Controller
+import uk.ac.warwick.courses.AppImports
 
 /**
  * Useful traits for all controllers to have.
  */
-trait Controllerism extends ValidatesCommand with Logging with EventHandling {
-	
+@Controller
+abstract class BaseController extends ValidatesCommand with Logging with EventHandling with AppImports {
   // make Mav available to controllers without needing to import
   val Mav = uk.ac.warwick.courses.web.Mav
   
