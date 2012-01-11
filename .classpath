@@ -21,24 +21,6 @@
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpclient-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/dependencies/com.springsource.org.aopalliance-1.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.beans-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.context-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.core-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jms-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RC1.jar" sourcepath="lib/src/org.springframework.web.servlet-sources-3.1.0.RC1.jar"/>
-	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RC1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjtools.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/warwickutils-all.jar" sourcepath="/utils/src"/>
 	<classpathentry kind="lib" path="lib/runtime/ehcache/ehcache-core-1.7.0.jar"/>
@@ -64,6 +46,24 @@
 	<classpathentry kind="lib" path="lib/build/lesscss-engine-1.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.core-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jms-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RELEASE.jar" sourcepath="lib/src/org.springframework.web.servlet-sources-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>

@@ -63,7 +63,7 @@
         destdir="target/${war.name}/WEB-INF/classes" 
         classpathref="build.classpath"
   		verbose="false"
-        aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RC1.jar"
+        aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar"
     	  log="target/log/iajc.log" />
 	<!-- bamboo's ant doesn't have resourcecontains -->
   	<!--
