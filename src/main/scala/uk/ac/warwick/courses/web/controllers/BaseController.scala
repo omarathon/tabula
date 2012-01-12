@@ -19,12 +19,43 @@ import org.springframework.beans.factory.annotation.Required
 import uk.ac.warwick.courses.events.EventHandling
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.AppImports
+import uk.ac.warwick.courses.CurrentUser
+
+abstract trait ControllerMethods extends Logging {
+	def mustBeLinked(assignment:Assignment, module:Module) = 
+	 if (assignment.module.id != module.id) {
+		logger.info("Not displaying assignment as it doesn't belong to specified module")
+  		throw new ItemNotFoundException(assignment)
+	 }
+  
+	  def mustBeLinked(feedback:Feedback, assignment:Assignment) = 
+		 if (feedback.assignment.id != assignment.id) {
+			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
+	  		throw new ItemNotFoundException(feedback)
+		 }
+	  
+	  /**
+	   * Returns an object if it is non-null and not None. Otherwise
+	   * it throws an ItemNotFoundException, which should get picked
+	   * up by an exception handler to display a 404 page.
+	   */
+	  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
+		  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+		  case None => throw new ItemNotFoundException()
+		  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+		  case _ => throw new ItemNotFoundException()
+	  }
+	   
+	 def user:CurrentUser
+	 var securityService:SecurityService
+	 def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
+}
 
 /**
  * Useful traits for all controllers to have.
  */
 @Controller
-abstract class BaseController extends ValidatesCommand with Logging with EventHandling with AppImports {
+abstract class BaseController extends ControllerMethods with ValidatesCommand with Logging with EventHandling with AppImports {
   // make Mav available to controllers without needing to import
   val Mav = uk.ac.warwick.courses.web.Mav
   
@@ -39,33 +70,11 @@ abstract class BaseController extends ValidatesCommand with Logging with EventHa
   
   def requestInfo = RequestInfo.fromThread
   def user = requestInfo.get.user
-  def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
+  
   
   def ajax = requestInfo.get.ajax
   
-  def mustBeLinked(assignment:Assignment, module:Module) = 
-	 if (assignment.module.id != module.id) {
-		logger.info("Not displaying assignment as it doesn't belong to specified module")
-  		throw new ItemNotFoundException(assignment)
-	 }
   
-  def mustBeLinked(feedback:Feedback, assignment:Assignment) = 
-	 if (feedback.assignment.id != assignment.id) {
-		logger.info("Not displaying feedback as it doesn't belong to specified assignment")
-  		throw new ItemNotFoundException(feedback)
-	 }
-  
-  /**
-   * Returns an object if it is non-null and not None. Otherwise
-   * it throws an ItemNotFoundException, which should get picked
-   * up by an exception handler to display a 404 page.
-   */
-  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
-	  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
-	  case None => throw new ItemNotFoundException()
-	  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
-	  case _ => throw new ItemNotFoundException()
-  }
   
   def compositeValidator:Validator = {
 	  if (validator != null) {

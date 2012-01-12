@@ -189,7 +189,6 @@
 	
 	<!-- <util:property-path id="groupService" path="userLookup.groupService"/> -->
  	
- 	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
@@ -199,6 +198,7 @@
 			<map>
 				<entry key="url"><bean class="uk.ac.warwick.courses.web.views.UrlMethodModel" /></entry>
 				<entry key="rootUrl" value="${toplevel.url}" />
+				<entry key="userlookup"><bean class="uk.ac.warwick.courses.web.views.UserLookupTag" /></entry>
 			</map>
 		</property>
 	</bean>

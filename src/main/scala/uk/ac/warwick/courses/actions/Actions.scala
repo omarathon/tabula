@@ -5,8 +5,10 @@ sealed abstract class Action[T]
 
 case class View(val item:Viewable) extends Action[Viewable]
 case class Submit(val item:Assignment) extends Action[Assignment]
+// At the moment, participating means viewing module overview, listing and uploading feedback.
 case class Participate(val item:Participatable) extends Action[Participatable]
 case class Manage(val item:Manageable) extends Action[Manageable]
+// full-on sysadmin masquerading.
 case class Masquerade() extends Action[Unit]
 
 trait Viewable
@@ -22,6 +24,21 @@ object Action {
 	val submit = classOf[Submit]
 	val participate = classOf[Participate]
 	val manage = classOf[Manage]
+	
+	/**
+	 * Create an Action from an action name (e.g. "View") and a target.
+	 * Most likely useful in view templates, for permissions checking.
+	 * 
+	 * Assumes all actions have one single-argument constructor.
+	 */
+	def of(name:String, target:Object) : Action[_] = {
+		try {
+			val clz = Class.forName("uk.ac.warwick.courses.actions."+name).asSubclass(classOf[Action[_]])
+			clz.getConstructors()(0).newInstance(target).asInstanceOf[Action[_]]
+		} catch {
+			case e:ClassNotFoundException => throw new IllegalArgumentException("Action "+name+" not recognised")
+		}
+	}
 	
 	/**
 	 * When I created the Action subclasses it worked great as you could

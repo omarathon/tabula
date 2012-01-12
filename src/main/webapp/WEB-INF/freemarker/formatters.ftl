@@ -1,11 +1,16 @@
 <#compress>
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
+
 <#macro module_name module>
 <span class="code">${module.code?upper_case}</span> <span class="name">(${module.name})</span>
 </#macro>
+
 <#macro date date>
 <@warwick.formatDate value=date pattern="d MMMM yyyy HH:mm:ss" />
 </#macro>
+
+<#macro p number singular>${number} ${singular}<#if number!=1>s</#if></#macro>
+
 <#macro usergroup_summary ug>
 <div class="usergroup-summary">
 <#if ug.baseWebgroup??>
@@ -22,5 +27,19 @@
 	</#if>
 </#if>
 </div>
+</#macro>
+
+<#-- comma separated list of users by name -->
+<#macro user_list_csv ids>
+<@userlookup ids=ids>
+	<#list returned_users?keys?sort as id>
+		<#assign returned_user=returned_users[id] />
+		<#if returned_user.foundUser>
+			${returned_user.fullName}<#if id_has_next>,</#if>
+		<#else>
+			${id}<#if id_has_next>,</#if>
+		</#if>
+	</#list>
+	</@userlookup>
 </#macro>
 </#compress>

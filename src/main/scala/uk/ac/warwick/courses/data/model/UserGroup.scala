@@ -11,6 +11,7 @@ import scala.collection.JavaConverters._
 import java.{util => jutil}
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.helpers.ArrayList
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -43,13 +44,13 @@ class UserGroup extends GeneratedId {
 	@JoinTable(name="UserGroupInclude", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")
 	))
-	@BeanProperty var includeUsers:jutil.List[String] = List()
+	@BeanProperty var includeUsers:jutil.List[String] = ArrayList()
 	
 	@ElementCollection @Column(name="usercode")
 	@JoinTable(name="UserGroupExclude", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")
 	))
-	@BeanProperty var excludeUsers:jutil.List[String] = List()
+	@BeanProperty var excludeUsers:jutil.List[String] = ArrayList()
 	
 	def addUser(user:String) = includeUsers.add(user)
 	def removeUser(user:String) = includeUsers.remove(user)

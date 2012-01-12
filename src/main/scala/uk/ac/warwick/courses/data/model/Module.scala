@@ -37,6 +37,11 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 	@JoinColumn(name="participantsgroup_id")
 	@BeanProperty var participants:UserGroup = new UserGroup
 	
+	/** Create an empty participants group if it's null. */
+	def ensureParticipantsGroup {
+		if (participants == null) participants = new UserGroup
+	}
+	
 	@ManyToOne
 	@JoinColumn(name="department_id")
 	@BeanProperty var department:Department = _

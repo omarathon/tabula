@@ -1,6 +1,6 @@
 body {
   font-size: 14px;
-  font-family: Calibri, "Bitstream Vera Sans", "Trebuchet MS", Trebuchet, sans-serif;
+  font-family: Ubuntu, Calibri, "Bitstream Vera Sans", "Trebuchet MS", Trebuchet, sans-serif;
   letter-spacing: normal;
   word-spacing: normal;
 }
@@ -24,7 +24,6 @@ body {
   font-family: inherit;
 }
 #site-header-container {
-  font-family: Cambria, "Liberation Serif", Georgia, serif;
   font-size: 52px;
   font-weight: normal;
   font-style: normal;
@@ -65,8 +64,9 @@ h2,
 h3,
 h4,
 h5,
-h6 {
-  font-family: Cambria, "Liberation Serif", Georgia, serif;
+h6,
+#site-header-container {
+  font-family: 'Ubuntu', 'Helvetica Neue', Arial, Sans, sans-serif;
   line-height: 1.4em;
 }
 h1 {

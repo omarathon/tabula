@@ -1,3 +1,4 @@
+
 jQuery(function($){
 	
 	$('input.date-time-picker').AnyTime_picker({
@@ -9,4 +10,13 @@ jQuery(function($){
 		
 	});
 	
-})
+});
+
+var Forms = {};
+Forms.DeletePermission = function(moduleCode, userId) {
+	if (confirm('Are you sure that you want to remove permission from ' + userId + "?")) {
+		
+	} else {
+		
+	}
+}

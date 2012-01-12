@@ -15,8 +15,8 @@
 </td>
 <td>${item.eventType}</td>
 <td>${item.eventStage}</td>
-<td>${item.userId}</td>
-<td>${item.masqueradeUserId}</td>
+<td>${item.userId!""}</td>
+<td>${item.masqueradeUserId!""}</td>
 </tr>
 </#list>
 </table>

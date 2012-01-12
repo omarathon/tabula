@@ -1,4 +1,6 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+
 <#macro row>
 <div class="form-row"><#nested/></div>
 </#macro>
@@ -15,6 +17,25 @@
 	<#nested />
 	</@field>
 </@row>
+</#macro>
+
+<#macro userpicker path list=false multiple=false>
+<@spring.bind path=path>
+<#-- This handles whether we're binding to a list or not but I think
+	it might still be more verbose than it needs to be. -->
+<#if list>
+	<#assign ids=status.value />
+<#elseif status.value??>
+	<#assign ids=[status.value] />
+</#if>
+<#if ids??>
+<#list ids as id>
+	<input type="text" name="${status.expression}" value="${id}">
+</#list>
+<#else>
+	<input type="text" name="${status.expression}">
+</#if>
+</@spring.bind>
 </#macro>
 
 <#macro filewidget basename>

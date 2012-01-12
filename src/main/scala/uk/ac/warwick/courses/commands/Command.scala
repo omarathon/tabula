@@ -4,7 +4,9 @@ import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.AppImports
 
 trait Describable {
+	// describe the thing that's happening.
 	def describe(d:Description)
+	// optional extra description after the thing's happened.
 	def describeResult(d:Description) {}
 	val eventName:String
 }
@@ -14,7 +16,7 @@ trait Describable {
  * It could be anything that we might want to keep track of,
  * especially if we might want to audit log it. Anything that
  * adds or changes any data is a candidate. Read-only queries,
- * not so much.
+ * not so much (unless we're interested in when a thing is observed/downloaded).
  */
 trait Command[R] extends Describable with AppImports {
 	def apply(): R
