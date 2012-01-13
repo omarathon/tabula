@@ -200,6 +200,7 @@
 				<entry key="rootUrl" value="${toplevel.url}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.courses.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.courses.web.views.PermissionFunction" /></entry>
+				<entry key="theYear"><bean class="uk.ac.warwick.courses.web.views.TheYear" /></entry>
 			</map>
 		</property>
 	</bean>

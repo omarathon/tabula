@@ -37,6 +37,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
       case directive: TemplateDirectiveModel => superWrap(directive)
       case method: TemplateMethodModel => superWrap(method)
+      case model:TemplateModel => superWrap(model)
       case sobj: ScalaObject => new ScalaHashModel(sobj, this)
       case _ => superWrap(obj)
     }
