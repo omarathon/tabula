@@ -7,4 +7,5 @@
 <#import "formatters.ftl" as fmt />
 <#import "forms.ftl" as form />
 <#import "routes.ftl" as routes />
+<#import "can_do.ftl" as can />
 </#compress>

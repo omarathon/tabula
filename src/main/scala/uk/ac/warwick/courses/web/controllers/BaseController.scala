@@ -48,6 +48,7 @@ abstract trait ControllerMethods extends Logging {
 	   
 	 def user:CurrentUser
 	 var securityService:SecurityService
+	 def can(action:Action[_]) = securityService.can(user, action)
 	 def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
 }
 

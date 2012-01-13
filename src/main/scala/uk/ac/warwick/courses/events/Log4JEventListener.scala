@@ -34,7 +34,7 @@ class Log4JEventListener extends EventListener {
 		if (event.userId != null) {
 			s ++= " user=" ++ userString(event.userId)
 			if (event.realUserId != event.userId) {
-				s ++= " realUser=" ++ userString(event.userId)
+				s ++= " realUser=" ++ userString(event.realUserId)
 			}
 		}
 		describe(event, s)

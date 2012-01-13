@@ -1,29 +1,30 @@
 package uk.ac.warwick.courses.web.controllers
 import scala.collection.JavaConversions._
+
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.FileCopyUtils
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+
+import java.util.{List=>JList}
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.commands.assignments._
+import uk.ac.warwick.courses.commands.feedback.AdminGetAllFeedbackCommand
+import uk.ac.warwick.courses.commands.feedback.AdminGetSingleFeedbackCommand
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.data.FeedbackDao
 import uk.ac.warwick.courses.data.FileDao
+import uk.ac.warwick.courses.services.fileserver.FileServer
+import uk.ac.warwick.courses.services.fileserver.RenderableAttachment
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
-import uk.ac.warwick.courses.services.fileserver.FileServer
-import uk.ac.warwick.courses.services.fileserver.RenderableAttachment
-import uk.ac.warwick.courses.data.FeedbackDao
-import uk.ac.warwick.courses.commands.feedback.AdminGetSingleFeedbackCommand
-import uk.ac.warwick.courses.commands.feedback.AdminGetAllFeedbackCommand
 
 /**
  * Screens for department and module admins.
@@ -42,10 +43,18 @@ class AdminHome extends BaseController {
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
 	def adminDepartment(@PathVariable dept: Department, user: CurrentUser) = {
-		mustBeAbleTo(Manage(dept))
+		val isDeptManager = can(Manage(dept))
+		val modules:JList[Module] = if (isDeptManager) {
+			dept.modules
+		} else {
+			moduleService.modulesManagedBy(user.idForPermissions).toList
+		}
+		if (modules.isEmpty()) {
+			mustBeAbleTo(Manage(dept))
+		}
 		Mav("admin/department",
 			"department" -> dept,
-			"modules" -> dept.modules.sortBy{ (module) => (module.assignments.isEmpty, module.code) })
+			"modules" -> modules.sortBy{ (module) => (module.assignments.isEmpty, module.code) })
 	}
 	
 }
@@ -82,7 +91,7 @@ class AddAssignment extends BaseController {
 	@RequestMapping(method = Array(RequestMethod.GET))
 	def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
 			form: AddAssignmentCommand, errors: Errors) = {
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module)
@@ -156,7 +165,7 @@ class DownloadFeedback extends BaseController {
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable feedbackId:String, @PathVariable filename:String, response:HttpServletResponse) {
 		mustBeLinked(assignment, module)
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 
 		feedbackDao.getFeedback(feedbackId) match {
 			case Some(feedback) => {
@@ -176,7 +185,7 @@ class DownloadAllFeedback extends BaseController {
 	@RequestMapping
 	def download(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable filename:String, response:HttpServletResponse) {
 		mustBeLinked(assignment, module)
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 		val renderable = new AdminGetAllFeedbackCommand(assignment).apply()
 		fileServer.serve(renderable, response)
 	}
@@ -188,7 +197,7 @@ class ListFeedback extends BaseController {
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
 		mustBeLinked(assignment, module)
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/feedback/list")
 	}
 }

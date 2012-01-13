@@ -5,11 +5,15 @@
 <h1>${department.name}</h1>
 
 <#list modules as module>
+<#assign can_manage=can.manage(module) />
 <a id="module-${module.code}"></a>
 <div class="module-info">
 <h2><@fmt.module_name module /></h2>
 	
+	
+	<#if can_manage >
 	<div>
+		
 		<#assign  module_managers = ((module.participants.includeUsers)![]) />
 		<@fmt.p module_managers?size "module manager"/><#if module_managers?size gt 0>:
 			<@fmt.user_list_csv ids=module_managers />
@@ -21,11 +25,14 @@
 		</a>
 		</span>
 	</div>
+	</#if>
 	
 	<#if module.assignments!?size = 0>
 		<p>This module has no assignments. 
 		<span class="actions">
+		<#if can_manage >
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
+		</#if>
 		</span>
 		</p>
 	<#else>
@@ -46,7 +53,9 @@
 				</div>
 			</div>
 			<div class="actions">
+				<#if can_manage >
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
+				</#if>
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
 				<br>
 				<#if has_feedback >
@@ -58,7 +67,9 @@
 		</#list>
 		
 		<div class="actions">
+		<#if can_manage >
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
+		</#if>
 		</div>
 	</#if>
 	
