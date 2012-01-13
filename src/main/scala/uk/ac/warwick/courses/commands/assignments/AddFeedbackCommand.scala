@@ -52,9 +52,11 @@ class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
 @Configurable
 class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[List[Feedback]] with Daoisms with Logging {
 	
-  val directoryPattern = new Regex("""(\d{7})/([^/]+)""")
-  val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
-  val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
+//  val directoryPattern = new Regex("""*.*?(\d{7}))*.*?/([^/]+)""")
+//  val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
+//  val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
+  
+  val uniNumberPattern = new Regex("""(\d{7,})""")
 	
   @Autowired var zipService:ZipService =_
   @Autowired var userLookup:UserLookupService =_
@@ -71,6 +73,8 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   @BeanProperty var archive:MultipartFile = _
   @BeanProperty var confirmed:Boolean = false
   /* ---- */
+  
+  private def filenameOf(path:String) = new java.io.File(path).getName
   
   def preExtractValidation(errors:Errors) = {
 	  if (archive != null) {
@@ -127,7 +131,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		val bits = Zips.iterator(zip) { (iterator) =>
 			for (entry <- iterator if !entry.isDirectory) yield {
 				val f = new FileAttachment
-				f.name = filenameOf(entry)
+				f.name = filenameOf(entry.getName)
 				f.uploadedData = new ZipEntryInputStream(zip, entry)
 				f.uploadedDataLength = entry.getSize
 				
@@ -157,11 +161,25 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		}
 		
 		for ((filename, file) <- bits) {
-			filename match {
-				case directoryPattern(number, name) => putItem(number, name, file)
-				case filePattern(number, name) => putItem(number, name, file)
-				case _ => unrecognisedFiles.addAll(file.attached)
+			// match uni numbers found in file path
+			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map{_.subgroups(0)}.toList
+			val numbers = allNumbers.filter { _.length == 7 }
+			
+			if (numbers.isEmpty) {
+				// no numbers at all.
+				unrecognisedFiles.addAll(file.attached)
+			} else if (numbers.removeDuplicates.size > 1) {
+				// multiple different numbers, ambiguous, reject this. 
+				unrecognisedFiles.addAll(file.attached)
+			} else {
+				// one 7 digit number, this one might be okay.
+				putItem(numbers.head, filenameOf(filename), file)
 			}
+//			filename match {
+//				case directoryPattern(number, name) => putItem(number, name, file)
+//				case filePattern(number, name) => putItem(number, name, file)
+//				case _ => unrecognisedFiles.addAll(file.attached)
+//			}
 		}
 		
 		items = itemMap.values().toList
@@ -209,13 +227,13 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   	  }
   }
   
-  def filenameOf(entry:ZipEntry):String = {
-		entry.getName match {
-			case directoryPattern(number, name) => name
-			case filePattern(number, name) => name
-			case anyFilePattern(name) => name 
-		}
-	}
+//  def filenameOf(entry:ZipEntry):String = {
+//		entry.getName match {
+//			case directoryPattern(number, name) => name
+//			case filePattern(number, name) => name
+//			case anyFilePattern(name) => name 
+//		}
+//	}
 
   def describe(d: Description) = d.assignment(assignment).properties(
 	  "studentId" -> uniNumber
