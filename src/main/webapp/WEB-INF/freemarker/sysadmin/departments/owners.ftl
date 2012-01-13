@@ -24,14 +24,17 @@
 </#if>
 
 <ul>
-<#list ownerlist as owner>
-<li>${owner}
+<@userlookup ids=ownerlist>
+<#list returned_users?values as owner>
+<li>
  <form method="post" action="/sysadmin/departments/${department.code}/owners/delete">
+    ${owner.userId} <#if owner.foundUser>(${owner.fullName})</#if>
  	<input type="hidden" name="usercode" value="${owner}" />
  	<input type="submit" value="delete" onclick="return confirm('Are you sure you want to remove this department owner?')" />
  </form>
 </li>
 </#list>
+</@userlookup>
 </ul>
 </#if>
 
