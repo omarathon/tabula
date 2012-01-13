@@ -34,7 +34,8 @@
 	<context:property-placeholder location="
 		classpath:/default.properties,
 		classpath:/courses.properties,
-		classpath:/courses-private.properties" />
+		classpath:/courses-private.properties,
+		/WEB-INF/build.properties" />
 	
 	<bean class="uk.ac.warwick.courses.events.EventLoggingAspect" factory-method="aspectOf">
 		<property name="listener" ref="eventListener" />
@@ -192,7 +193,9 @@
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
-		
+	
+	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
+	
 	<bean id="freemarkerConfiguration" class="uk.ac.warwick.courses.web.views.ScalaFreemarkerConfiguration">
 		<property name="sharedVariables">
 			<map>
@@ -201,6 +204,11 @@
 				<entry key="userlookup"><bean class="uk.ac.warwick.courses.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.courses.web.views.PermissionFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.courses.web.views.TheYear" /></entry>
+				<entry key="appBuildDate">
+					<bean factory-bean="dateTimeFormatter" factory-method="parseDateTime">
+						<constructor-arg value="${build.time}" />
+					</bean>
+				</entry>
 			</map>
 		</property>
 	</bean>
