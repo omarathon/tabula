@@ -10,9 +10,15 @@ import javax.persistence.JoinColumn
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence._
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.courses.data.FileDao
 
+@Configurable
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
+	
+	@transient @Autowired var fileDao:FileDao =_
 	
 	// optional link to a Submission
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -58,4 +64,5 @@ class FileAttachment extends GeneratedId {
 	
 	@transient @BeanProperty var uploadedData:InputStream = null
 	@transient @BeanProperty var uploadedDataLength:Long = 0
+	
 }

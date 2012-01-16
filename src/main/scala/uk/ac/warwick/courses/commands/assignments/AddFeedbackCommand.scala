@@ -38,6 +38,13 @@ class FeedbackItem {
     @BeanProperty var file:UploadedFile = new UploadedFile
 }
 
+// Purely for storing in command to display on the model.
+case class ProblemFile(
+		@BeanProperty val path:String, 
+		@BeanProperty val file:FileAttachment) {
+	def this() = this(null,null)
+}
+
 // Purely to generate an audit log event
 class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
 	def apply() {}
@@ -47,7 +54,9 @@ class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
 }
 
 /**
- * Command which (currently) adds a single piece of feedback for one assignment
+ * Command which adds feedback for an assignment.
+ * It either takes a single uniNumber and file, or it takes a 
+ * zip of files with uni numbers embedded in their path.
  */
 @Configurable
 class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[List[Feedback]] with Daoisms with Logging {
@@ -60,6 +69,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	
   @Autowired var zipService:ZipService =_
   @Autowired var userLookup:UserLookupService =_
+  @Autowired var fileDao:FileDao =_
 	
   /* for single upload */
   @BeanProperty var uniNumber:String =_
@@ -69,7 +79,8 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   /* for multiple upload */
   // use lazy list with factory as spring doesn't know how to dynamically create items 
   @BeanProperty var items:JList[FeedbackItem] = LazyLists.simpleFactory()
-  @BeanProperty var unrecognisedFiles:JList[FileAttachment] = LazyLists.simpleFactory()
+  @BeanProperty var unrecognisedFiles:JList[ProblemFile] = LazyLists.simpleFactory()
+  @BeanProperty var invalidFiles:JList[ProblemFile] = LazyLists.simpleFactory()
   @BeanProperty var archive:MultipartFile = _
   @BeanProperty var confirmed:Boolean = false
   /* ---- */
@@ -86,6 +97,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   }
   
   def postExtractValidation(errors:Errors) = {
+	  if (!invalidFiles.isEmpty()) errors.rejectValue("invalidFiles", "invalidFiles")
 	  if (items != null && !items.isEmpty()) {
 	 	  for (i <- 0 until items.length) {
 	 	 	  val item = items.get(i)
@@ -134,12 +146,8 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 				f.name = filenameOf(entry.getName)
 				f.uploadedData = new ZipEntryInputStream(zip, entry)
 				f.uploadedDataLength = entry.getSize
-				
-				val file = new UploadedFile
-				file.attached = List(f)
-				file.onBind
-				
-				(entry.getName, file)
+				fileDao.saveTemporary(f)
+				(entry.getName, f)
 			}
 		}
 		
@@ -149,13 +157,13 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 
 		unrecognisedFiles.clear()
 		
-		def putItem(number:String, name:String, file:UploadedFile) {
+		def putItem(number:String, name:String, file:FileAttachment) {
 			if (itemMap.containsKey(number)) {
-				itemMap.get(number).file.attached.addAll(file.attached)
+				itemMap.get(number).file.attached.add(file)
 			} else {
 				val item = new FeedbackItem
 				item.uniNumber = number
-				item.file.attached.addAll(file.attached)
+				item.file.attached.add(file)
 				itemMap.put(number, item)
 			}
 		}
@@ -163,23 +171,20 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		for ((filename, file) <- bits) {
 			// match uni numbers found in file path
 			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map{_.subgroups(0)}.toList
+			
+			// ignore any numbers longer than 7 characters.
 			val numbers = allNumbers.filter { _.length == 7 }
 			
 			if (numbers.isEmpty) {
 				// no numbers at all.
-				unrecognisedFiles.addAll(file.attached)
-			} else if (numbers.removeDuplicates.size > 1) {
+				unrecognisedFiles.add(new ProblemFile(filename, file))
+			} else if (numbers.distinct.size > 1) {
 				// multiple different numbers, ambiguous, reject this. 
-				unrecognisedFiles.addAll(file.attached)
+				invalidFiles.add(new ProblemFile(filename, file))
 			} else {
 				// one 7 digit number, this one might be okay.
 				putItem(numbers.head, filenameOf(filename), file)
 			}
-//			filename match {
-//				case directoryPattern(number, name) => putItem(number, name, file)
-//				case filePattern(number, name) => putItem(number, name, file)
-//				case _ => unrecognisedFiles.addAll(file.attached)
-//			}
 		}
 		
 		items = itemMap.values().toList

@@ -17,6 +17,13 @@
 	border: 1px solid #ffcc66;
 }
 
+.error-box-style() {
+	.border-radius(8px);
+	padding: 0.5em;
+	.vertical-gradient(#ffeeee, #ffcccc);
+	border: 1px solid #ff6666;
+}
+
 #page-header {
 	.vertical-gradient(#696, #363);
 }
@@ -208,6 +215,10 @@ ul.file-list {
 
 .unrecognised-files {
     .warning-box-style;
+}
+
+.invalid-files {
+    .error-box-style;
 }
 
 #footer-utility {

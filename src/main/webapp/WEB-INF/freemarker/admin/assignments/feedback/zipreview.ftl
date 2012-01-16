@@ -30,9 +30,24 @@
 <ul class="file-list">
 <#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
 <li>
-	<#-- FIXME these values don't get bound on a submit -->
-	<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}]" />
-	${unrecognisedFile.name}
+	<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].path" />
+	<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].file" />
+	${unrecognisedFile.path}
+</li>
+</#list>
+</ul>
+</div>
+</#if>
+
+<#if addFeedbackCommand.invalidFiles?size gt 0>
+<div class="invalid-files">
+<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
+<ul class="file-list">
+<#list addFeedbackCommand.invalidFiles as invalidFile>
+<li>
+	<@f.hidden path="invalidFiles[${invalidFile_index}].path" />
+	<@f.hidden path="invalidFiles[${invalidFile_index}].file" />
+	${invalidFile.path}
 </li>
 </#list>
 </ul>

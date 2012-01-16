@@ -23,10 +23,12 @@ import uk.ac.warwick.courses.helpers.ArrayList
  * 
  * When a webgroup is used, it is a live view on the webgroup (other
  * than the included and excluded users and caching), so it will
- * change when the webgroup does.
+ * change when the webgroup does (caches permitting).
  * 
  * Depending on what the UserGroup is attached to, the UI might choose
  * not to allow a webgroup to be used, and only allow included users.
+ * We might want to subclass UserGroup to make it a bit more explicit which
+ * groups support Webgroups, and prevent invalid operations.
  */
 @Entity
 @Configurable
