@@ -8,17 +8,30 @@
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" commandName=commandName>
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" commandName=commandName>
+<input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>
 
-<@spring.bind path="items">
-<p>
-	I've unpacked your zip file and I found feedback for ${status.value?size} students.
+<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
+<#if fromArchive>
+<#assign verbed_your_noun="unpacked your Zip file"/>
+<#else>
+<#assign verbed_your_noun="received your files"/>
+</#if>
 
-	<#if hasErrors>
-	However, there were some problems with its contents, which are shown below.
-	You'll need to correct these problems with the zip and try again.
+<@spring.bind path="items">
+<#assign itemsList=status.actualValue /> 
+<p>
+	<#if itemsList?size gt 0>
+		I've ${verbed_your_noun} and I found feedback for ${itemsList?size} students.
+		
+		<#if hasErrors>
+		However, there were some problems with its contents, which are shown below.
+		You'll need to correct these problems with the zip and try again.
+		</#if>
+	<#else>
+		I've ${verbed_your_noun} but I couldn't find any files that looked like feedback items.
 	</#if>
 
 </p>
@@ -54,14 +67,17 @@
 </div>
 </#if>
 
+
+	
+<@spring.bind path="items">
+<#assign itemList=status.actualValue />
+<#if itemList?size gt 0>
 <table class="batch-feedback-summary">
 	<tr>
 		<th>University ID</th>
 		<th>Files</th>
 	</tr>
-	
-<@spring.bind path="items">
-<#list status.value as item>
+<#list itemList as item>
 	<tr>
 	<@spring.nestedPath path="items[${item_index}]">
 		<@f.hidden path="uniNumber" />
@@ -87,6 +103,7 @@
 	</@spring.nestedPath>
 	</tr>
 </#list>
+</#if>
 </@spring.bind>
 </table>
 

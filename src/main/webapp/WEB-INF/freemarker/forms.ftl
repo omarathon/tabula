@@ -4,9 +4,11 @@
 <#macro row>
 <div class="form-row"><#nested/></div>
 </#macro>
+
 <#macro field>
 <div class="form-field"><#nested/></div>
 </#macro>
+
 <#macro labelled_row path label>
 <@f.errors path=path cssClass="error" />
 <@row>

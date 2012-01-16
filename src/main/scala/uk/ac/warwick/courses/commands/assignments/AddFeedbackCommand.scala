@@ -26,16 +26,21 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.UniversityId
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
-import java.util.HashMap
 import scala.util.matching.Regex
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.services.UserLookupService
+import java.util.ArrayList
 
 class FeedbackItem {
 	@BeanProperty var uniNumber:String =_
     @BeanProperty var file:UploadedFile = new UploadedFile
+    
+    def this(uniNumber:String) = {
+		this();
+		this.uniNumber = uniNumber;
+	}
 }
 
 // Purely for storing in command to display on the model.
@@ -82,17 +87,23 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   @BeanProperty var unrecognisedFiles:JList[ProblemFile] = LazyLists.simpleFactory()
   @BeanProperty var invalidFiles:JList[ProblemFile] = LazyLists.simpleFactory()
   @BeanProperty var archive:MultipartFile = _
+  @BeanProperty var batch:Boolean = false
+  @BeanProperty var fromArchive:Boolean = false
   @BeanProperty var confirmed:Boolean = false
   /* ---- */
   
   private def filenameOf(path:String) = new java.io.File(path).getName
   
   def preExtractValidation(errors:Errors) = {
-	  if (archive != null) {
-	 	  logger.info("file name is " + archive.getOriginalFilename())
-	 	  if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
-	 	 	  errors.rejectValue("archive", "archive.notazip")
-	 	  }
+	  if (batch) {
+		  if (archive != null && !archive.isEmpty()) {
+		 	  logger.info("file name is " + archive.getOriginalFilename())
+		 	  if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
+		 	 	  errors.rejectValue("archive", "archive.notazip")
+		 	  }
+		  } else if (file.isMissing) {
+		 	  errors.rejectValue("file.upload", "file.missing")
+		  }
 	  }
   }
   
@@ -136,37 +147,16 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   def onBind {
 	file.onBind
 	
-	// ZIP has been uploaded. unpack it
-	if (archive != null) {
-		val zip = new ZipInputStream(archive.getInputStream)
+	def store(itemMap:collection.mutable.Map[String,FeedbackItem], number:String, name:String, file:FileAttachment) =
+		itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber=number))
+			.file.attached.add(file)
 		
-		val bits = Zips.iterator(zip) { (iterator) =>
-			for (entry <- iterator if !entry.isDirectory) yield {
-				val f = new FileAttachment
-				f.name = filenameOf(entry.getName)
-				f.uploadedData = new ZipEntryInputStream(zip, entry)
-				f.uploadedDataLength = entry.getSize
-				fileDao.saveTemporary(f)
-				(entry.getName, f)
-			}
-		}
-		
+	
+	def processFiles(bits:Seq[Pair[String,FileAttachment]]) {
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
-		var itemMap = new HashMap[String,FeedbackItem]()
-
+		var itemMap = new collection.mutable.HashMap[String,FeedbackItem]()
 		unrecognisedFiles.clear()
-		
-		def putItem(number:String, name:String, file:FileAttachment) {
-			if (itemMap.containsKey(number)) {
-				itemMap.get(number).file.attached.add(file)
-			} else {
-				val item = new FeedbackItem
-				item.uniNumber = number
-				item.file.attached.add(file)
-				itemMap.put(number, item)
-			}
-		}
 		
 		for ((filename, file) <- bits) {
 			// match uni numbers found in file path
@@ -183,18 +173,48 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 				invalidFiles.add(new ProblemFile(filename, file))
 			} else {
 				// one 7 digit number, this one might be okay.
-				putItem(numbers.head, filenameOf(filename), file)
+				store(itemMap, numbers.head, filenameOf(filename), file)
 			}
 		}
 		
-		items = itemMap.values().toList
+		items = new ArrayList(itemMap.values().toList)
+	}
+	
+	// ZIP has been uploaded. unpack it
+	if (archive != null && !archive.isEmpty()) {
+		val zip = new ZipInputStream(archive.getInputStream)
+		
+		val bits = Zips.iterator(zip) { (iterator) =>
+			for (entry <- iterator if !entry.isDirectory) yield {
+				val f = new FileAttachment
+				f.name = filenameOf(entry.getName)
+				f.uploadedData = new ZipEntryInputStream(zip, entry)
+				f.uploadedDataLength = entry.getSize
+				fileDao.saveTemporary(f)
+				(entry.getName, f)
+			}
+		}
+		
+		processFiles(bits)
+		
+		// remember we got these items from a Zip, so we can tailor the text in the HTML.
+		fromArchive = true
 		
 		// this do-nothing command is to generate an audit event to record the unzipping
 		new ExtractFeedbackZip(this).apply()
 		
-	} else if (items != null) {
-		for (item <- items if item.file != null) item.file.onBind
-	}
+	} else {
+		if (batch && !file.attached.isEmpty()) {
+			val bits = file.attached.map { (attachment) => attachment.name -> attachment }
+			processFiles(bits)
+		}
+		
+		if (items != null) {
+			for (item <- items if item.file != null) item.file.onBind
+		}
+	} 
+	
+	
   }
   
   @Transactional

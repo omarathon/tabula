@@ -37,7 +37,7 @@ class SecurityService extends Logging {
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
 	  case View(department:Department) => checkGroup(user, Manage(department))
 	  
-	  case Participate(module:Module) => module.participants.includes(user.apparentId) || 
+	  case Participate(module:Module) => module.ensuredParticipants.includes(user.apparentId) || 
 	 	  						  	checkGroup(user, Manage(module.department))
 	  case Manage(module:Module) => checkGroup(user, Manage(module.department))
 	  case View(module:Module) => module.members.includes(user.apparentId) || 

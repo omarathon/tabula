@@ -12,11 +12,14 @@ jQuery(function($){
 	
 });
 
-var Forms = {};
+var Supports = {};
+Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
+
+/*var Forms = {};
 Forms.DeletePermission = function(moduleCode, userId) {
 	if (confirm('Are you sure that you want to remove permission from ' + userId + "?")) {
 		
 	} else {
 		
 	}
-}
+}*/

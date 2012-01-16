@@ -23,7 +23,7 @@ import collection.JavaConverters._
  * objects. 
  */
 @Configurable
-class UploadedFile(allowMultiple:Boolean = true) {
+class UploadedFile {
   @Autowired var fileDao:FileDao =_
   
   // files bound from an upload request, prior to being persisted
