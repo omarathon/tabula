@@ -101,7 +101,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		 	  if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 		 	 	  errors.rejectValue("archive", "archive.notazip")
 		 	  }
-		  } else if (file.isMissing) {
+		  } else if (items != null && items.isEmpty() && file.isMissing) {
 		 	  errors.rejectValue("file.upload", "file.missing")
 		  }
 	  }
