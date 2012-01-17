@@ -19,21 +19,23 @@ class MigrateBlobsCommand extends Command[Unit] with Daoisms {
 	
 	@Autowired var fileDao:FileDao = _
 	
-	def apply {
-		val blobs = session.newCriteria[FileAttachment]
-				.add(Restrictions.isNotNull("data"))
+	def attachmentsWithBlobs = session.newCriteria[FileAttachment]
+				.add(Restrictions.isNotNull("blob"))
 				.list
-				
-		for (attachment <- blobs) 
+	
+	@Transactional(readOnly=true)
+	def apply {
+	    val attachments = attachmentsWithBlobs
+		for (attachment <- attachments) 
 			migrate(attachment)
-		
+		blobsConverted = attachments.size
 	}
 	
 	@Transactional
 	def migrate(attachment:FileAttachment) {
-		val inputStream = attachment.dataStream
-		val targetFile = attachment.file
-		FileCopyUtils.copy(inputStream, new FileOutputStream(targetFile))
+	    // persist to file from dataStream (which is a blob)
+	    assert(attachment.blob != null)
+		fileDao.persistFileData(attachment, attachment.dataStream)
 		attachment.blob = null
 	}
 	

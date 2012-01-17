@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
+import java.io.InputStream
 
 @Repository
 class FileDao extends Daoisms with InitializingBean {
@@ -23,18 +24,21 @@ class FileDao extends Daoisms with InitializingBean {
 	
 	private def partition(id:String): String = id.replace("-","").grouped(idSplitSize).mkString("/")
 	
-	private def targetFile(id:String): File = new File(attachmentDir, partition(id)) 
+	def targetFile(id:String): File = new File(attachmentDir, partition(id)) 
 	
 	def saveTemporary(file:FileAttachment) :Unit = {
 		session.saveOrUpdate(file)
 		if (!file.hasData && file.uploadedData != null) {
-			val target = targetFile(file.id)
-			val directory = target.getParentFile()
-			directory.mkdirs()
-			if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
-			FileCopyUtils.copy(file.uploadedData, new FileOutputStream(target))
-		}
-		
+			persistFileData(file, file.uploadedData)
+		}	
+	}
+	
+	def persistFileData(file:FileAttachment, inputStream:InputStream) {
+	    val target = targetFile(file.id)
+		val directory = target.getParentFile()
+		directory.mkdirs()
+		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
+		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
 	}
 	
 	def makePermanent(file:FileAttachment) = {
