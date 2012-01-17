@@ -43,7 +43,7 @@ class FileAttachment extends GeneratedId {
 	@BeanProperty var dateUploaded:DateTime = new DateTime
 	
 	@Lob @Basic(fetch=FetchType.LAZY)
-	@Column(name="data", updatable=false, nullable=true)
+	@Column(name="data", updatable=true, nullable=true)
 	@BeanProperty var blob:Blob = null 
 	
 	@transient private var _file:File = null
