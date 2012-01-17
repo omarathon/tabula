@@ -245,8 +245,6 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
-	
-	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
@@ -312,8 +310,10 @@
 			<prop key="hibernate.jdbc.batch_size">20</prop>
 			<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
-			<prop key="hibernate.show_sql">true</prop>
+			<!-- <prop key="hibernate.show_sql">true</prop> -->
 		</util:properties>
+		
+		
 	</beans>
 
 

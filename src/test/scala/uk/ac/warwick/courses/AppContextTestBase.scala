@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.hibernate.SessionFactory
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml", "/WEB-INF/*-context.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @TransactionConfiguration()
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase {
