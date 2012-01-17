@@ -38,7 +38,7 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			command.onBind
 			val feedbacks = command.apply
 			feedbacks.size should be (1)
-			feedbacks(0).attachments.get(0).data.length should be (feedbackDocument.length)
+			feedbacks(0).attachments.get(0).length should be (feedbackDocument.length)
 		}
 		
 	}

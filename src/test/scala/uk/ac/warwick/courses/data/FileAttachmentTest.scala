@@ -26,10 +26,10 @@ class FileAttachmentTest extends AppContextTestBase {
 		session.flush
 		session.clear
 		
-		session.get(classOf[FileAttachment], attachment.id) match {
-			case loadedAttachment:FileAttachment => {
-				val blob = loadedAttachment.data
-				val data = readStream(blob.getBinaryStream, "UTF-8")
+		dao.getFileById(attachment.id) match {
+			case Some(loadedAttachment:FileAttachment) => {
+				//val blob = loadedAttachment.data
+				val data = readStream(loadedAttachment.dataStream, "UTF-8")
 				data should be (string)
 			}
 		}

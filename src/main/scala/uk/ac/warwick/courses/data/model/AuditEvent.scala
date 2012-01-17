@@ -10,15 +10,12 @@ import javax.persistence.Id
 // TODO use this class for querying auditevent.
 // need to manage access to the JSON map
 class AuditEvent {
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var eventDate:DateTime =_
 	var eventType:String =_
 	var eventStage:String =_
 	
-	@Column(name="user_id")
 	var userId:String =_
 	
-	@Column(name="masquerade_user_id")
 	var masqueradeUserId:String =_
 	
 	//todo convert to/from json
