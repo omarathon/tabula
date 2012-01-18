@@ -12,12 +12,12 @@ import uk.ac.warwick.courses.data.Daoisms
  * TODO remove this code and all references to the BLOB once this
  * is done.
  */
-class MigrateBlobs extends InitializingBean with Logging with Daoisms {
-	override def afterPropertiesSet {
-	    inSession { (session) =>
-			val command = new MigrateBlobsCommand()
-			command.apply
-			logger.info("Converted %d blobs".format(command.blobsConverted))
-	    }
+class MigrateBlobs extends Logging with Daoisms {
+  
+	def go {
+		val command = new MigrateBlobsCommand()
+		command.apply
+		logger.info("Converted %d blobs".format(command.blobsConverted))
 	}
+	
 }
