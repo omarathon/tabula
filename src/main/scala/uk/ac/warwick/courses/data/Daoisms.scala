@@ -18,6 +18,17 @@ trait Daoisms {
 
   protected def session = sessionFactory.getCurrentSession
   
+  /**
+   * Do some work in a new session. Only needed outside of a request,
+   * since we already have sessions there. When you know there's already
+   * a session, you can access it through the `session` getter (within
+   * the callback of this method, it should work too).
+   */
+  protected def inSession(fn: (Session)=>Unit) {
+    val sess = sessionFactory.openSession()
+    try fn(sess) finally sess.close()
+  }
+  
   /*
    * Adds a method to Session which returns a wrapped Criteria that works
    * better with Scala's generics support.
