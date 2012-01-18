@@ -131,6 +131,10 @@
 			</list>
 		</property>
 	</bean>
+	
+	<!-- Converts blob based attachments to file based on startup. Once run on
+	all the databases, remove this code. -->
+	<bean id="migrateBlobs" class="uk.ac.warwick.courses.system.MigrateBlobs" />
 		
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
