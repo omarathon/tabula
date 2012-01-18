@@ -60,6 +60,9 @@
 				<br>
 				<#if has_feedback >
 				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
+				<#if assignment.canPublishFeedback>
+				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">publish feedback</a>
+				</#if>
 				</#if>
 			</div>
 			<div class="end-assignment-info"></div>

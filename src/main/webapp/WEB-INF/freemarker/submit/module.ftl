@@ -11,7 +11,7 @@
 	<div class="assignment ${assignment.active?string("active", "inactive")}">
 		<h2>
 		<#if assignment.active>
-			<a href="${assignment.id}">${assignment.name}</a>
+			<a href="/modules/${module.code}/${assignment.id}">${assignment.name}</a>
 		<#else>
 			${assignment.name}
 		</#if>

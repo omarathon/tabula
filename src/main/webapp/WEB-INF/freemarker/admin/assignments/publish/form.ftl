@@ -2,6 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
+<#assign module=assignment.module />
+<#assign department=module.department />
 
 <@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/new" commandName="addFeedbackCommand">
 
