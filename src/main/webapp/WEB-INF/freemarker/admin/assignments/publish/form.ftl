@@ -5,7 +5,7 @@
 <#assign module=assignment.module />
 <#assign department=module.department />
 
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/new" commandName="addFeedbackCommand">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
 

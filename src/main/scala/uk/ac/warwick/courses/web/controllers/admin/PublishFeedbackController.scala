@@ -8,7 +8,7 @@ import uk.ac.warwick.courses.commands.PublishFeedbackCommand
 import uk.ac.warwick.courses.actions.Participate
 import org.springframework.validation.Errors
 
-@RequestMapping(value=Array("/admin/module/${module}/assignments/{assignment}/publish"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/publish"))
 @Controller
 class PublishFeedbackController extends BaseController {
 
