@@ -1,18 +1,23 @@
 package uk.ac.warwick.courses.data.model
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.sql.Blob
 import scala.reflect.BeanProperty
-import org.hibernate.annotations.Type
 import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Type
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.stereotype.Repository
+import javax.persistence.Basic
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
-import javax.persistence._
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.FileDao
+import javax.persistence.FetchType
 
 @Configurable
 @Entity @AccessType("field")
@@ -38,9 +43,15 @@ class FileAttachment extends GeneratedId {
 	@BeanProperty var dateUploaded:DateTime = new DateTime
 	
 	@Lob @Basic(fetch=FetchType.LAZY)
-	@Column(updatable=false, nullable=false)
-	@BeanProperty var data:Blob = null 
+	@Column(name="data", updatable=true, nullable=true)
+	@BeanProperty var blob:Blob = null 
 	
+	@transient private var _file:File = null
+	def file = {
+		if (_file == null) _file = fileDao.getData(id).orNull
+		_file
+	}
+		
 	@BeanProperty var name:String = _
 			
 	def this(n:String) { 
@@ -48,19 +59,29 @@ class FileAttachment extends GeneratedId {
 		name = n 
 	}
 	
-	def length = data match {
+	def length = blob match {
 		case blob:Blob => blob.length
-		case _ => 0
+		case _ => file match {
+			case file:File => file.length()
+			case _ => 0
+		}
 	}
 	
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream = data match {
+	def dataStream = blob match {
 		case blob:Blob => blob.getBinaryStream
-		case _ => null
+		case _ => file match {
+			case file:File => new FileInputStream(file)
+			case _ => null
+		}
 	}
+	
+	@deprecated
+	def hasBlob = blob != null
+	def hasData = hasBlob || file != null
 	
 	@transient @BeanProperty var uploadedData:InputStream = null
 	@transient @BeanProperty var uploadedDataLength:Long = 0

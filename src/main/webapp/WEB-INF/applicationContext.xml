@@ -135,6 +135,10 @@
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
+	<!-- Converts blob based attachments to file based on startup. Once run on
+	all the databases, remove this code. -->
+	<bean id="migrateBlobs" class="uk.ac.warwick.courses.system.MigrateBlobs" init-method="go" depends-on="dataSourceInitialiser" />
+	
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
 	
@@ -245,8 +249,6 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
-	
-	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
@@ -274,6 +276,8 @@
 	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
 	    	</property>
 	    </bean>
+	    
+	    <bean id="dataSourceInitialiser" class="java.lang.Object" />
 	    
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>
@@ -304,7 +308,7 @@
 		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 
-		<bean class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
+		<bean id="dataSourceInitialiser" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
 			c:dataSource-ref="dataSource"
 			p:scripts="schema.sql,data.sql" />
 		
@@ -312,8 +316,10 @@
 			<prop key="hibernate.jdbc.batch_size">20</prop>
 			<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
-			<prop key="hibernate.show_sql">true</prop>
+			<!-- <prop key="hibernate.show_sql">true</prop> -->
 		</util:properties>
+		
+		
 	</beans>
 
 

@@ -15,8 +15,8 @@ trait EventHandling {
 		try {
 			listener.beforeCommand(event)
 			val result = f
-			
-			listener.afterCommand(event, result)
+			val resultEvent = Event.resultFromDescribable(d)
+			listener.afterCommand(resultEvent, result)
 			return result
 		} catch {
 			case e:Throwable => {

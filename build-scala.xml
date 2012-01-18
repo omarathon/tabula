@@ -65,6 +65,7 @@
   		verbose="false"
         aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar"
     	  log="target/log/iajc.log" />
+  	<echo taskname="iajc" message="Woven aspects with IAJC" />
   	
   	<fail message="iajc errors" taskname="iajc">
   	    <condition><resourcecontains resource="target/log/iajc.log" substring="[error]"/></condition>

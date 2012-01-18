@@ -60,7 +60,7 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jms-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.transaction-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-tx/3.1.0.RELEASE/spring-tx-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-web/3.1.0.RELEASE/spring-web-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.web.servlet-3.1.0.RELEASE.jar" sourcepath="lib/src/org.springframework.web.servlet-sources-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RELEASE.jar"/>
@@ -89,6 +89,5 @@
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/webapp"/>
-	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>
