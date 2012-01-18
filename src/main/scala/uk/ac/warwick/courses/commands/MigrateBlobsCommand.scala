@@ -23,7 +23,7 @@ class MigrateBlobsCommand extends Command[Unit] with Daoisms {
 				.add(Restrictions.isNotNull("blob"))
 				.list
 	
-	@Transactional(readOnly=true)
+	@Transactional
 	def apply {
 	    val attachments = attachmentsWithBlobs
 		for (attachment <- attachments) 
