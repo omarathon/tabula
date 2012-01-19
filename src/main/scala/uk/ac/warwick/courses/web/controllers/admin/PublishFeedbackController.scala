@@ -8,17 +8,21 @@ import uk.ac.warwick.courses.commands.PublishFeedbackCommand
 import uk.ac.warwick.courses.actions.Participate
 import org.springframework.validation.Errors
 
-@RequestMapping(value=Array("/admin/assignments/{assignment}/publish"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/publish"))
 @Controller
 class PublishFeedbackController extends BaseController {
 
-  private def check(command:PublishFeedbackCommand) =
-	mustBeAbleTo(Participate(command.assignment.module))	  
+  private def check(command:PublishFeedbackCommand) {
+    mustBeLinked(mandatory(command.assignment), mandatory(command.module))
+	mustBeAbleTo(Participate(command.assignment.module))
+  }
     
-  @RequestMapping(params=Array("!confirm"))
+  @RequestMapping(method=Array(HEAD, GET), params=Array("!confirm"))
   def confirmation(command:PublishFeedbackCommand, errors:Errors): Mav = {
     check(command)
-    Mav("admin/assignments/publish/form", "assignment" -> command.assignment)
+    command.prevalidate(errors)
+    Mav("admin/assignments/publish/form", 
+        "assignment" -> command.assignment)
   }
   
   @RequestMapping(method=Array(POST))

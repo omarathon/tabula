@@ -2,8 +2,10 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
+<#assign module=assignment.module />
+<#assign department=module.department />
 
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/new" commandName="addFeedbackCommand">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
 
@@ -15,10 +17,15 @@ done once for an assignment, and cannot be undone. Be sure that you have receive
 feedback you need before publishing, and then check the box below.
 </p>
 
-<@form.labelled_row "confirm" "">
-	<@f.checkbox path="confirm" />
-	I have read the above and am ready to release feedback to students.
-</@form.labelled_row>
+<p>
+Note: notifications are not currently send to students - you will need to distribute the
+link yourself, by email or by posting it on your module web pages. Email notifications will
+happen in a future release.
+</p>
+
+<@f.errors path="confirm" cssClass="error" />
+<@f.checkbox path="confirm" id="confirmCheck" />
+<@f.label for="confirmCheck"><strong> I have read the above and am ready to release feedback to students.</strong></@f.label>
 
 <#-- TODO enable/disable submit button as box is checked. -->
 

@@ -20,6 +20,7 @@ import uk.ac.warwick.courses.events.EventHandling
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.AppImports
 import uk.ac.warwick.courses.CurrentUser
+import org.springframework.web.bind.annotation.RequestMethod
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 
@@ -29,7 +30,7 @@ abstract trait ControllerMethods extends Logging {
 	 }
   
 	  def mustBeLinked(feedback:Feedback, assignment:Assignment) = 
-		 if (feedback.assignment.id != assignment.id) {
+		 if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 	  		throw new ItemNotFoundException(feedback)
 		 }

@@ -147,6 +147,31 @@
 		
 	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
 	
+	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
+		<constructor-arg value="4" type="int" />
+	</bean>
+	
+	<!-- 
+		just logs mails for now.
+		When real mail sending is implemented, we'll keep this defined for the 'dev' profile
+		but define 'studentMailSender' as something that actually sends mail to the recipients on the
+		'production' profile.
+	 -->
+	<bean id="studentMailSender" class="uk.ac.warwick.courses.services.RedirectingMailSender">
+		<constructor-arg ref="mailSender" />
+	</bean>
+	
+	<bean id="mailSender"
+		class="uk.ac.warwick.util.mail.AsynchronousWarwickMailSender">
+		<constructor-arg index="0" ref="priorityTaskExecutionService" />
+		<constructor-arg index="1">
+			<bean
+				class="org.springframework.mail.javamail.JavaMailSenderImpl">
+				<property name="host" value="${mail.smtp.host}" />
+			</bean>
+		</constructor-arg>
+	</bean>
+	
 	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>
 			<filter ref="characterEncodingFilter" />

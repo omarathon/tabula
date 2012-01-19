@@ -46,6 +46,9 @@ class SecurityService extends Logging {
 	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
 	  
+	  case View(feedback:Feedback) => feedback.universityId == user.universityId ||
+	  								checkGroup(user, View(feedback.assignment))
+	  
 	  case Masquerade() => user.sysadmin || user.masquerader
 	  
 	  case action:Action[_] => throw new IllegalArgumentException(action.toString)
