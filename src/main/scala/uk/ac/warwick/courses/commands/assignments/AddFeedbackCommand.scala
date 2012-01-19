@@ -260,9 +260,9 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 //		}
 //	}
 
-  def describe(d: Description) = d.assignment(assignment).properties(
-	  "studentId" -> uniNumber
-  )
+  def describe(d: Description) = d
+		  .assignment(assignment)
+		  .studentIds(items.map{ _.uniNumber })
 
 }
 

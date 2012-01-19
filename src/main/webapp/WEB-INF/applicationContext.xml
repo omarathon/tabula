@@ -147,6 +147,9 @@
 		
 	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
 	
+	<!-- just logs mails for now -->
+	<bean id="mailSender" class="uk.ac.warwick.courses.services.RedirectingMailSender" />
+	
 	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>
 			<filter ref="characterEncodingFilter" />

@@ -47,6 +47,11 @@ abstract class Description {
 		this
 	}
 	
+	def studentIds(universityIds:Seq[String]) = {
+		map += "students" -> universityIds
+		this
+	}
+	
 	def assignment(assignment:Assignment) = {
 		map += "assignment" -> assignment.id
 		if (assignment.module != null) module(assignment.module)

@@ -13,7 +13,7 @@ import org.springframework.validation.Errors
 class PublishFeedbackController extends BaseController {
 
   private def check(command:PublishFeedbackCommand) {
-    mustBeLinked(command.assignment, command.module)
+    mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 	mustBeAbleTo(Participate(command.assignment.module))
   }
     

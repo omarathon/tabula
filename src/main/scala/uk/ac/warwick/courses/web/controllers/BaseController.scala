@@ -29,7 +29,7 @@ abstract trait ControllerMethods extends Logging {
 	 }
   
 	  def mustBeLinked(feedback:Feedback, assignment:Assignment) = 
-		 if (feedback.assignment.id != assignment.id) {
+		 if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 	  		throw new ItemNotFoundException(feedback)
 		 }
