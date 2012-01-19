@@ -9,13 +9,18 @@ Students will be able to access their feedback by visiting this page:
 </p>
 
 <p>
-<a href="<@url page="/module/${module.code}/${assignment.id}"/>">
-Assignment page
+Assignment page: 
+<#assign feedbackUrl><@url page="/module/${module.code}/${assignment.id}"/></#assign>
+<a href="${feedbackUrl}">
+${feedbackUrl}
 </a>
 </p>
 
+<p>They haven't been notified of this automatically, so you'll want to
+distribute this link to them.</p>
+
 <p>
-<a href="<@url page="/admin/department/{department.code}/#module-${module.code}" />">
+<a href="<@url page="/admin/department/${department.code}/#module-${module.code}" />">
 Return to assignment info
 </a>
 </p>

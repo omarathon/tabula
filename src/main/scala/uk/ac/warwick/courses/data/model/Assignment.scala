@@ -112,6 +112,6 @@ class Assignment() extends GeneratedId with Viewable {
 	def addFields(fields:FormField*) = for(field<-fields) addField(field)
 	
 	// Help views decide whether to show a publish button.
-	def canPublishFeedback:Boolean = !feedbacks.isEmpty && closeDate.isBeforeNow
+	def canPublishFeedback:Boolean = !resultsPublished && !feedbacks.isEmpty && closeDate.isBeforeNow
 }
 

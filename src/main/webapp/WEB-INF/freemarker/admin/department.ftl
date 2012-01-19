@@ -39,7 +39,20 @@
 		<#list module.assignments as assignment>
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
 		<div class="assignment-info">
+			<div class="column1">
 			<h3 class="name">${assignment.name}</h3>
+			<#if assignment.resultsPublished>
+			<p class="feedback-published">
+				Feedback published
+				<br>
+				<small>
+				<a href="<@url page="/module/${module.code}/${assignment.id}"/>">
+				Link for students
+				</a>
+				</small>
+			</p>
+			</#if>
+			</div>
 			<div class="stats">
 				<div>
 			    <@warwick.formatDate value=assignment.openDate pattern="d MMMM yyyy HH:mm" /> -<br>
@@ -56,7 +69,9 @@
 				<#if can_manage >
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
 				</#if>
+				<#if ! assignment.resultsPublished >
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
+				</#if>
 				<br>
 				<#if has_feedback >
 				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>

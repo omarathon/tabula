@@ -18,6 +18,10 @@ final class RedirectingMailSender(delegate:WarwickMailSender) extends WarwickMai
     throw new UnsupportedOperationException()
   }
   
+  implicit def ArrayOrEmpty[T:Manifest](a:Array[T]) = new {
+	  def orEmpty:Array[T] = Option(a).getOrElse(Array.empty)
+  }
+  
   override def send(message: SimpleMailMessage): Future[Boolean] = {
     logger.info("""-- Mock mail message --
 From: %s
@@ -27,11 +31,13 @@ CC: %s
 %s
     """ format (
     		message.getFrom(),
-    		message.getTo().mkString(", "),
-    		message.getCc().mkString(", "),
+    		message.getTo().orEmpty.mkString(", "),
+    		message.getCc().orEmpty.mkString(", "),
     		message.getText()
     ))
     ImmediateFuture.of(true)
   }
+  
+
 
 }

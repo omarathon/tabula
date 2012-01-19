@@ -13,7 +13,7 @@
 		Your feedback consists of ${feedback.attachments?size} files.
 		
 		<p>
-			<a href="<@url page="/modules/${module.code}/${assignment.id}/feedback.zip"/>">
+			<a href="<@url page="/module/${module.code}/${assignment.id}/feedback.zip"/>">
 				Download all as Zip file
 			</a>
 		</p>
@@ -24,6 +24,14 @@
 		</#list>
 		</ul>
 	</p>
+
+<#elseif assignment.resultsPublished>
+
+	<h2>No feedback for ${user.universityId}</h2>
+	
+	<p>Feedback has been published for this assignment, but there doesn't appear to be
+	any for you. If you submitted your assignment were told to expect marks/feedback here, please
+	speak to your module convenor.</p>
 
 <#else>
 

@@ -1,28 +1,37 @@
 package uk.ac.warwick.courses.commands
+
+import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
-import uk.ac.warwick.courses.data.model.Assignment
-import org.springframework.validation.Errors
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.courses.data.model.Module
+import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.util.mail.WarwickMailSender
-import collection.JavaConversions._
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.BindException
+import org.springframework.validation.Errors
+import javax.persistence.Entity
+import javax.persistence.NamedQueries
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-import org.springframework.validation.BindException
-import org.hibernate.validator.constraints.impl.EmailValidator
 import uk.ac.warwick.util.core.StringUtils
-import org.springframework.mail.SimpleMailMessage
+import uk.ac.warwick.util.mail.WarwickMailSender
+import javax.annotation.Resource
 
+@Configurable
 class PublishFeedbackCommand extends Command[Unit] {
   
-	@Autowired var mailSender:WarwickMailSender =_
+	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
 	@Autowired var userLookup:UserLookupService =_
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
 	
 	@BeanProperty var confirm:Boolean = false
+	
+	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
 	val fromAddress = "no-reply@warwick.ac.uk"
 	
@@ -58,9 +67,9 @@ class PublishFeedbackCommand extends Command[Unit] {
 	    val email = user.getEmail
 	    if (StringUtils.hasText(email)) {
 	      val message = messageFor(user)
-	      mailSender.send(message)
+	      studentMailSender.send(message)
 	    } else {
-	      emailErrors.reject("feedback.publish.user.noemail", Array(user.getUserId))
+	      emailErrors.reject("feedback.publish.user.noemail", Array(user.getUserId), "")
 	    }
 	  } else {
 	    emailErrors.reject("feedback.publish.user.notfound", Array(user.getUserId), "")
@@ -77,13 +86,19 @@ class PublishFeedbackCommand extends Command[Unit] {
       message.setText("""
 Hello %s
 	          
-Your assignment has been marked and feedback is ready for you to download.
-	          
+We thought you'd want to know that feedback is now available on your coursework '%s' for the module %s, %s. To retrieve this feedback, please visit:
+
 %s
-	          
-	      """.format(
+
+(Only you can retrieve this feedback, so you'll need your IT Services user name and password to confirm that it's really you.)
+
+If you have any difficulty retrieving your feedback, please contact coursework@warwick.ac.uk. This email was sent from an automated system, and replies to it will not reach a real person.	          
+""".format(
     		  user.getFirstName,
-    		  "LINK"
+    		  assignment.name,
+    		  assignment.module.code.toUpperCase,
+    		  assignment.module.name,
+    		  ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
       ))
       return message
 	}

@@ -17,10 +17,15 @@ done once for an assignment, and cannot be undone. Be sure that you have receive
 feedback you need before publishing, and then check the box below.
 </p>
 
-<@form.labelled_row "confirm" "">
-	<@f.checkbox path="confirm" />
-	I have read the above and am ready to release feedback to students.
-</@form.labelled_row>
+<p>
+Note: notifications are not currently send to students - you will need to distribute the
+link yourself, by email or by posting it on your module web pages. Email notifications will
+happen in a future release.
+</p>
+
+<@f.errors path="confirm" cssClass="error" />
+<@f.checkbox path="confirm" id="confirmCheck" />
+<@f.label for="confirmCheck"><strong> I have read the above and am ready to release feedback to students.</strong></@f.label>
 
 <#-- TODO enable/disable submit button as box is checked. -->
 

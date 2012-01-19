@@ -10,7 +10,9 @@ import uk.ac.warwick.courses.commands.Description
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.data.FeedbackDao
 import uk.ac.warwick.courses.services.fileserver.RenderableZip
+import org.springframework.beans.factory.annotation.Configurable
 
+@Configurable
 class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[RenderableFile]] {
 	@Autowired var zip:ZipService =_
 	@Autowired var feedbackDao:FeedbackDao =_

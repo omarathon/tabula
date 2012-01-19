@@ -12,7 +12,7 @@ class RedirectingMailSenderTest extends TestBase {
 	  val message = new SimpleMailMessage
 	  message.setTo(Array("ron@example.com", "jim@example.net"))
 	  message.setFrom("no-reply@example.com")
-	  message.setCc(Array("overlord@example.com"))
+	  //message.setCc(Array("overlord@example.com"))
 	  message.setText("""
 		CONGRATS
 		

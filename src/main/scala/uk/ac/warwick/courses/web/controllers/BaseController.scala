@@ -20,6 +20,7 @@ import uk.ac.warwick.courses.events.EventHandling
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.AppImports
 import uk.ac.warwick.courses.CurrentUser
+import org.springframework.web.bind.annotation.RequestMethod
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 

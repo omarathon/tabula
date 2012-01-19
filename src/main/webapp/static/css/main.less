@@ -75,7 +75,7 @@ html {
 	margin-bottom: 0.5em;
 	background-color: #fff;
 	
-	.name {
+	.column1 {
 		width: 18em;
 		float:left;
 	}
@@ -86,6 +86,10 @@ html {
 	}
 	.actions {
 		float: right;
+		text-align: right
+	}
+	.feedback-published {
+		font-weight: bold;
 	}
 }
 
@@ -157,14 +161,16 @@ input.date-time-picker:focus {
 	a {
 		text-decoration: none;
 		white-space: nowrap;
-		background: #CCC;
-		color: #333;
+		.vertical-gradient(#EEEEEE,#CCCCCC);
+		color: #222;
 		text-shadow: 0 1px 0 #fff;
 		border-radius: 3px;
 		padding: 2px 7px;
 		border: 1px solid #999;
+		line-height: 2em;
+		.transition(none);
 		&:hover {
-			background-color: #2c5893;
+			.vertical-gradient(darken(#2c5893,20%),#2c5893);
 			color: white;
 			text-shadow: none;
 		}
@@ -258,6 +264,8 @@ ul.file-list {
 	.form-field { margin-left: 0 !important; }
 	
 }
+
+.mod-name { font-size: 85%; }
 
 .disabled-zone {
   .opacity(0.6);

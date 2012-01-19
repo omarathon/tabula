@@ -42,14 +42,28 @@ class AssignmentController extends BaseController {
 	@RequestMapping(method=Array(GET))
 	def view(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
 		mustBeLinked(mandatory(assignment),  mandatory(module))
-		mustBeAbleTo(View(assignment))
+		
+		val feedback = (if (assignment.resultsPublished) 
+							  feedbackDao.getFeedbackByUniId(assignment, user.universityId)
+						   else None)
+		
+		/*
+		 * When feedback has been released and we have some for that user,
+		 * we should allow them to view. Otherwise, restrict to those who can
+		 * view assignment (those in the defined members group).
+		 * 
+		 * The check for being able to view feedback is not really necessary given that
+		 * we've just explicitly obtained the feedback for the current user.
+		 */
+		feedback match {
+			case Some(feedback) => mustBeAbleTo(View(feedback))
+			case None => mustBeAbleTo(View(assignment))
+		}
 		
 		Mav("submit/assignment", 
 			"module"-> module,
 			"assignment" -> assignment,
-			"feedback" -> (if (assignment.resultsPublished) 
-							  feedbackDao.getFeedbackByUniId(assignment, user.universityId)
-						   else None)
+			"feedback" -> feedback
 		)
 	}
 	

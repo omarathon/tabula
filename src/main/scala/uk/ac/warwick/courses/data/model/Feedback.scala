@@ -12,9 +12,10 @@ import scala.reflect.BeanProperty
 import javax.persistence.FetchType
 import javax.persistence.OneToMany
 import javax.persistence.CascadeType
+import uk.ac.warwick.courses.actions.Viewable
 
 @Entity @AccessType("field")
-class Feedback extends GeneratedId {
+class Feedback extends GeneratedId with Viewable {
 	
 	@ManyToOne(fetch=FetchType.LAZY, optional=false)
 	@BeanProperty var assignment:Assignment =_

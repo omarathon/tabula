@@ -17,7 +17,7 @@ class PublishFeedbackController extends BaseController {
 	mustBeAbleTo(Participate(command.assignment.module))
   }
     
-  @RequestMapping(params=Array("!confirm"))
+  @RequestMapping(method=Array(HEAD, GET), params=Array("!confirm"))
   def confirmation(command:PublishFeedbackCommand, errors:Errors): Mav = {
     check(command)
     command.prevalidate(errors)
