@@ -143,10 +143,6 @@
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
-	<!-- Converts blob based attachments to file based on startup. Once run on
-	all the databases, remove this code. -->
-	<bean id="migrateBlobs" class="uk.ac.warwick.courses.system.MigrateBlobs" init-method="go" depends-on="dataSourceInitialiser" />
-	
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
 	

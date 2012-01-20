@@ -47,7 +47,12 @@ class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[Renderabl
 	
 	private def zipped(feedback:Feedback) = new RenderableZip( zip.getFeedbackZip(feedback) )
 	
-	override def describe(d:Description) = d.assignment(assignment)
+	override def describe(d:Description) = { 
+		d.assignment(assignment)
+		
+	}
+	
+	private def specificFilename = filename.hasText
 	
 	override def describeResult(d:Description) {
 		
