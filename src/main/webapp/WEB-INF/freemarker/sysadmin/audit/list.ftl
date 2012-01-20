@@ -8,6 +8,14 @@
 <p>Results ${startIndex} - ${endIndex}</p>
 
 <table>
+<tr>
+<th>Date</td>
+<th>Event</th>
+<th>Stage</th>
+<th>Real user</th>
+<th>Apparent user</th>
+<th>Extra data</th>
+</tr>
 <#list items as item>
 <tr class="stage-${item.eventStage}">
 <td>
@@ -17,6 +25,7 @@
 <td>${item.eventStage}</td>
 <td>${item.userId!""}</td>
 <td>${item.masqueradeUserId!""}</td>
+<td>${item.data}</td>
 </tr>
 </#list>
 </table>

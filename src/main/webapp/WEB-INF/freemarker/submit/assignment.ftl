@@ -10,17 +10,26 @@
 	<h2>Feedback for ${user.universityId}</h2>
 	
 	<p>
-		Your feedback consists of ${feedback.attachments?size} files.
-		
-		<p>
-			<a href="<@url page="/module/${module.code}/${assignment.id}/feedback.zip"/>">
-				Download all as Zip file
-			</a>
-		</p>
+		<#-- Only offer a Zip if there's more than one file. -->
+		<#if feedback.attachments?size gt 1>
+			<p>Your feedback consists of ${feedback.attachments?size} files.</p>
+			<p>
+				<a href="<@url page="/module/${module.code}/${assignment.id}/all/feedback.zip"/>">
+					Download all as a Zip file
+				</a>
+			</p>
+			<p>Or download the attachments individually below.</p>
+		<#else>
+			<p>Your feedback file is available to download below.</p>
+		</#if>
 		
 		<ul class="file-list">
 		<#list feedback.attachments as attachment>
-			<li>${attachment.name}</li>
+			<li>
+			<a href="<@url page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>">
+				${attachment.name}
+			</a>
+			</li>
 		</#list>
 		</ul>
 	</p>
