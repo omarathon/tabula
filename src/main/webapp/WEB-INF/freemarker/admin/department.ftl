@@ -11,21 +11,20 @@
 <h2><@fmt.module_name module /></h2>
 	
 	
-	<#if can_manage >
 	<div>
 		
 		<#assign  module_managers = ((module.participants.includeUsers)![]) />
 		<@fmt.p module_managers?size "module manager"/><#if module_managers?size gt 0>:
 			<@fmt.user_list_csv ids=module_managers />
 		</#if>
-		
+		<#if can_manage >	
 		<span class="actions">
 		<a title="Edit module permissions" href="<@url page="/admin/module/${module.code}/permissions" />">
 		edit
 		</a>
 		</span>
+		</#if>
 	</div>
-	</#if>
 	
 	<#if module.assignments!?size = 0>
 		<p>This module has no assignments. 
