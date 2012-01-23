@@ -16,9 +16,6 @@ ${feedbackUrl}
 </a>
 </p>
 
-<p>They haven't been notified of this automatically, so you'll want to
-distribute this link to them.</p>
-
 <p>
 <a href="<@url page="/admin/department/${department.code}/#module-${module.code}" />">
 Return to assignment info
