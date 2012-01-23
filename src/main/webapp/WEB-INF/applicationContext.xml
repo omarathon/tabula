@@ -155,6 +155,9 @@
 		<constructor-arg value="4" type="int" />
 	</bean>
 	
+	<bean id="studentMailSender" class="uk.ac.warwick.courses.services.RedirectingMailSender">
+		<constructor-arg ref="mailSender" />
+	</bean>
 	
 	<bean id="mailSender"
 		class="uk.ac.warwick.util.mail.AsynchronousWarwickMailSender">
@@ -228,6 +231,7 @@
 				<entry key="userlookup"><bean class="uk.ac.warwick.courses.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.courses.web.views.PermissionFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.courses.web.views.TheYear" /></entry>
+				<entry key="features" value-ref="features" />
 				<entry key="appBuildDate">
 					<bean factory-bean="dateTimeFormatter" factory-method="parseDateTime">
 						<constructor-arg value="${build.time}" />
@@ -269,6 +273,12 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
+
+
+
+	
+	<!-- /JMX -->
+	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
@@ -279,16 +289,53 @@
 	</beans>
 	
 	<beans profile="dev">
-		<bean id="studentMailSender" class="uk.ac.warwick.courses.services.RedirectingMailSender">
-			<constructor-arg ref="mailSender" />
-		</bean>
 	</beans>
 	
 	<beans profile="production">
-		<bean id="studentMailSender" parent="mailSender" />
 	</beans>
 	
 	<beans profile="dev,production">
+	
+			<!-- JMX -->
+	
+			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer 
+		       when there is a choice of MBeanServers (such as when jconsole
+		       support is installed). -->
+		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
+		
+		  <!-- ## auto exported beans ## -->
+		  
+		  
+		  <!-- ## auto exporters ## -->
+		  
+		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+		  
+		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		    <property name="attributeSource" ref="jmxAttributeSource" />
+		  </bean>
+		  <bean id="jmxNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		        <property name="attributeSource" ref="jmxAttributeSource"/>
+		  </bean>
+		  <bean id="autoExporter" class="org.springframework.jmx.export.MBeanExporter">
+		  	<description>Exports beans annotated with @ManagedResource</description>
+		  	<property name="autodetect" value="true" />  
+		  	<property name="assembler" ref="jmxAssembler"/>
+		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
+		    <property name="server" ref="jmxServerLocator" />
+		  </bean>
+		  
+		    <!-- ## manually exported beans ## -->
+
+		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" 
+		  		lazy-init="false"
+		  		autowire="no"> <!-- don't autowire the Annotation assembler below. -->
+		    <property name="server" ref="jmxServerLocator" />
+		    <property name="beans">
+		      <map>
+		        <entry key="courses:name=features" value-ref="features" />
+		      </map>
+		    </property>
+		  </bean>
 	
 		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
 			p:ssosUrl="${ssoclient.ssos.url}"
@@ -306,8 +353,6 @@
 	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
 	    	</property>
 	    </bean>
-	    
-	    <bean id="dataSourceInitialiser" class="java.lang.Object" />
 	    
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>

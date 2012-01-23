@@ -20,6 +20,7 @@ class RedirectingMailSenderTest extends TestBase with Mockito {
 	  		"""
 		
 	  val sender = new RedirectingMailSender(delegate)
+	  sender.features = emptyFeatures
 	  
 	  val message = new SimpleMailMessage
 	  message.setTo(Array("ron@example.com", "jim@example.net"))

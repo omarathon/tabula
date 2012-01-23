@@ -6,14 +6,13 @@ import scala.reflect.BeanInfo
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.core.env.PropertySource
 import scala.reflect.BeanProperty
-import scala.reflect.BooleanBeanProperty
+import java.lang.Boolean
 
-@BeanInfo
 class Features(properties:Properties) {
 	
 	//// Features /////
 	
-	@BooleanBeanProperty var emailStudents:Boolean =_
+	@BeanProperty var emailStudents:Boolean = false
 	
 	//// END of features ///
 	
@@ -21,7 +20,7 @@ class Features(properties:Properties) {
 	
 	val bean = new BeanWrapperImpl(this)
 	private def featureKeys = properties.keysIterator.filter( _ startsWith featuresPrefix )
-	def capitalise(string:String) = string.head.toUpperCase + string.tail
+	def capitalise(string:String) = string.head.toUpper + string.tail
 	def removePrefix(string:String) = string.substring(featuresPrefix.length)
 	def camelise(string:String) = removePrefix(string).split("\\.").toList match {
 		case Nil => ""
@@ -29,4 +28,8 @@ class Features(properties:Properties) {
 	}
 	
 	for (key <- featureKeys) bean.setPropertyValue(camelise(key), properties.getProperty(key))
+}
+
+object Features {
+	def empty = new Features(new Properties)
 }

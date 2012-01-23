@@ -17,11 +17,17 @@ done once for an assignment, and cannot be undone. Be sure that you have receive
 feedback you need before publishing, and then check the box below.
 </p>
 
+<#if features.emailStudents>
+<p>
+Each student will receive an email containing the link to the feedback. They will sign in
+and be shown the feedback specific to them.
+</p>
+<#else>
 <p>
 Note: notifications are not currently send to students - you will need to distribute the
-link yourself, by email or by posting it on your module web pages. Email notifications will
-happen in a future release.
+link yourself, by email or by posting it on your module web pages.
 </p>
+</#if>
 
 <@f.errors path="confirm" cssClass="error" />
 <@f.checkbox path="confirm" id="confirmCheck" />

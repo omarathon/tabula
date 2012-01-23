@@ -20,14 +20,14 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	      hash.get("motto").toString should be("do be good, don't be bad")
 	    }
 	  }
-	  val list:java.util.List[String] = collection.JavaConversions.asList(Buffer("yes"))
+	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes"))
 	  wrapper.wrap(list) match {
 	 	  case listy:SimpleSequence => 
 	 	  case nope => fail("nope" + nope.getClass().getName())
 	  }
 	   
 	  class ListHolder {
-	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.asList(Buffer("contents"))
+	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents"))
 	  }
 	   
 	  new ListHolder().list.size should be (1)

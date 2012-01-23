@@ -20,6 +20,8 @@ import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import javax.annotation.Resource
 import uk.ac.warwick.courses.services.AssignmentService
+import java.util.{List=>JList}
+import uk.ac.warwick.courses.helpers.ArrayList
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] {
@@ -37,7 +39,11 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	val fromAddress = "no-reply@warwick.ac.uk"
 	
-	var emailErrors:Errors =_
+	case class MissingUser(val universityId:String)
+	case class BadEmail(val user:User)
+	
+	var missingUsers: JList[MissingUser] = ArrayList()
+	var badEmails: JList[BadEmail] = ArrayList()
 	
 	// validation done even when showing initial form.
 	def prevalidate(errors:Errors) {
@@ -58,7 +64,6 @@ class PublishFeedbackCommand extends Command[Unit] {
 	@Transactional
 	def apply {
 	  assignment.resultsPublished = true
-	  emailErrors = new BindException(this, "")
 	  val users = assignmentService.getUsersForFeedback(assignment)
 	  for (info <- users) email(info)
 	}
@@ -71,10 +76,10 @@ class PublishFeedbackCommand extends Command[Unit] {
 	      val message = messageFor(user)
 	      studentMailSender.send(message)
 	    } else {
-	      emailErrors.reject("feedback.publish.user.noemail", Array(id), "")
+	      badEmails add BadEmail(user)
 	    }
 	  } else {
-	    emailErrors.reject("feedback.publish.user.notfound", Array(id), "")
+	    missingUsers add MissingUser(id)
 	  }
 	}
 	

@@ -2,6 +2,7 @@ package uk.ac.warwick.courses
 
 import java.util.Properties
 import org.junit.Test
+import java.lang.Boolean
 
 class FeaturesTest extends TestBase {
 	@Test def validFeature {
@@ -10,6 +11,6 @@ class FeaturesTest extends TestBase {
 		props.setProperty("features.emailStudents", "true")
 		
 		val features = new Features(props)
-		features.emailStudents should be (true)
+		features.emailStudents should be (Boolean.TRUE)
 	}
 }
