@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}"))
-class DownloadFeedbackController extends BaseController {
+class DownloadFeedbackController extends AbstractAssignmentController {
 
 	@ModelAttribute def command(user:CurrentUser) = new DownloadFeedbackCommand(user)
     
@@ -31,9 +31,14 @@ class DownloadFeedbackController extends BaseController {
 	@RequestMapping(value=Array("/get/{filename}"), method=Array(RequestMethod.GET))
 	def getOne(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
 		mustBeLinked(command.assignment, command.module)
-		mustBeAbleTo(View(command.module))
+		
+		// Does permission checks.
+		checkCanGetFeedback(command.assignment, user)
+		
 		command.apply() match {
-		  case Some(renderable) => fileServer.serve(renderable, response)
+		  case Some(renderable) => {
+		 	  fileServer.serve(renderable, response)
+		  }
 		  case None => throw new ItemNotFoundException
 		}
 	}

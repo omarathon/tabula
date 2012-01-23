@@ -80,11 +80,12 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	private def messageFor(user:User): SimpleMailMessage = {
 	  val message = new SimpleMailMessage
+	  val moduleCode = assignment.module.code.toUpperCase
       message.setFrom(fromAddress)
       message.setTo(user.getEmail)
       // TODO configurable subject
-      message.setSubject("Your feedback is ready")
-      // TODO configurable body (or at least, Freemarker this up)
+      message.setSubject(moduleCode + ": Your coursework feedback is ready")
+      // TODO configurable body (or at least, FIXME Freemarker this up)
       message.setText("""
 Hello %s
 	          
@@ -98,7 +99,7 @@ If you have any difficulty retrieving your feedback, please contact coursework@w
 """.format(
     		  user.getFirstName,
     		  assignment.name,
-    		  assignment.module.code.toUpperCase,
+    		  moduleCode,
     		  assignment.module.name,
     		  ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
       ))
