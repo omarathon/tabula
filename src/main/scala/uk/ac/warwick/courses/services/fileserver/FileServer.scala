@@ -18,7 +18,8 @@ class FileServer {
 		 * to the only reliable method of specifying the filename which
 		 * is to put it as the last part of the URL path.
 		 */
+		val inStream = file.inputStream
 		out.addHeader("Content-Disposition", "attachment")
-		FileCopyUtils.copy(file.inputStream, out.getOutputStream)
+		FileCopyUtils.copy(inStream, out.getOutputStream)
 	}
 }

@@ -19,12 +19,14 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import javax.annotation.Resource
+import uk.ac.warwick.courses.services.AssignmentService
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] {
   
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
-	@Autowired var userLookup:UserLookupService =_
+	//@Autowired var userLookup:UserLookupService =_
+	@Autowired var assignmentService:AssignmentService =_
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
@@ -57,22 +59,22 @@ class PublishFeedbackCommand extends Command[Unit] {
 	def apply {
 	  assignment.resultsPublished = true
 	  emailErrors = new BindException(this, "")
-	  val uniIds = assignment.feedbacks.map { _.universityId }
-	  val users = uniIds.map { userLookup.getUserByWarwickUniId(_) }
-	  for (user <- users) email(user)
+	  val users = assignmentService.getUsersForFeedback(assignment)
+	  for (info <- users) email(info)
 	}
 	
-	private def email(user:User) {
+	private def email(info:Pair[String,User]) {
+	  val (id,user) = info
 	  if (user.isFoundUser()) {
 	    val email = user.getEmail
 	    if (StringUtils.hasText(email)) {
 	      val message = messageFor(user)
 	      studentMailSender.send(message)
 	    } else {
-	      emailErrors.reject("feedback.publish.user.noemail", Array(user.getUserId), "")
+	      emailErrors.reject("feedback.publish.user.noemail", Array(id), "")
 	    }
 	  } else {
-	    emailErrors.reject("feedback.publish.user.notfound", Array(user.getUserId), "")
+	    emailErrors.reject("feedback.publish.user.notfound", Array(id), "")
 	  }
 	}
 	

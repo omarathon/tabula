@@ -25,37 +25,35 @@ class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[Renderabl
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var filename:String =_
 	
-	private val FeedbackZipName = "feedback.zip"
-	
-	private var filenameDownloaded:String =_
+	private var fileFound:Boolean = _
 	
 	/**
 	 * If filename is unset, it returns a renderable Zip of all files.
 	 * If filename is set, it will return a renderable attachment if found.
 	 * In either case if it's not found, None is returned.
 	 */
-	def apply() = 
-	  feedbackDao.getFeedbackByUniId(assignment, user.universityId) map { (feedback) =>
+	def apply() = { 
+	  val result = feedbackDao.getFeedbackByUniId(assignment, user.universityId) map { (feedback) =>
 		 filename match {
-			 case FeedbackZipName => zipped(feedback)
 			 case filename:String if filename.hasText => {
 				 feedback.attachments.find( _.name == filename ).map( new RenderableAttachment(_) ).orNull
 			 }
 			 case _ => zipped(feedback)
 		 }
 	  }
+	  fileFound = result.isDefined
+	  result
+	}
 	
 	private def zipped(feedback:Feedback) = new RenderableZip( zip.getFeedbackZip(feedback) )
 	
 	override def describe(d:Description) = { 
 		d.assignment(assignment)
-		
+		d.property("filename", filename)
 	}
 	
-	private def specificFilename = filename.hasText
-	
 	override def describeResult(d:Description) {
-		
+		d.property("fileFound", fileFound)
 	}
 	
 }
