@@ -21,5 +21,8 @@ class TimeController {
     "time" -> new Date,
     "timeWelcome" -> timeWelcome
     )
+    
+  @RequestMapping(Array("/time/null"))
+  def error = throw new NullPointerException
 
 }

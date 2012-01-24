@@ -42,10 +42,6 @@ class FileAttachment extends GeneratedId {
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var dateUploaded:DateTime = new DateTime
 	
-	@Lob @Basic(fetch=FetchType.LAZY)
-	@Column(name="data", updatable=true, nullable=true)
-	@BeanProperty var blob:Blob = null 
-	
 	@transient private var _file:File = null
 	def file = {
 		if (_file == null) _file = fileDao.getData(id).orNull
@@ -59,29 +55,23 @@ class FileAttachment extends GeneratedId {
 		name = n 
 	}
 	
-	def length = blob match {
-		case blob:Blob => blob.length
-		case _ => file match {
+	def length = file match {
 			case file:File => file.length()
 			case _ => 0
 		}
-	}
+	
 	
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream = blob match {
-		case blob:Blob => blob.getBinaryStream
-		case _ => file match {
+	def dataStream = file match {
 			case file:File => new FileInputStream(file)
 			case _ => null
 		}
-	}
 	
-	@deprecated
-	def hasBlob = blob != null
-	def hasData = hasBlob || file != null
+	
+	def hasData = file != null
 	
 	@transient @BeanProperty var uploadedData:InputStream = null
 	@transient @BeanProperty var uploadedDataLength:Long = 0

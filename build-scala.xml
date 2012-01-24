@@ -56,7 +56,7 @@
     <scalac deprecation="on" unchecked="on"  
     	srcref="java+scala.srcpath"
     	destdir="target/unwoven" classpathref="build+built.classpath" />
-  	<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" />
+  	<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
   	
   	<iajc
         inpath="target/unwoven"
@@ -155,7 +155,7 @@
   	  		<path refid="test.classpath" />
   	  		<fileset dir="target/test" />
   	</path>
-  	<javac srcdir="src/test/scala" destdir="target/test" classpathref="test+built.classpath" />
+  	<javac srcdir="src/test/scala" destdir="target/test" classpathref="test+built.classpath" includeantruntime="no" />
   	
   	
   	<if>

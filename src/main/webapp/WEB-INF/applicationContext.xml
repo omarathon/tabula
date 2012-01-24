@@ -37,6 +37,12 @@
 		classpath:/courses-private.properties,
 		/WEB-INF/build.properties" />
 	
+	<bean id="features" class="uk.ac.warwick.courses.Features">
+		<constructor-arg>
+			<util:properties location="classpath:/courses.properties" />
+		</constructor-arg>
+	</bean>
+	
 	<bean class="uk.ac.warwick.courses.events.EventLoggingAspect" factory-method="aspectOf">
 		<property name="listener" ref="eventListener" />
 	</bean>
@@ -57,7 +63,7 @@
 		which is served by the ErrorController at /error/, which delegates to this.
 		So this should be handling all exceptions.
 	 -->
-	<bean class="uk.ac.warwick.courses.system.ExceptionResolver" p:order="0"
+	<bean class="uk.ac.warwick.courses.system.exceptions.ExceptionResolver" p:order="0"
 		p:defaultView="errors/500">
 		<property name="viewMappings">
 			<map>
@@ -65,6 +71,15 @@
 				<entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
 			</map>
 		</property>
+	</bean>
+	
+	<bean class="uk.ac.warwick.courses.system.exceptions.CompositeExceptionHandler">
+		<constructor-arg>
+			<list>
+				<bean class="uk.ac.warwick.courses.system.exceptions.LoggingExceptionHandler" />
+				<bean class="uk.ac.warwick.courses.system.exceptions.EmailingExceptionHandler" />
+			</list>
+		</constructor-arg>
 	</bean>
 	
 	<!-- validation -->
@@ -113,7 +128,9 @@
 	
 	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.courses.system.CommonPropertyEditors" />
 	
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
+	
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
@@ -135,10 +152,6 @@
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
-	<!-- Converts blob based attachments to file based on startup. Once run on
-	all the databases, remove this code. -->
-	<bean id="migrateBlobs" class="uk.ac.warwick.courses.system.MigrateBlobs" init-method="go" depends-on="dataSourceInitialiser" />
-	
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
 	
@@ -151,12 +164,6 @@
 		<constructor-arg value="4" type="int" />
 	</bean>
 	
-	<!-- 
-		just logs mails for now.
-		When real mail sending is implemented, we'll keep this defined for the 'dev' profile
-		but define 'studentMailSender' as something that actually sends mail to the recipients on the
-		'production' profile.
-	 -->
 	<bean id="studentMailSender" class="uk.ac.warwick.courses.services.RedirectingMailSender">
 		<constructor-arg ref="mailSender" />
 	</bean>
@@ -233,6 +240,7 @@
 				<entry key="userlookup"><bean class="uk.ac.warwick.courses.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.courses.web.views.PermissionFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.courses.web.views.TheYear" /></entry>
+				<entry key="features" value-ref="features" />
 				<entry key="appBuildDate">
 					<bean factory-bean="dateTimeFormatter" factory-method="parseDateTime">
 						<constructor-arg value="${build.time}" />
@@ -274,6 +282,12 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
+
+
+
+	
+	<!-- /JMX -->
+	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven/>
@@ -283,7 +297,54 @@
 		
 	</beans>
 	
+	<beans profile="dev">
+	</beans>
+	
+	<beans profile="production">
+	</beans>
+	
 	<beans profile="dev,production">
+	
+			<!-- JMX -->
+	
+			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer 
+		       when there is a choice of MBeanServers (such as when jconsole
+		       support is installed). -->
+		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
+		
+		  <!-- ## auto exported beans ## -->
+		  
+		  
+		  <!-- ## auto exporters ## -->
+		  
+		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+		  
+		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		    <property name="attributeSource" ref="jmxAttributeSource" />
+		  </bean>
+		  <bean id="jmxNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		        <property name="attributeSource" ref="jmxAttributeSource"/>
+		  </bean>
+		  <bean id="autoExporter" class="org.springframework.jmx.export.MBeanExporter">
+		  	<description>Exports beans annotated with @ManagedResource</description>
+		  	<property name="autodetect" value="true" />  
+		  	<property name="assembler" ref="jmxAssembler"/>
+		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
+		    <property name="server" ref="jmxServerLocator" />
+		  </bean>
+		  
+		    <!-- ## manually exported beans ## -->
+
+		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" 
+		  		lazy-init="false"
+		  		autowire="no"> <!-- don't autowire the Annotation assembler below. -->
+		    <property name="server" ref="jmxServerLocator" />
+		    <property name="beans">
+		      <map>
+		        <entry key="courses:name=features" value-ref="features" />
+		      </map>
+		    </property>
+		  </bean>
 	
 		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
 			p:ssosUrl="${ssoclient.ssos.url}"
@@ -301,8 +362,6 @@
 	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
 	    	</property>
 	    </bean>
-	    
-	    <bean id="dataSourceInitialiser" class="java.lang.Object" />
 	    
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>

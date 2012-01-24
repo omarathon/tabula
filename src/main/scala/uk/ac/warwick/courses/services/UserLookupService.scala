@@ -53,8 +53,9 @@ class MaintenanceUserLookup extends UserLookupInterface {
 
 	def findUsersWithFilter(arg0: Map[String,String], arg1: Boolean): List[User] = Nil
 
-	//FIXME return an implementation
+	// FIXME return an implementation
 	def getGroupService(): GroupService = null
+	// FIXME return an implementation
 	def getOnCampusService(): OnCampusService = null
 
 	def getUserByIdAndPassNonLoggingIn(arg0: String, arg1: String): User = new AnonymousUser()

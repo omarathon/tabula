@@ -5,6 +5,18 @@
 <#assign module=assignment.module />
 <#assign department=module.department />
 
+<script type="text/javascript">
+jQuery(function($){ "use strict";
+	var submitButton = $('#publish-submit'),
+		checkbox = $('#confirmCheck');
+	function updateCheckbox() {
+	  submitButton.attr('disabled', !checkbox.is(':checked'));
+	}
+	checkbox.change(updateCheckbox);
+	updateCheckbox();
+});
+</script>
+
 <@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
@@ -17,11 +29,17 @@ done once for an assignment, and cannot be undone. Be sure that you have receive
 feedback you need before publishing, and then check the box below.
 </p>
 
+<#if features.emailStudents>
+<p>
+Each student will receive an email containing the link to the feedback. They will sign in
+and be shown the feedback specific to them.
+</p>
+<#else>
 <p>
 Note: notifications are not currently send to students - you will need to distribute the
-link yourself, by email or by posting it on your module web pages. Email notifications will
-happen in a future release.
+link yourself, by email or by posting it on your module web pages.
 </p>
+</#if>
 
 <@f.errors path="confirm" cssClass="error" />
 <@f.checkbox path="confirm" id="confirmCheck" />
@@ -30,7 +48,7 @@ happen in a future release.
 <#-- TODO enable/disable submit button as box is checked. -->
 
 <div class="submit-buttons">
-<input type="submit" value="Publish">
+<input type="submit" id="publish-submit" value="Publish">
 </div>
 </@f.form>
 

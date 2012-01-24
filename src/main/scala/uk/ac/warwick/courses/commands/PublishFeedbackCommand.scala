@@ -2,29 +2,32 @@ package uk.ac.warwick.courses.commands
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
+
 import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.BindException
 import org.springframework.validation.Errors
+
+import javax.annotation.Resource
 import javax.persistence.Entity
-import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
-import javax.annotation.Resource
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] {
   
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
-	@Autowired var userLookup:UserLookupService =_
+	//@Autowired var userLookup:UserLookupService =_
+	@Autowired var assignmentService:AssignmentService =_
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
@@ -35,7 +38,11 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	val fromAddress = "no-reply@warwick.ac.uk"
 	
-	var emailErrors:Errors =_
+	case class MissingUser(val universityId:String)
+	case class BadEmail(val user:User, val exception:Exception=null)
+	
+	var missingUsers: JList[MissingUser] = ArrayList()
+	var badEmails: JList[BadEmail] = ArrayList()
 	
 	// validation done even when showing initial form.
 	def prevalidate(errors:Errors) {
@@ -56,33 +63,37 @@ class PublishFeedbackCommand extends Command[Unit] {
 	@Transactional
 	def apply {
 	  assignment.resultsPublished = true
-	  emailErrors = new BindException(this, "")
-	  val uniIds = assignment.feedbacks.map { _.universityId }
-	  val users = uniIds.map { userLookup.getUserByWarwickUniId(_) }
-	  for (user <- users) email(user)
+	  val users = assignmentService.getUsersForFeedback(assignment)
+	  for (info <- users) email(info)
 	}
 	
-	private def email(user:User) {
+	private def email(info:Pair[String,User]) {
+	  val (id,user) = info
 	  if (user.isFoundUser()) {
 	    val email = user.getEmail
 	    if (StringUtils.hasText(email)) {
 	      val message = messageFor(user)
-	      studentMailSender.send(message)
+	      try {
+	    	  studentMailSender.send(message)
+	      } catch {
+	     	  case e:MailException => badEmails add BadEmail(user, exception=e)
+	      }
 	    } else {
-	      emailErrors.reject("feedback.publish.user.noemail", Array(user.getUserId), "")
+	      badEmails add BadEmail(user)
 	    }
 	  } else {
-	    emailErrors.reject("feedback.publish.user.notfound", Array(user.getUserId), "")
+	    missingUsers add MissingUser(id)
 	  }
 	}
 	
 	private def messageFor(user:User): SimpleMailMessage = {
 	  val message = new SimpleMailMessage
+	  val moduleCode = assignment.module.code.toUpperCase
       message.setFrom(fromAddress)
       message.setTo(user.getEmail)
       // TODO configurable subject
-      message.setSubject("Your feedback is ready")
-      // TODO configurable body (or at least, Freemarker this up)
+      message.setSubject(moduleCode + ": Your coursework feedback is ready")
+      // TODO configurable body (or at least, FIXME Freemarker this up)
       message.setText("""
 Hello %s
 	          
@@ -96,7 +107,7 @@ If you have any difficulty retrieving your feedback, please contact coursework@w
 """.format(
     		  user.getFirstName,
     		  assignment.name,
-    		  assignment.module.code.toUpperCase,
+    		  moduleCode,
     		  assignment.module.name,
     		  ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
       ))

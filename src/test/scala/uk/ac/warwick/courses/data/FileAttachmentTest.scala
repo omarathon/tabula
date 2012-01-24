@@ -32,6 +32,7 @@ class FileAttachmentTest extends AppContextTestBase {
 				val data = readStream(loadedAttachment.dataStream, "UTF-8")
 				data should be (string)
 			}
+			case None => fail("nope")
 		}
 		
 	}

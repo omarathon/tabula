@@ -7,7 +7,6 @@ import javax.persistence.Column
 import org.hibernate.annotations.Type
 import javax.persistence.Id
 
-// TODO use this class for querying auditevent.
 // need to manage access to the JSON map
 class AuditEvent {
 	var eventDate:DateTime =_

@@ -27,8 +27,12 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
   wrapper.setMethodsShadowItems(false) // do not lookup method first.
   wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
   wrapper.setUseCache(true) //do caching by default.
-  wrapper.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY); //don't expose method, but properties only
+  //wrapper.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY); //don't expose method, but properties only
   this.setObjectWrapper(wrapper)  
+  
+  // Mainly for tests to run - if servlet context is never set, it will
+  // use the classloader to find templates.
+  setClassForTemplateLoading(getClass(), "/")
   
   @Required 
   def setSharedVariables(vars:java.util.Map[String,Any]) {
@@ -36,6 +40,7 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
     for ((key,value) <- vars) this.setSharedVariable(key,value)
   }
   
-  override def setServletContext(ctx:javax.servlet.ServletContext) =
+  override def setServletContext(ctx:javax.servlet.ServletContext) = {
     	setServletContextForTemplateLoading(ctx, "/")
+  }
 }

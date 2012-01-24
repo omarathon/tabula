@@ -72,11 +72,7 @@ abstract class BaseController extends ControllerMethods with ValidatesCommand wi
   
   def requestInfo = RequestInfo.fromThread
   def user = requestInfo.get.user
-  
-  
-  def ajax = requestInfo.get.ajax
-  
-  
+  def ajax = requestInfo.map{ _.ajax }.getOrElse(false)
   
   def compositeValidator:Validator = {
 	  if (validator != null) {

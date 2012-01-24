@@ -38,9 +38,9 @@ object AcademicYear {
 	
 	def guessByDate(now:DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {
-			new AcademicYear(now.getYear() + 1)
-		} else {
 			new AcademicYear(now.getYear())
+		} else {
+			new AcademicYear(now.getYear()-1)
 		}
 	}
 }

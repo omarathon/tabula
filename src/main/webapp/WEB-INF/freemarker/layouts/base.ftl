@@ -275,7 +275,7 @@
 									</#if>
 			          			</li>
 			          			<li class="spacer">|</li>
-			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; ${theYear}</a></li>
+			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; <@warwick.copyright /></a></li>
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>
 			          			<li class="spacer">|</li>

@@ -23,6 +23,11 @@ trait Command[R] extends Describable with AppImports {
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
 
+trait Unaudited { self:Describable =>
+	// override describe() with nothing, since it'll never be used.
+	override def describe(d:Description) {}
+}
+
 /**
  * Object for a Command to describe what it's just done.
  */

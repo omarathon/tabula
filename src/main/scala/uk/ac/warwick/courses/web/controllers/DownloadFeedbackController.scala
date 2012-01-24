@@ -15,19 +15,30 @@ import uk.ac.warwick.courses.data.FeedbackDao
 import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
-@RequestMapping(value=Array("/module/{module}/{assignment}/feedback.zip"))
-class DownloadFeedbackController extends BaseController {
+@RequestMapping(value=Array("/module/{module}/{assignment}"))
+class DownloadFeedbackController extends AbstractAssignmentController {
 
 	@ModelAttribute def command(user:CurrentUser) = new DownloadFeedbackCommand(user)
     
 	@Autowired var fileServer:FileServer =_
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
-	def get(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse) {
+	@RequestMapping(value=Array("/all/feedback.zip"), method=Array(RequestMethod.GET))
+	def getAll(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
+		command.filename = null
+		getOne(command,user,response)
+	}
+	
+	@RequestMapping(value=Array("/get/{filename}"), method=Array(RequestMethod.GET))
+	def getOne(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
 		mustBeLinked(command.assignment, command.module)
-		mustBeAbleTo(View(command.module))
+		
+		// Does permission checks.
+		checkCanGetFeedback(command.assignment, user)
+		
 		command.apply() match {
-		  case Some(zip) => fileServer.serve(zip, response)
+		  case Some(renderable) => {
+		 	  fileServer.serve(renderable, response)
+		  }
 		  case None => throw new ItemNotFoundException
 		}
 	}

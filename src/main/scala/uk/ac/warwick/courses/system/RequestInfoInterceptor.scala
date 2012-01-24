@@ -14,9 +14,11 @@ import uk.ac.warwick.courses.RequestInfo
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
-		request.getAttribute(CurrentUser.keyName) match {
-		 	case user:CurrentUser => RequestInfo.open(new RequestInfo(user=user))
+		val user = request.getAttribute(CurrentUser.keyName) match {
+		 	case user:CurrentUser => user
+		 	case _ => null
 		}
+		RequestInfo.open(new RequestInfo(user=user))
 		true
 	}
 	

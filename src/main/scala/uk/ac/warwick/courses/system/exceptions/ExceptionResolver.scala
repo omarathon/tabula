@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.system
+package uk.ac.warwick.courses.system.exceptions
 import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.servlet.HandlerExceptionResolver
@@ -14,6 +14,7 @@ import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.courses.UserError
 import uk.ac.warwick.courses.web.Mav
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -26,6 +27,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	
 	@Required @BeanProperty var defaultView:String =_
 	
+	@Autowired var exceptionHandler:ExceptionHandler =_
+	
 	/**
 	 * If the interesting exception matches one of these exceptions then
 	 * the given view name will be used instead of defaultView.
@@ -35,21 +38,26 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var viewMappings:JMap[String,String] = Map[String,String]()
 	
 	override def resolveException(request:HttpServletRequest, response:HttpServletResponse, obj:Any, e:Exception):ModelAndView = {
-		doResolve(e).toModelAndView
+		doResolve(e, request).toModelAndView
 	}
+	
+	/**
+	 * Resolve an exception outside of a request. Doesn't return a model/view.
+	 */
+	def resolveException(e:Exception) { doResolve(e) }
 	
 	/**
 	 * Simpler interface for ErrorController to delegate to, which is called when an exception
 	 * happens beyond Spring's grasp.
 	 */
-	def doResolve(e:Throwable):Mav = {
+	def doResolve(e:Throwable, request:HttpServletRequest=null):Mav = {
 		e match {
-	      case exception:Throwable => handle(exception)
+	      case exception:Throwable => handle(exception, request)
 	      case _ => handleNull
 	    }
 	}
 	
-	private def handle(exception:Throwable) = {
+	private def handle(exception:Throwable, request:HttpServletRequest) = {
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] ))
 
 		val mav = Mav(defaultView,
@@ -57,12 +65,17 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			"exception" -> interestingException
 		)
 		
-		// User errors should just be debug logged.
-		interestingException match {
-			case ie:UserError => if (debugEnabled) logger.debug("Error caught", interestingException)
-			case _ => logger.error("Error caught", interestingException)
+		val token = ExceptionTokens.newToken
+		
+		// handler will do logging, emailing
+		try {
+			exceptionHandler.exception(ExceptionContext(token, interestingException))
+		} catch {
+			// This is very bad and should never happen - but still try to avoid showing
+			// a plain JBoss exception to the user.
+			case e:Exception => logger.error("Exception handling exception!", e)
 		}
-	    
+		
 	    viewMappings.get(interestingException.getClass.getName) match {
 			case view:String => { mav.viewName = view }
 			case null => //keep defaultView
