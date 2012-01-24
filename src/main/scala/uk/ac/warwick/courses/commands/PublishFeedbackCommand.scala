@@ -2,26 +2,25 @@ package uk.ac.warwick.courses.commands
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
+
 import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.BindException
 import org.springframework.validation.Errors
+
+import javax.annotation.Resource
 import javax.persistence.Entity
-import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
-import javax.annotation.Resource
-import uk.ac.warwick.courses.services.AssignmentService
-import java.util.{List=>JList}
-import uk.ac.warwick.courses.helpers.ArrayList
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] {
@@ -40,7 +39,7 @@ class PublishFeedbackCommand extends Command[Unit] {
 	val fromAddress = "no-reply@warwick.ac.uk"
 	
 	case class MissingUser(val universityId:String)
-	case class BadEmail(val user:User)
+	case class BadEmail(val user:User, val exception:Exception=null)
 	
 	var missingUsers: JList[MissingUser] = ArrayList()
 	var badEmails: JList[BadEmail] = ArrayList()
@@ -74,7 +73,11 @@ class PublishFeedbackCommand extends Command[Unit] {
 	    val email = user.getEmail
 	    if (StringUtils.hasText(email)) {
 	      val message = messageFor(user)
-	      studentMailSender.send(message)
+	      try {
+	    	  studentMailSender.send(message)
+	      } catch {
+	     	  case e:MailException => badEmails add BadEmail(user, exception=e)
+	      }
 	    } else {
 	      badEmails add BadEmail(user)
 	    }
