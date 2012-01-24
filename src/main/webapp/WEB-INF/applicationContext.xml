@@ -63,7 +63,7 @@
 		which is served by the ErrorController at /error/, which delegates to this.
 		So this should be handling all exceptions.
 	 -->
-	<bean class="uk.ac.warwick.courses.system.ExceptionResolver" p:order="0"
+	<bean class="uk.ac.warwick.courses.system.exceptions.ExceptionResolver" p:order="0"
 		p:defaultView="errors/500">
 		<property name="viewMappings">
 			<map>
@@ -71,6 +71,15 @@
 				<entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
 			</map>
 		</property>
+	</bean>
+	
+	<bean class="uk.ac.warwick.courses.system.exceptions.CompositeExceptionHandler">
+		<constructor-arg>
+			<list>
+				<bean class="uk.ac.warwick.courses.system.exceptions.LoggingExceptionHandler" />
+				<bean class="uk.ac.warwick.courses.system.exceptions.EmailingExceptionHandler" />
+			</list>
+		</constructor-arg>
 	</bean>
 	
 	<!-- validation -->

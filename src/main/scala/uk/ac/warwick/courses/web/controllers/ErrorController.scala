@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.courses.system.ExceptionResolver
 import uk.ac.warwick.courses.web.Mav
+import uk.ac.warwick.courses.system.exceptions.ExceptionResolver
 
 @Controller
 class ErrorController extends BaseController {
