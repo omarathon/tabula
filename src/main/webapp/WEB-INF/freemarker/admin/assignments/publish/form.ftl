@@ -5,6 +5,18 @@
 <#assign module=assignment.module />
 <#assign department=module.department />
 
+<script type="text/javascript">
+jQuery(function($){ "use strict";
+	var submitButton = $('#publish-submit'),
+		checkbox = $('#confirmCheck');
+	function updateCheckbox() {
+	  submitButton.attr('disabled', !checkbox.is(':checked'));
+	}
+	checkbox.change(updateCheckbox);
+	updateCheckbox();
+});
+</script>
+
 <@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
@@ -36,7 +48,7 @@ link yourself, by email or by posting it on your module web pages.
 <#-- TODO enable/disable submit button as box is checked. -->
 
 <div class="submit-buttons">
-<input type="submit" value="Publish">
+<input type="submit" id="publish-submit" value="Publish">
 </div>
 </@f.form>
 
