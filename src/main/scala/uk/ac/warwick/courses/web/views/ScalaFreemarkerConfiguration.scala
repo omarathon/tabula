@@ -30,12 +30,17 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
   //wrapper.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY); //don't expose method, but properties only
   this.setObjectWrapper(wrapper)  
   
+  // Mainly for tests to run - if servlet context is never set, it will
+  // use the classloader to find templates.
+  setClassForTemplateLoading(getClass(), "/")
+  
   @Required 
   def setSharedVariables(vars:java.util.Map[String,Any]) {
 	this.setSharedVariable("commandVarName", FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME)
     for ((key,value) <- vars) this.setSharedVariable(key,value)
   }
   
-  override def setServletContext(ctx:javax.servlet.ServletContext) =
+  override def setServletContext(ctx:javax.servlet.ServletContext) = {
     	setServletContextForTemplateLoading(ctx, "/")
+  }
 }

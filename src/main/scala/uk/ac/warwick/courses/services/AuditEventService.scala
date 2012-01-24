@@ -21,6 +21,8 @@ import org.hibernate.dialect.Oracle10gDialect
 import org.springframework.transaction.annotation.Transactional
 import collection.JavaConversions._
 import org.springframework.jdbc.core.JdbcTemplate
+import java.sql.Clob
+import org.springframework.util.FileCopyUtils
 
 @Component
 class AuditEventService extends Daoisms {
@@ -40,8 +42,14 @@ class AuditEventService extends Daoisms {
 		a.eventType = array(2).toString
 		a.masqueradeUserId = array(3).asInstanceOf[String]
 		a.userId = array(4).asInstanceOf[String]
-		a.data = array(5).toString
+		a.data = unclob(array(5))
 		a
+	}
+	
+	def unclob(any:Object): String = any match {
+		case clob:Clob => FileCopyUtils.copyToString(clob.getCharacterStream)
+		case string:String => string
+		case null => ""
 	}
 	
 	def save(event:Event, stage:String) {
@@ -64,6 +72,7 @@ class AuditEventService extends Daoisms {
 	def listRecent(start:Int, count:Int) : JList[AuditEvent] = {
 		val jdbc = new JdbcTemplate(dataSource)
 		val query = session.createSQLQuery(listSql)
+		val lobber = session.getLobHelper
 		query.setFirstResult(start)
 		query.setMaxResults(count)
 		query.list()
