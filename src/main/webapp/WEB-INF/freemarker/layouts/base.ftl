@@ -34,7 +34,9 @@
 		
 		  <script type="text/javascript" src="/static/js/id6scripts.js"></script>
 		  <script type="text/javascript" src="/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+		  <script type="text/javascript" src="/static/libs/jquery.delayedObserver.js"></script>
 		  <script type="text/javascript" src="/static/libs/anytime/anytimec.js"></script>
+		  <script type="text/javascript" src="/static/libs/popup/popup.js"></script>
 		  <script type="text/javascript" src="/static/js/main.js"></script>
 
 	</head>
