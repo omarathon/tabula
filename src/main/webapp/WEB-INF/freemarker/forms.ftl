@@ -32,10 +32,10 @@
 </#if>
 <#if ids??>
 <#list ids as id>
-	<input type="text" name="${status.expression}" value="${id}">
+	<input type="text" class="user-code-picker" name="${status.expression}" value="${id}">
 </#list>
 <#else>
-	<input type="text" name="${status.expression}">
+	<input type="text" class="user-code-picker" name="${status.expression}">
 </#if>
 </@spring.bind>
 </#macro>

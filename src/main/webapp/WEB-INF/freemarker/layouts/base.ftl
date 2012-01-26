@@ -30,6 +30,7 @@
 		  	</style>
 		  <![endif]-->
 		  
+		  <link rel="stylesheet" href="/static/libs/popup/popup.css" type="text/css">
 		  <link rel="stylesheet" href="/static/css/fonts/standard.css" type="text/css">
 		
 		  <script type="text/javascript" src="/static/js/id6scripts.js"></script>
@@ -37,6 +38,7 @@
 		  <script type="text/javascript" src="/static/libs/jquery.delayedObserver.js"></script>
 		  <script type="text/javascript" src="/static/libs/anytime/anytimec.js"></script>
 		  <script type="text/javascript" src="/static/libs/popup/popup.js"></script>
+		  <script type="text/javascript" src="/static/js/modernizr.js"></script>
 		  <script type="text/javascript" src="/static/js/main.js"></script>
 
 	</head>

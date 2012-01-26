@@ -328,12 +328,16 @@ WPopupBox.prototype.setHeightToFit = function() {
 }
 
 WPopupBox.prototype.hide = function() {
-  this.rootElement.style.display = 'none';
+  //this.rootElement.style.display = 'none';
+  this.rootElement.className = 'WPopupBox transition';
+  this.rootElement.className = 'WPopupBox';
   WPopupBox.showSelectBoxes();
 };
 
 WPopupBox.prototype.show = function() {
-  this.rootElement.style.display = 'block';
+  //this.rootElement.style.display = 'block';
+  this.rootElement.className = 'WPopupBox transition';
+  this.rootElement.className = 'WPopupBox transition visible';
   // if we've set size before the first view, do it again because
   // it was likely not done properly (dimensions not calculated when
   // element is invisible
@@ -648,13 +652,16 @@ WPopupBox.prototype.positionRight = function(el, hideArrows) {
 	
 	h = this.height;
 	
+	console.log("height", h)
+	
 	x = Math.floor(midpoint.right);
 	y = Math.floor(midpoint.y - h/2); 
 	this.setPosition(x,y);
 	
 	if (this.jq) {
 		var thisPosition = jQuery(this.rootElement).offset();
-		jQuery(this.imageElements.la).css('top', midpoint.y - thisPosition.y);
+		//console.log(thisPosition);
+		jQuery(this.imageElements.la).css('top', midpoint.y - thisPosition.top);
 	} else {
 		var thisPosition = Position.cumulativeOffset(this.rootElement);
 		this.imageElements.la.style.top = parseInt(midpoint.y - thisPosition[1]) + 'px';

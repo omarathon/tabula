@@ -27,10 +27,21 @@ class Mav(var viewName:String) {
 	 	this
 	}
 	
+	/**
+	 * Change to a non-default layout template.
+	 * 
+	 * @see #noLayout
+	 */
 	def layout(name:String) = {
 		map += "renderLayout" -> name
 		this
 	}
+	
+	/**
+	 * Sets the layout parameter to "none" to
+	 * render the template without any surrounding stuff.
+	 */
+	def noLayout = layout("none")
 	
 	def toModel = {
 		map ++ bodyClassesItem

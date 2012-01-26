@@ -18,17 +18,17 @@ class UserPickerController extends BaseController {
 	@Autowired var userLookup:UserLookupService =_
   
 	@RequestMapping(value=Array("/api/userpicker/form"))
-	def form: Mav = Mav("api/userpicker/form")
+	def form: Mav = Mav("api/userpicker/form").noLayout
 	
 	@RequestMapping(value=Array("/api/userpicker/query"))
 	def query (form:QueryForm, out:Writer) = {
 	  val usersByStaff = fetch(form)
-	  val (staff, students) = (usersByStaff(true), usersByStaff(false))
+	  val (staff, students) = (usersByStaff.getOrElse(true, Nil), usersByStaff.getOrElse(false, Nil))
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
-	      "students" -> students)
+	      "students" -> students).noLayout
 	  
-	  // Cannot be bothered to transform JSON to HTML in-page.
+	  // JSON! Much easier to just generate the HTML though.
 //	  def jsonUser(user:User) = Map(
 //		  "id" -> user.getUserId,
 //		  "name" -> user.getFullName
@@ -44,6 +44,13 @@ class UserPickerController extends BaseController {
 //	  ));
 	}
 	
+	/**
+	 * Fetches user lookup results, then groups them into a map keyed by
+	 * whether they're staff.
+	 * 
+	 * i.e. result(true) -> collectionOfStaffUsers
+	 * 		result(false) -> nonStaffUsers
+	 */
 	def fetch(form:QueryForm) = {
 	  val users = userLookup.findUsersWithFilter(form.filter)
 	  users.groupBy{ _.isStaff() }
