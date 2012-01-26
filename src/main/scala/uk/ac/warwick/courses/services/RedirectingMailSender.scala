@@ -16,7 +16,7 @@ final class RedirectingMailSender(delegate:WarwickMailSender) extends WarwickMai
 
   @Autowired var features:Features =_
 
-  @Value("redirect.test.emails.to") var testEmailTo:String =_
+  @Value("${redirect.test.emails.to}") var testEmailTo:String =_
   
   override def createMimeMessage() = delegate.createMimeMessage()
 
