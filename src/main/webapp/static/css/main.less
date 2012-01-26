@@ -270,3 +270,49 @@ ul.file-list {
 .disabled-zone {
   .opacity(0.6);
 }
+
+.userpicker-button {
+  margin-left: 0.5em;
+}
+
+.fade-transition() {
+  @properties: opacity, -webkit-transform;
+  .transition-property(@properties);
+  .transition-duration(0.3s);
+}
+
+// Badass CSS transitions for the popup library
+.WPopupBox {
+  -webkit-transform-origin: 50% 50%;
+  .csstransitions & {
+    display: block;
+    pointer-events: none;
+    .fade-transition();
+    .opacity(0.0);
+    -webkit-transform: scale(0.5);
+  }
+  .csstransitions &.visible {
+  	.opacity(1.0);
+	pointer-events: auto;
+	-webkit-transform: scale(1);
+  }
+}
+
+.userpicker-results {
+  overflow: auto;
+  height: 330px; 
+  
+  table { width: 100%; }
+  td.user-id {
+    white-space: nowrap; 
+  	width: 5%; 
+  	cursor: hand;
+  	cursor: pointer;
+  	font-weight: bold;
+  	color: darkblue;
+  }
+  tr:hover {
+    background-color: #ddd;
+    background-color: fadeout(lighten(#ff0,30%), 40%);
+  }
+}

@@ -46,6 +46,9 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	// validation done even when showing initial form.
 	def prevalidate(errors:Errors) {
+	  if (assignment.resultsPublished) {
+	 	errors.rejectValue("assignment","feedback.publish.already")
+	  }
 	  if (assignment.closeDate.isAfterNow()) {
 	    errors.rejectValue("assignment","feedback.publish.notclosed")
 	  } else if (assignment.feedbacks.isEmpty()) {

@@ -32,7 +32,7 @@ class RemoveDeptOwnerCommand(val department:Department) extends Command[Unit]  w
 	def getUsercodes:Seq[String] = department.owners.members
 	 
 	@NotEmpty
-	@ValidUsercode(message="invalid usercode")
+	//@ValidUsercode(message="invalid usercode")
 	@BeanProperty var usercode:String =_
 	
 	@Transactional

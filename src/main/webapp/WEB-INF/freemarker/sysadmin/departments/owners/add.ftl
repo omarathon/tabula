@@ -7,7 +7,7 @@
 <@f.errors path="usercode" cssClass="error" />
 Add usercode
 </@f.label>
-<@f.input path="usercode" />
+<@f.input path="usercode" cssClass="user-code-picker" />
 
 <input type="submit" value="Add">
 </@f.form>

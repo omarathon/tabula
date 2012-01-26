@@ -30,6 +30,8 @@ class AddModulePermissionCommand extends Command[Unit] {
 	def validate(errors:Errors) {
 		if (usercodesEmpty) {
 			errors.rejectValue("usercodes", "NotEmpty")
+		} else if (alreadyHasCode) {
+			errors.rejectValue("usercodes", "userId.duplicate")
 		} else {
 			val anonUsers = userLookup.getUsersByUserIds(usercodes).values().find { !_.isFoundUser() }
 			for (user <- anonUsers) {
@@ -37,6 +39,8 @@ class AddModulePermissionCommand extends Command[Unit] {
 			}
 		}
 	}
+	
+	private def alreadyHasCode = usercodes.find { module.participants.includes(_) }.isDefined
 	
 	private def usercodesEmpty = usercodes.find { StringUtils.hasText(_) }.isEmpty
 	
