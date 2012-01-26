@@ -17,7 +17,7 @@ var ie_lt7 = /MSIE ((5\.5)|6)/.test(navigator.userAgent) && navigator.platform =
 
 var WPopupBox = function(config, options) {
   if (!config || (!config.images && config.imageroot)) {
-	var imageroot = this.imageroot = config.imageroot || '/static_war/popup/';
+	var imageroot = this.imageroot = (config||{}).imageroot || '/static_war/popup/';
 	config = {
 	  images : {
 	    tl : jsLoadImage(imageroot+'tl.png'),
@@ -94,12 +94,18 @@ var WPopupBox = function(config, options) {
   i.la = this._makeDiv('lArr alpha', config.images.leftArr, config.leftArr[0], config.leftArr[1]);
   i.ra = this._makeDiv('rArr alpha', config.images.rightArr, config.rightArr[0], config.rightArr[1]);
   
-  $A([i.ta, i.ba, i.la, i.ra]).each(function(im){
+  var each = (this.jq) ? jQuery.each : function(arr, callback) {
+	 $A(arr).each(function(v,i){
+		 callback(i,v);
+	 })
+  };
+  
+  each([i.ta, i.ba, i.la, i.ra], function(index, im){
 	  im.style.display = 'none';
 	  im.style.position = 'relative';
   });
    
-  $A([i.tl, i.tr, i.bl, i.br, i.t, i.r, i.b, i.l, i.c, i.ta, i.ba, i.la, i.ra]).each(function(im){
+  each([i.tl, i.tr, i.bl, i.br, i.t, i.r, i.b, i.l, i.c, i.ta, i.ba, i.la, i.ra], function(index, im){
 	  r.appendChild(im);
   });
   
