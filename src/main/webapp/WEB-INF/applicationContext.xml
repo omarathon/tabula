@@ -32,7 +32,6 @@
 	
 	<!-- make properties available as ${..} tokens -->
 	<context:property-placeholder location="
-		classpath:/courses.properties,
 		classpath:/default.properties,
 		classpath:/courses.properties,
 		classpath:/courses-private.properties,
