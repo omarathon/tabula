@@ -376,6 +376,8 @@ WPopupBox.prototype.setContent = function(content) {
  * Fetch the given URL as content and show the popup.
  * Equilent to old showPopup() function.
  * 
+ * Note: This method is not jQuery compatible.
+ * 
  * Valid options: {
  * 	 target: an element to point the popup at
  *   position: if set to 'right', it will use a left arrow to point. otherwise it will be below.
@@ -384,25 +386,36 @@ WPopupBox.prototype.setContent = function(content) {
  */
 WPopupBox.prototype.showUrl = function(url, options) {
 	options = options || {};
-	var callback = function(r) {
+	var popup = this;
+	var callback = function(data) {
 		document.body.style.cursor = "auto";
-		this.show();
-		this.setContent(r.responseText);
-		if (setupSubmitDisabling) {
+		popup.show();
+		popup.setContent(data);
+		if (typeof setupSubmitDisabling !== 'undefined') {
 		  setupSubmitDisabling();
 		}
 		if (options.target) {
 			var t = options.target;
-			if (options.position === 'right') { this.positionRight(t); } 
-			else { this.positionBelow(t); }
+			if (options.position === 'right') { popup.positionRight(t); } 
+			else { popup.positionBelow(t); }
 		}
 	};
-	document.body.style.cursor = "progress";
-	if (options.params) {
-		new Ajax.Request(url,{method:'post',onComplete:callback.bind(this), parameters:options.params});
+	var prototypeCallback = function(r) { callback(r.responseText); }
+	
+	if (this.jq) {
+		if (options.params) {
+			jQuery.ajax(url, {type:'POST', success:callback, data: options.params });
+		} else {
+			jQuery.ajax(url, {type:'POST', success:callback });
+		}
 	} else {
-		new Ajax.Request(url,{method:'post',onComplete:callback.bind(this)});
+		if (options.params) {
+			new Ajax.Request(url,{method:'post',onComplete:prototypeCallback, parameters:options.params});
+		} else {
+			new Ajax.Request(url,{method:'post',onComplete:prototypeCallback});
+		}
 	}
+	document.body.style.cursor = "progress";
 }
 
 WPopupBox.prototype.setContentElement = function(element) {
