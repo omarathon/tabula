@@ -51,6 +51,8 @@ var WPopupBox = function(config, options) {
   WPopupBox.jq = this.jq = (typeof jQuery != 'undefined');
   
   this.initialised = false;
+  
+  this.showing = false;
  
   this.glassElement = document.createElement('div');
   this.glassElement.className = 'WPopupGlass';
@@ -310,6 +312,8 @@ WPopupBox.prototype.setSize = function(w,h) {
   this.width = w; this.height = h;
   this.glassElement.style.width = w+'px';
   this.glassElement.style.height = h+'px';
+//  this.rootElement.style.width = w+'px';
+//  this.rootElement.style.height = h+'px';
   this.contentElement.style.width = (w-this.config.padding[3]-this.config.padding[1]) + 'px';
   this._repositionEdges();
 };
@@ -329,11 +333,13 @@ WPopupBox.prototype.setHeightToFit = function() {
 
 WPopupBox.prototype.hide = function() {
   this.rootElement.className = 'WPopupBox';
+  this.showing = false;
   WPopupBox.showSelectBoxes();
 };
 
 WPopupBox.prototype.show = function() {
   this.rootElement.className = 'WPopupBox visible';
+  this.showing = true;
   // if we've set size before the first view, do it again because
   // it was likely not done properly (dimensions not calculated when
   // element is invisible
@@ -348,12 +354,12 @@ WPopupBox.prototype.show = function() {
 };
 
 WPopupBox.prototype.toggle = function() {
-  if (this.rootElement.style.display === 'block') 
-    { this.hide(); } else { this.show(); }
+  if (this.isShowing()) 
+  { this.hide(); } else { this.show(); }
 }
 
 WPopupBox.prototype.isShowing = function() {
-	return this.rootElement.style.display === 'block';
+	return this.showing;
 }
 
 /*
@@ -412,12 +418,20 @@ WPopupBox.prototype.setContentFromElement = function(element) {
 };
 
 WPopupBox.prototype._afterContentSet = function() {
+	var popup = this;
 	this.closeButton = document.createElement('a');
 	this.closeButton.setAttribute("style","cursor:pointer;cursor:hand;");
-	this.closeButton.onclick = (function() {
-		this.hide();
-		return false;
-	}).bind(this);
+	if (this.jq) {
+		jQuery(this.closeButton).click(function(ev){
+			popup.hide();
+			ev.preventDefault();
+		});
+	} else {
+		this.closeButton.onclick = (function() {
+			this.hide();
+			return false;
+		}).bind(this);
+	}
 	
 	closeImg = document.createElement('img');
 	closeImg.src = this.imageroot+'close.png';

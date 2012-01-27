@@ -41,14 +41,18 @@ jQuery(function ($) {
 					$firstname = $contents.find('.userpicker-firstname'),
 					$lastname  = $contents.find('.userpicker-lastname'),
 					$results = $contents.find('.userpicker-results'),
+					$xhr,
 					onResultsLoaded;
 				
 				$firstname.focus();
 				$contents.find('input').delayedObserver(function () {
+					// WSOS will search with at least 2 chars, but let's
+					// enforce at least 3 to avoid overly broad searches.
 					if (trim($firstname.val()).length > 2 || 
 							trim($lastname.val()).length > 2) {
 						$results.html('Loading&hellip;');
-						$results.load('/api/userpicker/query',  {
+						if ($xhr) $xhr.abort();
+						$xhr = jQuery.get('/api/userpicker/query',  {
 							firstName: $firstname.val(),
 							lastName: $lastname.val()
 						}, onResultsLoaded);
@@ -56,7 +60,8 @@ jQuery(function ($) {
 				}, 0.5);
 				
 				// wire up each user Id to be clickable
-				onResultsLoaded = function() {
+				onResultsLoaded = function(data) {
+					$results.html(data);
 					$results.find('td.user-id').click(function(){
 						var userId = this.innerHTML;
 						_userPicker.targetInput.value = userId;
