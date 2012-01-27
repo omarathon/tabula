@@ -14,6 +14,7 @@ Download all as ZIP file
 <div class="feedback-list">
 <#list assignment.feedbacks as feedback>
 	<div class="feedback-info">
+		<#-- TODO show student name if allowed by department -->
 		<h2 class="uni-id">${feedback.universityId}</h2>
 		<div class="date">Uploaded <@fmt.date date=feedback.uploadedDate /></div>
     	<div class="attachments">Attachments:
