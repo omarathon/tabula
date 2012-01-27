@@ -36,7 +36,8 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
-	val fromAddress = "no-reply@warwick.ac.uk"
+	@Value("${mail.noreply.to}") var replyAddress:String = _
+	@Value("${mail.exceptions.to}") var fromAddress:String = _
 	
 	case class MissingUser(val universityId:String)
 	case class BadEmail(val user:User, val exception:Exception=null)
@@ -93,6 +94,7 @@ class PublishFeedbackCommand extends Command[Unit] {
 	  val message = new SimpleMailMessage
 	  val moduleCode = assignment.module.code.toUpperCase
       message.setFrom(fromAddress)
+      message.setReplyTo(replyAddress)
       message.setTo(user.getEmail)
       // TODO configurable subject
       message.setSubject(moduleCode + ": Your coursework feedback is ready")
