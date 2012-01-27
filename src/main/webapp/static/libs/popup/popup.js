@@ -675,15 +675,12 @@ WPopupBox.prototype.positionRight = function(el, hideArrows) {
 	
 	h = this.height;
 	
-	console.log("height", h)
-	
 	x = Math.floor(midpoint.right);
 	y = Math.floor(midpoint.y - h/2); 
 	this.setPosition(x,y);
 	
 	if (this.jq) {
 		var thisPosition = jQuery(this.rootElement).offset();
-		//console.log(thisPosition);
 		jQuery(this.imageElements.la).css('top', midpoint.y - thisPosition.top);
 	} else {
 		var thisPosition = Position.cumulativeOffset(this.rootElement);
