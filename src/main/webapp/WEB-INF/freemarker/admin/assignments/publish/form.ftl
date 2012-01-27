@@ -14,12 +14,19 @@ jQuery(function($){ "use strict";
 	}
 	checkbox.change(updateCheckbox);
 	updateCheckbox();
+	
+	
+	$('#feedback-check-recipient-results')
+		.html('<p>Checking for potential problems with students\' email addresses&hellip;</p>')
+		.load('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')
 });
 </script>
 
 <@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
+
+<@f.errors path="assignment" cssClass="error" />
 
 <p>This will publish feedback for ${assignment.feedbacks?size} students.</p>
 
@@ -41,11 +48,11 @@ link yourself, by email or by posting it on your module web pages.
 </p>
 </#if>
 
+<div id="feedback-check-recipient-results"></div>
+
 <@f.errors path="confirm" cssClass="error" />
 <@f.checkbox path="confirm" id="confirmCheck" />
 <@f.label for="confirmCheck"><strong> I have read the above and am ready to release feedback to students.</strong></@f.label>
-
-<#-- TODO enable/disable submit button as box is checked. -->
 
 <div class="submit-buttons">
 <input type="submit" id="publish-submit" value="Publish">

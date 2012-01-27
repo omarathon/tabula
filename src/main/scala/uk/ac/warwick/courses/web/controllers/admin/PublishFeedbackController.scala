@@ -20,7 +20,7 @@ class PublishFeedbackController extends BaseController {
   @RequestMapping(method=Array(HEAD, GET), params=Array("!confirm"))
   def confirmation(command:PublishFeedbackCommand, errors:Errors): Mav = {
     check(command)
-    command.prevalidate(errors)
+    if (errors.hasErrors) command.prevalidate(errors)
     Mav("admin/assignments/publish/form", 
         "assignment" -> command.assignment)
   }

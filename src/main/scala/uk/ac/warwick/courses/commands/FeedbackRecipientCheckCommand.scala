@@ -14,6 +14,7 @@ import uk.ac.warwick.courses.helpers.NoUser
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import javax.mail.MessagingException
+import uk.ac.warwick.courses.data.model.Module
 
 abstract class RecipientReportItem(val universityId:String, val user:User, val good:Boolean)
 case class MissingUser(id:String) extends RecipientReportItem(id, null, false)
@@ -22,7 +23,10 @@ case class GoodUser(u:User) extends RecipientReportItem(u.getWarwickId, u, true)
 
 case class RecipientCheckReport(
 	val users: List[RecipientReportItem]
-)
+) {
+	def hasProblems = users.find{ ! _.good }.isDefined
+	def problems = users.filter{ !_.good }
+}
 
 /**
  * A standalone command to go through all the feedback for an assignment, looking up
@@ -33,6 +37,7 @@ case class RecipientCheckReport(
 @Configurable
 class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with Unaudited {
 	
+	@BeanProperty var module:Module =_ // optional, mainly for binding from URL
 	@BeanProperty var assignment:Assignment =_
 	@Autowired var assignmentService:AssignmentService =_
 	
@@ -54,8 +59,6 @@ class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with U
 			case NoUser(user) => MissingUser(id)
 		}
 		
-	
-	
 	def isGoodEmail(email:String): Boolean = {
 		try {
 			new InternetAddress(email).validate
