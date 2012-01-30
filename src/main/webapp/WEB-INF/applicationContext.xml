@@ -373,6 +373,8 @@
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
 		
+		<bean id="mainDatabaseDialect" class="uk.ac.warwick.courses.data.oracle.Oracle10gDialect" />
+		
 		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
 			p:definitions="/WEB-INF/defs/views.xml"
 			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory">
@@ -391,6 +393,8 @@
 		<jdbc:embedded-database id="dataSource" />
 		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
+		
+		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
 
 		<bean id="dataSourceInitialiser" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
 			c:dataSource-ref="dataSource"

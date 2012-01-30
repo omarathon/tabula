@@ -23,17 +23,20 @@ import collection.JavaConversions._
 import org.springframework.jdbc.core.JdbcTemplate
 import java.sql.Clob
 import org.springframework.util.FileCopyUtils
+import org.hibernate.dialect.Dialect
+import javax.annotation.Resource
 
 @Component
 class AuditEventService extends Daoisms {
 
 	@Autowired var json:ObjectMapper =_
 	
+	@Resource(name="mainDatabaseDialect") var dialect:Dialect = _
+	
 	private val listSql = """select 
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data
 		from auditevent a order by eventdate desc """
 		
-	val dialect = new Oracle10gDialect
 	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
 		val a = new AuditEvent
@@ -53,9 +56,13 @@ class AuditEventService extends Daoisms {
 	}
 	
 	def save(event:Event, stage:String) {
+		
+		// Both Oracle and HSQLDB support sequences, but with different select syntax
+		val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
+		
 		val query = session.createSQLQuery("insert into auditevent " +
-				"(eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
-				"values(:date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+				"(id, eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
+				"values("+nextSeq+", :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
 		query.setTimestamp("date", event.date.toDate)
 		query.setString("name", event.name)
 		query.setString("stage", stage)

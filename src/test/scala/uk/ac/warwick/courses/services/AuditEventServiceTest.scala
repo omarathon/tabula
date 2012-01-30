@@ -7,13 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.events.Event
 import org.springframework.transaction.annotation.Transactional
 import org.joda.time.DateTime
+import org.hibernate.dialect.HSQLDialect
 
 class AuditEventServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AuditEventService =_
 	
+	
 	@Transactional
 	@Test def listEvents {
+		
 		val now = new DateTime()
 		for (i <- Range(1,30)) {
 			val event = new Event("Bite"+i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
