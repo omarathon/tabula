@@ -26,7 +26,6 @@ create table Department (
 
 create table FileAttachment (
     id nvarchar2(255) not null,
-    data blob,
     name nvarchar2(255),
     temporary number(1,0) not null,
     feedback_id nvarchar2(255),
@@ -91,6 +90,7 @@ CREATE INDEX IDX_USERGROUPINC ON USERGROUPINCLUDE(GROUP_ID);
 CREATE INDEX IDX_USERGROUPEXC ON USERGROUPEXCLUDE(GROUP_ID);
 
 create table AuditEvent (
+	ID NUMBER(38, 0),
 	eventdate timestamp,
 	eventType nvarchar2(255) not null,
 	eventStage nvarchar2(64) not null,
@@ -99,6 +99,7 @@ create table AuditEvent (
 	data nvarchar2(4000) not null
 );
 create index idx_auditeventdate on auditevent(eventdate);
+CREATE SEQUENCE "AUDITEVENT_SEQ" MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE;
 
 create table formfield (
     id nvarchar2(255) not null,
