@@ -14,6 +14,8 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.helpers.Logging
 import org.apache.commons.io.input.BoundedInputStream
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -84,6 +86,10 @@ object Zips {
     */
    def iterator[T](zip:ZipInputStream)(fn: (Iterator[ZipEntry])=>Iterator[T]): List[T] = ensureClose(zip) {
 	   fn( Iterator.continually{zip.getNextEntry}.takeWhile{_ != null} ).toList
+   }
+   
+   def iterator[T](zip:ZipArchiveInputStream)(fn: (Iterator[ZipArchiveEntry])=>Iterator[T]): List[T] = ensureClose(zip) {
+	   fn( Iterator.continually{zip.getNextZipEntry}.takeWhile{_ != null} ).toList
    }
    
    def map[T](zip:ZipInputStream)(fn: (ZipEntry)=>T): Seq[T] = ensureClose(zip) {

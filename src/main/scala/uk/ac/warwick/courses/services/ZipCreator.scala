@@ -1,17 +1,19 @@
 package uk.ac.warwick.courses.services
 import scala.collection.mutable.ListBuffer
 import java.io.InputStream
-import java.util.zip.ZipOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.util.zip.ZipEntry
 import java.nio.ByteBuffer
 import java.io.OutputStream
 import uk.ac.warwick.courses.helpers.Logging
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import java.io.RandomAccessFile
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
 
 trait ZipItem
-class ZipFileItem(val name:String, val input:InputStream) extends ZipItem
-class ZipFolderItem(val name:String, startItems:Seq[ZipItem]=Nil) extends ZipItem {
+case class ZipFileItem(val name:String, val input:InputStream) extends ZipItem
+case class ZipFolderItem(val name:String, startItems:Seq[ZipItem]=Nil) extends ZipItem {
 	var items:ListBuffer[ZipItem] = ListBuffer()
 	items.appendAll(startItems)
 }
@@ -47,6 +49,8 @@ trait ZipCreator extends Logging {
 			file.getParentFile.mkdirs
 			openZipStream(file) { (zip) =>
 				zip.setLevel(9)
+				// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
+				zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
 				writeItems(items, zip)
 			}
 		}
@@ -62,13 +66,13 @@ trait ZipCreator extends Logging {
 	
 	private def fileForName(name:String) = new File(zipDir, name + ".zip")
 
-	private def writeItems(items:Seq[ZipItem], zip:ZipOutputStream) {
+	private def writeItems(items:Seq[ZipItem], zip:ZipArchiveOutputStream) {
 		def writeFolder(basePath:String, items:Seq[ZipItem]) {
 			for (item <- items) item match {
 				case file:ZipFileItem => {
-					zip.putNextEntry(new ZipEntry(basePath+file.name))
+					zip.putArchiveEntry(new ZipArchiveEntry(basePath+file.name))
 					copy(file.input, zip)
-					zip.closeEntry
+					zip.closeArchiveEntry()
 				}
 				case folder:ZipFolderItem => writeFolder( basePath+folder.name+"/", folder.items)
 			}
@@ -81,10 +85,10 @@ trait ZipCreator extends Logging {
 	 * The output stream is always closed, and if anything bad happens the file
 	 * is deleted.
 	 */
-	private def openZipStream(file:File)(fn : (ZipOutputStream)=>Unit) {
-		var zip:ZipOutputStream = null; 
+	private def openZipStream(file:File)(fn : (ZipArchiveOutputStream)=>Unit) {
+		var zip:ZipArchiveOutputStream = null; 
 		try {
-			zip = new ZipOutputStream(new FileOutputStream(file))
+			zip = new ZipArchiveOutputStream(file)
 			fn(zip)
 		} catch {
 			case e:Exception => {
