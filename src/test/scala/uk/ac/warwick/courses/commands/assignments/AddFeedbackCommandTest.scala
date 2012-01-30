@@ -56,11 +56,13 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			command.preExtractValidation(errors)
 			command.onBind
 			command.postExtractValidation(errors)
-			println(errors)
 			errors.hasErrors should be (false)
 			
 			command.items.size should be(2)
 			command.unrecognisedFiles.size should be(1)
+			
+			val attached0123456 = command.items.find { _.uniNumber == "0123456" }.get.file.attached
+			attached0123456.find { _.name == "feedback.txt" }.get.length should be (975)
 		}
 	}
 }

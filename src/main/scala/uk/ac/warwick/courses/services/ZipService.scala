@@ -70,7 +70,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
  * InputStream to read a single zip entry from a parent input stream.
  */
 class ZipEntryInputStream(val zip:InputStream, val entry:ZipEntry)
-		extends BoundedInputStream(zip, entry.getCompressedSize) {
+		extends BoundedInputStream(zip, entry.getSize) {
 	setPropagateClose(false)
 }
 
