@@ -9,10 +9,11 @@ class ZipServiceTest extends TestBase {
 	@Test def readZip {
 		val zip = new ZipInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
 		val names = Zips.map(zip){ _.getName }.sorted
-		names should have ('size(7))
+		names should have ('size(8))
 		names should contain("0123456/")
 		names should contain("0123456/feedback.doc")
 		names should contain("0123456/feedback.mp3")
+		names should contain("0123456/feedback.txt")
 		names should contain("0123457/")
 		names should contain("0123457/crayons.doc")
 		names should contain("0123457/feedback.mp3")
@@ -24,10 +25,11 @@ class ZipServiceTest extends TestBase {
 		val names = Zips.iterator(zip){ (iterator) =>
 			for (i <- iterator) yield i.getName
 		}
-		names should have ('size(7))
+		names should have ('size(8))
 		names should contain("0123456/")
 		names should contain("0123456/feedback.doc")
 		names should contain("0123456/feedback.mp3")
+		names should contain("0123456/feedback.txt")
 		names should contain("0123457/")
 		names should contain("0123457/crayons.doc")
 		names should contain("0123457/feedback.mp3")
