@@ -179,7 +179,7 @@
 				<property name="host" value="${mail.smtp.host}" />
 			</bean>
 		</constructor-arg>
-	</bean>F
+	</bean>
 	
 	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>
