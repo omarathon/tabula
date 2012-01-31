@@ -16,11 +16,11 @@
 
 		  <@stylesheet "/static/css/concat6.css" />
 		  <#include "_styles.ftl" />
-		  <link rel="stylesheet" title="No Accessibility" href="/static/css/noaccessibility.css" type="text/css">
-		  <link rel="alternate stylesheet" title="Show Accessibility" href="/static/css/showaccessibility.css" type="text/css">
+		  <link rel="stylesheet" title="No Accessibility" href="<@url resource="/static/css/noaccessibility.css"/>" type="text/css">
+		  <link rel="alternate stylesheet" title="Show Accessibility" href="<@url resource="/static/css/showaccessibility.css"/>" type="text/css">
 		  
 		  <!--[if lt IE 8]>
-			  <link rel="stylesheet" href="/static/css/ielt8.css" type="text/css">
+		  	  <@stylesheet "/static/css/ielt8.css" />
 		  <![endif]-->
 		  <!--[if lt IE 9]>
 		  	<style type="text/css">
@@ -30,16 +30,16 @@
 		  	</style>
 		  <![endif]-->
 		  
-		  <link rel="stylesheet" href="/static/libs/popup/popup.css" type="text/css">
-		  <link rel="stylesheet" href="/static/css/fonts/standard.css" type="text/css">
+		  <@stylesheet "/static/libs/popup/popup.css" />
+		  <@stylesheet "/static/css/fonts/standard.css" />
 		
-		  <script type="text/javascript" src="/static/js/id6scripts.js"></script>
-		  <script type="text/javascript" src="/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
-		  <script type="text/javascript" src="/static/libs/jquery.delayedObserver.js"></script>
-		  <script type="text/javascript" src="/static/libs/anytime/anytimec.js"></script>
-		  <script type="text/javascript" src="/static/libs/popup/popup.js"></script>
-		  <script type="text/javascript" src="/static/js/modernizr.js"></script>
-		  <script type="text/javascript" src="/static/js/main.js"></script>
+		  <@script "/static/js/id6scripts.js" />
+		  <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
+		  <@script "/static/libs/jquery.delayedObserver.js" />
+		  <@script "/static/libs/anytime/anytimec.js" />
+		  <@script "/static/libs/popup/popup.js" />
+		  <@script "/static/js/modernizr.js" />
+		  <@script "/static/js/main.js" />
 
 	</head>
 	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses?default('')}">

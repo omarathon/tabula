@@ -152,6 +152,8 @@
 	<tx:annotation-driven mode="aspectj" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
+	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
+	
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
 	
@@ -177,7 +179,7 @@
 				<property name="host" value="${mail.smtp.host}" />
 			</bean>
 		</constructor-arg>
-	</bean>
+	</bean>F
 	
 	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>

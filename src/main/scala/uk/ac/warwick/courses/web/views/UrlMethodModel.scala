@@ -7,6 +7,8 @@ import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateModel
 import freemarker.core.Environment
 import org.springframework.beans.factory.annotation.Value
+import java.util.Properties
+import javax.annotation.Resource
 
 /**
  * 
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value
 class UrlMethodModel extends TemplateDirectiveModel {
   
 	@Value("${toplevel.url}") var toplevelUrl:String = _
+	
+	@Resource(name="staticHashes") var staticHashes:Properties = _
   
 	override def execute(env: Environment, 
 		    params: java.util.Map[_,_], 
@@ -23,7 +27,7 @@ class UrlMethodModel extends TemplateDirectiveModel {
 	  val path:String = if (params.containsKey("page")) {
 	    params.get("page").toString()
 	  } else if (params.containsKey("resource")) {
-	    params.get("resource").toString()
+	    addSuffix(params.get("resource").toString())
 	  } else {
 	    throw new IllegalArgumentException("")
 	  }
@@ -34,5 +38,11 @@ class UrlMethodModel extends TemplateDirectiveModel {
 	  
 	}
 	
+	def addSuffix(path:String) = {
+		staticHashes.getProperty(path.substring(1)) match {
+			case hash:String => path + "." + hash
+			case _ => path
+		}
+	}
 
 }

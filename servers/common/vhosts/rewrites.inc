@@ -8,5 +8,9 @@ RequestHeader set X-Requested-URI "%{REQ_URI}e" env=!no-requested-uri
 ####
 
 RewriteRule ^/favicon\.ico - [G,L]
+RewriteRule \.php$ [G,L]
+
+# static content suffixes
+RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1 [QSA]
 
 RewriteRule (.*) http://localzone:${proxy:port}/courses$1 [QSA,P,L]

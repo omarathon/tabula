@@ -36,7 +36,9 @@
   <taskdef resource="scala/tools/ant/antlib.xml" classpathref="build.classpath" />
   <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties" classpath="lib/runtime/aspectj/aspectjtools.jar" />
   <taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="build.classpath" />
-  
+  <taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask" classpath="lib/runtime/warwickutils-all.jar" />
+	
+	
   <target name="-checks">
   </target>
   
@@ -80,6 +82,11 @@
   	<lesscss todir="target/${war.name}/static">
 		<fileset dir="target/${war.name}/static" includes="**/*.less" excludes="**/*.inc.less"/>
 	</lesscss>
+  	
+  	<batchhash propertyfile="target/${war.name}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">
+       <fileset dir="target/${war.name}" includes="static/**" excludes="**/*.less" />
+    </batchhash>
+  	
   </target>
 
   <target name="package" depends="compile,compile-scripts" description="Compile and package application into a WAR file">
@@ -218,5 +225,6 @@
   	  />
   	</hibernate>
   </target>
+
 
 </project>
