@@ -21,5 +21,5 @@ Header append Vary User-Agent env=!dont-vary
 
 <IfModule mod_headers.c>
 Header unset X-Powered-By
-Header set Server
+Header set Server Warwick
 </IfModule> 
