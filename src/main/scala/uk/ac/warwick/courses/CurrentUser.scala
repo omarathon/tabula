@@ -26,6 +26,8 @@ class CurrentUser(
 	def fullName = apparentUser.getFullName
 	def firstName = apparentUser.getFirstName
 	def universityId = apparentUser.getWarwickId
+	def departmentName = apparentUser.getDepartment
+	def email = apparentUser.getEmail
 	
 	override def toString = {
       val builder = new StringBuilder("User ")

@@ -311,6 +311,17 @@ ul.file-list {
   }
 }
 
+// Change look of some things when they're in a popup box
+.WPopupBox {
+	.submit-buttons {
+	  margin-bottom: 0;
+	  padding-bottom: 0;
+	}
+	p {
+		margin-bottom: 1em;
+	}
+}
+
 .userpicker-results {
   overflow: auto;
   height: 330px; 
@@ -328,4 +339,22 @@ ul.file-list {
     background-color: #ddd;
     background-color: fadeout(lighten(#ff0,30%), 40%);
   }
+}
+
+#app-comment-message {
+  padding: 0.5em;
+  height: 8em;
+  width: 97%;
+}
+
+#app-feedback-link {
+  position:fixed;
+  left:0;
+  top:30%;
+  width: 36px;
+  height: 155px;
+  background: url(../images/app-feedback.png) no-repeat;
+  cursor: hand;
+  cursor: pointer;
+  a { display: none; }
 }

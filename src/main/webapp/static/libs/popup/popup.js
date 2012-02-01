@@ -16,8 +16,10 @@ var ie_lt7 = /MSIE ((5\.5)|6)/.test(navigator.userAgent) && navigator.platform =
 
 
 var WPopupBox = function(config, options) {
+  WPopupBox.jq = this.jq = (typeof jQuery != 'undefined');
+	
   if (!config || (!config.images && config.imageroot)) {
-	var imageroot = this.imageroot = (config||{}).imageroot || '/static_war/popup/';
+	var imageroot = this.imageroot = (config||WPopupBox.defaultConfig).imageroot || '/static_war/popup/';
 	config = {
 	  images : {
 	    tl : jsLoadImage(imageroot+'tl.png'),
@@ -43,12 +45,18 @@ var WPopupBox = function(config, options) {
 	   rightArr : [20,39]
 	};
   }
-  this.config = config;
+  
+  if (this.jq) {
+	  this.config = [];
+	  jQuery.extend(this.config, WPopupBox.defaultConfig);
+	  jQuery.extend(this.config, config);
+  } else {
+	  this.config = $H(WPopupBox.defaultConfig).merge(config).toObject();
+  }
   options = options || {};
   
   var self = this;
-  
-  WPopupBox.jq = this.jq = (typeof jQuery != 'undefined');
+ 
   
   this.initialised = false;
   
@@ -185,6 +193,7 @@ var WPopupBox = function(config, options) {
   this.initialised = true;
 };
 
+WPopupBox.defaultConfig = {};
 
 /*
  * Set the top-left position of the popup.
@@ -376,43 +385,48 @@ WPopupBox.prototype.setContent = function(content) {
  * Fetch the given URL as content and show the popup.
  * Equilent to old showPopup() function.
  * 
- * Note: This method is not jQuery compatible.
- * 
  * Valid options: {
  * 	 target: an element to point the popup at
  *   position: if set to 'right', it will use a left arrow to point. otherwise it will be below.
  *   params: parameters to pass to the AJAX request.
  * }
  */
+
 WPopupBox.prototype.showUrl = function(url, options) {
 	options = options || {};
+	var method = options.method || 'POST';
 	var popup = this;
 	var callback = function(data) {
 		document.body.style.cursor = "auto";
 		popup.show();
 		popup.setContent(data);
-		if (typeof setupSubmitDisabling !== 'undefined') {
+		if (typeof setupSubmitDisabling !== 'undefined') { // for Sitebuilder
 		  setupSubmitDisabling();
 		}
 		if (options.target) {
 			var t = options.target;
 			if (options.position === 'right') { popup.positionRight(t); } 
+			else if (options.position === 'above') { popup.positionAbove(t); }
 			else { popup.positionBelow(t); }
+		}
+		
+		if (options.onComplete) {
+			options.onComplete(popup.contentElement);
 		}
 	};
 	var prototypeCallback = function(r) { callback(r.responseText); }
 	
 	if (this.jq) {
 		if (options.params) {
-			jQuery.ajax(url, {type:'POST', success:callback, data: options.params });
+			jQuery.ajax(url, {type:method, success:callback, data: options.params });
 		} else {
-			jQuery.ajax(url, {type:'POST', success:callback });
+			jQuery.ajax(url, {type:method, success:callback });
 		}
 	} else {
 		if (options.params) {
-			new Ajax.Request(url,{method:'post',onComplete:prototypeCallback, parameters:options.params});
+			new Ajax.Request(url,{method:method,onComplete:prototypeCallback, parameters:options.params});
 		} else {
-			new Ajax.Request(url,{method:'post',onComplete:prototypeCallback});
+			new Ajax.Request(url,{method:method,onComplete:prototypeCallback});
 		}
 	}
 	document.body.style.cursor = "progress";
@@ -655,7 +669,7 @@ WPopupBox.prototype.getMidpoint = function(el) {
 WPopupBox.prototype.positionAbove = function(el) {
 	this.removeArrows();
 	this.setBottomArrow();
-	el = $(el);
+	if (!this.jq) el = $(el);
 	  
 	var midpoint = this.getMidpoint(el);
 	

@@ -53,18 +53,25 @@ abstract trait ControllerMethods extends Logging {
 	 def mustBeAbleTo(action:Action[_]) = securityService.check(user, action)
 }
 
+trait ControllerViews {
+	val Mav = uk.ac.warwick.courses.web.Mav
+	def Redirect(path:String) = Mav("redirect:" + path)
+	def Reload() = Redirect(currentPath)
+	
+	private def currentPath:String = requestInfo.get.requestedUri.getPath
+	
+	def requestInfo:Option[RequestInfo]
+}
+
 /**
  * Useful traits for all controllers to have.
  */
 @Controller
-abstract class BaseController extends ControllerMethods with ValidatesCommand with Logging with EventHandling with AppImports {
+abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling with AppImports {
   // make Mav available to controllers without needing to import
-  val Mav = uk.ac.warwick.courses.web.Mav
   
   @Required @Resource(name="validator") var globalValidator:Validator =_
   
-  def Redirect(path:String) = Mav("redirect:" + path)
-	
   @Autowired
   @BeanProperty var securityService:SecurityService =_
   

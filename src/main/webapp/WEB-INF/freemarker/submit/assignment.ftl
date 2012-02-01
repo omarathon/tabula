@@ -3,7 +3,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<h1>${module.name} - ${assignment.name}</h1>
+<h1>${module.name} (${module.code?upper_case}) - ${assignment.name}</h1>
 
 <#if feedback??>
 

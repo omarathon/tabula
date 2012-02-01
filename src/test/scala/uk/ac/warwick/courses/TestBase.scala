@@ -44,7 +44,7 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
 	 	  case None => {
 	 	 	  val user = new User(code)
 	 	 	  currentUser = new CurrentUser(user, user)
-	 		  new RequestInfo(currentUser)
+	 		  new RequestInfo(currentUser, null)
 	 	  }
 	  }
 	   

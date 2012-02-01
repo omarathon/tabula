@@ -31,7 +31,7 @@
 		p:basename="messages" />
 	
 	<!-- make properties available as ${..} tokens -->
-	<context:property-placeholder location="
+	<context:property-placeholder  location="
 		classpath:/default.properties,
 		classpath:/courses.properties,
 		classpath:/courses-private.properties,

@@ -289,6 +289,8 @@
 			          				App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
 			          			</li>
 		          			</ul>
+		          			
+		          			<div id="app-feedback-link" class="hide-smallscreen"><a href="/app/tell-us">Give feedback</a></div>
 		          				      					
 	      					<div style="clear:both;"></div>
 		          		</div>
@@ -296,5 +298,8 @@
 				</div>
 			</div>
 		</div>
+		
+	
+		
 	</body>
 </html>

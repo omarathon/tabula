@@ -19,7 +19,7 @@ jQuery(function ($) {
 		if (_userPicker == null) {
 			
 			// A popup box enhanced with a few methods for user picker
-			_userPicker = new WPopupBox({imageroot:'/static/libs/popup/'});
+			_userPicker = new WPopupBox();
 			
 			_userPicker.showPicker = function (element, targetInput) {
 				this.setContent("Loading&hellip;");
@@ -104,6 +104,43 @@ jQuery(function ($) {
 		
 	});
 	
+	var _feedbackPopup;
+	var getFeedbackPopup = function() {
+		if (!_feedbackPopup) {
+			_feedbackPopup = new WPopupBox();
+			_feedbackPopup.setSize(500,300);
+		}
+		return _feedbackPopup;
+	}
+	
+	$('#app-feedback-link').click(function(event){
+		event.preventDefault();
+		var popup = getFeedbackPopup();
+		var target = event.target;
+		var formLoaded = function(contentElement) {
+			var $form = jQuery(contentElement).find('form');
+			$form.submit(function(event){
+				event.preventDefault();
+				jQuery.post('/app/tell-us', $form.serialize(), function(data){
+					popup.setContent(data);
+					popup.positionRight(target);
+					formLoaded(contentElement);
+				});
+			});
+		}
+		
+		if (popup.isShowing()) {
+			popup.hide();
+		} else {
+			popup.showUrl('/app/tell-us', {
+				method:'GET', target: target, position:'right',
+				onComplete: formLoaded
+			});
+		}
+		
+	});
+	
+	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
 }); // end domready
 

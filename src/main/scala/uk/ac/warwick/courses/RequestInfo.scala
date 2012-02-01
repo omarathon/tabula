@@ -1,5 +1,7 @@
 package uk.ac.warwick.courses
 
+import uk.ac.warwick.util.web.Uri
+
 /**
  * Stores information about the current request, such as the
  * current user.
@@ -16,6 +18,7 @@ package uk.ac.warwick.courses
  */
 class RequestInfo(
 		val user:CurrentUser, 
+		val requestedUri:Uri,
 		val ajax:Boolean=false
 		)
 

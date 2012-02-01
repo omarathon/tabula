@@ -13,5 +13,14 @@ trait Logging {
      */
     def debug(message:String, arguments:Any*) =
     	if (debugEnabled) logger.debug(message format (arguments:_*))
+ 
+    /**
+     * For logging the result of a function without having to break it
+     * out into multiple lines.
+     */
+    def debugResult[T](description:String, result:T) : T = {
+    	debug("%s: %s", description, result)	
+    	result
+    }
     
 }
