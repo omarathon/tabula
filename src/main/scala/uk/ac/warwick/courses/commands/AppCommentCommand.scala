@@ -2,10 +2,8 @@ package uk.ac.warwick.courses.commands
 
 import java.lang.Boolean
 import java.util.concurrent.Future
-
 import scala.annotation.target.field
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Value
@@ -13,13 +11,13 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
-
 import freemarker.template.Configuration
 import freemarker.template.Template
 import javax.annotation.Resource
 import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.util.core.StringUtils._
 
 @Configurable
 class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
@@ -34,8 +32,15 @@ class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with 
 	var template:Template = _
 	
 	@BeanProperty var message:String =_
-	
-	@BeanProperty var pleaseRespond:Boolean =_
+//	@BeanProperty var pleaseRespond:Boolean =_
+	@BeanProperty var usercode:String =_
+	@BeanProperty var name:String =_
+	@BeanProperty var email:String =_
+	@BeanProperty var currentPage:String =_
+	@BeanProperty var browser:String =_
+	@BeanProperty var os:String =_
+	@BeanProperty var resolution:String =_
+	@BeanProperty var ipAddress:String =_
 	
 	def apply = {
 		val mail = new SimpleMailMessage
@@ -47,11 +52,18 @@ class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with 
 		mailSender send mail
 	}
 	
+	def prefill = {
+		if (user != null && user.loggedIn) {
+			if (isWhitespace(usercode)) usercode = user.apparentId
+			if (isWhitespace(name)) name = user.fullName
+			if (isWhitespace(email)) email = user.email
+		}
+	}
+	
 	def generateText = renderToString(template, Map(
-			"message" -> message,
-			"pleaseRespond" -> pleaseRespond,
-			"user" -> user
-		))
+			"user" -> user,
+			"info" -> this
+	))
 	
 	def afterPropertiesSet {
 		template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
@@ -63,6 +75,11 @@ class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with 
 	
 	def describe(d:Description) {}
 	
-	override def describeResult(d:Description) {}
+	override def describeResult(d:Description) = d.properties(
+			"name" -> name,
+			"email" -> email,
+			"message" -> message
+		)
+	
 	
 }

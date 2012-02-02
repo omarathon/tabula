@@ -5,6 +5,8 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 
 jQuery(function ($) {
 	
+	var exports = {};
+	
 	/*function _dbg(msg) {
 		if (window.console && console.debug) console.debug(msg);
 	}
@@ -115,12 +117,68 @@ jQuery(function ($) {
 		return _feedbackPopup;
 	}
 	
+	var fillInAppComments = function($form) {
+		BrowserDetect.init();
+		$form.find('#app-comment-os').val(BrowserDetect.OS);
+		$form.find('#app-comment-browser').val(BrowserDetect.browser + ' ' + BrowserDetect.version);
+		$form.find('#app-comment-resolution').val(BrowserDetect.resolution);
+		var $currentPage = $form.find('#app-comment-currentPage');
+		if ($currentPage.val() == '')
+			$currentPage.val(window.location.href);
+		BrowserDetect.findIP(function(ip){
+			$form.find('#app-comment-ipAddress').val(ip);
+		})
+	};
+	
+	var TogglingSection = function ($section, $header, options) {
+		var THIS = this;
+		var options = options || {};
+		var showByDefault = options.showByDefault || false;
+		this.$section = $section;
+		this.$toggleButton = $('<div class="toggle-button>(Show)</div>');
+		$header.append(this.$toggleButton).addClass('clickable-cursor').click(function(){
+			THIS.toggle();
+			if (options.callback) options.callback();
+		});
+		
+		if (!showByDefault) this.hide();
+	};
+	TogglingSection.prototype.toggle = function() {
+		if (this.$section.is(':visible')) this.hide();
+		else this.show();
+	};
+	TogglingSection.prototype.show = function() {
+		this.$toggleButton.html = 'Hide';
+		this.$section.show();
+	};
+	TogglingSection.prototype.hide = function() {
+		this.$toggleButton.html = 'Show';
+		this.$section.hide();
+	}
+	
+	var decorateAppCommentsForm = function($form) {
+		$form.addClass('narrowed-form');
+//		var $browserInfo = $form.find('.browser-info');
+//		var $heading = $form.find('.browser-info-heading');
+//		new TogglingSection($browserInfo, $heading, {callback: function(){
+//			getFeedbackPopup().setHeightToFit();
+//		}});
+	}
+	
+	// Fills in non-AJAX app comment form 
+	$('#app-comment-form').each(function() { 
+		var $form = $(this);
+		fillInAppComments($form);
+		decorateAppCommentsForm($form);
+	});
+	
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
 		var popup = getFeedbackPopup();
 		var target = event.target;
 		var formLoaded = function(contentElement) {
 			var $form = jQuery(contentElement).find('form');
+			decorateAppCommentsForm($form);
 			$form.submit(function(event){
 				event.preventDefault();
 				jQuery.post('/app/tell-us', $form.serialize(), function(data){
@@ -129,18 +187,24 @@ jQuery(function ($) {
 					formLoaded(contentElement);
 				});
 			});
-		}
+		};
+		var formFirstLoaded = function(contentElement) {
+			formLoaded(contentElement);
+			fillInAppComments($(contentElement).find('form'));
+		};
 		
 		if (popup.isShowing()) {
 			popup.hide();
 		} else {
 			popup.showUrl('/app/tell-us', {
 				method:'GET', target: target, position:'right',
-				onComplete: formLoaded
+				onComplete: formFirstLoaded
 			});
 		}
 		
 	});
+	
+	window.Courses = exports;
 	
 }); // end domready
 

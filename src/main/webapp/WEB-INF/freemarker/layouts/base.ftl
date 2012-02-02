@@ -39,6 +39,7 @@
 		  <@script "/static/libs/anytime/anytimec.js" />
 		  <@script "/static/libs/popup/popup.js" />
 		  <@script "/static/js/modernizr.js" />
+		  <@script "/static/js/browser-info.js" />
 		  <@script "/static/js/main.js" />
 
 	</head>
@@ -145,7 +146,7 @@
 			
 			<div id="navigation-and-content">
 			
-			
+	<#--
 	<div id="navigation" class="horizontal">
 	<div id="primary-navigation-wrapper">
 		<div id="before-primary-navigation"></div>
@@ -157,76 +158,50 @@
 						<div class="title rendered-link-content">
 							<a href="#">{THIS SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
 					</div>
 				</li><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
 							<a href="#">{SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
 					</div>
 				</li><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
 							<a href="#">{SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
 					</div>
 				</li><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
 							<a href="#">{SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
+
 					</div>
 				</li><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
 							<a href="#">{SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
+
 					</div>
 				</li><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
 							<a href="#">{SECTION}</a>										
 						</div>
-						<!-- 
-						<div class="description rendered-link-content">
-							Description (Note, only on top level pages)
-						</div>
-						-->
+	
 					</div>
 				</li>
 			</ul>
 		</div>
 		
+		
 		<div id="after-primary-navigation"></div>
 	</div>
 	
 </div>
-			
+		-->	
 				<div id="content-wrapper">					     
 					<div id="main-content">
 						<div id="page-title"> <!-- optional: class="site-root" (will hide the title using CSS) -->
@@ -290,7 +265,7 @@
 			          			</li>
 		          			</ul>
 		          			
-		          			<div id="app-feedback-link" class="hide-smallscreen"><a href="/app/tell-us">Give feedback</a></div>
+		          			<div id="app-feedback-link" class="hide-smallscreen"><a href="/app/tell-us?currentPage=${info.requestedUri}">Give feedback</a></div>
 		          				      					
 	      					<div style="clear:both;"></div>
 		          		</div>

@@ -9,7 +9,34 @@
 	you received, you should talk to the person setting your coursework.
 	</p>
 	
-	<@f.errors path="message" cssClass="error" />
+	<p>
+	We've filled in some information below about you and your computer in order to
+	help diagnose any problems you might be reporting; feel free to amend or remove any of it.
+	</p>
+
+	<#-- DRY -->
+	<#macro comment_input path title>
+		<@form.labelled_row path title>
+			<@f.input cssClass="text" path=path id="app-comment-${path}" />
+		</@form.labelled_row>
+	</#macro>
+	
+	<h4>About you</h4>
+	<@comment_input "name" "Your name" />
+	<@comment_input "email" "Your email" />
+	<@comment_input "usercode" "Usercode" />
+	
+	<h4 class="browser-info-heading">About your browser</h4>
+	<div class="browser-info">
+		<@comment_input "currentPage" "The page you're on" />
+		<@comment_input "browser" "Browser" />
+		<@comment_input "os" "Operating System" />
+		<@comment_input "resolution" "Screen size" />
+		<@comment_input "ipAddress" "IP Address" />
+	</div>
+
+	<h4>Your message</h4>
+	<@f.errors path="message" cssClass="error" />	
 	<@f.textarea path="message" id="app-comment-message" />
 	
 	<#--

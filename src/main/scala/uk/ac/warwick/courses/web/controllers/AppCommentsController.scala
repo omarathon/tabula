@@ -20,26 +20,25 @@ class AppCommentsController extends BaseController {
 	
 	@ModelAttribute def command(user:CurrentUser) = new AppCommentCommand(user)
 	
-	// render inside ID6 unless using AJAX
-	def useLayout:Boolean = !ajax
-	
 	@RequestMapping(method=Array(GET, HEAD))
-	def form (command:AppCommentCommand, errors:Errors) : Mav = 
-		chooseLayout(Mav("app/comments/form"))
+	def form (command:AppCommentCommand, errors:Errors) : Mav = {
+		command.prefill
+		formView
+	}
+	
+	def formView = chooseLayout(Mav("app/comments/form"))
 	
 	@RequestMapping(method=Array(POST))
 	def submit (command:AppCommentCommand, errors:Errors) : Mav = {
 		command validate errors
 		if (errors hasErrors) {
-			form(command, errors)
+			formView
 		} else {
 			command.apply()
 			chooseLayout(Mav("app/comments/success"))
 		}
 	}
 	
-	private def chooseLayout(mav:Mav) = 
-		if (useLayout) mav
-		else mav.noLayout
+	private def chooseLayout(mav:Mav) = mav.noLayoutIf(ajax)
 
 }

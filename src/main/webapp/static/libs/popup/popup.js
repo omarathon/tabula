@@ -689,8 +689,12 @@ WPopupBox.prototype.positionRight = function(el, hideArrows) {
 	
 	h = this.height;
 	
+	var scrollTop;
+	if (this.jq) scrollTop = jQuery(document.body).scrollTop();
+	else scrollTop = $(document.body).cumulativeScrollOffset()[1];
+	
 	x = Math.floor(midpoint.right);
-	y = Math.floor(midpoint.y - h/2); 
+	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2)); 
 	this.setPosition(x,y);
 	
 	if (this.jq) {

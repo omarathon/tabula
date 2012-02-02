@@ -43,6 +43,13 @@ class Mav(var viewName:String) {
 	 */
 	def noLayout = layout("none")
 	
+	/**
+	 * Changes to noLayout if the given thing is true.
+	 */
+	def noLayoutIf(bool:Boolean): Mav = 
+		if (bool) noLayout
+		else this
+	
 	def toModel = {
 		map ++ bodyClassesItem
 	}

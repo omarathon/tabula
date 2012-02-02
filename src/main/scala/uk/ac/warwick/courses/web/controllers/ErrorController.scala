@@ -19,11 +19,12 @@ class ErrorController extends BaseController {
   @RequestMapping(Array("/error"))
   def generalError(request:HttpServletRequest):Mav = {
 	exceptionResolver.doResolve(request.getAttribute("javax.servlet.error.exception").asInstanceOf[Throwable])
+		.noLayoutIf(ajax)
   }
   
   @RequestMapping(Array("/error/404"))
   def pageNotFound(@RequestHeader("X-Requested-Uri") requestedUri:String) = {
-    Mav("errors/404", "requestedUri"->requestedUri)
+    Mav("errors/404", "requestedUri"->requestedUri).noLayoutIf(ajax)
   }
   
 }
