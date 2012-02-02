@@ -97,6 +97,7 @@ create table AuditEvent (
 	real_user_id nvarchar2(255),
 	masquerade_user_id nvarchar2(255),
 	data nvarchar2(4000) not null
+	CONSTRAINT "auditevent_pk" PRIMARY KEY ("ID")
 );
 create index idx_auditeventdate on auditevent(eventdate);
 CREATE SEQUENCE "AUDITEVENT_SEQ" MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE;
