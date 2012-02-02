@@ -12,6 +12,8 @@ jQuery(function ($) {
 	
 	var trim = jQuery.trim;
 	
+	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
+	
 	// Lazily loaded user picker object.
 	var _userPicker = null;
 	function getUserPicker() {
@@ -140,8 +142,6 @@ jQuery(function ($) {
 		
 	});
 	
-	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
-
 }); // end domready
 
 }());
