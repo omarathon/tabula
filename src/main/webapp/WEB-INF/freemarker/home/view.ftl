@@ -15,11 +15,12 @@
 <h1>Hello, ${user.firstName}.</h1>
 <#else>
 <h1>Hello.</h1>
-</#if>
+</#if>	
 
-<p>This is the in-development coursework submission application.
-	It isn't quite ready for use yet, but you can keep up with news about it by
-	going to <a href="http://go.warwick.ac.uk/amupdates">go.warwick.ac.uk/amupdates</a>.</p>
+<p>
+This is a new service for managing coursework assignments and feedback. If you're a student,
+you might start getting emails containing links to download your feedback from here.
+</p>
 
 <#if moduleWebgroups?? && moduleWebgroups?size gt 0>
 <p>These are the modules we think you're enrolled in.</p>
