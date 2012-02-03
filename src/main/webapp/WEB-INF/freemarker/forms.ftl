@@ -21,23 +21,43 @@
 </@row>
 </#macro>
 
-<#macro userpicker path list=false multiple=false>
-<@spring.bind path=path>
-<#-- This handles whether we're binding to a list or not but I think
-	it might still be more verbose than it needs to be. -->
-<#if list>
-	<#assign ids=status.value />
-<#elseif status.value??>
-	<#assign ids=[status.value] />
-</#if>
-<#if ids??>
-<#list ids as id>
-	<input type="text" class="user-code-picker" name="${status.expression}" value="${id}">
-</#list>
+<#--
+
+Render a text field with user picker.
+
+To bind with Spring:
+<@userpicker path="yourBindPath" />
+
+To not bind:
+<@userpicker name="paramName" />
+
+-->
+<#macro userpicker path="" name="" list=false multiple=false>
+<#if name="">
+	<@spring.bind path=path>
+	<#-- This handles whether we're binding to a list or not but I think
+		it might still be more verbose than it needs to be. -->
+	<#assign ids=[] />
+	<#if list>
+		<#assign ids=status.value />
+	<#elseif status.value??>
+		<#assign ids=[status.value] />
+	</#if>
+	<@render_userpicker expression=status.expression value=ids />
+	</@spring.bind>
 <#else>
-	<input type="text" class="user-code-picker" name="${status.expression}">
+	<@render_userpicker expression=name value=[] />
 </#if>
-</@spring.bind>
+</#macro>
+
+<#macro render_userpicker expression value>
+	<#if value?? && value?size gt 0>
+	<#list value as id>
+		<input type="text" class="user-code-picker" name="${expression}" value="${id}">
+	</#list>
+	<#else>
+		<input type="text" class="user-code-picker" name="${expression}">
+	</#if>
 </#macro>
 
 <#macro filewidget basename>

@@ -1,6 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign form=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-
 <h1>Masquerade as a different user</h1>
 
 <#if !user.sysadmin && user.masquerader>
@@ -11,10 +8,10 @@
 
 <p>Masquerading as ${user.apparentId} (${user.apparentUser.fullName}).</p>
 
-<@form.form method="post" action="/admin/masquerade">
+<@f.form method="post" action="/admin/masquerade">
   <input type="hidden" name="action" value="remove" />
   <input type="submit" value="Unmask">
-</@form.form>
+</@f.form>
 
 <#else>
 
@@ -23,10 +20,10 @@
 </#if>
 
 <div>
-<@form.form method="post" action="/admin/masquerade">
-  User ID: <input type="text" name="usercode" />
+<@f.form method="post" action="/admin/masquerade" command="">
+  User ID: <@form.userpicker name="usercode" />
   <input type="submit" value="Mask">
-</@form.form>
+</@f.form>
 </div>
 
 </#if>
