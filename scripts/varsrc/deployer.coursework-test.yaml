@@ -6,8 +6,8 @@ apaches:
     balanced_ports: 
     - "8080"
     - "8180"
-    balancer_port: "8080"
-    current_port: "8080"
+    balancer_port: "10001"
+    current_port: "10001"
   remotehost: 
   apache_dir: "/usr/local/apache"
   rewrite_map: "/usr/local/apache/conf/vhosts/proxy_port.map"
