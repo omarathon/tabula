@@ -28,7 +28,15 @@ jQuery(function($){ "use strict";
 
 <@f.errors path="assignment" cssClass="error" />
 
-<p>This will publish feedback for ${assignment.feedbacks?size} students.</p>
+<#assign feedbackCount=assignment.feedbacks?size />
+<#assign unreleasedFeedbackCount=assignment.unreleasedFeedback?size />
+
+<p>This will publish feedback for ${unreleasedFeedbackCount} students.
+<#if feedbackCount != unreleasedFeedbackCount>
+There are ${feedbackCount} students in total but some have already had 
+their feedback published to them and those students won't be emailed again.
+</#if>
+</p>
 
 <p>
 Publishing feedback will make feedback available for students to download. It can only be

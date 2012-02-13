@@ -1,7 +1,7 @@
 package uk.ac.warwick.courses.commands
 import collection.mutable
 import uk.ac.warwick.courses.data.model._
-import uk.ac.warwick.courses.AppImports
+import uk.ac.warwick.courses.JavaImports
 
 trait Describable {
 	// describe the thing that's happening.
@@ -18,7 +18,7 @@ trait Describable {
  * adds or changes any data is a candidate. Read-only queries,
  * not so much (unless we're interested in when a thing is observed/downloaded).
  */
-trait Command[R] extends Describable with AppImports {
+trait Command[R] extends Describable with JavaImports {
 	def apply(): R
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }

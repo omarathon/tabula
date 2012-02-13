@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.helpers
 
 import org.apache.commons.collections.list.LazyList
 import org.apache.commons.collections.FactoryUtils
-import java.util.{List=>JList}
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.assignments.FeedbackItem
 
 object LazyLists {

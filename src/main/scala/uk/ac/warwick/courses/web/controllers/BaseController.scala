@@ -18,7 +18,7 @@ import javax.annotation.Resource
 import org.springframework.beans.factory.annotation.Required
 import uk.ac.warwick.courses.events.EventHandling
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.courses.AppImports
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.CurrentUser
 import org.springframework.web.bind.annotation.RequestMethod
 
@@ -67,7 +67,7 @@ trait ControllerViews {
  * Useful traits for all controllers to have.
  */
 @Controller
-abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling with AppImports {
+abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling {
   // make Mav available to controllers without needing to import
   
   @Required @Resource(name="validator") var globalValidator:Validator =_

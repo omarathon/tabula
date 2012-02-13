@@ -6,11 +6,11 @@ import uk.ac.warwick.courses.data.model.FileAttachment
 import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Configurable
 import java.io.File
-import java.util.{List => JList}
 import uk.ac.warwick.courses.helpers.LazyLists
 import uk.ac.warwick.courses.helpers.ArrayList
 import collection.JavaConversions._
 import collection.JavaConverters._
+import uk.ac.warwick.courses.JavaImports._
 
 /**
  * Encapsulates an initially-uploaded MultipartFile with a reference to

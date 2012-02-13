@@ -5,7 +5,7 @@ import model.Module
 import org.hibernate.`type`._
 import org.springframework.beans.factory.annotation.Autowired
 import collection.JavaConverters._
-import java.util.{List=>JList}
+import uk.ac.warwick.courses.JavaImports._
 
 trait ModuleDao {
   def saveOrUpdate(module:Module)

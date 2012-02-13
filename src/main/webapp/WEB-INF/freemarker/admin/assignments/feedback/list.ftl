@@ -17,6 +17,9 @@ Download all as ZIP file
 		<#-- TODO show student name if allowed by department -->
 		<h2 class="uni-id">${feedback.universityId}</h2>
 		<div class="date">Uploaded <@fmt.date date=feedback.uploadedDate /></div>
+		<#if feedback.checkedReleased>
+		<div class="released">Has been published</div>
+		</#if>
     	<div class="attachments">Attachments:
 			<#list feedback.attachments as attachment>
 				${attachment.name} 

@@ -6,7 +6,7 @@ import uk.ac.warwick.courses.data.model.Department
 import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
 import scala.collection.JavaConversions._
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import collection.JavaConverters._
 
 trait DepartmentDao {

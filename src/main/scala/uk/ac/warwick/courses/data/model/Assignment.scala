@@ -1,5 +1,5 @@
 package uk.ac.warwick.courses.data.model
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import scala.collection.JavaConversions._
 import scala.reflect._
 import org.hibernate.annotations.AccessType
@@ -109,9 +109,23 @@ class Assignment() extends GeneratedId with Viewable {
 		fields.add(field)
 	}
 	
+	/**
+	 * Returns a filtered copy of the feedbacks that haven't yet been published.
+	 * If the old-style assignment-wide published flag is true, then it
+	 * assumes all feedback has already been published.
+	 */
+	def unreleasedFeedback = if (resultsPublished) Nil
+			else feedbacks.filterNot( _.released == true ) // ==true because can be null
+	
+	def anyReleasedFeedback = if (resultsPublished) true
+			else feedbacks.find( _.released == true ).isDefined
+			
 	def addFields(fields:FormField*) = for(field<-fields) addField(field)
 	
 	// Help views decide whether to show a publish button.
-	def canPublishFeedback:Boolean = !resultsPublished && !feedbacks.isEmpty && closeDate.isBeforeNow
+	def canPublishFeedback:Boolean = 
+			! feedbacks.isEmpty && 
+			! unreleasedFeedback.isEmpty && 
+			closeDate.isBeforeNow
 }
 

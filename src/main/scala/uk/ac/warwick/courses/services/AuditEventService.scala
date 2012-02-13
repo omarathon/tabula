@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.services
 
 import java.io.StringWriter
 import java.sql.ResultSet
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import org.codehaus.jackson.map.ObjectMapper
 import org.hibernate.Session
 import org.joda.time.DateTime

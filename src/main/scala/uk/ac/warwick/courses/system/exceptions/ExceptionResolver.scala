@@ -9,7 +9,7 @@ import javax.servlet.ServletException
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.Ordered
 import uk.ac.warwick.util.core.ExceptionUtils
-import java.util.{Map => JMap}
+import uk.ac.warwick.courses.JavaImports._
 import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.courses.UserError

@@ -3,7 +3,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
-import uk.ac.warwick.courses.AppImports
+import uk.ac.warwick.courses.JavaImports._
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
 
 /**
@@ -11,7 +11,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
  * custom HandlerMethodReturnValueHandlers _before_ the default ones, without having
  * to replace them entirely.
  */
-class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter with AppImports {
+class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter {
 	@BeanProperty var customPreReturnValueHandlers:java.util.List[HandlerMethodReturnValueHandler] = Nil
 	
 	/*

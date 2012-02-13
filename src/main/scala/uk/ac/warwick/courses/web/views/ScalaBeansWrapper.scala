@@ -12,9 +12,8 @@ import java.{ util=>jutil }
 import freemarker.template.DefaultObjectWrapper
 import scala.util.matching.Regex
 import freemarker.ext.beans.BeanModel
-import uk.ac.warwick.courses.helpers.javaconversions._
 import uk.ac.warwick.courses.helpers.Logging
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 /** A implemenation of BeansWrapper that support native Scala basic and collection types
  * in Freemarker template engine.
@@ -31,9 +30,9 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
       case None => null
       case jcol: java.util.Collection[_] => superWrap(jcol)
       case jmap: java.util.Map[_,_] => superWrap(jmap)
-      case smap: scala.collection.Map[_,_] => superWrap(JMap(smap))
-      case sseq: scala.Seq[_] => superWrap(new JList(sseq))
-      case scol: scala.Collection[_] => superWrap(JCollection(scol))
+      case smap: scala.collection.Map[_,_] => superWrap(mapAsJavaMapConverter(smap).asJava)
+      case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
+      case scol: scala.Collection[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
       //case sdt: JDate => super.wrap(sdt.date) //unwrap the JDate instance to java date.
       case directive: TemplateDirectiveModel => superWrap(directive)
       case method: TemplateMethodModel => superWrap(method)

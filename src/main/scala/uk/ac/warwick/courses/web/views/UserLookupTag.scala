@@ -7,7 +7,7 @@ import freemarker.core.Environment
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.UserLookupService
 import freemarker.template.utility.DeepUnwrap
-import uk.ac.warwick.courses.AppImports
+import uk.ac.warwick.courses.JavaImports._
 import freemarker.ext.beans.BeansWrapper
 import freemarker.template.TemplateException
 import collection.JavaConversions._
@@ -21,7 +21,7 @@ import collection.JavaConversions._
  * When users is set, missing_ids will also be a sequence of user IDs
  * that couldn't be found.
  */
-class UserLookupTag extends TemplateDirectiveModel with AppImports {
+class UserLookupTag extends TemplateDirectiveModel {
 	
 	@Autowired var userLookup:UserLookupService =_
 	

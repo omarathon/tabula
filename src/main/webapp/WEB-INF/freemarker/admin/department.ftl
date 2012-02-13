@@ -1,6 +1,15 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
  
+<#macro longDateRange start end>
+	<#assign openTZ><@warwick.formatDate value=start pattern="z" /></#assign>
+	<#assign closeTZ><@warwick.formatDate value=end pattern="z" /></#assign>
+	<@warwick.formatDate value=start pattern="d MMMM yyyy HH:mm" /> 
+	<#if openTZ != closeTZ>(${openTZ})</#if>
+	-<br>
+	<@warwick.formatDate value=end pattern="d MMMM yyyy HH:mm (z)" />
+</#macro>
+ 
 <#if department??>
 <h1>${department.name}</h1>
 
@@ -40,35 +49,35 @@
 		<div class="assignment-info">
 			<div class="column1">
 			<h3 class="name">${assignment.name}</h3>
-			<#if assignment.resultsPublished>
+			<#if assignment.anyReleasedFeedback>
 			<p class="feedback-published">
-				Feedback published
+				Feedback published. URL for students:
 				<br>
-				<small>
-				<a href="<@url page="/module/${module.code}/${assignment.id}"/>">
-				Link for students
-				</a>
-				</small>
+				<input type="text" class="url-copy-area" value="<@url page="/module/${module.code}/${assignment.id}"/>">
 			</p>
 			</#if>
 			</div>
 			<div class="stats">
 				<div>
-			    <@warwick.formatDate value=assignment.openDate pattern="d MMMM yyyy HH:mm" /> -<br>
-			    <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm (z)" />
+				<@longDateRange assignment.openDate assignment.closeDate />
 				</div>
 				<div>
 				${assignment.submissions?size} submissions,
 				<#if has_feedback><a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />"></#if>
 				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>.
-				
 				</div>
+				<#assign unreleasedFeedback=assignment.unreleasedFeedback />
+				<#if unreleasedFeedback?size gt 0>
+					<div class="has-unreleased-feedback">
+					${unreleasedFeedback?size} feedback to publish.
+					</div>
+				</#if>
 			</div>
 			<div class="actions">
 				<#if can_manage >
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
 				</#if>
-				<#if ! assignment.resultsPublished >
+				<#if !assignment.resultsPublished>
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
 				</#if>
 				<br>

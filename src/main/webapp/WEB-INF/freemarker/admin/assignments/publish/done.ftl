@@ -9,7 +9,6 @@ Students will be able to access their feedback by visiting this page:
 </p>
 
 <p>
-Assignment page: 
 <#assign feedbackUrl><@url page="/module/${module.code}/${assignment.id}"/></#assign>
 <a href="${feedbackUrl}">
 ${feedbackUrl}

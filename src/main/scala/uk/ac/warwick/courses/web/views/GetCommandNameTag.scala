@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.web.views
 
 import freemarker.template.TemplateMethodModel
 import org.springframework.web.servlet.tags.form.FormTag
-import java.util.{List=>JList}
+import uk.ac.warwick.courses.JavaImports._
 import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateModel

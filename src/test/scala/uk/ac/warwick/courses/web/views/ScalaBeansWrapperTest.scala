@@ -20,22 +20,22 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	      hash.get("motto").toString should be("do be good, don't be bad")
 	    }
 	  }
-	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes"))
+	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
 	  wrapper.wrap(list) match {
 	 	  case listy:SimpleSequence => 
 	 	  case nope => fail("nope" + nope.getClass().getName())
 	  }
 	   
 	  class ListHolder {
-	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents"))
+	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
 	  }
 	   
-	  new ListHolder().list.size should be (1)
+	  new ListHolder().list.size should be (2)
 	   
 	  wrapper.wrap(new ListHolder()) match {
 	 	  case hash:ScalaHashModel => {
 	 	 	  hash.get("list") match {
-	 	 	 	  case listy:SimpleSequence => listy.size should be (1)
+	 	 	 	  case listy:SimpleSequence => listy.size should be (2)
 	 	 	  }
 	 	  }
 	  }

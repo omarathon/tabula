@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.events
 
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import collection.JavaConversions._
 import uk.ac.warwick.courses.commands.Describable
 import uk.ac.warwick.courses.commands.Description

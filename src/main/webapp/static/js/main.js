@@ -172,6 +172,10 @@ jQuery(function ($) {
 		decorateAppCommentsForm($form);
 	});
 	
+	$('input.url-copy-area').focus(function(){
+		this.select();
+	});
+	
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
 		var popup = getFeedbackPopup();

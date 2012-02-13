@@ -1,5 +1,8 @@
 package uk.ac.warwick.courses.helpers.javaconversions
 
+/**
+ * These are only really for ScalaBeansWrapper
+ */
 
 //package javaconversions {
 	

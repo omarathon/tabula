@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import java.util.{List=>JList}
+import uk.ac.warwick.courses.JavaImports._
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 import uk.ac.warwick.courses.actions._

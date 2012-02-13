@@ -1,5 +1,5 @@
 package uk.ac.warwick.courses.events
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import scala.collection.JavaConversions._
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before

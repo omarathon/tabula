@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.commands
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
 import org.hibernate.annotations.AccessType
@@ -47,8 +47,10 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	// validation done even when showing initial form.
 	def prevalidate(errors:Errors) {
+	  // legacy published flag set - we can't publish again here.
+	  // after this is deployed, this flag can go away, along with this check.
 	  if (assignment.resultsPublished) {
-	 	errors.rejectValue("assignment","feedback.publish.already")
+	 	  errors.rejectValue("assignment","feedback.publish.already")
 	  }
 	  if (assignment.closeDate.isAfterNow()) {
 	    errors.rejectValue("assignment","feedback.publish.notclosed")
@@ -66,8 +68,12 @@ class PublishFeedbackCommand extends Command[Unit] {
 	
 	@Transactional
 	def apply {
-	  assignment.resultsPublished = true
+	  //assignment.resultsPublished = true
 	  val users = assignmentService.getUsersForFeedback(assignment)
+	  // note: after setting these to true, unreleasedFeedback will return empty.
+	  for (feedback <- assignment.unreleasedFeedback) {
+	 	  feedback.released = true
+	  }
 	  for (info <- users) email(info)
 	}
 	

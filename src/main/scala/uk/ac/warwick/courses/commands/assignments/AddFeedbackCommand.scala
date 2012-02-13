@@ -2,7 +2,6 @@ package uk.ac.warwick.courses.commands.assignments
 
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import java.util.{List => JList}
 import scala.collection.JavaConversions._
 import collection.JavaConverters._
 import scala.reflect.BeanInfo
@@ -225,6 +224,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		  feedback.assignment = assignment
 		  feedback.uploaderId = submitter.apparentId
 		  feedback.universityId = uniNumber
+		  feedback.released = false
 		  for (attachment <- file.attached) 
 			  feedback addAttachment attachment
 		  session.saveOrUpdate(feedback)

@@ -16,4 +16,23 @@ class AssignmentTest extends TestBase {
 		}
 	}
 	
+	@Test def unreleasedFeedback {
+		val assignment = new Assignment
+		assignment.feedbacks should be ('empty)
+		assignment.unreleasedFeedback should be ('empty)
+		
+		val feedback = new Feedback
+		assignment.feedbacks add feedback
+		assignment.feedbacks.size should be (1)
+		assignment.unreleasedFeedback.size should be (1)
+		
+		assignment.resultsPublished = true
+		assignment.unreleasedFeedback should be ('empty)
+		assignment.resultsPublished = false
+		assignment.unreleasedFeedback.size should be (1)
+		
+		feedback.released = true
+		assignment.unreleasedFeedback should be ('empty)
+	}
+	
 }

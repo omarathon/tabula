@@ -1,5 +1,5 @@
 package uk.ac.warwick.courses.data.model
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
@@ -13,6 +13,7 @@ import javax.persistence.FetchType
 import javax.persistence.OneToMany
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.actions.Viewable
+import uk.ac.warwick.courses.JavaImports._
 
 @Entity @AccessType("field")
 class Feedback extends GeneratedId with Viewable {
@@ -27,6 +28,17 @@ class Feedback extends GeneratedId with Viewable {
 	var uploadedDate:DateTime = new DateTime
 	
 	var universityId:String =_
+	
+	var released:JBoolean = false
+	
+	/**
+	 * Returns the released flag of this feedback,
+	 * OR the parent assignment's value if not set.
+	 */
+	def checkedReleased:Boolean = Option(released) match {
+		case Some(bool) => bool
+		case None => assignment.resultsPublished
+	}
 	
 	@OneToMany(mappedBy="feedback", fetch=FetchType.LAZY)
 	var attachments:JList[FileAttachment] = ArrayList()

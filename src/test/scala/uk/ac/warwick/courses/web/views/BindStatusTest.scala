@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.web.views
 
-import java.util.{List => JList}
+import uk.ac.warwick.courses.JavaImports._
 import org.junit.Test
 import org.springframework.web.servlet.support.BindStatus
 import uk.ac.warwick.courses.helpers.ArrayList
