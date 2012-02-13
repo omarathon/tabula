@@ -16,6 +16,7 @@ import uk.ac.warwick.courses.helpers.Logging
 import org.apache.commons.io.input.BoundedInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import uk.ac.warwick.courses.helpers.Closeables._
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -100,6 +101,6 @@ object Zips {
 	  }.toList // use toList to evaluate items now, before we actually close the stream
    }
 
-   def ensureClose[T](c:Closeable)(fn: =>T): T = try { fn } finally { c.close }
+   
    
 }
