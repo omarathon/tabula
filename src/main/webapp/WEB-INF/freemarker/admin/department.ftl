@@ -49,38 +49,45 @@
 		<div class="assignment-info">
 			<div class="column1">
 			<h3 class="name">${assignment.name}</h3>
-			<#if assignment.anyReleasedFeedback>
-			<p class="feedback-published">
-				Feedback published. URL for students:
-				<br>
-				<input type="text" class="url-copy-area" value="<@url page="/module/${module.code}/${assignment.id}"/>">
-			</p>
-			</#if>
 			</div>
 			<div class="stats">
-				<div>
-				<@longDateRange assignment.openDate assignment.closeDate />
+				<div class="open-date">
+					<span class="label">Opens</span> <@warwick.formatDate value=assignment.openDate pattern="d MMM yyyy HH:mm" /> 
 				</div>
-				<div>
-				${assignment.submissions?size} submissions,
+				<div class="close-date">
+					<span class="label">Closes</span> <@warwick.formatDate value=assignment.closeDate pattern="d MMM yyyy HH:mm" /> 
+				</div>
+				<div class="submission-count">
+					${assignment.submissions?size} submissions
+				</div>
+				<div class="feedback-count">
 				<#if has_feedback><a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />"></#if>
-				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>.
-				</div>
+				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
 				<#assign unreleasedFeedback=assignment.unreleasedFeedback />
 				<#if unreleasedFeedback?size gt 0>
 					<div class="has-unreleased-feedback">
-					${unreleasedFeedback?size} feedback to publish.
+					(${unreleasedFeedback?size} to publish)
 					</div>
 				</#if>
+				</div>
+				
+				<#if assignment.anyReleasedFeedback>
+				<p class="feedback-published">
+					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
+					<a class="copyable-url" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Copy it to the clipboard and then paste it into an email or page.">
+						URL for students
+					</a>
+				</p>
+				</#if>
+				
 			</div>
-			<div class="actions">
+			<div class="actions assignment-buttons">
 				<#if can_manage >
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
 				</#if>
 				<#if !assignment.resultsPublished>
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
 				</#if>
-				<br>
 				<#if has_feedback >
 				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
 				<#if assignment.canPublishFeedback>

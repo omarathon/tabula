@@ -34,14 +34,6 @@
 		</ul>
 	</p>
 
-<#elseif assignment.resultsPublished>
-
-	<h2>No feedback for ${user.universityId}</h2>
-	
-	<p>Feedback has been published for this assignment, but there doesn't appear to be
-	any for you. If you submitted your assignment were told to expect marks/feedback here, please
-	speak to your module convenor.</p>
-
 <#else>
 
 	<h2>${user.fullName} (${user.universityId})</h2>

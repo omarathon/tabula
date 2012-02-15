@@ -1,5 +1,7 @@
 @import "css3.less";
 
+@warning-color: #933;
+
 #container {
   .box-shadow(0,0,48px, rgba(0,0,0,0.4));
 }
@@ -84,12 +86,28 @@ html {
 		width: 17em;
 		float:left;
 	}
-	.actions {
+	.assignment-buttons {
 		float: right;
-		text-align: right
+		text-align: right;
+		width: 9em;
+		a {
+			display: block;
+			padding: 0 7px;
+			margin: 1px 0;
+		}
 	}
 	.feedback-published {
 		font-weight: bold;
+	}
+	span.label {
+		color: #444;
+	}
+	.submission-count, .feedback-count {
+	  padding-left: 20px;
+	  background: url(../images/filetypes/text-x-generic.png) 0 2px no-repeat;
+	}
+	.has-unreleased-feedback {
+	  color: @warning-color;
 	}
 }
 
@@ -169,7 +187,7 @@ input.date-time-picker:focus {
 		border: 1px solid #999;
 		line-height: 2em;
 		.transition(none);
-		&:hover {
+		&:hover, &.hover {
 			.vertical-gradient(darken(#2c5893,20%),#2c5893);
 			color: white;
 			text-shadow: none;

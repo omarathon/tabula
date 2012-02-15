@@ -33,6 +33,10 @@
 		  <@stylesheet "/static/libs/popup/popup.css" />
 		  <@stylesheet "/static/css/fonts/standard.css" />
 		
+		  <@script "/static/libs/zeroclipboard/ZeroClipboard.js" />
+		  <script>
+		  ZeroClipboard.setMoviePath("<@url resource="/static/libs/zeroclipboard/ZeroClipboard.swf"/>");
+		  </script>
 		  <@script "/static/js/id6scripts.js" />
 		  <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 		  <@script "/static/libs/jquery.delayedObserver.js" />

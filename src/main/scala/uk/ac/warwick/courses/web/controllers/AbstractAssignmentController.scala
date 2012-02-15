@@ -13,9 +13,9 @@ abstract class AbstractAssignmentController extends BaseController {
 	@Autowired var feedbackDao:FeedbackDao =_
 	
 	def checkCanGetFeedback(assignment:Assignment, user:CurrentUser): Option[Feedback] = {
-		val feedback = (if (assignment.resultsPublished) 
-							  feedbackDao.getFeedbackByUniId(assignment, user.universityId)
-						   else None)
+		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId)
+		
+		
 		
 		/*
 		 * When feedback has been released and we have some for that user,
@@ -27,7 +27,7 @@ abstract class AbstractAssignmentController extends BaseController {
 		 */
 		feedback match {
 			case Some(feedback) => mustBeAbleTo(View(feedback))
-			case None => mustBeAbleTo(View(assignment))
+			case None => //mustBeAbleTo(View(assignment))
 		}
 		feedback
 	}

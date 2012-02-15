@@ -172,9 +172,27 @@ jQuery(function ($) {
 		decorateAppCommentsForm($form);
 	});
 	
-	$('input.url-copy-area').focus(function(){
-		this.select();
-	});
+	if (window.ZeroClipboard) {
+		var $copiedText = $('<div>').html('Copied to clipboard.');
+		
+		$('a.copyable-url').each(function(){
+			var $copyLink = $('<a href="#">')
+					.html("Copy URL for Students")
+					.attr("title", this.title);
+			var $relative = $('<div>').addClass('actions').css('position','relative').append($copyLink);
+			$(this).replaceWith($relative);
+			
+			var clip = new ZeroClipboard.Client();
+			clip.setText(this.href);
+			clip.glue($copyLink[0], $relative[0]);
+			clip.addEventListener('onComplete', function(client, text){
+				console.log('copied', text);
+				$copiedText.stop(true).hide();
+				$relative[0].appendChild($copiedText[0]);
+				$copiedText.slideDown().delay(2000).slideUp('slow');
+			});
+		});
+	}
 	
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
@@ -207,6 +225,15 @@ jQuery(function ($) {
 		}
 		
 	});
+	
+	$('.assignment-info .assignment-buttons').css('opacity',0);
+	$('.assignment-info').hover(function() { 
+		$(this).find('.assignment-buttons').stop().fadeTo('fast', 1);
+	}, function() { 
+		$(this).find('.assignment-buttons').stop().fadeTo('fast', 0); 
+	});
+	
+	
 	
 	window.Courses = exports;
 	
