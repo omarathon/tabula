@@ -27,7 +27,7 @@ import uk.ac.warwick.courses.services.AssignmentService
 		  
 		  val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 		  
-		  if (moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
+		  if (false/*disabled*/ && moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
 		 	  debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
 		 	  Mav("redirect:/admin/department/%s/".format(ownedDepartments.head.code))
 		  } else {

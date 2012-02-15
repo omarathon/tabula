@@ -35,6 +35,17 @@ This is a new service for managing coursework assignments and feedback. If you'r
 you might start getting emails containing links to download your feedback from here.
 </p>
 
+<#if assignmentsWithFeedback?? && assignmentsWithFeedback?size gt 0>
+<h2>Your feedback</h2>
+<#list assignmentsWithFeedback as assignment>
+	<div>
+		<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
+		</a>
+	</div>
+</#list>
+</#if>
+
 <#--
 <#if moduleWebgroups?? && moduleWebgroups?size gt 0>
 <p>These are the modules we think you're enrolled in.</p>
