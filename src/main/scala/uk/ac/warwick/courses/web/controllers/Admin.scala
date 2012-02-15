@@ -47,7 +47,7 @@ class AdminHome extends BaseController {
 		val modules:JList[Module] = if (isDeptManager) {
 			dept.modules
 		} else {
-			moduleService.modulesManagedBy(user.idForPermissions).toList
+			moduleService.modulesManagedBy(user.idForPermissions, dept).toList
 		}
 		if (modules.isEmpty()) {
 			mustBeAbleTo(Manage(dept))

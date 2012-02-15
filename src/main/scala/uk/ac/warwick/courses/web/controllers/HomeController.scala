@@ -11,9 +11,11 @@ import uk.ac.warwick.courses.data.model.Module
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.services.AssignmentService
 
 @Controller class HomeController extends BaseController {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
+	@Autowired var assignmentService: AssignmentService =_
 	@Autowired var userLookup:UserLookupService =_
 	def groupService = userLookup.getGroupService
   
@@ -21,13 +23,20 @@ import uk.ac.warwick.courses.services.UserLookupService
 	  if (user.loggedIn) {
 		  val moduleWebgroups = moduleService.modulesAttendedBy(user.idForPermissions)//groupsFor(user),
 		  val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
-		  if (moduleWebgroups.isEmpty && ownedDepartments.size == 1) {
+		  val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
+		  
+		  val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
+		  
+		  if (moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
 		 	  debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
 		 	  Mav("redirect:/admin/department/%s/".format(ownedDepartments.head.code))
 		  } else {
 			  Mav("home/view",
+			 	  "assignmentsWithFeedback" -> assignmentsWithFeedback,
 			      "moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
-			      "ownedDepartments" -> ownedDepartments
+			      "ownedDepartments" -> ownedDepartments,
+			      "ownedModule" -> ownedModules,
+			      "ownedModuleDepartments" -> ownedModules.map{_.department}.distinct
 			      )
 		  }
 	  } else {

@@ -40,6 +40,7 @@ class ModuleAndDepartmentService extends Logging  {
     def departmentsOwnedBy(usercode:String) = departmentDao.getByOwner(usercode)
     
     def modulesManagedBy(usercode:String) = moduleDao.findByParticipant(usercode)
+    def modulesManagedBy(usercode:String, dept:Department) = moduleDao.findByParticipant(usercode, dept)
     
     /**
      * Modules that this user is attending.
