@@ -184,7 +184,12 @@ jQuery(function ($) {
 			
 			var clip = new ZeroClipboard.Client();
 			clip.setText(this.href);
+			clip.setHandCursor( true );
 			clip.glue($copyLink[0], $relative[0]);
+			
+			// Add original link as fallback Flash content, just in case.
+			$relative.find('embed').append(this);
+			
 			clip.addEventListener('onComplete', function(client, text){
 				console.log('copied', text);
 				$copiedText.stop(true).hide();

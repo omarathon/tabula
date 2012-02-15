@@ -1,6 +1,7 @@
 @import "css3.less";
 
 @warning-color: #933;
+@subtle-text-color: #444;
 
 #container {
   .box-shadow(0,0,48px, rgba(0,0,0,0.4));
@@ -100,7 +101,7 @@ html {
 		font-weight: bold;
 	}
 	span.label {
-		color: #444;
+		color: @subtle-text-color;
 	}
 	.submission-count, .feedback-count {
 	  padding-left: 20px;
@@ -108,6 +109,9 @@ html {
 	}
 	.has-unreleased-feedback {
 	  color: @warning-color;
+	}
+	.no-unreleased-feedback {
+	  color: @subtle-text-color;
 	}
 }
 

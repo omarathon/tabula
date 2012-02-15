@@ -65,9 +65,13 @@
 				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
 				<#assign unreleasedFeedback=assignment.unreleasedFeedback />
 				<#if unreleasedFeedback?size gt 0>
-					<div class="has-unreleased-feedback">
+					<span class="has-unreleased-feedback">
 					(${unreleasedFeedback?size} to publish)
-					</div>
+					</span>
+				<#elseif has_feedback>
+					<span class="no-unreleased-feedback">
+					(all published)
+					</span>
 				</#if>
 				</div>
 				
