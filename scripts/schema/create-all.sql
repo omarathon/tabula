@@ -8,7 +8,6 @@ create table Assignment (
     fileExtensions nvarchar2(255),
     name nvarchar2(255),
     openDate timestamp,
-    resultspublished number(1,0) not null,
     module_id nvarchar2(255),
     collectMarks number(1,0) not null,
     CONSTRAINT "ASSIGNMENT_PK" PRIMARY KEY ("ID")
@@ -56,6 +55,7 @@ create table Feedback (
 	uploaded_date timestamp not null,
 	universityId nvarchar2(255) not null,
 	assignment_id nvarchar2(255) not null,
+	RELEASED NUMBER(1, 0) default 0 not null,
 	CONSTRAINT "FEEDBACK_PK" PRIMARY KEY ("ID")
 );
 CREATE INDEX IDX_FEEDBACK_ASSIGNMENT ON FEEDBACK(ASSIGNMENT_ID);
