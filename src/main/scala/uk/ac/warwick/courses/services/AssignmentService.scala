@@ -52,6 +52,6 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	
 	def getUsersForFeedback(assignment:Assignment): Seq[Pair[String,User]] = {
 		val uniIds = assignment.unreleasedFeedback.map { _.universityId }
-		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id)) }
+		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
 	}
 }
