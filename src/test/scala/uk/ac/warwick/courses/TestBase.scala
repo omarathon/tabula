@@ -14,6 +14,8 @@ import org.specs.mock.JMocker._
 import org.specs.mock.JMocker.{expect => expecting}
 import uk.ac.warwick.userlookup.UserLookupInterface
 import java.util.Properties
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockHttpServletRequest
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
@@ -60,5 +62,12 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   def resourceAsBytes(path:String):Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
   
   def emptyFeatures = new Features(new Properties)
+
+  def testRequest(uri:String=null) = {
+    val req = new MockHttpServletRequest
+    req.setRequestURI(uri)
+    req
+  }
   
+  def testResponse = new MockHttpServletResponse
 }

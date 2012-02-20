@@ -79,7 +79,26 @@ jQuery(function ($) {
 		return _userPicker;
 	}
 	
-	
+	/**
+	 * 
+	 */
+	var $rateFeedback = $('#feedback-rating-form');
+	if ($rateFeedback.length > 0) {
+		$rateFeedback.hide();
+		$rateFeedback.find('input[type=radio]').each(function(){
+			var rating = this.value;
+			var $img = $('<img>').attr('src','/static/images/icons/plus.png')
+				.hover(
+					function(){ this.addClass('hover'); }, 
+					function(){ this.removeClass('hover'); }
+				)
+				.click(function(){
+					$rateFeedback.find()
+					console.log('Submit rating of ' + rating);
+				});
+			$rateFeedback.append($img);
+		});
+	}
 	
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",

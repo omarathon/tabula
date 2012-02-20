@@ -13,7 +13,7 @@ class StringListUserType extends AbstractBasicUserType[Seq[String], String] {
 
 	val separator = ","
 	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.NVARCHAR)
+	override def sqlTypes = Array(Types.VARCHAR)
 	
 	val nullValue = null
 	val nullObject = null
