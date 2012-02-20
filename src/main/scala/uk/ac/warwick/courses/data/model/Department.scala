@@ -25,6 +25,8 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@JoinColumn(name="ownersgroup_id")
 	@BeanProperty var owners:UserGroup = new UserGroup
 	
+	@BeanProperty var collectFeedbackRatings:Boolean = false
+	
 	def isOwnedBy(userId:String) = owners.includes(userId)
 	
 	def addOwner(owner:String) = ensureOwners.addUser(owner)

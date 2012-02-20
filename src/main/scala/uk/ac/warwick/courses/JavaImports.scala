@@ -14,6 +14,7 @@ trait JavaImports {
 	type JList[V] = java.util.List[V]
 	type JMap[K,V] = java.util.Map[K,V]
 	type JSet[V] = java.util.Set[V]
+	type JInteger = java.lang.Integer
 }
 
 object JavaImports extends JavaImports

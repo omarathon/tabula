@@ -1,12 +1,7 @@
 package uk.ac.warwick.courses.data.model
 
-import org.hibernate.usertype.UserType
-import java.io.Serializable
-import java.sql.ResultSet
-import java.sql.Types
-import org.hibernate.Hibernate
-import java.sql.PreparedStatement
 import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
 
 /**
  * For storing comma-separated strings in Hibernate.
@@ -14,11 +9,16 @@ import org.hibernate.`type`.StandardBasicTypes
  * Doesn't handle values with commas in them so this is not appropriate
  * for user-inputted data.
  */
-class StringListUserType extends AbstractStringUserType[Seq[String]] {
+class StringListUserType extends AbstractBasicUserType[Seq[String], String] {
 
 	val separator = ","
-  
+	val basicType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.NVARCHAR)
+	
+	val nullValue = null
+	val nullObject = null
+	
 	override def convertToObject(string:String) = string.split(separator) 
-	override def convertToString(list:Seq[String]) = list.mkString(separator)
-  
+	override def convertToValue(list:Seq[String]) = list.mkString(separator)
+	
 }

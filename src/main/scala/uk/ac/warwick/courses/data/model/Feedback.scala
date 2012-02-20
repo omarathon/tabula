@@ -31,6 +31,9 @@ class Feedback extends GeneratedId with Viewable {
 	
 	var released:JBoolean = false
 	
+	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
+	var rating:Option[Int] = None
+	
 	/**
 	 * Returns the released flag of this feedback,
 	 * OR the parent assignment's value if not set.

@@ -19,6 +19,7 @@ create table Department (
     code nvarchar2(255),
     name nvarchar2(255),
     ownersgroup_id nvarchar2(255),
+    collectFeedbackRatings NUMBER(1,0) DEFAULT 1 NOT NULL,
     CONSTRAINT "DEPARTMENT_PK" PRIMARY KEY ("ID")
 );
 
@@ -56,6 +57,7 @@ create table Feedback (
 	universityId nvarchar2(255) not null,
 	assignment_id nvarchar2(255) not null,
 	RELEASED NUMBER(1, 0) default 0 not null,
+	rating NUMBER(3,0) NOT NULL,
 	CONSTRAINT "FEEDBACK_PK" PRIMARY KEY ("ID")
 );
 CREATE INDEX IDX_FEEDBACK_ASSIGNMENT ON FEEDBACK(ASSIGNMENT_ID);
