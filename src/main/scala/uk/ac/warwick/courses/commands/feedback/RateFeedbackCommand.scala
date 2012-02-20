@@ -6,10 +6,10 @@ import uk.ac.warwick.courses.data.model.Feedback
 import scala.reflect.BeanProperty
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
+import uk.ac.warwick.courses.Features
 
-class RateFeedbackCommand extends Command[Unit] {
+class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends Command[Unit] {
 	
-	@BeanProperty var feedback:Feedback =_
 	@BeanProperty var rating:JInteger =_
 	
 	@Transactional

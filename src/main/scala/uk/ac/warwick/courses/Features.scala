@@ -13,6 +13,7 @@ class Features(properties:Properties) {
 	//// Features /////
 	
 	@BeanProperty var emailStudents:Boolean = false
+	@BeanProperty var collectRatings:Boolean = true
 	
 	//// END of features ///
 	
