@@ -18,14 +18,33 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   
 	val AjaxHeader = "X-Requested-With"
 	val XRequestedUriHeader = "X-Requested-Uri"
-	
+	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
+		
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
-		RequestInfo.open(new RequestInfo(
+		implicit val req = request
+		RequestInfo.open(fromAttributeElse(new RequestInfo(
 				user = getUser(request),
 				requestedUri = getRequestedUri(request),
 				ajax = isAjax(request)
-		))
+		)))
 		true
+	}
+	
+	/**
+	 * Gets a RequestInfo from a request attribute, else constructs
+	 * it from the given code block and stores it in an attribute.
+	 * Stored in an attribute so that forwarded requests use the same
+	 * object.
+	 */
+	private def fromAttributeElse(ifEmpty: =>RequestInfo)(implicit request:HttpServletRequest) = {
+		request.getAttribute(RequestInfoAttribute) match {
+			case info:RequestInfo => info
+			case _ => {
+				val info = ifEmpty
+				request.setAttribute(RequestInfoAttribute, info)
+				info
+			}
+		}
 	}
 	
 	private def getUser(implicit request:HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {

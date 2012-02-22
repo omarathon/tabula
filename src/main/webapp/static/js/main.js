@@ -94,7 +94,7 @@ jQuery(function ($) {
 					if (!value) { // remove rating
 						$form.append($('<input type=checkbox>').attr({'name':'unset', checked:true}).hide());
 					}
-					$form.append($('<span class=subtle>Saving&hellip;</span>'));
+					$form.append($('<span class=subtle> Saving&hellip;</span>'));
 					$.post(action, $form.serialize())
 						.success(function(data){ 
 							$rateFeedback.replaceWith(data);

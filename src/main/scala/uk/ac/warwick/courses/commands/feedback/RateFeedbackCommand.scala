@@ -28,14 +28,15 @@ class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends 
 			else Some(rating)
 	}
 	
-	// FIXME define validation messages
 	def validate(errors:Errors) {
 		if (enabled) {
-			rating match {
-				case r if r < 1 => errors.rejectValue("rating", "feedback.rating.low")
-				case r if r > maximumStars => errors.rejectValue("rating", "feedback.rating.high")
-				case null => errors.rejectValue("rating", "feedback.rating.empty")
-				case _ =>
+			if (!unset) {
+				effectiveRating match {
+					case r:JInteger if r < 1 => errors.rejectValue("rating", "feedback.rating.low")
+					case r:JInteger if r > maximumStars => errors.rejectValue("rating", "feedback.rating.high")
+					case null => errors.rejectValue("rating", "feedback.rating.empty")
+					case _ =>
+				}
 			}
 		} else {
 			errors.rejectValue("rating", "feedback.rating.disabled")
