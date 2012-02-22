@@ -11,6 +11,8 @@ import uk.ac.warwick.courses.services.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.util.web.Uri
+import collection.JavaConversions._
+import collection.JavaConverters._
 
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   
@@ -26,15 +28,22 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 		true
 	}
 	
-	private def getUser(request:HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {
+	private def getUser(implicit request:HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {
 		 	case user:CurrentUser => user
 		 	case _ => null
 		}
 	
-	private def isAjax(request:HttpServletRequest) = request.getHeader(AjaxHeader) match {
+	private def isAjax(implicit request:HttpServletRequest) = hasXHRHeader || hasAJAXParam
+	
+	private def hasXHRHeader(implicit request:HttpServletRequest) = request.getHeader(AjaxHeader) match {
 			case "XMLHttpRequest" => true
 			case _ => false
 		}
+	
+	private def hasAJAXParam(implicit request:HttpServletRequest) = request.getParameter("ajax") match {
+		case s:String => true
+		case _ => false
+	}
 	
 	private def getRequestedUri(request:HttpServletRequest) = Uri.parse(request.getHeader(XRequestedUriHeader) match {
 			case string:String => string

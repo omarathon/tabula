@@ -34,6 +34,11 @@ class Feedback extends GeneratedId with Viewable {
 	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
 	var rating:Option[Int] = None
 	
+	def ratingInteger:JInteger = rating match {
+		case Some(a:Int) => a
+		case _ => null
+	}
+	
 	/**
 	 * Returns the released flag of this feedback,
 	 * OR the parent assignment's value if not set.

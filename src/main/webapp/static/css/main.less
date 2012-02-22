@@ -1,5 +1,6 @@
 @import "css3.less";
 
+@grid-size:16px;
 @warning-color: #933;
 @subtle-text-color: #444;
 
@@ -391,3 +392,14 @@ ul.file-list {
   cursor: pointer;
   a { display: none; }
 }
+
+#feedback-rating-container {
+  float:right;
+  width: 23em;
+  #feedback-rating {
+  	margin: @grid-size;
+  }
+  .box-style();
+}
+
+.subtle { color: @subtle-text-color; }

@@ -32,6 +32,7 @@
 		  
 		  <@stylesheet "/static/libs/popup/popup.css" />
 		  <@stylesheet "/static/css/fonts/standard.css" />
+		  <@stylesheet "/static/libs/jquery-rating/jquery.rating.css" />
 		
 		  <@script "/static/libs/zeroclipboard/ZeroClipboard.js" />
 		  <script>
@@ -40,6 +41,7 @@
 		  <@script "/static/js/id6scripts.js" />
 		  <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 		  <@script "/static/libs/jquery.delayedObserver.js" />
+		  <@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
 		  <@script "/static/libs/anytime/anytimec.js" />
 		  <@script "/static/libs/popup/popup.js" />
 		  <@script "/static/js/modernizr.js" />

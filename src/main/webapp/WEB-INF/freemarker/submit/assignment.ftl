@@ -9,6 +9,15 @@
 
 	<h2>Feedback for ${user.universityId}</h2>
 	
+	<#if features.collectRatings>
+		<div id="feedback-rating-container" class="is-stackable">
+			<!-- fallback for noscript -->
+			<div style="padding:0.5em">
+			<a target="_blank" href="<@routes.ratefeedback feedback />">Rate your feedback</a> (opens in a new window/tab)
+			</div>
+		</div>
+	</#if>
+	
 	<p>
 		<#-- Only offer a Zip if there's more than one file. -->
 		<#if feedback.attachments?size gt 1>

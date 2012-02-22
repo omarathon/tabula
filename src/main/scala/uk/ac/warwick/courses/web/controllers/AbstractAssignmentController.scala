@@ -15,8 +15,6 @@ abstract class AbstractAssignmentController extends BaseController {
 	def checkCanGetFeedback(assignment:Assignment, user:CurrentUser): Option[Feedback] = {
 		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId)
 		
-		
-		
 		/*
 		 * When feedback has been released and we have some for that user,
 		 * we should allow them to view. Otherwise, restrict to those who can

@@ -82,23 +82,37 @@ jQuery(function ($) {
 	/**
 	 * 
 	 */
-	var $rateFeedback = $('#feedback-rating-form');
-	if ($rateFeedback.length > 0) {
-		$rateFeedback.hide();
-		$rateFeedback.find('input[type=radio]').each(function(){
-			var rating = this.value;
-			var $img = $('<img>').attr('src','/static/images/icons/plus.png')
-				.hover(
-					function(){ this.addClass('hover'); }, 
-					function(){ this.removeClass('hover'); }
-				)
-				.click(function(){
-					$rateFeedback.find()
-					console.log('Submit rating of ' + rating);
-				});
-			$rateFeedback.append($img);
-		});
-	}
+	var $rateFeedback;
+	var decorateFeedbackForm = function() {
+		$rateFeedback = $('#feedback-rating');
+		var $form = $rateFeedback.find('form'),
+			action = $form.attr('action');
+		
+		if ($form.length > 0) {
+			$form.find('input[name=rating]').rating({
+				callback: function(value, link) {
+					if (!value) { // remove rating
+						$form.append($('<input type=checkbox>').attr({'name':'unset', checked:true}).hide());
+					}
+					$form.append($('<span class=subtle>Saving&hellip;</span>'));
+					$.post(action, $form.serialize())
+						.success(function(data){ 
+							$rateFeedback.replaceWith(data);
+							decorateFeedbackForm();
+						})
+						.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
+				}
+			});
+		}
+	};
+	decorateFeedbackForm();
+	$('#feedback-rating-container').each(function(){
+		var $this = $(this);
+		var action = $this.find('a').attr('href');
+		$this.html('').load(action, function(){
+			decorateFeedbackForm();
+		})
+	})
 	
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",

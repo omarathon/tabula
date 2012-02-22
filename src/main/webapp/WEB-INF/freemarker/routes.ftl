@@ -8,5 +8,5 @@ if we end up changing any of them.
 <#macro ratefeedback feedback><#compress>
     <#assign assignment=feedback.assignment />
     <#assign module=assignment.module />
-    <@url page="/module/${module.code}/${assignment.id/rate" />
+    <@url page="/module/${module.code}/${assignment.id}/rate" />
 </#compress></#macro>

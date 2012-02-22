@@ -6,6 +6,7 @@
     <session-factory>
 		<property name="hibernate.show_sql">false</property>
         <property name="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</property>
+        <property name="hibernate.current_session_context_class">thread</property>
         <mapping package="uk.ac.warwick.courses.data.model" />
     </session-factory>
 </hibernate-configuration>

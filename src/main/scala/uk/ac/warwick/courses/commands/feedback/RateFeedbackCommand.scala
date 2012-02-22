@@ -10,30 +10,44 @@ import uk.ac.warwick.courses.Features
 
 class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends Command[Unit] {
 	
-	@BeanProperty var rating:JInteger =_
+	@BeanProperty var rating:JInteger = Option(feedback).map{ _.ratingInteger }.orNull
+	
+	@BeanProperty var unset:Boolean = false
+	
+	def effectiveRating:JInteger = 
+		if (unset) null
+		else rating
+	
+	
+	val maximumStars = 5
 	
 	@Transactional
 	def apply {
-		feedback.rating = Some(rating)
+		feedback.rating = 
+			if (unset) None 
+			else Some(rating)
 	}
 	
 	// FIXME define validation messages
 	def validate(errors:Errors) {
-		if (feedback.assignment.module.department.collectFeedbackRatings) {
-			if (rating == null) {
-				errors.rejectValue("rating", "feedback.rating.empty")
-			} else if (rating < 1) {
-				errors.rejectValue("rating", "feedback.rating.low")
-			} else if (rating > 10) {
-				errors.rejectValue("rating", "feedback.rating.high")
+		if (enabled) {
+			rating match {
+				case r if r < 1 => errors.rejectValue("rating", "feedback.rating.low")
+				case r if r > maximumStars => errors.rejectValue("rating", "feedback.rating.high")
+				case null => errors.rejectValue("rating", "feedback.rating.empty")
+				case _ =>
 			}
 		} else {
 			errors.rejectValue("rating", "feedback.rating.disabled")
 		}
 	}
 	
+	def enabled = 
+		features.collectRatings &&
+		feedback.assignment.module.department.collectFeedbackRatings 
+	
 	def describe(d:Description) = d.feedback(feedback).properties(
-			"rating" -> rating,
-			"previousRating" -> feedback.rating
+			"rating" -> effectiveRating,
+			"previousRating" -> feedback.rating.orNull
 	)
 }
