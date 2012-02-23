@@ -54,9 +54,9 @@ class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with 
 	
 	def prefill = {
 		if (user != null && user.loggedIn) {
-			if (isWhitespace(usercode)) usercode = user.apparentId
-			if (isWhitespace(name)) name = user.fullName
-			if (isWhitespace(email)) email = user.email
+			if (!hasText(usercode)) usercode = user.apparentId
+			if (!hasText(name)) name = user.fullName
+			if (!hasText(email)) email = user.email
 		}
 	}
 	
