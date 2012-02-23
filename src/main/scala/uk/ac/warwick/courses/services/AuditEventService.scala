@@ -34,7 +34,7 @@ class AuditEventService extends Daoisms {
 	@Resource(name="mainDatabaseDialect") var dialect:Dialect = _
 	
 	private val baseSelect = """select 
-		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data
+		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid
 		from auditevent a"""
 	
 	// for viewing paginated lists of events
@@ -56,6 +56,7 @@ class AuditEventService extends Daoisms {
 		a.masqueradeUserId = array(3).asInstanceOf[String]
 		a.userId = array(4).asInstanceOf[String]
 		a.data = unclob(array(5))
+		a.eventId = array(6).asInstanceOf[String]
 		a
 	}
 	
@@ -71,8 +72,9 @@ class AuditEventService extends Daoisms {
 		val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
 		
 		val query = session.createSQLQuery("insert into auditevent " +
-				"(id, eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
-				"values("+nextSeq+", :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+				"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
+				"values("+nextSeq+", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+		query.setString("eventid", event.id)
 		query.setTimestamp("date", event.date.toDate)
 		query.setString("name", event.name)
 		query.setString("stage", stage)

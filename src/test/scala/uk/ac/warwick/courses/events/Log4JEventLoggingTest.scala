@@ -35,7 +35,7 @@ class Log4JEventLoggingTest extends TestBase {
 		val description = new DescriptionImpl
 		command.describe(description)
 		
-		val event = new Event(command.eventName, null, null, description.allProperties.toMap, new DateTime) 
+		val event = new Event("1235", command.eventName, null, null, description.allProperties.toMap, new DateTime) 
 		
 		listener.afterCommand(event, null)
 		writer.toString should include ("event=Null mykey=jibberjabber")

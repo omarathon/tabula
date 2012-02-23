@@ -1,3 +1,6 @@
+-- canonical script for generating the database schema from scratch.
+-- when you create a migration script, you should also update this
+-- to produce the same results.
 
 create table Assignment (
     id nvarchar2(255) not null,
@@ -93,6 +96,7 @@ CREATE INDEX IDX_USERGROUPEXC ON USERGROUPEXCLUDE(GROUP_ID);
 
 create table AuditEvent (
 	ID NUMBER(38, 0),
+	EVENTID NCHAR(36),
 	eventdate timestamp,
 	eventType nvarchar2(255) not null,
 	eventStage nvarchar2(64) not null,
@@ -102,6 +106,7 @@ create table AuditEvent (
 	CONSTRAINT "auditevent_pk" PRIMARY KEY ("ID")
 );
 create index idx_auditeventdate on auditevent(eventdate);
+CREATE INDEX "AUDITEVENT_EVENTID_IDX" ON AUDITEVENT(EVENTID);
 CREATE SEQUENCE "AUDITEVENT_SEQ" MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE;
 
 create table formfield (

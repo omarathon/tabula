@@ -19,7 +19,7 @@ class AuditEventServiceTest extends AppContextTestBase {
 		
 		val now = new DateTime()
 		for (i <- Range(1,30)) {
-			val event = new Event("Bite"+i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
+			val event = new Event("1138-9962-1813-4938", "Bite"+i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
 			service.save(event, "pre")
 		}
 		

@@ -10,6 +10,7 @@ import javax.persistence.Id
 // need to manage access to the JSON map
 class AuditEvent {
 	var id:String =_
+	var eventId:String =_
 	var eventDate:DateTime =_
 	var eventType:String =_
 	var eventStage:String =_

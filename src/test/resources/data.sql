@@ -4,6 +4,7 @@
 
 create table auditevent (
 	id integer,
+	eventid varchar(36),
 	eventdate timestamp,
 	eventType varchar(255) not null,
 	eventStage varchar(64) not null,
