@@ -38,9 +38,7 @@
 	<#if module.assignments!?size = 0>
 		<p>This module has no assignments. 
 		<span class="actions">
-		<#if can_manage >
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
-		</#if>
 		</span>
 		</p>
 	<#else>
@@ -86,9 +84,7 @@
 				
 			</div>
 			<div class="actions assignment-buttons">
-				<#if can_manage >
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
-				</#if>
 				<#if !assignment.resultsPublished>
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
 				</#if>
@@ -104,9 +100,7 @@
 		</#list>
 		
 		<div class="actions">
-		<#if can_manage >
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
-		</#if>
 		</div>
 	</#if>
 	

@@ -2,6 +2,7 @@ package uk.ac.warwick.courses.commands
 import collection.mutable
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.JavaImports
+import org.springframework.validation.Errors
 
 trait Describable {
 	// describe the thing that's happening.
@@ -22,6 +23,7 @@ trait Command[R] extends Describable with JavaImports {
 	def apply(): R
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
+
 
 trait Unaudited { self:Describable =>
 	// override describe() with nothing, since it'll never be used.

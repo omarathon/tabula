@@ -27,7 +27,7 @@ class SecurityServiceTest extends TestBase {
 	
 	@Test def factory {
 		val dept = new Department
-		val viewIt = Action.of[View](dept)
+		val viewIt = Action.of("View", dept)
 		
 		viewIt.getClass should be (classOf[View])
 	}

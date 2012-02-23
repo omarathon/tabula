@@ -20,10 +20,10 @@ trait Participatable
 
 object Action {
 	
-	val view = classOf[View]
-	val submit = classOf[Submit]
-	val participate = classOf[Participate]
-	val manage = classOf[Manage]
+//	val view = classOf[View]
+//	val submit = classOf[Submit]
+//	val participate = classOf[Participate]
+//	val manage = classOf[Manage]
 	
 	/**
 	 * Create an Action from an action name (e.g. "View") and a target.
@@ -31,10 +31,10 @@ object Action {
 	 * 
 	 * Assumes all actions have one single-argument constructor.
 	 */
-	def of(name:String, target:Object) : Action[_] = {
+	def of(name:String, target:Object*) : Action[_] = {
 		try {
 			val clz = Class.forName("uk.ac.warwick.courses.actions."+name).asSubclass(classOf[Action[_]])
-			clz.getConstructors()(0).newInstance(target).asInstanceOf[Action[_]]
+			clz.getConstructors()(0).newInstance(target:_*).asInstanceOf[Action[_]]
 		} catch {
 			case e:ClassNotFoundException => throw new IllegalArgumentException("Action "+name+" not recognised")
 		}
@@ -51,13 +51,13 @@ object Action {
 	 * doesn't check at compile time that the item you're passing in matches
 	 * the type expected for the action type!
 	 */
-	def of[A<:Action[_]] (item:Any) (implicit m:ClassManifest[A]) = {
-		m match {
-			case m if manifest <:< manifest[View] => View(item.asInstanceOf[Viewable])
-			case m if manifest <:< manifest[Submit] => Submit(item.asInstanceOf[Assignment])
-			case m if manifest <:< manifest[Participate] => Participate(item.asInstanceOf[Participatable])
-			case m if manifest <:< manifest[Manage] => Manage(item.asInstanceOf[Manageable])
-			case m if manifest <:< manifest[Masquerade] => Masquerade()
-		}
-	}
+//	def of[A<:Action[_]] (item:Any) (implicit m:ClassManifest[A]) = {
+//		m match {
+//			case m if manifest <:< manifest[View] => View(item.asInstanceOf[Viewable])
+//			case m if manifest <:< manifest[Submit] => Submit(item.asInstanceOf[Assignment])
+//			case m if manifest <:< manifest[Participate] => Participate(item.asInstanceOf[Participatable])
+//			case m if manifest <:< manifest[Manage] => Manage(item.asInstanceOf[Manageable])
+//			case m if manifest <:< manifest[Masquerade] => Masquerade()
+//		}
+//	}
 }

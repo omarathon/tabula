@@ -91,7 +91,7 @@ class AddAssignment extends BaseController {
 	@RequestMapping(method = Array(RequestMethod.GET))
 	def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
 			form: AddAssignmentCommand, errors: Errors) = {
-		mustBeAbleTo(Participate(module))
+		permCheck(module)
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module)
@@ -100,7 +100,7 @@ class AddAssignment extends BaseController {
 	@RequestMapping(method = Array(RequestMethod.POST))
 	def addAssignmentSubmit(user: CurrentUser, @PathVariable module: Module,
 			@Valid form: AddAssignmentCommand, errors: Errors) = {
-		mustBeAbleTo(Manage(module))
+		permCheck(module)
 		if (errors.hasErrors) {
 			addAssignmentForm(user, module, form, errors)
 		} else {
@@ -109,6 +109,8 @@ class AddAssignment extends BaseController {
 				
 		}
 	}
+	
+	def permCheck(module:Module) = mustBeAbleTo(Participate(module)) 
 
 }
 
@@ -130,7 +132,7 @@ class EditAssignment extends BaseController {
 			form:EditAssignmentCommand, errors: Errors) = {
 		
 		if (assignment.module != module) throw new ItemNotFoundException
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/edit",
 			"department" -> module.department,
 			"module" -> module,
@@ -144,7 +146,7 @@ class EditAssignment extends BaseController {
 			@PathVariable assignment:Assignment,
 			@Valid form: EditAssignmentCommand, errors: Errors) = {
 		
-		mustBeAbleTo(Manage(module))
+		mustBeAbleTo(Participate(module))
 		if (errors.hasErrors) {
 			showForm(module, assignment, form, errors)
 		} else {
