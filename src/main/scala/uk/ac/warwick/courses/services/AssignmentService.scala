@@ -37,7 +37,7 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 		session.createQuery("""select distinct a from Feedback f
 				join f.assignment as a
 				where f.universityId = :universityId
-				and (f.released=true or a.resultsPublished=true)""")
+				and f.released=true""")
 			.setString("universityId", universityId)
 			.list.asInstanceOf[JList[Assignment]]
 	

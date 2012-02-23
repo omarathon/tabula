@@ -43,7 +43,7 @@ class AdminHome extends BaseController {
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
 	def adminDepartment(@PathVariable dept: Department, user: CurrentUser) = {
-		val isDeptManager = can(Manage(dept))
+		val isDeptManager = can(Manage(mandatory(dept)))
 		val modules:JList[Module] = if (isDeptManager) {
 			dept.modules
 		} else {

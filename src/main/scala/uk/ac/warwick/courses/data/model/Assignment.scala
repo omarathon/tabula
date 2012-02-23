@@ -101,8 +101,6 @@ class Assignment() extends GeneratedId with Viewable {
 	@IndexColumn(name="position")
 	@BeanProperty var fields:JList[FormField] = ArrayList()
 	
-	@BeanProperty var resultsPublished:Boolean = false
-	
 	def addField(field:FormField) {
 		field.assignment = this
 		field.position = fields.length
@@ -114,11 +112,9 @@ class Assignment() extends GeneratedId with Viewable {
 	 * If the old-style assignment-wide published flag is true, then it
 	 * assumes all feedback has already been published.
 	 */
-	def unreleasedFeedback = if (resultsPublished) Nil
-			else feedbacks.filterNot( _.released == true ) // ==true because can be null
+	def unreleasedFeedback = feedbacks.filterNot( _.released == true ) // ==true because can be null
 	
-	def anyReleasedFeedback = if (resultsPublished) true
-			else feedbacks.find( _.released == true ).isDefined
+	def anyReleasedFeedback = feedbacks.find( _.released == true ).isDefined
 			
 	def addFields(fields:FormField*) = for(field<-fields) addField(field)
 	

@@ -41,11 +41,11 @@ class Feedback extends GeneratedId with Viewable {
 	
 	/**
 	 * Returns the released flag of this feedback,
-	 * OR the parent assignment's value if not set.
+	 * OR false if unset.
 	 */
 	def checkedReleased:Boolean = Option(released) match {
 		case Some(bool) => bool
-		case None => assignment.resultsPublished
+		case None => false
 	}
 	
 	@OneToMany(mappedBy="feedback", fetch=FetchType.LAZY)

@@ -85,9 +85,7 @@
 			</div>
 			<div class="actions assignment-buttons">
 				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
-				<#if !assignment.resultsPublished>
 				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
-				</#if>
 				<#if has_feedback >
 				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
 				<#if assignment.canPublishFeedback>
