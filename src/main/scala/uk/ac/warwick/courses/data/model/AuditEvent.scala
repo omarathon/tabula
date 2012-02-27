@@ -8,18 +8,18 @@ import org.hibernate.annotations.Type
 import javax.persistence.Id
 
 // need to manage access to the JSON map
-class AuditEvent {
-	var id:String =_
-	var eventId:String =_
-	var eventDate:DateTime =_
-	var eventType:String =_
-	var eventStage:String =_
+case class AuditEvent(
+	var id:String = null,
+	var eventId:String = null,
+	var eventDate:DateTime = null,
+	var eventType:String = null,
+	var eventStage:String = null,
 	
-	var userId:String =_
+	var userId:String = null,
 	
-	var masqueradeUserId:String =_
+	var masqueradeUserId:String = null,
 	
 	//todo convert to/from json
-	var data:String =_
+	var data:String = null
 	//var data:Map[String,Any] =_
-} 
+)

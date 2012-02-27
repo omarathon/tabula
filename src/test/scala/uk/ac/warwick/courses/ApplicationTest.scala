@@ -26,16 +26,32 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.Department
 import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import org.springframework.beans.factory.annotation.Value
 
 class ApplicationTest extends AppContextTestBase {
     
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_
+    
+    @Value("${filesystem.index.audit.dir}") var auditIndexDir:String =_
     
     @Test def handlerMappings = {
     	annotationMapper.getHandlerMethods.size should not be (0)
     	for ((info,method) <- annotationMapper.getHandlerMethods()) {
     		
     	}
+    }
+    
+    /**
+     * Check that a property in default.properties can reference
+     * a property found in courses.properties, even though the latter
+     * is loaded after the former.
+     * 
+     * This is important for allowing "base.data.dir" to be set in
+     * courses.properties, and default.properties using that as
+     * the root directory for many other directory locations.
+     */
+    @Test def defaultProperties = {
+    	auditIndexDir should be ("target/test-tmp/index/audit")
     }
     
     @Transactional @Test def hibernatePersistence = {

@@ -1,4 +1,7 @@
 package uk.ac.warwick.courses
+
+import java.io.File
+import java.util.Properties
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matcher
 import org.joda.time.DateTime
@@ -6,19 +9,42 @@ import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
 import org.scalatest.junit.JUnitSuite
 import org.scalatest.junit.ShouldMatchersForJUnit
-import org.specs.mock.JMocker.`with`
-import uk.ac.warwick.userlookup.User
-import org.springframework.util.FileCopyUtils
-import org.springframework.core.io.ClassPathResource
 import org.specs.mock.JMocker._
 import org.specs.mock.JMocker.{expect => expecting}
-import uk.ac.warwick.userlookup.UserLookupInterface
-import java.util.Properties
-import org.springframework.mock.web.MockHttpServletResponse
+import org.specs.mock.JMocker.`with`
+import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.userlookup.User
+import org.junit.After
+import uk.ac.warwick.util.core.spring.FileUtils
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
+  var temporaryDirectories:Set[File] = Set.empty
+	
+  // Location of /tmp - best to create a subdir below it.
+  lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
+  val random = new scala.util.Random
+  lazy val json = new JsonObjectMapperFactory().createInstance
+  
+  /**
+   * Returns a new temporary directory that will get cleaned up
+   * automatically at the end of the test.
+   */
+  def createTemporaryDirectory:File = {
+	  val file = new File(IoTmpDir, "JavaTestTmp-"+random.nextInt(99999999))
+	  file.mkdir() should be (true)
+	  temporaryDirectories += file
+	  file
+  }
+  
+  /**
+   * Removes any directories created by #createTemporaryDirectory
+   */
+  //@After def deleteTemporaryDirs = temporaryDirectories.par.foreach( FileUtils.recursiveDelete _ )
+	
   /**
    * withArgs(a,b,c) translates to
    * with(allOf(a,b,c)).

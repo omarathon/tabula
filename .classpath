@@ -20,7 +20,7 @@
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpclient-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/dependencies/com.springsource.org.aopalliance-1.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjtools.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/aspectj/aspectjtools.jar" sourcepath="/home/nick/.m2/repository/org/aspectj/aspectjtools/1.6.11/aspectjtools-1.6.11-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/warwickutils-all.jar" sourcepath="/utils/src"/>
 	<classpathentry kind="lib" path="lib/runtime/ehcache/ehcache-core-1.7.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/google-guava/guava-r07.jar"/>
@@ -68,6 +68,8 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-codec/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/sso-client/sso-client-1.87.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/lucene/lucene-core-3.5.0.jar" sourcepath="/home/nick/.m2/repository/org/apache/lucene/lucene-core/3.5.0/lucene-core-3.5.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/lucene-test-framework-3.5.0.jar" sourcepath="/home/nick/.m2/repository/org/apache/lucene/lucene-test-framework/3.5.0/lucene-test-framework-3.5.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/json/paranamer-2.3.jar"/>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>

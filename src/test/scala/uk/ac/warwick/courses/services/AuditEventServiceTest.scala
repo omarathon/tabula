@@ -23,9 +23,9 @@ class AuditEventServiceTest extends AppContextTestBase {
 			service.save(event, "pre")
 		}
 		
-		val recent = service.listRecent(5,10)
+		val recent = service.listRecent(5,10).toList
 		recent.size should be (10)
-		recent.get(0).eventType should be ("Bite24")
-		recent.get(2).eventType should be ("Bite22")
+		recent(0).eventType should be ("Bite24")
+		recent(2).eventType should be ("Bite22")
 	}
 }

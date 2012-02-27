@@ -187,6 +187,7 @@
     <mkdir dir="target/test-results" />
     <junit fork="true" haltonfailure="yes">
       <jvmarg value="-XX:MaxPermSize=512M" />
+      <jvmarg value="-ea" />
       <classpath refid="test.classpath" />
       <formatter type="xml" />
       <formatter type="plain" usefile="no" />

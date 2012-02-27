@@ -25,9 +25,20 @@ import java.sql.Clob
 import org.springframework.util.FileCopyUtils
 import org.hibernate.dialect.Dialect
 import javax.annotation.Resource
+import org.codehaus.jackson.JsonParseException
+import org.codehaus.jackson.map.JsonMappingException
+
+trait AuditEventService {
+	def mapListToObject(array:Array[Object]): AuditEvent
+	def unclob(any:Object): String
+	def save(event:Event, stage:String):Unit
+	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent]
+	def listRecent(start:Int, count:Int) : Seq[AuditEvent]
+	def parseData(data:String): Option[Map[String,Any]]
+}
 
 @Component
-class AuditEventService extends Daoisms {
+class AuditEventServiceImpl extends Daoisms with AuditEventService {
 
 	@Autowired var json:ObjectMapper =_
 	
@@ -45,8 +56,6 @@ class AuditEventService extends Daoisms {
 					where eventdate >= :oldest
 					order by eventdate asc """
 	
-	
-		
 	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
 		val a = new AuditEvent
@@ -88,7 +97,7 @@ class AuditEventService extends Daoisms {
 		query.executeUpdate()
 	}
 	
-	def listNewerThan(date:DateTime, max:Int) : JList[AuditEvent] = {
+	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent] = {
 		val query = session.createSQLQuery(indexListSql)
 		query.setTimestamp("eventdate", date.toDate)
 		query.setMaxResults(max)
@@ -97,7 +106,7 @@ class AuditEventService extends Daoisms {
 			.map(mapListToObject _)
 	}
 
-	def listRecent(start:Int, count:Int) : JList[AuditEvent] = {
+	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
 		val query = session.createSQLQuery(listSql)
 		query.setFirstResult(start)
 		query.setMaxResults(count)
@@ -106,6 +115,11 @@ class AuditEventService extends Daoisms {
 			.map(mapListToObject _)
 	}
 	
-	
+	// parse the data portion of the AuditEvent
+	def parseData(data:String): Option[Map[String,Any]] = try {
+		Option(json.readValue(data, classOf[Map[String,Any]]))
+	} catch {
+		case e @ (_:JsonParseException | _:JsonMappingException) => None
+	}
 	
 }
