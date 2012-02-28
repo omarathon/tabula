@@ -152,53 +152,27 @@
 			
 			<div id="navigation-and-content">
 			
-	<#--
+	
 	<div id="navigation" class="horizontal">
 	<div id="primary-navigation-wrapper">
 		<div id="before-primary-navigation"></div>
 		
-		<div id="primary-navigation-container" class="fixed-width">
-			<ul id="primary-navigation" class="cols-6">
-				<li class="section selected-section rendered-link">
+		<div id="primary-navigation-container" >
+			<ul id="primary-navigation" >
+				<li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
-							<a href="#">{THIS SECTION}</a>										
+							<a href="<@url page="/" />">Home</a>										
 						</div>
-					</div>
-				</li><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{SECTION}</a>										
-						</div>
-					</div>
-				</li><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{SECTION}</a>										
-						</div>
-					</div>
-				</li><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{SECTION}</a>										
-						</div>
-
-					</div>
-				</li><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{SECTION}</a>										
-						</div>
-
-					</div>
-				</li><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="#">{SECTION}</a>										
-						</div>
-	
 					</div>
 				</li>
+				<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
+					<div class="link-content">
+						<div class="title rendered-link-content">
+							<a href="<@url page=crumb.url />">${crumb.title}</a>										
+						</div>
+					</div>
+				</li></#list></#if>
 			</ul>
 		</div>
 		
@@ -207,7 +181,7 @@
 	</div>
 	
 </div>
-		-->	
+		
 				<div id="content-wrapper">					     
 					<div id="main-content">
 						<div id="page-title"> <!-- optional: class="site-root" (will hide the title using CSS) -->

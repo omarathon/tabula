@@ -16,6 +16,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.actions.Participate
 import org.springframework.web.bind.annotation.RequestMethod
+import uk.ac.warwick.courses.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
@@ -44,6 +45,7 @@ class AddFeedback extends BaseController {
 			"module" -> module,
 			"assignment" -> assignment
 			)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 	
 	@Transactional
@@ -61,7 +63,7 @@ class AddFeedback extends BaseController {
 			showForm(module, assignment, form, errors)
 		} else {
 			form.apply
-			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+			Mav("redirect:" + Routes.admin.module(module))
 		}
 	}
 	

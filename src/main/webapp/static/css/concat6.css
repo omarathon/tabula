@@ -724,35 +724,12 @@ body,html {
   margin: 0px 4px;
 }
 #navigation.horizontal ul li {
-  -webkit-transition: all 0.1s linear 0s;
-  /* Saf3.1+, Chrome */
+  -webkit-transition: color 0.1s linear 0s;
+  -moz-transition: color 0.1s linear 0s;
+  -ms-transition: color 0.1s linear 0s;
+  -o-transition: color 0.1s linear 0s;
+  transition: color 0.1s linear 0s;
 
-  -moz-transition: all 0.1s linear 0s;
-  /* FF4 */
-
-  -ms-transition: all 0.1s linear 0s;
-  /* IE10 */
-
-  -o-transition: all 0.1s linear 0s;
-  /* Opera 10.5x */
-
-  transition: all 0.1s linear 0s;
-  -webkit-transition: all 0.1s linear 0s;
-  /* Saf3.1+, Chrome */
-
-  -moz-transition: all 0.1s linear 0s;
-  /* FF4 */
-
-  -ms-transition: all 0.1s linear 0s;
-  /* IE10 */
-
-  -o-transition: all 0.1s linear 0s;
-  /* Opera 10.5x */
-
-  transition: all 0.1s linear 0s;
-  display: inline-block;
-  zoom: 1;
-  *display: inline;
   display: inline-block;
   zoom: 1;
   *display: inline;
@@ -1191,27 +1168,17 @@ body.vertical-nav.vertical-nav-wide #navigation {
 #primary-navigation li.rendered-link .rendered-link-content a:hover {
   color: #efefef;
 }
+/*
 #primary-navigation li.rendered-link:hover {
   background-color: #666666;
   -moz-box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* FF3.5+ */
-
   -webkit-box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* Saf3.0+, Chrome */
-
   box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* Opera 10.5, FF4, IE9, Chrome 10+ */
-
   -moz-box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* FF3.5+ */
-
   -webkit-box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* Saf3.0+, Chrome */
-
   box-shadow: 0px 1px 16px rgba(0, 0, 0, 0.8);
-  /* Opera 10.5, FF4, IE9, Chrome 10+ */
-
 }
+*/
 #primary-navigation li.rendered-link.selected-section {
   background: #d0d2d3;
 }

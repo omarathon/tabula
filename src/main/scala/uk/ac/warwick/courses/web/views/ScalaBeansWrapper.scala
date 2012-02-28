@@ -86,9 +86,19 @@ class ScalaHashModel(sobj: ScalaObject, wrapper: ScalaBeansWrapper) extends Bean
 	  val x = key
 	  getters.get(key) match {
 	    case Some(getter) => wrapper.wrap(getter())
-	    case None => throw new TemplateModelException(key+" not found in object "+sobj)
+	    case None => checkInnerClasses(key)
 	  }
   }
+  
+  def checkInnerClasses(key:String) : TemplateModel = {
+	  try {
+		  wrapper.wrap(Class.forName(sobj.getClass.getName+key+"$").getField("MODULE$").get(null))
+	  } catch {
+	 	  case e @ (_:ClassNotFoundException | _:NoSuchFieldException) => 
+	 	 	  throw new TemplateModelException(key+" not found in object "+sobj)
+	  }
+  }
+  
   override def isEmpty = false
 }
 

@@ -55,6 +55,7 @@ abstract trait ControllerMethods extends Logging {
 
 trait ControllerViews {
 	val Mav = uk.ac.warwick.courses.web.Mav
+	val Breadcrumbs = uk.ac.warwick.courses.web.Breadcrumbs
 	def Redirect(path:String) = Mav("redirect:" + path)
 	def Reload() = Redirect(currentPath)
 	
@@ -81,19 +82,15 @@ abstract class BaseController extends ControllerMethods with ControllerViews wit
   def user = requestInfo.get.user
   def ajax = requestInfo.map{ _.ajax }.getOrElse(false)
   
-  def compositeValidator:Validator = {
-	  if (validator != null) {
-	 	  if (keepOriginalValidator) {
-	 	 	  new CompositeValidator(validator, globalValidator)
-	 	  } else {
-	 		  validator
-	 	  }
-	  } else {
-	 	  globalValidator
-	  }
-  }
-  
-  @InitBinder def _binding(binder:WebDataBinder) = {
+  /**
+   * Sets up @Valid validation.
+   * If "validator" has been set, it will be used. If "keepOriginalValidator" is true,
+   * it will be joined up with the default global validator (the one that does annotation based
+   * validation like @NotEmpty). Otherwise it's replaced.
+   * 
+   * Sets up disallowedFields.
+   */
+  @InitBinder final def _binding(binder:WebDataBinder) = {
 	  if (validator != null) {
 	 	  if (keepOriginalValidator) {
 	 	 	  val original = binder.getValidator
@@ -105,6 +102,10 @@ abstract class BaseController extends ControllerMethods with ControllerViews wit
 	  binder.setDisallowedFields(disallowedFields:_*)
 	  binding(binder, binder.getTarget)
   }
+  
+  /**
+   * Do any custom binding init by overriding this method.
+   */
   def binding[T](binder:WebDataBinder, target:T) {}
   
 

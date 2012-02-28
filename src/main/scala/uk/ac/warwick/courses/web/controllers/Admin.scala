@@ -1,15 +1,14 @@
 package uk.ac.warwick.courses.web.controllers
-import scala.collection.JavaConversions._
 
+import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-
-import uk.ac.warwick.courses.JavaImports._
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.commands.assignments._
 import uk.ac.warwick.courses.commands.feedback.AdminGetAllFeedbackCommand
@@ -25,6 +24,7 @@ import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
+import uk.ac.warwick.courses.web.Routes
 
 /**
  * Screens for department and module admins.
@@ -55,6 +55,7 @@ class AdminHome extends BaseController {
 		Mav("admin/department",
 			"department" -> dept,
 			"modules" -> modules.sortBy{ (module) => (module.assignments.isEmpty, module.code) })
+			
 	}
 	
 }
@@ -95,6 +96,7 @@ class AddAssignment extends BaseController {
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))
@@ -105,8 +107,7 @@ class AddAssignment extends BaseController {
 			addAssignmentForm(user, module, form, errors)
 		} else {
 			form.apply
-			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
-				
+			Redirect(Routes.admin.module(module))
 		}
 	}
 	
@@ -138,6 +139,7 @@ class EditAssignment extends BaseController {
 			"module" -> module,
 			"assignment" -> assignment
 			)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 	
 	@RequestMapping(method = Array(RequestMethod.POST))
@@ -151,7 +153,7 @@ class EditAssignment extends BaseController {
 			showForm(module, assignment, form, errors)
 		} else {
 			form.apply
-			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+			Redirect(Routes.admin.module(module))
 		}
 		
 	}
@@ -201,6 +203,7 @@ class ListFeedback extends BaseController {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/feedback/list")
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 }
 

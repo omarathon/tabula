@@ -11,7 +11,32 @@ class MyObject {
   def getMotto() = "do be good, don't be bad"
 }
 
+object World {
+	object England {
+		val plant = "Rose"
+	}
+	object Scotland {
+		def plant = "Thistle"
+	}
+}
+
 class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
+	
+	@Test def nestedObjects {
+		World.Scotland.plant should be ("Thistle")
+		
+		val wrapper = new ScalaBeansWrapper()
+		wrapper.wrap(World) match {
+			case hash:ScalaHashModel => {
+				hash.get("Scotland") match {
+					case hash:ScalaHashModel => {
+						hash.get("plant").toString should be ("Thistle")
+					}
+				}
+			}
+		}
+	}
+	
 	@Test def scalaGetter {
 	  val wrapper = new ScalaBeansWrapper()
 	  wrapper.wrap(new MyObject) match {

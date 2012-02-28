@@ -1,20 +1,23 @@
 package uk.ac.warwick.courses.web.controllers.admin
 
-import uk.ac.warwick.courses.JavaImports._
+import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod._
+
+import javax.persistence.Entity
+import javax.persistence.NamedQueries
+import uk.ac.warwick.courses.actions.Manage
+import uk.ac.warwick.courses.commands.modules.AddModulePermissionCommand
+import uk.ac.warwick.courses.commands.modules.RemoveModulePermissionCommand
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
-import org.springframework.web.bind.annotation.RequestMethod._
-import org.codehaus.jackson.map.annotate.JsonView
-import uk.ac.warwick.courses.actions.Manage
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.courses.commands.modules.AddModulePermissionCommand
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.courses.data.model.UserGroup
-import org.springframework.validation.Errors
-import uk.ac.warwick.courses.commands.modules.RemoveModulePermissionCommand
+import uk.ac.warwick.courses.web.Routes
 
 trait ModulePermissionControllerMethods extends BaseController {
 	
@@ -24,7 +27,9 @@ trait ModulePermissionControllerMethods extends BaseController {
 	def form(module:Module) : Mav = {
 		checks(module)
 		Mav("admin/modules/permissions/form", "module"->module)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
+	
 	
 	def checks(module:Module) = {
 		mustBeAbleTo(Manage(module))
@@ -51,7 +56,7 @@ class ModuleAddPermissionController extends BaseController with ModulePermission
 			form(module)
 		} else {
 			command.apply()
-			Redirect("/admin/module/"+module.code+"/permissions")
+			Redirect(Routes.admin.modulePermissions(module))
 		}
 		
 	}
@@ -68,7 +73,7 @@ class ModuleRemovePermissionController extends BaseController with ModulePermiss
 			form(module)
 		} else {
 			command.apply()
-			Redirect("/admin/module/"+module.code+"/permissions")
+			Redirect(Routes.admin.modulePermissions(module))
 		}
 		
 	}

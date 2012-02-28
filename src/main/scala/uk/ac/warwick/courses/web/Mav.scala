@@ -1,7 +1,9 @@
 package uk.ac.warwick.courses.web
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 import org.springframework.web.servlet.ModelAndView
-import collection.JavaConversions._
-import collection.mutable
+import uk.ac.warwick.courses.data.model
 
 /**
  * Scala-y modelandview object. There is a return value processor
@@ -32,10 +34,12 @@ class Mav(var viewName:String) {
 	 * 
 	 * @see #noLayout
 	 */
-	def layout(name:String) = {
-		map += "renderLayout" -> name
-		this
-	}
+	def layout(name:String) = addObjects("renderLayout" -> name)
+	
+	/**
+	 * Add a list of breadcrumbs to display in the navigation.
+	 */
+	def crumbs(pages:Breadcrumb*) = addObjects("breadcrumbs" -> pages.toSeq)
 	
 	/**
 	 * Sets the layout parameter to "none" to
@@ -65,6 +69,10 @@ class Mav(var viewName:String) {
 		mav
 	}
 }
+
+
+
+
 
 /**
  * ModelAndView builder. Takes a viewname and then any number of Pair objects (which awesomely can be

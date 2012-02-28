@@ -15,6 +15,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.actions.Participate
 import javax.validation.Valid
+import uk.ac.warwick.courses.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
@@ -24,12 +25,15 @@ class AddBatchFeedback extends BaseController {
 	
 	def onBind(cmd:AddFeedbackCommand) = cmd.onBind
 	
+	// Add the common breadcrumbs to the model.
+	def crumbed(mav:Mav, module:Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	
 	@RequestMapping(method=Array(RequestMethod.GET))
 	def uploadZipForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand):Mav = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
-		Mav("admin/assignments/feedback/zipform")
+		crumbed(Mav("admin/assignments/feedback/zipform"), module)
 	}
 	
 	@RequestMapping(method=Array(RequestMethod.POST), params=Array("!confirm"))
@@ -43,7 +47,7 @@ class AddBatchFeedback extends BaseController {
 			cmd.postExtractValidation(errors)
 			mustBeLinked(assignment,module)
 			mustBeAbleTo(Participate(module))
-			Mav("admin/assignments/feedback/zipreview")
+			crumbed(Mav("admin/assignments/feedback/zipreview"), module)
 		}
 	}
 	
@@ -56,11 +60,11 @@ class AddBatchFeedback extends BaseController {
 		cmd.onBind
 		cmd.postExtractValidation(errors)
 		if (errors.hasErrors) {
-			Mav("admin/assignments/feedback/zipreview")
+			crumbed(Mav("admin/assignments/feedback/zipreview"), module)
 		} else {
 			// do apply, redirect back
 			cmd.apply()
-			Mav("redirect:/admin/department/" + module.department.code + "/#module-" + module.code)
+			Redirect(Routes.admin.module(module))
 		}
 	}
 	
