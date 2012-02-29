@@ -20,6 +20,7 @@ trait AssignmentService {
 	def getUsersForFeedback(assignment:Assignment): Seq[Pair[String,User]]
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment]
+	
 }
 
 @Service
@@ -34,8 +35,8 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	}
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment] =
-		session.createQuery("""select distinct a from Feedback f
-				join f.assignment as a
+		session.createQuery("""select distinct a from Assignment a
+				join a.feedbacks as f
 				where f.universityId = :universityId
 				and f.released=true""")
 			.setString("universityId", universityId)

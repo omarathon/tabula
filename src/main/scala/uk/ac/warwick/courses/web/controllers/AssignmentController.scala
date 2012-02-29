@@ -34,6 +34,8 @@ class ModuleController extends BaseController {
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends AbstractAssignmentController {
 	
+	hideDeletedItems
+	
 	@ModelAttribute def form(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new SubmitAssignmentCommand(assignment, user)
 	

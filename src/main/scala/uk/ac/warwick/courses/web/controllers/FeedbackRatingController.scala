@@ -23,6 +23,8 @@ class FeedbackRatingController extends AbstractAssignmentController {
 
 	@Autowired @BeanProperty var features:Features =_
 	
+	hideDeletedItems
+	
 	@ModelAttribute def cmd(
 			@PathVariable("assignment") assignment:Assignment,
 			@PathVariable("module") module:Module) = {

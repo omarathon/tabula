@@ -23,7 +23,7 @@ class UserPickerController extends BaseController {
 	@RequestMapping(value=Array("/api/userpicker/query"))
 	def query (form:QueryForm, out:Writer) = {
 	  val usersByStaff = fetch(form)
-	  val (staff, students) = (usersByStaff.getOrElse(true, Nil), usersByStaff.getOrElse(false, Nil))
+	  val (staff, students) = (usersByStaff.getOrElse(true, Seq.empty), usersByStaff.getOrElse(false, Seq.empty))
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
 	      "students" -> students).noLayout

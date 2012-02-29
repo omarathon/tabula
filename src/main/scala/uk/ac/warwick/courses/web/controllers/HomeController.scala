@@ -18,12 +18,16 @@ import uk.ac.warwick.courses.services.AssignmentService
 	@Autowired var assignmentService: AssignmentService =_
 	@Autowired var userLookup:UserLookupService =_
 	def groupService = userLookup.getGroupService
+	
+	hideDeletedItems
   
 	@RequestMapping(Array("/"))	def home(user:CurrentUser) = {
 	  if (user.loggedIn) {
 		  val moduleWebgroups = moduleService.modulesAttendedBy(user.idForPermissions)//groupsFor(user),
 		  val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 		  val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
+		  
+		  val filter = session.getEnabledFilter("notDeleted")
 		  
 		  val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 		  

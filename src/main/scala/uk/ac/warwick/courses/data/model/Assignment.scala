@@ -20,14 +20,26 @@ import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import javax.persistence.FetchType
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.helpers.ArrayList
+import org.hibernate.annotations._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
 }
 
+/**
+ * Represents an assignment within a module, occurring at a certain time.
+ * 
+ * Notes about the notDeleted filter:
+ *   filters don't run on session.get() but getById will check for you.
+ *   queries will only include it if it's the entity after "from" and not
+ *     some other secondary entity joined on. It's usually possible to flip the
+ *     query around to make this work.
+ */
+@FilterDef(name="notDeleted", defaultCondition="deleted = 0")
+@Filter(name="notDeleted")
 @Entity @AccessType("field")
-class Assignment() extends GeneratedId with Viewable {
+class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	import Assignment._
 	
 	def this(_module:Module) {
@@ -117,6 +129,11 @@ class Assignment() extends GeneratedId with Viewable {
 	def anyReleasedFeedback = feedbacks.find( _.released == true ).isDefined
 			
 	def addFields(fields:FormField*) = for(field<-fields) addField(field)
+	
+	def addFeedback(feedback:Feedback) {
+		feedbacks.add(feedback)
+		feedback.assignment = this
+	}
 	
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback:Boolean = 

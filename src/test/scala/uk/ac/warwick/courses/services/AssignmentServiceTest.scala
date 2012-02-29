@@ -10,7 +10,28 @@ import uk.ac.warwick.courses.data.model.Feedback
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
-	@Autowired var service:AssignmentService =_
+	@Autowired var service:AssignmentServiceImpl =_
+	
+	/**
+	 * The Hibernate filter that adds deleted != 0
+	 */
+	@Transactional @Test def notDeletedFilter {
+		val module = new Module
+		session.save(module)
+		val assignment = new Assignment
+		assignment.name = "Essay"
+		assignment.module = module
+		assignment.academicYear = new AcademicYear(2009)
+		assignment.markDeleted()
+		session.save(assignment)
+		
+		service.isFilterEnabled("notDeleted") should be (false)
+		service.getAssignmentById(assignment.id) should be (Some(assignment))
+		session.enableFilter("notDeleted")
+		service.getAssignmentById(assignment.id) should be (None)
+		
+		service.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be (None)
+	}
 	
 	@Transactional @Test def findDuplicateAssignmentNames {
 		val module = new Module
@@ -31,37 +52,46 @@ class AssignmentServiceTest extends AppContextTestBase {
 	}
 	
 	@Transactional @Test def findModulesWithFeedback {
+		val ThisUser = 	"1234567"
+		val OtherUser = "1234568"
+		
 		val myFeedback = new Feedback
-		myFeedback.universityId = "1234567"
+		myFeedback.universityId = ThisUser
 		myFeedback.released = true
 		
 		val otherFeedback = new Feedback
-		otherFeedback.universityId = "1234568"
+		otherFeedback.universityId = OtherUser
 		otherFeedback.released = true
 		
 		val unreleasedFeedback = new Feedback
-		unreleasedFeedback.universityId = "1234568"
+		unreleasedFeedback.universityId = ThisUser
+			
+		val deletedFeedback = new Feedback
+		deletedFeedback.universityId = ThisUser
+		deletedFeedback.released = true
 		
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
+		val assignment3 = new Assignment
+		assignment3.markDeleted
 		
-		assignment1.feedbacks.add(myFeedback)
-		myFeedback.assignment = assignment1
-		
-		assignment1.feedbacks.add(otherFeedback)
-		otherFeedback.assignment = assignment1
-		
-		assignment2.feedbacks.add(unreleasedFeedback)
-		unreleasedFeedback.assignment = assignment2
+		assignment1.addFeedback(myFeedback)
+		assignment1.addFeedback(otherFeedback)
+		assignment2.addFeedback(unreleasedFeedback)
+		assignment3.addFeedback(deletedFeedback)
 		
 		session.save(assignment1)
 		session.save(assignment2)
+		session.save(assignment3)
 		
 		session.save(myFeedback)
 		session.save(otherFeedback)
 		session.save(unreleasedFeedback)
+		session.save(deletedFeedback)
 		
-		val assignments = service.getAssignmentsWithFeedback("1234567")
+		session.enableFilter("notDeleted")
+		
+		val assignments = service.getAssignmentsWithFeedback(ThisUser)
 		assignments.size should be (1)
 		assignments(0) should be (assignment1)
 	}

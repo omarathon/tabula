@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import scala.annotation.target.field
 import javax.sql.DataSource
 import org.hibernate.Session
+import uk.ac.warwick.courses.data.model.CanBeDeleted
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -17,6 +18,8 @@ trait Daoisms {
   @AutowiredField var sessionFactory:SessionFactory = _
 
   protected def session = sessionFactory.getCurrentSession
+  
+  def isFilterEnabled(name:String) = session.getEnabledFilter(name) != null
   
   /**
    * Do some work in a new session. Only needed outside of a request,
@@ -50,9 +53,19 @@ trait Daoisms {
 	  case _ => None
   }
   
-  // type-safe session.get. returns an Option object, which will match None if
-  // null was returned.
-  protected def getById[D](id:String)(implicit m:Manifest[D]) : Option[D] =
-	  Option(session.get(m.erasure.getName(), id).asInstanceOf[D])
+  /**
+   * type-safe session.get. returns an Option object, which will match None if
+   * null is returned.
+   * 
+   * For CanBeDeleted entities, it also checks if the entity is deleted and
+   * the notDeleted filter is enabled, in which case it also returns None.
+   */
+  protected def getById[D](id:String)(implicit m:Manifest[D]) : Option[D] = 
+	  session.get(m.erasure.getName(), id) match {
+	  	case entity:CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
+	  	case entity:Any if m.erasure.isInstance(entity) => Option(entity.asInstanceOf[D])
+	  	case _ => None
+  	  }
+  
 
 }

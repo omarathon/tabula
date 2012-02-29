@@ -124,6 +124,10 @@
 				</constructor-arg>
 			</bean>
 		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="uk.ac.warwick.courses.system.ControllerPreRequestInterceptor" />
+		</mvc:interceptor>
 	</mvc:interceptors>
 	
 	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.courses.system.CommonPropertyEditors" />
@@ -406,7 +410,7 @@
 			<prop key="hibernate.jdbc.batch_size">20</prop>
 			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.hsql.HSQLDialect</prop>
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
-			<!-- <prop key="hibernate.show_sql">true</prop> -->
+			<prop key="hibernate.show_sql">true</prop> 
 		</util:properties>
 		
 		

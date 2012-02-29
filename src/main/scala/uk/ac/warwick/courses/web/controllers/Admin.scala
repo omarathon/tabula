@@ -161,6 +161,49 @@ class EditAssignment extends BaseController {
 }
 
 @Controller
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/delete"))
+class DeleteAssignment extends BaseController {
+	
+	validatesWith{ (form:DeleteAssignmentCommand, errors:Errors) =>
+		form.validate(errors)
+	}
+	
+	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
+		new DeleteAssignmentCommand(mandatory(assignment))
+	
+	@RequestMapping(method=Array(RequestMethod.GET))
+	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
+			form:DeleteAssignmentCommand, errors: Errors) = {
+		
+		if (assignment.module != module) throw new ItemNotFoundException
+		mustBeAbleTo(Participate(module))
+		Mav("admin/assignments/delete",
+			"department" -> module.department,
+			"module" -> module,
+			"assignment" -> assignment
+			)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	}
+	
+	@RequestMapping(method = Array(RequestMethod.POST))
+	def submit(
+			@PathVariable module: Module,
+			@PathVariable assignment:Assignment,
+			@Valid form: DeleteAssignmentCommand, errors: Errors) = {
+		
+		mustBeAbleTo(Participate(module))
+		if (errors.hasErrors) {
+			showForm(module, assignment, form, errors)
+		} else {
+			form.apply
+			Redirect(Routes.admin.module(module))
+		}
+		
+	}
+	
+}
+
+@Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadFeedback extends BaseController {
 	@Autowired var feedbackDao:FeedbackDao =_

@@ -13,6 +13,7 @@ abstract class AbstractAssignmentController extends BaseController {
 	@Autowired var feedbackDao:FeedbackDao =_
 	
 	def checkCanGetFeedback(assignment:Assignment, user:CurrentUser): Option[Feedback] = {
+		notDeleted(assignment)
 		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId)
 		
 		/*

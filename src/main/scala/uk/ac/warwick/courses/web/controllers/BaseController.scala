@@ -21,6 +21,8 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.CurrentUser
 import org.springframework.web.bind.annotation.RequestMethod
+import uk.ac.warwick.courses.data.model.CanBeDeleted
+import uk.ac.warwick.courses.data.Daoisms
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 
@@ -43,9 +45,13 @@ abstract trait ControllerMethods extends Logging {
 	  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
 		  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 		  case None => throw new ItemNotFoundException()
-		  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+		  case thing:T if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 		  case _ => throw new ItemNotFoundException()
 	  }
+	   
+	 def notDeleted[T <: CanBeDeleted](entity:T):T = 
+		 if (entity.deleted) throw new ItemNotFoundException()
+		 else entity
 	   
 	 def user:CurrentUser
 	 var securityService:SecurityService
@@ -68,7 +74,7 @@ trait ControllerViews {
  * Useful traits for all controllers to have.
  */
 @Controller
-abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling {
+abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling with Daoisms {
   // make Mav available to controllers without needing to import
   
   @Required @Resource(name="validator") var globalValidator:Validator =_
@@ -81,6 +87,20 @@ abstract class BaseController extends ControllerMethods with ControllerViews wit
   def requestInfo = RequestInfo.fromThread
   def user = requestInfo.get.user
   def ajax = requestInfo.map{ _.ajax }.getOrElse(false)
+  
+  /**
+   * Enables the Hibernate filter for this session to exclude
+   * entities marked as deleted.
+   */
+  private var _hideDeletedItems = false
+  def hideDeletedItems = { _hideDeletedItems = true }
+  
+  final def preRequest {
+	  // if hideDeletedItems has been called, exclude all "deleted=1" items from Hib queries.
+	  if (_hideDeletedItems) {
+	 	  session.enableFilter("notDeleted")
+	  }
+  }
   
   /**
    * Sets up @Valid validation.
