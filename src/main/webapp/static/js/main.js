@@ -1,7 +1,49 @@
-(function () { "use strict";
+(function ($) { "use strict";
 
 window.Supports = {};
 window.Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
+
+/**
+ * Replace links with a textbox that selects itself on focus, and
+ * gives you a hint to press Ctrl+C (or Apple+C) 
+ * 
+ * options:
+ *   preselect: true to preselect item. Only works when working on a single element.
+ */
+jQuery.fn.copyable = function(options) {
+  options = options || {};
+  var Mac = -1!=(window.navigator&&navigator.platform||"").indexOf("Mac");
+  var PressCtrlC = 'Now press '+(Mac?'\u2318':'Ctrl')+"-C to copy.";
+  
+  var preselect = (this.length == 1) && (!!options['preselect'] || false);
+  var prefixLinkText = (!!options['prefixLinkText'] || false);
+    
+  this.each(function(){
+    var $this = $(this),
+        url = this.href,
+        title = this.title,
+        text = $this.html();
+    var $container = $('<span class=copyable-url-container>').attr('title',title);
+    var $explanation = $('<span class=press-ctrl-c>').html(PressCtrlC).hide();
+    var $input = $('<input class=copyable-url>')
+        .attr('readonly', true)
+        .attr('value',url)
+        .click(function(){
+          this.select();
+          $explanation.slideDown('fast');
+        }).blur(function(){
+          $explanation.fadeOut('fast');
+        });
+    $container.append($input).append($explanation);
+    $this.replaceWith($container);
+    if (prefixLinkText) {
+    	$container.before(text);
+    }
+    if (preselect) {
+    	$input.click();
+    }
+  });
+}
 
 jQuery(function ($) {
 	
@@ -204,33 +246,8 @@ jQuery(function ($) {
 		fillInAppComments($form);
 		decorateAppCommentsForm($form);
 	});
-	
-	if (window.ZeroClipboard) {
-		var $copiedText = $('<div>').html('Copied to clipboard.');
 		
-		$('a.copyable-url').each(function(){
-			var $copyLink = $('<a href="#">')
-					.html("Copy URL for Students")
-					.attr("title", this.title);
-			var $relative = $('<div>').addClass('actions').css('position','relative').append($copyLink);
-			$(this).replaceWith($relative);
-			
-			var clip = new ZeroClipboard.Client();
-			clip.setText(this.href);
-			clip.setHandCursor( true );
-			clip.glue($copyLink[0], $relative[0]);
-			
-			// Add original link as fallback Flash content, just in case.
-			$relative.find('embed').append(this);
-			
-			clip.addEventListener('onComplete', function(client, text){
-				console.log('copied', text);
-				$copiedText.stop(true).hide();
-				$relative[0].appendChild($copiedText[0]);
-				$copiedText.slideDown().delay(2000).slideUp('slow');
-			});
-		});
-	}
+	$('a.copyable-url').copyable({prefixLinkText:true});
 	
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
@@ -277,4 +294,4 @@ jQuery(function ($) {
 	
 }); // end domready
 
-}());
+}(jQuery));
