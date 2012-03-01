@@ -14,3 +14,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
     <#assign module=assignment.module />
     <@url page="/module/${module.code}/${assignment.id}/rate" />
 </#compress></#macro>
+<#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
+<#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>

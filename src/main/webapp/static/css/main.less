@@ -162,13 +162,15 @@ html {
 	}
 }
 
-input.text,
-input.date-time-picker {
-	border: 1px solid #999;
-	border-radius: 4px;
-	box-shadow: 2px 2px 2px rgba(0,0,0,0.2) inset;
-	padding: 2px 0 0 5px;
-	width: 10em;
+input {
+	&.text, &.date-time-picker {
+		border: 1px solid #999;
+		border-radius: 4px;
+		box-shadow: 2px 2px 2px rgba(0,0,0,0.2) inset;
+		padding: 2px 0 0 5px;
+	}
+	&.text { width: 14em; }
+	&.date-time-picker { width: 10em; }
 }
 
 /* input.text:focus,
@@ -463,6 +465,11 @@ span.press-ctrl-c {
   padding: 3px 5px;
   border: 1px solid #aaf;
   .box-shadow(0, 2px, 2px, rgba(0,0,0,0.3));
+}
+
+ul.links {
+  list-style: none;
+  li {  }
 }
 
 .subtle { color: @subtle-text-color; }

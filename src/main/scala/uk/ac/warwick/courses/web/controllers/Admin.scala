@@ -25,6 +25,7 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.web.Routes
+import org.springframework.validation.BeanPropertyBindingResult
 
 /**
  * Screens for department and module admins.
@@ -134,12 +135,21 @@ class EditAssignment extends BaseController {
 		
 		if (assignment.module != module) throw new ItemNotFoundException
 		mustBeAbleTo(Participate(module))
+		val couldDelete = canDelete(assignment)
 		Mav("admin/assignments/edit",
 			"department" -> module.department,
 			"module" -> module,
-			"assignment" -> assignment
+			"assignment" -> assignment,
+			"canDelete" -> couldDelete
 			)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	}
+	
+	private def canDelete(assignment:Assignment):Boolean = {
+		val cmd = new DeleteAssignmentCommand(assignment)
+		val errors = new BeanPropertyBindingResult(cmd, "cmd")
+		cmd.prechecks(errors)
+		!errors.hasErrors
 	}
 	
 	@RequestMapping(method = Array(RequestMethod.POST))

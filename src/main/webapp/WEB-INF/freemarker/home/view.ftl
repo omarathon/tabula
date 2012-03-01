@@ -1,28 +1,14 @@
 <#escape x as x?html>
 
+<#function nonempty collection>
+<#return collection?? && collection?size gt 0/>
+</#function>
+
 <#macro link_to_department department>
 <a href="<@url page="/admin/department/${department.code}/"/>">
 	Go to the ${department.name} admin page
 </a>
 </#macro>
-
-<#if ownedDepartments?? && ownedDepartments?size gt 0>
-<#list ownedDepartments as department>
-	<div class="admin-flash">
-	You're a departmental administrator for ${department.name}.
-	<@link_to_department department />
-	</div>
-</#list>
-</#if>
-
-<#if ownedModuleDepartments?? && ownedModuleDepartments?size gt 0>
-<#list ownedModuleDepartments as department>
-	<div class="admin-flash">
-	You're a manager for one or more modules in ${department.name}.
-	<@link_to_department department />
-	</div>
-</#list>
-</#if>
 
 <#if user.loggedIn && user.firstName??>
 <h1>Hello, ${user.firstName}.</h1>
@@ -35,15 +21,43 @@ This is a new service for managing coursework assignments and feedback. If you'r
 you might start getting emails containing links to download your feedback from here.
 </p>
 
+<#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
+<h2>Administration</h2>
+</#if>
+
+<#if nonempty(ownedDepartments)>
+<p>You're a departmental administrator.</p>
+<ul class="links">
+<#list ownedDepartments as department>
+	<li>
+	<@link_to_department department />
+	</li>
+</#list>
+</ul>
+</#if>
+
+<#if nonempty(ownedModuleDepartments)>
+<p>You're a manager for one or more modules.</p>
+<ul class="links">
+<#list ownedModuleDepartments as department>
+	<li>
+	<@link_to_department department />
+	</li>
+</#list>
+</ul>
+</#if>
+
 <#if assignmentsWithFeedback?? && assignmentsWithFeedback?size gt 0>
 <h2>Your feedback</h2>
+<ul class="links">
 <#list assignmentsWithFeedback as assignment>
-	<div>
+	<li>
 		<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
 			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
 		</a>
-	</div>
+	</li>
 </#list>
+</ul>
 </#if>
 
 <#--

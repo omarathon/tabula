@@ -38,7 +38,7 @@
 		  <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 		  <@script "/static/libs/jquery.delayedObserver.js" />
 		  <@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
-		  <@script "/static/libs/anytime/anytimec.js" />
+		  <#--<@script "/static/libs/anytime/anytimec.js" />-->
 		  <@script "/static/libs/popup/popup.js" />
 		  <@script "/static/js/modernizr.js" />
 		  <@script "/static/js/browser-info.js" />
@@ -165,7 +165,7 @@
 				<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
 					<div class="link-content">
 						<div class="title rendered-link-content">
-							<a href="<@url page=crumb.url />">${crumb.title}</a>										
+							<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
 						</div>
 					</div>
 				</li></#list></#if>

@@ -43,6 +43,7 @@
 		</p>
 	<#else>
 		<#list module.assignments as assignment>
+		<#if !assignment.deleted>
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
 		<div class="assignment-info">
 			<div class="column1">
@@ -95,6 +96,7 @@
 			</div>
 			<div class="end-assignment-info"></div>
 		</div>
+		</#if>
 		</#list>
 		
 		<div class="actions">

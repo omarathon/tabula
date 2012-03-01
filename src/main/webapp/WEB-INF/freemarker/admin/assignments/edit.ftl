@@ -49,4 +49,13 @@ or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 
+<#if canDelete>
+<p class="subtle actions">Did you create this assignment in error? 
+You may <a href="<@routes.assignmentdelete assignment=assignment />">delete</a> it if you definitely won't need it again.</p>
+<#else>
+<p class="subtle">
+It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
+</p>
+</#if>
+
 </#escape>

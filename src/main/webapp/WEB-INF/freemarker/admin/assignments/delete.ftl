@@ -2,14 +2,26 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
+<h1>Delete assignment</h1>
 
 <@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/delete" commandName="deleteAssignmentCommand">
 
-<p></p>
+<h2>${assignment.name} (${assignment.academicYear.label})</h2>
+
+<!-- global errors -->
+<@f.errors cssClass="error" />
+
+<p>
+You can delete an assignment if it's been created in error. 
+</p>
+
+<@f.errors path="confirm" cssClass="error" />
+<@f.checkbox path="confirm" id="confirmCheck" />
+<@f.label for="confirmCheck"><strong> I definitely will not need this assignment again and wish to delete it entirely.</strong></@f.label>
 
 <div class="submit-buttons actions">
 <input type="submit" value="Delete">
-or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
+or <a href="<@routes.assignmentedit assignment=assignment />">Cancel</a>
 </div>
 </@f.form>
 
