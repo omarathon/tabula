@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#function nonempty collection>
+<#function nonempty collection=[]>
 <#return collection?? && collection?size gt 0/>
 </#function>
 
@@ -20,6 +20,13 @@
 This is a new service for managing coursework assignments and feedback. If you're a student,
 you might start getting emails containing links to download your feedback from here.
 </p>
+
+<#if !user.loggedIn>
+<p>
+You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+to see a personalised view.
+</p>
+</#if>
 
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
 <h2>Administration</h2>

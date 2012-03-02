@@ -36,25 +36,28 @@ class AssignmentController extends AbstractAssignmentController {
 	
 	hideDeletedItems
 	
-	@ModelAttribute def form(@PathVariable assignment:Assignment, user:CurrentUser) = 
+	@ModelAttribute def form(@PathVariable("assignment") assignment:Assignment, user:CurrentUser) = 
 		new SubmitAssignmentCommand(assignment, user)
 	
 	@RequestMapping(method=Array(GET))
-	def view(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
+	def view(@PathVariable("module") module:Module, user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
+		val assignment = form.assignment
 		mustBeLinked(mandatory(assignment),  mandatory(module))
 		
 		val feedback = checkCanGetFeedback(assignment, user)
 		
-		Mav("submit/assignment", 
-			"module"-> module,
-			"assignment" -> assignment,
-			"feedback" -> feedback.orNull
-		)
+		feedback.map{ f =>
+			Mav("submit/assignment", 
+				"module"-> module,
+				"assignment" -> assignment,
+				"feedback" -> f
+			)
+		}.getOrElse{ RedirectToSignin() }
 	}
 	
 	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser, @Valid form:SubmitAssignmentCommand, errors:Errors) = {
-		view(module,assignment,user,form,errors)
+	def submit(@PathVariable module:Module, user:CurrentUser, @Valid form:SubmitAssignmentCommand, errors:Errors) = {
+		view(module,user,form,errors)
 	}
 			
 }

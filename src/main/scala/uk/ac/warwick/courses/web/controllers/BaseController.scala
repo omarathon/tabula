@@ -23,6 +23,9 @@ import uk.ac.warwick.courses.CurrentUser
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.courses.data.model.CanBeDeleted
 import uk.ac.warwick.courses.data.Daoisms
+import uk.ac.warwick.courses.web.Mav
+import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
+import uk.ac.warwick.sso.client.SSOConfiguration
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 
@@ -63,9 +66,17 @@ trait ControllerViews {
 	val Mav = uk.ac.warwick.courses.web.Mav
 	val Breadcrumbs = uk.ac.warwick.courses.web.Breadcrumbs
 	def Redirect(path:String) = Mav("redirect:" + path)
+	def RedirectToSignin(target:String=loginUrl):Mav = Redirect(target)
 	def Reload() = Redirect(currentPath)
 	
-	private def currentPath:String = requestInfo.get.requestedUri.getPath
+	private def currentUri = requestInfo.get.requestedUri
+	private def currentPath:String = currentUri.getPath
+	private def loginUrl = {
+		val generator = new SSOLoginLinkGenerator
+		generator.setConfig(SSOConfiguration.getConfig)
+		generator.setTarget(currentUri.toString)
+		generator.getLoginUrl
+	}
 	
 	def requestInfo:Option[RequestInfo]
 }

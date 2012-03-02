@@ -11,5 +11,6 @@ class DiagnosticController {
 	@RequestMapping(Array("/up")) def test(out:Writer) =
 		out.write(String.valueOf(((System.currentTimeMillis - startTime)*0.001).toLong))
 	
+	@RequestMapping(Array("/error")) def error = throw new RuntimeException("Deliberately generated exception")
 	
 }

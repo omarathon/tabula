@@ -3,6 +3,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
+<#compress>
 <h1>${module.name} (${module.code?upper_case}) - ${assignment.name}</h1>
 
 <#if feedback??>
@@ -45,39 +46,51 @@
 
 <#else>
 
-	<h2>${user.fullName} (${user.universityId})</h2>
-
-	<p>
-		If you've submitted your assignment, you should be able to access your
-		feedback here once it's ready.
-	</p>
-
-<#-- Dead code for now, until submission is properly implemented -->
-<#if assignment.active && false>
-
-	<p>Submission closes <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm:ss (z)" /></p>
-
-	<@f.form cssClass="submission-form" method="post" action="/module/${module.code}/${assignment.id}" commandName="submitAssignment">
-	<@f.errors cssClass="error form-errors">
-	</@f.errors>
-	<p>Student: ${user.apparentUser.warwickId}</p>
+	<#if user.loggedIn>
 	
-	<div class="submission-fields">
+		<h2>${user.fullName} (${user.universityId})</h2>
 	
-	<#list assignment.fields as field>
-	<div class="submission-field">
-	<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
-	</div>
-	</#list>
+		<p>
+			If you've submitted your assignment, you should be able to access your
+			feedback here once it's ready.
+		</p>
 	
-	</div>
+	<#-- Dead code for now, until submission is properly implemented -->
+	<#if assignment.active && false>
 	
-	<div class="submit-buttons">
-	<input type="submit" value="Submit">
-	</div>
-	</@f.form>
+		<p>Submission closes <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm:ss (z)" /></p>
+	
+		<@f.form cssClass="submission-form" method="post" action="/module/${module.code}/${assignment.id}" commandName="submitAssignment">
+		<@f.errors cssClass="error form-errors">
+		</@f.errors>
+		<p>Student: ${user.apparentUser.warwickId}</p>
+		
+		<div class="submission-fields">
+		
+		<#list assignment.fields as field>
+		<div class="submission-field">
+		<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
+		</div>
+		</#list>
+		
+		</div>
+		
+		<div class="submit-buttons">
+		<input type="submit" value="Submit">
+		</div>
+		</@f.form>
+	</#if>
+	
+	<#else><!-- not logged in -->
+		
+		<p>
+		You'll need to <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+		first.
+		</p>
+		
+	</#if>
+
 </#if>
 
-</#if>
-
+</#compress>
 </#escape>

@@ -3,6 +3,7 @@
 	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 	<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 	<#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
+	<#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
 	<#import "formatters.ftl" as fmt />
 	<#import "forms.ftl" as form />
 	<#import "routes.ftl" as routes />
