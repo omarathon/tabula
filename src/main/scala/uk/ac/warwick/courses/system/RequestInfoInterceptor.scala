@@ -36,14 +36,11 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	 * Stored in an attribute so that forwarded requests use the same
 	 * object.
 	 */
-	private def fromAttributeElse(ifEmpty: =>RequestInfo)(implicit request:HttpServletRequest) = {
-		request.getAttribute(RequestInfoAttribute) match {
-			case info:RequestInfo => info
-			case _ => {
-				val info = ifEmpty
-				request.setAttribute(RequestInfoAttribute, info)
-				info
-			}
+	private def fromAttributeElse(ifEmpty: =>RequestInfo)(implicit request:HttpServletRequest) : RequestInfo = {
+		Option(request.getAttribute(RequestInfoAttribute).asInstanceOf[RequestInfo]).getOrElse {
+			val info = ifEmpty
+			request.setAttribute(RequestInfoAttribute, info)
+			info
 		}
 	}
 	
