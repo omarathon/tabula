@@ -281,6 +281,20 @@ jQuery(function ($) {
 		
 	});
 	
+	(function(){
+		
+		var $collectSubmissions = $('input#collectSubmissions');
+		var $options = $('#submission-options');
+		$collectSubmissions.change(function(){
+			if ($collectSubmissions.is(':checked')) $options.stop().slideDown('fast');
+			else $options.stop().slideUp('fast');
+		});
+		$options.toggle($collectSubmissions.is(':checked'));
+		
+	})();
+	
+	
+	
 	$('.assignment-info .assignment-buttons').css('opacity',0);
 	$('.assignment-info').hover(function() { 
 		$(this).find('.assignment-buttons').stop().fadeTo('fast', 1);

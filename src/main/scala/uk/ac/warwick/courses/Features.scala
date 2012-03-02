@@ -15,7 +15,7 @@ import java.lang.Boolean
  * App can change startup features in its courses.properties,
  *   then modify them at runtime via JMX.
  */
-class Features(properties:Properties) {
+case class Features(properties:Properties) {
 	
 	//// Features /////
 	
@@ -24,6 +24,10 @@ class Features(properties:Properties) {
 	@BeanProperty var submissions:Boolean = false
 	
 	//// END of features ///
+	
+	
+	// begin black magic that converts features.* properties into values
+	// to inject into this instance.
 	
 	val featuresPrefix = "features."
 	

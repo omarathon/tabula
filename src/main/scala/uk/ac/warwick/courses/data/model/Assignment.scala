@@ -84,6 +84,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	@BeanProperty var closeDate:DateTime =_
 	
 	var collectMarks:Boolean =_
+	@BeanProperty var collectSubmissions:Boolean = false
+	@BeanProperty var restrictSubmissions:Boolean = false
+	@BeanProperty var allowLateSubmissions:Boolean = true
 	
 	/**
 	 * Returns whether we're between the opening and closing dates

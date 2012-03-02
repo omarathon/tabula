@@ -143,9 +143,13 @@ html {
 	text-align: right;
 	font-weight: bold;
 }
+.form-row .form-field label {
+	float: none;
+}
 .form-field {
 	margin-left: 16.5em;
 }
+label.disabled { color: #666; }
 
 .narrowed-form {
 	.form-row label { width:8em; }
@@ -470,6 +474,10 @@ span.press-ctrl-c {
 ul.links {
   list-style: none;
   li {  }
+}
+
+#submission-options {
+  padding-left: 2em;
 }
 
 .subtle { color: @subtle-text-color; }

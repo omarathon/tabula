@@ -27,7 +27,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	def getAcademicYearString = if (academicYear != null) academicYear.toString() else ""
 	
-	@BeanProperty var collectMarks:Boolean = false
+	@BeanProperty var collectMarks:Boolean = _
+	@BeanProperty var collectSubmissions:Boolean = _
+	@BeanProperty var restrictSubmissions:Boolean = _
+	@BeanProperty var allowLateSubmissions:Boolean = _
 	
 	def copyTo(assignment:Assignment) {
 		assignment.name = name
@@ -35,6 +38,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    assignment.closeDate = closeDate
 	    assignment.collectMarks = collectMarks
 	    assignment.academicYear = academicYear
+	    assignment.collectSubmissions = collectSubmissions
+	    // changes disabled for now
+	    //assignment.restrictSubmissions = restrictSubmissions
+	    assignment.allowLateSubmissions = allowLateSubmissions
 	}
 	
 	def copyFrom(assignment:Assignment) {
@@ -43,5 +50,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		closeDate = assignment.closeDate
 		collectMarks = assignment.collectMarks
 		academicYear = assignment.academicYear
+		collectSubmissions = assignment.collectSubmissions
+		restrictSubmissions = assignment.restrictSubmissions
+		allowLateSubmissions = assignment.allowLateSubmissions
 	}
 }
