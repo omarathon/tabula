@@ -43,7 +43,8 @@
 		</constructor-arg>
 	</bean>
 	
-	<bean class="uk.ac.warwick.courses.events.EventLoggingAspect" factory-method="aspectOf">
+	<bean class="org.aspectj.lang.Aspects" factory-method="aspectOf">
+		<constructor-arg value="uk.ac.warwick.courses.events.EventLoggingAspect" />
 		<property name="listener" ref="eventListener" />
 	</bean>
 	
@@ -403,7 +404,7 @@
 		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
 
 		<bean id="dataSourceInitialiser" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
-			c:dataSource-ref="dataSource"
+			p:dataSource-ref="dataSource"
 			p:scripts="schema.sql,data.sql" />
 		
 		<util:properties id="hibernateProperties">

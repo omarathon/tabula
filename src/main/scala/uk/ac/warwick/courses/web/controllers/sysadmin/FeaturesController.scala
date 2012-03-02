@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import scala.annotation.target.field
 import scala.annotation.target.param
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.BeanWrapper
 
 case class FeatureItem(val name:String, val value:Boolean)
 
@@ -23,11 +25,19 @@ case class FeatureItem(val name:String, val value:Boolean)
  */
 @Controller
 @RequestMapping(value=Array("/sysadmin/features"))
-final class FeaturesController @Autowired()(val features:Features) extends BaseController {
-	val wrapper = new BeanWrapperImpl(features)
-	private val properties = wrapper.getPropertyDescriptors.toList
+final class FeaturesController extends BaseController with InitializingBean {
+	
+	@Autowired var features:Features =_
+	
+	private var wrapper:BeanWrapper =_
+	private var properties:List[PropertyDescriptor] =_
+									
+	override def afterPropertiesSet {
+		wrapper = new BeanWrapperImpl(features)
+		properties = wrapper.getPropertyDescriptors.toList
 									.filter{ _.getPropertyType.isAssignableFrom(classOf[java.lang.Boolean]) }
 									.sortBy{ _.getDisplayName }
+	}
 									
 	def currentValues = properties.map { (property) =>
 		new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[java.lang.Boolean] )
@@ -40,9 +50,11 @@ final class FeaturesController @Autowired()(val features:Features) extends BaseC
 	}
 	
 	@RequestMapping(method=Array(RequestMethod.POST))
-	def update(@RequestParam name:String, @RequestParam value:Boolean): Mav = {
+	def update(@RequestParam("name") name:String, @RequestParam("value") value:Boolean): Mav = {
 		properties.find { _.getName == name } match {
-			case Some(property) => property.getWriteMethod.invoke(features, Array(value))
+			case Some(property) => {
+				wrapper.setPropertyValue(property.getName, value)
+			}
 			case None => throw new IllegalArgumentException
 		}
 		Redirect("/sysadmin/features")

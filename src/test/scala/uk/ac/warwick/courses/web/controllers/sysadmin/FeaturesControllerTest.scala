@@ -8,7 +8,9 @@ import java.util.Properties
 class FeaturesControllerTest extends TestBase {
 	@Test def access {
 		val features = new Features(new Properties)
-		val controller = new FeaturesController(features)
+		val controller = new FeaturesController
+		controller.features = features
+		controller.afterPropertiesSet
 		
 		controller.currentValues should not be ('empty)
 		
@@ -17,5 +19,9 @@ class FeaturesControllerTest extends TestBase {
 		features.emailStudents = true
 		
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (true)
+		
+		controller.update("emailStudents", false)
+		
+		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (false)
 	}
 }

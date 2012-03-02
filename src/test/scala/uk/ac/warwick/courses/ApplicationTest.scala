@@ -41,7 +41,7 @@ class ApplicationTest extends AppContextTestBase {
     	}
     }
     
-    /**
+    /** 
      * Check that a property in default.properties can reference
      * a property found in courses.properties, even though the latter
      * is loaded after the former.

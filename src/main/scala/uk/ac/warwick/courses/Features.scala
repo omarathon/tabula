@@ -8,12 +8,20 @@ import org.springframework.core.env.PropertySource
 import scala.reflect.BeanProperty
 import java.lang.Boolean
 
+/**
+ * Defines flags to turn features on and off.
+ * 
+ * Defaults set in default.properties.
+ * App can change startup features in its courses.properties,
+ *   then modify them at runtime via JMX.
+ */
 class Features(properties:Properties) {
 	
 	//// Features /////
 	
 	@BeanProperty var emailStudents:Boolean = false
 	@BeanProperty var collectRatings:Boolean = true
+	@BeanProperty var submissions:Boolean = false
 	
 	//// END of features ///
 	
