@@ -46,13 +46,15 @@ class AssignmentController extends AbstractAssignmentController {
 		
 		val feedback = checkCanGetFeedback(assignment, user)
 		
-		feedback.map{ f =>
+		if (user.loggedIn) {
 			Mav("submit/assignment", 
 				"module"-> module,
 				"assignment" -> assignment,
-				"feedback" -> f
+				"feedback" -> feedback
 			)
-		}.getOrElse{ RedirectToSignin() }
+		} else {
+			RedirectToSignin() 
+		}
 	}
 	
 	@RequestMapping(method=Array(POST))
