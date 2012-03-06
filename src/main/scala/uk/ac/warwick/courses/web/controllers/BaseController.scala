@@ -48,7 +48,7 @@ abstract trait ControllerMethods extends Logging {
 	  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
 		  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 		  case None => throw new ItemNotFoundException()
-		  case thing:T if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+		  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 		  case _ => throw new ItemNotFoundException()
 	  }
 	   

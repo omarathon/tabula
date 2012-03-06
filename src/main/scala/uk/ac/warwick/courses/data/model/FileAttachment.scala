@@ -25,17 +25,17 @@ class FileAttachment extends GeneratedId {
 	
 	@transient @Autowired var fileDao:FileDao =_
 	
-	// optional link to a Submission
+	// optional link to a SubmissionValue
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="submission_id")
-	@BeanProperty var submission:Submission = null
+	@BeanProperty var submissionValue:Submission = null
 	
 	// optional link to some Feedback
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="feedback_id")
 	@BeanProperty var feedback:Feedback =_
 	
-	def isAttached = feedback != null || submission != null
+	def isAttached = feedback != null || submissionValue != null
 	
 	@BeanProperty var temporary:Boolean = true
 

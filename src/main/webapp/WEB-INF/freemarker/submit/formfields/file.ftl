@@ -1,3 +1,2 @@
 
-
-<input name="${field.id}" type="file">
+<@form.filewidget "fields[${field.id}].file" />

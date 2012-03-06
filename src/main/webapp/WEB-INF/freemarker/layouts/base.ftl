@@ -37,7 +37,7 @@
 		  <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 		  <@script "/static/libs/jquery.delayedObserver.js" />
 		  <@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
-		  <#--<@script "/static/libs/anytime/anytimec.js" />-->
+		  <@script "/static/libs/anytime/anytimec.js" />
 		  <@script "/static/libs/popup/popup.js" />
 		  <@script "/static/js/modernizr.js" />
 		  <@script "/static/js/browser-info.js" />

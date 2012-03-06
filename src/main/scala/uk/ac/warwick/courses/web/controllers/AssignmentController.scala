@@ -15,6 +15,10 @@ import uk.ac.warwick.courses.data.FeedbackDao
 import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.courses.CurrentUser
 import org.springframework.web.bind.annotation.RequestMethod._
+import uk.ac.warwick.courses.web.Routes
+import org.springframework.web.bind.WebDataBinder
+import uk.ac.warwick.courses.commands.assignments.SubmittedFieldsPropertyEditor
+import org.springframework.transaction.annotation.Transactional
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
@@ -36,13 +40,25 @@ class AssignmentController extends AbstractAssignmentController {
 	
 	hideDeletedItems
 	
-	@ModelAttribute def form(@PathVariable("assignment") assignment:Assignment, user:CurrentUser) = 
-		new SubmitAssignmentCommand(assignment, user)
+	validatesWith{ (cmd:SubmitAssignmentCommand,errors) => cmd.validate(errors) }
+	
+	@ModelAttribute def form(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = {  
+		val cmd = new SubmitAssignmentCommand(assignment, user)
+		cmd.module = module
+		cmd
+	}
+	
+	
+	def checks(form:SubmitAssignmentCommand) = {
+		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
+	}
 	
 	@RequestMapping(method=Array(GET))
-	def view(@PathVariable("module") module:Module, user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
+	def view(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
 		val assignment = form.assignment
-		mustBeLinked(mandatory(assignment),  mandatory(module))
+		val module = form.module
+		form.onBind
+		checks(form)
 		
 		val feedback = checkCanGetFeedback(assignment, user)
 		
@@ -57,9 +73,19 @@ class AssignmentController extends AbstractAssignmentController {
 		}
 	}
 	
+	@Transactional
 	@RequestMapping(method=Array(POST))
 	def submit(@PathVariable module:Module, user:CurrentUser, @Valid form:SubmitAssignmentCommand, errors:Errors) = {
-		view(module,user,form,errors)
+		val assignment = form.assignment
+		val module = form.module
+		form.onBind
+		checks(form)
+		if (errors.hasErrors) {
+			view(user,form,errors)
+		} else {
+			form.apply
+			Redirect(Routes.assignment(form.assignment))
+		}
 	}
 			
 }

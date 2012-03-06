@@ -156,10 +156,10 @@ jQuery(function ($) {
 		})
 	})
 	
-//	$('input.date-time-picker').AnyTime_picker({
-//		format: "%e-%b-%Y %H:%i:%s",
-//		firstDOW: 1
-//	});
+	$('input.date-time-picker').AnyTime_picker({
+		format: "%e-%b-%Y %H:%i:%s",
+		firstDOW: 1
+	});
 	
 	// TODO make buttons that don't take too long but are less than instantaneous
 	// (~5 secs) spawn a spinner or please wait text.

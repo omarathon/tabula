@@ -48,38 +48,50 @@
 
 	<#if user.loggedIn>
 	
-		<h2>${user.fullName} (${user.universityId})</h2>
-	
-		<p>
-			If you've submitted your assignment, you should be able to access your
-			feedback here once it's ready.
-		</p>
-	
-	<#-- Dead code for now, until submission is properly implemented -->
-	<#if assignment.active && false>
-	
-		<p>Submission closes <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm:ss (z)" /></p>
-	
-		<@f.form cssClass="submission-form" method="post" action="/module/${module.code}/${assignment.id}" commandName="submitAssignment">
-		<@f.errors cssClass="error form-errors">
-		</@f.errors>
-		<p>Student: ${user.apparentUser.warwickId}</p>
+		<#if features.submissions>
 		
-		<div class="submission-fields">
+			<#if assignment.submittable>
 		
-		<#list assignment.fields as field>
-		<div class="submission-field">
-		<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
-		</div>
-		</#list>
+				<p>Submission deadline: <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm (z)" /></p>
+				
+				<#if assignment.closed>
+					
+				</#if>
+			
+				<@f.form cssClass="submission-form" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}" modelAttribute="submitAssignmentCommand">
+				<@f.errors cssClass="error form-errors">
+				</@f.errors>
+				<p>Student: ${user.apparentUser.warwickId}</p>
+				
+				<div class="submission-fields">
+				
+				<#list assignment.fields as field>
+				<div class="submission-field">
+				<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
+				</div>
+				</#list>
+				
+				</div>
+				
+				<div class="submit-buttons">
+				<input type="submit" value="Submit">
+				</div>
+				</@f.form>
+				
+			<#else>
+				
+			</#if>
+			
+		<#else>
 		
-		</div>
+			<h2>${user.fullName} (${user.universityId})</h2>
 		
-		<div class="submit-buttons">
-		<input type="submit" value="Submit">
-		</div>
-		</@f.form>
-	</#if>
+			<p>
+				If you've submitted your assignment, you should be able to access your
+				feedback here once it's ready.
+			</p>	
+		
+		</#if>
 	
 	<#else><!-- not logged in -->
 		

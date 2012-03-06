@@ -55,7 +55,7 @@
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.expression-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.instrument.tomcat-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jdbc-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-jdbc/3.1.0.RELEASE/spring-jdbc-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.jms-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.orm-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-orm/3.1.0.RELEASE/spring-orm-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.oxm-3.1.0.RELEASE.jar"/>

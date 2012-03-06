@@ -5,10 +5,14 @@ import org.junit.Test
 import scala.collection.mutable.Buffer
 import freemarker.template.SimpleSequence
 import scala.reflect.BeanProperty
+import org.junit.Ignore
 
 class MyObject {
   var name = "text"
   def getMotto() = "do be good, don't be bad"
+	  
+  def getGreeting(name:String) = "Hello %s!" format (name)
+  def getGreeting():String = getGreeting("you")
 }
 
 object World {
@@ -33,6 +37,19 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 						hash.get("plant").toString should be ("Thistle")
 					}
 				}
+			}
+		}
+	}
+	
+	/**
+	 * def getGreeting(name:String="you") should be able to access the
+	 * default no-param version as if it were a regular getGreeting() getter.
+	 */
+	@Test def defaultParameters {
+		val wrapper = new ScalaBeansWrapper()
+		wrapper.wrap(new MyObject) match {
+			case hash:ScalaHashModel => {
+				hash.get("greeting").toString should be ("Hello you!")
 			}
 		}
 	}

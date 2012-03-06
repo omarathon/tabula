@@ -61,7 +61,7 @@ To not bind:
 </#macro>
 
 <#macro filewidget basename>
-	<#local command=.vars[Request[commandVarName]] />
+	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<@f.errors path="${basename}" cssClass="error" />
 	<@f.errors path="${basename}.upload" cssClass="error" />
 	<@f.errors path="${basename}.attached" cssClass="error" />
@@ -70,11 +70,13 @@ To not bind:
 	File
 	</@f.label>
 	<@field>
-	<#if command[basename].uploaded>
-	<#list addFeedbackCommand[basename].attached as attached>
+	<@spring.bind path="${basename}">
+	<#local f=status.actualValue />
+	<#if f.exists>
+	<#list f.attached as attached>
 		<#assign uploadedId=attached.id />
 		<div id="attachment-${uploadedId}">
-		<input type="hidden" name="file.attached" value="${uploadedId}">
+		<input type="hidden" name="${basename}.attached" value="${uploadedId}">
 		${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
 		</div>
 		<div id="upload-${uploadedId}" style="display:none">
@@ -94,6 +96,7 @@ To not bind:
 	<#else>
 	<input type="file" name="${basename}.upload" >
 	</#if>
+	</@spring.bind>
 	</@field>
 	</@row>
 </#macro>

@@ -23,8 +23,8 @@ import uk.ac.warwick.courses.helpers.Logging
  */
 class ContextProfileInitializer extends ApplicationContextInitializer[ConfigurableWebApplicationContext] with Logging {
 
-  var mainConfig = "courses.properties"
-  var optionalConfig = "courses-instance.properties"
+  var mainConfig = "/courses.properties"
+  var optionalConfig = "/courses-instance.properties"
   val profilesProperty = "spring.profiles.active"
   
   override def initialize(ctx:ConfigurableWebApplicationContext) = {
@@ -91,7 +91,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 class CompositePropertySource(name:String) extends PropertySource[Unit](name,null) {
 	  val mutableSources = new MutablePropertySources
 	  
-	  def addRequiredSource(src:Option[PropertySource[_]]) = mutableSources.addLast(src.get)
+	  def addRequiredSource(src:Option[PropertySource[_]]) = mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
 	  def addOptionalSource(src:Option[PropertySource[_]]) = src match {
 	 	  case Some(src) => mutableSources.addLast(src)
 	 	  case None => 

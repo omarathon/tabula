@@ -1,16 +1,17 @@
 package uk.ac.warwick.courses.data.model
-import javax.persistence.Entity
+
+import scala.reflect.BeanProperty
+
 import org.hibernate.annotations.AccessType
-import javax.validation.constraints.NotNull
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-import scala.reflect.BeanProperty
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.CascadeType
-import javax.persistence.OneToMany
-import javax.persistence.FetchType
-import javax.persistence.Column
+import org.springframework.beans.factory.annotation.Configurable
+
+import javax.persistence._
+import javax.validation.constraints.NotNull
+import uk.ac.warwick.courses.JavaImports.JSet
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId {
@@ -38,10 +39,27 @@ class Submission extends GeneratedId {
 	 */
 	@NotNull
 	@BeanProperty var universityId:String =_
+
+	@OneToMany(mappedBy="submission", cascade=Array(CascadeType.ALL))
+	@BeanProperty var values:JSet[SavedSubmissionValue] =_
+}
+
+/**
+ * Stores a value submitted for a single assignment field. It has
+ * a few different fields to handle holding various types of item.
+ */
+@Entity @AccessType("field")
+class SavedSubmissionValue extends GeneratedId {
 	
-//	@OneToMany(mappedBy="submission", fetch=FetchType.LAZY)
-//	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="submission_id")
+	@BeanProperty var submission:Submission =_
 	
+	/**
+	 * Optional, only for file fields
+	 */
+	@OneToMany(mappedBy="submissionValue", fetch=FetchType.LAZY)
+	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
 	
-  
+	@BeanProperty var value:String =_
 }

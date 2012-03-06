@@ -23,7 +23,10 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2009)
 		assignment.markDeleted()
+		assignment.addDefaultFields
 		session.save(assignment)
+		
+		assignment.fields.get(1)
 		
 		service.isFilterEnabled("notDeleted") should be (false)
 		service.getAssignmentById(assignment.id) should be (Some(assignment))

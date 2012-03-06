@@ -74,7 +74,7 @@
 				</#if>
 				</div>
 				
-				<#if assignment.anyReleasedFeedback>
+				<#if assignment.anyReleasedFeedback || features.submissions>
 				<p class="feedback-published">
 					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
 					<a class="copyable-url" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Copy it to the clipboard and then paste it into an email or page.">

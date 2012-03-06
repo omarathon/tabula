@@ -21,6 +21,9 @@ import uk.ac.warwick.courses.JavaImports._
  * to an array or collection of MultipartFile objects. This is why UploadedFile
  * has a collection of MultipartFiles, rather than using a collection of UploadedFile
  * objects. 
+ * 
+ * Works well with the filewidget macro in forms.ftl. Remember to set the
+ * multipart/form-data encoding type on your form.
  */
 @Configurable
 class UploadedFile {

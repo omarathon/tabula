@@ -18,10 +18,11 @@ import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
  * the nullObject and nullValue values to tell it what value to
  * use in the case of null coming from other direction
  */
-abstract class AbstractBasicUserType[T<:Object:ClassManifest, V] extends UserType {
+abstract class AbstractBasicUserType[T<:Object:ClassManifest, V:ClassManifest] extends UserType {
 
 	// Store information about what T is.
-	protected val m:ClassManifest[T] = implicitly[ClassManifest[T]]
+	protected val m:ClassManifest[T] = classManifest[T]
+	protected val vm:ClassManifest[V] = classManifest[V]
 	
 	val basicType:AbstractSingleColumnStandardBasicType[V]
 	val nullObject:T // what to use when NULL comes out of the DB
@@ -31,7 +32,7 @@ abstract class AbstractBasicUserType[T<:Object:ClassManifest, V] extends UserTyp
 	
 	final override def nullSafeGet(resultSet:ResultSet, names:Array[String], owner:Object) = { 
 	  	basicType.nullSafeGet(resultSet, names(0)) match {
-	  		case s:V => convertToObject(s)
+	  		case s:Any if vm.erasure.isInstance(s) => convertToObject(s.asInstanceOf[V])
 	  		case null => nullObject
 		}
 	}

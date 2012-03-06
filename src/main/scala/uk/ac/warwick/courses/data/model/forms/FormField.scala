@@ -9,14 +9,16 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.GeneratedId
-import java.lang.Integer
 import org.hibernate.annotations.Type
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.commands.UploadedFile
+import org.springframework.validation.Errors
 
 @Configurable
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="fieldtype")
-abstract class FormField extends GeneratedId /*with PreSaveBehaviour with PostLoadBehaviour*/ {
+abstract class FormField extends GeneratedId {
 
 	def this(a:Assignment) = {
 		this()
@@ -55,17 +57,31 @@ abstract class FormField extends GeneratedId /*with PreSaveBehaviour with PostLo
 	final def readOnly = isReadOnly
 	
 	@Type(`type`="int")
-	@BeanProperty var position:Integer = 0
+	@BeanProperty var position:JInteger = 0
 	
+	/** Determines which Freemarker template is used to render it. */
 	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value
+
+	/**
+	 * Return a blank SubmissionValue that can be used to bind a submission
+	 * of the same type as this FormField.
+	 */
+	def blankSubmissionValue:SubmissionValue
 	
-//	override def preSave(newRecord:Boolean) {
-//		properties = json.writeValueAsString(properties)
-//	}
-//	
-//	override def postLoad {
-//		propertiesMap = json.readValue(new StringReader(propertiesString), classOf[Map[String,Any]])
-//	}
+	def validate(value:SubmissionValue, errors:Errors)
+	
+}
+
+/**
+ * represents a submitted value. 
+ */
+abstract class SubmissionValue {
+	def onBind {}
+}
+class StringSubmissionValue(@BeanProperty var value:String = null) extends SubmissionValue
+class BooleanSubmissionValue(@BeanProperty var value:JBoolean = null) extends SubmissionValue
+class FileSubmissionValue(@BeanProperty var file:UploadedFile = new UploadedFile) extends SubmissionValue {
+	override def onBind { file.onBind }
 }
 
 trait SimpleValue[T] { self:FormField =>
@@ -74,6 +90,8 @@ trait SimpleValue[T] { self:FormField =>
 	
 	def value = propertiesMap("value")
 	def getValue() = value
+	
+	def blankSubmissionValue = new StringSubmissionValue()
 }
 
 @Entity 
@@ -81,29 +99,40 @@ trait SimpleValue[T] { self:FormField =>
 class CommentField extends FormField with SimpleValue[String]  {
 	override def isReadOnly = true
 	
-	
+	override def validate(value:SubmissionValue, errors:Errors) {}
 }
 
 @Entity 
 @DiscriminatorValue("text")
-class TextField extends FormField  {
-	
+class TextField extends FormField with SimpleValue[String] {
+	override def validate(value:SubmissionValue, errors:Errors) {}
 }
 
 @Entity 
 @DiscriminatorValue("textarea")
-class TextareaField extends FormField {
-	
+class TextareaField extends FormField with SimpleValue[String] {
+	override def validate(value:SubmissionValue, errors:Errors) {}
 }
 
 @Entity 
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
-	
+	def blankSubmissionValue = new BooleanSubmissionValue()
+	override def validate(value:SubmissionValue, errors:Errors) {}
 }
 
 @Entity 
 @DiscriminatorValue("file")
 class FileField extends FormField {
+	def blankSubmissionValue = new FileSubmissionValue()
+	
+	override def validate(value:SubmissionValue, errors:Errors) {
+		value match {
+			case v:FileSubmissionValue => 
+				if (value.asInstanceOf[FileSubmissionValue].file.isMissing) {
+					errors.rejectValue("file", "file.missing")
+				}
+		}
+	}
 	
 }

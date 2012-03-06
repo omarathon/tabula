@@ -1,6 +1,5 @@
 package uk.ac.warwick.courses.data.model
 import uk.ac.warwick.courses.JavaImports._
-import scala.collection.JavaConversions._
 import scala.reflect._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.IndexColumn
@@ -21,6 +20,7 @@ import javax.persistence.FetchType
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.annotations._
+import scala.collection.JavaConversions._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -63,7 +63,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		val file = new FileField
 		file.name = defaultUploadName
 		
-		addFields(pretext, file)
+//		addFields(pretext, file)
+		addField(pretext)
+		addField(file)
 	}
 
 	
@@ -92,9 +94,14 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	 * Returns whether we're between the opening and closing dates
 	 */
 	def isBetweenDates(now:DateTime = new DateTime) =
-		now.isAfter(openDate) && now.isBefore(closeDate)
+		isOpened(now) && !isClosed(now)
 	
-	def submittable = active && isBetweenDates()
+	def isOpened(now:DateTime) = now.isAfter(openDate)
+	def isOpened():Boolean = isOpened(new DateTime)
+	def isClosed(now:DateTime) = now.isAfter(closeDate)
+	def isClosed():Boolean = isClosed(new DateTime)
+		
+	def submittable = active && isOpened() && (allowLateSubmissions || !isClosed())
 		
 	@ManyToOne
 	@JoinColumn(name="module_id")
@@ -130,8 +137,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	def unreleasedFeedback = feedbacks.filterNot( _.released == true ) // ==true because can be null
 	
 	def anyReleasedFeedback = feedbacks.find( _.released == true ).isDefined
-			
-	def addFields(fields:FormField*) = for(field<-fields) addField(field)
+	
+	def addFields(fieldz:FormField*) = for(field<-fieldz) addField(field)
 	
 	def addFeedback(feedback:Feedback) {
 		feedbacks.add(feedback)
