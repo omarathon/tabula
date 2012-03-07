@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.Unaudited
+import uk.ac.warwick.courses.helpers.Logging
 
 /**
  * Gives a class the ability to record events from a Describable object.
  */
-trait EventHandling {
+trait EventHandling extends Logging {
 	@Autowired @BeanProperty var listener:EventListener = _
 
 	/**
@@ -29,7 +30,15 @@ trait EventHandling {
 					return result
 				} catch {
 					case e:Throwable => {
-						listener.onException(event, e)
+						// On exception, pass that on then rethrow.
+						// If the exception handler throws an exception, just log that and rethrow the original
+						try {
+							listener.onException(event, e)
+						} catch {
+							case e1:Throwable => logger.error("Exception in EventHandling.onException", e1)
+						} finally {
+							throw e
+						}
 						throw e
 					}
 				}

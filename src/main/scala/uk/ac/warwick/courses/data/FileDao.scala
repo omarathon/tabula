@@ -13,6 +13,9 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
 import java.io.InputStream
+import org.hibernate.criterion.{Restrictions => Is}
+import collection.JavaConversions._
+import uk.ac.warwick.util.core.spring.FileUtils
 
 @Repository
 class FileDao extends Daoisms with InitializingBean {
@@ -58,11 +61,18 @@ class FileDao extends Daoisms with InitializingBean {
 
 	
 	/**
-	 * Delete any temporary blobs that are more than a day old.
+	 * Delete any temporary blobs that are more than 2 days old.
 	 */
-	def deleteOldTemporaryFiles = session.createSQLQuery("delete from fileattachment where temporary=1 and dateupload < :old")
-		.setTimestamp("old", now minusDays(1) toDate)
-		.executeUpdate
+	def deleteOldTemporaryFiles = {
+		val oldFiles = session.newCriteria[FileAttachment]
+			.add(Is.eq("temporary", true))
+			.add(Is.lt("dateUploaded", now minusDays(2) toDate))
+			.list
+			
+		for (file <- oldFiles) {
+			targetFile(file.id).delete()
+		}
+	}
 	
 	def afterPropertiesSet {
 		if (!attachmentDir.isDirectory()) {

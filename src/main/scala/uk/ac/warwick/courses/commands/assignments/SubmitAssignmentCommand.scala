@@ -15,12 +15,14 @@ import scala.reflect.BeanProperty
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.courses.data.model.forms.SubmissionValue
+import org.springframework.beans.factory.annotation.Configurable
 
 
 class SubmittedFieldsPropertyEditor extends PropertyEditorSupport {
 	
 }
 
+@Configurable
 class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) extends Command[Submission] {
 
   @Autowired var service:AssignmentService =_
@@ -64,7 +66,7 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	  }
 	   
 	  //FIXME obviously remove this ASAP
-	  errors.reject("assignment.submit.notimplemented");
+//	  errors.reject("assignment.submit.notimplemented");
   }
 
   @Transactional
@@ -75,7 +77,14 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	submission.submittedDate = new DateTime
 	submission.userId = user.apparentUser.getUserId
 	submission.universityId = user.apparentUser.getWarwickId
-	// FIXME add submission values! especially attachments!
+	
+	submission.values = fields.map { case (_,submissionValue) =>
+		val value = new SavedSubmissionValue()
+		value.name = submissionValue.field.name
+		value.submission = submission
+		submissionValue.persist(value)
+		value
+	}.toSet[SavedSubmissionValue]
 	
 	service.saveSubmission(submission)
 	submission

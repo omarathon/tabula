@@ -18,6 +18,7 @@ import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import uk.ac.warwick.courses.data.FileDao
 import javax.persistence.FetchType
+import uk.ac.warwick.courses.data.model.forms.SubmissionValue
 
 @Configurable
 @Entity @AccessType("field")
@@ -28,7 +29,7 @@ class FileAttachment extends GeneratedId {
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="submission_id")
-	@BeanProperty var submissionValue:Submission = null
+	@BeanProperty var submissionValue:SavedSubmissionValue = null
 	
 	// optional link to some Feedback
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -55,20 +56,15 @@ class FileAttachment extends GeneratedId {
 		name = n 
 	}
 	
-	def length = file match {
-			case file:File => file.length()
-			case _ => 0
-		}
+	def length = Option(file) map {_.length} getOrElse {0}
 	
 	
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream = file match {
-			case file:File => new FileInputStream(file)
-			case _ => null
-		}
+	def dataStream = Option(file) map { new FileInputStream(_) } orNull
+		
 	
 	
 	def hasData = file != null

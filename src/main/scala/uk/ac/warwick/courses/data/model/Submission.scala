@@ -48,12 +48,15 @@ class Submission extends GeneratedId {
  * Stores a value submitted for a single assignment field. It has
  * a few different fields to handle holding various types of item.
  */
-@Entity @AccessType("field")
+@Entity(name="SubmissionValue") @AccessType("field")
 class SavedSubmissionValue extends GeneratedId {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="submission_id")
 	@BeanProperty var submission:Submission =_
+	
+	// matches with assignment field name
+	@BeanProperty var name:String =_
 	
 	/**
 	 * Optional, only for file fields

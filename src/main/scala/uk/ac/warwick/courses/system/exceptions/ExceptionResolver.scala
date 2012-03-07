@@ -38,7 +38,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var viewMappings:JMap[String,String] = Map[String,String]()
 	
 	override def resolveException(request:HttpServletRequest, response:HttpServletResponse, obj:Any, e:Exception):ModelAndView = {
-		doResolve(e, request).toModelAndView
+		doResolve(e).toModelAndView
 	}
 	
 	/**
@@ -50,14 +50,17 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Simpler interface for ErrorController to delegate to, which is called when an exception
 	 * happens beyond Spring's grasp.
 	 */
-	def doResolve(e:Throwable, request:HttpServletRequest=null):Mav = {
+	def doResolve(e:Throwable):Mav = {
 		e match {
-	      case exception:Throwable => handle(exception, request)
+	      case exception:Throwable => handle(exception)
 	      case _ => handleNull
 	    }
 	}
 	
-	private def handle(exception:Throwable, request:HttpServletRequest) = {
+	def reportExceptions[T](fn : =>T) = 
+		try { fn } catch { case e:Throwable => handle(e); throw e }
+	
+	private def handle(exception:Throwable) = {
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] ))
 
 		val mav = Mav(defaultView,
@@ -83,7 +86,6 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	    
 	    mav
 	}
-	
 		
 	private def handleNull = {
 		logger.error("Unexpectedly tried to resolve a null exception!")

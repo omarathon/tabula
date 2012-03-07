@@ -31,6 +31,7 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission:Submission) = {
+//		for (value <- submission.values) session.saveOrUpdate(value)
 		session.saveOrUpdate(submission)
 	}
 	

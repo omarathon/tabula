@@ -1,19 +1,37 @@
 package uk.ac.warwick.courses.data.model.forms
+
 import java.io.StringReader
 import scala.annotation.target.field
 import scala.reflect.BeanProperty
+import collection.JavaConversions._
 import org.codehaus.jackson.map.ObjectMapper
+import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.validation.Errors
 import javax.persistence._
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.GeneratedId
-import org.hibernate.annotations.Type
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.UploadedFile
-import org.springframework.validation.Errors
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.GeneratedId
+import uk.ac.warwick.courses.data.model.SavedSubmissionValue
+import uk.ac.warwick.courses.data.FileDao
+import org.springframework.beans.factory.annotation.Configurable
 
+/**
+ * A FormField defines a field to be displayed on an Assignment
+ * when a student is making a submission.
+ * 
+ * Submissions are bound in the command as SubmissionValue items,
+ * and if validation passes a Submission object is saved with a
+ * collection of SavedSubmissionValue objects.
+ * 
+ * Although there can be many types of FormField, many of them
+ * can use the same SubmissionValue class if they contain the
+ * same sort of data (e.g. a string), and there is only one
+ * SavedSubmissionValue class.
+ * 
+ */
 @Configurable
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -72,17 +90,7 @@ abstract class FormField extends GeneratedId {
 	
 }
 
-/**
- * represents a submitted value. 
- */
-abstract class SubmissionValue {
-	def onBind {}
-}
-class StringSubmissionValue(@BeanProperty var value:String = null) extends SubmissionValue
-class BooleanSubmissionValue(@BeanProperty var value:JBoolean = null) extends SubmissionValue
-class FileSubmissionValue(@BeanProperty var file:UploadedFile = new UploadedFile) extends SubmissionValue {
-	override def onBind { file.onBind }
-}
+
 
 trait SimpleValue[T] { self:FormField =>
 	def value_=(value:T) { propertiesMap += "value" -> value }
@@ -91,7 +99,7 @@ trait SimpleValue[T] { self:FormField =>
 	def value = propertiesMap("value")
 	def getValue() = value
 	
-	def blankSubmissionValue = new StringSubmissionValue()
+	def blankSubmissionValue = new StringSubmissionValue(this)
 }
 
 @Entity 
@@ -117,14 +125,14 @@ class TextareaField extends FormField with SimpleValue[String] {
 @Entity 
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
-	def blankSubmissionValue = new BooleanSubmissionValue()
+	def blankSubmissionValue = new BooleanSubmissionValue(this)
 	override def validate(value:SubmissionValue, errors:Errors) {}
 }
 
 @Entity 
 @DiscriminatorValue("file")
 class FileField extends FormField {
-	def blankSubmissionValue = new FileSubmissionValue()
+	def blankSubmissionValue = new FileSubmissionValue(this)
 	
 	override def validate(value:SubmissionValue, errors:Errors) {
 		value match {
