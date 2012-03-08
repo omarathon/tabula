@@ -55,7 +55,7 @@
 					to view who made late submissions and take the appropriate action.
 				</div>
 			</div>
-		</div>
+		</div> 
 	
 	
 	</@form.labelled_row>

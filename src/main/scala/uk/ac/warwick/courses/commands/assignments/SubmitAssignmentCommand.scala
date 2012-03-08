@@ -53,6 +53,9 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	  if (!assignment.isOpened()) {
 	 	  errors.reject("assignment.submit.notopen")
 	  }
+	  if (!assignment.collectSubmissions) {
+	 	  errors.reject("assignment.submit.disabled")
+	  }
 	  if (!assignment.allowLateSubmissions && assignment.isClosed()) {
 	 	  errors.reject("assignment.submit.closed")
 	  }

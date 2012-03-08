@@ -11,7 +11,11 @@ object Routes {
 	private def encoded(string:String) = URLEncoder.encode(string, "UTF-8")
 	
 	def home = "/"
-	def assignment(assignment:Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
+		
+	object assignment {
+		def apply(assignment:Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
+		def receipt(assignment:Assignment) = apply(assignment)
+	}
 	
 	object admin {
 		def department(department:Department) = "/admin/department/%s/" format (encoded(department.code))

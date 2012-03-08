@@ -32,13 +32,15 @@ trait Daoisms {
     try fn(sess) finally sess.close()
   }
   
+  class NiceCriteriaCreator(session:Session) {
+	  def newCriteria[T](implicit m:Manifest[T]) = new ScalaCriteria[T](session.createCriteria(m.erasure))
+  }
+  
   /*
    * Adds a method to Session which returns a wrapped Criteria that works
    * better with Scala's generics support.
    */
-  implicit def niceCriteriaCreator(session:Session) = new {
-	def newCriteria[T](implicit m:Manifest[T]) = new ScalaCriteria[T](session.createCriteria(m.erasure))
-  }
+  implicit def niceCriteriaCreator(session:Session) = new NiceCriteriaCreator(session)
   
   /**
    * Returns Some(obj) if it matches the expected type, otherwise None.

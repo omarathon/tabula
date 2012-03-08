@@ -1,19 +1,26 @@
 package uk.ac.warwick.courses.services
-import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.data.model.Assignment
+
+import scala.collection.JavaConversions.asScalaBuffer
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import uk.ac.warwick.courses.data.model.Submission
+import javax.persistence.Entity
+import uk.ac.warwick.courses.JavaImports.JList
+import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
+import uk.ac.warwick.courses.data.model.Submission
+import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
-import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+import org.hibernate.criterion.Restrictions
 
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
 	def save(assignment:Assignment)
 	def saveSubmission(submission:Submission)
+	def getSubmission(assignment:Assignment, userId:String) : Option[Submission]
 	
 	def getAssignmentByNameYearModule(name:String, year:AcademicYear, module:Module): Option[Assignment]
 	
@@ -33,6 +40,13 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def saveSubmission(submission:Submission) = {
 //		for (value <- submission.values) session.saveOrUpdate(value)
 		session.saveOrUpdate(submission)
+	}
+	
+	def getSubmission(assignment:Assignment, userId:String) = {
+		session.newCriteria[Submission]
+				.add(Restrictions.eq("assignment", assignment))
+				.add(Restrictions.eq("userId", userId))
+				.uniqueResult
 	}
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment] =

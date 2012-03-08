@@ -40,6 +40,10 @@ html {
 	background: #cce5cc;
 }
 
+h1 {
+	margin: 16px;
+}
+
 .flush-content #content-wrapper {
 	padding: 0px;
 	margin: 0px;
@@ -58,6 +62,16 @@ html {
 	background-color: #eee;
 }
 
+.submission-receipt-container {
+	width: 30em;
+	padding: 2em;
+}
+.submission-receipt {
+	border: 1px solid #CCC;
+	padding: 1em;
+	.box-shadow(0px, 6px, 14px, rgba(0,0,0,0.3));
+	background: #F8F8F8 url(../images/icons/glyphicons_193_circle_ok.png) 95% 1em no-repeat;
+}
 
 .feedback-info {
 	.box-style;
@@ -137,11 +151,13 @@ html {
 	margin-bottom: 0.5em;
 }
 
-.form-row label {
-	width: 16em;
-	float: left;
-	text-align: right;
-	font-weight: bold;
+.form-row {
+	label,.label {
+		width: 16em;
+		float: left;
+		text-align: right;
+		font-weight: bold;
+	}
 }
 .form-row .form-field label {
 	float: none;
@@ -319,7 +335,9 @@ ul.file-list {
 		tr, td { display: block; }
 	}
 
-    .form-row label { float: none !important; width:auto !important; }
+    .form-row {
+    	label, .label { float: none !important; width:auto !important; }
+    }
 	.form-field { margin-left: 0 !important; }
 	
 }
@@ -373,7 +391,9 @@ ul.file-list {
 	}
 	
 	.narrowed-form {
-		.form-row label { width: 12em; }
+		.form-row {
+			.label, label { width: 12em; }
+		}
 		.form-field { margin-left: 12.5em; }
 	}
 }
@@ -478,6 +498,10 @@ ul.links {
 
 #submission-options {
   padding-left: 2em;
+}
+
+#submitAssignmentCommand {
+  margin-top: 1em;
 }
 
 .subtle { color: @subtle-text-color; }

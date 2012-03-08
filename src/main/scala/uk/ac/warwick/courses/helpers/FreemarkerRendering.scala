@@ -2,6 +2,7 @@ package uk.ac.warwick.courses.helpers
 
 import java.io.StringWriter
 import freemarker.template.Template
+import freemarker.template.Configuration
 
 /**
  * Methods for out-of-request template rendering.
@@ -19,4 +20,7 @@ trait FreemarkerRendering {
 		writer.toString
 	}
 	
+	def renderToString(template:String, model:Any)(implicit config:Configuration): String = {
+		renderToString(config.getTemplate(template), model)
+	}
 }

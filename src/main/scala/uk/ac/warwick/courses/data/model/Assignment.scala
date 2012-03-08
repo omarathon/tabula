@@ -25,6 +25,8 @@ import scala.collection.JavaConversions._
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
+		
+	final val NotDeletedFilter = "notDeleted"
 }
 
 /**
@@ -36,8 +38,8 @@ object Assignment {
  *     some other secondary entity joined on. It's usually possible to flip the
  *     query around to make this work.
  */
-@FilterDef(name="notDeleted", defaultCondition="deleted = 0")
-@Filter(name="notDeleted")
+@FilterDef(name=Assignment.NotDeletedFilter, defaultCondition="deleted = 0")
+@Filter(name=Assignment.NotDeletedFilter)
 @Entity @AccessType("field")
 class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	import Assignment._
@@ -101,7 +103,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	def isClosed(now:DateTime) = now.isAfter(closeDate)
 	def isClosed():Boolean = isClosed(new DateTime)
 		
-	def submittable = active && isOpened() && (allowLateSubmissions || !isClosed())
+	def submittable = active && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed())
 		
 	@ManyToOne
 	@JoinColumn(name="module_id")

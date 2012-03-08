@@ -2,7 +2,6 @@ package uk.ac.warwick.courses.commands
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
-
 import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -11,7 +10,6 @@ import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
-
 import javax.annotation.Resource
 import javax.persistence.Entity
 import uk.ac.warwick.courses.data.model.Assignment
@@ -21,13 +19,15 @@ import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.courses.helpers.FreemarkerRendering
+import freemarker.template.Configuration
 
 @Configurable
-class PublishFeedbackCommand extends Command[Unit] {
+class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering {
   
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
-	//@Autowired var userLookup:UserLookupService =_
 	@Autowired var assignmentService:AssignmentService =_
+	@Autowired implicit var freemarker:Configuration =_
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
@@ -37,7 +37,8 @@ class PublishFeedbackCommand extends Command[Unit] {
 	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
 	@Value("${mail.noreply.to}") var replyAddress:String = _
-	@Value("${mail.exceptions.to}") var fromAddress:String = _
+	@Value("${mail.exceptions.to}") var fromAddress:String = 
+  _
 	
 	case class MissingUser(val universityId:String)
 	case class BadEmail(val user:User, val exception:Exception=null)
@@ -99,27 +100,22 @@ class PublishFeedbackCommand extends Command[Unit] {
       // TODO configurable subject
       message.setSubject(moduleCode + ": Your coursework feedback is ready")
       // TODO configurable body (or at least, FIXME Freemarker this up)
-      message.setText("""
-Hello %s
-	          
-We thought you'd want to know that feedback is now available on your coursework '%s' for the module %s, %s. To retrieve this feedback, please visit:
-
-%s
-
-(Only you can retrieve this feedback, so you'll need your IT Services user name and password to confirm that it's really you.)
-
-If you have any difficulty retrieving your feedback, please contact coursework@warwick.ac.uk. This email was sent from an automated system, and replies to it will not reach a real person.	          
-""".format(
-    		  user.getFirstName,
-    		  assignment.name,
-    		  moduleCode,
-    		  assignment.module.name,
-    		  ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
-      ))
+      message.setText(messageTextFor(user))
+    	
       return message
 	}
 	
 	def describe(d:Description) = d
 		.assignment(assignment)
 		.studentIds(assignment.feedbacks.map { _.universityId })
+  
+  def messageTextFor(user:User) = 
+	  renderToString("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
+    		  "name" -> user.getFirstName,
+    		  "assignmentName" -> assignment.name,
+    		  "moduleCode" -> assignment.module.code.toUpperCase,
+    		  "moduleName" -> assignment.module.name,
+    		  "url" -> ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
+      ))
+	
 }

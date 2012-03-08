@@ -21,5 +21,5 @@ class ScalaCriteria[T](c:org.hibernate.Criteria) {
 		this
 	}
 	def list: java.util.List[T] = c.list().asInstanceOf[java.util.List[T]]
-	def uniqueResult:T = c.uniqueResult().asInstanceOf[T]
+	def uniqueResult:Option[T] = Option(c.uniqueResult().asInstanceOf[T])
 }

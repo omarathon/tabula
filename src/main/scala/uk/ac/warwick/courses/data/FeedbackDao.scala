@@ -16,10 +16,10 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 	
 	override def getFeedback(id:String) = option[Feedback](session.get(clazz, id))
 	
-	override def getFeedbackByUniId(assignment:Assignment, uniId:String): Option[Feedback] = option[Feedback](
+	override def getFeedbackByUniId(assignment:Assignment, uniId:String): Option[Feedback] = 
 			session.newCriteria[Feedback]
 				.add(is eq("universityId", uniId))
 				.add(is eq("assignment", assignment))
 				.uniqueResult
-		)
+		
 }

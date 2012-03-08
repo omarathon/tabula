@@ -179,7 +179,8 @@
 		
 				<div id="content-wrapper">					     
 					<div id="main-content">
-						<div id="page-title"> <!-- optional: class="site-root" (will hide the title using CSS) -->
+						<#--
+						<div id="page-title">
 			
 							<h1>
 								<span id="after-page-title"></span>
@@ -187,6 +188,7 @@
 			
 							<div id="page-title-bottom"></div>
 						</div>
+						-->
 			
 						<!-- column-1 and column-2 may not stick around as IDs - don't use them in a site design -->
 						<div id="column-1"><div id="column-1-content">
