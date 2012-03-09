@@ -18,5 +18,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
 
 <#-- non admin -->
-<#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/receipt"/></#macro>
+<#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
+<#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 </#compress>

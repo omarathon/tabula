@@ -6,7 +6,7 @@ import uk.ac.warwick.util.core.{StringUtils => Utils}
  * Scala-style String utilities. Adds the methods as implicit methods
  * on String.
  */
-object StringUtils {
+trait StringUtils {
 	class SuperString(string:String) {
 		def hasText = Utils hasText string
 		def hasLength = Utils hasLength string
@@ -19,3 +19,5 @@ object StringUtils {
 	
 	implicit def StringToSuperString(string:String) = new SuperString(string)
 }
+
+object StringUtils extends StringUtils

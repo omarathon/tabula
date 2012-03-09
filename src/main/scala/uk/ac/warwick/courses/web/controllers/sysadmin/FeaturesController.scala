@@ -43,7 +43,7 @@ final class FeaturesController extends BaseController with InitializingBean {
 		new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[java.lang.Boolean] )
 	}
 									
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(): Mav = {
 		Mav("sysadmin/features",
 				"currentValues" -> currentValues)

@@ -90,7 +90,7 @@ class AddAssignment extends BaseController {
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
 		new AddAssignmentCommand(mandatory(module))
 
-	@RequestMapping(method = Array(RequestMethod.GET))
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
 			form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
@@ -129,7 +129,7 @@ class EditAssignment extends BaseController {
 	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
 		new EditAssignmentCommand(mandatory(assignment))
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			form:EditAssignmentCommand, errors: Errors) = {
 		
@@ -181,7 +181,7 @@ class DeleteAssignment extends BaseController {
 	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
 		new DeleteAssignmentCommand(mandatory(assignment))
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			form:DeleteAssignmentCommand, errors: Errors) = {
 		
@@ -219,7 +219,7 @@ class DownloadFeedback extends BaseController {
 	@Autowired var feedbackDao:FeedbackDao =_
 	@Autowired var fileServer:FileServer =_
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable feedbackId:String, @PathVariable filename:String, response:HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
@@ -251,7 +251,7 @@ class DownloadAllFeedback extends BaseController {
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
 class ListFeedback extends BaseController {
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))

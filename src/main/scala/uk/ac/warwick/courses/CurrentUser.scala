@@ -18,6 +18,7 @@ class CurrentUser(
 	
 	def loggedIn = realUser.isLoggedIn
 	def idForPermissions = apparentUser.getUserId()
+	def exists = realUser.isFoundUser
 	
 	def apparentId = apparentUser.getUserId
 	def realId = realUser.getUserId

@@ -7,7 +7,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.courses.actions.Action
-import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.services.SecurityService
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.RequestInfo
@@ -85,7 +85,13 @@ trait ControllerViews {
  * Useful traits for all controllers to have.
  */
 @Controller
-abstract class BaseController extends ControllerMethods with ControllerViews with ValidatesCommand with Logging with EventHandling with Daoisms {
+abstract class BaseController extends ControllerMethods 
+	with ControllerViews 
+	with ValidatesCommand 
+	with Logging 
+	with EventHandling 
+	with Daoisms 
+	with StringUtils {
   // make Mav available to controllers without needing to import
   
   @Required @Resource(name="validator") var globalValidator:Validator =_
@@ -105,6 +111,7 @@ abstract class BaseController extends ControllerMethods with ControllerViews wit
    */
   private var _hideDeletedItems = false
   def hideDeletedItems = { _hideDeletedItems = true }
+  def showDeletedItems = { _hideDeletedItems = false }
   
   final def preRequest {
 	  // if hideDeletedItems has been called, exclude all "deleted=1" items from Hib queries.

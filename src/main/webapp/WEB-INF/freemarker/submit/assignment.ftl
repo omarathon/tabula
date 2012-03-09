@@ -63,10 +63,14 @@
 				<p>You should have been sent an email confirming the submission. Check your spam folders if it doesn't show up in your inbox. 
 				If it's been a few minutes and it still hasn't reached you, click the button below to send a fresh copy.</p>
 				
+				
 				<#assign receiptFormUrl><@routes.assignmentreceipt assignment=assignment /></#assign>
 				<form action="${receiptFormUrl}" method="POST">
-					<input type="submit" name="resend" value="Re-send email">
+					<div class="submit-buttons">
+					<input type="submit" name="resend" value="Re-send email receipt">
+					</div>
 				</form> 
+				
 			</div>
 		</#if>
 			

@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.courses.web.Cookies._
 import uk.ac.warwick.courses.web.Cookie
 import uk.ac.warwick.courses.web.controllers.BaseController
@@ -31,13 +31,13 @@ class MasqueradeController extends BaseController {
 	
 	//@ModelAttribute def model = new HashMap[String,Object]
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(HEAD,GET))
 	def form():Mav = {
 		checkPermissions()
 		Mav("sysadmin/masquerade/form")
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST),params=Array("!action"))
+	@RequestMapping(method=Array(POST),params=Array("!action"))
 	def submit(@RequestParam usercode:String, response:HttpServletResponse):Mav = {
 		checkPermissions()
 		userLookup.getUserByUserId(usercode) match {
@@ -47,7 +47,7 @@ class MasqueradeController extends BaseController {
 		Redirect("/admin/masquerade")
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST),params=Array("action=remove"))
+	@RequestMapping(method=Array(POST),params=Array("action=remove"))
 	def remove(response:HttpServletResponse):Mav = {
 		checkPermissions()
 		response addCookie newCookie(null)

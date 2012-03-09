@@ -12,15 +12,14 @@ import freemarker.template.Configuration
  * 		Work out some way of attaching pretend context to make it work?
  */
 trait FreemarkerRendering {
-	//def configuration:Configuration
 	
-	def renderToString(template:Template, model:Any): String = {
+	protected def renderToString(template:Template, model:Any): String = {
 		val writer = new StringWriter
 		template.process(model, writer)
 		writer.toString
 	}
 	
-	def renderToString(template:String, model:Any)(implicit config:Configuration): String = {
+	protected def renderToString(template:String, model:Any)(implicit config:Configuration): String = {
 		renderToString(config.getTemplate(template), model)
 	}
 }

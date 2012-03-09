@@ -22,13 +22,13 @@ class DownloadFeedbackController extends AbstractAssignmentController {
     
 	@Autowired var fileServer:FileServer =_
 	
-	@RequestMapping(value=Array("/all/feedback.zip"), method=Array(RequestMethod.GET))
+	@RequestMapping(value=Array("/all/feedback.zip"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAll(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
 		command.filename = null
 		getOne(command,user,response)
 	}
 	
-	@RequestMapping(value=Array("/get/{filename}"), method=Array(RequestMethod.GET))
+	@RequestMapping(value=Array("/get/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getOne(command:DownloadFeedbackCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
 		mustBeLinked(command.assignment, command.module)
 		

@@ -9,7 +9,7 @@ import uk.ac.warwick.courses.commands.assignments.AddFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.web.Mav
-import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.courses.data.model.Module
@@ -28,7 +28,7 @@ class AddBatchFeedback extends BaseController {
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(HEAD,GET))
 	def uploadZipForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand):Mav = {
 		mustBeLinked(assignment,module)
@@ -36,7 +36,7 @@ class AddBatchFeedback extends BaseController {
 		crumbed(Mav("admin/assignments/feedback/zipform"), module)
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST), params=Array("!confirm"))
+	@RequestMapping(method=Array(POST), params=Array("!confirm"))
 	def confirmBatchUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
 		cmd.preExtractValidation(errors)
@@ -51,7 +51,7 @@ class AddBatchFeedback extends BaseController {
 		}
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST), params=Array("confirm=true"))
+	@RequestMapping(method=Array(POST), params=Array("confirm=true"))
 	def doUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
 		mustBeLinked(assignment,module)

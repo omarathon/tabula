@@ -26,38 +26,48 @@ import uk.ac.warwick.courses.web.Mav
 @RequestMapping(Array("/module/{module}/"))
 class ModuleController extends BaseController {
   
+	hideDeletedItems
+	
 	@RequestMapping
 	def viewModule(@PathVariable module:Module) = {
 		mustBeAbleTo(View(mandatory(module)))
 		Mav("submit/module", 
 			"module"-> module,
-			"assignments" -> module.assignments.sortBy{ _.closeDate }.reverse)
+			"assignments" -> module.assignments.filterNot{_.deleted}.sortBy{ _.closeDate }.reverse
+			)
 	}
 	
 }
 
 @Configurable
 @Controller
-@RequestMapping(value=Array("/module/{module}/{assignment}/resend-receipt"), method=Array(POST))
+@RequestMapping(value=Array("/module/{module}/{assignment}/resend-receipt"))
 class ResendSubmissionEmail extends AbstractAssignmentController {
 	
-	@RequestMapping def sendEmail(user:CurrentUser, form:SendSubmissionReceiptCommand) : Mav = {
+	hideDeletedItems
+	
+	@RequestMapping(method=Array(GET,HEAD))
+	def nope(form:SendSubmissionReceiptCommand) = Redirect( Routes.assignment(mandatory(form.assignment)) )
+	
+	@RequestMapping(method=Array(POST)) 
+	def sendEmail(user:CurrentUser, form:SendSubmissionReceiptCommand) : Mav = {
 		form.user = user
 		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
 		
 		val submission = assignmentService.getSubmission(form.assignment, user.apparentId)
-		val sent = submission match {
-			case Some(submission) =>
+		val hasEmail = user.email.hasText
+		val sent:Boolean = submission match {
+			case Some(submission) if (submission.submitted) =>
 				form.submission = submission
 				form.apply()
-				true
 			case None => false
 		}
 		Mav("submit/receipt", 
 				"submission" -> submission,
 				"module"-> form.module,
 				"assignment" -> form.assignment,
-				"sent" -> sent
+				"sent" -> sent,
+				"hasEmail" -> hasEmail
 		)
 		
 	}
@@ -84,7 +94,7 @@ class AssignmentController extends AbstractAssignmentController {
 		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
 	}
 	
-	@RequestMapping(method=Array(GET))
+	@RequestMapping(method=Array(HEAD, GET))
 	def view(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
 		val assignment = form.assignment
 		val module = form.module
@@ -92,7 +102,7 @@ class AssignmentController extends AbstractAssignmentController {
 		checks(form)
 		
 		val feedback = checkCanGetFeedback(assignment, user)
-		val submission = assignmentService.getSubmission(assignment, user.apparentId)
+		val submission = assignmentService.getSubmission(assignment, user.apparentId).filter{_.submitted}
 		/*
 		 * Submission values are an unordered set without any proper name, so
 		 * match them up into an ordered sequence of pairs.

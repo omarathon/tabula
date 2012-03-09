@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.actions.Participate
-import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.courses.web.Routes
 
 @Controller
@@ -34,7 +34,7 @@ class AddFeedback extends BaseController {
 		command.onBind
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(GET,HEAD))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute form:AddFeedbackCommand, errors: Errors) = {
 		mustBeLinked(assignment,module)
@@ -49,7 +49,7 @@ class AddFeedback extends BaseController {
 	}
 	
 	@Transactional
-	@RequestMapping(method = Array(RequestMethod.POST))
+	@RequestMapping(method = Array(POST))
 	def submit(
 			@PathVariable module:Module,
 			@PathVariable assignment:Assignment,
