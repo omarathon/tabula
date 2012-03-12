@@ -26,6 +26,8 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	openDate = new DateTime().withTime(12,0,0,0)
     closeDate = openDate.plusWeeks(2)
     
+    def assignment:Assignment = null
+    
 	@Transactional
 	override def apply:Assignment = {
 	  val assignment = new Assignment(module)
@@ -42,10 +44,4 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 		"closeDate" -> closeDate
 	)
 
-}
-
-class AddAssignmentValidator extends ClassValidator[AddAssignmentCommand] {
-	override def valid(cmd:AddAssignmentCommand, errors:Errors) = {
-		
-	}
 }

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <div id="feedback-rating">
 
 <#assign command=rateFeedbackCommand/>
@@ -45,3 +46,4 @@ in future. Please try to rate solely on the quality of the feedback.
 </#if>
 
 </div>
+</#escape>

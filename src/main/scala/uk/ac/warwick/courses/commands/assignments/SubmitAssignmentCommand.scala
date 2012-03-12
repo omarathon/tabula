@@ -18,10 +18,6 @@ import uk.ac.warwick.courses.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
 
 
-class SubmittedFieldsPropertyEditor extends PropertyEditorSupport {
-	
-}
-
 @Configurable
 class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) extends Command[Submission] {
 

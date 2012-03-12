@@ -24,6 +24,8 @@ class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssign
 	
 	this.copyFrom(assignment)
 	
+	def module = assignment.module
+	
 	@Transactional
 	override def apply:Assignment = {
 	  copyTo(assignment)

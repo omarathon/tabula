@@ -66,6 +66,12 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
   var currentUser:CurrentUser = null
   
+  /**
+   * Sets up a pretend requestinfo context with the given pretend user
+   * around the callback.
+   * 
+   * withUser("cusebr") { /* ... your code */  }
+   */
   def withUser(code:String)(fn: =>Unit) {
 	  val requestInfo = RequestInfo.fromThread match {
 	 	  case Some(info) => throw new IllegalStateException("A RequestInfo is already open")

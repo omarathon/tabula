@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>${module.name} (${module.code?upper_case})
 <br><strong>${assignment.name}</strong></h1>
 
@@ -24,3 +25,4 @@ ITS helpdesk who will help you </p>
 </#if>
 
 <p><a href="<@routes.assignment assignment=assignment />">Back to assignment page</a></p>
+</#escape>

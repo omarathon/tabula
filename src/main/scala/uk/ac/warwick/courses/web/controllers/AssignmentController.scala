@@ -11,7 +11,6 @@ import javax.validation.Valid
 import uk.ac.warwick.courses.actions.View
 import uk.ac.warwick.courses.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.courses.commands.assignments.SubmitAssignmentCommand
-import uk.ac.warwick.courses.commands.assignments.SubmittedFieldsPropertyEditor
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.FeedbackDao
@@ -111,9 +110,8 @@ class AssignmentController extends AbstractAssignmentController {
 		 * If any submission value doesn't match the assignment fields, it just isn't shown.
 		 */
 		val submissionValues = submission.map{ submission =>
-			val values = submission.values
 			assignment.fields.map { field =>
-				(field, values.find(_.name == field.name))
+				(field, submission.values.find(_.name == field.name))
 			}
 		}.getOrElse(Seq.empty)
 		

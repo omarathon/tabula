@@ -31,6 +31,11 @@
 		<fileset dir="lib/runtime" includes="**/*.jar" />
 		<fileset dir="lib/build" includes="**/*.jar" />
 	</path>
+	
+	<path id="build+built.classpath">
+		<path refid="build.classpath" />
+		<path location="target/unwoven" />
+	</path>
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="build.classpath" />
 	<taskdef resource="scala/tools/ant/antlib.xml" classpathref="build.classpath" />
@@ -51,10 +56,6 @@
 		<mkdir dir="target/${war.name}/WEB-INF/classes" />
 		<mkdir dir="target/unwoven" />
 		<mkdir dir="target/log" />
-		<path id="build+built.classpath">
-			<path refid="build.classpath" />
-			<path location="target/unwoven" />
-		</path>
 		
 		<scalac deprecation="on" unchecked="on" srcref="java+scala.srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
 		<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
@@ -138,6 +139,18 @@
 		</pathconvert>
 		<sortlist delimiter="&#xA;" value="${jars}" property="jars.sorted" />
 		<echo message="${jars.sorted}" taskname="" />
+	</target>
+	
+	<target name="scaladoc" depends="compile">
+		<property name="docs.dir" value="target/scaladoc" />
+		<mkdir dir="${docs.dir}" />
+		<scaladoc 
+			srcdir="${src.scala}"
+			destdir="${docs.dir}"
+			deprecation="yes" unchecked="yes"
+			doctitle="${ant.project.name}"
+			classpathref="build+built.classpath" 
+		/>
 	</target>
 
 	<target name="test" depends="compile" description="Run unit tests.">

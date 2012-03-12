@@ -65,9 +65,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		val file = new FileField
 		file.name = defaultUploadName
 		
-//		addFields(pretext, file)
-		addField(pretext)
-		addField(file)
+		addFields(pretext, file)
 	}
 
 	
@@ -130,6 +128,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		field.position = fields.length
 		fields.add(field)
 	}
+	
+	def findField(name:String) : Option[FormField] = fields.find{_.name == name}
 	
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.

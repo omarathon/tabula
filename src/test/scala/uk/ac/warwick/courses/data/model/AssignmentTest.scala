@@ -16,6 +16,13 @@ class AssignmentTest extends TestBase {
 		}
 	}
 	
+	@Test def fields {
+		val assignment = new Assignment
+		assignment.findField(Assignment.defaultCommentFieldName) should not be ('defined)
+		assignment.addDefaultFields
+		assignment.findField(Assignment.defaultCommentFieldName) should be ('defined)
+	}
+	
 	@Test def unreleasedFeedback {
 		val assignment = new Assignment
 		assignment.feedbacks should be ('empty)

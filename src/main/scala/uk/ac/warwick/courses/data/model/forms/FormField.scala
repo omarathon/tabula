@@ -96,7 +96,7 @@ trait SimpleValue[T] { self:FormField =>
 	def value_=(value:T) { propertiesMap += "value" -> value }
 	def setValue(value:T) = value_=(value)
 	
-	def value = propertiesMap("value")
+	def value:T = propertiesMap("value").asInstanceOf[T]
 	def getValue() = value
 	
 	def blankSubmissionValue = new StringSubmissionValue(this)

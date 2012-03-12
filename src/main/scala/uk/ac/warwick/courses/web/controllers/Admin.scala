@@ -81,10 +81,8 @@ class AddAssignment extends BaseController {
 	}
 	
 	validatesWith { (cmd:AddAssignmentCommand, errors:Errors) =>
-		assignmentService.getAssignmentByNameYearModule(cmd.name, cmd.academicYear, cmd.module) match {
-			case Some(assignment) => errors.rejectValue("name", "name.duplicate.assignment", Array(cmd.name), "")
-			case None => 
-		}
+		cmd.validate(errors)
+		
 	}
 	
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
@@ -121,6 +119,7 @@ class AddAssignment extends BaseController {
 class EditAssignment extends BaseController {
 	
 	validatesWith{ (form:EditAssignmentCommand, errors:Errors) =>
+		form.validate(errors)
 		if (form.academicYear != form.assignment.academicYear) {
 			errors.rejectValue("academicYear", "academicYear.immutable")
 		}

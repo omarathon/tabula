@@ -55,6 +55,14 @@
 					to view who made late submissions and take the appropriate action.
 				</div>
 			</div>
+			<div>
+			<label for="assignmentComment">Text to show on submission form:</label>
+			<div class="subtle">
+				
+			</div>
+			<@f.errors path="comment" cssClass="error" />
+			<@f.textarea path="comment" id="assignmentComment" />
+			</div>
 		</div> 
 	
 	

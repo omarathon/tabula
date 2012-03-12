@@ -9,11 +9,22 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.AcademicYear
+import org.springframework.validation.Errors
+import org.springframework.validation.ValidationUtils
+import javax.validation.constraints.Max
+import uk.ac.warwick.courses.data.model.Module
+import uk.ac.warwick.courses.data.model.forms.TextField
+import org.hibernate.validator.constraints.Length
+import uk.ac.warwick.courses.data.model.forms.CommentField
 
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@Autowired var service:AssignmentService =_
 	
+	def module:Module
+	def assignment:Assignment
+	
+	@Length(max=200)
 	@NotEmpty(message="{NotEmpty.assignmentName}")
 	@BeanProperty var name:String = _
 	
@@ -32,6 +43,20 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var restrictSubmissions:Boolean = _
 	@BeanProperty var allowLateSubmissions:Boolean = _
 	
+	/**
+	 * This isn't actually a property on Assignment, it's one of the default fields added
+	 * to all Assignments. When the forms become customisable this will be replaced with
+	 * a full blown field editor. 
+	 */
+	@Length(max=2000)
+	@BeanProperty var comment:String = _ 
+	
+	def validate(errors:Errors) {
+		service.getAssignmentByNameYearModule(name, academicYear, module)
+			.filterNot{ _ eq assignment }
+			.map{ a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
+	}
+	
 	def copyTo(assignment:Assignment) {
 		assignment.name = name
 	    assignment.openDate = openDate
@@ -42,6 +67,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    // changes disabled for now
 	    //assignment.restrictSubmissions = restrictSubmissions
 	    assignment.allowLateSubmissions = allowLateSubmissions
+	    assignment.findField(Assignment.defaultCommentFieldName) collect {
+			case textField:CommentField => textField.value = comment
+			case _ => // found it but it wasn't a text
+		}
 	}
 	
 	def copyFrom(assignment:Assignment) {
@@ -53,5 +82,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
 		allowLateSubmissions = assignment.allowLateSubmissions
+		assignment.findField(Assignment.defaultCommentFieldName) collect {
+			case textField:CommentField => comment = textField.value
+			case _ => // found but wasn't a TextField
+		}
 	}
 }
