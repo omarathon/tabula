@@ -8,6 +8,11 @@ import uk.ac.warwick.courses.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.courses.actions.Participate
 
+/**
+ * For calling by AJAX. Returns a report of the email addresses that would be
+ * the recipients for any published feedback, noting ones that appear empty or
+ * invalid.
+ */
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class FeedbackRecipientCheckController extends BaseController {

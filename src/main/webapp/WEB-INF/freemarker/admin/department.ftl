@@ -56,11 +56,19 @@
 				<div class="close-date">
 					<span class="label">Closes</span> <@warwick.formatDate value=assignment.closeDate pattern="d MMM yyyy HH:mm" /> 
 				</div>
-				<div class="submission-count">
-					${assignment.submissions?size} submissions
-				</div>
+				<#if features.submissions && assignment.collectSubmissions>
+					<div class="submission-count">
+						<#if assignment.submissions?size gt 0>
+							<a href="<@routes.assignmentsubmissions assignment=assignment />" title="View all submissions">
+								${assignment.submissions?size} submissions
+							</a>
+						<#else>
+							${assignment.submissions?size} submissions
+						</#if>
+					</div>
+				</#if>
 				<div class="feedback-count">
-				<#if has_feedback><a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />"></#if>
+				<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
 				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
 				<#assign unreleasedFeedback=assignment.unreleasedFeedback />
 				<#if unreleasedFeedback?size gt 0>
