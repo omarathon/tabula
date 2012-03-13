@@ -15,10 +15,11 @@
 
 <#list modules as module>
 <#assign can_manage=can.manage(module) />
+<#assign has_assignments=(module.assignments!?size gt 0) />
 <a id="module-${module.code}"></a>
-<div class="module-info">
+<div class="module-info<#if !has_assignments> empty</#if>">
 <h2><@fmt.module_name module /></h2>
-	
+	<div class="module-info-contents">
 	
 	<div>
 		
@@ -35,7 +36,7 @@
 		</#if>
 	</div>
 	
-	<#if module.assignments!?size = 0>
+	<#if !has_assignments >
 		<p>This module has no assignments. 
 		<span class="actions">
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
@@ -111,6 +112,8 @@
 		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
 		</div>
 	</#if>
+	
+	</div>
 	
 </div>
 </#list>
