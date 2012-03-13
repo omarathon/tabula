@@ -1,6 +1,12 @@
 <#escape x as x?html>
 <h1>All submissions for ${assignment.name}</h1>
 
+<div class="actions">
+<a class="long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/download-zip/submissions.zip'/>">
+Download all as ZIP file
+</a>
+</div>
+
 <#if submissions?size gt 0>
 <div class="submission-list">
 <#list submissions as submission>

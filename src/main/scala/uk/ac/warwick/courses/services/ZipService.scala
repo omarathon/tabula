@@ -17,6 +17,8 @@ import org.apache.commons.io.input.BoundedInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import uk.ac.warwick.courses.helpers.Closeables._
+import uk.ac.warwick.courses.data.model.Submission
+import collection.JavaConversions._
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -44,7 +46,8 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def partition(id:String): String = id.replace("-","").grouped(idSplitSize).mkString("/")
 	
 	def resolvePath(feedback:Feedback): String = "feedback/" + partition(feedback.id)
-	def resolvePathForFeedback(assignment:Assignment): String = "all-feedback/" + partition(assignment.id)
+	def resolvePathForFeedback(assignment:Assignment) = "all-feedback/" + partition(assignment.id)
+	def resolvePathForSubmission(assignment:Assignment) = "all-submissions/" + partition(assignment.id)
 	
 	def invalidateFeedbackZip(assignment:Assignment) = invalidate(resolvePathForFeedback(assignment))
 	
@@ -63,6 +66,29 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		getZip( resolvePathForFeedback(assignment),
 			assignment.feedbacks.map { (feedback) => 
 				new ZipFolderItem( feedback.universityId, getFeedbackZipItems(feedback) )
+			}
+		)
+	}
+	
+	/**
+	 * Find all file attachment fields and any attachments in them, as a single list.
+	 * TODO This doesn't check for duplicate file names
+	 */
+	private def getSubmissionZipItems(submission:Submission): Seq[ZipItem] = {
+		val allAttachments = submission.values.toSeq filter {_.hasAttachments} flatMap { _.attachments }
+		allAttachments map { attachment => 
+			new ZipFileItem(submission.universityId+" - "+attachment.name, attachment.dataStream) 
+		}
+	}
+		
+	
+	/**
+	 * A zip of submissions with a folder for each student.
+	 */
+	def getAllSubmissionZips(assignment:Assignment): File = {
+		getZip( resolvePathForSubmission(assignment),
+			assignment.submissions.map { (submission) => 
+				new ZipFolderItem( submission.universityId, getSubmissionZipItems(submission) )
 			}
 		)
 	}

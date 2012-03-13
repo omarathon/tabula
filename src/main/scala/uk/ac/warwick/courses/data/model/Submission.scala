@@ -64,5 +64,7 @@ class SavedSubmissionValue extends GeneratedId {
 	@OneToMany(mappedBy="submissionValue", fetch=FetchType.LAZY)
 	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
 	
+	def hasAttachments = attachments != null && !attachments.isEmpty
+	
 	@BeanProperty var value:String =_
 }

@@ -1,15 +1,18 @@
 package uk.ac.warwick.courses.services
-import scala.collection.mutable.ListBuffer
-import java.io.InputStream
+
 import java.io.File
-import java.io.FileOutputStream
-import java.nio.ByteBuffer
+import java.io.InputStream
 import java.io.OutputStream
-import uk.ac.warwick.courses.helpers.Logging
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import java.io.RandomAccessFile
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import java.nio.ByteBuffer
+
+import scala.annotation.implicitNotFound
+import scala.collection.mutable.ListBuffer
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+
+import uk.ac.warwick.courses.helpers.Logging
 
 trait ZipItem
 case class ZipFileItem(val name:String, val input:InputStream) extends ZipItem

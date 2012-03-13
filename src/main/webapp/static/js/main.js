@@ -164,7 +164,14 @@ jQuery(function ($) {
 	// TODO make buttons that don't take too long but are less than instantaneous
 	// (~5 secs) spawn a spinner or please wait text.
 	$('a.long-running').click(function (event) {
-		
+		var $this = $(this);
+		if (!$this.hasClass('clicked')) {
+			$this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
+			return true;
+		} else {
+			event.preventDefault();
+			return false;
+		}
 	});
 	
 	$('input.user-code-picker').each(function (i, picker) {
