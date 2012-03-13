@@ -12,6 +12,15 @@ import java.io.InputStream
 class FileAttachmentTest extends AppContextTestBase {
 	@Autowired var dao:FileDao =_
 	
+	/** 
+	 * HFC-136 
+	 * Filenames can be prefixed with whitespace, preventing download
+	 */
+	@Test def untrimmedFilenames {
+		new FileAttachment(" 0123456.docx").name should be ("0123456.docx")
+		new FileAttachment(null).name should be (null)
+	}
+	
 	@Transactional
 	@Test def save {
 		val attachment = new FileAttachment("file.txt")

@@ -48,8 +48,18 @@ class FileAttachment extends GeneratedId {
 		if (_file == null) _file = fileDao.getData(id).orNull
 		_file
 	}
-		
-	@BeanProperty var name:String = _
+	
+	@Column(name="name")
+	private var _name:String =_
+	def name = _name
+	def getName() = _name
+	def setName(n:String) { 
+		name = n 
+	}
+	def name_= (n:String) {
+		// trim incoming filenames
+		_name = Option(n).map(_.trim).orNull
+	}
 			
 	def this(n:String) { 
 		this()
