@@ -18,6 +18,7 @@ import org.joda.time.DateTime
 import javax.servlet.http.HttpServletRequest
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.io.IOException
 
 case class ExceptionContext(val token:String, val exception:Throwable, val request:HttpServletRequest=null) {
 	def getHasRequest = request==null
@@ -46,8 +47,12 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	@Autowired var freemarker:FreemarkerConfiguration =_
 	var template:Template =_
 	
+	// Check for this exception without needing it on the classpath
+	private val ClientAbortException = "org.apache.catalina.connector.ClientAbortException"
+	
 	override def exception(context:ExceptionContext) = context.exception match {
 		case userError:UserError => {} 
+		case e:IOException if e.getClass.getName equals ClientAbortException => {} // cancelled download.
 		case e => {
 			try {
 				val message = makeEmail(context)
