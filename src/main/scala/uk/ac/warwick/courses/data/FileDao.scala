@@ -16,6 +16,8 @@ import java.io.InputStream
 import org.hibernate.criterion.{Restrictions => Is}
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.spring.FileUtils
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.Propagation
 
 @Repository
 class FileDao extends Daoisms with InitializingBean {
@@ -24,6 +26,9 @@ class FileDao extends Daoisms with InitializingBean {
 	@Value("${filesystem.create.missing}") var createMissingDirectories:Boolean =_
 	
 	val idSplitSize = 4
+	
+	val TemporaryFileBatch = 1000 // query for this many each time
+	val TemporaryFileSubBatch = 10 // run a separate transaction for each one
 	
 	private def partition(id:String): String = id.replace("-","").grouped(idSplitSize).mkString("/")
 	
@@ -64,14 +69,30 @@ class FileDao extends Daoisms with InitializingBean {
 	 * Delete any temporary blobs that are more than 2 days old.
 	 */
 	def deleteOldTemporaryFiles = {
-		val oldFiles = session.newCriteria[FileAttachment]
+		val oldFiles = findOldTemporaryFiles
+		/*
+		 * This is a fun time for getting out of sync.
+		 * Trying to run a few at a time in a separate transaction so that if something
+		 * goes rubbish, there isn't too much out of sync.
+		 */
+		for (files <- oldFiles.grouped(TemporaryFileSubBatch)) deleteSomeFiles(files)
+		
+		oldFiles.size
+	}
+	
+	@Transactional
+	private def findOldTemporaryFiles = session.newCriteria[FileAttachment]
 			.add(Is.eq("temporary", true))
-			.add(Is.lt("dateUploaded", now minusDays(2) toDate))
+			.add(Is.lt("dateUploaded", now minusDays(2)))
+			.setMaxResults(TemporaryFileBatch)
 			.list
-			
-		for (file <- oldFiles) {
-			targetFile(file.id).delete()
-		}
+	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	private def deleteSomeFiles(files:Seq[FileAttachment]) {
+		session.createQuery("delete FileAttachment f where f.id in :ids")
+				.setParameterList("ids", files.map(_.id))
+				.executeUpdate()
+		for (file <- files) targetFile(file.id).delete()
 	}
 	
 	def afterPropertiesSet {

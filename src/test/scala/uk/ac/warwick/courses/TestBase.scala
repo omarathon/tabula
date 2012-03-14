@@ -43,7 +43,7 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   /**
    * Removes any directories created by #createTemporaryDirectory
    */
-  //@After def deleteTemporaryDirs = temporaryDirectories.par.foreach( FileUtils.recursiveDelete _ )
+  @After def deleteTemporaryDirs = temporaryDirectories.par.foreach( FileUtils.recursiveDelete _ )
 	
   /**
    * withArgs(a,b,c) translates to
