@@ -28,7 +28,7 @@ class FileDao extends Daoisms with InitializingBean {
 	val idSplitSize = 4
 	
 	val TemporaryFileBatch = 1000 // query for this many each time
-	val TemporaryFileSubBatch = 10 // run a separate transaction for each one
+	val TemporaryFileSubBatch = 50 // run a separate transaction for each one
 	
 	private def partition(id:String): String = id.replace("-","").grouped(idSplitSize).mkString("/")
 	
