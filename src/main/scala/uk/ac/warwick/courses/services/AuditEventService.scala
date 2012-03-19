@@ -27,6 +27,8 @@ import org.hibernate.dialect.Dialect
 import javax.annotation.Resource
 import org.codehaus.jackson.JsonParseException
 import org.codehaus.jackson.map.JsonMappingException
+import org.hibernate.Hibernate
+import org.hibernate.`type`.StandardBasicTypes
 
 trait AuditEventService {
 	def mapListToObject(array:Array[Object]): AuditEvent
@@ -45,7 +47,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	@Resource(name="mainDatabaseDialect") var dialect:Dialect = _
 	
 	private val baseSelect = """select 
-		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid
+		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
 		from auditevent a"""
 	
 	// for viewing paginated lists of events
@@ -53,7 +55,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	
 	// for getting events newer than a certain date, for indexing
 	private val indexListSql = baseSelect + """ 
-					where eventdate >= :oldest
+					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
 	
 	
@@ -66,7 +68,12 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		a.userId = array(4).asInstanceOf[String]
 		a.data = unclob(array(5))
 		a.eventId = array(6).asInstanceOf[String]
+		a.id = toIdType(array(7))
 		a
+	}
+	
+	def toIdType(any:Object): Long = any match {
+		case n:Number => n.longValue
 	}
 	
 	def unclob(any:Object): String = any match {

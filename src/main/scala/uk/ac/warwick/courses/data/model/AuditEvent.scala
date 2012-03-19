@@ -9,7 +9,7 @@ import javax.persistence.Id
 
 // need to manage access to the JSON map
 case class AuditEvent(
-	var id:String = null,
+	var id:Long = 0,
 	var eventId:String = null,
 	var eventDate:DateTime = null,
 	var eventType:String = null,

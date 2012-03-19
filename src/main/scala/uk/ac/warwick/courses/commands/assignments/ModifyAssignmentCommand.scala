@@ -41,7 +41,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var collectMarks:Boolean = _
 	@BeanProperty var collectSubmissions:Boolean = _
 	@BeanProperty var restrictSubmissions:Boolean = _
-	@BeanProperty var allowLateSubmissions:Boolean = _
+	@BeanProperty var allowLateSubmissions:Boolean = true
 	
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added

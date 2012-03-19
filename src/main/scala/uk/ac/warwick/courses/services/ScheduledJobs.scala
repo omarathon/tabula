@@ -17,7 +17,11 @@ import uk.ac.warwick.courses.system.exceptions.ExceptionResolver
 @Service
 class ScheduledJobs {
 	
-	@Autowired @BeanProperty var exceptionResolver:ExceptionResolver =_
+	@Autowired @BeanProperty 
+	var exceptionResolver:ExceptionResolver =_
+	
+	@Autowired @BeanProperty
+	var indexingService:AuditEventIndexService =_
 	
 	/*
 	 * Don't think @Transactional works on these methods so it should be put
@@ -33,5 +37,8 @@ class ScheduledJobs {
 	def cleanupTemporaryFiles:Unit = exceptionResolver.reportExceptions {  
 		new CleanupTemporaryFilesCommand().apply()
 	}
+	
+	@Scheduled(cron="0 */5 * * * *") // every 5 minutes
+	def indexAuditEvents:Unit = exceptionResolver.reportExceptions { indexingService.index }
 	
 }
