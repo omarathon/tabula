@@ -6,8 +6,10 @@ package uk.ac.warwick.courses.commands
  */
 class NullCommand extends Command[Unit] {
 	
-	private var fn = ()=>{}
-	def apply = fn()
+	private var fn = ()=>{} 
+	def apply() = {
+		fn()
+	}
 	def will(f: ()=>Unit) = {
 		fn = f
 		this

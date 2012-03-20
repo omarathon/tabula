@@ -1,34 +1,23 @@
 package uk.ac.warwick.courses.services
 
 import java.io.StringWriter
-import java.sql.ResultSet
-import uk.ac.warwick.courses.JavaImports._
+import java.sql.Clob
+import scala.collection.JavaConversions.asScalaBuffer
+import org.codehaus.jackson.map.JsonMappingException
 import org.codehaus.jackson.map.ObjectMapper
-import org.hibernate.Session
+import org.codehaus.jackson.JsonParseException
+import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
-import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.FileCopyUtils
+import javax.annotation.Resource
+import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.data.model.AuditEvent
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.events.Event
-import org.springframework.jdbc.core.PreparedStatementCreator
-import org.springframework.jdbc.core.PreparedStatementCallback
-import java.sql.PreparedStatement
-import java.sql.Connection
-import org.hibernate.dialect.Oracle10gDialect
-import org.springframework.transaction.annotation.Transactional
-import collection.JavaConversions._
-import org.springframework.jdbc.core.JdbcTemplate
-import java.sql.Clob
-import org.springframework.util.FileCopyUtils
-import org.hibernate.dialect.Dialect
-import javax.annotation.Resource
-import org.codehaus.jackson.JsonParseException
-import org.codehaus.jackson.map.JsonMappingException
-import org.hibernate.Hibernate
-import org.hibernate.`type`.StandardBasicTypes
+import org.springframework.transaction.annotation.Propagation
 
 trait AuditEventService {
 	def getById(id:Long): Option[AuditEvent]
@@ -61,7 +50,6 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
 	
-	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
 		val a = new AuditEvent
 		a.eventDate = new DateTime(array(0))
@@ -92,6 +80,16 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	}
 	
 	def save(event:Event, stage:String) {
+		doSave(event, stage)
+	}
+	
+	/**
+	 * Saves the event in a separate transaction to the main one,
+	 * so that it can be committed even if the main operation is
+	 * rolling back.
+	 */
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	def doSave(event:Event, stage:String) {
 		// Both Oracle and HSQLDB support sequences, but with different select syntax
 		// TODO evaluate this and the SQL once on init
 		val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
@@ -112,6 +110,8 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		}
 		query.executeUpdate()
 	}
+	
+	
 	
 	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent] = {
 		val query = session.createSQLQuery(indexListSql)
