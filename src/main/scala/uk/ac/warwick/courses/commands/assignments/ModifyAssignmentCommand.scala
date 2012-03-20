@@ -17,6 +17,10 @@ import uk.ac.warwick.courses.data.model.forms.TextField
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.CommentField
 
+object DateFormats {
+	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
+}
+
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@Autowired var service:AssignmentService =_
@@ -28,10 +32,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@NotEmpty(message="{NotEmpty.assignmentName}")
 	@BeanProperty var name:String = _
 	
-    @DateTimeFormat(style = "MM")
+    @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var openDate:DateTime = new DateTime().withTime(12,0,0,0)
 	
-    @DateTimeFormat(style = "MM")
+    @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate:DateTime = openDate.plusWeeks(2)
 	
 	@BeanProperty var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
