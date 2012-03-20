@@ -31,6 +31,7 @@ import org.hibernate.Hibernate
 import org.hibernate.`type`.StandardBasicTypes
 
 trait AuditEventService {
+	def getById(id:Long): Option[AuditEvent]
 	def mapListToObject(array:Array[Object]): AuditEvent
 	def unclob(any:Object): String
 	def save(event:Event, stage:String):Unit
@@ -49,6 +50,8 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	private val baseSelect = """select 
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
 		from auditevent a"""
+		
+	private val idSql = baseSelect + " where id = :id"
 	
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
@@ -80,6 +83,12 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		case clob:Clob => FileCopyUtils.copyToString(clob.getCharacterStream)
 		case string:String => string
 		case null => ""
+	}
+	
+	def getById(id:Long): Option[AuditEvent] = {
+		val query = session.createSQLQuery(idSql)
+		query.setLong("id", id)
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]]))
 	}
 	
 	def save(event:Event, stage:String) {

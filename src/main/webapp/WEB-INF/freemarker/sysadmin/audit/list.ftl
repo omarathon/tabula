@@ -5,6 +5,13 @@
 
 <h1>All audit events</h1>
 
+<#if lastIndexTime??>
+<p>Last index ran at <@warwick.formatDate value=lastIndexTime pattern="d MMMM yyyy HH:mm" /></p>
+</#if>
+<#if lastIndexDuration??>
+<p>Last index ran for ${lastIndexDuration.getStandardSeconds()} seconds.</p>
+</#if>
+
 <p>Results ${startIndex} - ${endIndex}</p>
 
 <table>

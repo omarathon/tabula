@@ -6,6 +6,8 @@ import scala.collection.mutable.Buffer
 import freemarker.template.SimpleSequence
 import scala.reflect.BeanProperty
 import org.junit.Ignore
+import org.joda.time.Duration
+import freemarker.template.SimpleHash
 
 class MyObject {
   var name = "text"
@@ -37,6 +39,18 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 						hash.get("plant").toString should be ("Thistle")
 					}
 				}
+			}
+		}
+	}
+	
+	@Ignore
+	@Test def duration {
+		val duration = Duration.standardSeconds(7) // seven seconds away...
+		val wrapper = new ScalaBeansWrapper()
+		val wrapped = wrapper.wrap(duration)
+		wrapped match {
+			case d:SimpleHash => {
+				d.get("standardSeconds") should be (7)
 			}
 		}
 	}

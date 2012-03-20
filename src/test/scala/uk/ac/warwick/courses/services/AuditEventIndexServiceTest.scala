@@ -4,6 +4,7 @@ import uk.ac.warwick.courses.TestBase
 import org.apache.lucene.util.LuceneTestCase
 import org.junit.Test
 import uk.ac.warwick.courses.Mockito
+import uk.ac.warwick.courses.JavaImports._
 import org.junit.After
 import org.junit.Before
 import org.joda.time.DateTime
@@ -20,7 +21,8 @@ import uk.ac.warwick.courses.JsonObjectMapperFactory
 
 class AuditEventIndexServiceTest extends TestBase with Mockito {
 	
-	@Test def index {
+	@Test def index = withFakeTime(dateTime(2001, 6)) {
+		
 		val TEMP_DIR = createTemporaryDirectory
 		
 		val stopwatch = new StopWatch
@@ -55,7 +57,9 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		val service = mock[AuditEventService]
 		service.parseData(null) returns None
 		service.parseData(jsonDataString) returns Some(jsonData)
-		service.listNewerThan(any[DateTime], isEq(1000)) returns events 
+		service.parseData("{}") returns Some(Map())
+		service.listNewerThan(any[DateTime], isEq(1000)) returns events
+		service.getById(any[JLong]) returns events.headOption
 		
 		val indexer = new AuditEventIndexService
 		indexer.service = service
@@ -68,14 +72,21 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		
 		stopwatch.stop()
 		
-		there was atLeastOne(service).parseData(null)
-		there was atLeastOne(service).parseData(jsonDataString)
-		
 		val user = new User("jeb")
 		user.setWarwickId("0123456")
 		
 		indexer.student(user).size should be (20)
 		
+		indexer.indexEvents(Seq(AuditEvent(
+				id=9000, eventId="9000", eventType="PublishFeedback", eventStage="before", userId="bob",
+				eventDate=new DateTime(2000,1,1,0,0,0).plusSeconds(9000),
+				data=jsonDataString
+			)))
+		
+		indexer.student(user).size should be (21)
+		
+		indexer.listRecent(0, 13).size should be (13)
+			
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
@@ -88,6 +99,10 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		
 		// index again to check that it doesn't do any once-only stuff
 		indexer.index
+		
+		there was atLeastOne(service).parseData("{}")
+		there was atLeastOne(service).parseData(jsonDataString)
+		
 		
 	}
 }

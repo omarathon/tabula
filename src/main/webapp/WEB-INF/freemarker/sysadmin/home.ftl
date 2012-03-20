@@ -13,6 +13,10 @@
 
 <p><a href="/sysadmin/audit/list">List audit events</a></p>
 
+<p><a href="/sysadmin/audit/search">List audit events (Index version)</a></p>
+
+<hr>
+
 <p>
 <@form.form method="post" action="/sysadmin/import">
   <input type="submit" value="Run department/module import">

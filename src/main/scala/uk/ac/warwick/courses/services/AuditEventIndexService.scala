@@ -2,27 +2,32 @@ package uk.ac.warwick.courses.services
 
 import java.io.File
 import java.io.FileNotFoundException
+import scala.collection.JavaConverters._
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
-import org.apache.lucene.index._
 import org.apache.lucene.index.FieldInfo.IndexOptions
-import org.apache.lucene.search._
+import org.apache.lucene.index._
 import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search._
+import org.apache.lucene.search._
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.util.Version
 import org.joda.time.DateTime
+import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.AuditEvent
 import uk.ac.warwick.courses.helpers.Closeables._
-import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.helpers.Stopwatches._
+import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.userlookup.User
-import org.apache.lucene.search._
-import collection.JavaConverters._
-import org.springframework.stereotype.Component
-import uk.ac.warwick.courses.helpers.Logging
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.util.core.StopWatch
+import scala.collection.immutable.Stream
 
 /**
  * Indexes audit events using Lucene.
@@ -39,6 +44,9 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	// Are we indexing now?
 	var indexing:Boolean = false
 	
+	var lastIndexTime:Option[DateTime] = None
+	var lastIndexDuration:Option[Duration] = None
+	
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
 	 * If it's already running, the code is skipped.
@@ -49,18 +57,28 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		if (indexing)
 			logger.info("Skipped indexing because the indexer is already/still running.")
 		else
-			try { indexing = true; work } 
+			try { indexing = true; work} 
 			finally indexing = false
 	
-	var reader:IndexReader =_
-	var searcher:IndexSearcher =_
+//	var reader:IndexReader =_
+//	var searcher:IndexSearcher =_
+	/**
+	 * SearcherManager handles returning a fresh IndexSearcher for each search,
+	 * and managing old IndexSearcher instances that might still be in use. Use
+	 * acquire() and release() to get IndexSearchers, and call maybeReopen() when
+	 * the index has changed (i.e. after an index)
+	 */
+	var searcherManager: SearcherManager = _
 	val analyzer = new StandardAnalyzer(LuceneVersion)
+			
+//	val executorService = Executors.newCachedThreadPool
 	
 	/**
 	 * When an index run finishes, we note down the date of the newest audit item,
 	 * so we know where to check from next time.
 	 */
 	var mostRecentIndexedItem: Option[DateTime] = None
+	
 	
 	override def afterPropertiesSet {
 		if (!indexPath.exists) {
@@ -72,49 +90,81 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		initialiseSearching
 	}
 	
-	def initialiseSearching = 
-		if (reader == null) {
+	private def initialiseSearching = {
+		if (searcherManager == null) {
 			try {
-				reader = IndexReader.open(FSDirectory.open(indexPath), true)
-				searcher = new IndexSearcher(reader)
+				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null, null)
 			} catch {
-				case e:IndexNotFoundException => {
-					logger.warn("No index found.")
-					reader = null
-					searcher = null
-				}
+				case e:IndexNotFoundException => logger.warn("No index found.")
 			}
 		}
+	} 
+	
+	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
+		val min = new DateTime().minusYears(2)
+		val docs = search(
+			query = NumericRangeQuery.newLongRange("eventDate", min.getMillis, null, true, true),
+			sort = new Sort(new SortField("eventDate", SortField.LONG, true)),
+			offset = start,
+			max = count
+		)
+		docs flatMap { toId(_) } flatMap { service.getById(_) }
+	}
+	
+	/**
+	 * Sets up a new IndexSearcher with a reopened IndexReader so that
+	 * subsequent searches see the results of recent index changes.
+	 */
+	private def reopen = {
+		initialiseSearching
+		searcherManager.maybeReopen
+	}
 	
 	/**
 	 * Incremental index. Can be run often.
 	 */
 	@Transactional
-	def index = ifNotIndexing {
-		val writerConfig = new IndexWriterConfig(LuceneVersion, analyzer)
-		val startDate = latestIndexItem
-		val newItems = service.listNewerThan(startDate, 1000).filter{_.eventStage == "before"}
-		if (newItems.isEmpty) {
-			logger.debug("No new items to index.")
-		} else {
-			closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
+	def index() = ifNotIndexing {
+		val stopWatch = new StopWatch()
+		stopWatch.record("Incremental index") {
+			val startDate = latestIndexItem
+			val newItems = service.listNewerThan(startDate, 1000).filter{_.eventStage == "before"}
+			if (newItems.isEmpty) {
+				logger.debug("No new items to index.")
+			} else {
 				if (debugEnabled) logger.debug("Indexing items from " + startDate)
-				for (item <- newItems) {
-					updateMostRecent(item)
-					writer.updateDocument(uniqueTerm(item), toDocument(item))
-				}
-				if (debugEnabled) logger.debug("Indexed " + newItems.size + " items")
+				doIndexEvents(newItems)
 			}
 		}
+		lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
+		lastIndexTime = Some(new DateTime())
 	}
 	
-	def toId(doc:Document) = documentValue(doc, "id")
+	/**
+	 * Indexes a specific given list of events.
+	 */
+	@Transactional
+	def indexEvents(events:Seq[AuditEvent]) = ifNotIndexing { doIndexEvents(events) }
+	
+	private def doIndexEvents(events:Seq[AuditEvent]) {
+		val writerConfig = new IndexWriterConfig(LuceneVersion, analyzer)
+		closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
+			for (item <- events) {
+				updateMostRecent(item)
+				writer.updateDocument(uniqueTerm(item), toDocument(item))
+			}
+			if (debugEnabled) logger.debug("Indexed " + events.size + " items")
+		}
+		reopen
+	}
+	
+	private def toId(doc:Document) = documentValue(doc, "id").map{_.toLong}
 	
 	/**
 	 * If this item is the newest item this service has seen, save the date
 	 * so we know where to start from next time.
 	 */
-	def updateMostRecent(item:AuditEvent) {
+	private def updateMostRecent(item:AuditEvent) {
 		val shouldUpdate = mostRecentIndexedItem.map{ _ isBefore item.eventDate }.getOrElse{ true }
 		if (shouldUpdate)
 			mostRecentIndexedItem = Some(item.eventDate)
@@ -150,7 +200,8 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	 */
 	def newest(since:DateTime=null) : Option[Document] = {
 		initialiseSearching
-		if (searcher == null) { // usually if we've never indexed before, no index file
+		
+		if (searcherManager == null) { // usually if we've never indexed before, no index file
 			None
 		} else {
 			val min:Option[JLong] = Option(since).map{_.getMillis}
@@ -169,34 +220,51 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	def findByUserId(usercode:String) = 
 		search(new TermQuery(new Term("userId", usercode)))
+		
+	def whoDownloadedFeedback(assignment:Assignment) =
+		search(new TermQuery(new Term("assignment", assignment.id)))
+			.flatMap{ toId(_) }
+			.flatMap{ service.getById(_) }
+			.map{ _.userId }
+			.distinct
+			
 	
-	def search(query:Query, max:Int, sort:Sort=null) : Seq[Document] = doSearch(query, Some(max), sort)
-	def search(query:Query) : Seq[Document] = doSearch(query, None, null)
-	def search(query:Query, sort:Sort) : Seq[Document] = doSearch(query, None, sort)
-	private def doSearch(query:Query, max:Option[Int], sort:Sort) : Seq[Document] = {
+	def search(query:Query, max:Int, sort:Sort=null, offset:Int=0) : Seq[Document] = doSearch(query, Some(max), sort, offset)
+	def search(query:Query) : Seq[Document] = doSearch(query, None, null, 0)
+	def search(query:Query, sort:Sort) : Seq[Document] = doSearch(query, None, sort, 0)
+	private def doSearch(query:Query, max:Option[Int], sort:Sort, offset:Int) : Seq[Document] = {
 		initialiseSearching
-		val maxResults = max.getOrElse{searcher.maxDoc}
-		val results = 
-			if (sort == null) searcher.search(query, null, maxResults)
-			else searcher.search(query,null,maxResults,sort)
-		transformResults(results)
+		if (searcherManager == null) return Seq.empty
+		acquireSearcher { searcher =>
+			val maxResults = max.getOrElse(searcher.maxDoc)
+			val results = 
+				if (sort == null) searcher.search(query, null, searcher.maxDoc)
+				else searcher.search(query,null,searcher.maxDoc,sort)
+			transformResults(searcher, results, offset, maxResults)
+		}
+	}
+			
+	private def acquireSearcher[T](work: IndexSearcher=>T): T = {
+		val searcher = searcherManager.acquire
+		try work(searcher)
+		finally searcherManager.release(searcher)
 	}
 	
-	def transformResults(results:TopDocs) = {
+	private def transformResults(searcher:IndexSearcher, results:TopDocs, offset:Int, max:Int) = {
 		val hits = results.scoreDocs
-		hits.par.map { hit => searcher.doc(hit.doc)	}.seq
+		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
 	
 	/**
 	 * If an existing Document is in the index with this term, it
 	 * will be replaced.
 	 */
-	def uniqueTerm(item:AuditEvent) = new Term("id", Option(item.eventId).getOrElse(item.id.toString))
+	private def uniqueTerm(item:AuditEvent) = new Term("id", item.id.toString)
 	
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	def toDocument(item:AuditEvent) : Document = {
+	private def toDocument(item:AuditEvent) : Document = {
 		val doc = new Document
 		doc add plainStringField("id", item.id.toString)
 		if (item.eventId != null) { // null for old events
@@ -219,7 +287,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	private def addDataToDoc(data:Map[String,Any], doc:Document) = {
 		for (key <- Seq("feedback", "assignment", "module", "department")) {
 			data.get(key) match {
-				case Some(value:String) => doc add plainStringField(key, value)
+				case Some(value:String) => doc add plainStringField(key, value, stored=false)
 				case _ => // missing or not a string
 			}
 		}

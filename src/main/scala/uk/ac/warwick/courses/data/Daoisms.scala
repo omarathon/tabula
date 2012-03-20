@@ -65,7 +65,7 @@ trait Daoisms {
   protected def getById[D](id:String)(implicit m:Manifest[D]) : Option[D] = 
 	  session.get(m.erasure.getName(), id) match {
 	  	case entity:CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
-	  	case entity:Any if m.erasure.isInstance(entity) => Option(entity.asInstanceOf[D])
+	  	case entity:Any if m.erasure.isInstance(entity) => Some(entity.asInstanceOf[D])
 	  	case _ => None
   	  }
   

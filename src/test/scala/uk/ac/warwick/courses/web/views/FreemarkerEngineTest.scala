@@ -9,6 +9,7 @@ import freemarker.template.Configuration
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.web.Routes
 import org.junit.Ignore
+import org.joda.time.Duration
 
 class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
@@ -28,8 +29,12 @@ class FreemarkerEngineTest extends TestBase {
 	}
 	
 	@Test def plain {
-		val output = render("plain.ftl", Map("specifiedValue" -> "Specified value."))
-		output should be ("No frills template. Unspecified value. Specified value.")
+		val num:Option[Duration] = Some(Duration.standardSeconds(1))
+		val output = render("plain.ftl", Map(
+				"specifiedValue" -> "Specified value.",
+				"longnum" -> num
+		))
+		output should be ("No frills template #1. Unspecified value. Specified value.")
 	}
 	
 	/**
