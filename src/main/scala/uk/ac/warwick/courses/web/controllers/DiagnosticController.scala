@@ -2,10 +2,12 @@ package uk.ac.warwick.courses.web.controllers
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import java.io.Writer
+import uk.ac.warwick.courses.commands.NullCommand
+import uk.ac.warwick.courses.helpers.Logging
 
 @Controller
 @RequestMapping(Array("/test"))
-class DiagnosticController {
+class DiagnosticController extends Logging {
 	val startTime = System.currentTimeMillis
 	
 	@RequestMapping(Array("/up")) def test(out:Writer) =
@@ -13,4 +15,13 @@ class DiagnosticController {
 	
 	@RequestMapping(Array("/error")) def error = throw new RuntimeException("Deliberately generated exception")
 	
+	@RequestMapping(Array("/error-command")) def errCommand = {
+		val command = new NullCommand
+		logger.info("About to throw an exception")
+		command will {
+			logger.info("Yep, definitely throwing...")
+			throw new RuntimeException("Deliberately generated exception")
+		}
+		command.apply()
+	}
 }

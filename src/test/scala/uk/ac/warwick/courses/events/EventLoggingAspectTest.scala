@@ -15,7 +15,6 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 	
 	@Test def aspectsApplied {
 		val command = new NullCommand().will { () => 
-			println("Ain't doing nothing today") 
 		}
 			
 		val listener = mock[EventListener]

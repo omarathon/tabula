@@ -27,6 +27,8 @@ class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[Renderabl
 	
 	private var fileFound:Boolean = _
 	
+	var callback: (RenderableFile)=>Unit = _
+	
 	/**
 	 * If filename is unset, it returns a renderable Zip of all files.
 	 * If filename is set, it will return a renderable attachment if found.
@@ -42,6 +44,9 @@ class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[Renderabl
 		 }
 	  }
 	  fileFound = result.isDefined
+	  if (callback != null) {
+		  result.map{ callback(_) }
+	  }
 	  result
 	}
 	
