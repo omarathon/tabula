@@ -47,14 +47,9 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
     def importDepartments {
       logger.info("Importing departments")
       for (dept <- moduleImporter.getDepartments) {
-        dept.faculty match {
-          case "Service/Admin" => logger.debug("Skipping Service/Admin department " + dept.code)
-          case _ => {
-            moduleService.getDepartmentByCode(dept.code) match {
-              case None => session.save(newDepartmentFrom(dept))
-              case Some(dept) => { debug("Skipping %s as it is already in the database", dept.code) }
-            }
-          }
+        moduleService.getDepartmentByCode(dept.code) match {
+          case None => session.save(newDepartmentFrom(dept))
+          case Some(dept) => { debug("Skipping %s as it is already in the database", dept.code) }
         }
       }
     }
