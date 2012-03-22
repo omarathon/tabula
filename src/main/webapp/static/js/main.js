@@ -23,9 +23,9 @@ jQuery.fn.copyable = function(options) {
         url = this.href,
         title = this.title,
         text = $this.html();
-    var $container = $('<span class=copyable-url-container>').attr('title',title);
-    var $explanation = $('<span class=press-ctrl-c>').html(PressCtrlC).hide();
-    var $input = $('<input class=copyable-url>')
+    var $container = $('<span class=copyable-url-container></span>').attr('title',title);
+    var $explanation = $('<span class=press-ctrl-c></span>').html(PressCtrlC).hide();
+    var $input = $('<input class=copyable-url></span>')
         .attr('readonly', true)
         .attr('value',url)
         .click(function(){
@@ -35,7 +35,7 @@ jQuery.fn.copyable = function(options) {
           $explanation.fadeOut('fast');
         });
     $container.append($input).append($explanation);
-    $this.replaceWith($container);
+    $this.after($container).remove();
     if (prefixLinkText) {
     	$container.before(text);
     }
