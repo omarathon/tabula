@@ -38,7 +38,7 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			command.onBind
 			val feedbacks = command.apply
 			feedbacks.size should be (1)
-			feedbacks(0).attachments.get(0).length should be (feedbackDocument.length)
+			feedbacks(0).attachments.get(0).length should be (Some(feedbackDocument.length))
 		}
 		
 	}
@@ -62,7 +62,7 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			command.unrecognisedFiles.size should be(1)
 			
 			val attached0123456 = command.items.find { _.uniNumber == "0123456" }.get.file.attached
-			attached0123456.find { _.name == "feedback.txt" }.get.length should be (975)
+			attached0123456.find { _.name == "feedback.txt" }.get.length should be (Some(975))
 		}
 	}
 }
