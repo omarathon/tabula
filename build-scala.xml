@@ -13,11 +13,11 @@
 			<fail unless="@{var}.available" message="@{var} is set but ${@{var}} is not a directory." />
 		</sequential>
 	</macrodef>
-
+	
 	<property file="build.properties" />
 	<property file="local.properties" />
 	<property name="log4j.configuration" value="build-log4j.properties" />
-
+	
 	<property name="src.scala" value="src/main/scala" />
 	<property name="src.java" value="src/main/java" />
 	<path id="java+scala.srcpath">
@@ -45,6 +45,14 @@
 
 
 	<target name="-checks">
+		
+	</target>
+	
+	<target name="-require-local-properties">
+		<sequential>
+			<available type="file" file="local.properties" property="local.properties.available" />
+			<fail unless="local.properties.available" message="local.properties was not found. Make a copy of local-example.properties and change the settings to match your machine's configuration." />
+		</sequential>
 	</target>
 
 	<target name="clean">
@@ -111,7 +119,7 @@
 	</target>
 
 	<!-- Copy unpacked war directory to deploy.dir -->
-	<target name="dev-deploy-unpacked" depends="package">
+	<target name="dev-deploy-unpacked" depends="-require-local-properties,package">
 		<assert-dir-exists var="deploy.dir" />
 		<sync todir="${deploy.dir}/${war.name}">
 			<fileset dir="target/${war.name}" />
@@ -119,14 +127,14 @@
 		<touch file="${deploy.dir}/${war.name}/WEB-INF/web.xml" />
 	</target>
 
-	<target name="dev-deploy-views">
+	<target name="dev-deploy-views" depends="-require-local-properties">
 		<assert-dir-exists var="deploy.dir" />
 		<sync todir="${deploy.dir}/${war.name}/WEB-INF/freemarker">
 			<fileset dir="src/main/webapp/WEB-INF/freemarker" />
 		</sync>
 	</target>
 
-	<target name="dev-deploy-static" depends="compile-scripts">
+	<target name="dev-deploy-static" depends="-require-local-properties,compile-scripts">
 		<assert-dir-exists var="deploy.dir" />
 		<sync todir="${deploy.dir}/${war.name}/static">
 			<fileset dir="target/${war.name}/static" />
