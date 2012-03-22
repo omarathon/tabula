@@ -6,6 +6,7 @@ trait RenderableFile {
 	def inputStream:InputStream
 	def filename:String
 	def contentType:String
+	def contentLength:Option[Long]
 	
 	/**
 	 * Optional property - if present, fileserver may use it instead of

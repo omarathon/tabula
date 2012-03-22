@@ -66,7 +66,7 @@ class FileAttachment extends GeneratedId {
 		name = n 
 	}
 	
-	def length = Option(file) map {_.length} getOrElse {0}
+	def length:Option[Long] = Option(file) map {_.length}
 	
 	
 	/**

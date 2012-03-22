@@ -20,6 +20,9 @@ class FileServer {
 		 */
 		val inStream = file.inputStream
 		out.addHeader("Content-Disposition", "attachment")
+		file.contentLength.map { length =>
+			out.addHeader("Content-Length", length.toString)
+		}
 		FileCopyUtils.copy(inStream, out.getOutputStream)
 	}
 }

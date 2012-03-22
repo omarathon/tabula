@@ -9,4 +9,5 @@ class RenderableZip(zip:File) extends RenderableFile {
 	def filename: String = zip.getName
 	def contentType: String = "application/zip"
 	def file: Option[File] = Some(zip)
+	def contentLength = Some(zip.length)
 }
