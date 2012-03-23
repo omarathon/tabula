@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <h1>Published feedback for ${assignment.name}.</h1>
 
 <#assign module=assignment.module />
@@ -20,3 +22,5 @@ ${feedbackUrl}
 Return to assignment info
 </a>
 </p>
+
+</#escape>

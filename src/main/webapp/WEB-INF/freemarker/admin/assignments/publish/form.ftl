@@ -15,10 +15,13 @@ jQuery(function($){ "use strict";
 	checkbox.change(updateCheckbox);
 	updateCheckbox();
 	
-	
 	$('#feedback-check-recipient-results')
 		.html('<p>Checking for potential problems with students\' email addresses&hellip;</p>')
-		.load('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')
+		.load('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients');
+		
+	$('#submissions-report-results')
+		.html('<p>Comparing feedback list against submission list&hellip;</p>')
+		.load('/admin/module/${module.code}/assignments/${assignment.id}/submissions-report');
 });
 </script>
 
@@ -57,6 +60,9 @@ link yourself, by email or by posting it on your module web pages.
 </#if>
 
 <div id="feedback-check-recipient-results"></div>
+<#if features.submissions && assignment.submissions?size gt 0>
+<div id="submissions-report-results"></div>
+</#if>
 
 <@f.errors path="confirm" cssClass="error" />
 <@f.checkbox path="confirm" id="confirmCheck" />

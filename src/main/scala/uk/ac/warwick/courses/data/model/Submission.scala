@@ -16,6 +16,11 @@ import uk.ac.warwick.courses.JavaImports.JSet
 @Entity @AccessType("field")
 class Submission extends GeneratedId {
   
+	def this(universityId:String) {
+		this()
+		this.universityId = universityId
+	}
+	
 	@ManyToOne(optional=false, cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _

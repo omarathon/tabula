@@ -109,7 +109,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@OrderBy("submittedDate")
-	@BeanProperty var submissions:JList[Submission] =_
+	@BeanProperty var submissions:JList[Submission] = ArrayList()
 	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@BeanProperty var feedbacks:JList[Feedback] = ArrayList()
@@ -152,5 +152,25 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 			! feedbacks.isEmpty && 
 			! unreleasedFeedback.isEmpty && 
 			closeDate.isBeforeNow
+		
+	/**
+	 * Report on the submissions and feedbacks, noting
+	 * where the lists of students don't match up.
+	 */
+	def submissionsReport = {
+		// Get sets of University IDs
+		val feedbackUniIds = feedbacks map {_.universityId} toSet
+		val submissionUniIds = submissions map {_.universityId} toSet
+		
+		// Subtract the sets from each other to obtain discrepencies
+		val feedbackOnly = feedbackUniIds &~ submissionUniIds
+		val submissionOnly = submissionUniIds &~ feedbackUniIds
+		
+		SubmissionsReport(this, feedbackOnly, submissionOnly)
+	}
 }
 
+case class SubmissionsReport(val assignment:Assignment, val feedbackOnly:Set[String], val submissionOnly:Set[String]) {
+	def hasProblems = assignment.collectSubmissions && 
+		(!feedbackOnly.isEmpty || !submissionOnly.isEmpty)
+}

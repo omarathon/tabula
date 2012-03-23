@@ -16,7 +16,7 @@ import uk.ac.warwick.courses.data.model
  *   )
  */
 class Mav(var viewName:String) {
-	var map = mutable.Map[String,Any]()
+	var map = mutable.Map[String,Any]("embedded" -> false)
 	var classes:List[String] = Nil
 	
 	def addObjects(items:Pair[String,Any]*) = {
@@ -44,8 +44,19 @@ class Mav(var viewName:String) {
 	/**
 	 * Sets the layout parameter to "none" to
 	 * render the template without any surrounding stuff.
+	 * 
+	 * Also sets embedded->true so views can decide whether to 
+	 * render certain elements.
 	 */
-	def noLayout = layout("none")
+	def noLayout = {
+		addObjects("embedded" -> true)
+		layout("none")
+	}
+	
+	def embedded = {
+		addObjects("embedded" -> true)
+		layout("embedded")
+	}
 	
 	/**
 	 * Changes to noLayout if the given thing is true.

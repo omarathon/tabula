@@ -1,4 +1,5 @@
 <#compress>
+<#escape x as x?html>
 
 <#if report.hasProblems>
 
@@ -27,4 +28,5 @@
 	<p>No problems found with students' email addresses.</p>
 </#if>
 
+</#escape>
 </#compress>

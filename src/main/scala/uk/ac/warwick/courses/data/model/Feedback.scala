@@ -18,6 +18,11 @@ import uk.ac.warwick.courses.actions.Viewable
 @Entity @AccessType("field")
 class Feedback extends GeneratedId with Viewable {
 	
+	def this(universityId:String) {
+		this()
+		this.universityId = universityId
+	}
+	
 	@ManyToOne(fetch=FetchType.LAZY, optional=false)
 	@BeanProperty var assignment:Assignment =_
 	
