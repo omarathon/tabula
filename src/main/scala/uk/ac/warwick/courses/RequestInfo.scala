@@ -28,6 +28,11 @@ object RequestInfo {
 	}
 	def fromThread = threadLocal.get
 	def open(info:RequestInfo) = threadLocal.set(Some(info))
+	
+	def use(info:RequestInfo)(fn: =>Unit) =
+		try { open(info); fn }
+		finally close 
+	
 	/*threadLocal.get match {
 		case None => threadLocal.set(Some(info))
 		case Some(info) => throw new IllegalStateException("RequestInfo already set")

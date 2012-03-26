@@ -7,9 +7,17 @@ user=${requestInfo.user.realId}
 masqueradingAs=${requestInfo.user.apparentId}
 </#if>
 </#if>
+<#if requestInfo.requestedUri??>
+info.requestedUri=${requestInfo.requestedUri}
+</#if>
 </#if>
 <#if request??>
 request.requestURI=${request.requestURI}
+request.method=${request.method}
+<#assign parameters=request.parameterMap />
+<#list parameters?keys as key>
+request.params[${key}]=[<#list parameters[key] as v>${v}<#if v_has_next>,</#if></#list>]
+</#list>
 </#if>
 </#compress>
 

@@ -7,6 +7,7 @@ import org.hamcrest.Matcher
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
+import org.junit.After
 import org.scalatest.junit.JUnitSuite
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.specs.mock.JMocker._
@@ -16,9 +17,12 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.util.FileCopyUtils
+import collection.JavaConversions._
+import freemarker.cache.ClassTemplateLoader
+import uk.ac.warwick.courses.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.User
-import org.junit.After
 import uk.ac.warwick.util.core.spring.FileUtils
+import freemarker.cache.MultiTemplateLoader
 
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   
@@ -102,4 +106,12 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
   }
   
   def testResponse = new MockHttpServletResponse
+  
+  def newFreemarkerConfiguration = new ScalaFreemarkerConfiguration {
+		setTemplateLoader(new MultiTemplateLoader(Array(
+				new ClassTemplateLoader(getClass, "/freemarker/"), // to match test templates
+				new ClassTemplateLoader(getClass, "/") // to match live templates
+		)))
+		setAutoIncludes(Nil) // don't use prelude
+	}
 }

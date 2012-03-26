@@ -13,13 +13,9 @@ import org.joda.time.Duration
 
 class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
-	def newConfiguration = new ScalaFreemarkerConfiguration {
-		setTemplateLoader(new ClassTemplateLoader(getClass, "/freemarker/"))
-		setSharedVariables(Map("Routes" -> Routes))
-		setAutoIncludes(Nil) // don't use prelude
-	}
+	
 	@Before def setup {
-		configuration = newConfiguration
+		configuration = newFreemarkerConfiguration
 	}
 	
 	def render(template:String, map:Map[String,Any]) = {

@@ -20,8 +20,8 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.io.IOException
 
-case class ExceptionContext(val token:String, val exception:Throwable, val request:HttpServletRequest=null) {
-	def getHasRequest = request==null
+case class ExceptionContext(val token:String, val exception:Throwable, val request:Option[HttpServletRequest]=None) {
+	def getHasRequest = request.isDefined
 }
 
 trait ExceptionHandler {

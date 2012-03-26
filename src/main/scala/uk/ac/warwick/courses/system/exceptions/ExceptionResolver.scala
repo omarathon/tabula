@@ -38,7 +38,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var viewMappings:JMap[String,String] = Map[String,String]()
 	
 	override def resolveException(request:HttpServletRequest, response:HttpServletResponse, obj:Any, e:Exception):ModelAndView = {
-		doResolve(e).toModelAndView
+		doResolve(e, Some(request)).toModelAndView
 	}
 	
 	/**
@@ -50,17 +50,20 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Simpler interface for ErrorController to delegate to, which is called when an exception
 	 * happens beyond Spring's grasp.
 	 */
-	def doResolve(e:Throwable):Mav = {
+	def doResolve(e:Throwable, request:Option[HttpServletRequest]=None):Mav = {
 		e match {
-	      case exception:Throwable => handle(exception)
+	      case exception:Throwable => handle(exception, request)
 	      case _ => handleNull
 	    }
 	}
 	
 	def reportExceptions[T](fn : =>T) = 
-		try { fn } catch { case e:Throwable => handle(e); throw e }
+		try fn  
+		catch { 
+			case e:Throwable => { handle(e, None); throw e } 
+		}
 	
-	private def handle(exception:Throwable) = {
+	private def handle(exception:Throwable, request:Option[HttpServletRequest]) = {
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] ))
 
 		val mav = Mav(defaultView,
@@ -72,7 +75,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		
 		// handler will do logging, emailing
 		try {
-			exceptionHandler.exception(ExceptionContext(token, interestingException))
+			exceptionHandler.exception(ExceptionContext(token, interestingException, request))
 		} catch {
 			// This is very bad and should never happen - but still try to avoid showing
 			// a plain JBoss exception to the user.
