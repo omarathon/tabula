@@ -31,11 +31,12 @@
 	</div>
 	</#if>
 	
+	
 	<p>
-		Discrepencies between submissions and feedback may not be a problem - you might not be
-		collecting submissions online, or somebody might have erroneously submitted an assignment
-		that doesn't need feedback. 
+		The above discrepencies are provided for information.
+		It is up to you to decide whether to continue publishing. 
 	</p>
+	
 
 <#else>
 	<p><span class="icon-ok"></span> The submissions and the feedback items appear to match up for this assignment.</p>
