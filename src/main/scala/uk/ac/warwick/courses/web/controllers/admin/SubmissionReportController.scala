@@ -8,7 +8,7 @@ import uk.ac.warwick.courses.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.courses.actions.Participate
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.userlookup.UserLookup
+import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
 
 class SubmissionReportCommand {
@@ -20,7 +20,7 @@ class SubmissionReportCommand {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/submissions-report"))
 class SubmissionReportController extends BaseController {
 
-	@Autowired var userLookup:UserLookup =_
+	@Autowired var userLookup:UserLookupInterface =_
 	
 	@RequestMapping()
 	def get(command:SubmissionReportCommand): Mav = {	
