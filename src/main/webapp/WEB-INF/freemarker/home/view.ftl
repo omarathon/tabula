@@ -54,16 +54,36 @@ to see a personalised view.
 </ul>
 </#if>
 
-<#if assignmentsWithFeedback?? && assignmentsWithFeedback?size gt 0>
-<h2>Your feedback</h2>
+<#assign has_feedback=(assignmentsWithFeedback?? && assignmentsWithFeedback?size gt 0) />
+<#assign has_submissions=(assignmentsWithSubmission?? && assignmentsWithSubmission?size gt 0) />
+
+<#if has_feedback || has_submissions>
+<h2>Your assignments</h2>
+
 <ul class="links">
+
+<#if has_feedback>
 <#list assignmentsWithFeedback as assignment>
-	<li>
+	<li class="assignment-info">
+		<span class="label-green">Marked</span>
 		<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
 			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
 		</a>
 	</li>
 </#list>
+</#if>
+
+<#if has_submissions>
+<#list assignmentsWithSubmission as assignment>
+	<li class="assignment-info">
+		<span class="label-orange">Submitted</span>
+		<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
+		</a>
+	</li>
+</#list>
+</#if>
+
 </ul>
 </#if>
 

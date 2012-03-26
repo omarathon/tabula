@@ -27,6 +27,7 @@ trait AssignmentService {
 	def getUsersForFeedback(assignment:Assignment): Seq[Pair[String,User]]
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment]
+	def getAssignmentsWithSubmission(universityId:String): Seq[Assignment]
 	
 }
 
@@ -54,6 +55,13 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 				join a.feedbacks as f
 				where f.universityId = :universityId
 				and f.released=true""")
+			.setString("universityId", universityId)
+			.list.asInstanceOf[JList[Assignment]]
+	
+	def getAssignmentsWithSubmission(universityId:String): Seq[Assignment] =
+		session.createQuery("""select distinct a from Assignment a
+				join a.submissions as f
+				where f.universityId = :universityId""")
 			.setString("universityId", universityId)
 			.list.asInstanceOf[JList[Assignment]]
 	

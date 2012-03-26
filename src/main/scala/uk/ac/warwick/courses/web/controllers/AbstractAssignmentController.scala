@@ -16,7 +16,7 @@ abstract class AbstractAssignmentController extends BaseController {
 	
 	def checkCanGetFeedback(assignment:Assignment, user:CurrentUser): Option[Feedback] = {
 		notDeleted(assignment)
-		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId)
+		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
 		
 		/*
 		 * When feedback has been released and we have some for that user,

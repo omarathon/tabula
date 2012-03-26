@@ -12,11 +12,13 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.Features
 
 @Controller class HomeController extends BaseController {
 	@Autowired var moduleService: ModuleAndDepartmentService =_
 	@Autowired var assignmentService: AssignmentService =_
 	@Autowired var userLookup:UserLookupService =_
+	@Autowired var features:Features =_
 	def groupService = userLookup.getGroupService
 	
 	hideDeletedItems
@@ -30,6 +32,9 @@ import uk.ac.warwick.courses.services.AssignmentService
 		  val filter = session.getEnabledFilter("notDeleted")
 		  
 		  val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
+		  val assignmentsWithSubmission = 
+		 	  if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
+		 	  else Seq.empty
 		  
 		  if (false/*disabled*/ && moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
 		 	  debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
@@ -37,6 +42,7 @@ import uk.ac.warwick.courses.services.AssignmentService
 		  } else {
 			  Mav("home/view",
 			 	  "assignmentsWithFeedback" -> assignmentsWithFeedback,
+			 	  "assignmentsWithSubmission" -> (assignmentsWithSubmission filterNot (assignmentsWithFeedback contains)),
 			      "moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
 			      "ownedDepartments" -> ownedDepartments,
 			      "ownedModule" -> ownedModules,
