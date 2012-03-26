@@ -48,6 +48,9 @@ class AssignmentTest extends TestBase {
 		
 		// only 0000008 .. 0000010 are common to both lists
 		val report = assignment.submissionsReport
+		assignment.collectSubmissions = false
+		report should not be ('hasProblems) // be has problems.
+		assignment.collectSubmissions = true
 		report should be ('hasProblems) // be has problems.
 		report.feedbackOnly.toSeq.sorted should be ((1 to 7) map idFormat)
 		report.submissionOnly.toSeq.sorted should be ((11 to 20) map idFormat)
