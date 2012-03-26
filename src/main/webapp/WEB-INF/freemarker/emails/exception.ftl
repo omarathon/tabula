@@ -12,6 +12,7 @@ info.requestedUri=${requestInfo.requestedUri}
 </#if>
 </#if>
 <#if request??>
+request.remoteAddr=${request.remoteAddr}
 request.requestURI=${request.requestURI}
 request.method=${request.method}
 <#assign parameters=request.parameterMap />
@@ -22,4 +23,9 @@ request.params[${key}]=[<#list parameters[key] as v>${v}<#if v_has_next>,</#if><
 </#compress>
 
 ${exceptionStack}
+
+<#if request??>
+<#list request.headerNames as header>${header}: ${request.getHeader(header)}
+</#list>
+</#if>
 
