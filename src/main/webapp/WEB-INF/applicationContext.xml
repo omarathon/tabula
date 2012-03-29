@@ -363,6 +363,10 @@
 		   <property name="jndiName" value="java:/CoursesDS"/>
 	    </bean>
 	    
+	    <bean id="academicDataStore" class="org.springframework.jndi.JndiObjectFactoryBean">
+		   <property name="jndiName" value="java:/AcademicDS"/>
+	    </bean>
+	    
 	    <bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
 	    	<property name="nativeJdbcExtractor">
 	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
@@ -398,6 +402,9 @@
 	
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
+		
+		<!-- never read or written - just need a DataSource to exist -->
+    <bean id="academicDataStore" class="uk.ac.warwick.courses.system.UnusableDataSource" />
 		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 		

@@ -6,16 +6,20 @@ import scala.annotation.target.field
 import javax.sql.DataSource
 import org.hibernate.Session
 import uk.ac.warwick.courses.data.model.CanBeDeleted
+import javax.annotation.Resource
 
 /**
  * A trait for DAO classes to mix in to get useful things
  * like the current session.
+ * 
+ * It's only really for Hibernate access to the default
+ * session factory. If you want to do JDBC stuff or use a 
+ * different data source you'll need to look elsewhere.
  */
 trait Daoisms {
-  type AutowiredField = Autowired @field
   
-  @AutowiredField var dataSource:DataSource =_
-  @AutowiredField var sessionFactory:SessionFactory = _
+  @field @Resource(name="dataSource") var dataSource:DataSource =_
+  @field @Autowired var sessionFactory:SessionFactory = _
 
   protected def session = sessionFactory.getCurrentSession
   
