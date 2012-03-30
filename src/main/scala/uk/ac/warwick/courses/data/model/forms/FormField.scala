@@ -17,6 +17,7 @@ import uk.ac.warwick.courses.data.model.GeneratedId
 import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
+import scala.xml.NodeSeq
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -106,6 +107,16 @@ trait SimpleValue[T] { self:FormField =>
 @DiscriminatorValue("comment")
 class CommentField extends FormField with SimpleValue[String]  {
 	override def isReadOnly = true
+	
+	/**
+	 * Return a formatted version of the text that can be inserted
+	 * WITHOUT escaping.
+	 */
+	def formattedHtml:String = Option(value) map { raw =>
+		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
+		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
+		(NodeSeq fromSeq nodes).toString 
+	} getOrElse("")
 	
 	override def validate(value:SubmissionValue, errors:Errors) {}
 }

@@ -1,3 +1,3 @@
 <div class="comment-field">
-<p>${field.value?html}</p>
+<p>${field.formattedHtml}<#-- Pre-escaped HTML, no need for escaping --></p>
 </div>
