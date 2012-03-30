@@ -27,6 +27,8 @@ object Assignment {
 	val defaultUploadName = "upload"
 		
 	final val NotDeletedFilter = "notDeleted"
+		
+	final val MaximumFileAttachments = 50
 }
 
 /**
@@ -129,7 +131,20 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		fields.add(field)
 	}
 	
+	/**
+	 * Find a FormField on the Assignment with the given name.
+	 */
 	def findField(name:String) : Option[FormField] = fields.find{_.name == name}
+	
+	/**
+	 * Find a FormField on the Assignment with the given name and type.
+	 * A field with a matching name but not a matching type is ignored.
+	 */
+	def findFieldOfType[T <: FormField](name:String)(implicit m:Manifest[T]) : Option[T] = 
+		findField(name) match {
+			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[T])
+			case _ => None
+		}
 	
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.
@@ -169,6 +184,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		SubmissionsReport(this, feedbackOnly, submissionOnly)
 	}
 }
+
+
 
 case class SubmissionsReport(val assignment:Assignment, val feedbackOnly:Set[String], val submissionOnly:Set[String]) {
 	def hasProblems = assignment.collectSubmissions && 

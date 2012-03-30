@@ -9,6 +9,7 @@ import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.validation.Errors
+import org.springframework.web.util.HtmlUtils._
 import javax.persistence._
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.UploadedFile
@@ -18,6 +19,7 @@ import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
+import uk.ac.warwick.courses.helpers.ArrayList
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -72,6 +74,22 @@ abstract class FormField extends GeneratedId {
 	
 	@transient @BeanProperty var propertiesMap:collection.Map[String,Any] = Map()
 	
+	protected def setProperty(name:String,value:Any) = {
+		propertiesMap += name -> value
+	}
+	/**
+	 * Fetch a property out of the property map if it matches the type.
+	 * Careful with types as they are generally the ones that the JSON library
+	 * has decided on, so integers come out as java.lang.Integer, and Int
+	 * won't match.
+	 */
+	protected def getProperty[T](name:String, default:T)(implicit m:Manifest[T]) = 
+		propertiesMap.get(name) match {
+			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[T]
+			case _ => default
+		}
+	
+	
 	def isReadOnly = false
 	final def readOnly = isReadOnly
 	
@@ -97,7 +115,7 @@ trait SimpleValue[T] { self:FormField =>
 	def value_=(value:T) { propertiesMap += "value" -> value }
 	def setValue(value:T) = value_=(value)
 	
-	def value:T = propertiesMap("value").asInstanceOf[T]
+	def value:T = propertiesMap.getOrElse("value", null).asInstanceOf[T]
 	def getValue() = value
 	
 	def blankSubmissionValue = new StringSubmissionValue(this)
@@ -145,6 +163,13 @@ class CheckboxField extends FormField {
 class FileField extends FormField {
 	def blankSubmissionValue = new FileSubmissionValue(this)
 	
+	def attachmentLimit:Int = getProperty[JInteger]("attachmentLimit", 1)
+	def attachmentLimit_=(limit:Int) = setProperty("attachmentLimit", limit)
+	
+	// List of extensions.
+	def attachmentTypes:Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
+	def attachmentTypes_=(types:Seq[String]) = setProperty("attachmentTypes", types:JList[String])
+	
 	override def validate(value:SubmissionValue, errors:Errors) {
 		value match {
 			case v:FileSubmissionValue => 
@@ -153,5 +178,4 @@ class FileField extends FormField {
 				}
 		}
 	}
-	
 }

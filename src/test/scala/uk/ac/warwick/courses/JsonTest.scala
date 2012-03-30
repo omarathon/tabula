@@ -1,10 +1,10 @@
 package uk.ac.warwick.courses
 import scala.collection.mutable.{Map => MutableMap}
-
 import org.codehaus.jackson.map.ObjectMapper
 import org.junit.Test
-
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import java.io.StringReader
+import collection.JavaConversions._
 
 class JsonTest extends TestBase {
 	
@@ -17,6 +17,13 @@ class JsonTest extends TestBase {
 		m.writeValueAsString(Map()) should be("{}")
 		
 		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
+	}
+	
+	@Test def parseNumbers {
+		val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
+		val map = m.readValue(new StringReader(props), classOf[Map[String,Any]])
+		map("filetypes").asInstanceOf[java.util.List[_]].toSeq should equal (Seq("pdf","doc","docx"))
+		map("age").asInstanceOf[Int] should be (23)
 	}
 	
 	// bug in scala jackson module

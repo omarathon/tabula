@@ -23,9 +23,20 @@ import uk.ac.warwick.courses.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 import freemarker.cache.MultiTemplateLoader
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
+/**
+ * Base class for tests which boringly uses the JUnit support of
+ * Scalatest, so you do @Test annotated methods as you normally would.
+ * You can use ScalaTest's "should" matchers though, which is nice.
+ * 
+ * Also a bunch of methods for generating fake support resources.
+ */
+
+trait TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers
   
+trait TestHelpers {
   var temporaryDirectories:Set[File] = Set.empty
 	
   // Location of /tmp - best to create a subdir below it.
@@ -39,7 +50,7 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
    */
   def createTemporaryDirectory:File = {
 	  val file = new File(IoTmpDir, "JavaTestTmp-"+random.nextInt(99999999))
-	  file.mkdir() should be (true)
+	  if (!file.mkdir()) throw new IllegalStateException("Couldn't create " + file)
 	  temporaryDirectories += file
 	  file
   }
@@ -66,6 +77,7 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
 	 	  DateTimeUtils.setCurrentMillisSystem
 	  }
 	   
+  /** Returns midnight on the first day of this year and month. */
   def dateTime(year:Int, month:Int) = new DateTime(year,month,1,0,0,0)
   
   var currentUser:CurrentUser = null
@@ -95,6 +107,10 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit {
 	  }
   } 
   
+  /**
+   * Fetches a resource as a string. Assumes UTF-8 unless specified.
+   */
+  def resourceAsString(path:String, encoding:String="UTF-8"):String = new String(resourceAsBytes(path), encoding)
   def resourceAsBytes(path:String):Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
   
   def emptyFeatures = new Features(new Properties)

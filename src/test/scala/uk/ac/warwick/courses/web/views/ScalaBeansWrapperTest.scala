@@ -12,6 +12,7 @@ import freemarker.template.SimpleHash
 class MyObject {
   var name = "text"
   def getMotto() = "do be good, don't be bad"
+  def grotto = "Santa's"
 	  
   def getGreeting(name:String) = "Hello %s!" format (name)
   def getGreeting():String = getGreeting("you")
@@ -74,6 +75,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	    case hash:ScalaHashModel => {
 	      hash.get("name").toString should be("text")
 	      hash.get("motto").toString should be("do be good, don't be bad")
+	      hash.get("grotto").toString should be("Santa's")
 	    }
 	  }
 	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
