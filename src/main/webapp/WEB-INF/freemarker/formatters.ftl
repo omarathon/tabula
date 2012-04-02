@@ -9,7 +9,7 @@
 <@warwick.formatDate value=date pattern="d MMMM yyyy HH:mm:ss" />
 </#macro>
 
-<#macro p number singular>${number} ${singular}<#if number!=1>s</#if></#macro>
+<#macro p number singular plural="${singular}s">${number} <#if number=1>${singular}<#else>${plural}</#if></#macro>
 
 <#macro usergroup_summary ug>
 <div class="usergroup-summary">

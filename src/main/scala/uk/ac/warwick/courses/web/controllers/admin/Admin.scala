@@ -39,6 +39,7 @@ import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
+import uk.ac.warwick.courses.services.AuditEventIndexService
 
 /**
  * Screens for department and module admins.
@@ -260,14 +261,19 @@ class DownloadAllFeedback extends BaseController {
 	}
 }
 
-@Controller
+@Configurable @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
 class ListFeedback extends BaseController {
+	
+	@Autowired var auditIndexService: AuditEventIndexService = _
+	
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
-		Mav("admin/assignments/feedback/list")
+		Mav("admin/assignments/feedback/list",
+				"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment)
+			)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 }

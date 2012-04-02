@@ -5,6 +5,10 @@
 
 <h1>All feedback for ${assignment.name}</h1>
 
+<p>
+	<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date. <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
+</p>
+
 <div class="actions">
 <a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download-zip/feedback.zip'/>">
 Download all as ZIP file

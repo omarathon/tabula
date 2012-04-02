@@ -108,7 +108,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			offset = start,
 			max = count
 		)
-		docs flatMap { toId(_) } flatMap { service.getById(_) }
+		docs flatMap toId flatMap service.getById
 	}
 	
 	/**
@@ -222,16 +222,20 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		search(new TermQuery(new Term("userId", usercode)))
 		
 	def whoDownloadedFeedback(assignment:Assignment) =
-		search(new TermQuery(new Term("assignment", assignment.id)))
+		search(all(
+				new TermQuery(new Term("eventType", "DownloadFeedback")),
+				new TermQuery(new Term("assignment", assignment.id))
+			))
 			.flatMap{ toId(_) }
 			.flatMap{ service.getById(_) }
-			.map{ _.userId }
+			.map{ _.masqueradeUserId }
 			.distinct
 			
 	
 	def search(query:Query, max:Int, sort:Sort=null, offset:Int=0) : Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query:Query) : Seq[Document] = doSearch(query, None, null, 0)
 	def search(query:Query, sort:Sort) : Seq[Document] = doSearch(query, None, sort, 0)
+	
 	private def doSearch(query:Query, max:Option[Int], sort:Sort, offset:Int) : Seq[Document] = {
 		initialiseSearching
 		if (searcherManager == null) return Seq.empty
@@ -280,7 +284,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			case None => // no valid JSON
 			case Some(data) => addDataToDoc(data, doc)
 		}
-		doc add dateField("eventDate", item.eventDate)		
+		doc add dateField("eventDate", item.eventDate)
 		doc
 	}
 	
