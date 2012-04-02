@@ -18,6 +18,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
 <#macro assignmentsubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/list"/></#macro>
 <#macro assignmentfeedbacks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/list"/></#macro>
+<#macro feedbackadd assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
+<#macro feedbackdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>

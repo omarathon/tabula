@@ -26,6 +26,10 @@ object Routes {
 			def create(module:Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
 			def edit(assignment:Assignment) = "/admin/module/%s/assignments/%s/edit" format (encoded(assignment.module.code), assignment.id)
 			def delete(assignment:Assignment) = "/admin/module/%s/assignments/%s/delete" format (encoded(assignment.module.code), assignment.id)
+			
+			object feedback {
+				def apply(assignment:Assignment) = "/admin/module/%s/assignments/%s/feedback/list" format (encoded(assignment.module.code), assignment.id)
+			}
 		}
 	}
 }

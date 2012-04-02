@@ -24,6 +24,12 @@ trait Command[R] extends Describable with JavaImports {
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
 
+trait SelfValidating {
+	def validate(implicit errors:Errors)
+	
+	def reject(code:String)(implicit errors:Errors) = errors.reject(code)
+	def rejectValue(prop:String, code:String)(implicit errors:Errors) = errors.rejectValue(prop,code)
+}
 
 trait Unaudited { self:Describable =>
 	// override describe() with nothing, since it'll never be used.

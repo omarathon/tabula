@@ -56,6 +56,8 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 	@BeanProperty var assignments:java.util.List[Assignment] = List()
 	
 	@BeanProperty var active:Boolean = _
+	
+	override def toString = "Module["+code+"]"
 }
 
 object Module {

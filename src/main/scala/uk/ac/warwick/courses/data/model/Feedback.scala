@@ -14,9 +14,10 @@ import javax.persistence.OneToMany
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.actions.Viewable
+import uk.ac.warwick.courses.actions.Deleteable
 
 @Entity @AccessType("field")
-class Feedback extends GeneratedId with Viewable {
+class Feedback extends GeneratedId with Viewable with Deleteable {
 	
 	def this(universityId:String) {
 		this()

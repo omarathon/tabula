@@ -23,7 +23,7 @@ import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import freemarker.template.Configuration
 
 @Configurable
-class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering {
+class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
   
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
 	@Autowired var assignmentService:AssignmentService =_
@@ -37,8 +37,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering {
 	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
 	@Value("${mail.noreply.to}") var replyAddress:String = _
-	@Value("${mail.exceptions.to}") var fromAddress:String = 
-  _
+	@Value("${mail.exceptions.to}") var fromAddress:String = _
 	
 	case class MissingUser(val universityId:String)
 	case class BadEmail(val user:User, val exception:Exception=null)
@@ -55,10 +54,10 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering {
 	  }
 	}
 	
-	def validate(errors:Errors) {
+	def validate(implicit errors:Errors) {
 	  prevalidate(errors)
 	  if (!confirm) {
-	    errors.rejectValue("confirm","feedback.publish.confirm")
+	    rejectValue("confirm","feedback.publish.confirm")
 	  }
 	}
 	

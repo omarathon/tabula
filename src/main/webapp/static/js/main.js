@@ -190,6 +190,41 @@ jQuery(function ($) {
 		
 	});
 	
+	$('.feedback-list').each(function(){
+		var $feedbackList = $(this);
+		var $checkboxes = $feedbackList.find('input.collection-checkbox');
+		var $selectAll = $feedbackList.find('input.collection-check-all');
+		var updateDeleteButton = function() {
+			$('#delete-feedback-button').toggleClass('disabled', !$checkboxes.is(':checked'));
+		}
+		updateDeleteButton();
+		$checkboxes.change(function(){
+			var allChecked = $checkboxes.not(":checked").length == 0;
+			$selectAll.attr("checked", allChecked);
+			updateDeleteButton();
+		});
+		$selectAll.change(function(){
+			$checkboxes.attr("checked", this.checked);
+			updateDeleteButton();
+		});
+		
+		// Returns an array of IDs.
+		var getCheckedFeedbacks = function() {
+			return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
+		};
+		
+		$('#delete-feedback-button').click(function(event){
+			event.preventDefault();
+			var $checkedBoxes = $checkboxes.filter(":checked");
+			if ($checkedBoxes.length > 0) {
+				var $form = $('<form></form>').attr({method:'POST',action:this.href});
+				$form.append($checkedBoxes);
+				$form.submit();
+			}
+			return false;
+		})
+	});
+	
 	var _feedbackPopup;
 	var getFeedbackPopup = function() {
 		if (!_feedbackPopup) {
@@ -288,18 +323,16 @@ jQuery(function ($) {
 		
 	});
 	
-	(function(){
-		
-		var $collectSubmissions = $('input#collectSubmissions');
-		var $options = $('#submission-options');
-		$collectSubmissions.change(function(){
-			if ($collectSubmissions.is(':checked')) $options.stop().slideDown('fast');
-			else $options.stop().slideUp('fast');
+	var slideMoreOptions = function($checkbox, $slidingDiv) {
+		$checkbox.change(function(){
+			if ($checkbox.is(':checked')) $slidingDiv.stop().slideDown('fast');
+			else $slidingDiv.stop().slideUp('fast');
 		});
-		$options.toggle($collectSubmissions.is(':checked'));
-		
-	})();
+		$slidingDiv.toggle($checkbox.is(':checked'));
+	};
 	
+	
+	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
 	
 	
 	$('.assignment-info .assignment-buttons').css('opacity',0);

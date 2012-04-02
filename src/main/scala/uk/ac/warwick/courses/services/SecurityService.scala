@@ -35,19 +35,20 @@ class SecurityService extends Logging {
 	def checkGroup(user:CurrentUser, action:Action[_]):Boolean = action match {
 		
 	  case Manage(department:Department) => department isOwnedBy user.idForPermissions
-	  case View(department:Department) => checkGroup(user, Manage(department))
+	  case View(department:Department) => can(user, Manage(department))
 	  
 	  case Participate(module:Module) => module.ensuredParticipants.includes(user.apparentId) || 
-	 	  						  	checkGroup(user, Manage(module.department))
-	  case Manage(module:Module) => checkGroup(user, Manage(module.department))
+	 	  						  	can(user, Manage(module.department))
+	  case Manage(module:Module) => can(user, Manage(module.department))
 	  case View(module:Module) => module.members.includes(user.apparentId) || 
-	  							  checkGroup(user, View(module.department))
+	  							  can(user, View(module.department))
 	  
-	  case View(assignment:Assignment) => checkGroup(user, View(assignment.module))
-	  case Submit(assignment:Assignment) => checkGroup(user, View(assignment.module))
+	  case View(assignment:Assignment) => can(user, View(assignment.module))
+	  case Submit(assignment:Assignment) => can(user, View(assignment.module))
 	  
 	  case View(feedback:Feedback) => feedback.universityId == user.universityId ||
-	  								checkGroup(user, View(feedback.assignment))
+	  								can(user, View(feedback.assignment))
+	  case Delete(feedback:Feedback) => can(user, Participate(feedback.assignment.module))
 	  
 	  case Masquerade() => user.sysadmin || user.masquerader
 	  

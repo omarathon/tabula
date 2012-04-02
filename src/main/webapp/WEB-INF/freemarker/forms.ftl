@@ -9,8 +9,10 @@
 <div class="form-field"><#nested/></div>
 </#macro>
 
+<#macro errors path><@f.errors path=path cssClass="error" /></#macro>
+
 <#macro labelled_row path label>
-<@f.errors path=path cssClass="error" />
+<@errors path=path />
 <@row>
 	<@f.label path=path>
 	${label}
@@ -62,9 +64,9 @@ To not bind:
 
 <#macro filewidget basename>
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
-	<@f.errors path="${basename}" cssClass="error" />
-	<@f.errors path="${basename}.upload" cssClass="error" />
-	<@f.errors path="${basename}.attached" cssClass="error" />
+	<@errors path="${basename}" />
+	<@errors path="${basename}.upload" />
+	<@errors path="${basename}.attached" />
 	<@row>
 	<@f.label path="${basename}.upload">
 	File

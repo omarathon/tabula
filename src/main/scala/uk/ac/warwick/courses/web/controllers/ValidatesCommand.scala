@@ -3,6 +3,7 @@ import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.helpers.ClassValidator
+import uk.ac.warwick.courses.commands.SelfValidating
 
 /**
  * Methods for setting custom validator stuff.
@@ -37,6 +38,14 @@ trait ValidatesCommand {
 	validator = new ClassValidator[T] {
 		override def valid(target:T, errors:Errors) = fn(target, errors)
 	}
+  }
+  
+  /**
+   * If the command object implements SelfValidating, this will
+   * run its validation command when a @Valid object is requested.
+   */
+  def validatesSelf[T <: SelfValidating] {
+	  validatesWith[T] { (cmd, errors) => cmd.validate(errors) }
   }
   
   /**

@@ -16,7 +16,7 @@ import uk.ac.warwick.courses.data.model
  *   )
  */
 class Mav(var viewName:String) {
-	var map = mutable.Map[String,Any]("embedded" -> false)
+	var map = mutable.Map[String,Any]()
 	var classes:List[String] = Nil
 	
 	def addObjects(items:Pair[String,Any]*) = {

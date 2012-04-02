@@ -11,6 +11,8 @@ trait StringUtils {
 		def hasText = Utils hasText string
 		def hasLength = Utils hasLength string
 		def orEmpty:String = Option(string).getOrElse("")
+		def maybeText:Option[String] = Option(string).filter(Utils.hasText)
+		def textOrEmpty:String = maybeText.getOrElse("")
 	}
 	
 	object HasText {

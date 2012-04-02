@@ -45,10 +45,16 @@ abstract trait ControllerMethods extends Logging {
 	   * it throws an ItemNotFoundException, which should get picked
 	   * up by an exception handler to display a 404 page.
 	   */
-	  def mandatory[T](something:T)(implicit m:Manifest[T]):T = something match {
-		  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
-		  case None => throw new ItemNotFoundException()
+	  def mandatory[T](something:T)(implicit m:Manifest[T]) : T = something match {
 		  case thing:Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+		  case _ => throw new ItemNotFoundException()
+	  }
+	  /**
+	   * Pass in an Option and receive either the actual value, or
+	   * an ItemNotFoundException is thrown.
+	   */
+	  def mandatory[T](option:Option[T])(implicit m:Manifest[T]) : T = option match {
+		  case Some(thing:Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
 		  case _ => throw new ItemNotFoundException()
 	  }
 	   
@@ -81,6 +87,14 @@ trait ControllerViews {
 	def requestInfo:Option[RequestInfo]
 }
 
+trait ControllerImports {
+	import org.springframework.web.bind.annotation.RequestMethod
+	final val GET = RequestMethod.GET
+	final val PUT = RequestMethod.PUT
+	final val HEAD = RequestMethod.HEAD
+	final val POST = RequestMethod.POST
+}
+
 /**
  * Useful traits for all controllers to have.
  */
@@ -91,9 +105,12 @@ abstract class BaseController extends ControllerMethods
 	with Logging 
 	with EventHandling 
 	with Daoisms 
-	with StringUtils {
+	with StringUtils
+	with ControllerImports {
   // make Mav available to controllers without needing to import
   
+  
+	
   @Required @Resource(name="validator") var globalValidator:Validator =_
   
   @Autowired

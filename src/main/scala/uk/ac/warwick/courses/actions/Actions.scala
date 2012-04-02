@@ -10,10 +10,12 @@ case class Participate(val item:Participatable) extends Action[Participatable]
 case class Manage(val item:Manageable) extends Action[Manageable]
 // full-on sysadmin masquerading.
 case class Masquerade() extends Action[Unit]
+case class Delete(val d:Deleteable) extends Action[Deleteable]
 
 trait Viewable
 trait Manageable
 trait Participatable
+trait Deleteable
 
 
 object Action {
