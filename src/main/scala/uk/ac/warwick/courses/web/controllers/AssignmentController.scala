@@ -93,7 +93,15 @@ class AssignmentController extends AbstractAssignmentController {
 		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
 	}
 	
-	@RequestMapping(method=Array(HEAD, GET))
+	/**
+	 * Sitebuilder-embeddable view.
+	 */
+	@RequestMapping(method=Array(HEAD, GET), params=Array("embedded"))
+	def embeddedView(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
+		view(user,form,errors).embedded
+	}
+	
+	@RequestMapping(method=Array(HEAD, GET), params=Array("!embedded"))
 	def view(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
 		val assignment = form.assignment
 		val module = form.module
