@@ -9,6 +9,7 @@
 <a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download-zip/feedback.zip'/>">
 Download all as ZIP file
 </a>
+&nbsp;
 <a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-feedback-button">Delete selected</a>
 </div>
 
