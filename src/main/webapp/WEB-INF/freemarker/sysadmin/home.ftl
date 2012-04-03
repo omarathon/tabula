@@ -19,6 +19,6 @@
 
 <p>
 <@form.form method="post" action="/sysadmin/import">
-  <input type="submit" value="Run department/module import">
+  <input type="submit" value="Run department/module import" onclick="return confirm('Really? Could take a minute.')">
 </@form.form>
 </p>
