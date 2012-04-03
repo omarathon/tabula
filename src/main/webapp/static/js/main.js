@@ -190,7 +190,7 @@ jQuery(function ($) {
 		
 	});
 	
-	$('.feedback-list').each(function(){
+	$('.submission-list, .feedback-list').each(function(){
 		var $feedbackList = $(this);
 		var $checkboxes = $feedbackList.find('input.collection-checkbox');
 		var $selectAll = $feedbackList.find('input.collection-check-all');
@@ -213,7 +213,8 @@ jQuery(function ($) {
 			return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
 		};
 		
-		$('#delete-feedback-button').click(function(event){
+		// #delete-selected-button won't work for >1 set of checkboxes on a page.
+		$('#delete-selected-button').click(function(event){
 			event.preventDefault();
 			var $checkedBoxes = $checkboxes.filter(":checked");
 			if ($checkedBoxes.length > 0) {
@@ -222,8 +223,9 @@ jQuery(function ($) {
 				$form.submit();
 			}
 			return false;
-		})
+		});
 	});
+	
 	
 	var _feedbackPopup;
 	var getFeedbackPopup = function() {

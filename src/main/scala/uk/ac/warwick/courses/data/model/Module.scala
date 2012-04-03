@@ -33,6 +33,7 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 	@BeanProperty var members:UserGroup = new UserGroup
 	
 	// The participants are markers/moderators who upload feedback. 
+	// They can also publish feedback.
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="participantsgroup_id")
 	@BeanProperty var participants:UserGroup = new UserGroup

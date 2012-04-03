@@ -21,6 +21,9 @@ trait AssignmentService {
 	def save(assignment:Assignment)
 	def saveSubmission(submission:Submission)
 	def getSubmission(assignment:Assignment, userId:String) : Option[Submission]
+	def getSubmission(id:String) : Option[Submission]
+	
+	def delete(submission:Submission) : Unit
 	
 	def getAssignmentByNameYearModule(name:String, year:AcademicYear, module:Module): Option[Assignment]
 	
@@ -49,6 +52,10 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 				.add(Restrictions.eq("userId", userId))
 				.uniqueResult
 	}
+	
+	def getSubmission(id:String) = getById[Submission](id)
+	
+	def delete(submission:Submission) = session.delete(submission)
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment] =
 		session.createQuery("""select distinct a from Assignment a

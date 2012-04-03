@@ -14,7 +14,10 @@
 <@spring.bind path="feedbacks">
 <@form.errors path="feedbacks" />
 <#assign feedbacksList=status.actualValue />
-<p>Deleting <strong><@fmt.p feedbacksList?size "feedback item" /></strong>.</p>
+<p>Deleting <strong><@fmt.p feedbacksList?size "feedback item" /></strong>.
+You only need to do this if the wrong feedback has been uploaded. If you are trying to re-use this assignment,
+you should go back and create a separate assignment instead.
+</p>
 <#list feedbacksList as feedback>
 <input type="hidden" name="feedbacks" value="${feedback.id}" />
 </#list>

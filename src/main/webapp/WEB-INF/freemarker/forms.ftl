@@ -1,5 +1,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+<#compress>
+<#escape x as x?html>
 
 <#macro row>
 <div class="form-row"><#nested/></div>
@@ -7,6 +9,20 @@
 
 <#macro field>
 <div class="form-field"><#nested/></div>
+</#macro>
+
+<#macro selector_check_all>
+<div class="check-all checkbox">
+	<label><span class="very-subtle">select all</span>
+		<input type="checkbox" class="collection-check-all">
+	</label>
+</div>
+</#macro>
+
+<#macro selector_check_row name value>
+<div class="checkbox">
+	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
+</div>
 </#macro>
 
 <#macro errors path><@f.errors path=path cssClass="error" /></#macro>
@@ -102,3 +118,6 @@ To not bind:
 	</@field>
 	</@row>
 </#macro>
+
+</#escape>
+</#compress>

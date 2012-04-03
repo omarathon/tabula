@@ -1,20 +1,19 @@
 package uk.ac.warwick.courses.data.model
 
 import scala.reflect.BeanProperty
-
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
-
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.JavaImports.JSet
+import uk.ac.warwick.courses.actions.Deleteable
 
 @Entity @AccessType("field")
-class Submission extends GeneratedId {
+class Submission extends GeneratedId with Deleteable {
   
 	def this(universityId:String) {
 		this()

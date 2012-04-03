@@ -14,20 +14,14 @@
 Download all as ZIP file
 </a>
 &nbsp;
-<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-feedback-button">Delete selected</a>
+<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-selected-button">Delete selected</a>
 </div>
 
 <div class="feedback-list">
-		<div class="check-all checkbox">
-			<label><span class="very-subtle">select all</span>
-				<input type="checkbox" class="collection-check-all">
-			</label>
-		</div>
+		<@form.selector_check_all />
 <#list assignment.feedbacks as feedback>
 	<div class="feedback-info">
-		<div class="checkbox">
-			<input type="checkbox" class="collection-checkbox" name="feedbacks" value="${feedback.id}">
-		</div>
+		<@form.selector_check_row "feedbacks" feedback.id />
 		<#-- TODO show student name if allowed by department -->
 		<h2 class="uni-id">${feedback.universityId}</h2>
 		<div class="date">Uploaded <@fmt.date date=feedback.uploadedDate /></div>

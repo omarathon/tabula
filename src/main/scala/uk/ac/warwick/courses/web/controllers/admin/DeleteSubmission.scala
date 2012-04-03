@@ -5,9 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.courses.commands.assignments.AddFeedbackCommand
 import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.commands.feedback.DeleteFeedbackCommand
+import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
 import org.springframework.transaction.annotation.Transactional
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -16,27 +15,31 @@ import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.actions.Delete
 import collection.JavaConversions._
 import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/delete"))
-class DeleteFeedback extends BaseController {
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/delete"))
+class DeleteSubmission extends BaseController {
 	@ModelAttribute
-	def command(@PathVariable assignment:Assignment) = new DeleteFeedbackCommand(assignment)
+	def command(@PathVariable assignment:Assignment) = new DeleteSubmissionCommand(assignment)
 	
-	validatesSelf[DeleteFeedbackCommand]
+	validatesSelf[DeleteSubmissionCommand]
 	
-	def formView(assignment:Assignment) = Mav("admin/assignments/feedback/delete",
+	def formView(assignment:Assignment) = Mav("admin/assignments/submissions/delete",
 				"assignment" -> assignment)
 				.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 	
+	def RedirectBack(assignment:Assignment) = Redirect(Routes.admin.assignment.submission(assignment))
+
 	@RequestMapping(method=Array(GET))
-	def get(@PathVariable assignment:Assignment) = Redirect(Routes.admin.assignment.feedback(assignment))
-				
+	def get(@PathVariable assignment:Assignment) = RedirectBack(assignment)
+	
+	
 	@RequestMapping(method=Array(POST), params=Array("!confirmScreen"))
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			form:DeleteFeedbackCommand, errors: Errors) = {
+			form:DeleteSubmissionCommand, errors: Errors) = {
 		mustBeLinked(assignment,module)
-		mustBeAbleTo(Delete(mandatory(form.feedbacks.headOption)))
+		mustBeAbleTo(Delete(mandatory(form.submissions.headOption)))
 		form.prevalidate(errors)
 		formView(assignment)
 	}
@@ -45,14 +48,14 @@ class DeleteFeedback extends BaseController {
 	@RequestMapping(method = Array(POST), params=Array("confirmScreen"))
 	def submit(
 			@PathVariable module:Module, @PathVariable assignment:Assignment,
-			@Valid form:DeleteFeedbackCommand, errors: Errors) = {
+			@Valid form:DeleteSubmissionCommand, errors: Errors) = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 		if (errors.hasErrors) {
 			formView(assignment)
 		} else {
 			form.apply()
-			Redirect(Routes.admin.assignment.feedback(assignment))
+			RedirectBack(assignment)
 		}
 	}
 }

@@ -50,6 +50,8 @@ class SecurityService extends Logging {
 	  								can(user, View(feedback.assignment))
 	  case Delete(feedback:Feedback) => can(user, Participate(feedback.assignment.module))
 	  
+	  case Delete(submission:Submission) => can(user, Participate(submission.assignment.module))
+	  
 	  case Masquerade() => user.sysadmin || user.masquerader
 	  
 	  case action:Action[_] => throw new IllegalArgumentException(action.toString)
