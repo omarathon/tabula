@@ -44,9 +44,18 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 		participants
 	}
 	
+	def ensuredMembers = {
+		ensureMembersGroup
+		members
+	}
+	
 	/** Create an empty participants group if it's null. */
 	def ensureParticipantsGroup {
 		if (participants == null) participants = new UserGroup
+	}
+	
+	def ensureMembersGroup {
+		if (members == null) members = new UserGroup
 	}
 	
 	@ManyToOne
