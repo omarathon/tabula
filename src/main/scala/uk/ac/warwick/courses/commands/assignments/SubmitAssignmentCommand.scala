@@ -55,6 +55,11 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	  if (!assignment.allowLateSubmissions && assignment.isClosed()) {
 	 	  errors.reject("assignment.submit.closed")
 	  }
+	  // HFC-164
+	  if (assignment.submissions.exists(_.universityId == user.universityId)) {
+	 	  errors.reject("assignment.submit.already")
+	  }
+	 	
 	   
 	  // Individually validate all the custom fields
 	  // If a submitted ID is not found in assignment, it's ignored.
@@ -64,8 +69,6 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	 	  errors.popNestedPath()
 	  }
 	   
-	  //FIXME obviously remove this ASAP
-//	  errors.reject("assignment.submit.notimplemented");
   }
 
   @Transactional

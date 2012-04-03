@@ -88,11 +88,12 @@ trait TestHelpers {
    * 
    * withUser("cusebr") { /* ... your code */  }
    */
-  def withUser(code:String)(fn: =>Unit) {
+  def withUser(code:String, universityId:String=null)(fn: =>Unit) {
 	  val requestInfo = RequestInfo.fromThread match {
 	 	  case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 	 	  case None => {
 	 	 	  val user = new User(code)
+	 	 	  user.setWarwickId(universityId)
 	 	 	  currentUser = new CurrentUser(user, user)
 	 		  new RequestInfo(currentUser, null)
 	 	  }

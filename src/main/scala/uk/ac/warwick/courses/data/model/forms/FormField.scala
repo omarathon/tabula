@@ -83,7 +83,7 @@ abstract class FormField extends GeneratedId {
 	 * has decided on, so integers come out as java.lang.Integer, and Int
 	 * won't match.
 	 */
-	protected def getProperty[T](name:String, default:T)(implicit m:Manifest[T]) = 
+	protected def getProperty[T] (name:String, default:T) (implicit m:Manifest[T]) = 
 		propertiesMap.get(name) match {
 			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[T]
 			case _ => default
@@ -170,12 +170,18 @@ class FileField extends FormField {
 	def attachmentTypes:Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
 	def attachmentTypes_=(types:Seq[String]) = setProperty("attachmentTypes", types:JList[String])
 	
+	// This is before onBind is called, so multipart files have not been persisted
+	// as attachments yet.
 	override def validate(value:SubmissionValue, errors:Errors) {
 		value match {
-			case v:FileSubmissionValue => 
-				if (value.asInstanceOf[FileSubmissionValue].file.isMissing) {
+			case v:FileSubmissionValue => {
+				if (v.file.isMissing) {
 					errors.rejectValue("file", "file.missing")
+				} else if (v.file.size > attachmentLimit) {
+					if (attachmentLimit == 1) errors.rejectValue("file", "file.toomany.one")
+					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit:JInteger), "")
 				}
+			}
 		}
 	}
 }

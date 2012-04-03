@@ -131,6 +131,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		fields.add(field)
 	}
 	
+	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
+	def commentField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+	
 	/**
 	 * Find a FormField on the Assignment with the given name.
 	 */

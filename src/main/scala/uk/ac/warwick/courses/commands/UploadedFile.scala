@@ -1,16 +1,19 @@
 package uk.ac.warwick.courses.commands
-import org.springframework.web.multipart.MultipartFile
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.data.FileDao
-import uk.ac.warwick.courses.data.model.FileAttachment
-import scala.reflect.BeanProperty
-import org.springframework.beans.factory.annotation.Configurable
+
 import java.io.File
-import uk.ac.warwick.courses.helpers.LazyLists
-import uk.ac.warwick.courses.helpers.ArrayList
-import collection.JavaConversions._
-import collection.JavaConverters._
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.reflect.BeanProperty
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.web.multipart.MultipartFile
+
 import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.courses.data.FileDao
+import uk.ac.warwick.courses.helpers.ArrayList
 
 /**
  * Encapsulates an initially-uploaded MultipartFile with a reference to
@@ -38,8 +41,16 @@ class UploadedFile {
   def isMissing = !isExists
   def isExists = hasUploads || hasAttachments
   
+  def size:Int = if (hasAttachments) attached.size
+  			else if (hasUploads) nonEmptyUploads.size
+  			else 0
+  
+  def attachedOrEmpty = Option(attached) getOrElse ArrayList()
+  def uploadOrEmpty = Option(upload) getOrElse ArrayList()
+	  
   def hasAttachments = attached != null && !attached.isEmpty()
-  def hasUploads = (upload != null && !upload.isEmpty() && upload.filter{_.isEmpty}.isEmpty)
+  def hasUploads = !nonEmptyUploads.isEmpty
+  def nonEmptyUploads = Option(upload).getOrElse(ArrayList()).filterNot{_.isEmpty}
   def isUploaded = hasUploads
   					
   def onBind {

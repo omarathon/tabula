@@ -78,7 +78,7 @@ To not bind:
 	</#if>
 </#macro>
 
-<#macro filewidget basename>
+<#macro filewidget basename multiple=true>
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<@errors path="${basename}" />
 	<@errors path="${basename}.upload" />
@@ -111,8 +111,10 @@ To not bind:
 		});
 		</script>
 	</#list>
+	<#elseif multiple>
+		<input type="file" name="${basename}.upload" multiple>
 	<#else>
-	<input type="file" name="${basename}.upload" >
+		<input type="file" name="${basename}.upload" >
 	</#if>
 	</@spring.bind>
 	</@field>
