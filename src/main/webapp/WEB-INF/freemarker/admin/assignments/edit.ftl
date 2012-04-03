@@ -1,7 +1,10 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-
+<#-- 
+HFC-166 Don't use #compress on this file because
+the comments textarea needs to maintain newlines. 
+-->
 
 <@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/edit" commandName="editAssignmentCommand">
 
