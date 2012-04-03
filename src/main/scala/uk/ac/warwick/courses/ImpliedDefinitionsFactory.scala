@@ -25,7 +25,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
    * generate our own definition based on the base layout
    */
   override def getDefinition(name: String, ctx: TilesRequestContext) = {
-    if (debugEnabled) logger debug("Rendering " + name)
+    if (debugEnabled) logger.trace("Rendering " + name)
     val request = ctx.getRequestScope()
     val name2 = name // TODO figure out why using name directly ends up null
     super.getDefinition(name, ctx) match {
@@ -41,7 +41,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
   
   def layoutDefinition(ctx:TilesRequestContext) = {
     val layout = layoutTemplate(ctx)
-    if (debugEnabled) logger debug("Using layout template " + layout)
+    if (debugEnabled) logger.trace("Using layout template " + layout)
     super.getDefinition(layout, ctx)
   }
   

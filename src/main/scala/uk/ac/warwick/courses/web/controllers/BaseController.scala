@@ -95,6 +95,10 @@ trait ControllerImports {
 	final val POST = RequestMethod.POST
 }
 
+trait PreRequestHandler {
+	def preRequest
+}
+
 /**
  * Useful traits for all controllers to have.
  */
@@ -106,7 +110,8 @@ abstract class BaseController extends ControllerMethods
 	with EventHandling 
 	with Daoisms 
 	with StringUtils
-	with ControllerImports {
+	with ControllerImports
+	with PreRequestHandler {
   // make Mav available to controllers without needing to import
   
   
