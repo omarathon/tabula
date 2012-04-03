@@ -83,7 +83,7 @@ class AssignmentController extends AbstractAssignmentController {
 	validatesWith{ (cmd:SubmitAssignmentCommand,errors) => cmd.validate(errors) }
 	
 	@ModelAttribute def form(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = {  
-		val cmd = new SubmitAssignmentCommand(assignment, user)
+		val cmd = new SubmitAssignmentCommand(mandatory(assignment), user)
 		cmd.module = module
 		cmd
 	}

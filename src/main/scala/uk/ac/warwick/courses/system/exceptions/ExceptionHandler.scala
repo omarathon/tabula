@@ -36,7 +36,7 @@ class CompositeExceptionHandler(handlers:java.util.List[ExceptionHandler]) exten
 
 class LoggingExceptionHandler extends ExceptionHandler with Logging {
 	override def exception(context:ExceptionContext) = context.exception match {
-		case userError:UserError => logger.debug("User error", userError)
+		case userError:UserError => if (debugEnabled) logger.debug("User error", userError)
 		case e => logger.error("Exception "+context.token, e)
 	}
 }
