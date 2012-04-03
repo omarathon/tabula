@@ -1,5 +1,7 @@
-<#compress>
-
+<#-- 
+HFC-166 Don't use #compress on this file because
+the comments textarea needs to maintain newlines. 
+-->
 <#macro datefield path label>
 <@form.labelled_row path label>
 <@f.input path=path cssClass="date-time-picker" />
@@ -78,4 +80,3 @@
 	
 </#if>
 
-</#compress>
