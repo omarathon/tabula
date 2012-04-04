@@ -229,6 +229,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			.flatMap{ toId(_) }
 			.flatMap{ service.getById(_) }
 			.map{ _.masqueradeUserId }
+			.filterNot{ _ == null }
 			.distinct
 			
 	
