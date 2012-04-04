@@ -25,6 +25,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import freemarker.cache.MultiTemplateLoader
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.junit.Before
 
 /**
  * Base class for tests which boringly uses the JUnit support of
@@ -37,28 +38,45 @@ import org.scalatest.junit.JUnitRunner
 trait TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers
   
 trait TestHelpers {
-  var temporaryDirectories:Set[File] = Set.empty
+  var temporaryFiles:Set[File] = Set.empty
 	
   // Location of /tmp - best to create a subdir below it.
   lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
   val random = new scala.util.Random
   lazy val json = new JsonObjectMapperFactory().createInstance
   
+  @Before def emptyTempDirSet = temporaryFiles = Set.empty
+  
   /**
    * Returns a new temporary directory that will get cleaned up
    * automatically at the end of the test.
    */
   def createTemporaryDirectory:File = {
-	  val file = new File(IoTmpDir, "JavaTestTmp-"+random.nextInt(99999999))
-	  if (!file.mkdir()) throw new IllegalStateException("Couldn't create " + file)
-	  temporaryDirectories += file
+	  // try 10 times to find an unused filename.
+	  // Stream is lazy so it won't try making 10 files every time.
+	  val dir = findTempFile
+	  if (!dir.mkdir()) throw new IllegalStateException("Couldn't create " + dir)
+	  temporaryFiles += dir
+	  dir
+  }
+  
+  def createTemporaryFile:File = {
+	  val file = findTempFile
+	  if (!file.createNewFile()) throw new IllegalStateException("Couldn't create " + file)
+	  temporaryFiles += file
 	  file
   }
+  
+  private def findTempFile:File = 
+	  Stream.range(1,10)
+		.map { i=> new File(IoTmpDir, "JavaTestTmp-"+random.nextLong()) }
+	    .find(!_.exists)
+	    .getOrElse(throw new IllegalStateException("Couldn't find unique filename!"))
   
   /**
    * Removes any directories created by #createTemporaryDirectory
    */
-  @After def deleteTemporaryDirs = temporaryDirectories.par.foreach( FileUtils.recursiveDelete _ )
+  @After def deleteTemporaryDirs = temporaryFiles.par.foreach( FileUtils.recursiveDelete _ )
 	
   /**
    * withArgs(a,b,c) translates to

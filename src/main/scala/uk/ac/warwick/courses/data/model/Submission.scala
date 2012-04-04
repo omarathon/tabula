@@ -11,6 +11,7 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.JavaImports.JSet
 import uk.ac.warwick.courses.actions.Deleteable
+import collection.JavaConversions._
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -46,6 +47,10 @@ class Submission extends GeneratedId with Deleteable {
 
 	@OneToMany(mappedBy="submission", cascade=Array(CascadeType.ALL))
 	@BeanProperty var values:JSet[SavedSubmissionValue] =_
+	
+	def valuesWithAttachments = values.filter(_.hasAttachments)
+	
+	def allAttachments = valuesWithAttachments.toSeq flatMap { _.attachments }
 }
 
 /**
@@ -71,4 +76,14 @@ class SavedSubmissionValue extends GeneratedId {
 	def hasAttachments = attachments != null && !attachments.isEmpty
 	
 	@BeanProperty var value:String =_
+}
+
+object SavedSubmissionValue {
+	def withAttachments(submission:Submission, name:String, attachments:java.util.Set[FileAttachment]) = {
+		val value = new SavedSubmissionValue()
+		value.submission = submission
+		value.name = name
+		value.attachments = attachments
+		value
+	}
 }

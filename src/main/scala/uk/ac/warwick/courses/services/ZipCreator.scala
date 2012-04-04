@@ -14,7 +14,9 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 
 import uk.ac.warwick.courses.helpers.Logging
 
-trait ZipItem
+trait ZipItem {
+	val name:String
+}
 case class ZipFileItem(val name:String, val input:InputStream) extends ZipItem
 case class ZipFolderItem(val name:String, startItems:Seq[ZipItem]=Nil) extends ZipItem {
 	var items:ListBuffer[ZipItem] = ListBuffer()

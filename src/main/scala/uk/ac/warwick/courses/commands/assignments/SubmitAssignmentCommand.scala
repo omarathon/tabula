@@ -59,6 +59,8 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	  if (assignment.submissions.exists(_.universityId == user.universityId)) {
 	 	  errors.reject("assignment.submit.already")
 	  }
+	   
+	  // TODO for multiple attachments, check filenames are unique
 	 	
 	   
 	  // Individually validate all the custom fields

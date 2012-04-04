@@ -48,6 +48,7 @@ class FileAttachment extends GeneratedId {
 		if (_file == null) _file = fileDao.getData(id).orNull
 		_file
 	}
+	def file_=(f:File) { _file = f }
 	
 	@Column(name="name")
 	private var _name:String =_

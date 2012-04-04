@@ -24,6 +24,12 @@ import uk.ac.warwick.courses.actions._
 	new NamedQuery(name="module.department", query="select m from Module m where department = :department")
 ))
 class Module extends GeneratedId with Viewable with Manageable with Participatable {
+	
+	def this(code:String=null) {
+		this()
+		this.code = code
+	}
+	
 	@BeanProperty var code:String = _
 	@BeanProperty var name:String = _
 	

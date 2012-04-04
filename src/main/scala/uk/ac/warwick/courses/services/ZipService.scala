@@ -74,10 +74,10 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * Find all file attachment fields and any attachments in them, as a single list.
 	 * TODO This doesn't check for duplicate file names
 	 */
-	private def getSubmissionZipItems(submission:Submission): Seq[ZipItem] = {
-		val allAttachments = submission.values.toSeq filter {_.hasAttachments} flatMap { _.attachments }
+	def getSubmissionZipItems(submission:Submission): Seq[ZipItem] = {
+		val allAttachments = submission.allAttachments
 		allAttachments map { attachment => 
-			new ZipFileItem(submission.universityId+" - "+attachment.name, attachment.dataStream) 
+			new ZipFileItem(submission.assignment.module.code + " - " + submission.universityId+" - "+attachment.name, attachment.dataStream) 
 		}
 	}
 		
