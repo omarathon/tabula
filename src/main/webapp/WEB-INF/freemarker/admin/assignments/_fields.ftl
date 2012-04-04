@@ -60,7 +60,7 @@ the comments textarea needs to maintain newlines.
 			<div>
 			<label for="assignmentComment">Text to show on submission form:</label>
 			<div class="subtle">
-				
+				You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
 			</div>
 			<@f.errors path="comment" cssClass="error" />
 			<@f.textarea path="comment" id="assignmentComment" />
