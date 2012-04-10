@@ -4,14 +4,13 @@ import org.junit.Test
 import uk.ac.warwick.courses.commands.assignments.AddAssignmentCommand
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.ModuleDao
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.courses.data.model.forms._
-import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model._
 
 class AddAssignmentCommandTest extends AppContextTestBase {
 	
@@ -28,8 +27,13 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 	@Test def add {
 
 		withUser("abc") {
+			
+			val dept = new Department
+			dept.code = "in"
+			session.save(dept)
 		
 			val module = new Module
+			module.department = dept
 			modules.saveOrUpdate(module)
 			session.flush // get out of my car, get into my database
 			
