@@ -188,7 +188,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		SubmissionsReport(this, feedbackOnly, submissionOnly)
 	}
 	
-	def toStringMap = Map(
+	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
 		"openDate" -> openDate,

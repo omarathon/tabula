@@ -1,8 +1,8 @@
 package uk.ac.warwick.courses
 
 trait ToString {
-	def toStringMap:Map[String,Any]
+	def toStringProps:Seq[Pair[String,Any]]
 	override def toString() = {
-		getClass.getSimpleName + toStringMap.map{case(k,v) => k+"="+v}.mkString("[", ",", "]")
+		getClass.getSimpleName + toStringProps.map{case(k,v) => k+"="+v}.mkString("[", ",", "]")
 	} 
 }
