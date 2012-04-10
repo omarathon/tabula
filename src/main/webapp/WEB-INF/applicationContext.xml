@@ -29,13 +29,20 @@
 	
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
 		p:basename="messages" />
+		
+	<bean id="properties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:/courses.properties</value>
+				<value>classpath:/courses-private.properties</value>
+				<value>classpath:/default.properties</value>
+				<value>/WEB-INF/build.properties</value>
+			</list>
+		</property>
+	</bean>
 	
 	<!-- make properties available as ${..} tokens -->
-	<context:property-placeholder  location="
-		classpath:/default.properties,
-		classpath:/courses.properties,
-		classpath:/courses-private.properties,
-		/WEB-INF/build.properties" />
+	<!-- <context:property-placeholder location="classpath:/default.properties"  /> -->
 	
 	<bean id="features" class="uk.ac.warwick.courses.Features">
 		<constructor-arg>
@@ -312,6 +319,57 @@
 	<beans profile="production">
 	</beans>
 	
+	<beans profile="console">
+	
+		<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+		    <property name="url" value="${db.url}"/>
+		    <property name="username" value="${db.username}"/>
+		    <property name="password" value="${db.password}"/>
+		    <property name="connectionProperties">
+		    	<props>
+		    		<prop key="defaultNChar">true</prop>
+		    	</props>
+		    </property>
+		</bean>
+		
+		<bean id="academicDataStore" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+		    <property name="url" value="${ads.db.url}"/>
+		    <property name="username" value="${ads.db.username}"/>
+		    <property name="password" value="${ads.db.password}"/>
+		</bean>
+		
+		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
+	    	<property name="nativeJdbcExtractor">
+	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
+	    	</property>
+	    </bean>
+	</beans>
+	
+	<beans profile="dev,production,console">
+		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
+			p:ssosUrl="${ssoclient.ssos.url}"
+			p:groupServiceLocation="${ssoclient.webgroups.url}" />
+	
+		<bean class="uk.ac.warwick.courses.system.DatabaseEncodingChecker" />
+		
+		
+	    
+		<util:properties id="jdbcProperties">
+			<prop key="defaultNChar">true</prop>
+		</util:properties>
+		<util:properties id="hibernateProperties">
+			<prop key="hibernate.jdbc.batch_size">20</prop>
+			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</prop>
+			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
+			<prop key="defaultNChar">true</prop>
+		</util:properties>
+		
+		<bean id="mainDatabaseDialect" class="uk.ac.warwick.courses.data.oracle.Oracle10gDialect" />
+		
+	</beans>
+	
 	<beans profile="dev,production">
 	
 			<!-- JMX -->
@@ -355,11 +413,12 @@
 		    </property>
 		  </bean>
 	
-		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
-			p:ssosUrl="${ssoclient.ssos.url}"
-			p:groupServiceLocation="${ssoclient.webgroups.url}" />
-	
-		<bean class="uk.ac.warwick.courses.system.DatabaseEncodingChecker" />
+		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
+	    	<property name="nativeJdbcExtractor">
+	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
+	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
+	    	</property>
+	    </bean>
 		
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/CoursesDS"/>
@@ -369,26 +428,7 @@
 		   <property name="jndiName" value="java:/AcademicDS"/>
 	    </bean>
 	    
-	    <bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
-	    	<property name="nativeJdbcExtractor">
-	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
-	    	</property>
-	    </bean>
-	    
-		<util:properties id="jdbcProperties">
-			<prop key="defaultNChar">true</prop>
-		</util:properties>
-		<util:properties id="hibernateProperties">
-			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</prop>
-			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
-			<prop key="defaultNChar">true</prop>
-		</util:properties>
-		
-		<bean id="mainDatabaseDialect" class="uk.ac.warwick.courses.data.oracle.Oracle10gDialect" />
-		
-		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
+	    <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
 			p:definitions="/WEB-INF/defs/views.xml"
 			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory">
 			<property name="tilesProperties">
@@ -399,7 +439,7 @@
 				</props>
 			</property>
 		</bean>
-			
+	    
 	</beans>
 	
 	<beans profile="test">
