@@ -2,12 +2,20 @@ package uk.ac.warwick.courses.services
 
 import java.io.File
 import java.io.FileNotFoundException
+
 import scala.collection.JavaConverters._
+import scala.collection.immutable.Stream
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer
+import org.apache.lucene.analysis.Analyzer
+import org.apache.lucene.analysis.KeywordAnalyzer
+import org.apache.lucene.analysis.PerFieldAnalyzerWrapper
+import org.apache.lucene.analysis.WhitespaceAnalyzer
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index.FieldInfo.IndexOptions
 import org.apache.lucene.index._
+import org.apache.lucene.queryParser.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.search._
@@ -19,6 +27,7 @@ import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.AuditEvent
@@ -26,15 +35,39 @@ import uk.ac.warwick.courses.helpers.Closeables._
 import uk.ac.warwick.courses.helpers.Stopwatches._
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.core.StopWatch
-import scala.collection.immutable.Stream
 
 /**
- * Indexes audit events using Lucene.
+ * Indexes audit events using Lucene, and does searches on it.
+ * 
+ * TODO Split out indexing from searching, it's a big mess.
+ *      Maybe put searches in AuditEventService.
  */
 @Component 
 class AuditEventIndexService extends InitializingBean with QueryMethods with Logging {
 	final val LuceneVersion = Version.LUCENE_35
+	
+	// Fields containing IDs and things that should be passed
+	// around as-is.
+	// NOTE: analyzer was switched to do token analysis by default,
+	//    so this particular list is not used.
+	val tokenFields = Set(
+			"eventType",
+			"department",
+			"module",
+			"assignment",
+			"submission",
+			"feedback",
+			"studentId"
+		)
+	
+	// Fields that are a space-separated list of tokens.
+	// A list of IDs needs to be in here or else the whole thing
+	// will be treated as one value.
+	val tokenListFields = Set(
+			"students",
+			"feedbacks",
+			"submissions"
+		)
 	
 	@Autowired var service:AuditEventService =_ 
 	@Value("${filesystem.index.audit.dir}") var indexPath:File =_
@@ -50,7 +83,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
 	 * If it's already running, the code is skipped.
-	 * We only try indexing once a minute so there's no need to bother about
+	 * We only try indexing once a minute so thmiere's no need to bother about
 	 * tight race conditions here.
 	 */
 	def ifNotIndexing(work: =>Unit) = 
@@ -59,9 +92,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		else
 			try { indexing = true; work} 
 			finally indexing = false
-	
-//	var reader:IndexReader =_
-//	var searcher:IndexSearcher =_
+
 	/**
 	 * SearcherManager handles returning a fresh IndexSearcher for each search,
 	 * and managing old IndexSearcher instances that might still be in use. Use
@@ -69,9 +100,18 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	 * the index has changed (i.e. after an index)
 	 */
 	var searcherManager: SearcherManager = _
-	val analyzer = new StandardAnalyzer(LuceneVersion)
-			
-//	val executorService = Executors.newCachedThreadPool
+	val analyzer = {
+		//val standard = new StandardAnalyzer(LuceneVersion)
+		val token = new KeywordAnalyzer()
+		val whitespace:Analyzer = new WhitespaceAnalyzer(LuceneVersion)
+
+		val tokenListMappings = tokenListFields.map(field=> (field -> whitespace))
+		//val tokenMappings = tokenFields.map(field=> (field -> token))
+		val mappings = (tokenListMappings/* ++ tokenMappings*/).toMap.asJava
+		
+		new PerFieldAnalyzerWrapper(token, mappings)
+	}
+	val parser = new QueryParser(LuceneVersion, "", analyzer)
 	
 	/**
 	 * When an index run finishes, we note down the date of the newest audit item,
@@ -125,7 +165,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	 */
 	@Transactional
 	def index() = ifNotIndexing {
-		val stopWatch = new StopWatch()
+		val stopWatch = StopWatch()
 		stopWatch.record("Incremental index") {
 			val startDate = latestIndexItem
 			val newItems = service.listNewerThan(startDate, 1000).filter{_.eventStage == "before"}
@@ -138,6 +178,12 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		}
 		lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
 		lastIndexTime = Some(new DateTime())
+	}
+	
+	@Transactional
+	def indexFrom(startDate:DateTime) = ifNotIndexing {
+		val newItems = service.listNewerThan(startDate, 100000).filter{_.eventStage == "before"}
+		doIndexEvents(newItems)
 	}
 	
 	/**
@@ -178,7 +224,10 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			// extract possible list of eventDate values from possible newest item and get possible first value as a Long.
 			documentValue(newest(), "eventDate")
 				.map { v => new DateTime(v.toLong) }
-				.getOrElse { new DateTime().minusYears(1) }
+				.getOrElse {
+					logger.info("No recent document found, indexing the past year")
+					new DateTime().minusYears(1) 
+				}
 				// TODO change to just a few weeks after first deploy of this - 
 				// this is just to get all historical data indexed, after which we won't ever
 				// be so out of date.
@@ -226,13 +275,12 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 				new TermQuery(new Term("eventType", "DownloadFeedback")),
 				new TermQuery(new Term("assignment", assignment.id))
 			))
-			.flatMap{ toId(_) }
-			.flatMap{ service.getById(_) }
+			.flatMap( toId )
+			.flatMap( service.getById )
 			.map{ _.masqueradeUserId }
 			.filterNot{ _ == null }
 			.distinct
 			
-	
 	def search(query:Query, max:Int, sort:Sort=null, offset:Int=0) : Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query:Query) : Seq[Document] = doSearch(query, None, null, 0)
 	def search(query:Query, sort:Sort) : Seq[Document] = doSearch(query, None, sort, 0)
@@ -289,20 +337,38 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		doc
 	}
 	
+	def openQuery(queryString:String, start:Int, count:Int) = {
+		val query = parser.parse(queryString)
+		val docs = search(query,
+			sort = new Sort(new SortField("eventDate", SortField.LONG, true)),
+			offset = start,
+			max = count
+		)
+		docs flatMap toId flatMap service.getById
+	}
+	
 	private def addDataToDoc(data:Map[String,Any], doc:Document) = {
-		for (key <- Seq("feedback", "assignment", "module", "department")) {
+		for (key <- Seq("submission", "feedback", "assignment", "module", "department","studentId")) {
 			data.get(key) match {
 				case Some(value:String) => doc add plainStringField(key, value, stored=false)
 				case _ => // missing or not a string
 			}
 		}
-		data.get("students").collect {
-			case studentIds:Array[String] => 
-				val field = new Field("students", studentIds.mkString(" "), Store.NO, Index.ANALYZED_NO_NORMS)
-				field.setIndexOptions(IndexOptions.DOCS_ONLY)
-				doc add field
-			case _ =>
+		for (key <- Seq("students")) {
+			data.get(key).collect {
+				case ids:JList[_] => doc add seqField(key, ids.asScala)
+				case ids:Seq[_] => doc add seqField(key, ids)
+				case ids:Array[String] => doc add seqField(key, ids)
+				case other:Any => logger.warn("Collection field "+key+" was unexpected type: " + other.getClass.getName)
+				case _ =>
+			}
 		}
+	}
+	
+	private def seqField(key:String, ids:Seq[_]) = {
+		val field = new Field(key, ids.mkString(" "), Store.NO, Index.ANALYZED_NO_NORMS)
+		field.setIndexOptions(IndexOptions.DOCS_ONLY)
+		field
 	}
 	
 	private def plainStringField(name:String, value:String, stored:Boolean=true) = {

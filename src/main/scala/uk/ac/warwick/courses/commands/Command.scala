@@ -73,6 +73,7 @@ abstract class Description {
 	
 	def module(module:Module) = {
 		map += "module" -> module.id
+		map += "department" -> module.department.code
 		this
 	}
 	

@@ -8,7 +8,7 @@ weaving. The actual application uses compile-time weaving which doesn't depend o
 
 -->
 <aspectj>
-	<weaver options="-showWeaveInfo
+	<weaver options="-showWeaveInfo -Xreweavable
 		-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler">
 		<include within="uk.ac.warwick..*"/>
 	</weaver>

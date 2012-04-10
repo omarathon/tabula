@@ -1,9 +1,10 @@
 package uk.ac.warwick.courses.helpers
 
-import uk.ac.warwick.util.core.StopWatch
+import uk.ac.warwick.util
 
 object Stopwatches {
-	class EnhancedStopwatch(val stopwatch:StopWatch) {
+	
+	class EnhancedStopwatch(val stopwatch:util.core.StopWatch) {
 		def record(taskName:String)(work: =>Unit) {
 			try {
 				stopwatch.start(taskName)
@@ -14,5 +15,9 @@ object Stopwatches {
 		}
 	}
 	
-	implicit def ToEnhancedStopwatch(s:StopWatch) = new EnhancedStopwatch(s)
+	implicit def ToEnhancedStopwatch(s:util.core.StopWatch) = new EnhancedStopwatch(s)
+	
+	object StopWatch {
+		def apply() = new util.core.StopWatch()
+	}
 }

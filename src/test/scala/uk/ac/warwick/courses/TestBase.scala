@@ -26,6 +26,8 @@ import freemarker.cache.MultiTemplateLoader
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.junit.Before
+import java.io.StringWriter
+import java.io.StringReader
 
 /**
  * Base class for tests which boringly uses the JUnit support of
@@ -77,7 +79,9 @@ trait TestHelpers {
    * Removes any directories created by #createTemporaryDirectory
    */
   @After def deleteTemporaryDirs = temporaryFiles.par.foreach( FileUtils.recursiveDelete _ )
-	
+
+  def readJsonMap(s:String): Map[String,Any] = json.readValue(new StringReader(s), classOf[java.util.Map[String,Any]]).toMap
+  
   /**
    * withArgs(a,b,c) translates to
    * with(allOf(a,b,c)).

@@ -36,6 +36,12 @@ object Routes {
 			}
 		}
 	}
+	
+	object sysadmin {
+		object events {
+			def query = "/sysadmin/audit/search"
+		}
+	}
 }
 
 // Could do something like this to centralise all the @RequestMapping locations?

@@ -18,6 +18,7 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.courses.JsonObjectMapperFactory
+import uk.ac.warwick.courses.helpers.ArrayList
 
 class AuditEventIndexServiceTest extends TestBase with Mockito {
 	
@@ -33,6 +34,7 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 					"students" -> Array("0123456", "0199999")
 				)
 		val jsonDataString = json.writeValueAsString(jsonData)
+		println(jsonDataString)
 		
 		stopwatch.start("creating items")
 		
@@ -56,7 +58,7 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		
 		val service = mock[AuditEventService]
 		service.parseData(null) returns None
-		service.parseData(jsonDataString) returns Some(jsonData)
+		service.parseData(jsonDataString) returns Some(readJsonMap(jsonDataString))
 		service.parseData("{}") returns Some(Map())
 		service.listNewerThan(any[DateTime], isEq(1000)) returns events
 		service.getById(any[JLong]) returns events.headOption
@@ -86,6 +88,8 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		indexer.student(user).size should be (21)
 		
 		indexer.listRecent(0, 13).size should be (13)
+		
+		indexer.openQuery("eventType:PublishFeedback", 0, 100).size should be (21)
 			
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time

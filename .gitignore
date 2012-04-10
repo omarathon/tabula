@@ -7,3 +7,7 @@ local.properties
 *~
 CVS
 ajcore*
+/scripts/dev/courses.properties
+/scripts/dev/courses-private.properties
+console.properties
+courses-private.properties

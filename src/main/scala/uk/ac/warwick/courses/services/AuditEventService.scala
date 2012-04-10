@@ -27,6 +27,7 @@ trait AuditEventService {
 	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent]
 	def listRecent(start:Int, count:Int) : Seq[AuditEvent]
 	def parseData(data:String): Option[Map[String,Any]]
+	def getByEventId(eventId:String): Seq[AuditEvent]
 }
 
 @Component
@@ -42,6 +43,8 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		
 	private val idSql = baseSelect + " where id = :id"
 	
+	private val eventIdSql = baseSelect + " where eventid = :id"
+	
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
 	
@@ -49,6 +52,12 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	private val indexListSql = baseSelect + """ 
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
+	
+	def getByEventId(eventId:String): Seq[AuditEvent] = {
+		val query = session.createSQLQuery(eventIdSql)
+		query.setString("id", eventId)
+		query.list.asInstanceOf[List[Array[Object]]] map mapListToObject
+	}
 	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
 		val a = new AuditEvent

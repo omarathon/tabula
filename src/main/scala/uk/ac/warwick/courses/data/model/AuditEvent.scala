@@ -20,6 +20,9 @@ case class AuditEvent(
 	var masqueradeUserId:String = null,
 	
 	//todo convert to/from json
-	var data:String = null
-	//var data:Map[String,Any] =_
+	var data:String = null,
+	
+	// this is set manually
+	var parsedData:Option[Map[String,Any]] = None
+
 )

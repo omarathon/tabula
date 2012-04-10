@@ -68,6 +68,11 @@
 		<scalac deprecation="on" unchecked="on" srcref="java+scala.srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
 		<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
 
+		<antcall target="-iajc" />
+
+	</target>
+	
+	<target name="-iajc" unless="iajc.disabled">
 		<iajc inpath="target/unwoven" destdir="target/${war.name}/WEB-INF/classes" classpathref="build.classpath" verbose="false" aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar" log="target/log/iajc.log" />
 		<echo taskname="iajc" message="Woven aspects with IAJC" />
 
@@ -76,7 +81,6 @@
 				<resourcecontains resource="target/log/iajc.log" substring="[error]" />
 			</condition>
 		</fail>
-
 	</target>
 
 	<target name="compile-scripts">
