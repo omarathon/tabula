@@ -21,6 +21,7 @@ import javax.persistence.CascadeType
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.annotations._
 import scala.collection.JavaConversions._
+import uk.ac.warwick.courses.ToString
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -43,7 +44,7 @@ object Assignment {
 @FilterDef(name=Assignment.NotDeletedFilter, defaultCondition="deleted = 0")
 @Filter(name=Assignment.NotDeletedFilter)
 @Entity @AccessType("field")
-class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
+class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToString {
 	import Assignment._
 	
 	def this(_module:Module) {
@@ -186,6 +187,14 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted {
 		
 		SubmissionsReport(this, feedbackOnly, submissionOnly)
 	}
+	
+	def toStringMap = Map(
+		"id" -> id,
+		"name" -> name,
+		"openDate" -> openDate,
+		"closeDate" -> closeDate,
+		"module" -> module
+	)
 }
 
 
