@@ -33,9 +33,9 @@
 	<bean id="properties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 		<property name="locations">
 			<list>
+				<value>classpath:/default.properties</value>
 				<value>classpath:/courses.properties</value>
 				<value>classpath:/courses-private.properties</value>
-				<value>classpath:/default.properties</value>
 				<value>/WEB-INF/build.properties</value>
 			</list>
 		</property>
