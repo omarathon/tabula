@@ -21,6 +21,12 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.Cookie
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
+import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import scala.reflect.BeanProperty
+import uk.ac.warwick.courses.commands.assignments.DateFormats
+import uk.ac.warwick.courses.services.AuditEventIndexService
+import org.springframework.beans.factory.annotation.Configurable
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -29,12 +35,16 @@ import uk.ac.warwick.courses.web.Mav
 abstract class BaseSysadminController extends BaseController {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
 	
+	def redirectToHome = Redirect("/sysadmin/")
+	
 	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")
 	
 	def viewDepartmentOwners(@PathVariable dept:Department) : Mav = 
 		Mav("sysadmin/departments/owners",
 			  		  "department" -> dept,
 			  		  "owners" -> dept.owners)
+			  		  
+	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
 	
 }
 	
@@ -116,5 +126,24 @@ class AddDeptOwnerController extends BaseSysadminController {
 	}
 }
 
+@Configurable
+class ReindexForm {
+	@Autowired @BeanProperty var indexer:AuditEventIndexService =_
+	
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty var from:DateTime =_
+	
+	def reindex = {
+		indexer.indexFrom(from)
+	}
+}
 
-
+@Controller 
+@RequestMapping(Array("/sysadmin/index/run"))
+class SysadminIndexController extends BaseSysadminController {	
+	@RequestMapping(method=Array(RequestMethod.POST))
+	def reindex(form:ReindexForm)  = {
+		form.reindex
+		redirectToHome
+	}
+}

@@ -1,5 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign form=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <h1>Web system administrating system screen page</h1>
 
@@ -18,7 +16,15 @@
 <hr>
 
 <p>
-<@form.form method="post" action="/sysadmin/import">
+<@f.form method="post" action="/sysadmin/import">
   <input type="submit" value="Run department/module import" onclick="return confirm('Really? Could take a minute.')">
-</@form.form>
+</@f.form>
 </p>
+
+<hr>
+
+<p>
+<@f.form method="post" action="/sysadmin/index/run" commandName="reindexForm">
+Rebuild index from <@f.input path="from" cssClass="date-time-picker" />
+<input type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+</@f.form>
