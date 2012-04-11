@@ -9,6 +9,12 @@
 
 <h1>Feature flags</h1>
 
+<p>
+If you're on a multi-instance system, this controller will only
+update one instance at a time. Updating a flag on only one instance could
+lead to confusing and/or undefined behaviour. 
+</p>
+
 <table class="feature-flags">
 <#list currentValues as feature>
 <tr>
