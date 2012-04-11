@@ -136,7 +136,7 @@ trait TestHelpers {
   def resourceAsString(path:String, encoding:String="UTF-8"):String = new String(resourceAsBytes(path), encoding)
   def resourceAsBytes(path:String):Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
   
-  def emptyFeatures = new Features(new Properties)
+  def emptyFeatures = Features.empty
 
   def testRequest(uri:String=null) = {
     val req = new MockHttpServletRequest

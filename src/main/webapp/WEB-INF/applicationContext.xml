@@ -44,7 +44,7 @@
 	<!-- make properties available as ${..} tokens -->
 	<!-- <context:property-placeholder location="classpath:/default.properties"  /> -->
 	
-	<bean id="features" class="uk.ac.warwick.courses.Features">
+	<bean id="features" class="uk.ac.warwick.courses.FeaturesImpl">
 		<constructor-arg>
 			<util:properties location="classpath:/courses.properties" />
 		</constructor-arg>

@@ -10,7 +10,7 @@ class FeaturesTest extends TestBase {
 		props.setProperty("irrelevant.property", "who cares")
 		props.setProperty("features.emailStudents", "true")
 		
-		val features = new Features(props)
+		val features = Features.fromProperties(props)
 		features.emailStudents should be (Boolean.TRUE)
 	}
 }

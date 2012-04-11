@@ -7,7 +7,7 @@ import java.util.Properties
 
 class FeaturesControllerTest extends TestBase {
 	@Test def access {
-		val features = new Features(new Properties)
+		val features = Features.fromProperties(new Properties)
 		val controller = new FeaturesController
 		controller.features = features
 		controller.afterPropertiesSet

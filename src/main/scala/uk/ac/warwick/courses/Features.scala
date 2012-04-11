@@ -7,6 +7,10 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.core.env.PropertySource
 import scala.reflect.BeanProperty
 import java.lang.Boolean
+import scala.reflect.BeanInfo
+import java.beans.SimpleBeanInfo
+import java.beans.BeanDescriptor
+import java.beans.PropertyDescriptor
 
 /**
  * Defines flags to turn features on and off.
@@ -15,23 +19,23 @@ import java.lang.Boolean
  * App can change startup features in its courses.properties,
  *   then modify them at runtime via JMX.
  */
-case class Features(properties:Properties) {
-	
-	//// Features /////
-	
+abstract class Features {
+
 	@BeanProperty var emailStudents:Boolean = false
 	@BeanProperty var collectRatings:Boolean = true
 	@BeanProperty var submissions:Boolean = false
+	@BeanProperty var privacyStatement:Boolean = true
 	
-	//// END of features ///
-	
-	
+}
+
+
+class FeaturesImpl(properties:Properties) extends Features {
 	// begin black magic that converts features.* properties into values
 	// to inject into this instance.
 	
-	val featuresPrefix = "features."
+	private val featuresPrefix = "features."
 	
-	val bean = new BeanWrapperImpl(this)
+	private val bean = new BeanWrapperImpl(this)
 	private def featureKeys = properties.keysIterator.filter( _ startsWith featuresPrefix )
 	def capitalise(string:String) = string.head.toUpper + string.tail
 	def removePrefix(string:String) = string.substring(featuresPrefix.length)
@@ -44,5 +48,6 @@ case class Features(properties:Properties) {
 }
 
 object Features {
-	def empty = new Features(new Properties)
+	def empty = new FeaturesImpl(new Properties)
+	def fromProperties(p:Properties) = new FeaturesImpl(p)
 }
