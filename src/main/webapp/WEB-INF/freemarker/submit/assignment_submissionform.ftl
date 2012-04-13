@@ -1,4 +1,4 @@
-<p>Submission deadline: <@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm (z)" /></p>
+<p>Submission deadline: <@fmt.date date=assignment.closeDate timezone=true /></p>
 		
 <#if assignment.submittable>
 
@@ -67,7 +67,7 @@
 			</p>
 		</div>
 	<#elseif !assignment.opened>
-		<p>This assignment isn't open yet - it will open on <@warwick.formatDate value=assignment.openDate pattern="d MMMM yyyy 'at' HH:mm (z)" />.</p>
+		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true timezone=true />.</p>
 	<#else>
 		<p>
 			

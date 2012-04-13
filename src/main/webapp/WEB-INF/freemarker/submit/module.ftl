@@ -18,7 +18,7 @@
 		</h2>
 		<div class="date end-date">
 			Submission ${assignment.active?string("closes", "closed")} 
-			<@warwick.formatDate value=assignment.closeDate pattern="d MMMM yyyy HH:mm:ss (z)" />
+			<@fmt.date date=assignment.closeDate seconds=true timezone=true />
 		</div>
 	</div>
 

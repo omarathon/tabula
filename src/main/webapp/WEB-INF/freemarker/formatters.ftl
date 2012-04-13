@@ -5,8 +5,10 @@
 <span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">(${module.name})</span>
 </#macro>
 
-<#macro date date>
-<@warwick.formatDate value=date pattern="d MMMM yyyy HH:mm:ss" />
+<#macro date_full date><@date date=date seconds=true /></#macro>
+
+<#macro date date at=false timezone=false seconds=false capitalise=true>
+${dateBuilder(date, seconds, at, timezone, capitalise)}
 </#macro>
 
 <#macro p number singular plural="${singular}s">${number} <#if number=1>${singular}<#else>${plural}</#if></#macro>

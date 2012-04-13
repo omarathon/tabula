@@ -4,10 +4,10 @@
 <#macro longDateRange start end>
 	<#assign openTZ><@warwick.formatDate value=start pattern="z" /></#assign>
 	<#assign closeTZ><@warwick.formatDate value=end pattern="z" /></#assign>
-	<@warwick.formatDate value=start pattern="d MMMM yyyy HH:mm" /> 
+	<@fmt.date start /> 
 	<#if openTZ != closeTZ>(${openTZ})</#if>
 	-<br>
-	<@warwick.formatDate value=end pattern="d MMMM yyyy HH:mm (z)" />
+	<@fmt.date end /> (${closeTZ})
 </#macro>
  
 <#if department??>
@@ -52,10 +52,10 @@
 			</div>
 			<div class="stats">
 				<div class="open-date">
-					<span class="label">Opens</span> <@warwick.formatDate value=assignment.openDate pattern="d MMM yyyy HH:mm" /> 
+					<span class="label">Opens</span> <@fmt.date assignment.openDate /> 
 				</div>
 				<div class="close-date">
-					<span class="label">Closes</span> <@warwick.formatDate value=assignment.closeDate pattern="d MMM yyyy HH:mm" /> 
+					<span class="label">Closes</span> <@fmt.date assignment.closeDate /> 
 				</div>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">

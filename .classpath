@@ -72,6 +72,7 @@
 	<classpathentry kind="lib" path="lib/runtime/sso-client/sso-client-1.88a.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/sso-client/oauth-20090825.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-fileupload/commons-fileupload-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/build/ojdbc6.jar"/>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>

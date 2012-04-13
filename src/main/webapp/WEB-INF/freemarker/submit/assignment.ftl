@@ -1,7 +1,4 @@
-<#assign fmt=JspTaglibs["/WEB-INF/tld/fmt.tld"]>
-<#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+
 <#escape x as x?html>
 <#compress>
 <h1>${module.name} (${module.code?upper_case})

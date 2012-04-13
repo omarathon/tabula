@@ -4,7 +4,7 @@
 	<div class="submission-receipt-container is-stackable">
 	<div class="submission-receipt">
 	<h3>Submission receipt</h3>
-	<p>Submission received <@warwick.formatDate value=submission.submittedDate pattern="d MMMM yyyy 'at' HH:mm:ss" />.</p>
+	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true />.</p>
 	<p>Submission ID: ${submission.id}</p>
 	</div>
 	</div>

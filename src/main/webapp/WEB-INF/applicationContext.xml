@@ -262,6 +262,7 @@
 						<constructor-arg value="${build.time}" />
 					</bean>
 				</entry>
+				<entry key="dateBuilder"><bean class="uk.ac.warwick.courses.helpers.DateBuilder" /></entry>
 			</map>
 		</property>
 	</bean>
