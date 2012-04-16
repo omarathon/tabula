@@ -22,7 +22,7 @@ class AuditLogQuery {
 }
 
 @Configurable
-case class UserLookupQuery {
+case class UserLookupQuery() {
 	@Autowired var userLookup:UserLookupInterface =_
 	@BeanProperty var userId:String =_
 	@BeanProperty var uniId:String =_
