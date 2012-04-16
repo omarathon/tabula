@@ -1,9 +1,5 @@
 <#escape x as x?html>
 
-<#function nonempty collection=[]>
-<#return collection?? && collection?size gt 0/>
-</#function>
-
 <#macro link_to_department department>
 <a href="<@url page="/admin/department/${department.code}/"/>">
 	Go to the ${department.name} admin page

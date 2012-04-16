@@ -49,13 +49,16 @@
 		<div class="assignment-info">
 			<div class="column1">
 			<h3 class="name">${assignment.name}</h3>
+			<#if assignment.closed>
+				<div><span class="label-orange">Closed</span></div>
+			</#if>
 			</div>
 			<div class="stats">
 				<div class="open-date">
-					<span class="label">Opens</span> <@fmt.date assignment.openDate /> 
+					<span class="label"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
 				</div>
 				<div class="close-date">
-					<span class="label">Closes</span> <@fmt.date assignment.closeDate /> 
+					<span class="label"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
 				</div>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">
@@ -99,7 +102,11 @@
 				<#if has_feedback >
 				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
 				<#if assignment.canPublishFeedback>
-				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">publish feedback</a>
+				  <#if assignment.closed>
+				    <a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">publish feedback</a>
+				  <#else>
+				    <a class="list-feedback-link disabled" href="#" title="You can only publish feedback after the close date.">publish feedback</a>
+				  </#if>
 				</#if>
 				</#if>
 			</div>

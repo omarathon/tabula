@@ -9,6 +9,12 @@
 	<#import "routes.ftl" as routes />
 	<#import "can_do.ftl" as can />
 </#if>
+
 <#macro stylesheet path><link rel="stylesheet" href="<@url resource=path/>" type="text/css"></#macro>
 <#macro script path><script src="<@url resource=path/>" type="text/javascript"></script></#macro>
+
+<#function nonempty collection=[]>
+<#return collection?? && collection?size gt 0/>
+</#function>
+
 </#compress>

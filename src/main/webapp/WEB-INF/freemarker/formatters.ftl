@@ -13,6 +13,8 @@ ${dateBuilder(date, seconds, at, timezone, capitalise)}
 
 <#macro p number singular plural="${singular}s">${number} <#if number=1>${singular}<#else>${plural}</#if></#macro>
 
+<#macro tense date future past><#if date.afterNow>${future}<#else>${past}</#if></#macro>
+
 <#macro usergroup_summary ug>
 <div class="usergroup-summary">
 <#if ug.baseWebgroup??>

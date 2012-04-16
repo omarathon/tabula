@@ -101,6 +101,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	
 	def isOpened(now:DateTime) = now.isAfter(openDate)
 	def isOpened():Boolean = isOpened(new DateTime)
+	/**
+	 * Whether it's after the close date. Depending on the assignment
+	 * we might still be allowing submissions, though.
+	 */
 	def isClosed(now:DateTime) = now.isAfter(closeDate)
 	def isClosed():Boolean = isClosed(new DateTime)
 		
