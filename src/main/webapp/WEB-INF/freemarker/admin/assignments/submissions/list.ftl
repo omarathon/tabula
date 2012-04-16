@@ -19,7 +19,12 @@ Download all as ZIP file
 		<@form.selector_check_row "submissions" submission.id />
 		<#-- TODO show student name if allowed by department -->
 		<h2 class="uni-id">${submission.universityId}</h2>
-		<div class="date">Submitted <@fmt.date_full date=submission.submittedDate /></div>
+		<div>
+		<span class="date">Submitted <@fmt.date date=submission.submittedDate seconds=true capitalise=false /></span>
+		<#if submission.late>
+		  <span class="label-red">Late</span>
+		</#if>
+		</div>
 	</div>
 
 </#list>

@@ -4,7 +4,7 @@
 	<div class="submission-receipt-container is-stackable">
 	<div class="submission-receipt">
 	<h3>Submission receipt</h3>
-	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true />.</p>
+	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
 	<p>Submission ID: ${submission.id}</p>
 	</div>
 	</div>

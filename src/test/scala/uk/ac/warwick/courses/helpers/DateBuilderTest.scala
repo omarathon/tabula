@@ -19,12 +19,14 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 			val tomorrow = new DateTime().plusDays(1)
 			val today = new DateTime()
 			
-			builder.format(anotherDay, false, false, false, true) should be ("Sat 10th March 2012 12:13")
-			builder.format(anotherDay, true, true, true, true) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
+			builder.format(anotherDay, false, false, false, true, true) should be ("Sat 10th March 2012 12:13")
+			builder.format(anotherDay, true, true, true, true, true) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
 			
-			builder.format(yesterday, false, true, false, true) should be ("Yesterday at 13:36")
-			builder.format(tomorrow, true, true, false, false) should be ("tomorrow at 13:36:00")
-			builder.format(today, false, false, false, true) should be ("Today 13:36")
+			builder.format(yesterday, false, true, false, true, true) should be ("Yesterday at 13:36")
+			builder.format(tomorrow, true, true, false, false, true) should be ("tomorrow at 13:36:00")
+			builder.format(today, false, false, false, true, true) should be ("Today 13:36")
+			
+			builder.format(today, false, false, false, true, false) should be ("Thu 12th April 2012 13:36")
 			
 			// Freemarker exec
 			implicit val fmConfig = newFreemarkerConfiguration

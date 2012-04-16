@@ -26,14 +26,14 @@ class DateBuilder extends TemplateMethodModelEx {
 		false -> _relativeWords.mapValues(_.toLowerCase)
 	)
 	
-	def format(date:DateTime, includeSeconds:Boolean, includeAt:Boolean, includeTimezone:Boolean, capitalise:Boolean) = {
+	def format(date:DateTime, includeSeconds:Boolean, includeAt:Boolean, includeTimezone:Boolean, capitalise:Boolean, relative:Boolean) = {
 		val pattern = new StringBuilder
 		if (includeAt) pattern.append(" 'at'")
 		pattern.append(" HH:mm")
 		if (includeSeconds) pattern.append(":ss")
 		if (includeTimezone) pattern.append(" (z)")
 		
-		datePart(date, capitalise) + (formatterMap(pattern.toString) print date)
+		datePart(date, capitalise, relative) + (formatterMap(pattern.toString) print date)
 	}
 	
 	def ordinal(day:Int) = day%10 match {
@@ -44,16 +44,19 @@ class DateBuilder extends TemplateMethodModelEx {
 		case _ => "th"
 	}
 	
-	private def datePart(date:DateTime, capitalise:Boolean) = {
+	private def datePart(date:DateTime, capitalise:Boolean, relative:Boolean) = {
 		val today = new DateTime().toDateMidnight
 		val thatDay = date.toDateMidnight
 		
-		if (today isEqual thatDay) relativeWords(capitalise)('today)
-		else if (today.minusDays(1) isEqual thatDay) relativeWords(capitalise)('yesterday)
-		else if (today.plusDays(1) isEqual thatDay) relativeWords(capitalise)('tomorrow)
-		else (dayAndDateFormat print date) + 
+		lazy val absoluteDate = (dayAndDateFormat print date) + 
 			 ordinal(date.getDayOfMonth) +
 			 (monthAndYearFormat print date)
+		
+		if (!relative) absoluteDate
+		else if (today isEqual thatDay) relativeWords(capitalise)('today)
+		else if (today.minusDays(1) isEqual thatDay) relativeWords(capitalise)('yesterday)
+		else if (today.plusDays(1) isEqual thatDay) relativeWords(capitalise)('tomorrow)
+		else absoluteDate
 	}
 	
 		
@@ -61,8 +64,8 @@ class DateBuilder extends TemplateMethodModelEx {
 	override def exec(list:java.util.List[_]) = {
 		val args = list.toSeq.map{model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])}
 		args match {
-			case Seq(date:DateTime, secs:JBoolean, at:JBoolean, tz:JBoolean, caps:JBoolean) => 
-				format(date, secs, at, tz, caps)
+			case Seq(date:DateTime, secs:JBoolean, at:JBoolean, tz:JBoolean, caps:JBoolean, relative:JBoolean) => 
+				format(date, secs, at, tz, caps, relative)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}

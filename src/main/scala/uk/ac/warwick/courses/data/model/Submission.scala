@@ -21,6 +21,8 @@ class Submission extends GeneratedId with Deleteable {
 		this.universityId = universityId
 	}
 	
+	def isLate = submittedDate != null && assignment.closeDate.isBefore(submittedDate)
+	
 	@ManyToOne(optional=false, cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
