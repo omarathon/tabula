@@ -55,10 +55,10 @@
 			</div>
 			<div class="stats">
 				<div class="open-date">
-					<span class="label"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
+					<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
 				</div>
 				<div class="close-date">
-					<span class="label"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
+					<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
 				</div>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">

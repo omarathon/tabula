@@ -1,5 +1,5 @@
 <@form.row>
-<span class="label"></span>
+<span class="label-like"></span>
 <@form.field>
 ${field.formattedHtml}<#-- Pre-escaped HTML, no need for escaping -->
 </@form.field>

@@ -16,7 +16,7 @@
 	</@f.errors>
 	
 	<@form.row>
-	 <span class="label">Your University ID</span>
+	 <span class="label-like">Your University ID</span>
 	 <@form.field>
 	   ${user.apparentUser.warwickId}
 	 </@form.field>
@@ -32,7 +32,7 @@
 	
 	<#if features.privacyStatement>
 	<@form.row>
-	<span class="label">Privacy statement</span>
+	<span class="label-like">Privacy statement</span>
 	<@form.field>
 		<p class="privacy-field">
 			The data on this form relates to your submission of 
