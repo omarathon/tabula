@@ -87,8 +87,8 @@
 		<copy todir="target/${war.name}">
 			<fileset dir="src/main/webapp" />
 		</copy>
-		<lesscss todir="target/${war.name}/static">
-			<fileset dir="target/${war.name}/static" includes="**/*.less" excludes="**/*.inc.less" />
+		<lesscss todir="target/${war.name}/static/css">
+			<fileset dir="target/${war.name}/static/css" includes="*.less" excludes="**/*.inc.less" />
 		</lesscss>
 
 		<batchhash propertyfile="target/${war.name}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">

@@ -37,13 +37,10 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	
 	var released:JBoolean = false
 	
-	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
-	var rating:Option[Int] = None
-	
-	def ratingInteger:JInteger = rating match {
-		case Some(a:Int) => a
-		case _ => null
-	}
+	@Type(`type`="uk.ac.warwick.courses.data.model.OptionBooleanUserType")
+	var ratingPrompt:Option[Boolean] = None
+	@Type(`type`="uk.ac.warwick.courses.data.model.OptionBooleanUserType")
+	var ratingHelpful:Option[Boolean] = None
 	
 	/**
 	 * Returns the released flag of this feedback,

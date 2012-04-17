@@ -21,3 +21,12 @@ class OptionIntegerUserType extends AbstractBasicUserType[Option[Int], JInteger]
   val nullValue = null
   val nullObject = None
 }
+
+class OptionBooleanUserType extends AbstractBasicUserType[Option[Boolean], JBoolean] {
+  def convertToObject(input: JBoolean) = Option(input)
+  def convertToValue(obj: Option[Boolean]) = obj.map{ new JBoolean(_) }.orNull
+  def sqlTypes = Array(Types.BOOLEAN)
+  val basicType = StandardBasicTypes.BOOLEAN
+  val nullValue = null
+  val nullObject = None
+}

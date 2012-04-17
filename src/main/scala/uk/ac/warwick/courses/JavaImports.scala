@@ -16,6 +16,8 @@ trait JavaImports {
 	type JSet[V] = java.util.Set[V]
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
+	
+	protected implicit def ToJInteger(b:Option[Boolean]) = b.map{b=>b:JBoolean}.orNull
 }
 
 object JavaImports extends JavaImports

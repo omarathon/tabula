@@ -7,37 +7,56 @@ import scala.reflect.BeanProperty
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.Features
+import uk.ac.warwick.courses.JavaImports._
+
+/**
+ * A holder for a boolean value plus an extra flag to say that
+ * we want it to be null. This is because Spring won't bind null
+ * to a value, it will leave it with its existing value.
+ */
+case class NullableBoolean(@BeanProperty var value:JBoolean) {
+	@BeanProperty var unset:Boolean = _
+	def toBoolean:Option[Boolean] = if (unset) None else Option(value)
+	
+	def update { 
+		if (unset) value = null
+	}
+}
 
 class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends Command[Unit] {
 	
-	@BeanProperty var rating:JInteger = Option(feedback).map{ _.ratingInteger }.orNull
+//	@BeanProperty var rating:JInteger = _ 
 	
-	@BeanProperty var unset:Boolean = false
+	@BeanProperty var wasPrompt:NullableBoolean = 
+		NullableBoolean(Option(feedback).flatMap(_.ratingPrompt))
+		
+	@BeanProperty var wasHelpful:NullableBoolean = 
+		NullableBoolean(Option(feedback).flatMap(_.ratingHelpful))
 	
-	def effectiveRating:JInteger = 
-		if (unset) null
-		else rating
+//	@BeanProperty var unset:Boolean = false
+//	
+//	def effectiveRating:JInteger = 
+//		if (unset) null
+//		else rating
 	
 	
 	val maximumStars = 5
 	
 	@Transactional
 	def apply {
-		feedback.rating = 
-			if (unset) None 
-			else Some(rating)
+		feedback.ratingHelpful = wasHelpful.toBoolean
+		feedback.ratingPrompt = wasPrompt.toBoolean
 	}
 	
 	def validate(errors:Errors) {
 		if (enabled) {
-			if (!unset) {
-				effectiveRating match {
-					case r:JInteger if r < 1 => errors.rejectValue("rating", "feedback.rating.low")
-					case r:JInteger if r > maximumStars => errors.rejectValue("rating", "feedback.rating.high")
-					case null => errors.rejectValue("rating", "feedback.rating.empty")
-					case _ =>
-				}
-			}
+			wasPrompt.update
+			wasHelpful.update
+			
+			if (!wasPrompt.unset && wasPrompt.value == null) 
+				errors.rejectValue("wasPrompt", "feedback.rating.empty")
+			if (!wasHelpful.unset && wasHelpful.value == null) 
+				errors.rejectValue("wasHelpful", "feedback.rating.empty")
 		} else {
 			errors.rejectValue("rating", "feedback.rating.disabled")
 		}
@@ -48,7 +67,7 @@ class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends 
 		feedback.assignment.module.department.collectFeedbackRatings 
 	
 	def describe(d:Description) = d.feedback(feedback).properties(
-			"rating" -> effectiveRating,
-			"previousRating" -> feedback.rating.orNull
+//			"rating" -> effectiveRating,
+//			"previousRating" -> feedback.rating.orNull
 	)
 }

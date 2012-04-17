@@ -131,20 +131,60 @@ jQuery(function ($) {
 			action = $form.attr('action');
 		
 		if ($form.length > 0) {
-			$form.find('input[name=rating]').rating({
-				callback: function(value, link) {
-					if (!value) { // remove rating
-						$form.append($('<input type=checkbox>').attr({'name':'unset', checked:true}).hide());
-					}
-					$form.append($('<span class=subtle> Saving&hellip;</span>'));
-					$.post(action, $form.serialize())
-						.success(function(data){ 
-							$rateFeedback.replaceWith(data);
-							decorateFeedbackForm();
-						})
-						.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
-				}
+			$form.find('.rating-question').button().each(function(){
+				var $question = $(this);
+				var $group = $('<div>').attr({'class':'btn-group',"data-toggle":"buttons-radio"});
+				var $radios = $question.find('input[type=radio]');
+				var $unsetter = $question.find('input[type=checkbox]');
+				$radios.each(function(){
+					var radio = this;
+					var text = $(radio).parent('label').text();
+					var $button = $('<a>').attr({'class':'btn'}).html(text);
+					if (radio.checked) $button.addClass('active');
+					$button.click(function(ev){
+						radio.checked = true;
+						$unsetter.attr('checked',false);
+					});
+					$group.append($button);
+				});
+//				$unsetter.each(function(){
+//					var checkbox = this;
+//					var $button = $('<a>').attr({'class':'btn'}).html(");
+//					$button.click(function(ev){
+//						
+//						this.checked = true;
+//						
+//					});
+//					$group.append($button);
+//				});
+				$question.find('label').hide();
+				$question.append($group);
 			});
+			$form.on('submit', function(event){
+				$form.find('input[type=submit]').button('loading');
+				event.preventDefault();
+				$.post(action, $form.serialize())
+					.success(function(data){ 
+						$rateFeedback.replaceWith(data);
+						decorateFeedbackForm();
+					})
+					.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
+				return false;
+			});
+//			$form.find('input[name=rating]').rating({
+//				callback: function(value, link) {
+//					if (!value) { // remove rating
+//						$form.append($('<input type=checkbox>').attr({'name':'unset', checked:true}).hide());
+//					}
+//					$form.append($('<span class=subtle> Saving&hellip;</span>'));
+//					$.post(action, $form.serialize())
+//						.success(function(data){ 
+//							$rateFeedback.replaceWith(data);
+//							decorateFeedbackForm();
+//						})
+//						.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
+//				}
+//			});
 		}
 	};
 	decorateFeedbackForm();

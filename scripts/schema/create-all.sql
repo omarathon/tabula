@@ -60,7 +60,8 @@ create table Feedback (
 	universityId nvarchar2(255) not null,
 	assignment_id nvarchar2(255) not null,
 	RELEASED NUMBER(1, 0) default 0 not null,
-	rating NUMBER(3,0) NOT NULL,
+	ratingPrompt NUMBER(1,0),
+	ratingHelpful NUMBER(1,0),
 	CONSTRAINT "FEEDBACK_PK" PRIMARY KEY ("ID")
 );
 CREATE INDEX IDX_FEEDBACK_ASSIGNMENT ON FEEDBACK(ASSIGNMENT_ID);
@@ -122,3 +123,12 @@ create table formfield (
     CONSTRAINT "formfield_pk" PRIMARY KEY ("ID")
 );
 create index idx_formfieldassignment on formfield(assignment_id);
+
+CREATE TABLE SUBMISSIONVALUE (
+	id nvarchar2(100) not null,
+	name nvarchar2(255) not null,
+	submission_id nvarchar2(255) not null,
+	VALUE nvarchar2(4000),
+	CONSTRAINT "SUBMISSIONVALUE_PK" PRIMARY KEY ("ID")
+);
+CREATE INDEX "IDX_SUBMISSIONVALUE_SUBMISSION" ON SUBMISSIONVALUE(SUBMISSION_ID);

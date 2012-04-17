@@ -39,6 +39,7 @@
 		  <@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
 		  <@script "/static/libs/anytime/anytimec.js" />
 		  <@script "/static/libs/popup/popup.js" />
+		  <@script "/static/libs/bootstrap/js/bootstrap.js" />
 		  <@script "/static/js/modernizr.js" />
 		  <@script "/static/js/browser-info.js" />
 		  <@script "/static/js/main.js" />

@@ -1,17 +1,26 @@
 package uk.ac.warwick.courses.commands.feedback
 
+import collection.JavaConversions._
 import uk.ac.warwick.courses.TestBase
+import uk.ac.warwick.courses.JavaImports._
 import org.junit.Test
 import org.springframework.validation.BindException
 import uk.ac.warwick.courses.Mockito
 import uk.ac.warwick.courses.data.model._
+import org.springframework.web.bind.WebDataBinder
+import org.springframework.validation.DataBinder
+import org.springframework.beans.PropertyValues
+import org.springframework.beans.MutablePropertyValues
+import org.springframework.web.bind.ServletRequestDataBinder
 
 class RateFeedbackCommandTest extends TestBase with Mockito {
 	@Test def nullRating {
 		val (feedback,_,_,_) = deepFeedback
 		val command = new RateFeedbackCommand(feedback, emptyFeatures)
-		command.rating = null
-		command.unset = true
+		command.wasPrompt.value = null
+		command.wasPrompt.unset = true
+		command.wasHelpful.value = null
+		command.wasHelpful.unset = true
 		val errors = new BindException(command, "command") 
 		command.validate(errors)
 		errors.hasErrors should be (false)
@@ -20,17 +29,21 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 	@Test def invalidRating {
 		val (feedback,_,_,_) = deepFeedback
 		val command = new RateFeedbackCommand(feedback, emptyFeatures)
-		command.rating = 0
+		command.wasPrompt.value = null
+		command.wasPrompt.unset = false
 		val errors = new BindException(command, "command") 
 		command.validate(errors)
-		errors.hasFieldErrors("rating") should be (true)
+		errors.hasFieldErrors("wasPrompt") should be (true)
 	}
+
 	
 	def deepFeedback = {
 		val feedback = smartMock[Feedback]
 		val assignment = smartMock[Assignment]
 		val module = smartMock[Module]
 		val department = smartMock[Department]
+		feedback.ratingHelpful returns None
+		feedback.ratingPrompt returns None
 		feedback.assignment returns assignment
 		assignment.module returns module
 		module.department returns department
