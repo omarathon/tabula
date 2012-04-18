@@ -258,8 +258,9 @@ jQuery(function ($) {
 			event.preventDefault();
 			var $checkedBoxes = $checkboxes.filter(":checked");
 			if ($checkedBoxes.length > 0) {
-				var $form = $('<form></form>').attr({method:'POST',action:this.href});
+				var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
 				$form.append($checkedBoxes);
+				$(document.body).append($form);
 				$form.submit();
 			}
 			return false;
