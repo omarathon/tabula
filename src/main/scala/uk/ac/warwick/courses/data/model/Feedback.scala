@@ -60,4 +60,11 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 		attachment.feedback = this
 		attachments.add(attachment)
 	}
+	
+	/**
+	 * Whether ratings are being collected for this feedback.
+	 * Doesn't take into account whether the ratings feature is enabled, so you
+	 * need to check that separately. 
+	 */
+	def collectRatings:Boolean = assignment.module.department.collectFeedbackRatings
 }

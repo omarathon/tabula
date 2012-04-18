@@ -58,13 +58,11 @@ class RateFeedbackCommand(val feedback:Feedback, val features:Features) extends 
 			if (!wasHelpful.unset && wasHelpful.value == null) 
 				errors.rejectValue("wasHelpful", "feedback.rating.empty")
 		} else {
-			errors.rejectValue("rating", "feedback.rating.disabled")
+			errors.reject("feedback.rating.disabled")
 		}
 	}
 	
-	def enabled = 
-		features.collectRatings &&
-		feedback.assignment.module.department.collectFeedbackRatings 
+	def enabled = features.collectRatings && feedback.collectRatings 
 	
 	def describe(d:Description) = d.feedback(feedback).properties(
 //			"rating" -> effectiveRating,

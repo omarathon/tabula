@@ -1,6 +1,6 @@
 <h2>Feedback for ${user.universityId}</h2>
 	
-<#if features.collectRatings>
+<#if features.collectRatings && feedback.collectRatings>
 	<div id="feedback-rating-container" class="is-stackable">
 		<!-- fallback for noscript -->
 		<div style="padding:0.5em">

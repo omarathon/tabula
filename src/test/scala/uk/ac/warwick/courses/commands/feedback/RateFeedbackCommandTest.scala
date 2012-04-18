@@ -23,7 +23,7 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 		command.wasHelpful.unset = true
 		val errors = new BindException(command, "command") 
 		command.validate(errors)
-		errors.hasErrors should be (false)
+		withClue(errors) { errors.hasErrors should be (false) }
 	}
 	
 	@Test def invalidRating {
@@ -42,6 +42,7 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 		val assignment = smartMock[Assignment]
 		val module = smartMock[Module]
 		val department = smartMock[Department]
+		feedback.collectRatings returns true
 		feedback.ratingHelpful returns None
 		feedback.ratingPrompt returns None
 		feedback.assignment returns assignment
