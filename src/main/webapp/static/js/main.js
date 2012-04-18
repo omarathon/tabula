@@ -392,7 +392,17 @@ jQuery(function ($) {
 			$(this).css('opacity',1)
 				.find('h2 small').remove().end()
 				.find('.module-info-contents').show().end();	
-		});
+		})
+		.hide()
+		.first().before(
+			$('<p>').html('Empty modules are hidden. ').append(
+				$('<a>').addClass('btn').attr('href','#').html("Show all modules").click(function(event){
+					event.preventDefault();
+					$(this.parentNode).remove();
+					$('.module-info.empty').show();
+				})
+			)
+		);
 	
 	window.Courses = exports;
 	

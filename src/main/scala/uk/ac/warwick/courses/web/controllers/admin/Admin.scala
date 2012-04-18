@@ -49,6 +49,8 @@ import uk.ac.warwick.courses.services.AuditEventIndexService
 class AdminHome extends BaseController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
+	
+	hideDeletedItems
 
 	@RequestMapping(Array("/admin/"))
 	def homeScreen(user: CurrentUser) = {
