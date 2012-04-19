@@ -147,16 +147,6 @@ jQuery(function ($) {
 					});
 					$group.append($button);
 				});
-//				$unsetter.each(function(){
-//					var checkbox = this;
-//					var $button = $('<a>').attr({'class':'btn'}).html(");
-//					$button.click(function(ev){
-//						
-//						this.checked = true;
-//						
-//					});
-//					$group.append($button);
-//				});
 				$question.find('label').hide();
 				$question.append($group);
 			});
@@ -171,20 +161,6 @@ jQuery(function ($) {
 					.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
 				return false;
 			});
-//			$form.find('input[name=rating]').rating({
-//				callback: function(value, link) {
-//					if (!value) { // remove rating
-//						$form.append($('<input type=checkbox>').attr({'name':'unset', checked:true}).hide());
-//					}
-//					$form.append($('<span class=subtle> Saving&hellip;</span>'));
-//					$.post(action, $form.serialize())
-//						.success(function(data){ 
-//							$rateFeedback.replaceWith(data);
-//							decorateFeedbackForm();
-//						})
-//						.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
-//				}
-//			});
 		}
 	};
 	decorateFeedbackForm();
@@ -201,8 +177,6 @@ jQuery(function ($) {
 		firstDOW: 1
 	});
 	
-	// TODO make buttons that don't take too long but are less than instantaneous
-	// (~5 secs) spawn a spinner or please wait text.
 	$('a.long-running').click(function (event) {
 		var $this = $(this);
 		if (!$this.hasClass('clicked')) {
@@ -225,6 +199,35 @@ jQuery(function ($) {
 			userPicker.showPicker(picker, picker);
 		});
 	});
+	/*
+	var $userCodePickers = $('input.user-code-picker'); 
+	$userCodePickers.autocomplete({
+		minLength:2,
+	    source: function(request, response) {
+	    	$.ajax({
+	    		url: "/api/userpicker/query.json",
+	    		dataType: 'json',
+	    		data: { query: request.term },
+	    		success: function(data) {
+	    			response( data );
+	    		}
+	    	})
+	    },
+	    focus: function(event,ui){
+	        this.value = ui.item.id;
+	        return false;
+	    },
+	    select: function(event,ui){
+	        this.value = ui.item.id;
+	        return false;
+	    }
+	}).data( "autocomplete" )._renderItem = function( ul, item ) {
+	    return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( "<a>" + item.label + " (" + item.dept + ")</a>" )
+        .appendTo( ul );
+	};
+	*/
 	
 	$('input.uni-id-picker').each(function (picker) {
 		

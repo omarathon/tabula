@@ -20,6 +20,20 @@ class UserPickerController extends BaseController {
 	@RequestMapping(value=Array("/api/userpicker/form"))
 	def form: Mav = Mav("api/userpicker/form").noLayout
 	
+	@RequestMapping(value=Array("/api/userpicker/query.json"))
+	def queryJson (form:QueryForm, out:Writer) = {
+	  def toJson(user:User) = Map(
+	    "value" -> user.getUserId,
+	    "label" -> user.getFullName,
+	    "type" -> user.getUserType,
+	    "dept" -> user.getShortDepartment
+	  )
+	  var users = userLookup.findUsersWithFilter(form.filter)
+	  if (users.size < 10) users ++= userLookup.findUsersWithFilter(form.filterBackwards)
+	  json.writeValue(out, (users map toJson));
+	}
+
+	
 	@RequestMapping(value=Array("/api/userpicker/query"))
 	def query (form:QueryForm, out:Writer) = {
 	  val usersByStaff = fetch(form)
@@ -27,21 +41,6 @@ class UserPickerController extends BaseController {
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
 	      "students" -> students).noLayout
-	  
-	  // JSON! Much easier to just generate the HTML though.
-//	  def jsonUser(user:User) = Map(
-//		  "id" -> user.getUserId,
-//		  "name" -> user.getFullName
-//		)
-//	  json.writeValue(out, Map(
-//	      "result" -> Map(
-//	          "count" -> usersByStaff.values.foldLeft(0){ _ + _.size },
-//		      "users" -> Map(
-//		    	   "staff" -> usersByStaff(true).map{jsonUser},
-//		    	   "students" -> usersByStaff(false).map{jsonUser}
-//		      )
-//	      )
-//	  ));
 	}
 	
 	/**
@@ -61,10 +60,29 @@ object UserPickerController {
 	class QueryForm {
 		@BeanProperty var firstName:String = ""
 		@BeanProperty var lastName:String = ""
-		  
+		
+		/**
+		 * If one word is given, it's used as surname.
+		 * If more words are given, the first two are used
+		 * 	as firstname and surname.
+		 */
+		def setQuery(q:String) {
+			firstName = ""
+			lastName = ""
+			q.split("\\s").toList match {
+			   case Nil => 
+			   case surname::Nil => lastName = surname
+			   case first::second::_ => firstName = first; lastName = second
+			}
+		}
+		def query_=(q:String):Unit = setQuery(q)
+			
 		def filter:Map[String,String] = 
 		  	item("givenName", firstName) ++ item("sn", lastName)
-		  	
+		
+		// filter with surname as firstname and viceversa, in case we get no results
+		def filterBackwards:Map[String,String] = 
+			item("givenName", lastName) ++ item("sn", firstName)
 		  
 		private def item(name:String, value:String) = value match {
 		  case s:String if s.hasText => Map(name -> (value + "*"))
