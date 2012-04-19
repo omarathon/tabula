@@ -55,7 +55,10 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	
 	def getSubmission(id:String) = getById[Submission](id)
 	
-	def delete(submission:Submission) = session.delete(submission)
+	def delete(submission:Submission) = {
+		submission.assignment.submissions.remove(submission)
+		session.delete(submission)
+	}
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment] =
 		session.createQuery("""select distinct a from Assignment a

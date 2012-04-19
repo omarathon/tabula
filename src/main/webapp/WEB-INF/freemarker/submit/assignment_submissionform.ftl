@@ -1,6 +1,14 @@
+<#if !submission??>
 <p>Submission deadline: <@fmt.date date=assignment.closeDate timezone=true /></p>
-		
-<#if assignment.submittable>
+</#if>
+
+<#if (assignment.submittable && !submission??) || assignment.resubmittable>
+
+	<#if submission??>
+	<hr>
+	<h2>Re-submit</h2>
+	<p>You can re-submit your work in case you've made a mistake, up until the deadline (<@fmt.date date=assignment.closeDate timezone=true />).</p>
+	</#if>
 
 	<#if assignment.closed>
 		<div class="potential-problem">
@@ -52,7 +60,7 @@
 	</div>
 	</@f.form>
 	
-<#else>
+<#elseif !submission??>
 
 	<#if !assignment.collectSubmissions>
 		<p>

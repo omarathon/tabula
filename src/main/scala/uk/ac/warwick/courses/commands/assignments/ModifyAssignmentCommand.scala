@@ -51,6 +51,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var collectSubmissions:Boolean = _
 	@BeanProperty var restrictSubmissions:Boolean = _
 	@BeanProperty var allowLateSubmissions:Boolean = true
+	@BeanProperty var allowResubmission:Boolean = false
 	
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
@@ -81,6 +82,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    // changes disabled for now
 	    //assignment.restrictSubmissions = restrictSubmissions
 	    assignment.allowLateSubmissions = allowLateSubmissions
+	    assignment.allowResubmission = allowResubmission
 	    findCommentField(assignment) map ( field => field.value = comment )
 	    findFileField(assignment) map { file => 
 	    	file.attachmentLimit = fileAttachmentLimit 
@@ -97,6 +99,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
 		allowLateSubmissions = assignment.allowLateSubmissions
+		allowResubmission = assignment.allowResubmission
 		findCommentField(assignment) map ( field => comment = field.value )
 		findFileField(assignment) map { field => 
 			fileAttachmentLimit = field.attachmentLimit 

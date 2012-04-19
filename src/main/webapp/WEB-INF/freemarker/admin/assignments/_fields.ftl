@@ -58,6 +58,15 @@ the comments textarea needs to maintain newlines.
 				</div>
 			</div>
 			<div>
+				<label><@f.checkbox path="allowResubmission" />
+					Allow students to re-submit work
+				</label>
+				<div class="subtle">
+					Students will be able to submit new work, replacing any previous submission.
+					Re-submission is only allowed before the close date.
+				</div>
+			</div>
+			<div>
 			<label for="assignmentComment">Text to show on submission form:</label>
 			<div class="subtle">
 				You can make a new paragraph by leaving a blank line (i.e. press Enter twice).

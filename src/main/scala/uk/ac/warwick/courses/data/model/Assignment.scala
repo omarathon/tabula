@@ -92,6 +92,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var collectSubmissions:Boolean = false
 	@BeanProperty var restrictSubmissions:Boolean = false
 	@BeanProperty var allowLateSubmissions:Boolean = true
+	@BeanProperty var allowResubmission:Boolean = false
 	
 	/**
 	 * Returns whether we're between the opening and closing dates
@@ -107,9 +108,18 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 */
 	def isClosed(now:DateTime) = now.isAfter(closeDate)
 	def isClosed():Boolean = isClosed(new DateTime)
-		
+	
+	/**
+	 * Calculates whether we could submit to this assignment.
+	 */
 	def submittable = active && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed())
-		
+
+	/**
+	 * Calculates whether we could re-submit to this assignment (assuming that the current
+	 * student has already submitted).
+	 */
+	def resubmittable = submittable && allowResubmission && !isClosed()
+	
 	@ManyToOne
 	@JoinColumn(name="module_id")
 	@BeanProperty var module:Module =_
@@ -199,6 +209,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		"closeDate" -> closeDate,
 		"module" -> module
 	)
+
 }
 
 

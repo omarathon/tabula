@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
+	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="src" output="bin/java" path="src/main/java"/>
+	<classpathentry kind="lib" path="src/main/resources"/>
+	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
@@ -73,8 +77,6 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-fileupload/commons-fileupload-1.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/ojdbc6.jar"/>
 	<classpathentry kind="lib" path="lib/build/lesscss-engine-1.3.1-SNAPSHOT.jar"/>
-	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
-	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-api-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
@@ -96,7 +98,5 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-beanutils-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-digester-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
-	<classpathentry kind="lib" path="src/main/resources"/>
-	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

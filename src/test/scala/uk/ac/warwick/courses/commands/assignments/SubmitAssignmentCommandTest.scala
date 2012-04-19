@@ -27,6 +27,12 @@ class SubmitAssignmentCommandTest extends TestBase {
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		errors.hasErrors should be (true)
+		
+		// But guys, guys... what if...
+		assignment.allowResubmission = true
+		errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+		errors.hasErrors should be (false)
 	}
 	
 	def newActiveAssignment = {

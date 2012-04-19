@@ -16,12 +16,14 @@ import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.courses.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.courses.services.ZipService
 
 
 @Configurable
-class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) extends Command[Submission] {
+class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) extends Command[Submission] with SelfValidating {
 
   @Autowired var service:AssignmentService =_
+  @Autowired var zipService:ZipService = _
 
   @BeanProperty var fields = buildEmptyFields
   
@@ -42,22 +44,28 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	  Map(pairs:_*)
   }
   
-  def validate(errors:Errors) {
+  def validate(implicit errors:Errors) {
 	  if (!assignment.active) {
-	 	  errors.reject("assignment.submit.inactive")
+	 	  reject("assignment.submit.inactive")
 	  }
 	  if (!assignment.isOpened()) {
-	 	  errors.reject("assignment.submit.notopen")
+	 	  reject("assignment.submit.notopen")
 	  }
 	  if (!assignment.collectSubmissions) {
-	 	  errors.reject("assignment.submit.disabled")
+	 	  reject("assignment.submit.disabled")
 	  }
 	  if (!assignment.allowLateSubmissions && assignment.isClosed()) {
-	 	  errors.reject("assignment.submit.closed")
+	 	  reject("assignment.submit.closed")
 	  }
 	  // HFC-164
 	  if (assignment.submissions.exists(_.universityId == user.universityId)) {
-	 	  errors.reject("assignment.submit.already")
+	 	  if (assignment.allowResubmission) {
+	 		  if (assignment.allowLateSubmissions && assignment.isClosed()) {
+	 		 	  reject("assignment.resubmit.closed")
+	 		  }
+	 	  } else {
+	 		  reject("assignment.submit.already")
+	 	  }
 	  }
 	   
 	  // TODO for multiple attachments, check filenames are unique
@@ -75,6 +83,14 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 
   @Transactional
   override def apply = {
+	assignment.submissions.find(_.universityId == user.universityId).map{ existingSubmission =>
+		if (assignment.resubmittable) {
+			service.delete(existingSubmission)
+		} else { // Validation should prevent ever reaching here.
+			throw new IllegalArgumentException("Submission already exists and can't overwrite it")
+		}
+	}
+	  
 	val submission = new Submission
 	submission.assignment = assignment
 	submission.submitted = true
@@ -90,11 +106,12 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 		value
 	}.toSet[SavedSubmissionValue]
 	
+	zipService.invalidateSubmissionZip(assignment)
 	service.saveSubmission(submission)
 	submission
   }
 
-  override def describe(d: Description) = d.properties(
+  override def describe(d: Description) = d.assignment(assignment).properties(
     
   )
   

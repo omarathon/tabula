@@ -16,9 +16,8 @@
 		</#if>
 			
 		<#-- At some point, also check if resubmission is allowed for this assignment -->
-		<#if !submission??>
-			<#include "assignment_submissionform.ftl" />
-		</#if><#-- submission?? -->
+		<#include "assignment_submissionform.ftl" />
+		
 		
 	<#else>
 	
