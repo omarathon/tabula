@@ -2,10 +2,8 @@ package uk.ac.warwick.courses.services
 
 import java.io.File
 import java.io.FileNotFoundException
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.KeywordAnalyzer
@@ -27,7 +25,7 @@ import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-
+import org.springframework.context.Lifecycle
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.AuditEvent
@@ -35,6 +33,11 @@ import uk.ac.warwick.courses.helpers.Closeables._
 import uk.ac.warwick.courses.helpers.Stopwatches._
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.userlookup.User
+import scala.actors.threadpool.ExecutorService
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import org.springframework.beans.factory.DisposableBean
 
 /**
  * Indexes audit events using Lucene, and does searches on it.
@@ -43,7 +46,7 @@ import uk.ac.warwick.userlookup.User
  *      Maybe put searches in AuditEventService.
  */
 @Component 
-class AuditEventIndexService extends InitializingBean with QueryMethods with Logging {
+class AuditEventIndexService extends InitializingBean with QueryMethods with Logging with DisposableBean {
 	final val LuceneVersion = Version.LUCENE_35
 	
 	// Fields containing IDs and things that should be passed
@@ -79,6 +82,9 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	var lastIndexTime:Option[DateTime] = None
 	var lastIndexDuration:Option[Duration] = None
+	
+	// HFC-189 Reopen index every 2 minutes, even if not the indexing instance.
+	val executor:ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 	
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
@@ -128,6 +134,15 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		if (!indexPath.isDirectory) throw new IllegalStateException("Audit event index path not a directory: " + indexPath.getAbsolutePath)
 		
 		initialiseSearching
+		
+		// Reopen the index reader periodically, else it won't notice changes.
+		executor.scheduleAtFixedRate( Runnable{ 
+			try reopen catch { case e => logger.error("Index service reopen failed", e) } 
+		}, 20, 20, TimeUnit.SECONDS)
+	}
+	
+	override def destroy {
+		executor.shutdown()
 	}
 	
 	private def initialiseSearching = {
@@ -201,7 +216,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			}
 			if (debugEnabled) logger.debug("Indexed " + events.size + " items")
 		}
-		reopen
+		reopen // not really necessary as we reopen periodically anyway
 	}
 	
 	private def toId(doc:Document) = documentValue(doc, "id").map{_.toLong}
