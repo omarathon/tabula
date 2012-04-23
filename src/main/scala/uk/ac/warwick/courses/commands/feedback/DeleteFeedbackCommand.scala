@@ -31,9 +31,10 @@ class DeleteFeedbackCommand(val assignment:Assignment) extends Command[Unit] wit
 		if (feedbacks.find(_.assignment != assignment).isDefined) {
 			reject("feedback.delete.wrongassignment")
 		}
-		if (feedbacks.find(_.released).isDefined) {
-			reject("feedback.delete.released")
-		}
+		// HFC-88 allow deleting released feedback.
+//		if (feedbacks.find(_.released).isDefined) {
+//			reject("feedback.delete.released")
+//		}
 	}
 	
 	def validate(implicit errors:Errors) {
