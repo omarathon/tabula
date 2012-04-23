@@ -4,6 +4,8 @@
 
 <#if (assignment.submittable && !submission??) || assignment.resubmittable>
 
+	<a id="submittop"></a>
+
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
@@ -11,7 +13,7 @@
 	</#if>
 
 	<#if assignment.closed>
-		<div class="potential-problem">
+		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
 			<p>
 				You can still submit to this assignment but your mark may be affected. 
@@ -19,7 +21,7 @@
 		</div>
 	</#if>
 
-	<@f.form cssClass="submission-form" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}" modelAttribute="submitAssignmentCommand">
+	<@f.form cssClass="submission-form" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
 	<@f.errors cssClass="error form-errors">
 	</@f.errors>
 	

@@ -56,6 +56,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
 	
+	val maxFileAttachments:Int = 10
+	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 	
 	/**

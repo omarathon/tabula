@@ -112,11 +112,11 @@ ul {
 	.assignment-buttons {
 		float: right;
 		text-align: right;
-		width: 9em;
+		width: 10.5em;
 		a {
 			display: block;
-			padding: 0 7px;
 			margin: 1px 0;
+			text-align: right;
 		}
 	}
 	.feedback-published {
@@ -520,5 +520,11 @@ textarea#assignmentComment {
   .date { white-space: nowrap; }
   td,th { padding: 4px; }
 }
+
+// button-style links don't also need underlining
+a.btn { text-decoration: none; }
+
+// Icons + ID6 require some adjustment
+[class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
 
 } // .coursework-page

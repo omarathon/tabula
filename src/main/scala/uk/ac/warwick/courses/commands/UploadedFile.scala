@@ -16,8 +16,8 @@ import uk.ac.warwick.courses.data.FileDao
 import uk.ac.warwick.courses.helpers.ArrayList
 
 /**
- * Encapsulates an initially-uploaded MultipartFile with a reference to
- * a FileAttachment to hold on to the ID of a file on subsequent submissions,
+ * Encapsulates initially-uploaded MultipartFiles with a reference to
+ * FileAttachments to hold on to the ID of a file on subsequent submissions,
  * so that you don't have to re-upload a file again.
  * 
  * When an HTML5 multiple file upload control is used, Spring can bind this
@@ -52,7 +52,13 @@ class UploadedFile {
   def hasUploads = !nonEmptyUploads.isEmpty
   def nonEmptyUploads = Option(upload).getOrElse(ArrayList()).filterNot{_.isEmpty}
   def isUploaded = hasUploads
-  					
+  
+  /**
+   * Performs persistence of uploads such as converting MultipartFiles
+   * into FileAttachments saves to the database. When first saved, these
+   * FileAttachments are marked as "temporary" until persisted by whatever
+   * command needs them. This method will throw an exception
+   */
   def onBind {
 	  for (item <- attached) {
 		  if (item != null && !item.temporary) {

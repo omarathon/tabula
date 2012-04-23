@@ -78,44 +78,90 @@ To not bind:
 	</#if>
 </#macro>
 
-<#macro filewidget basename multiple=true>
+<#--
+	Create a file(s) upload widget, binding to an UploadedFile object.
+	For multiple file support, it will use the HTML5 attribute if available,
+	otherwise it will degrade to other mechanisms.
+	
+	basename - bind path to the UploadedFile.
+	multiple - whether it should be possible to upload more than one file.
+-->
+<#macro filewidget basename multiple=true max=10>
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
-	<@errors path="${basename}" />
-	<@errors path="${basename}.upload" />
-	<@errors path="${basename}.attached" />
+	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@row>
 	<@f.label path="${basename}.upload">
 	File
 	</@f.label>
 	<@field>
+	<@errors path="${basename}" />
+	<@errors path="${basename}.upload" />
+	<@errors path="${basename}.attached" />
 	<@spring.bind path="${basename}">
 	<#local f=status.actualValue />
+	<div class="subtle"><#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if></div>
+	<div id="${elementId}">
 	<#if f.exists>
-	<#list f.attached as attached>
-		<#assign uploadedId=attached.id />
-		<div id="attachment-${uploadedId}">
-		<input type="hidden" name="${basename}.attached" value="${uploadedId}">
-		${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
-		</div>
-		<div id="upload-${uploadedId}" style="display:none">
-		<input type="file" name="${basename}.upload" >
-		</div>
-		<script>
-		jQuery(function($){
-		$('#remove-attachment-${uploadedId}').click(function(ev){
-		  ev.preventDefault();
-		  $('#attachment-${uploadedId}').remove(); 
-		  $('#upload-${uploadedId}').show();
-		  return false;
-		});
-		});
-		</script>
-	</#list>
-	<#elseif multiple>
+		<#list f.attached as attached>
+			<#assign uploadedId=attached.id />
+			<div class="hidden-attachment" id="attachment-${uploadedId}">
+			<input type="hidden" name="${basename}.attached" value="${uploadedId}">
+			${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
+			</div>
+			<div id="upload-${uploadedId}" style="display:none">
+			
+			</div>
+		</#list>
+	</#if>
+	
+	<#if multiple>
 		<input type="file" name="${basename}.upload" multiple>
+		<noscript>
+			<#list (2..max) as i>
+				<br><input type="file" name="${basename}.upload">
+			</#list>
+		</noscript>
 	<#else>
 		<input type="file" name="${basename}.upload" >
 	</#if>
+	</div>
+	
+	<#if multiple>
+		<script><!--
+		
+		jQuery(function($){
+			var $container = $('#${elementId}'), 
+			    $file = $container.find('input[type=file]'),
+			    $addButton; 
+			if (Supports.multipleFiles) {
+				// nothing, already works
+			} else {
+				// Add button which generates more file inputs
+			    $addButton = $('<a>').addClass('btn btn-mini').append($('<i class="icon-plus"></i>').attr('title','Add another attachment'));
+			    $addButton.click(function(){
+			    	$addButton
+			    		.before($('<br/>'))
+			    		.before($('<input type="file">').attr('name',"${basename}.upload"));
+			    	if ($container.find('input[type=file]').length >= ${max}) {
+			    	    $addButton.hide(); // you've got enough file input thingies now.
+			    	}
+			    });
+				$file.after($addButton);
+			}
+			
+			$container.find('.hidden-attachment a').click(function(ev){
+			    ev.preventDefault();
+			    $(this).parent('.hidden-attachment').remove(); 
+			    if ($addbutton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
+			       $addButton.show();
+			    }
+			    return false;
+			});
+		});
+		
+		//--></script>
+	</#if>
+	
 	</@spring.bind>
 	</@field>
 	</@row>

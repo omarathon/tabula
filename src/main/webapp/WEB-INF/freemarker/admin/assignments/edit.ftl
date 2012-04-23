@@ -5,8 +5,9 @@
 HFC-166 Don't use #compress on this file because
 the comments textarea needs to maintain newlines. 
 -->
-
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/edit" commandName="editAssignmentCommand">
+<#assign commandName="editAssignmentCommand"/>
+<#assign command=editAssignmentCommand />
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/edit" commandName=commandName>
 
 <#--
 <div id="form-editor-sidebar">

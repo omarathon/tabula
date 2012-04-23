@@ -128,7 +128,8 @@ class AssignmentController extends AbstractAssignmentController {
 				"module"-> module,
 				"assignment" -> assignment,
 				"feedback" -> feedback,
-				"submission" -> submission
+				"submission" -> submission,
+				"justSubmitted" -> form.justSubmitted
 			)
 		} else {
 			RedirectToSignin() 
@@ -148,7 +149,7 @@ class AssignmentController extends AbstractAssignmentController {
 			val submission = form.apply
 			val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
 			sendReceipt.apply()
-			Redirect(Routes.assignment(form.assignment))
+			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}
 			

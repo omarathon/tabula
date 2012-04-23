@@ -7,8 +7,9 @@ the comments textarea needs to maintain newlines.
 -->
 
 <h1>Create assignment for <@fmt.module_name module /></h1>
-
-<@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName="addAssignmentCommand">
+<#assign commandName="addAssignmentCommand" />
+<#assign command=addAssignmentCommand />
+<@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName=commandName>
 <@f.errors cssClass="error form-errors">
 
 </@f.errors>

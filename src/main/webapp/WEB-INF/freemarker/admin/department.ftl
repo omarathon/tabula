@@ -28,18 +28,18 @@
 			<@fmt.user_list_csv ids=module_managers />
 		</#if>
 		<#if can_manage >	
-		<span class="actions">
-		<a title="Edit module permissions" href="<@url page="/admin/module/${module.code}/permissions" />">
-		edit
+		
+		<a class="btn btn-mini" title="Edit module permissions" href="<@url page="/admin/module/${module.code}/permissions" />">
+		Edit
 		</a>
-		</span>
+		
 		</#if>
 	</div>
 	
 	<#if !has_assignments >
 		<p>This module has no assignments. 
-		<span class="actions">
-		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
+		<span class="btn-group">
+		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
 		</span>
 		</p>
 	<#else>
@@ -96,16 +96,16 @@
 				</#if>
 				
 			</div>
-			<div class="actions assignment-buttons">
-				<a class="edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">edit details</a>
-				<a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">add feedback</a>
+			<div class="assignment-buttons">
+				<a class="btn edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit details <i class="icon-edit"></i></a>
+				<a class="btn feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
 				<#if has_feedback >
-				<a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">list feedback</a>
+				<a class="btn list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
 				<#if assignment.canPublishFeedback>
 				  <#if assignment.closed>
-				    <a class="list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">publish feedback</a>
+				    <a class="btn list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
 				  <#else>
-				    <a class="list-feedback-link disabled" href="#" title="You can only publish feedback after the close date.">publish feedback</a>
+				    <a class="btn list-feedback-link disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
 				  </#if>
 				</#if>
 				</#if>
@@ -115,8 +115,8 @@
 		</#if>
 		</#list>
 		
-		<div class="actions">
-		<a href="<@url page="/admin/module/${module.code}/assignments/new" />">New assignment</a>
+		<div class="btn-group">
+		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
 		</div>
 	</#if>
 	

@@ -30,6 +30,9 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
   // not important to command - only used to bind to request.
   @transient @BeanProperty var module:Module =_
   
+  // just used as a hint to the view.
+  @transient @BeanProperty var justSubmitted:Boolean = false
+  
   def onBind:Unit = for ((key, field) <- fields) field.onBind
   
   /**

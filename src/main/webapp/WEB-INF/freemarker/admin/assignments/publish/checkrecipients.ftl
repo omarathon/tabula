@@ -4,8 +4,8 @@
 <#if report.hasProblems>
 
 	<#assign problems = report.problems />
-	<div class="bad-recipients potential-problem">
-	<p>
+	<div class="bad-recipients alert alert-error">
+	<p> <i class="icon-remove"></i>
 		<@fmt.p problems?size "problem" /> found with students' and/or their email addresses.
 		You can continue to publish the feedback, but you may want to post the feedback link to
 		a web page that the students can access even if they didn't get the email. You'll be given
@@ -25,7 +25,9 @@
 	</ul>
 	</div>
 <#else>
-	<p>No problems found with students' email addresses.</p>
+	<div class="alert alert-success">
+	  <p><i class="icon-ok"></i> No problems found with students' email addresses.</p>
+	</div>
 </#if>
 
 </#escape>

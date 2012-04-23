@@ -1,5 +1,9 @@
 <div class="submission-received">
-	<p>Thanks for your submission.</p>
+	<#if justSubmitted!false>
+	<div class="alert alert-success">
+		<a class="close" data-dismiss="alert">×</a>Thanks, we've received your submission.
+	</div>
+	</#if>
 	
 	<div class="submission-receipt-container is-stackable">
 	<div class="submission-receipt">

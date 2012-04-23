@@ -67,6 +67,14 @@ the comments textarea needs to maintain newlines.
 				</div>
 			</div>
 			<div>
+				<label>
+					<@f.select path="fileAttachmentLimit">
+						<@f.options items=1..command.maxFileAttachments />
+					</@f.select>
+					Maximum number of file attachments per submission
+				</label>
+			</div>
+			<div>
 			<label for="assignmentComment">Text to show on submission form:</label>
 			<div class="subtle">
 				You can make a new paragraph by leaving a blank line (i.e. press Enter twice).

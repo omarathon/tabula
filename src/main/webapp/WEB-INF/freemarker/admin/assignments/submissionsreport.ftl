@@ -8,7 +8,7 @@
 <#if report.hasProblems>
 
 	<#if submissionOnly?size gt 0>
-	<div class="potential-problem">
+	<div class="alert alert-error">
 		<p>These users have submitted to the assignment, but no feedback has been uploaded for them.</p>
 		
 		<ul class="user-list">
@@ -20,8 +20,8 @@
 	</#if>
 	
 	<#if feedbackOnly?size gt 0>
-	<div class="potential-problem">
-		<p>There is feedback for these users but they did not submit an assignment to this system.</p>
+	<div class="alert alert-error">
+		<p><i class="icon-remove"></i> There is feedback for these users but they did not submit an assignment to this system.</p>
 		
 		<ul class="user-list">
 		<#list feedbackOnly as u>
@@ -39,7 +39,9 @@
 	
 
 <#else>
-	<p><span class="icon-ok"></span> The submissions and the feedback items appear to match up for this assignment.</p>
+	<div class="alert alert-success">
+	<p><i class="icon-ok"></i> The submissions and the feedback items appear to match up for this assignment.</p>
+	</div>
 </#if>
 
 </#escape>
