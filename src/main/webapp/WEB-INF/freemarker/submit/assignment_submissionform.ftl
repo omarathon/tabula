@@ -1,5 +1,5 @@
 <#if !submission??>
-<p>Submission deadline: <@fmt.date date=assignment.closeDate timezone=true /></p>
+	<#include "assignment_deadline.ftl" />
 </#if>
 
 <#if (assignment.submittable && !submission??) || assignment.resubmittable>
@@ -9,7 +9,8 @@
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
-	<p>You can re-submit your work in case you've made a mistake, up until the deadline (<@fmt.date date=assignment.closeDate timezone=true />).</p>
+	<p>You can re-submit your work in case you've made a mistake, up until the deadline, 
+	   <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).</p>
 	</#if>
 
 	<#if assignment.closed>
@@ -70,11 +71,11 @@
 			an email to retrieve your feedback from here.
 		</p>
 	<#elseif assignment.closed>
-		<div class="potential-problem">
+		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
-			<p>
-				This assignment doesn't allow late submissions.
-			</p>
+			
+			This assignment doesn't allow late submissions.
+			
 		</div>
 	<#elseif !assignment.opened>
 		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true timezone=true />.</p>

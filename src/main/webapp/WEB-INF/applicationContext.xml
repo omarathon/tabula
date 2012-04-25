@@ -263,6 +263,7 @@
 					</bean>
 				</entry>
 				<entry key="dateBuilder"><bean class="uk.ac.warwick.courses.helpers.DateBuilder" /></entry>
+				<entry key="durationFormatter"><bean class="uk.ac.warwick.courses.helpers.DurationFormatterTag" /></entry>
 			</map>
 		</property>
 	</bean>

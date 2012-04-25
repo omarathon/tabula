@@ -22,6 +22,7 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.annotations._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.ToString
+import org.joda.time.Interval
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
