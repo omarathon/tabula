@@ -4,10 +4,11 @@ import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.JavaImports
 import org.springframework.validation.Errors
 
-trait Describable {
+trait Describable[T] {
 	// describe the thing that's happening.
 	def describe(d:Description)
 	// optional extra description after the thing's happened.
+	def describeResult(d:Description, result:T) { describeResult(d) }
 	def describeResult(d:Description) {}
 	val eventName:String
 }
@@ -19,7 +20,7 @@ trait Describable {
  * adds or changes any data is a candidate. Read-only queries,
  * not so much (unless we're interested in when a thing is observed/downloaded).
  */
-trait Command[R] extends Describable with JavaImports {
+trait Command[R] extends Describable[R] with JavaImports {
 	def apply(): R
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
@@ -31,7 +32,7 @@ trait SelfValidating {
 	def rejectValue(prop:String, code:String)(implicit errors:Errors) = errors.rejectValue(prop,code)
 }
 
-trait Unaudited { self:Describable =>
+trait Unaudited { self:Describable[_] =>
 	// override describe() with nothing, since it'll never be used.
 	override def describe(d:Description) {}
 }

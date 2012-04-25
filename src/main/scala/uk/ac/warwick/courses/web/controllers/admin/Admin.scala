@@ -105,21 +105,19 @@ class AddAssignment extends BaseController {
 		new AddAssignmentCommand(mandatory(module))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def addAssignmentForm(user: CurrentUser, @PathVariable module: Module,
+	def form(user: CurrentUser, @PathVariable module: Module, 
 			form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
-		Mav("admin/assignments/new",
-			"department" -> module.department,
-			"module" -> module)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		form.prefillFromRecentAssignment
+		formView(module)
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))
-	def addAssignmentSubmit(user: CurrentUser, @PathVariable module: Module,
+	def submit(user: CurrentUser, @PathVariable module: Module,
 			@Valid form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
 		if (errors.hasErrors) {
-			addAssignmentForm(user, module, form, errors)
+			formView(module)
 		} else {
 			form.apply
 			Redirect(Routes.admin.module(module))
@@ -127,6 +125,13 @@ class AddAssignment extends BaseController {
 	}
 	
 	def permCheck(module:Module) = mustBeAbleTo(Participate(module)) 
+  
+    def formView(module:Module) = {
+	  Mav("admin/assignments/new",
+	  	"department" -> module.department,
+	  	"module" -> module)
+	  	.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	}
 
 }
 

@@ -17,7 +17,7 @@ trait EventHandling extends Logging {
 	 * after or error. All of them should have the same eventid to
 	 * join them together (though they also have unique primary keys).
 	 */
-	def recordEvent[T](d:Describable)(f: =>T): T = 
+	def recordEvent[T](d:Describable[T])(f: =>T): T = 
 		d match {
 			case _:Unaudited => f // don't audit unaudited events!
 			case _ => {
@@ -25,17 +25,17 @@ trait EventHandling extends Logging {
 				try {
 					listener.beforeCommand(event)
 					val result = f
-					val resultEvent = Event.resultFromDescribable(d, event.id)
+					val resultEvent = Event.resultFromDescribable(d, result, event.id)
 					listener.afterCommand(resultEvent, result)
 					return result
 				} catch {
-					case e:Throwable => {
+					case e => {
 						// On exception, pass that on then rethrow.
 						// If the exception handler throws an exception, just log that and rethrow the original
 						try {
 							listener.onException(event, e)
 						} catch {
-							case e1:Throwable => logger.error("Exception in EventHandling.onException", e1)
+							case e1 => logger.error("Exception in EventHandling.onException", e1)
 						} finally {
 							throw e
 						}

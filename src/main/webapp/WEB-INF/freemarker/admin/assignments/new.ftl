@@ -10,9 +10,14 @@ the comments textarea needs to maintain newlines.
 <#assign commandName="addAssignmentCommand" />
 <#assign command=addAssignmentCommand />
 <@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName=commandName>
-<@f.errors cssClass="error form-errors">
 
-</@f.errors>
+<#if command.prefilled>
+<div class="alert alert-success">
+Some fields have been pre-filled from another recently created assignment for convenience.
+</div>
+</#if>
+
+<@f.errors cssClass="error form-errors" />
 
 <#assign newRecord=true />
 

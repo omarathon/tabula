@@ -141,6 +141,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var fields:JList[FormField] = ArrayList()
 	
 	def addField(field:FormField) {
+		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name "+field.name+" already exists")
 		field.assignment = this
 		field.position = fields.length
 		fields.add(field)

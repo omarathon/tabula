@@ -66,7 +66,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	 * a full blown field editor. 
 	 */
 	@Length(max=2000)
-	@BeanProperty var comment:String = _ 
+	@BeanProperty var comment:String = _
+	
+	var prefilled:Boolean = _
 	
 	def validate(errors:Errors) {
 		service.getAssignmentByNameYearModule(name, academicYear, module)
@@ -92,12 +94,24 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		}
 	}
 	
-	def copyFrom(assignment:Assignment) {
-		name = assignment.name
+	def prefillFromRecentAssignment = {
+		service.recentAssignment(module) map { (a) =>
+			copyNonspecificFrom(a)
+			prefilled = true
+		}
+	}
+	
+	
+	/**
+	 * Copy just the fields that it might be useful to
+	 * prefill. The assignment passed in might typically be
+	 * another recently created assignment, that may have good
+	 * initial values for submission options.
+	 */
+	def copyNonspecificFrom(assignment:Assignment) {
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
 		collectMarks = assignment.collectMarks
-		academicYear = assignment.academicYear
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
 		allowLateSubmissions = assignment.allowLateSubmissions
@@ -107,6 +121,12 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			fileAttachmentLimit = field.attachmentLimit 
 			fileAttachmentTypes = field.attachmentTypes
 		}
+	}
+	
+	def copyFrom(assignment:Assignment) {
+		name = assignment.name
+		academicYear = assignment.academicYear
+		copyNonspecificFrom(assignment)
 	}
 	
 	private def findFileField(assignment:Assignment) = 

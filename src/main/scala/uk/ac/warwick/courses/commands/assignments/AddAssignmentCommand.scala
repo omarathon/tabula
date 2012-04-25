@@ -38,6 +38,8 @@ class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentComma
 	  assignment
 	}
 	
+	override def describeResult(d:Description, assignment:Assignment) = d.assignment(assignment)
+	
 	override def describe(d:Description) = d.module(module).properties(
 		"name" -> name,
 		"openDate" -> openDate,

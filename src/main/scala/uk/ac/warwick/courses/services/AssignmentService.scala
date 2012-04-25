@@ -15,6 +15,7 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
 import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.Order
 
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
@@ -32,12 +33,19 @@ trait AssignmentService {
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId:String): Seq[Assignment]
 	
+	/**
+	 * Find a recent assignment within this module, or failing that 
+	 */
+	def recentAssignment(module:Module): Option[Assignment]
+	
 }
 
 @Service
 class AssignmentServiceImpl extends AssignmentService with Daoisms {
+	import Restrictions._
 	
 	@Autowired var userLookup:UserLookupService =_
+	@Autowired var auditEventIndexService:AuditEventIndexService =_
 	
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
@@ -88,4 +96,7 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 		val uniIds = assignment.unreleasedFeedback.map { _.universityId }
 		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
 	}
+	
+	def recentAssignment(module:Module) = 
+		auditEventIndexService.recentAssignment(module)
 }

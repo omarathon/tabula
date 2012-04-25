@@ -56,7 +56,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	def getByEventId(eventId:String): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(eventIdSql)
 		query.setString("id", eventId)
-		query.list.asInstanceOf[List[Array[Object]]] map mapListToObject
+		query.list.asInstanceOf[JList[Array[Object]]] map mapListToObject
 	}
 	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
@@ -85,7 +85,16 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	def getById(id:Long): Option[AuditEvent] = {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
-		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]]))
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])) map addRelated
+	}
+	
+	def addParsedData(event:AuditEvent) = {
+		event.parsedData = parseData(event.data)
+	}
+	
+	def addRelated(event:AuditEvent) = {
+		event.related = getByEventId(event.eventId)
+		event
 	}
 	
 	def save(event:Event, stage:String) {
@@ -119,8 +128,6 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		}
 		query.executeUpdate()
 	}
-	
-	
 	
 	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent] = {
 		val query = session.createSQLQuery(indexListSql)

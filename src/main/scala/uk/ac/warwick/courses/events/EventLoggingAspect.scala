@@ -20,10 +20,10 @@ import org.springframework.beans.factory.annotation.Configurable
 class EventLoggingAspect extends EventHandling {
 	
 	@Pointcut("execution(* uk.ac.warwick.courses.commands.Command.apply(..)) && target(callee)")
-	def applyCommand(callee:Describable): Unit = {}
+	def applyCommand(callee:Describable[_]): Unit = {}
 	
 	@Around("applyCommand(callee)")
-	def aroundApplyCommand(jp:ProceedingJoinPoint, callee:Describable):Any = 
-		recordEvent(callee) { jp.proceed }
+	def aroundApplyCommand[T](jp:ProceedingJoinPoint, callee:Describable[T]):Any = 
+		recordEvent(callee) { jp.proceed.asInstanceOf[T] }
 	
 }

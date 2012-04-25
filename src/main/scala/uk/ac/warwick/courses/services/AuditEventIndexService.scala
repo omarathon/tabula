@@ -38,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
+import uk.ac.warwick.courses.data.model.Module
 
 /**
  * Indexes audit events using Lucene, and does searches on it.
@@ -48,6 +49,12 @@ import org.springframework.beans.factory.DisposableBean
 @Component 
 class AuditEventIndexService extends InitializingBean with QueryMethods with Logging with DisposableBean {
 	final val LuceneVersion = Version.LUCENE_35
+	
+	// largest batch of event items we'll load in at once.
+	final val MaxBatchSize = 100000
+	
+	// largest batch of event items we'll load in at once during scheduled incremental index.
+	final val IncrementalBatchSize = 1000
 	
 	// Fields containing IDs and things that should be passed
 	// around as-is.
@@ -73,6 +80,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		)
 	
 	@Autowired var service:AuditEventService =_ 
+	@Autowired var assignmentService:AssignmentService =_ 
 	@Value("${filesystem.index.audit.dir}") var indexPath:File =_
 	@Value("${filesystem.create.missing}") var createMissingDirectories:Boolean =_
 	@Value("${courses.audit.index.weeksbacklog}") var weeksBacklog:Int =_
@@ -177,13 +185,17 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	/**
 	 * Incremental index. Can be run often.
+	 * Has a limit to how many items it will load at once, but subsequent indexes
+	 * will get through those. There would have to be hundreds of audit events
+	 * per minute in order for the index to lag behind, and even then it would catch
+	 * up as soon as it reached a quiet time.
 	 */
 	@Transactional
 	def index() = ifNotIndexing {
 		val stopWatch = StopWatch()
 		stopWatch.record("Incremental index") {
 			val startDate = latestIndexItem
-			val newItems = service.listNewerThan(startDate, 1000).filter{_.eventStage == "before"}
+			val newItems = service.listNewerThan(startDate, IncrementalBatchSize).filter{_.eventStage == "before"}
 			if (newItems.isEmpty) {
 				logger.debug("No new items to index.")
 			} else {
@@ -197,7 +209,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	@Transactional
 	def indexFrom(startDate:DateTime) = ifNotIndexing {
-		val newItems = service.listNewerThan(startDate, 100000).filter{_.eventStage == "before"}
+		val newItems = service.listNewerThan(startDate, MaxBatchSize).filter{_.eventStage == "before"}
 		doIndexEvents(newItems)
 	}
 	
@@ -221,6 +233,17 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	private def toId(doc:Document) = documentValue(doc, "id").map{_.toLong}
 	
+	private def toAuditEvent(id:Long) = service.getById(id)
+	private def toAuditEvent(doc:Document) :Option[AuditEvent] = toId(doc) flatMap (toAuditEvent)
+	
+	private def toParsedAuditEvent(doc:Document) : Option[AuditEvent] = toAuditEvent(doc).map { event =>
+		event.parsedData = service.parseData(event.data)
+		event.related.map { e =>
+			e.parsedData = service.parseData(e.data)
+		}
+		event
+	}
+	
 	/**
 	 * If this item is the newest item this service has seen, save the date
 	 * so we know where to start from next time.
@@ -233,6 +256,8 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	
 	/**
 	 * Either get the date of the most recent item we've process in this JVM
+	 * or look up the most recent item in the index, or else index everything
+	 * from the past year.
 	 */
 	def latestIndexItem:DateTime = {
 		mostRecentIndexedItem.map{ _.minusMinutes(5) }.getOrElse {
@@ -292,9 +317,22 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			))
 			.flatMap( toId )
 			.flatMap( service.getById )
+			.filterNot( _.hadError )
 			.map{ _.masqueradeUserId }
 			.filterNot{ _ == null }
 			.distinct
+			
+	def recentAssignment(module:Module) : Option[Assignment] = {
+		search(query = all(
+				new TermQuery(new Term("eventType", "AddAssignment")),
+				new TermQuery(new Term("module", module.id))),
+				max=1,
+				sort=new Sort(new SortField("eventDate", SortField.LONG, true)))
+			.flatMap( toParsedAuditEvent )
+			.flatMap( _.assignmentId )
+			.flatMap( assignmentService.getAssignmentById )
+			.headOption
+	}
 			
 	def search(query:Query, max:Int, sort:Sort=null, offset:Int=0) : Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query:Query) : Seq[Document] = doSearch(query, None, null, 0)

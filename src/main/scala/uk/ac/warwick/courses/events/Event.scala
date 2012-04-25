@@ -16,16 +16,14 @@ case class Event(
 )
 
 object Event {
-	def fromDescribable(describable:Describable) = doFromDescribable(describable, false)
-	def resultFromDescribable(describable:Describable, id:String) = doFromDescribable(describable, true, id)
+	def fromDescribable(describable:Describable[_]) = doFromDescribable(describable, None)
+	def resultFromDescribable[T](describable:Describable[T], result:T, id:String) = doFromDescribable(describable, Some(result), id)
 	
-	private def doFromDescribable(describable:Describable, result:Boolean, id:String = null) = {
+	private def doFromDescribable[T](describable:Describable[T], result:Option[T], id:String = null) = {
 		val description = new DescriptionImpl
-		if (result) { 
-			describable.describeResult(description)
-		} else { 
-			describable.describe(description) 
-		}
+		result.map ( r => describable.describeResult(description, r) )
+			 .getOrElse ( describable.describe(description)  )
+
 		val (apparentId, realUserId) = getUser match {
 			case Some(user) => (user.apparentId, user.realId)
 			case None => (null, null)
