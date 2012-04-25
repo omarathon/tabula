@@ -2,12 +2,12 @@
 <h1>All submissions for ${assignment.name}</h1>
 <#assign module=assignment.module />
 
-<div class="actions">
-<a class="long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/download-zip/submissions.zip'/>">
+<div>
+<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/download-zip/submissions.zip'/>"><i class="icon-download"></i>
 Download all as ZIP file
 </a>
 &nbsp;
-<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete' />" id="delete-selected-button">Delete selected</a>
+<a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete' />" id="delete-selected-button">Delete selected</a>
 </div>
 
 <#if submissions?size gt 0>

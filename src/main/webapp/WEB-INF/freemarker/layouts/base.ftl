@@ -133,12 +133,12 @@
 						</div>
 						
 						<div id="custom-header">
-							<div class="actions">
+							<div class="">
 							<#if user.sysadmin>
-								<a href="<@url page="/sysadmin/" />">Sysadmin</a>
+								<a class="btn btn-inverse" href="<@url page="/sysadmin/" />">Sysadmin</a>
 							</#if>
 							<#if user.masquerader || user.sysadmin>
-								<a href="<@url page="/admin/masquerade" />">Masquerade</a>
+								<a class="btn btn-inverse" href="<@url page="/admin/masquerade" />">Masquerade</a>
 							</#if>
 							</div>
 						</div>

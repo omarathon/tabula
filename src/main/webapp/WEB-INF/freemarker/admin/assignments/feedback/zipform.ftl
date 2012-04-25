@@ -64,7 +64,7 @@ if (Supports.multipleFiles) {
 </script>
 
 <div class="submit-buttons">
-<input type="submit" value="Upload">
+<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
 </div>
 </@f.form>
 </div>

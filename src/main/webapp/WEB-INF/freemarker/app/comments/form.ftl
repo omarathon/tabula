@@ -52,7 +52,7 @@
 	</div>
 	-->
 	
-	<div class="submit-buttons actions"><input type="submit" value="Send"></div>
+	<div class="submit-buttons"><input class="btn btn-primary" type="submit" value="Send"></div>
 </@f.form>
 
 <script>

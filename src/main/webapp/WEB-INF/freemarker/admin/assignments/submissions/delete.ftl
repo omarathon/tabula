@@ -30,7 +30,7 @@ re-use this assignment, you should instead go back and create a separate assignm
 </p>
 
 <div class="submit-buttons">
-<input type="submit" value="Delete">
+<input class="btn btn-danger" type="submit" value="Delete">
 </div>
 </@f.form>
 

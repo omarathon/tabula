@@ -109,12 +109,12 @@
 
 <div class="submit-buttons">
 <#if hasErrors>
-<input type="submit" value="Confirm" disabled="true">
+<input class="btn btn-primary" type="submit" value="Confirm" disabled="true">
 <#else>
 <input type="hidden" name="confirm" value="true">
-<input type="submit" value="Confirm">
+<input class="btn btn-primary" type="submit" value="Confirm">
 </#if>
-or <a href="<@routes.depthome module=assignment.module />">Cancel</a>
+or <a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 

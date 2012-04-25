@@ -9,12 +9,12 @@
 	<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date. <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
 </p>
 
-<div class="actions">
-<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download-zip/feedback.zip'/>">
+<div>
+<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download-zip/feedback.zip'/>"><i class="icon-download"></i>
 Download all as ZIP file
 </a>
 &nbsp;
-<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-selected-button">Delete selected</a>
+<a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-selected-button">Delete selected</a>
 </div>
 
 <div class="feedback-list">

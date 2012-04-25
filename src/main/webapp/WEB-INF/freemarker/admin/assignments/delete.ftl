@@ -19,10 +19,19 @@ You can delete an assignment if it's been created in error.
 <@f.checkbox path="confirm" id="confirmCheck" />
 <@f.label for="confirmCheck"><strong> I definitely will not need this assignment again and wish to delete it entirely.</strong></@f.label>
 
-<div class="submit-buttons actions">
-<input type="submit" value="Delete">
-or <a href="<@routes.assignmentedit assignment=assignment />">Cancel</a>
+<div class="submit-buttons">
+<input type="submit" value="Delete" class="btn btn-danger">
+or <a href="<@routes.assignmentedit assignment=assignment />" class="btn">Cancel</a>
 </div>
 </@f.form>
+
+<script>
+jQuery(function($){
+	$('#confirmCheck').change(function(){
+		$('.submit-buttons input[type=submit]').attr('disabled', !this.checked).toggleClass('disabled', !this.checked);
+	});
+	$('.submit-buttons input[type=submit]').attr('disabled',true).addClass('disabled');
+})
+</script>
 
 </#escape>
