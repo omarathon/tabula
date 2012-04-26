@@ -25,7 +25,7 @@ jQuery.fn.copyable = function(options) {
         text = $this.html();
     var $container = $('<span class=copyable-url-container></span>').attr('title',title);
     var $explanation = $('<span class=press-ctrl-c></span>').html(PressCtrlC).hide();
-    var $input = $('<input class=copyable-url></span>')
+    var $input = $('<input class="copyable-url" rel="tooltip"></span>')
         .attr('readonly', true)
         .attr('value',url)
         .click(function(){
@@ -43,6 +43,8 @@ jQuery.fn.copyable = function(options) {
     	$input.click();
     }
   });
+  
+  return this;
 }
 
 jQuery(function ($) {
@@ -190,7 +192,7 @@ jQuery(function ($) {
 	
 	$('input.user-code-picker').each(function (i, picker) {
 		var $picker = $(picker),
-			$button = $('<span class="userpicker-button actions"><a href="#">Search for user</a></span>'),
+			$button = $('<a href="#" class="btn">Search for user</a>'),
 			userPicker = getUserPicker(); // could be even lazier and init on click
 		$picker.after("&nbsp;");
 		$picker.after($button);
@@ -335,7 +337,7 @@ jQuery(function ($) {
 		decorateAppCommentsForm($form);
 	});
 		
-	$('a.copyable-url').copyable({prefixLinkText:true});
+	$('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
 	
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();

@@ -1,5 +1,8 @@
 @import "css3.less";
-@import "bootstrap/bootstrap.less";
+.coursework-page {
+  @import "bootstrap/bootstrap.less";
+  @import "bootstrap/responsive.less";
+}
 
 @grid-size:16px;
 @warning-color: #933;
@@ -155,32 +158,6 @@ ul {
 	border-top: 1px solid #EEE;
 }
 
-.form-row {
-	clear:left;
-	margin-bottom: 0.5em;
-}
-
-.form-row {
-	label,.label-like {
-		width: 16em;
-		float: left;
-		text-align: right;
-		font-weight: bold;
-	}
-}
-.form-row .form-field label {
-	float: none;
-}
-.form-field {
-	margin-left: 16.5em;
-}
-label.disabled { color: #666; }
-
-.narrowed-form {
-	.form-row label { width:8em; }
-	.form-field { margin-left: 8.5em; }
-}
-
 #batch-feedback-form {
 	#multifile-column {
 		padding-right: 1em;
@@ -190,31 +167,6 @@ label.disabled { color: #666; }
 		padding-left: 1em; 
 	}
 }
-
-input {
-	&.text, &.date-time-picker {
-		border: 1px solid #999;
-		border-radius: 4px;
-		box-shadow: 2px 2px 2px rgba(0,0,0,0.2) inset;
-		padding: 2px 0 0 5px;
-	}
-	&.text { width: 14em; }
-	&.date-time-picker { width: 10em; }
-}
-
-input[type=checkbox] {
-	.cursor-pointer();
-}
-
-label {
-    .cursor-pointer();
-}
-
-/* input.text:focus,
-input.date-time-picker:focus {
-	box-shadow: 2px 2px 2px rgba(120,120,200,0.2) inset;
-}
- */
 
 // Don't actually use this, it's too amazing
 .sweet-button() {
@@ -264,10 +216,6 @@ input.date-time-picker:focus {
 	text-shadow: 0 1px 0 #000;
 }
 
-//.actions a, input[type=submit] {
-//	.sweet-button();
-//}
-
 table {
   th,td {
     vertical-align: top;
@@ -286,7 +234,6 @@ table {
 	  li {
 	    padding-left: 10px;
 	    margin: 3px 0;
-	    //background: url(/static/images/filetypes/text-x-generic.png) top left no-repeat;
 	    a {
 	      max-width: 28em;
 	      overflow: hidden;
@@ -303,11 +250,6 @@ table {
 	  }
 	}
 
-}
-
-.submit-buttons input {
-	/*padding: 0.5em;
-	font-size: 120%;*/
 }
 
 #masquerade-notice {
@@ -367,11 +309,6 @@ table {
 		display: block;
 		tr, td { display: block; }
 	}
-
-    .form-row {
-    	label, .label-like { float: none !important; width:auto !important; }
-    }
-	.form-field { margin-left: 0 !important; }
 	
 }
 
@@ -441,8 +378,6 @@ table {
 }
 
 .rating-question { margin: 1em; }
-
-
 
 input.copyable-url { 
   text-overflow: ellipsis; 
@@ -532,5 +467,12 @@ a.btn { text-decoration: none; }
 
 // Icons + ID6 require some adjustment
 [class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
+
+// Some fields not quite aligning with adjacent things like .add-on 
+input[type=text] {
+  position: relative;
+  top: 1px;
+}
+
 
 } // .coursework-page

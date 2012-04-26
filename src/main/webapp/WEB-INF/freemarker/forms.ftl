@@ -3,13 +3,36 @@
 <#compress>
 <#escape x as x?html>
 
-<#macro row>
-<div class="form-row"><#nested/></div>
+<#macro row path="" error=false>
+<#if path="">
+<div class="control-group"><#nested/></div>
+<#elseif error>
+<div class="control-group error"><#nested/></div>
+<#else>
+<@spring.bind path=path>
+<div class="control-group<#if status.error> error</#if>"><#nested/></div>
+</@spring.bind>
+</#if>
 </#macro>
 
 <#macro field>
-<div class="form-field"><#nested/></div>
+<div class="controls"><#nested/></div>
 </#macro>
+
+<#macro label path="" for="" checkbox=false>
+<#local clazz="control-label">
+<#if checkbox>
+  <#local clazz="checkbox" />
+</#if>
+<#if path!="">
+  <@f.label path=path cssClass=clazz><#nested/></@f.label>
+<#elseif for!="">
+  <label for="${for}" class="${clazz}"><#nested /></label>
+<#else>
+  <label class="${clazz}"><#nested /></label>
+</#if>
+</#macro>
+<#assign _label=label /><#-- to resolve naming conflicts -->
 
 <#macro selector_check_all>
 <div class="check-all checkbox">
@@ -25,16 +48,16 @@
 </div>
 </#macro>
 
-<#macro errors path><@f.errors path=path cssClass="error" /></#macro>
+<#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
 <#macro labelled_row path label>
-<@errors path=path />
-<@row>
-	<@f.label path=path>
+<@row path=path>
+	<@_label path=path>
 	${label}
-	</@f.label>
+	</@_label>
 	<@field>
 	<#nested />
+	<@errors path=path />
 	</@field>
 </@row>
 </#macro>
@@ -71,10 +94,14 @@ To not bind:
 <#macro render_userpicker expression value>
 	<#if value?? && value?size gt 0>
 	<#list value as id>
-		<input type="text" class="user-code-picker" name="${expression}" value="${id}">
+		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+		--><input type="text" class="user-code-picker" name="${expression}" value="${id}">
+		</div>
 	</#list>
 	<#else>
-		<input type="text" class="user-code-picker" name="${expression}">
+		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+		--><input type="text" class="user-code-picker" name="${expression}">
+		</div>
 	</#if>
 </#macro>
 
@@ -90,9 +117,9 @@ To not bind:
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@row>
-	<@f.label path="${basename}.upload">
+	<@label path="${basename}.upload">
 	File
-	</@f.label>
+	</@label>
 	<@field>
 	<@errors path="${basename}" />
 	<@errors path="${basename}.upload" />

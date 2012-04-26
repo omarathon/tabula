@@ -16,8 +16,10 @@ You can delete an assignment if it's been created in error.
 </p>
 
 <@f.errors path="confirm" cssClass="error" />
+<@form.label checkbox=true>
 <@f.checkbox path="confirm" id="confirmCheck" />
-<@f.label for="confirmCheck"><strong> I definitely will not need this assignment again and wish to delete it entirely.</strong></@f.label>
+<strong> I definitely will not need this assignment again and wish to delete it entirely.</strong>
+</@form.label>
 
 <div class="submit-buttons">
 <input type="submit" value="Delete" class="btn btn-danger">

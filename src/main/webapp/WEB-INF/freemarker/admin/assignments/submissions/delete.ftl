@@ -26,7 +26,7 @@ re-use this assignment, you should instead go back and create a separate assignm
 
 <p>
 <@form.errors path="confirm" />
-<label><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submission items.</label> 
+<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submission items.</label></@form.label> 
 </p>
 
 <div class="submit-buttons">

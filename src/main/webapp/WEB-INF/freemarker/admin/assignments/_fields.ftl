@@ -34,59 +34,61 @@ the comments textarea needs to maintain newlines.
 </#if>
 
 <#if features.submissions>
-	<@form.labelled_row "collectSubmissions" "Collect submissions">
-	<@f.checkbox path="collectSubmissions" id="collectSubmissions" />
+	<@form.labelled_row "collectSubmissions" "Submissions">
+		<label class="checkbox">
+			<@f.checkbox path="collectSubmissions" id="collectSubmissions" />
+			Collect submissions
+		</label>
+	</@form.labelled_row>
 	
-	<div id="submission-options">
-			<h3>Submission options</h3>
-			<div>
-				<label class="disabled"><@f.checkbox path="restrictSubmissions" disabled="true" />
-					Restrict submissions to the students registered on the module
-				</label>
-				<div class="subtle">
-				 	Restricting to a group of students is not currently supported, so
-				 	the above option can't be changed.
-				</div>
-			</div>
-			<div>
-				<label><@f.checkbox path="allowLateSubmissions" />
+	<fieldset id="submission-options">
+		<legend>Submission options</legend>
+		<@form.row>
+			<@form.label></@form.label>
+			<@form.field>				
+				<label class="checkbox">
+					<@f.checkbox path="allowLateSubmissions" />
 					Allow submissions after the close date
 				</label>
-				<div class="subtle">
-					If you allow submissions after the close date, you will be able
-					to view who made late submissions and take the appropriate action.
-				</div>
-			</div>
-			<div>
-				<label><@f.checkbox path="allowResubmission" />
+			</@form.field>	
+		</@form.row>	
+		<@form.row>
+			<@form.label></@form.label>
+			<@form.field>	
+				<label class="checkbox">
+					<@f.checkbox path="allowResubmission" />
 					Allow students to re-submit work
 				</label>
-				<div class="subtle">
+				<div class="help-block">
 					Students will be able to submit new work, replacing any previous submission.
 					Re-submission is only allowed before the close date.
 				</div>
-			</div>
-			<div>
-				<label>
-					<@f.select path="fileAttachmentLimit">
-						<@f.options items=1..command.maxFileAttachments />
-					</@f.select>
-					Maximum number of file attachments per submission
-				</label>
-			</div>
-			<div>
-			<label for="assignmentComment">Text to show on submission form:</label>
-			<div class="subtle">
-				You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
-			</div>
-			<@f.errors path="comment" cssClass="error" />
-			<@f.textarea path="comment" id="assignmentComment" />
-			</div>
-		</div> 
+			</@form.field>
+		</@form.row>
+
+		<@form.row>
+			<@form.label path="fileAttachmentLimit">Max attachments per submission</@form.label>
+			<@form.field>
+				<@f.select path="fileAttachmentLimit" cssClass="span1">
+					<@f.options items=1..command.maxFileAttachments />
+				</@f.select>
+			</@form.field>						
+		</@form.row>
+		<div>
+		<@form.row path="comment">
+		  <@form.label for="assignmentComment">Text to show on submission form:</@form.label>
+		  	<@form.field>
+				<@f.errors path="comment" cssClass="error" />
+				<@f.textarea path="comment" id="assignmentComment" />
+				<div class="help-block">
+					You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
+				</div>
+			</@form.field>
+		</@form.row>
+	</fieldset>
 	
-	
-	</@form.labelled_row>
-	
+
+<#--
 	<@form.row>
 	<@form.field>
 	
@@ -94,6 +96,7 @@ the comments textarea needs to maintain newlines.
 		
 	</@form.field>
 	</@form.row>
+-->
 	
 </#if>
 

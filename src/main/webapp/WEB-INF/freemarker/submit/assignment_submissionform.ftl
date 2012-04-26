@@ -59,7 +59,7 @@
 	</div>
 	
 	<div class="submit-buttons">
-	<input type="submit" value="Submit">
+	<input class="btn btn-large btn-primary" type="submit" value="Submit">
 	</div>
 	</@f.form>
 	
