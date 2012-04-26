@@ -64,11 +64,13 @@ link yourself, by email or by posting it on your module web pages.
 </#if>
 
 <@f.errors path="confirm" cssClass="error" />
-<@f.checkbox path="confirm" id="confirmCheck" />
-<@f.label for="confirmCheck"><strong> I have read the above and am ready to release feedback to students.</strong></@f.label>
+<label class="checkbox">
+	<@f.checkbox path="confirm" id="confirmCheck" />
+	<strong> I have read the above and am ready to release feedback to students.</strong>
+</label>
 
 <div class="submit-buttons">
-<input type="submit" id="publish-submit" value="Publish">
+<input class="btn btn-primary" type="submit" id="publish-submit" value="Publish">
 </div>
 </@f.form>
 

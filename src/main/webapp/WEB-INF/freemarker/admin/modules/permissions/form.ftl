@@ -15,20 +15,22 @@
 	
 	<#assign moduleperms_url><@routes.moduleperms module/></#assign>
 	
-	<@f.form action="${moduleperms_url}" method="post" commandName="addCommand">
-		<input type="hidden" name="_command" value="add">
-		<input type="hidden" name="module" value="${module.code}">
-		<@f.errors path="usercodes" cssClass="error" />
-		Add user <@form.userpicker path="usercodes" />
-		<span class="inline-submit-buttons"><input type="submit" value="Add"></span>
+	<@f.form action="${moduleperms_url}" method="post" commandName="addCommand" cssClass="form-inline">
+		<@form.row path="usercodes">
+			<input type="hidden" name="_command" value="add">
+			<input type="hidden" name="module" value="${module.code}">
+			Add user <@form.userpicker path="usercodes" />
+			<input class="btn" type="submit" value="Add">
+			<@f.errors path="usercodes" cssClass="error help-inline" />
+		</@form.row>
 	</@f.form>
 	
 	<#macro useractions user_id>
-		<form action="${moduleperms_url}" method="post" onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
+		<form action="${moduleperms_url}" class="form-tiny" method="post" onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
 			<input type="hidden" name="_command" value="remove">
 			<input type="hidden" name="module" value="${module.code}">
 			<input type="hidden" name="usercodes" value="${user_id}">
-			<input type="submit" value="Remove" >
+			<input class="btn" type="submit" value="Remove" >
 		</form>
 	</#macro>
 	

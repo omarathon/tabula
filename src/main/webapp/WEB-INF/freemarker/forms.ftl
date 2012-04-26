@@ -95,12 +95,12 @@ To not bind:
 	<#if value?? && value?size gt 0>
 	<#list value as id>
 		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-		--><input type="text" class="user-code-picker" name="${expression}" value="${id}">
+		--><input type="text" class="user-code-picker span2" name="${expression}" value="${id}">
 		</div>
 	</#list>
 	<#else>
 		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-		--><input type="text" class="user-code-picker" name="${expression}">
+		--><input type="text" class="user-code-picker span2" name="${expression}">
 		</div>
 	</#if>
 </#macro>
