@@ -12,7 +12,6 @@ import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.validators._
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.commands._
 import org.springframework.validation.Errors
