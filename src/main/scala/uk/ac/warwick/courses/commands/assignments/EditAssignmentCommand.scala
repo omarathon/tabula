@@ -16,9 +16,6 @@ import uk.ac.warwick.courses.validators._
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
 
-@SpelAsserts(Array(
-	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
-))
 @Configurable
 class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssignmentCommand {
 	

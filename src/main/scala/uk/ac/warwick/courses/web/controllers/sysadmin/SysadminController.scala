@@ -13,7 +13,6 @@ import uk.ac.warwick.courses.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.courses.commands.departments.RemoveDeptOwnerCommand
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
-import uk.ac.warwick.courses.validators.UniqueUsercode
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 import org.springframework.web.bind.annotation.RequestParam
@@ -27,6 +26,7 @@ import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.assignments.DateFormats
 import uk.ac.warwick.courses.services.AuditEventIndexService
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.userlookup.UserLookupInterface
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Configurable
 
 abstract class BaseSysadminController extends BaseController {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
+	@Autowired var userLookup:UserLookupInterface = _ 
 	
 	def redirectToHome = Redirect("/sysadmin/")
 	
@@ -45,6 +46,8 @@ abstract class BaseSysadminController extends BaseController {
 			  		  "owners" -> dept.owners)
 			  		  
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
+	
+	
 	
 }
 	
@@ -104,6 +107,14 @@ class RemoveDeptOwnerController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
 class AddDeptOwnerController extends BaseSysadminController {
 
+	validatesWith { (cmd:AddDeptOwnerCommand, errors:Errors) =>
+		if (cmd.getUsercodes.contains(cmd.usercode)) {
+			errors.rejectValue("usercode", "userId.duplicate")
+		} else if (!userLookup.getUserByUserId(cmd.usercode).isFoundUser) {
+			errors.rejectValue("usercode", "userId.notfound")
+		}
+	}
+	
 	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
 		new AddDeptOwnerCommand(dept)
 	}

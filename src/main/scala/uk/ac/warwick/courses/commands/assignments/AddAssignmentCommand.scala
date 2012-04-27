@@ -17,9 +17,6 @@ import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.commands._
 import org.springframework.validation.Errors
 
-@SpelAsserts(Array( 
-	new SpelAssert(value="openDate < closeDate", message="{closeDate.early}")
-))
 @Configurable
 class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentCommand {
 	

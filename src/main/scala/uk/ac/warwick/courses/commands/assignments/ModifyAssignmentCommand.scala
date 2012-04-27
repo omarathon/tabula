@@ -74,6 +74,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		service.getAssignmentByNameYearModule(name, academicYear, module)
 			.filterNot{ _ eq assignment }
 			.map{ a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
+			
+		if (openDate.isBefore(closeDate)) {
+			errors.reject("closedate.early")
+		}
 	}
 	
 	def copyTo(assignment:Assignment) {
