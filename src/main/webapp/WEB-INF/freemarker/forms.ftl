@@ -116,7 +116,7 @@ To not bind:
 <#macro filewidget basename multiple=true max=10>
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
-	<@row>
+	<@row path=basename>
 	<@label path="${basename}.upload">
 	File
 	</@label>
@@ -126,7 +126,6 @@ To not bind:
 	<@errors path="${basename}.attached" />
 	<@spring.bind path="${basename}">
 	<#local f=status.actualValue />
-	<div class="subtle"><#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if></div>
 	<div id="${elementId}">
 	<#if f.exists>
 		<#list f.attached as attached>
@@ -152,6 +151,8 @@ To not bind:
 		<input type="file" name="${basename}.upload" >
 	</#if>
 	</div>
+	
+	<div class="subtle help-block"><#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if></div>
 	
 	<#if multiple>
 		<script><!--

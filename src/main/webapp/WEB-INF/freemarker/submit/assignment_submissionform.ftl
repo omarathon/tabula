@@ -22,14 +22,14 @@
 		</div>
 	</#if>
 
-	<@f.form cssClass="submission-form" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
+	<@f.form cssClass="submission-form form-horizontal" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
 	<@f.errors cssClass="error form-errors">
 	</@f.errors>
 	
 	<@form.row>
-	 <span class="label-like">Your University ID</span>
+	 <label class="control-label">Your University ID</label>
 	 <@form.field>
-	   ${user.apparentUser.warwickId}
+	   <div class="uneditable-input">${user.apparentUser.warwickId}</div>
 	 </@form.field>
     </@form.row>
 	
@@ -43,7 +43,7 @@
 	
 	<#if features.privacyStatement>
 	<@form.row>
-	<span class="label-like">Privacy statement</span>
+	<label class="control-label">Privacy statement</label>
 	<@form.field>
 		<p class="privacy-field">
 			The data on this form relates to your submission of 
