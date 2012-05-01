@@ -11,6 +11,7 @@ import uk.ac.warwick.courses.helpers.Logging
  */
 trait EventHandling extends Logging {
 	@Autowired @BeanProperty var listener:EventListener = _
+	
 
 	/**
 	 * Records the various stages of an event: before, and either

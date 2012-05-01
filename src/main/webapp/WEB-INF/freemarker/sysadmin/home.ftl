@@ -33,6 +33,17 @@ Rebuild index from
 <@f.input path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
 </@f.form>
+</p>
+
+<h4>Maintenance mode</h4>
+
+<#if maintenanceModeService.enabled>
+<p>Currently <strong>enabled</strong>.</p>
+<#else>
+<p>Disabled.</p>
+</#if>
+
+<p><a href="<@url page="/sysadmin/maintenance"/>">Update settings</a></p>
 
 </div>
 </div>

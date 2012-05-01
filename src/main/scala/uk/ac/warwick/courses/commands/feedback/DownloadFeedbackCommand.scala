@@ -1,23 +1,21 @@
 package uk.ac.warwick.courses.commands.feedback
-import uk.ac.warwick.courses.commands.Command
-import uk.ac.warwick.courses.services.fileserver.RenderableFile
-import uk.ac.warwick.courses.services.ZipService
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.Module
+
+import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
-import uk.ac.warwick.courses.commands.Description
-import uk.ac.warwick.courses.CurrentUser
-import uk.ac.warwick.courses.data.FeedbackDao
-import uk.ac.warwick.courses.services.fileserver.RenderableZip
+
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.courses.helpers.StringUtils._
-import collection.JavaConversions._
-import uk.ac.warwick.courses.services.fileserver.RenderableAttachment
-import uk.ac.warwick.courses.data.model.Feedback
+
+import uk.ac.warwick.courses.commands._
+import uk.ac.warwick.courses.data.model._
+import uk.ac.warwick.courses.data._
+import uk.ac.warwick.courses.helpers.StringUtils.StringToSuperString
+import uk.ac.warwick.courses.services.fileserver._
+import uk.ac.warwick.courses.services.ZipService
+import uk.ac.warwick.courses.CurrentUser
 
 @Configurable
-class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[RenderableFile]] {
+class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
 	@Autowired var zip:ZipService =_
 	@Autowired var feedbackDao:FeedbackDao =_
 	

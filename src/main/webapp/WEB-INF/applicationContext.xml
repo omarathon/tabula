@@ -50,10 +50,10 @@
 		</constructor-arg>
 	</bean>
 	
-	<bean class="org.aspectj.lang.Aspects" factory-method="aspectOf">
+	<!-- <bean class="org.aspectj.lang.Aspects" factory-method="aspectOf">
 		<constructor-arg value="uk.ac.warwick.courses.events.EventLoggingAspect" />
 		<property name="listener" ref="eventListener" />
-	</bean>
+	</bean> -->
 	
 	<bean id="eventListener" class="uk.ac.warwick.courses.events.CompositeEventListener">
 		<constructor-arg>
@@ -77,6 +77,7 @@
 			<map>
 				<entry key="uk.ac.warwick.courses.PermissionDeniedException" value="errors/permissionDenied" />
 				<entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
+				<entry key="uk.ac.warwick.courses.services.MaintenanceModeEnabledException" value="errors/maintenance" />
 			</map>
 		</property>
 	</bean>

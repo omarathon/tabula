@@ -1,10 +1,11 @@
 package uk.ac.warwick.courses.events
-import org.joda.time.DateTime
-import uk.ac.warwick.courses.commands.DescriptionImpl
-import uk.ac.warwick.courses.commands.Describable
-import uk.ac.warwick.courses.RequestInfo
-import uk.ac.warwick.courses.commands.Description
+
 import java.util.UUID
+import org.joda.time.DateTime
+import uk.ac.warwick.courses.commands.Describable
+import uk.ac.warwick.courses.commands.DescriptionImpl
+import uk.ac.warwick.courses.RequestInfo
+import java.io.Serializable
 
 case class Event(
 	val id:String,
@@ -13,7 +14,9 @@ case class Event(
     val realUserId:String,
     val extra:Map[String,Any],
 	val date:DateTime=new DateTime
-)
+) extends Serializable
+
+case class EventAndStage(event:Event, stage:String) extends Serializable
 
 object Event {
 	def fromDescribable(describable:Describable[_]) = doFromDescribable(describable, None)

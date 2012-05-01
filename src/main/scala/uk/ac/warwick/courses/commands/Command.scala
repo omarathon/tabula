@@ -32,6 +32,13 @@ trait SelfValidating {
 	def rejectValue(prop:String, code:String)(implicit errors:Errors) = errors.rejectValue(prop,code)
 }
 
+/**
+ * Marks a command as being safe to use during maintenance mode (other than audit events
+ * which are handled separately). If it doesn't directly update or insert into the database,
+ * it is safe.
+ */
+trait ReadOnly
+
 trait Unaudited { self:Describable[_] =>
 	// override describe() with nothing, since it'll never be used.
 	override def describe(d:Description) {}

@@ -38,6 +38,8 @@ object Routes {
 	}
 	
 	object sysadmin {
+		def home = "/sysadmin" 
+		
 		object events {
 			def query = "/sysadmin/audit/search"
 		}

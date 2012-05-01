@@ -79,6 +79,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 			"submissions"
 		)
 	
+	@Autowired var maintenanceService:MaintenanceModeService = _
 	@Autowired var service:AuditEventService =_ 
 	@Autowired var assignmentService:AssignmentService =_ 
 	@Value("${filesystem.index.audit.dir}") var indexPath:File =_
@@ -103,6 +104,8 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	def ifNotIndexing(work: =>Unit) = 
 		if (indexing)
 			logger.info("Skipped indexing because the indexer is already/still running.")
+		else if (maintenanceService.enabled)
+			logger.info("Skipped indexing because maintenance mode is enabled.")
 		else
 			try { indexing = true; work} 
 			finally indexing = false

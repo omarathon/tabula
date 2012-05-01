@@ -57,11 +57,15 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	    }
 	}
 	
+	/**
+	 * Catch any exception in the given callback. Useful for wrapping some
+	 * work that's done outside of a request, such as a scheduled task, because
+	 * otherwise the exception will be only minimally logged by the scheduler.
+	 */
 	def reportExceptions[T](fn : =>T) = 
 		try fn  
-		catch { 
-			case e:Throwable => { handle(e, None); throw e } 
-		}
+		catch { case throwable => handle(throwable, None); throw throwable } 
+		
 	
 	private def handle(exception:Throwable, request:Option[HttpServletRequest]) = {
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array( classOf[ServletException] ))

@@ -10,8 +10,7 @@ import org.mockito.Matchers.{eq => isEq}
 
 class EventLoggingAspectTest extends TestBase with Mockito {
 	
-	
-	val aspect = Aspects.aspectOf(classOf[EventLoggingAspect])
+	val aspect = Aspects.aspectOf(classOf[CommandApplyAspect])
 	
 	@Test def aspectsApplied {
 		val command = new NullCommand().will { () => 

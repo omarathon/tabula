@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.commands.assignments
 
-import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.courses.commands._
 import uk.ac.warwick.courses.services.fileserver.RenderableZip
 import uk.ac.warwick.courses.services.ZipService
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,7 +12,7 @@ import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 
 @Configurable
-class DownloadAllSubmissionsCommand extends Command[RenderableZip] {
+class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly {
 
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_

@@ -37,6 +37,7 @@ class CompositeExceptionHandler(handlers:java.util.List[ExceptionHandler]) exten
 class LoggingExceptionHandler extends ExceptionHandler with Logging {
 	override def exception(context:ExceptionContext) = context.exception match {
 		case userError:UserError => if (debugEnabled) logger.debug("User error", userError)
+		case handled:HandledException => if (debugEnabled) logger.debug("Handled exception", handled)
 		case e => logger.error("Exception "+context.token, e)
 	}
 }
@@ -52,6 +53,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	
 	override def exception(context:ExceptionContext) = context.exception match {
 		case userError:UserError => {} 
+		case handled:HandledException => {}
 		case e:IOException if e.getClass.getName equals ClientAbortException => {} // cancelled download.
 		case e => {
 			try {

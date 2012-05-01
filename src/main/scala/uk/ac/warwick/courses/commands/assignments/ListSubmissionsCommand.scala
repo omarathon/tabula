@@ -6,8 +6,9 @@ import uk.ac.warwick.courses.data.model._
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.helpers.DateTimeOrdering._
+import uk.ac.warwick.courses.commands.ReadOnly
 
-class ListSubmissionsCommand extends Command[Seq[Submission]] with Unaudited {
+class ListSubmissionsCommand extends Command[Seq[Submission]] with Unaudited with ReadOnly {
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_

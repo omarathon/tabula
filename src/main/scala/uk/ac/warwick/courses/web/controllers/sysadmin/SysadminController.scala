@@ -1,6 +1,11 @@
 package uk.ac.warwick.courses.web.controllers.sysadmin
+
+import scala.reflect.BeanProperty
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,22 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.validation.Valid
 import uk.ac.warwick.courses.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.courses.commands.departments.RemoveDeptOwnerCommand
+import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
+import uk.ac.warwick.courses.commands.SelfValidating
 import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.services.AuditEventIndexService
+import uk.ac.warwick.courses.services.MaintenanceModeService
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.validators.UniqueUsercode
-import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
-import org.springframework.web.bind.annotation.RequestParam
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.Cookie
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
-import org.joda.time.DateTime
-import org.springframework.format.annotation.DateTimeFormat
-import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.assignments.DateFormats
-import uk.ac.warwick.courses.services.AuditEventIndexService
-import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.services.MaintenanceModeService
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -51,11 +52,13 @@ abstract class BaseSysadminController extends BaseController {
 @Controller
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
+	
+	@Autowired var maintenanceService: MaintenanceModeService =_
   
 	@RequestMapping
-	def home = "sysadmin/home"
+	def home = Mav("sysadmin/home").addObjects("maintenanceModeService" -> maintenanceService)
 		
-	@RequestMapping(value=Array("/departments/{dept}/owners/"), method=Array(RequestMethod.GET))
+	@RequestMapping(value=Array("/departments/{dept}/owners/"), method=Array(GET))
 	def departmentOwners(@PathVariable dept:Department) = viewDepartmentOwners(dept)
 	  
 	@RequestMapping(Array("/departments/"))
@@ -69,7 +72,7 @@ class SysadminController extends BaseSysadminController {
   					  "department" -> dept)
 	}
 	
-	@RequestMapping(value=Array("/import"), method=Array(RequestMethod.POST))
+	@RequestMapping(value=Array("/import"), method=Array(POST))
 	def importModules = {
 		  new ImportModulesCommand().apply()
 		  "sysadmin/importdone"
@@ -87,7 +90,7 @@ class RemoveDeptOwnerController extends BaseSysadminController {
 		new RemoveDeptOwnerCommand(dept)
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST))
+	@RequestMapping(method=Array(POST))
 	def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors)  = {
 		if (errors.hasErrors) {
 		  viewDepartmentOwners(dept)
@@ -108,13 +111,13 @@ class AddDeptOwnerController extends BaseSysadminController {
 		new AddDeptOwnerCommand(dept)
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.GET))
+	@RequestMapping(method=Array(GET))
 	def showForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors) = {
 		Mav("sysadmin/departments/owners/add",
 			"department" -> dept)
 	}
 	
-	@RequestMapping(method=Array(RequestMethod.POST))
+	@RequestMapping(method=Array(POST))
 	def submit(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors)  = {
 		if (errors.hasErrors) {
 		  showForm(dept, form, errors)
@@ -141,9 +144,52 @@ class ReindexForm {
 @Controller 
 @RequestMapping(Array("/sysadmin/index/run"))
 class SysadminIndexController extends BaseSysadminController {	
-	@RequestMapping(method=Array(RequestMethod.POST))
+	@RequestMapping(method=Array(POST))
 	def reindex(form:ReindexForm)  = {
 		form.reindex
 		redirectToHome
+	}
+}
+
+class MaintenanceModeForm(service:MaintenanceModeService) extends SelfValidating {
+	@BeanProperty var enable:Boolean = service.enabled
+	@BeanProperty var until:DateTime = service.until.orNull
+	@BeanProperty var message:String = service.message.orNull
+	
+	def validate(implicit errors:Errors) {
+		
+	}
+}
+
+@Controller 
+@RequestMapping(Array("/sysadmin/maintenance"))
+class MaintenanceModeController extends BaseSysadminController {
+	@Autowired var service:MaintenanceModeService =_
+	
+	validatesSelf[MaintenanceModeForm]
+	
+	@ModelAttribute def cmd = new MaintenanceModeForm(service)
+	
+	@RequestMapping(method=Array(GET, HEAD))
+	def showForm(form:MaintenanceModeForm, errors:Errors)  = 
+		Mav("sysadmin/maintenance").noLayoutIf(ajax)
+	
+	@RequestMapping(method=Array(POST))
+	def submit(@Valid form:MaintenanceModeForm, errors:Errors) = {
+		if (errors.hasErrors) showForm(form, errors)
+		else doSubmit(form)
+	}
+	
+	def doSubmit(form:MaintenanceModeForm) = {
+		if (!form.enable) {
+			form.message = null
+			form.until = null
+		}
+		service.message = Option(form.message)
+		service.until = Option(form.until)
+		if (form.enable) service.enable
+		else service.disable
+		
+		Redirect(Routes.sysadmin.home)
 	}
 }

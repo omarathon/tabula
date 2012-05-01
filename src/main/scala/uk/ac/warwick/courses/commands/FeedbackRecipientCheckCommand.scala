@@ -35,7 +35,7 @@ case class RecipientCheckReport(
  * when feedback is published.
  */
 @Configurable
-class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with Unaudited {
+class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
 	
 	@BeanProperty var module:Module =_ // optional, mainly for binding from URL
 	@BeanProperty var assignment:Assignment =_
