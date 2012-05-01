@@ -1,21 +1,24 @@
 package uk.ac.warwick.courses.system.exceptions
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
+
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
+
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.ServletException
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.Ordered
-import uk.ac.warwick.util.core.ExceptionUtils
-import uk.ac.warwick.courses.JavaImports._
-import collection.JavaConversions._
-import collection.JavaConverters._
-import uk.ac.warwick.courses.UserError
 import uk.ac.warwick.courses.web.Mav
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.RequestInfo
+import uk.ac.warwick.courses.UserError
+import uk.ac.warwick.util.core.ExceptionUtils
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.

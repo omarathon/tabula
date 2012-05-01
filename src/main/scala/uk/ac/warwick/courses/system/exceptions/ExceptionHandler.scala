@@ -1,24 +1,26 @@
 package uk.ac.warwick.courses.system.exceptions
 
-import collection.JavaConversions._
-import uk.ac.warwick.courses.helpers.Logging
-import uk.ac.warwick.courses.UserError
-import uk.ac.warwick.util.mail.WarwickMailSender
-import javax.annotation.Resource
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.mail.MailException
-import uk.ac.warwick.courses.RequestInfo
-import org.springframework.beans.factory.annotation.Autowired
-import freemarker.template.{Configuration => FreemarkerConfiguration}
-import org.springframework.beans.factory.InitializingBean
-import freemarker.template.Template
-import uk.ac.warwick.courses.helpers.FreemarkerRendering
-import org.joda.time.DateTime
-import javax.servlet.http.HttpServletRequest
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.io.IOException
+
+import scala.collection.JavaConversions.asScalaBuffer
+
+import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.mail.MailException
+import org.springframework.mail.SimpleMailMessage
+
+import freemarker.template.{Configuration => FreemarkerConfiguration}
+import freemarker.template.Template
+import javax.annotation.Resource
+import javax.servlet.http.HttpServletRequest
+import uk.ac.warwick.courses.helpers.FreemarkerRendering
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.RequestInfo
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 case class ExceptionContext(val token:String, val exception:Throwable, val request:Option[HttpServletRequest]=None) {
 	def getHasRequest = request.isDefined

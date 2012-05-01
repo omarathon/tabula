@@ -1,5 +1,6 @@
 package uk.ac.warwick.courses
 import uk.ac.warwick.courses.actions.Action
+import uk.ac.warwick.courses.system.exceptions.UserError
 
 /**
  * Thrown by security when a user tries to do an action that
