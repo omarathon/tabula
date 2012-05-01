@@ -19,7 +19,8 @@ import uk.ac.warwick.util.web.Uri
 class RequestInfo(
 		val user:CurrentUser, 
 		val requestedUri:Uri,
-		val ajax:Boolean=false
+		val ajax:Boolean=false,
+		val maintenance:Boolean=false
 		)
 
 object RequestInfo {

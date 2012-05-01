@@ -13,6 +13,7 @@ import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.util.web.Uri
 import collection.JavaConversions._
 import collection.JavaConverters._
+import uk.ac.warwick.courses.services.MaintenanceModeService
 
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   
@@ -20,12 +21,15 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	val XRequestedUriHeader = "X-Requested-Uri"
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
 		
+	@Autowired var maintenance: MaintenanceModeService =_
+		
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
 		implicit val req = request
 		RequestInfo.open(fromAttributeElse(new RequestInfo(
 				user = getUser(request),
 				requestedUri = getRequestedUri(request),
-				ajax = isAjax(request)
+				ajax = isAjax(request),
+				maintenance = maintenance.enabled
 		)))
 		true
 	}

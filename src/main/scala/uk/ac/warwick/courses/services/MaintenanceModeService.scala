@@ -7,7 +7,7 @@ import scala.react.EventSource
 import uk.ac.warwick.courses.system.exceptions.HandledException
 
 @Service
-class MaintenanceModeService {
+class MaintenanceModeService extends MaintenanceStatus {
 	private var _enabled:Boolean = false;
 	
 	@BeanProperty def enabled:Boolean = _enabled
@@ -33,6 +33,12 @@ class MaintenanceModeService {
 		_enabled = false
 		changingState.emit(_enabled)
 	}
+}
+
+trait MaintenanceStatus {
+	def enabled:Boolean
+	def until:Option[DateTime]
+	def message:Option[String]
 }
 
 /**

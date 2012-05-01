@@ -134,6 +134,14 @@
 						
 						<div id="custom-header">
 							<div class="">
+							<#if info.maintenance>
+								<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="bottom" data-content="This system has been placed in a read-only mode. You will be able to downoad files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
+								<script>
+									jQuery(function($){
+										$('#maintenance-mode-label').popover();
+									});
+								</script>
+							</#if>
 							<#if user.sysadmin>
 								<a class="btn btn-inverse" href="<@url page="/sysadmin/" />">Sysadmin</a>
 							</#if>
