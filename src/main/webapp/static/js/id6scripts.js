@@ -13927,7 +13927,7 @@ $(function() {
 jQuery(function($) {
 	new NavigableList({
 		inputElement: $('#search-box'),
-		queryURL: 'http://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json?maxResults=6&prefix=',
+		queryURL: 'https://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json?maxResults=6&prefix=',
 		containerElement: $('#search-suggestions'),
 		jsonCallback: function(data) {
 			this.options.containerElement.empty();
