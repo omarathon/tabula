@@ -63,9 +63,12 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		service.listNewerThan(any[DateTime], isEq(1000)) returns events
 		service.getById(any[JLong]) returns events.headOption
 		
+		val maintenanceMode = mock[MaintenanceModeService]
+		
 		val indexer = new AuditEventIndexService
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
+		indexer.maintenanceService = maintenanceMode
 		indexer.afterPropertiesSet
 		
 		stopwatch.start("indexing")

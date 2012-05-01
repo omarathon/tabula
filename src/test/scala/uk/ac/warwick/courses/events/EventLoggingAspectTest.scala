@@ -7,6 +7,7 @@ import uk.ac.warwick.courses.Mockito
 import collection.JavaConversions._
 import uk.ac.warwick.courses.commands._
 import org.mockito.Matchers.{eq => isEq}
+import uk.ac.warwick.courses.services.MaintenanceModeService
 
 class EventLoggingAspectTest extends TestBase with Mockito {
 	
@@ -17,7 +18,9 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 		}
 			
 		val listener = mock[EventListener]
+		val maintenanceMode = mock[MaintenanceModeService]
 		aspect.listener = listener
+		aspect.maintenanceMode = maintenanceMode
 		
 		command()
 
