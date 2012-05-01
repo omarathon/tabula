@@ -2,14 +2,12 @@ package uk.ac.warwick.courses.commands.assignments
 
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
-
 import org.hibernate.validator.constraints.Length
 import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
-
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 import uk.ac.warwick.courses.commands.Command
@@ -20,11 +18,7 @@ import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.AcademicYear
-
-
-object DateFormats {
-	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
-}
+import uk.ac.warwick.courses.DateFormats
 
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
@@ -75,8 +69,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			.filterNot{ _ eq assignment }
 			.map{ a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
 			
-		if (openDate.isBefore(closeDate)) {
-			errors.reject("closedate.early")
+		if (openDate.isAfter(closeDate)) {
+			errors.reject("closeDate.early")
 		}
 	}
 	

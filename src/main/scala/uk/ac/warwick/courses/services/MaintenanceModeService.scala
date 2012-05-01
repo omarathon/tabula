@@ -25,13 +25,17 @@ class MaintenanceModeService extends MaintenanceStatus {
 	private def notEnabled = new IllegalStateException("Maintenance not enabled")
 	
 	def enable {
-		_enabled = true
-		changingState.emit(_enabled)
+		if (!_enabled) {
+			_enabled = true
+			changingState.emit(_enabled)
+		}
 	}
 	
 	def disable {
-		_enabled = false
-		changingState.emit(_enabled)
+		if (_enabled) {
+			_enabled = false
+			changingState.emit(_enabled)
+		}
 	}
 }
 
@@ -51,4 +55,8 @@ trait MaintenanceStatus {
  */
 class MaintenanceModeEnabledException(val until:Option[DateTime], val message:Option[String]) 
 	extends RuntimeException 
-	with HandledException
+	with HandledException {
+	
+	def getMessageOrEmpty = message.getOrElse("")
+	
+}

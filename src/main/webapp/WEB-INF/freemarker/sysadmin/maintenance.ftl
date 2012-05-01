@@ -8,7 +8,7 @@
 	</@form.labelled_row>
 	
 	<@form.labelled_row "until" "ETA">
-		<@f.input path=path cssClass="date-time-picker" placeholder="Click to pick a date" />
+		<@f.input path="until" cssClass="date-time-picker" placeholder="Click to pick a date" />
 	</@form.labelled_row>
 	
 	<@form.labelled_row "message" "Custom message">

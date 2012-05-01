@@ -23,7 +23,7 @@ import uk.ac.warwick.courses.services.AuditEventIndexService
 import uk.ac.warwick.courses.services.MaintenanceModeService
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.web.controllers.BaseController
-import uk.ac.warwick.courses.commands.assignments.DateFormats
+import uk.ac.warwick.courses.DateFormats
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.web.Routes
@@ -164,8 +164,11 @@ class SysadminIndexController extends BaseSysadminController {
 
 class MaintenanceModeForm(service:MaintenanceModeService) extends SelfValidating {
 	@BeanProperty var enable:Boolean = service.enabled
-	@BeanProperty var until:DateTime = service.until.orNull
-	@BeanProperty var message:String = service.message.orNull
+	
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty var until:DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
+	
+	@BeanProperty var message:String = service.message orNull
 	
 	def validate(implicit errors:Errors) {
 		
@@ -187,20 +190,20 @@ class MaintenanceModeController extends BaseSysadminController {
 	
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid form:MaintenanceModeForm, errors:Errors) = {
-		if (errors.hasErrors) showForm(form, errors)
-		else doSubmit(form)
+		if (errors.hasErrors) 
+			showForm(form, errors)
+		else {
+			if (!form.enable) {
+				form.message = null
+				form.until = null
+			}
+			service.message = Option(form.message)
+			service.until = Option(form.until)
+			if (form.enable) service.enable
+			else service.disable
+			
+			Redirect(Routes.sysadmin.home)
+		}
 	}
 	
-	def doSubmit(form:MaintenanceModeForm) = {
-		if (!form.enable) {
-			form.message = null
-			form.until = null
-		}
-		service.message = Option(form.message)
-		service.until = Option(form.until)
-		if (form.enable) service.enable
-		else service.disable
-		
-		Redirect(Routes.sysadmin.home)
-	}
 }

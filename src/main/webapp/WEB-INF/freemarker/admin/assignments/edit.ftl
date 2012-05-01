@@ -33,6 +33,7 @@ the comments textarea needs to maintain newlines.
 </div>
 <div class="form-editor-tab" id="form-editor-formprops">
 -->
+<@f.errors cssClass="error form-errors" />
 
 <#assign newRecord=false />
 
