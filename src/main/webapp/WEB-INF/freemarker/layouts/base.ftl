@@ -100,11 +100,7 @@
 					
 						<!-- Start removal here if non-branded -->
 							<div id="search-container">
-								<form actio
-    //.form-row {
-    //	label, .label-like { float: none !important; width:auto !important; }
-    //}
-	//.form-field { margin-left: 0 !important; }n="http://search.warwick.ac.uk/website" class="form-inline">
+								<form action="http://search.warwick.ac.uk/website" class="form-inline">
 									<ul class="index-section">
 										<li data-index-section="website" data-index-title="Warwick" title="" class="active">Search University of Warwick</li>
 										<li data-index-section="people" data-index-title="People" data-go-type="people" title="">Search for people at Warwick</li>
