@@ -15,6 +15,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.courses.UserError
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.courses.RequestInfo
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -38,8 +39,10 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var viewMappings:JMap[String,String] = Map[String,String]()
 	
 	override def resolveException(request:HttpServletRequest, response:HttpServletResponse, obj:Any, e:Exception):ModelAndView = {
-		doResolve(e, Some(request)).toModelAndView
+		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
 	}
+	
+	private def ajax = RequestInfo.fromThread.map{_.ajax}.getOrElse(false)
 	
 	/**
 	 * Resolve an exception outside of a request. Doesn't return a model/view.

@@ -47,6 +47,15 @@ jQuery.fn.copyable = function(options) {
   return this;
 }
 
+/*
+ * Do the given function only if it matched any elements.
+ * "this" refers to the jQuery object inside the callback.
+ */
+jQuery.fn.use = function(callback) {
+  if (this.length > 0) callback.call(this);
+  return this;
+}
+
 jQuery(function ($) {
 	
 	var exports = {};
@@ -156,9 +165,14 @@ jQuery(function ($) {
 				$form.find('input[type=submit]').button('loading');
 				event.preventDefault();
 				$.post(action, $form.serialize())
-					.success(function(data){ 
-						$rateFeedback.replaceWith(data);
-						decorateFeedbackForm();
+					.success(function(data){
+						if (data.indexOf('id="feedback-rating"') != -1) {
+							$rateFeedback.replaceWith(data);
+							decorateFeedbackForm();
+						} else { // returned some other HTML - error page or login page?
+							alert('Sorry, there was a problem saving the rating.');
+							$form.find('input[type=submit]').button('reset');
+						}
 					})
 					.error(function(){ alert('Sorry, that didn\'t seem to work.'); });
 				return false;
