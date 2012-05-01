@@ -20,6 +20,12 @@ import scala.collection.mutable
  */
 class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging {
 
+  final val FreemarkerRoot = "/WEB-INF/freemarker/"
+  final val Extension = ".ftl"
+  final val LayoutAttribute = "renderLayout"
+  final val DefaultLayout = "base"
+  final val BodyTileAttribute = "body"
+	
   /*
    * Return a definition if found in XML. Otherwise if it doesn't start with /,
    * generate our own definition based on the base layout
@@ -32,7 +38,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
       case definition:Any => definition
       case _ if !name2.startsWith("/") => new Definition(layoutDefinition(ctx)) {
         addAll(Map(
-            "body" -> new Attribute("/WEB-INF/freemarker/"+name2+".ftl")
+            BodyTileAttribute -> new Attribute(FreemarkerRoot+name2+Extension)
         ))
   	  }
       case _ => null // Let it be handled by FreemarkerServlet
@@ -45,15 +51,13 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
     super.getDefinition(layout, ctx)
   }
   
-  def layoutTemplate(ctx:TilesRequestContext) = {
-    if (ctx.getRequestScope != null) {
-      ctx.getRequestScope.get("renderLayout") match {
-	      case name:String => name.trim
-	      case _ => "base"
-	    }
-    } else {
-     	"base"
-    }
-  }
+  def layoutTemplate(ctx:TilesRequestContext) =
+    if (ctx.getRequestScope != null) 
+      ctx.getRequestScope.get(LayoutAttribute) match {
+	    case name:String => name.trim
+	    case _ => DefaultLayout
+	  }
+    else DefaultLayout
+
   
 }

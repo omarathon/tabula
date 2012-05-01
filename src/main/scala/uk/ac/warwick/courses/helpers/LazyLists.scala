@@ -5,6 +5,15 @@ import org.apache.commons.collections.FactoryUtils
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.assignments.FeedbackItem
 
+/**
+ * Lazy lists are useful in Spring forms when you have a list of rich class objects
+ * because Spring won't create empty objects for you.
+ * 
+ * e.g. myCommand.widgets[5].name=rob
+ * 
+ * Spring will call getWidgets().get(5).setName("rob"). A LazyFactory will create an
+ * empty widget at index 5 so that there isn't an NPE.
+ */
 object LazyLists {
 	
 	/**
