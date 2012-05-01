@@ -17,7 +17,7 @@ import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.Ordered
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.RequestInfo
-import uk.ac.warwick.courses.UserError
+import uk.ac.warwick.courses.system.exceptions.UserError
 import uk.ac.warwick.util.core.ExceptionUtils
 
 /**
