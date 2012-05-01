@@ -20,10 +20,10 @@
 	
 	<property name="src.scala" value="src/main/scala" />
 	<property name="src.java" value="src/main/java" />
-	<path id="java+scala.srcpath">
-		<path path="${src.scala}" />
-		<path path="${src.java}" />
-	</path>
+	
+	<condition property="has.java.src">
+		<available file="${src.java}" />
+	</condition>
 
 	<fileset id="runtime.jars" dir="lib/runtime" includes="**/*.jar" />
 
@@ -43,6 +43,21 @@
 	<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="build.classpath" />
 	<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask" classpath="lib/runtime/warwickutils-all.jar" />
 
+	<target name="init">
+		<!-- set up the path "srcpath" based on whether there's any java source -->
+		<!-- the two path sets to choose from -->
+		<path id="java+scala.srcpath">
+			<path path="${src.scala}" />
+			<path path="${src.java}" />
+		</path>
+		<path id="scala.srcpath" path="${src.scala}" />
+		
+		<!-- pick the combined one if it's available -->
+		<condition property="_select_srcpath" value="java+scala.srcpath" else="scala.srcpath">
+			<istrue value="${has.java.src}" />
+		</condition>
+		<path id="srcpath" refid="${_select_srcpath}" />
+	</target>
 
 	<target name="-checks">
 		
@@ -60,13 +75,18 @@
 		<delete dir="target" />
 	</target>
 
-	<target name="compile" depends="-checks" description="Compile source files into target directory">
+	<target name="compile" depends="init,-checks" description="Compile source files into target directory">
 		<mkdir dir="target/${war.name}/WEB-INF/classes" />
 		<mkdir dir="target/unwoven" />
 		<mkdir dir="target/log" />
 		
-		<scalac deprecation="on" unchecked="on" srcref="java+scala.srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
-		<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
+		<scalac deprecation="on" unchecked="on" srcref="srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
+		<if>
+			<istrue value="${has.java.src}"></istrue>
+			<then>
+				<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
+			</then>
+		</if>
 
 		<antcall target="-iajc" />
 

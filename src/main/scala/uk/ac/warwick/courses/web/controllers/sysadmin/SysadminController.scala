@@ -22,12 +22,12 @@ import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.services.AuditEventIndexService
 import uk.ac.warwick.courses.services.MaintenanceModeService
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
-import uk.ac.warwick.courses.validators.UniqueUsercode
 import uk.ac.warwick.courses.web.controllers.BaseController
-import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.commands.assignments.DateFormats
+import uk.ac.warwick.courses.web.Mav
+import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.web.Routes
-import uk.ac.warwick.courses.services.MaintenanceModeService
+
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -35,6 +35,7 @@ import uk.ac.warwick.courses.services.MaintenanceModeService
 
 abstract class BaseSysadminController extends BaseController {
 	@Autowired var moduleService:ModuleAndDepartmentService = null
+	@Autowired var userLookup:UserLookupInterface = _ 
 	
 	def redirectToHome = Redirect("/sysadmin/")
 	
@@ -46,6 +47,8 @@ abstract class BaseSysadminController extends BaseController {
 			  		  "owners" -> dept.owners)
 			  		  
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
+	
+	
 	
 }
 	
@@ -107,6 +110,14 @@ class RemoveDeptOwnerController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
 class AddDeptOwnerController extends BaseSysadminController {
 
+	validatesWith { (cmd:AddDeptOwnerCommand, errors:Errors) =>
+		if (cmd.getUsercodes.contains(cmd.usercode)) {
+			errors.rejectValue("usercode", "userId.duplicate")
+		} else if (!userLookup.getUserByUserId(cmd.usercode).isFoundUser) {
+			errors.rejectValue("usercode", "userId.notfound")
+		}
+	}
+	
 	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
 		new AddDeptOwnerCommand(dept)
 	}

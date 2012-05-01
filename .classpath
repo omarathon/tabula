@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" output="bin/scala" path="src/main/scala"/>
 	<classpathentry kind="src" output="bin/test" path="src/test/scala"/>
-	<classpathentry kind="src" output="bin/java" path="src/main/java"/>
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
