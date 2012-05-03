@@ -125,6 +125,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@JoinColumn(name="module_id")
 	@BeanProperty var module:Module =_
 	
+	@ManyToOne
+	@JoinColumn(name="upstream_id")
+	@BeanProperty var upstreamAssignment:UpstreamAssignment =_
+	
 	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	@OrderBy("submittedDate")
 	@BeanProperty var submissions:JList[Submission] = ArrayList()
