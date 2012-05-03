@@ -18,9 +18,10 @@ import collection.JavaConversions._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.annotation.Propagation
+import uk.ac.warwick.courses.helpers.Logging
 
 @Repository
-class FileDao extends Daoisms with InitializingBean {
+class FileDao extends Daoisms with InitializingBean with Logging {
 	
 	@Value("${filesystem.attachment.dir}") var attachmentDir:File =_
 	@Value("${filesystem.create.missing}") var createMissingDirectories:Boolean =_
@@ -47,11 +48,6 @@ class FileDao extends Daoisms with InitializingBean {
 		directory.mkdirs()
 		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
 		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
-	}
-	
-	def makePermanent(file:FileAttachment) = {
-		//file.temporary = false
-		session.update(file)
 	}
 	
 	def getFileById(id:String) = getById[FileAttachment](id)
@@ -89,8 +85,18 @@ class FileDao extends Daoisms with InitializingBean {
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	private def deleteSomeFiles(files:Seq[FileAttachment]) {
+		// To be safe, split off temporary files which are attached to non-temporary things
+		// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
+		val grouped = files groupBy ( _.isAttached )
+		val (okayToDelete, dontDelete) = (grouped(false), grouped(true))
+		
+		if (dontDelete.size > 0) {
+			// Somewhere else in the app is failing to set temporary=false
+			logger.error("%d fileAttachments are temporary but are attached to another entity! I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size)
+		}
+		
 		session.createQuery("delete FileAttachment f where f.id in :ids")
-				.setParameterList("ids", files.map(_.id))
+				.setParameterList("ids", okayToDelete.map(_.id))
 				.executeUpdate()
 		for (file <- files) targetFile(file.id).delete()
 	}

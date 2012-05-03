@@ -47,7 +47,7 @@ class FileSubmissionValue(val field:FormField) extends SubmissionValue {
 	override def onBind { file.onBind }
 	def persist(ssv:SavedSubmissionValue) {
 		val savedAttachments = for (attachment <- file.attached) yield {
-			fileDao.makePermanent(attachment)
+			attachment.temporary = false
 			attachment.submissionValue = ssv
 			attachment
 		}
