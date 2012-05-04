@@ -7,7 +7,5 @@ import scala.util.Random
  * that needed a short URL, like an assignment.
  */
 object ShortCode {
-	
-	def random():String = Random.alphanumeric.take(5).mkString("")
-
+	def random() = Random.alphanumeric.take(5).mkString
 }
