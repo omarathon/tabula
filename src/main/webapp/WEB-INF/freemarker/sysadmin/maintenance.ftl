@@ -1,7 +1,6 @@
 <h1>Maintenance mode</h1>
 
-<#assign formurl><@url page="/sysadmin/maintenance"/></#assign>
-<@f.form action=formurl cssClass="form-horizontal" commandName="maintenanceModeForm">
+<@f.form action="?" cssClass="form-horizontal" commandName="maintenanceModeForm">
 
 	<@form.labelled_row "enable" "Enabled?">
 		<@f.checkbox path="enable" />
