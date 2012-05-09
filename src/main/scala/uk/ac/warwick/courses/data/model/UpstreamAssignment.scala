@@ -1,10 +1,13 @@
 package uk.ac.warwick.courses.data.model
 
+import javax.persistence.Entity
+
 /**
  * Represents an upstream assignment as found in the central
  * University systems. An upstream assignment is timeless - it doesn't
  * relate to a specific instance of an assignment or even a particular year.
  */
+@Entity
 class UpstreamAssignment extends GeneratedId {
 	/**
 	 * Lowercase module code, with CATS. e.g. in304-15

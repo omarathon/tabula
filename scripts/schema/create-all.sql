@@ -90,7 +90,6 @@ create table UserGroupExclude (
 create table UserGroupInclude (
     group_id nvarchar2(255) not null,
     usercode nvarchar2(255)
-    
 );
 CREATE INDEX IDX_USERGROUPINC ON USERGROUPINCLUDE(GROUP_ID);
 CREATE INDEX IDX_USERGROUPEXC ON USERGROUPEXCLUDE(GROUP_ID);

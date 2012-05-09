@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.persistence.Entity
 import uk.ac.warwick.courses.JavaImports.JList
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.data.model.Submission
+import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
@@ -38,6 +36,8 @@ trait AssignmentService {
 	 */
 	def recentAssignment(module:Module): Option[Assignment]
 	
+	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
+	
 }
 
 @Service
@@ -50,7 +50,6 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission:Submission) = {
-//		for (value <- submission.values) session.saveOrUpdate(value)
 		session.saveOrUpdate(submission)
 	}
 	
@@ -99,4 +98,15 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	
 	def recentAssignment(module:Module) = 
 		auditEventIndexService.recentAssignment(module)
+		
+	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
+		Option(assignment.upstreamAssignment).flatMap { upstream =>
+			session.newCriteria[UpstreamAssessmentGroup]
+					.add(Restrictions.eq("academicYear", assignment.academicYear))
+					.add(Restrictions.eq("moduleCode", upstream.moduleCode ))
+					.add(Restrictions.eq("assessmentGroup", upstream.assessmentGroup ))
+					.add(Restrictions.eq("occurrence", assignment.occurrence ))
+					.uniqueResult
+		}
+	}
 }

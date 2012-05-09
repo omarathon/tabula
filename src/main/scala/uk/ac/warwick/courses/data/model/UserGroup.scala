@@ -12,6 +12,8 @@ import java.{util => jutil}
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.helpers.ArrayList
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.FilterDef
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -29,9 +31,15 @@ import uk.ac.warwick.courses.helpers.ArrayList
  * not to allow a webgroup to be used, and only allow included users.
  * We might want to subclass UserGroup to make it a bit more explicit which
  * groups support Webgroups, and prevent invalid operations.
+ * 
+ * Depending on context, the usercodes may be university IDs.
  */
 @Entity
 @Configurable
+@FilterDefs(Array(
+	new FilterDef(name="editableIncludes"),
+	new FilterDef(name="noneditableIncludes")
+))
 class UserGroup extends GeneratedId {
   
 	// Not created by Spring but @Autowiring works thanks to compile-time weaving.
@@ -43,10 +51,18 @@ class UserGroup extends GeneratedId {
 	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
 	
 	@ElementCollection @Column(name="usercode")
+	@Filter(name="editableIncludes", condition="editable")
 	@JoinTable(name="UserGroupInclude", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")
 	))
 	@BeanProperty var includeUsers:jutil.List[String] = ArrayList()
+	
+	@ElementCollection @Column(name="usercode")
+	@Filter(name="noneditableIncludes", condition="!editable")
+	@JoinTable(name="UserGroupStatic", joinColumns=Array(
+	    new JoinColumn(name="group_id", referencedColumnName="id")
+	))
+	@BeanProperty var staticIncludeUsers:jutil.List[String] = ArrayList()
 	
 	@ElementCollection @Column(name="usercode")
 	@JoinTable(name="UserGroupExclude", joinColumns=Array(
@@ -60,6 +76,7 @@ class UserGroup extends GeneratedId {
 	def excludeUser(user:String) = excludeUsers.add(user)
 	def unexcludeUser(user:String) = excludeUsers.remove(user)
 
+	var universityIds:Boolean = false
 	
 	/*
 	 * Could implement as `members.contains(user)`
@@ -69,14 +86,24 @@ class UserGroup extends GeneratedId {
 	  !(excludeUsers contains user) && 
 	  (
 	    (includeUsers contains user) ||
+	    (staticIncludeUsers contains user) ||
 	    (baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup))
 	  )
 	  
 	def members =
-	  (includeUsers ++ webgroupMembers) filterNot excludeUsers.contains
+	  (includeUsers ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 	  
 	def webgroupMembers:List[String] = baseWebgroup match {
 	  case webgroup:String => groupService.getUserCodesInGroup(webgroup).asScala.toList
 	  case _ => Nil
+	}
+}
+
+object UserGroup {
+	def emptyUsercodes = new UserGroup
+	def emptyUniversityIds = {
+		val g = new UserGroup
+		g.universityIds = true
+		g
 	}
 }

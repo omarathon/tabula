@@ -14,7 +14,19 @@ import org.springframework.transaction.support._
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @TransactionConfiguration()
 @ActiveProfiles(Array("test"))
-abstract class AppContextTestBase extends TestBase {
+abstract class AppContextTestBase extends TestBase with TransactionalTesting {
+	
+}
+
+@RunWith(classOf[SpringJUnit4ClassRunner])
+@ContextConfiguration(locations=Array("/WEB-INF/common.xml","/WEB-INF/persistence.xml"))
+@TransactionConfiguration()
+@ActiveProfiles(Array("test"))
+abstract class PersistenceTestBase extends TestBase with TransactionalTesting {
+	
+}
+
+trait TransactionalTesting {
 	@Autowired var sessionFactory:SessionFactory =_
 	@Autowired var transactionManager:PlatformTransactionManager =_
 	
