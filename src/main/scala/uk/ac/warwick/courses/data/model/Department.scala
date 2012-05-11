@@ -10,6 +10,7 @@ import javax.persistence.PostLoad
 import uk.ac.warwick.courses.data._
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.actions._
+import uk.ac.warwick.courses.JavaImports._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
@@ -19,7 +20,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var name:String = null
 	
 	@OneToMany(mappedBy="department")
-	@BeanProperty var modules:java.util.List[Module] = List()
+	@BeanProperty var modules:JList[Module] = List()
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="ownersgroup_id")

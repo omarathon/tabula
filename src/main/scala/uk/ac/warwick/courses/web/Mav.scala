@@ -39,7 +39,7 @@ class Mav(var viewName:String) {
 	/**
 	 * Add a list of breadcrumbs to display in the navigation.
 	 */
-	def crumbs(pages:Breadcrumb*) = addObjects("breadcrumbs" -> pages.toSeq)
+	def crumbs(pages:BreadCrumb*) = addObjects("breadcrumbs" -> pages.toSeq)
 	
 	/**
 	 * Sets the layout parameter to "none" to

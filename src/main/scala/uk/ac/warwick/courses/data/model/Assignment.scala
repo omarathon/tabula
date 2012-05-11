@@ -69,7 +69,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Column(nullable=false)
 	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime())
 	
-	var occurrence:String =_
+	@transient var occurrence:String =_
 	
 	/**
 	 * Before we allow customising of assignments, we just want the basic
@@ -139,9 +139,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@JoinColumn(name="module_id")
 	@BeanProperty var module:Module =_
 	
-	@ManyToOne
-	@JoinColumn(name="upstream_id")
-	@BeanProperty var upstreamAssignment:UpstreamAssignment =_
+//	@ManyToOne
+//	@JoinColumn(name="upstream_id")
+	@transient @BeanProperty var upstreamAssignment:UpstreamAssignment =_
 	
 	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
 	@OrderBy("submittedDate")

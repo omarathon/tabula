@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <httpbasic><allow>true</allow></httpbasic>   
+  <mode>new</mode>
+
+  <shire>
+    <filteruserkey>SSO_USER</filteruserkey>
+    <uri-header>x-requested-uri</uri-header>
+    <location>https://smudge.warwick.ac.uk/sso/acs</location>
+    <sscookie>
+      <name>SSO-SSC-Courses</name>
+      <path>/</path>
+      <domain>smudge.warwick.ac.uk</domain>
+    </sscookie>
+    <providerid>urn:smudge.warwick.ac.uk:courses:service</providerid>
+  </shire>
+
+  <credentials>
+    <certificate>file:/apps/apache/conf/ssl/smudge.warwick.ac.uk.crt</certificate>
+    <key>file:/apps/apache/conf/ssl/smudge.warwick.ac.uk.key</key>
+    <chain>file:/apps/apache/conf/ssl/terena-ca.crt</chain>
+  </credentials>
+
+</config>

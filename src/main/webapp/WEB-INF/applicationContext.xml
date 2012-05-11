@@ -30,8 +30,8 @@
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
 		p:basename="messages" />
 		
-	<import resource="common.xml" />
-	<import resource="persistence.xml" />
+	<import resource="common-context.xml" />
+	<import resource="persistence-context.xml" />
 	
 	<bean id="eventListener" class="uk.ac.warwick.courses.events.CompositeEventListener">
 		<constructor-arg>

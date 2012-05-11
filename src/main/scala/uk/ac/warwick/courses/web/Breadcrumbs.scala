@@ -5,7 +5,7 @@ import uk.ac.warwick.courses.data.model
 /**
  * An object that can be rendered as part of the breadcrumb navigation on the page.
  */
-trait Breadcrumb {
+trait BreadCrumb {
 	val title:String
 	val url:String
 	def linked:Boolean = true
@@ -20,7 +20,7 @@ object BreadCrumb {
 }
 
 object Breadcrumbs {
-	abstract class Abstract extends Breadcrumb
+	abstract class Abstract extends BreadCrumb
 	case class Standard(val title:String, val url:String, override val tooltip:String) extends Abstract
 	
 	/**
