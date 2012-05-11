@@ -88,7 +88,8 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		// To be safe, split off temporary files which are attached to non-temporary things
 		// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
 		val grouped = files groupBy ( _.isAttached )
-		val (okayToDelete, dontDelete) = (grouped(false), grouped(true))
+		val okayToDelete = grouped.getOrElse(false,Nil)
+		val dontDelete = grouped.getOrElse(true, Nil)
 		
 		if (dontDelete.size > 0) {
 			// Somewhere else in the app is failing to set temporary=false

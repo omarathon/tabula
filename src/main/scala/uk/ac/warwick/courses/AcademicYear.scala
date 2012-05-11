@@ -16,6 +16,24 @@ case class AcademicYear(val startYear:Int) {
 	
 	def previous = new AcademicYear(startYear-1)
 	def next = new AcademicYear(startYear+1)
+	
+	def -(i:Int) = new AcademicYear(startYear-i)
+	def +(i:Int) = new AcademicYear(startYear+i)
+	
+	/**
+	 * Returns a sequence of AcademicYears, in order, starting
+	 * the given number of years before this year, and ending
+	 * the given number of years after, inclusive. The length
+	 * will be 1 + yearsBefore + yearsAfter. If both are 0, then
+	 * it will have a single element containing this year.
+	 */
+	def yearsSurrounding(yearsBefore:Int, yearsAfter:Int) : Seq[AcademicYear] = {
+		assert(yearsBefore >= 0)
+		assert(yearsAfter >= 0)
+		val length = 1 + yearsBefore + yearsAfter
+		val first = (this - yearsBefore)
+		Iterable.iterate(first, length) { y => y.next }.toSeq
+	}
 }
 
 /**
@@ -35,6 +53,30 @@ class AcademicYearEditor extends PropertyEditorSupport {
 }
 
 object AcademicYear {
+	
+	private val SitsPattern = """(\d{2})/(\d{2})""".r
+	/**
+	 * We're only dealing with current years, not DOBs or anything, so can afford
+	 * to make the century break large. I don't think there is even any module data in SITS
+	 * from before 2004, so could even do without this check.
+	 * 
+	 * Anyway, this will only break near the year 2090.
+	 */
+	private val CenturyBreak = 90
+	
+	def parse(string:String) = string match {
+		case SitsPattern(year1, year2) => AcademicYear(parseTwoDigits(year1))
+		case _ => throw new IllegalArgumentException("Did not match YY/YY: " + string)
+	}
+	
+	/**
+	 * Academic years in SITS are only 2 digits so we need to be able to parse them.
+	 * Assume that it's almost always a 20XX date.
+	 */
+	private def parseTwoDigits(twoDigitYear:String) = twoDigitYear.toInt match {
+		case y if y > CenturyBreak => 1900 + y
+		case y => 2000 + y
+	}
 	
 	def guessByDate(now:DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {

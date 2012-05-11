@@ -36,5 +36,12 @@ class UpstreamAssignment extends GeneratedId {
 	 * Returns moduleCode without CATS. e.g. in304
 	 */
 	def moduleCodeBasic = Module.stripCats(moduleCode)
+	
+	def needsUpdatingFrom(other:UpstreamAssignment) = (
+		this.name != other.name ||
+		this.departmentCode != other.departmentCode
+	)
+		
+	
 }
 

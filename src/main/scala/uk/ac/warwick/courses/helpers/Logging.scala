@@ -1,10 +1,15 @@
 package uk.ac.warwick.courses.helpers
 import org.apache.log4j.Logger
+import uk.ac.warwick.courses.helpers.Stopwatches._
+import org.apache.log4j.Priority
 
 trait Logging {
     val loggerName = this.getClass.getName
     lazy val logger = Logger.getLogger(loggerName)
     lazy val debugEnabled = logger.isDebugEnabled
+    
+    val Info = Priority.INFO
+    val Debug = Priority.DEBUG
     
     /**
      * Logs a debug message, with the given arguments inserted into the
@@ -15,6 +20,16 @@ trait Logging {
     	if (debugEnabled) logger.debug(message format (arguments:_*))
  
     /**
+     * Log an info message with the size of a collection.
+     * Returns the collection so you can wrap it with this without having
+     * to break out into a variable.
+     */
+    def logSize[T](seq:Seq[T], level:Priority=Info) (implicit m:Manifest[T]) = {
+		logger.log(level, "Collection of "+m.erasure.getClass.getSimpleName+"s: "+seq.size)
+		seq
+	}
+    	
+    /**
      * For logging the result of a function without having to break it
      * out into multiple lines.
      */
@@ -23,4 +38,24 @@ trait Logging {
     	result
     }
     
+    /**
+     * Wrap some code in a stopwatch, logging some timing info
+     * if it takes longer than minMillis.
+     */
+    def benchmark[T](description:String, level:Priority=Info, minMillis:Int=0)( fn: =>T ) : T = {
+    	if (!Logging.benchmarking) return fn
+    	val s = StopWatch()
+    	try s.record(description) {
+    		fn
+    	} finally {
+    		if (s.getTotalTimeMillis > minMillis) {
+    			logger.log(level, s.prettyPrint)
+    		}
+    	}
+    }
+    
+}
+
+object Logging {
+	var benchmarking = true
 }
