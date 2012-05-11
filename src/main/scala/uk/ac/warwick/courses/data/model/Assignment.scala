@@ -1,28 +1,40 @@
 package uk.ac.warwick.courses.data.model
-import uk.ac.warwick.courses.JavaImports._
-import scala.reflect._
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.reflect.BeanProperty
+import scala.reflect.Manifest
 import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.IndexColumn
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Configurable
+import Assignment.defaultCommentFieldName
+import Assignment.defaultUploadName
+import javax.persistence.Access
 import javax.persistence.Basic
 import javax.persistence.Column
+import javax.persistence.DiscriminatorColumn
+import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
+import javax.persistence.Inheritance
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
-import uk.ac.warwick.courses.actions._
-import uk.ac.warwick.courses.data.model.forms._
-import uk.ac.warwick.courses.AcademicYear
-import uk.ac.warwick.courses.helpers.DateTimeOrdering._
-import javax.persistence.FetchType
-import javax.persistence.CascadeType
+import uk.ac.warwick.courses.JavaImports.JList
+import uk.ac.warwick.courses.actions.Viewable
+import uk.ac.warwick.courses.data.model.forms.CommentField
+import uk.ac.warwick.courses.data.model.forms.FileField
+import uk.ac.warwick.courses.data.model.forms.FormField
+import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.courses.helpers.ArrayList
-import org.hibernate.annotations._
-import scala.collection.JavaConversions._
+import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.ToString
-import org.joda.time.Interval
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -56,6 +68,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Basic @Type(`type`="uk.ac.warwick.courses.data.model.AcademicYearUserType")
 	@Column(nullable=false)
 	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime())
+	
+	var occurrence:String =_
 	
 	/**
 	 * Before we allow customising of assignments, we just want the basic
@@ -125,11 +139,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@JoinColumn(name="module_id")
 	@BeanProperty var module:Module =_
 	
-	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	@ManyToOne
+	@JoinColumn(name="upstream_id")
+	@BeanProperty var upstreamAssignment:UpstreamAssignment =_
+	
+	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
 	@OrderBy("submittedDate")
 	@BeanProperty var submissions:JList[Submission] = ArrayList()
 	
-	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
 	@BeanProperty var feedbacks:JList[Feedback] = ArrayList()
 	
 	def mostRecentFeedbackUpload = feedbacks.maxBy{_.uploadedDate}.uploadedDate
@@ -137,7 +155,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	/**
 	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
 	 */
-	@OneToMany(mappedBy="assignment", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
 	@IndexColumn(name="position")
 	@BeanProperty var fields:JList[FormField] = ArrayList()
 	

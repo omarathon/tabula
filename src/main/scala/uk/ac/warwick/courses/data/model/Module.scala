@@ -17,6 +17,7 @@ import org.hibernate.annotations.FetchMode
 import javax.persistence.FetchType
 import javax.persistence.OneToOne
 import uk.ac.warwick.courses.actions._
+import scala.util.matching.Regex
 
 @Entity
 @NamedQueries(Array(
@@ -77,8 +78,16 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 }
 
 object Module {
+	
+	private val ModuleCatsPattern = new Regex("(.+?)-(\\d+)")
+	
 	def nameFromWebgroupName(groupName:String) : String = groupName.indexOf("-") match {
 		case -1 => groupName
 		case i:Int => groupName.substring(i+1)
+	}
+	
+	def stripCats(fullModuleName:String) : String = fullModuleName match {
+		case ModuleCatsPattern(module, cats) => module
+		case _ => throw new IllegalArgumentException(fullModuleName + " didn't match pattern")
 	}
 }

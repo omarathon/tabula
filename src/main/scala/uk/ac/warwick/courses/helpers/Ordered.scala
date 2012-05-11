@@ -7,5 +7,7 @@ import scala.reflect.BeanProperty
  * meaningful implementation of it.
  */
 trait Ordered extends org.springframework.core.Ordered {
-	@BeanProperty var order:Int = _
+	var order:Int = _
+	override def getOrder = order
+	def setOrder(o:Int) { order = o }
 }
