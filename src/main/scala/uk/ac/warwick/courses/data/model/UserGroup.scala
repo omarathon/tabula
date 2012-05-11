@@ -36,10 +36,6 @@ import org.hibernate.annotations.FilterDef
  */
 @Entity
 @Configurable
-@FilterDefs(Array(
-	new FilterDef(name="editableIncludes"),
-	new FilterDef(name="noneditableIncludes")
-))
 class UserGroup extends GeneratedId {
   
 	// Not created by Spring but @Autowiring works thanks to compile-time weaving.
@@ -51,14 +47,12 @@ class UserGroup extends GeneratedId {
 	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
 	
 	@ElementCollection @Column(name="usercode")
-	@Filter(name="editableIncludes", condition="editable")
 	@JoinTable(name="UserGroupInclude", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")
 	))
 	@BeanProperty var includeUsers:jutil.List[String] = ArrayList()
 	
 	@ElementCollection @Column(name="usercode")
-	@Filter(name="noneditableIncludes", condition="!editable")
 	@JoinTable(name="UserGroupStatic", joinColumns=Array(
 	    new JoinColumn(name="group_id", referencedColumnName="id")
 	))
