@@ -24,6 +24,12 @@
 </@f.form>
 </p>
 
+<p>
+<@f.form method="post" action="/sysadmin/import-sits">
+  <input class="btn btn-danger" type="submit" value="Run assignment data import" onclick="return confirm('Really? Could take a minute.')">
+</@f.form>
+</p>
+
 <hr>
 
 <p>

@@ -26,6 +26,8 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import uk.ac.warwick.sso.client.SSOConfiguration
+import org.springframework.context.MessageSource
+import org.springframework.web.servlet.LocaleResolver
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 
@@ -120,6 +122,14 @@ abstract class BaseController extends ControllerMethods
   
   @Autowired
   @BeanProperty var securityService:SecurityService =_
+  
+  @Autowired private var messageSource:MessageSource =_
+  
+  /**
+   * Resolve a message from messages.properties. This is the same way that 
+   * validation error codes are resolved.
+   */
+  def getMessage(key:String, args:Object*) = messageSource.getMessage(key, args.toArray, null)
   
   var disallowedFields:List[String] = Nil
   
