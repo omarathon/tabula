@@ -1,0 +1,106 @@
+TextListController = function (target, formField){
+	this.newItemHead = '<li class="item"><span>';
+	this.newItemTail = '</span><a class="close" href="#"></a></li>';
+	
+	this.formField = jQuery(formField);
+	
+	this.container = jQuery(target);
+	this.inputContainer = jQuery(".inputContainer", this.container);
+	this.minInputWidth = 75; // px
+	this.preventDuplicates = false;
+	
+	// init
+	this.bindInputBoxEvents();
+	this.bindRemoveItemEvent();
+	this.initaliseListItems();
+};
+
+TextListController.prototype = {
+
+	bindInputBoxEvents: function (){
+		var self = this;
+		jQuery("input", this.inputContainer).on('keyup', function(event){
+			if(event.keyCode == "32"){ //' '
+		        var newItem = jQuery(this).val();
+		        newItem = newItem.substring(0, newItem.length-1);
+				if(self.preventDuplicates && self.isDuplicate(newItem)){
+					jQuery(this).val(newItem);
+				} else {
+					self.addItem(newItem);
+					jQuery(this).val('');	
+				}
+		    }
+		});
+	},
+	
+	bindRemoveItemEvent: function(){
+		self = this;
+		this.container.on("click", ".item a.close", function(event){
+			var parent = jQuery(this).closest(".item");
+			parent.fadeOut(function(){
+				parent.remove();
+				self.syncFormField();
+				self.resizeInputContainer();
+			});
+			event.preventDefault();
+		});
+	},
+	
+	initaliseListItems: function(){
+		var items = this.formField.val().split(',');
+		for(var i=0; i<items.length; i++){
+			this.inputContainer.before(this.newItemHead + items[i] + this.newItemTail);
+		}
+		this.resizeInputContainer();
+	},
+	
+	syncFormField: function(){
+		this.formField.val(''); //clear the form field
+		var items = jQuery(".item", this.container);
+		var newValue = "";
+		items.each(function(index){
+			newValue += jQuery(this).find("span").html();
+			if(index < items.length-1) newValue += ","
+		});
+		this.formField.val(newValue);
+	},
+	
+	addItem: function(text){
+		this.inputContainer.before(this.newItemHead + text + this.newItemTail);
+		this.syncFormField();
+		this.resizeInputContainer();
+	},
+	
+	isDuplicate: function(text){
+		var result = false;
+		var items = jQuery(".item", this.container)
+		items.each(function(index){
+			var item = jQuery(this)
+			if(item.find("span").html() == text){
+				item.animate({backgroundColor:'#00AACC'}, 500, function(){
+					item.animate({backgroundColor:'#0074CC'}, 500);
+				}); 
+				result=true;
+			}
+		});
+		return result;
+	},
+
+	resizeInputContainer: function(){
+		var width=0;
+		var totalWidth = Math.round(jQuery("ul", this.container).outerWidth(true));
+		jQuery(".item", this.container).each(function(){
+			var itemWidth = jQuery(this).outerWidth(true);
+			width += jQuery(this).outerWidth(true);
+			if (width > totalWidth){ // row has wapped restart counting size from the next row
+				width=itemWidth;
+			}
+		});
+		width=Math.round(width);
+		if(totalWidth-width > this.minInputWidth){
+			this.inputContainer.css("width", (totalWidth-width-3)+"px");
+		} else {
+			this.inputContainer.css("width", "100%");
+		}
+	}
+};

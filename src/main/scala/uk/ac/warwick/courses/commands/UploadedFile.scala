@@ -38,6 +38,10 @@ class UploadedFile {
   // files that have been persisted - can be represented in forms by ID
   @BeanProperty var attached:JList[FileAttachment] = ArrayList()//LazyLists.simpleFactory()
   
+  def uploadedFileNames : Seq[String] = upload.map(file => file.getOriginalFilename())
+  def attatchedFileNames : Seq[String]  = attached.map(file => file.getName())
+  def fileNames = uploadedFileNames ++ attatchedFileNames
+  
   def isMissing = !isExists
   def isExists = hasUploads || hasAttachments
   

@@ -95,3 +95,59 @@ tr.even-row {
 // Undo the damage done by Bootstrap
 #search-container form { margin: 0 !important; }
 #search-box { border-radius: 0 !important; }
+
+// styles for text lists
+
+.textBoxListContainer ul {
+	display: block;
+  	overflow: hidden;
+  	margin: 0px !important;
+  	padding: 0px !important;
+  	border: 1px solid #CCCCCC;
+  	border-radius: 3px 3px 3px 3px;
+  	width:218px;
+  	li {
+  		list-style-type: none;
+  		float: left;
+  		display: block;
+  		margin-bottom: 2px !important;
+  		padding: 0px;
+  		cursor: default;
+  		
+  		&.item{
+			border: 1px solid #CCCCCC;
+			border-color: #0055CC #0055CC #003580;
+			border-radius: 3px 3px 3px 3px;
+			background-color:#0074CC;
+			margin: 2px;
+			padding: 2px 0px 2px 4px;
+			line-height: 14px;	
+			  
+			span{
+				margin-right: 2px;
+				color: #FFFFFF;
+				text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+			}
+				
+			a.close{
+				opacity: 1.0;
+				width: 12px;
+				height: 12px;
+				background:url(/static/images/text-list-close.png) -48px -96px;
+			}
+		}
+  		
+ 		&.inputContainer {
+			line-height: 14px;
+			margin-bottom: 0px !important;
+			input {
+				border: 0;
+				width:100%;
+				box-shadow: none;
+				&:focus{
+					box-shadow: none;
+				}
+			}
+		}
+  	}
+}

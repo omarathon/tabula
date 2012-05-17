@@ -20,6 +20,9 @@ import uk.ac.warwick.courses.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
 import uk.ac.warwick.courses.helpers.ArrayList
+import org.springframework.web.multipart.commons.CommonsMultipartFile
+import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.courses.data.model.FileAttachment
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -174,12 +177,19 @@ class FileField extends FormField {
 	// as attachments yet.
 	override def validate(value:SubmissionValue, errors:Errors) {
 		value match {
-			case v:FileSubmissionValue => {
+			case v:FileSubmissionValue => {				
 				if (v.file.isMissing) {
 					errors.rejectValue("file", "file.missing")
 				} else if (v.file.size > attachmentLimit) {
 					if (attachmentLimit == 1) errors.rejectValue("file", "file.toomany.one")
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit:JInteger), "")
+				} else if(!attachmentTypes.isEmpty){
+				    val attachmentStrings = attachmentTypes.map(s => "."+s)
+				    val invalidFiles = v.file.fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
+				    if(invalidFiles.size > 0){
+				    	if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+				    	else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+					}
 				}
 			}
 		}

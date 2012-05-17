@@ -51,6 +51,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var fileAttachmentLimit:Int = 1
 	
 	val maxFileAttachments:Int = 10
+	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%\.].*""";
 	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 	
@@ -71,6 +72,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			
 		if (openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
+		}
+		if(fileAttachmentTypes.mkString("").matches(invalidAttatchmentPattern)){
+			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 	}
 	
