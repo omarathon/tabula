@@ -74,6 +74,29 @@ the comments textarea needs to maintain newlines.
 				</@f.select>
 			</@form.field>						
 		</@form.row>
+		
+		<@form.row>
+			<@form.label path="fileAttachmentTypes">Accepted attachment file types</@form.label>
+			<@form.field>
+				<@f.errors path="fileAttachmentTypes" cssClass="error" />
+				<@f.input path="fileAttachmentTypes"  type="hidden" />
+				<script type="text/javascript" src="/static/js/textList.js"></script>
+				<script type="text/javascript">
+					jQuery(document).ready(function(){
+						var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
+					});
+				</script>
+				<div id="fileExtensionList" class="textBoxListContainer">
+					<ul>
+						<li class="inputContainer"><input class="text" type="text"></li>
+					</ul>
+				</div>
+				<div class="help-block">
+					Enter the file types you would like to allow (e.g. "pdf doc docx"). Only attachments with the extensions specified will be permitted. Leave this field blank to accept any attachments with any extension.
+				</div>
+			</@form.field>						
+		</@form.row>
+		
 		<div>
 		<@form.row path="comment">
 		  <@form.label for="assignmentComment">Text to show on submission form:</@form.label>
