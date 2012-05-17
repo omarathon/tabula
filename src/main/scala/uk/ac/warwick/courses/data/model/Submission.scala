@@ -1,5 +1,6 @@
 package uk.ac.warwick.courses.data.model
 
+import scala.collection.JavaConversions.asScalaSet
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
@@ -7,11 +8,16 @@ import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
-import javax.persistence._
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.JavaImports.JSet
 import uk.ac.warwick.courses.actions.Deleteable
-import collection.JavaConversions._
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -23,7 +29,7 @@ class Submission extends GeneratedId with Deleteable {
 	
 	def isLate = submittedDate != null && assignment.closeDate.isBefore(submittedDate)
 	
-	@ManyToOne(optional=false, cascade=Array(CascadeType.PERSIST,CascadeType.MERGE))
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE))
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
   
@@ -47,7 +53,7 @@ class Submission extends GeneratedId with Deleteable {
 	@NotNull
 	@BeanProperty var universityId:String =_
 
-	@OneToMany(mappedBy="submission", cascade=Array(CascadeType.ALL))
+	@OneToMany(mappedBy="submission", cascade=Array(ALL))
 	@BeanProperty var values:JSet[SavedSubmissionValue] =_
 	
 	def valuesWithAttachments = values.filter(_.hasAttachments)
@@ -62,7 +68,7 @@ class Submission extends GeneratedId with Deleteable {
 @Entity(name="SubmissionValue") @AccessType("field")
 class SavedSubmissionValue extends GeneratedId {
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=LAZY)
 	@JoinColumn(name="submission_id")
 	@BeanProperty var submission:Submission =_
 	
@@ -72,8 +78,8 @@ class SavedSubmissionValue extends GeneratedId {
 	/**
 	 * Optional, only for file fields
 	 */
-	@OneToMany(mappedBy="submissionValue", fetch=FetchType.LAZY)
-	@BeanProperty var attachments:java.util.Set[FileAttachment] =_
+	@OneToMany(mappedBy="submissionValue", fetch=LAZY)
+	@BeanProperty var attachments:JSet[FileAttachment] =_
 	
 	def hasAttachments = attachments != null && !attachments.isEmpty
 	

@@ -27,6 +27,8 @@ import uk.ac.warwick.courses.DateFormats
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.services.AssignmentImporter
+import uk.ac.warwick.courses.commands.imports.ImportAssignmentsCommand
 
 
 /**
@@ -158,6 +160,20 @@ class SysadminIndexController extends BaseSysadminController {
 	@RequestMapping(method=Array(POST))
 	def reindex(form:ReindexForm)  = {
 		form.reindex
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-sits"))
+class ImportSitsController extends BaseSysadminController {
+	
+	@Autowired var importer:AssignmentImporter =_
+	
+	@RequestMapping(method=Array(POST))
+	def reindex()  = {
+		val command = new ImportAssignmentsCommand
+		command.apply()
 		redirectToHome
 	}
 }

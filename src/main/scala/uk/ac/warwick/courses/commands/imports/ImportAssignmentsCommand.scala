@@ -8,7 +8,7 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
-
+import collection.JavaConversions._
 
 @Configurable
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
@@ -16,11 +16,10 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	@Autowired var assignmentImporter:AssignmentImporter =_
 	@Autowired var assignmentService:AssignmentService =_
 	
-	
-	
 	def apply() { 
 		benchmark("ImportAssignments") {
 			doAssignments
+			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
 			doGroups
 		}
 	}
@@ -33,18 +32,27 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	
 	def doGroups {
 		// Split into chunks so we commit transactions periodically.
-		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(500))
+		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100))
 			saveGroups(groups)
 	}
 	
 	@Transactional
 	def saveGroups(groups:Seq[UpstreamAssessmentGroup]) = {
-		for (group <- groups) {
-			assignmentService.save(group)
-			
-			//assignmentImporter.getMembersOf(group)
+		logger.debug("Importing "+groups.size+" assessment groups and their members")
+		benchmark("Import "+groups.size+" groups") {
+			for (group <- groups) {
+				val members = assignmentImporter.getMembers(group)
+				if (!equals(members, group.members.staticIncludeUsers)) {
+					group.members.staticIncludeUsers.clear
+					group.members.staticIncludeUsers.addAll(members)
+				}
+				assignmentService.save(group)
+			}
 		}
 	}
+	
+	def equal(s1:Seq[String], s2:Seq[String]) = 
+		s1.length == s2.length && s1.sorted == s2.sorted
 
 	def describe(d: Description) {
 		

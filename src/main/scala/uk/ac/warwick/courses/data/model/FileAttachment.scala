@@ -19,10 +19,12 @@ import javax.persistence.ManyToOne
 import uk.ac.warwick.courses.data.FileDao
 import javax.persistence.FetchType
 import uk.ac.warwick.courses.data.model.forms.SubmissionValue
+import scala.util.matching.Regex
 
 @Configurable
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
+	import FileAttachment._
 	
 	@transient @Autowired var fileDao:FileDao =_
 	
@@ -54,12 +56,9 @@ class FileAttachment extends GeneratedId {
 	private var _name:String =_
 	def name = _name
 	def getName() = _name
-	def setName(n:String) { 
-		name = n 
-	}
+	def setName(n:String) { name = n }
 	def name_= (n:String) {
-		// trim incoming filenames
-		_name = Option(n).map(_.trim).orNull
+		_name = Option(n).map(sanitisedFilename).orNull
 	}
 			
 	def this(n:String) { 
@@ -82,5 +81,13 @@ class FileAttachment extends GeneratedId {
 	
 	@transient @BeanProperty var uploadedData:InputStream = null
 	@transient @BeanProperty var uploadedDataLength:Long = 0
+	
+}
+
+object FileAttachment {
+	
+	private val BadWindowsCharacters = new Regex("""[<\\"|:*/>?]""")
+	
+	def sanitisedFilename(filename:String) = BadWindowsCharacters.replaceAllIn(filename.trim, "")
 	
 }

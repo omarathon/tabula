@@ -21,6 +21,10 @@ class FileAttachmentTest extends AppContextTestBase {
 		new FileAttachment(null).name should be (null)
 	}
 	
+	@Test def badWindowsFilenames {
+		new FileAttachment(""" \Fun: good or bad? <You|decide>/.docx""").name should be ("Fun good or bad Youdecide.docx")
+	}
+	
 	@Transactional
 	@Test def save {
 		val attachment = new FileAttachment("file.txt")
