@@ -143,7 +143,7 @@ class AssignmentController extends AbstractAssignmentController {
 		val module = form.module
 		form.onBind
 		checks(form)
-		if (errors.hasErrors) {
+		if (errors.hasErrors || !user.loggedIn) {
 			view(user,form,errors)
 		} else {
 			val submission = form.apply
