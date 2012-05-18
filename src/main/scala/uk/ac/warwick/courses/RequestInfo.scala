@@ -34,9 +34,5 @@ object RequestInfo {
 		try { open(info); fn }
 		finally close 
 	
-	/*threadLocal.get match {
-		case None => threadLocal.set(Some(info))
-		case Some(info) => throw new IllegalStateException("RequestInfo already set")
-	}*/
 	def close = threadLocal.remove
 }

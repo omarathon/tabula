@@ -70,10 +70,8 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 			case _ => request.getRequestURL.toString
 		})
 	
-//	
-//	
-//	override def afterCompletion(request:HttpServletRequest , response:HttpServletResponse , handler:Object, ex:Exception) {
-//		RequestInfo.close
-//	}
+	override def afterCompletion(request:HttpServletRequest , response:HttpServletResponse , handler:Object, ex:Exception) {
+		RequestInfo.close
+	}
     
 }
