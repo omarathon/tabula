@@ -3,6 +3,11 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import java.beans.PropertyEditorSupport
 
+/**
+ * Represents a particular academic year. Traditionally they are displayed as
+ * "99/00" or "11/12" but we just store the first year as a 4-digit number.
+ * toString() returns the traditional format.
+ */
 case class AcademicYear(val startYear:Int) {
 	val endYear = startYear+1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
