@@ -2,19 +2,20 @@ package uk.ac.warwick.courses.web
 
 import uk.ac.warwick.courses.data.model._
 import java.net.URLEncoder
+import org.springframework.beans.factory.annotation.Value
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
  * are hardcoded and repeated.
  */
 object Routes {
-	private def encoded(string:String) = URLEncoder.encode(string, "UTF-8")
-	
+	private def encoded(string:String) = URLEncoder.encode(string, "UTF-8")	
 	def home = "/"
-		
+	
 	object assignment {
 		def apply(assignment:Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
 		def receipt(assignment:Assignment) = apply(assignment)
+		def receiptWithHost(assignment:Assignment, topLevelUrl: String) = "%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id)
 	}
 	
 	object admin {
@@ -55,3 +56,4 @@ object Routes {
 		}
 	}
 }*/
+

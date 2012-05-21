@@ -21,6 +21,7 @@ import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import freemarker.template.Configuration
+import uk.ac.warwick.courses.web.Routes
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
@@ -34,10 +35,9 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	
 	@BeanProperty var confirm:Boolean = false
 	
-	@Value("${toplevel.url}") var topLevelUrl:String = _
-	
 	@Value("${mail.noreply.to}") var replyAddress:String = _
 	@Value("${mail.exceptions.to}") var fromAddress:String = _
+	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
 	case class MissingUser(val universityId:String)
 	case class BadEmail(val user:User, val exception:Exception=null)
@@ -114,7 +114,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
     		  "assignmentName" -> assignment.name,
     		  "moduleCode" -> assignment.module.code.toUpperCase,
     		  "moduleName" -> assignment.module.name,
-    		  "url" -> ("%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id))
+    		  "url" -> Routes.assignment.receiptWithHost(assignment, topLevelUrl)
       ))
 	
 }

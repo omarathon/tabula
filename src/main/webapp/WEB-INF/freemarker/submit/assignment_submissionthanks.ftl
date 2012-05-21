@@ -10,16 +10,16 @@
 	<h3>Submission receipt</h3>
 	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
 	<p>Submission ID: ${submission.id}</p>
-	<p>
-		Uploaded attatchments:
-		<#if submission.allAttachments??>
+	<#if submission.allAttachments??>
+		<p>
+			Uploaded attachments:
 			<ul>
 				<#list submission.allAttachments as attachment>
 					<li><a href="/module/${module.code}/${assignment.id}/attachment/${attachment.name}">${attachment.name}</a></li>
 				</#list>  
 			</ul>
-		</#if>
-	</p>
+		</p>
+	</#if>
 	</div>
 	</div>
 	

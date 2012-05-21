@@ -20,6 +20,7 @@ import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat
+import uk.ac.warwick.courses.web.Routes
 
 /**
  * Send an email confirming the receipt of a submission to the student
@@ -40,6 +41,7 @@ class SendSubmissionReceiptCommand (
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
 	@Value("${mail.noreply.to}") var replyAddress:String = _
 	@Value("${mail.exceptions.to}") var fromAddress:String = _
+	@Value("${toplevel.url}") var topLevelUrl:String = _
 	
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 	
@@ -64,7 +66,8 @@ class SendSubmissionReceiptCommand (
 	    	"submissionDate" -> dateFormatter.print(submission.submittedDate),
 	    	"assignment" -> assignment,
 	    	"module" -> module,
-	    	"user" -> user
+	    	"user" -> user,
+	    	"url" -> Routes.assignment.receiptWithHost(assignment, topLevelUrl)
 	    )))
 		message
 	}
