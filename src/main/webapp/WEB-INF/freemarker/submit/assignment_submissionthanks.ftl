@@ -1,7 +1,7 @@
 <div class="submission-received">
 	<#if justSubmitted!false>
 	<div class="alert alert-success">
-		<a class="close" data-dismiss="alert">Ã—</a>Thanks, we've received your submission.
+		<a class="close" data-dismiss="alert">×</a>Thanks, we've received your submission.
 	</div>
 	</#if>
 	
@@ -10,6 +10,16 @@
 	<h3>Submission receipt</h3>
 	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
 	<p>Submission ID: ${submission.id}</p>
+	<p>
+		Uploaded attatchments:
+		<#if submission.allAttachments??>
+			<ul>
+				<#list submission.allAttachments as attachment>
+					<li><a href="/module/${module.code}/${assignment.id}/attachment/${attachment.name}">${attachment.name}</a></li>
+				</#list>  
+			</ul>
+		</#if>
+	</p>
 	</div>
 	</div>
 	
