@@ -114,7 +114,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
     		  "assignmentName" -> assignment.name,
     		  "moduleCode" -> assignment.module.code.toUpperCase,
     		  "moduleName" -> assignment.module.name,
-    		  "url" -> Routes.assignment.receiptWithHost(assignment, topLevelUrl)
+    		  "url" -> (topLevelUrl + Routes.assignment.receipt(assignment))
       ))
 	
 }

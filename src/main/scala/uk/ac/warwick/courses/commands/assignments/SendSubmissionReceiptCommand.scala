@@ -67,7 +67,7 @@ class SendSubmissionReceiptCommand (
 	    	"assignment" -> assignment,
 	    	"module" -> module,
 	    	"user" -> user,
-	    	"url" -> Routes.assignment.receiptWithHost(assignment, topLevelUrl)
+	    	"url" -> (topLevelUrl + Routes.assignment.receipt(assignment))
 	    )))
 		message
 	}

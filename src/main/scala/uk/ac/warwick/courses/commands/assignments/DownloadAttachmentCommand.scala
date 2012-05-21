@@ -27,12 +27,14 @@ class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[Render
 
     // get the currentUsers submissions
     var submissions:Seq[Submission] = assignment.getSubmissions
+    
+    
     submissions.filter(name => name == user.universityId)
     
     // TODO - maybe multiple submission leads to more than one submission - if so get the latest
     // should only have one submission per assignment so take the first 
-    var submission = submissions.head      
-    var attatchment = submission.allAttachments.filter(attatchment => attatchment.name == filename).head;
+    var submission = submissions.head      //may explode if empty
+    var attatchment = submission.allAttachments.filter(attatchment => attatchment.name == filename).head; // find instead
     val result = Option(new RenderableAttachment(attatchment))
      
     fileFound = result.isDefined

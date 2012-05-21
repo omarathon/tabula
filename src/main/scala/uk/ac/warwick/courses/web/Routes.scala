@@ -15,7 +15,6 @@ object Routes {
 	object assignment {
 		def apply(assignment:Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
 		def receipt(assignment:Assignment) = apply(assignment)
-		def receiptWithHost(assignment:Assignment, topLevelUrl: String) = "%s/module/%s/%s" format (topLevelUrl, assignment.module.code, assignment.id)
 	}
 	
 	object admin {
