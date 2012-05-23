@@ -108,8 +108,10 @@
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
 		
+		<jdbc:embedded-database id="academicDataStore" />
+		
 		<!-- never read or written - just need a DataSource to exist -->
-    	<bean id="academicDataStore" class="uk.ac.warwick.courses.system.UnusableDataSource" />
+    	<!-- <bean id="academicDataStore" class="uk.ac.warwick.courses.system.UnusableDataSource" /> -->
 		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 		
@@ -117,7 +119,11 @@
 
 		<bean id="dataSourceInitialiser" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
 			p:dataSource-ref="dataSource"
-			p:scripts="schema.sql,data.sql" />
+			p:scripts="#{{'schema.sql', 'data.sql'}}" />
+			
+		<bean id="adsInit" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
+			p:dataSource-ref="academicDataStore"
+			p:scripts="ads.sql" />
 		
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>

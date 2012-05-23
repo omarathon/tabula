@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import collection.JavaConversions._
+import uk.ac.warwick.courses.SprCode
 
 @Configurable
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
@@ -21,13 +22,19 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			doAssignments
 			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
 			doGroups
+			doGroupMembers
 		}
 	}
 	
 	@Transactional
 	def doAssignments {
-		for (assignment <- logSize(assignmentImporter.getAllAssignments))
+		for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
+			if (assignment.name == null) {
+				// Some SITS data is bad, but try to carry on.
+				assignment.name = "Assignment"
+			}
 			assignmentService.save(assignment)
+		}
 	}
 	
 	def doGroups {
@@ -36,17 +43,55 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			saveGroups(groups)
 	}
 	
+	/**
+	 * This calls the importer method that iterates over ALL module registrations.
+	 * The results are ordered such that it can hold a list of items until it
+	 * detects one that belongs to a different group, at which point it saves
+	 * what it's got and starts a new list. This way we don't have to load many
+	 * things into memory at once.
+	 */
+	@Transactional
+	def doGroupMembers {
+		benchmark("Import all group members") {
+			var registrations = List[ModuleRegistration]()
+			var count = 0
+			assignmentImporter.allMembers { r =>
+				if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
+					// This element r is for a new group, so save this group and start afresh
+					save(registrations)
+					registrations = Nil
+				}
+				registrations = registrations :+ r 
+				count += 1
+				if (count % 1000 == 0) {
+					logger.info("Processed " + count + " group members")
+				}
+			}
+			logger.info("Processed all " + count + " group members")
+		}
+	}
+	
+	/**
+	 * This sequence of ModuleRegistrations represents the members of an assessment
+	 * group, so save them (and reconcile it with any existing members we have in the
+	 * database).
+	 */
+	def save(group:Seq[ModuleRegistration]) {
+		group.headOption map { head =>
+			val assessmentGroup = head.toUpstreamAssignmentGroup
+			// Convert ModuleRegistrations to simple uni ID strings.
+			val members = group map (mr => SprCode.getUniversityId(mr.sprCode))
+			assignmentService.replaceMembers(assessmentGroup, members)
+		}
+	}
+	
 	@Transactional
 	def saveGroups(groups:Seq[UpstreamAssessmentGroup]) = {
-		logger.debug("Importing "+groups.size+" assessment groups and their members")
+		logger.debug("Importing "+groups.size+" assessment groups")
 		benchmark("Import "+groups.size+" groups") {
 			for (group <- groups) {
-				val members = assignmentImporter.getMembers(group)
-				if (!equals(members, group.members.staticIncludeUsers)) {
-					group.members.staticIncludeUsers.clear
-					group.members.staticIncludeUsers.addAll(members)
-				}
 				assignmentService.save(group)
+				session.evict(group)
 			}
 		}
 	}

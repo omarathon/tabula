@@ -55,3 +55,15 @@ Directory structure
 - `scripts`
     - `schema` - SQL migration scripts for any database schema changes.
     - `varsrc` - Deploy scripts, usually found in /var/src/courses on servers
+    
+IDE setup
+---------
+
+If you want to run unit tests in Eclipse, you'll need to be weaving classes with Load-Time Weaving.
+All you need to do is pass the weaving agent to Java when you launch, e.g.
+
+    -javaagent:/home/nick/code/aspectjweaver.jar
+    
+With the actual path of aspectjweaver.jar there. You can even go to Installed JREs in Eclipse and
+add the option there, so that all commands are run with the weaver. It shouldn't affect any other
+things you run, since it does nothing unless there's an aop.xml file.

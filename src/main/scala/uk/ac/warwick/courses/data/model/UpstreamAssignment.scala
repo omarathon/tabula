@@ -1,6 +1,7 @@
 package uk.ac.warwick.courses.data.model
 
 import javax.persistence.Entity
+import uk.ac.warwick.courses.data.PreSaveBehaviour
 
 /**
  * Represents an upstream assignment as found in the central
@@ -8,7 +9,7 @@ import javax.persistence.Entity
  * relate to a specific instance of an assignment or even a particular year.
  */
 @Entity
-class UpstreamAssignment extends GeneratedId {
+class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 	/**
 	 * Lowercase module code, with CATS. e.g. in304-15
 	 */
@@ -41,7 +42,15 @@ class UpstreamAssignment extends GeneratedId {
 		this.name != other.name ||
 		this.departmentCode != other.departmentCode
 	)
-		
+	
+	override def preSave(newRecord:Boolean) {
+		ensureNotNull("name", name)
+		ensureNotNull("moduleCode", moduleCode)
+	}
+	
+	private def ensureNotNull(name:String, value:Any) {
+		if (value == null) throw new IllegalStateException("null "+name+" not allowed")
+	}
 	
 }
 

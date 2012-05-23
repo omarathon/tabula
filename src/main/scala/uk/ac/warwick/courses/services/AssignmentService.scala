@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.services
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
@@ -14,12 +14,14 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
 import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
+import uk.ac.warwick.courses.helpers.Logging
 
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
 	def save(assignment:Assignment)
 	def save(assignment:UpstreamAssignment)
 	def save(group:UpstreamAssessmentGroup)
+	def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
 	def saveSubmission(submission:Submission)
 	def getSubmission(assignment:Assignment, userId:String) : Option[Submission]
 	def getSubmission(id:String) : Option[Submission]
@@ -39,11 +41,12 @@ trait AssignmentService {
 	def recentAssignment(module:Module): Option[Assignment]
 	
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
+	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	
 }
 
 @Service
-class AssignmentServiceImpl extends AssignmentService with Daoisms {
+class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging {
 	import Restrictions._
 	
 	@Autowired var userLookup:UserLookupService =_
@@ -52,6 +55,17 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission:Submission) = session.saveOrUpdate(submission)
+	
+	def replaceMembers(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
+		if (debugEnabled) debugReplace(template, universityIds)
+		getAssessmentGroup(template).map { group =>
+			val collection = group.members.staticIncludeUsers
+			collection.clear
+			collection.addAll(universityIds)
+		} getOrElse {
+			logger.warn("No such assessment group found: " + template.toText)
+		}
+	}
 	
 	/**
 	 * Tries to find an identical UpstreamAssignment in the database, based on the
@@ -133,12 +147,21 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
 		Option(assignment.upstreamAssignment).flatMap { upstream =>
-			session.newCriteria[UpstreamAssessmentGroup]
-					.add(Restrictions.eq("academicYear", assignment.academicYear))
-					.add(Restrictions.eq("moduleCode", upstream.moduleCode ))
-					.add(Restrictions.eq("assessmentGroup", upstream.assessmentGroup ))
-					.add(Restrictions.eq("occurrence", assignment.occurrence ))
+			criteria(assignment.academicYear, upstream.moduleCode, upstream.assessmentGroup, assignment.occurrence)
 					.uniqueResult
 		}
+	}
+	
+	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+	
+	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) = 
+		session.newCriteria[UpstreamAssessmentGroup]
+				.add(Restrictions.eq("academicYear", academicYear))
+				.add(Restrictions.eq("moduleCode", moduleCode ))
+				.add(Restrictions.eq("assessmentGroup", assessmentGroup ))
+				.add(Restrictions.eq("occurrence", occurrence ))
+				
+	private def debugReplace(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
+		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toText))
 	}
 }

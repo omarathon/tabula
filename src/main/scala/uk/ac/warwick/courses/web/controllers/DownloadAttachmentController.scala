@@ -22,7 +22,7 @@ class DownloadAttachmentController extends AbstractAssignmentController{
   
 	@RequestMapping(value=Array("/attachment/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAttachment(command:DownloadAttachmentCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
-		mustBeLinked(command.assignment, command.module)
+		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 		
 		// specify callback so that audit logging happens around file serving
 		command.callback = { (renderable) => fileServer.serve(renderable, response)	}

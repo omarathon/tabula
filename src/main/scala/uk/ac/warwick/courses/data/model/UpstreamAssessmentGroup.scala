@@ -37,7 +37,10 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	
 	override def preSave(newRecord:Boolean) {
 		if (!members.universityIds) throw new IllegalStateException
-		
-		
 	}
+	
+	/**
+	 * A short textual identifier for this group, useful for logging.
+	 */
+	def toText = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
 }
