@@ -88,7 +88,7 @@ TextListController.prototype = {
 	},
 	
 	addItem: function(text){
-		this.inputContainer.before(this.newItemHead + newItem + this.newItemTail);
+		this.inputContainer.before(this.newItemHead + text + this.newItemTail);
 		this.syncFormField();
 		this.resizeInputContainer();
 	},
