@@ -14,6 +14,7 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
 import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
+import uk.ac.warwick.courses.helpers.Logging
 
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
@@ -45,7 +46,7 @@ trait AssignmentService {
 }
 
 @Service
-class AssignmentServiceImpl extends AssignmentService with Daoisms {
+class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging {
 	import Restrictions._
 	
 	@Autowired var userLookup:UserLookupService =_
@@ -56,10 +57,13 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def saveSubmission(submission:Submission) = session.saveOrUpdate(submission)
 	
 	def replaceMembers(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
+		if (debugEnabled) debugReplace(template, universityIds)
 		getAssessmentGroup(template).map { group =>
 			val collection = group.members.staticIncludeUsers
 			collection.clear
 			collection.addAll(universityIds)
+		} getOrElse {
+			logger.warn("No such assessment group found: " + template.toText)
 		}
 	}
 	
@@ -156,4 +160,8 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 				.add(Restrictions.eq("moduleCode", moduleCode ))
 				.add(Restrictions.eq("assessmentGroup", assessmentGroup ))
 				.add(Restrictions.eq("occurrence", occurrence ))
+				
+	private def debugReplace(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
+		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toText))
+	}
 }

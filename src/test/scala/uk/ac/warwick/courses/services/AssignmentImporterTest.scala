@@ -39,11 +39,11 @@ class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 		assignmentImporter.ads = ads
 		assignmentImporter.afterPropertiesSet
 		
-		intercept[RuntimeException] {
-			assignmentImporter.allMembers { mr =>
-				throw new RuntimeException("reached this")
-			}
+		var count = 0
+		assignmentImporter.allMembers { mr =>
+			count += 1
 		}
+		count should be (1)
 	}
 
 }
