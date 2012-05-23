@@ -88,7 +88,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
-	var fileExtensions:Seq[String] = _
+	@BeanProperty var fileExtensions:Seq[String] = _
 	
 	def setAllFileTypesAllowed { fileExtensions = Nil } 
   

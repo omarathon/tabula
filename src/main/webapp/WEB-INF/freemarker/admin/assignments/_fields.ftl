@@ -84,6 +84,9 @@ the comments textarea needs to maintain newlines.
 				<script type="text/javascript">
 					jQuery(document).ready(function(){
 						var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
+						textListController.restrictedCharacterRegex = '\\.';
+						textListController.preventDuplicates = true;
+						textListController.init();
 					});
 				</script>
 				<div id="fileExtensionList" class="textBoxListContainer">
@@ -92,7 +95,7 @@ the comments textarea needs to maintain newlines.
 					</ul>
 				</div>
 				<div class="help-block">
-					Enter the file types you would like to allow (e.g. "pdf doc docx"). Only attachments with the extensions specified will be permitted. Leave this field blank to accept any attachments with any extension.
+					Enter the file types you would like to allow separated by spaces (e.g. "pdf doc docx"). Only attachments with the extensions specified will be permitted. Leave this field blank to accept attachments with any extension.
 				</div>
 			</@form.field>						
 		</@form.row>

@@ -1,2 +1,3 @@
 <#assign maxFiles=field.attachmentLimit />
-<@form.filewidget basename="fields[${field.id}].file" multiple=(maxFiles gt 1) max=maxFiles />
+<#assign fileTypes=field.attachmentTypes />
+<@form.filewidget basename="fields[${field.id}].file" types=fileTypes multiple=(maxFiles gt 1) max=maxFiles />

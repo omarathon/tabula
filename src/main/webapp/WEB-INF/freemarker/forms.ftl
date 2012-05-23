@@ -113,7 +113,7 @@ To not bind:
 	basename - bind path to the UploadedFile.
 	multiple - whether it should be possible to upload more than one file.
 -->
-<#macro filewidget basename multiple=true max=10>
+<#macro filewidget types basename multiple=true max=10 >
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@row path=basename>
@@ -152,7 +152,12 @@ To not bind:
 	</#if>
 	</div>
 	
-	<div class="subtle help-block"><#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if></div>
+	<div class="subtle help-block">
+		<#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+		<#if types?size &gt; 0>
+			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>
+		</#if>
+	</div>
 	
 	<#if multiple>
 		<script><!--

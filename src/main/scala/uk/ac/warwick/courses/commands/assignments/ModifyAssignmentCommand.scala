@@ -51,7 +51,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var fileAttachmentLimit:Int = 1
 	
 	val maxFileAttachments:Int = 10
-	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%\.].*""";
+	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
 	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 	

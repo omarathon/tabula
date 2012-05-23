@@ -6,23 +6,43 @@ TextListController = function (target, formField){
 	
 	this.container = jQuery(target);
 	this.inputContainer = jQuery(".inputContainer", this.container);
+	
+	this.seperator = ',';
 	this.minInputWidth = 75; // px
 	this.preventDuplicates = false;
-	
-	// init
-	this.bindInputBoxEvents();
-	this.bindRemoveItemEvent();
-	this.initaliseListItems();
+	this.restrictedCharacterRegex = undefined;
 };
 
 TextListController.prototype = {
 
+	init: function (){
+		this.bindInputBoxEvents();
+		this.bindRemoveItemEvent();
+		this.initaliseListItems();
+	},
+
 	bindInputBoxEvents: function (){
 		var self = this;
+		
 		jQuery("input", this.inputContainer).on('keyup', function(event){
 			if(event.keyCode == "32"){ //' '
 		        var newItem = jQuery(this).val();
+		        newItem = self.sanitiseInput(newItem);
 		        newItem = newItem.substring(0, newItem.length-1);
+				if(self.preventDuplicates && self.isDuplicate(newItem)){
+					jQuery(this).val(newItem);
+				} else {
+					self.addItem(newItem);
+					jQuery(this).val('');	
+				}
+		    }
+		});
+		
+		// if there is any text remaining in the input box when it loses focus convert it into a new item
+		jQuery("input", this.inputContainer).on('focusout', function(event){
+			if(jQuery(this).val() !== ""){
+		        var newItem = jQuery(this).val();
+		        newItem = self.sanitiseInput(newItem);
 				if(self.preventDuplicates && self.isDuplicate(newItem)){
 					jQuery(this).val(newItem);
 				} else {
@@ -47,9 +67,11 @@ TextListController.prototype = {
 	},
 	
 	initaliseListItems: function(){
-		var items = this.formField.val().split(',');
+		var items = this.formField.val().split(this.seperator);
 		for(var i=0; i<items.length; i++){
-			this.inputContainer.before(this.newItemHead + items[i] + this.newItemTail);
+			if(items[i] !== ""){
+				this.inputContainer.before(this.newItemHead + items[i] + this.newItemTail);
+			}
 		}
 		this.resizeInputContainer();
 	},
@@ -66,9 +88,18 @@ TextListController.prototype = {
 	},
 	
 	addItem: function(text){
-		this.inputContainer.before(this.newItemHead + text + this.newItemTail);
+		this.inputContainer.before(this.newItemHead + newItem + this.newItemTail);
 		this.syncFormField();
 		this.resizeInputContainer();
+	},
+	
+	sanitiseInput: function(text){
+		// strip any instances of the separator from the new item
+		var result = text.replace(new RegExp(this.seperator, 'g') , '');
+		if(this.restrictedCharacterRegex){
+			result = result.replace(new RegExp(this.restrictedCharacterRegex, 'g') , '');
+		}
+		return result;
 	},
 	
 	isDuplicate: function(text){
