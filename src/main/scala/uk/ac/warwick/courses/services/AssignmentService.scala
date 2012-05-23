@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.services
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
@@ -20,6 +20,7 @@ trait AssignmentService {
 	def save(assignment:Assignment)
 	def save(assignment:UpstreamAssignment)
 	def save(group:UpstreamAssessmentGroup)
+	def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
 	def saveSubmission(submission:Submission)
 	def getSubmission(assignment:Assignment, userId:String) : Option[Submission]
 	def getSubmission(id:String) : Option[Submission]
@@ -39,6 +40,7 @@ trait AssignmentService {
 	def recentAssignment(module:Module): Option[Assignment]
 	
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
+	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	
 }
 
@@ -52,6 +54,14 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission:Submission) = session.saveOrUpdate(submission)
+	
+	def replaceMembers(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
+		getAssessmentGroup(template).map { group =>
+			val collection = group.members.staticIncludeUsers
+			collection.clear
+			collection.addAll(universityIds)
+		}
+	}
 	
 	/**
 	 * Tries to find an identical UpstreamAssignment in the database, based on the
@@ -133,12 +143,17 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms {
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
 		Option(assignment.upstreamAssignment).flatMap { upstream =>
-			session.newCriteria[UpstreamAssessmentGroup]
-					.add(Restrictions.eq("academicYear", assignment.academicYear))
-					.add(Restrictions.eq("moduleCode", upstream.moduleCode ))
-					.add(Restrictions.eq("assessmentGroup", upstream.assessmentGroup ))
-					.add(Restrictions.eq("occurrence", assignment.occurrence ))
+			criteria(assignment.academicYear, upstream.moduleCode, upstream.assessmentGroup, assignment.occurrence)
 					.uniqueResult
 		}
 	}
+	
+	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+	
+	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) = 
+		session.newCriteria[UpstreamAssessmentGroup]
+				.add(Restrictions.eq("academicYear", academicYear))
+				.add(Restrictions.eq("moduleCode", moduleCode ))
+				.add(Restrictions.eq("assessmentGroup", assessmentGroup ))
+				.add(Restrictions.eq("occurrence", occurrence ))
 }

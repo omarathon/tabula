@@ -5,6 +5,7 @@
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
@@ -48,9 +49,9 @@
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-aop/3.1.0.RELEASE/spring-aop-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-aspects/3.1.0.RELEASE/spring-aspects-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.beans-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-beans/3.1.0.RELEASE/spring-beans-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-context/3.1.0.RELEASE/spring-context-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.context.support-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-context-support/3.1.0.RELEASE/spring-context-support-3.1.0.RELEASE-sources.jar"/>

@@ -29,10 +29,10 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
    */
   override def preTemplateProcess(req:HttpServletRequest,res:HttpServletResponse,template:Template,data:TemplateModel) = {
 	val model = data.asInstanceOf[SimpleHash]
-	val info = RequestInfo.fromThread.get
-	model.put("info", info)
-	//model.put("user", SSOClientFilter.getUserFromRequest(req))
-	model.put("user", info.user)
+	val info = RequestInfo.fromThread.map { info =>
+		model.put("info", info)
+		model.put("user", info.user)
+	}
 	true
   }
   

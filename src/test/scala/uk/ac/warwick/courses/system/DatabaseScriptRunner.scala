@@ -14,7 +14,9 @@ class DatabaseScriptRunner extends InitializingBean {
     
     @BeanProperty var dataSource:DataSource =_
     
-    def setScripts(scripts:Array[Resource]) = populator.setScripts(scripts)
+    def setScripts(scripts:Array[Resource]) = {
+    	populator.setScripts(scripts)
+    }
     
 	def addScript(path:String) = {
 	  populator.addScript(new ClassPathResource(path))
@@ -22,8 +24,10 @@ class DatabaseScriptRunner extends InitializingBean {
 	}
     
 	def afterPropertiesSet = {
-		val populator = new ResourceDatabasePopulator
-		populator.addScript(new ClassPathResource("data.sql"))
+//		val populator = new ResourceDatabasePopulator
+//		for (script <- scripts)
+//			populator.addScript(script)
+//		populator.addScript(new ClassPathResource("data.sql"))
 		for (connection <- managed(dataSource.getConnection))
 			populator.populate(connection)
 	}
