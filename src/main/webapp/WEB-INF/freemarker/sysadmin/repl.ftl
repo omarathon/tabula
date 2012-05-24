@@ -1,27 +1,48 @@
+<#escape x as x?html>
 <h1>Evaluator</h1>
-<p>Available variables: <code>session</code>, <code>beanFactory</code>.</p>
+<div class="row-fluid">
+
+<div class="span9">
+
 <@f.form method="post" action="/sysadmin/repl">
-<textarea name="query" class="span6">
-${query!""}
-</textarea>
+<input name="query" style="width:100%" value="${query!""}" />
 <br>
 <input type="submit" class="btn" value="Evaluate">
 </@f.form>
 
 <#if response.value??>
 <#assign stringValue=response.stringValue/>
-<#elseif response.isNone>
+<#elseif response.none>
 <#assign stringValue=None/>
 </#if>
 
 <#if stringValue??>
 <pre class="well"><code>
-${stringValue}: ${response.value.class.simpleName}
+${stringValue}: ${response.valueType}
 </code></pre>
 </#if>
 <#if response.exception??>
-<p class="alert alert-warning">
+<div class="alert alert-warning">
 <h3>${response.exception.class.simpleName}</h3>
-${response.exception.message}
-</p>
+${response.exception.message!''}
+<pre>
+${response.stackTrace!''}
+</pre>
+</div>
 </#if>
+</#escape>
+
+</div>
+
+<div class="span3">
+
+<p>Available variables: <code>session</code>, <code>beanFactory</code>.</p>
+<p>Available maps: <code>assignments</code>, <code>departmentCodes</code>.</p>
+
+<p>
+<a href="http://static.springsource.org/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-intro">REPL reference</a>
+</p>
+
+</div>
+
+</div>

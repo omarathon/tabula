@@ -30,6 +30,10 @@
 </@f.form>
 </p>
 
+<p>
+<a href="/sysadmin/repl">Evaluator</a>
+</p>
+
 <hr>
 
 <p>

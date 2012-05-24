@@ -27,8 +27,8 @@ import org.hibernate.Session
 class SysadminREPL extends BaseController with BeanFactoryAware {
 	
 	@BeanProperty var beanFactory:BeanFactory =_
-	@BeanProperty var assignmentService:AssignmentService =_
-	@BeanProperty var moduleAndDepartmentService:ModuleAndDepartmentService =_
+	@Autowired var assignmentService:AssignmentService =_
+	@Autowired var moduleAndDepartmentService:ModuleAndDepartmentService =_
 	
 	val spel:SpelExpressionParser = new SpelExpressionParser
 	
@@ -100,5 +100,19 @@ case class Return(val value:Any, val exception:Exception = null) {
 	lazy val isNone = value match {
 		case None => true
 		case _ => false
+	}
+	lazy val stackTrace = {
+		val stringer = new StringWriter
+		val writer = new PrintWriter(stringer)
+		exception.printStackTrace(writer)
+		writer.close
+		stringer.toString
+	}
+	lazy val valueType = {
+		value match {
+			case Some(any:Any) => any.getClass.getSimpleName
+			case any:Any => any.getClass.getSimpleName
+			case _ => "?"
+		}
 	}
 }
