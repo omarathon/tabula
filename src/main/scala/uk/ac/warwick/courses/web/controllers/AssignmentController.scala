@@ -53,7 +53,7 @@ class ResendSubmissionEmail extends AbstractAssignmentController {
 		form.user = user
 		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
 		
-		val submission = assignmentService.getSubmission(form.assignment, user.apparentId)
+		val submission = assignmentService.getSubmissionByUniId(form.assignment, user.universityId)
 		val hasEmail = user.email.hasText
 		val sent:Boolean = submission match {
 			case Some(submission) if (submission.submitted) =>
@@ -109,7 +109,7 @@ class AssignmentController extends AbstractAssignmentController {
 		checks(form)
 		
 		val feedback = checkCanGetFeedback(assignment, user)
-		val submission = assignmentService.getSubmission(assignment, user.apparentId).filter{_.submitted}
+		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter{_.submitted}
 		/*
 		 * Submission values are an unordered set without any proper name, so
 		 * match them up into an ordered sequence of pairs.

@@ -23,7 +23,7 @@ trait AssignmentService {
 	def save(group:UpstreamAssessmentGroup)
 	def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
 	def saveSubmission(submission:Submission)
-	def getSubmission(assignment:Assignment, userId:String) : Option[Submission]
+	def getSubmissionByUniId(assignment:Assignment, uniId:String) : Option[Submission]
 	def getSubmission(id:String) : Option[Submission]
 	
 	def delete(submission:Submission) : Unit
@@ -99,10 +99,10 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 		}
 		.getOrElse{ session.save(group) }
 	
-	def getSubmission(assignment:Assignment, userId:String) = {
+	def getSubmissionByUniId(assignment:Assignment, uniId:String) = {
 		session.newCriteria[Submission]
 				.add(Restrictions.eq("assignment", assignment))
-				.add(Restrictions.eq("userId", userId))
+				.add(Restrictions.eq("universityId", uniId))
 				.uniqueResult
 	}
 	
