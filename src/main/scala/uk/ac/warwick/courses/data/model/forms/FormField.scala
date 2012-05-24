@@ -185,7 +185,7 @@ class FileField extends FormField {
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit:JInteger), "")
 				} else if(!attachmentTypes.isEmpty){
 				    val attachmentStrings = attachmentTypes.map(s => "."+s)
-				    val fileNames = v.file.fileNames
+				    val fileNames = v.file.fileNames map (_.toLowerCase)
 				    val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
 				    if(invalidFiles.size > 0){
 				    	if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")

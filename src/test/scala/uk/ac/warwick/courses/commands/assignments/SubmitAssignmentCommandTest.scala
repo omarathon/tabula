@@ -79,7 +79,7 @@ class SubmitAssignmentCommandTest extends TestBase {
 		errors.hasErrors should be (false)
 		
 		val pdf = resourceAsBytes("attachment3.pdf")
-		submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.pdf", null, pdf)
+		submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.PDF", null, pdf)
 		cmd.validate(errors)
 		errors.hasErrors should be (false)
 

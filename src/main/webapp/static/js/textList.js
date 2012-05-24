@@ -10,7 +10,7 @@ TextListController = function (target, formField){
 	this.seperator = ',';
 	this.minInputWidth = 75; // px
 	this.preventDuplicates = false;
-	this.restrictedCharacterRegex = undefined;
+	this.transformInput = undefined;
 };
 
 TextListController.prototype = {
@@ -96,8 +96,9 @@ TextListController.prototype = {
 	sanitiseInput: function(text){
 		// strip any instances of the separator from the new item
 		var result = text.replace(new RegExp(this.seperator, 'g') , '');
-		if(this.restrictedCharacterRegex){
-			result = result.replace(new RegExp(this.restrictedCharacterRegex, 'g') , '');
+		if(this.transformInput){
+			// if a custom text transform for the input exists then apply it
+			result = this.transformInput(result);
 		}
 		return result;
 	},

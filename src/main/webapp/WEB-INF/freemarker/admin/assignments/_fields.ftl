@@ -92,7 +92,10 @@ the comments textarea needs to maintain newlines.
 				<script type="text/javascript">
 					jQuery(document).ready(function(){
 						var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
-						textListController.restrictedCharacterRegex = '\\.';
+						textListController.transformInput = function(text){
+							var result = text.replace(new RegExp('\\.', 'g') , '');
+							return result.toLowerCase();
+						};
 						textListController.preventDuplicates = true;
 						textListController.init();
 					});
