@@ -69,7 +69,7 @@
 		</p>
 		<p>
 			<@f.errors path="plagiarismDeclaration" cssClass="error" />
-			<@f.checkbox path="plagiarismDeclaration" /> I confirm that this assignment is all my own work
+			<label><@f.checkbox path="plagiarismDeclaration" /> I confirm that this assignment is all my own work</label>
 		</p>
 	</@form.field>
 	</@form.row>
