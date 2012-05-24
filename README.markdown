@@ -67,3 +67,15 @@ All you need to do is pass the weaving agent to Java when you launch, e.g.
 With the actual path of aspectjweaver.jar there. You can even go to Installed JREs in Eclipse and
 add the option there, so that all commands are run with the weaver. It shouldn't affect any other
 things you run, since it does nothing unless there's an aop.xml file.
+
+Database schema changes
+---------
+
+Any SQL for changing the database schema should go in `scripts/schema/migrations`. Migrations are done
+manually so you need to run it on dev, test and production separately. The recommended route is to
+migrate dev first to get it working, and then update test and production _at the same time_. If you
+don't do these at the same time then you run the risk of having everything working on test so you do
+a deploy and it's broken on live because of the old schema.
+
+There is also a `create-all.sql` which should define all the tables from scratch - if your migration
+adds or alters a column then it should do this in the initial `CREATE TABLE` command here.
