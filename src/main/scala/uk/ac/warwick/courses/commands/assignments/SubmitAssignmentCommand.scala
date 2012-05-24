@@ -33,6 +33,9 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
   // just used as a hint to the view.
   @transient @BeanProperty var justSubmitted:Boolean = false
   
+  // just used as a hint to the view.
+  @transient @BeanProperty var plagiarismDeclaration:Boolean = false
+  
   def onBind:Unit = for ((key, field) <- fields) field.onBind
   
   /**
@@ -70,9 +73,12 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
 	 		  reject("assignment.submit.already")
 	 	  }
 	  }
-	   
-	  // TODO for multiple attachments, check filenames are unique
-	 	
+	  
+	  if(assignment.displayPlagiarismNotice && !plagiarismDeclaration){
+	  	rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
+	  }
+	 
+	  // TODO for multiple attachments, check filenames are unique 	
 	   
 	  // Individually validate all the custom fields
 	  // If a submitted ID is not found in assignment, it's ignored.

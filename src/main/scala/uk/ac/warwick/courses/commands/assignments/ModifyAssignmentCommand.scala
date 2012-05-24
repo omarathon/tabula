@@ -46,6 +46,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var restrictSubmissions:Boolean = _
 	@BeanProperty var allowLateSubmissions:Boolean = true
 	@BeanProperty var allowResubmission:Boolean = false
+	@BeanProperty var displayPlagiarismNotice:Boolean = _
 	
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
@@ -89,6 +90,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    //assignment.restrictSubmissions = restrictSubmissions
 	    assignment.allowLateSubmissions = allowLateSubmissions
 	    assignment.allowResubmission = allowResubmission
+	    assignment.displayPlagiarismNotice = displayPlagiarismNotice
 	    findCommentField(assignment) map ( field => field.value = comment )
 	    findFileField(assignment) map { file => 
 	    	file.attachmentLimit = fileAttachmentLimit 
@@ -118,6 +120,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		restrictSubmissions = assignment.restrictSubmissions
 		allowLateSubmissions = assignment.allowLateSubmissions
 		allowResubmission = assignment.allowResubmission
+		displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		findCommentField(assignment) map ( field => comment = field.value )
 		findFileField(assignment) map { field => 
 			fileAttachmentLimit = field.attachmentLimit 

@@ -56,6 +56,25 @@
 	</@form.row>
 	</#if>
 	
+	<#if assignment.displayPlagiarismNotice>
+	<@form.row>
+	<label class="control-label">Plagiarism declaration</label>
+	<@form.field>
+		<p class="plagiarism-field">
+			Work submitted to the University of Warwick for official
+			assessment must be all your own work and any parts that
+			are copied or used from other people must be appropriately
+			acknowledged. Failure to properly acknowledge any copied 
+			work is plagiarism and may result in a mark of zero. 
+		</p>
+		<p>
+			<@f.errors path="plagiarismDeclaration" cssClass="error" />
+			<@f.checkbox path="plagiarismDeclaration" /> I confirm that this assignment is all my own work
+		</p>
+	</@form.field>
+	</@form.row>
+	</#if>
+	
 	</div>
 	
 	<div class="submit-buttons">

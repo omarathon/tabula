@@ -40,9 +40,17 @@ the comments textarea needs to maintain newlines.
 			Collect submissions
 		</label>
 	</@form.labelled_row>
-	
 	<fieldset id="submission-options">
 		<legend>Submission options</legend>
+		<@form.row>
+			<@form.label></@form.label>
+			<@form.field>				
+				<label class="checkbox">
+					<@f.checkbox path="displayPlagiarismNotice" />
+					Show plagiarism notice
+				</label>
+			</@form.field>	
+		</@form.row>
 		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>				
@@ -51,7 +59,7 @@ the comments textarea needs to maintain newlines.
 					Allow submissions after the close date
 				</label>
 			</@form.field>	
-		</@form.row>	
+		</@form.row>
 		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>	

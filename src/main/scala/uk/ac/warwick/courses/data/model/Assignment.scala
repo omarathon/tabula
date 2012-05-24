@@ -108,6 +108,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var restrictSubmissions:Boolean = false
 	@BeanProperty var allowLateSubmissions:Boolean = true
 	@BeanProperty var allowResubmission:Boolean = false
+	@BeanProperty var displayPlagiarismNotice:Boolean = false
 	
 	/**
 	 * Returns whether we're between the opening and closing dates
