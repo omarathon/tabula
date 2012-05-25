@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/scala-compiler.jar" sourcepath="/home/nick/.m2/repository/org/scala-lang/scala-compiler/2.9.1/scala-compiler-2.9.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/build/scala-compiler.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
