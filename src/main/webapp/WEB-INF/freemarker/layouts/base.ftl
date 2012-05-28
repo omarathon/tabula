@@ -251,7 +251,7 @@
 			          			</li>
 		          			</ul>
 		          			
-		          			<div id="app-feedback-link" class="hide-smallscreen"><a href="/app/tell-us?currentPage=${info.requestedUri}">Give feedback</a></div>
+		          			<div id="app-feedback-link"><a href="/app/tell-us?currentPage=${info.requestedUri}">Give feedback</a></div>
 		          				      					
 	      					<div style="clear:both;"></div>
 		          		</div>

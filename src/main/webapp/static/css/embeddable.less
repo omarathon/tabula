@@ -353,16 +353,18 @@ table {
   width: 97%;
 }
 
-#app-feedback-link {
-  position:fixed;
-  left:0;
-  top:30%;
-  width: 36px;
-  height: 155px;
-  background: url(../images/app-feedback.png) no-repeat;
-  cursor: hand;
-  cursor: pointer;
-  a { display: none; }
+@media screen and (min-width:1000px) {
+  #app-feedback-link {
+    position:fixed;
+    left:0;
+    top:30%;
+    width: 36px;
+    height: 155px;
+    background: url(../images/app-feedback.png) no-repeat;
+    cursor: hand;
+    cursor: pointer;
+    a { display: none; }
+  }
 }
 
 #feedback-rating-container {
