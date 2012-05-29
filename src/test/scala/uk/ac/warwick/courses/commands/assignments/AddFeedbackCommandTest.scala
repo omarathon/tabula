@@ -18,6 +18,7 @@ import org.junit.Before
 import uk.ac.warwick.userlookup.User
 import org.specs.mock.ClassMocker
 import uk.ac.warwick.courses.LenientUserLookup
+import uk.ac.warwick.courses.helpers.ArrayList
 
 class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with LenientUserLookup {
 	
@@ -34,7 +35,7 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			session.save(assignment)
 			val command = new AddFeedbackCommand(assignment, currentUser)
 			command.uniNumber = "1234567"
-			command.file.upload = List(new MockMultipartFile("feedback.docx", feedbackDocument))
+			command.file.upload = ArrayList(new MockMultipartFile("feedback.docx", feedbackDocument))
 			command.onBind
 			val feedbacks = command.apply
 			feedbacks.size should be (1)
