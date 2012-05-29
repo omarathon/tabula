@@ -10,25 +10,30 @@ import uk.ac.warwick.courses.commands.Description
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.courses.data.model.Submission
+import uk.ac.warwick.courses.helpers.ArrayList
 
 @Configurable
-class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
 	@BeanProperty var filename:String =_
 	
-	@Autowired var zipService:ZipService =_
+	@BeanProperty var submissions:JList[Submission] = ArrayList()
 	
-	override def apply = {
-		val zip = zipService.getAllSubmissionsZip(assignment)
+	@Autowired var zipService:ZipService =_	
+	
+	override def apply : RenderableZip = {
+		submissions.find(_.assignment==assignment) map { throw new IllegalStateException("Submissions don't match the assignment") }
+		val zip = zipService.getSomeSubmissionsZip(submissions)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)
 		renderable
 	}
 	
 	override def describe(d:Description) = d.assignment(assignment).properties(
-			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0)
+			"submissionCount" -> Option(submissions).map(_.size).getOrElse(0)
 	)
 	
 }

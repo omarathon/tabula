@@ -54,6 +54,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	
 	def getFeedbackZip(feedback:Feedback): File = 
 		getZip( resolvePath(feedback), getFeedbackZipItems(feedback))
+		
 	
 	private def getFeedbackZipItems(feedback:Feedback): Seq[ZipItem] =
 		feedback.attachments.map { (attachment) => 
@@ -81,18 +82,28 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			new ZipFileItem(submission.assignment.module.code + " - " + submission.universityId+" - "+attachment.name, attachment.dataStream) 
 		}
 	}
-		
+	
+	/**
+	 * Get a zip containing these submissions. If there is more than one submission
+	 * for a user, the zip _might_ work but look weird.
+	 */
+	def getSomeSubmissionsZip(submissions:Seq[Submission]): File = 
+		createUnnamedZip( submissions map getSubmissionZipFolder )
+	
+	/**
+	 * A zip folder containing this submission's items.
+	 */
+	private def getSubmissionZipFolder(submission:Submission): ZipItem = 
+		new ZipFolderItem( submission.universityId, getSubmissionZipItems(submission) )
 	
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */
-	def getAllSubmissionZips(assignment:Assignment): File = {
+	def getAllSubmissionsZip(assignment:Assignment): File = 
 		getZip( resolvePathForSubmission(assignment),
-			assignment.submissions.map { (submission) => 
-				new ZipFolderItem( submission.universityId, getSubmissionZipItems(submission) )
-			}
+			assignment.submissions map getSubmissionZipFolder
 		)
-	}
+	
 	
 }
 

@@ -25,6 +25,14 @@ trait Command[R] extends Describable[R] with JavaImports {
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
 
+trait ApplyWithCallback[R] extends Command[R] {
+	var callback: (R)=>Unit =_
+	def apply(fn:(R)=>Unit) : R = {
+		callback = fn
+		apply
+	}
+}
+
 trait SelfValidating {
 	def validate(implicit errors:Errors)
 	

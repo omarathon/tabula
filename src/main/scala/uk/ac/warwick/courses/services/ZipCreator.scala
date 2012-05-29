@@ -4,16 +4,18 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
-
 import scala.annotation.implicitNotFound
 import scala.collection.mutable.ListBuffer
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-
 import uk.ac.warwick.courses.helpers.Logging
+import org.hibernate.id.GUIDGenerator
+import java.util.UUID
 
+/**
+ * An item in a Zip file. Can be a file or a folder.
+ */
 trait ZipItem {
 	val name:String
 }
@@ -47,20 +49,44 @@ trait ZipCreator extends Logging {
 	 * 
 	 * name will be a path underneath the zipDir root, e.g.
 	 * "feedback/ab/cd/ef/123". A zip extension will be added.
+	 * 
+	 * If a zip of the given name already exists, it returns that file
+	 * instead of regenerating the file. The app has to remember to call
+	 * invalidateZip whenever the contents of the zip would change, otherwise
+	 * it becomes stale.
 	 */
 	def getZip(name:String, items:Seq[ZipItem]) = {
 		val file = fileForName(name)
-		if (!file.exists) {
-			file.getParentFile.mkdirs
-			openZipStream(file) { (zip) =>
-				zip.setLevel(9)
-				// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
-				zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
-				writeItems(items, zip)
-			}
-		}
+		if (!file.exists) writeToFile(file, items)
 		file
 	}
+	
+	/**
+	 * Create a new Zip with a randomly generated name.
+	 */
+	def createUnnamedZip(items:Seq[ZipItem]) = {
+		val file = unusedFile
+		writeToFile(file, items)
+		file
+	}
+	
+	private def writeToFile(file:File, items:Seq[ZipItem]) = {
+		file.getParentFile.mkdirs
+		openZipStream(file) { (zip) =>
+			zip.setLevel(9)
+			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
+			zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
+			writeItems(items, zip)
+		}
+	}
+	
+	/** Try 100 times to get an unused filename */
+	private def unusedFile = Stream.range(1,100)
+			.map( _=>fileForName(randomUUID) )
+			.find(!_.exists)
+			.getOrElse(throw new IllegalStateException("Couldn't find unique filename"))
+			
+	private def randomUUID = UUID.randomUUID.toString().replace("-","")
 
 	/**
 	 * Invalidates a previously created zip, by deleting its file.

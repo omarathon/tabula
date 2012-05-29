@@ -12,6 +12,7 @@ import uk.ac.warwick.courses.services.fileserver.FileServer
 import uk.ac.warwick.courses.commands.assignments.DownloadAllSubmissionsCommand
 import org.springframework.beans.factory.annotation.Autowired
 import javax.servlet.http.HttpServletResponse
+import uk.ac.warwick.courses.commands.assignments.DownloadSubmissionsCommand
 
 @Configurable @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
@@ -34,18 +35,29 @@ class ListSubmissions extends BaseController {
 }
 
 @Configurable @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
-class DownloadAllSubmissions extends BaseController {
+@RequestMapping
+class DownloadSubmissionsController extends BaseController {
 
 	@Autowired var fileServer:FileServer =_
 	
-	@RequestMapping
-	def download(command:DownloadAllSubmissionsCommand, response:HttpServletResponse) {
+	@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
+	def download(command:DownloadSubmissionsCommand, response:HttpServletResponse) {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
-		command.renderableHandler = (renderable => fileServer.serve(renderable, response))
-		command.apply()
+		command.apply { renderable => 
+			fileServer.serve(renderable, response)
+		}
+	}
+	
+	@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
+	def downloadAll(command:DownloadAllSubmissionsCommand, response:HttpServletResponse) {
+		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(Participate(module))
+		command.apply { renderable => 
+			fileServer.serve(renderable, response)
+		}
 	}
 	
 }
