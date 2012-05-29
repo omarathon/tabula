@@ -105,6 +105,7 @@ class AssignmentController extends AbstractAssignmentController {
 	def view(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
 		val assignment = form.assignment
 		val module = form.module
+		
 		form.onBind
 		checks(form)
 		

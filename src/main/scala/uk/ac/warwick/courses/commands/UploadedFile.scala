@@ -69,8 +69,7 @@ class UploadedFile {
 		 	  throw new IllegalStateException("Non temporary file used")
 		  } 
 	  }
-	  if (shouldPersist) {
-	 	  attached.clear()
+	  if (hasUploads) {    
 	 	  // convert MultipartFiles into FileAttachments
 	 	  val newAttachments = for (item <- upload) yield {
 	 	 	  val a = new FileAttachment
@@ -80,6 +79,8 @@ class UploadedFile {
 		 	  fileDao.saveTemporary(a)
 		 	  a
 	 	  }
+	 	  // remove converted files from upload to avoid duplicates
+	 	  upload.clear
 	 	  attached.addAll(newAttachments)
 	  } else {
 	 	  // sometimes we manually add FileAttachments with uploaded data to persist
@@ -88,10 +89,4 @@ class UploadedFile {
 	  }
 	  
   }
-  
-  /**
-   * If there are no persisted files already and we have at least one non-empty
-   * multipart file here, then save them as persisted fileattachments.
-   */
-  private def shouldPersist = !hasAttachments && hasUploads
 }
