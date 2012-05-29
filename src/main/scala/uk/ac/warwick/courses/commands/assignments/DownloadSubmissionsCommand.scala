@@ -12,7 +12,11 @@ import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.ItemNotFoundException
 
+/**
+ * Download one or more submissions from an assignment, as a Zip.
+ */
 @Configurable
 class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
@@ -25,7 +29,10 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	@Autowired var zipService:ZipService =_	
 	
 	override def apply : RenderableZip = {
-		submissions.find(_.assignment==assignment) map { throw new IllegalStateException("Submissions don't match the assignment") }
+		if (submissions.isEmpty) throw new ItemNotFoundException
+		if (submissions.exists(_.assignment!=assignment)) {
+			throw new IllegalStateException("Submissions don't match the assignment") 
+		}
 		val zip = zipService.getSomeSubmissionsZip(submissions)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)

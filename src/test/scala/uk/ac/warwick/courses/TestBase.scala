@@ -28,6 +28,8 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.Before
 import java.io.StringWriter
 import java.io.StringReader
+import org.aspectj.lang.Aspects
+import uk.ac.warwick.courses.commands.CommandApplyAspect
 
 /**
  * Base class for tests which boringly uses the JUnit support of
@@ -41,13 +43,18 @@ trait TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers
   
 trait TestHelpers {
   var temporaryFiles:Set[File] = Set.empty
-	
+  
   // Location of /tmp - best to create a subdir below it.
   lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
   val random = new scala.util.Random
   lazy val json = new JsonObjectMapperFactory().createInstance
   
   @Before def emptyTempDirSet = temporaryFiles = Set.empty
+  
+  @Before def setupAspects = {
+	  val commandAspect = Aspects.aspectOf(classOf[CommandApplyAspect])
+	  commandAspect.enabled = false
+  }
   
   /**
    * Returns a new temporary directory that will get cleaned up

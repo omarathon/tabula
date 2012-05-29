@@ -185,7 +185,7 @@ To not bind:
 			$container.find('.hidden-attachment a').click(function(ev){
 			    ev.preventDefault();
 			    $(this).parent('.hidden-attachment').remove(); 
-			    if ($addbutton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
+			    if ($addButton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
 			       $addButton.show();
 			    }
 			    return false;

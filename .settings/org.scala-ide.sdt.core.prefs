@@ -1,4 +1,3 @@
-#Tue Nov 29 11:50:58 GMT 2011
 Xcheck-null=false
 Xcheckinit=false
 Xdisable-assertions=false
@@ -51,7 +50,8 @@ nowarn=false
 optimise=false
 organizeimports.expandcollapse=expand
 organizeimports.groups=java$scala$org$com
-organizeimports.wildcards=scalaz$scalaz.Scalaz
+organizeimports.useProjectSpecificSettings=true
+organizeimports.wildcards=scalaz$uk.ac.warwick.courses.JavaImports$scala.collection.JavaConversions$scalaz.Scalaz
 scala.compiler.useProjectSettings=false
 syntaxColouring.bracket.bold=false
 syntaxColouring.bracket.colour=0,0,0

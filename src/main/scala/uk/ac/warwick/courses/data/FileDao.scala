@@ -39,7 +39,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		session.saveOrUpdate(file)
 		if (!file.hasData && file.uploadedData != null) {
 			persistFileData(file, file.uploadedData)
-		}	
+		}
 	}
 	
 	def persistFileData(file:FileAttachment, inputStream:InputStream) {

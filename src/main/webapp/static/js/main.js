@@ -185,8 +185,8 @@ jQuery(function ($) {
 		var action = $this.find('a').attr('href');
 		$this.html('').load(action, function(){
 			decorateFeedbackForm();
-		})
-	})
+		});
+	});
 	
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",
@@ -195,8 +195,12 @@ jQuery(function ($) {
 	
 	$('a.long-running').click(function (event) {
 		var $this = $(this);
-		if (!$this.hasClass('clicked')) {
+		var originalText = $this.html();
+		if (!$this.hasClass('clicked') && !$this.hasClass('disabled')) {
 			$this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
+			setTimeout(function(){
+				$this.removeClass('clicked').css({opacity:1}).html(originalText);
+			}, 5000);
 			return true;
 		} else {
 			event.preventDefault();
@@ -253,18 +257,19 @@ jQuery(function ($) {
 		var $feedbackList = $(this);
 		var $checkboxes = $feedbackList.find('input.collection-checkbox');
 		var $selectAll = $feedbackList.find('input.collection-check-all');
-		var updateDeleteButton = function() {
-			$('#delete-feedback-button').toggleClass('disabled', !$checkboxes.is(':checked'));
+		var updateButtons = function() {
+			var disabled = !$checkboxes.is(':checked');
+			$('#delete-feedback-button,#delete-selected-button,#download-selected-button').toggleClass('disabled', disabled);
 		}
-		updateDeleteButton();
+		updateButtons();
 		$checkboxes.change(function(){
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
-			updateDeleteButton();
+			updateButtons();
 		});
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
-			updateDeleteButton();
+			updateButtons();
 		});
 		
 		// Returns an array of IDs.
@@ -273,12 +278,12 @@ jQuery(function ($) {
 		};
 		
 		// #delete-selected-button won't work for >1 set of checkboxes on a page.
-		$('#delete-selected-button').click(function(event){
+		$('#download-selected-button, #delete-selected-button').click(function(event){
 			event.preventDefault();
 			var $checkedBoxes = $checkboxes.filter(":checked");
 			if ($checkedBoxes.length > 0) {
 				var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-				$form.append($checkedBoxes);
+				$form.append($checkedBoxes.clone());
 				$(document.body).append($form);
 				$form.submit();
 			}

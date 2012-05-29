@@ -20,14 +20,22 @@ class CommandApplyAspect extends EventHandling {
 	
 	@BeanProperty @Autowired var maintenanceMode:MaintenanceModeService =_
 	
+	/**
+	 * You'd only ever disable this in testing.
+	 */
+	var enabled = true
+	
 	@Pointcut("execution(* uk.ac.warwick.courses.commands.Command.apply(..)) && target(callee)")
 	def applyCommand(callee:Describable[_]): Unit = {}
 	
 	@Around("applyCommand(callee)")
 	def aroundApplyCommand[T](jp:ProceedingJoinPoint, callee:Describable[T]):Any = 
-		if (!maintenanceMode.enabled || callee.isInstanceOf[ReadOnly]) 
-			recordEvent(callee) { jp.proceed.asInstanceOf[T] }
-		else 
-			throw maintenanceMode.exception()
+		if (enabled) {
+			if (maintenanceCheck(callee)) recordEvent(callee) { jp.proceed.asInstanceOf[T] }
+			else throw maintenanceMode.exception()
+		} else {
+			jp.proceed.asInstanceOf[T]
+		}	
 	
+	def maintenanceCheck(callee:Describable[_]) = !maintenanceMode.enabled || callee.isInstanceOf[ReadOnly]
 }

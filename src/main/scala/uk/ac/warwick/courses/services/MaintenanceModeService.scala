@@ -6,8 +6,36 @@ import org.joda.time.DateTime
 import scala.react.EventSource
 import uk.ac.warwick.courses.system.exceptions.HandledException
 
+trait MaintenanceModeService {
+	
+	/** Enable maintenance mode. **/
+	def enable
+	
+	/** Disable maintenance mode. **/
+	def disable
+	
+	/** Returns whether maintenance mode is enabled. */
+	@BeanProperty def enabled:Boolean
+	
+	/** 
+	 * An EventSource to which you can attach a listener to find
+	 * out when maintenance mode goes on and off.
+	 */
+	val changingState:EventSource[Boolean]
+	
+	/**
+	 * Returns an Exception object suitable for throwing when trying
+	 * to do an unsupported op while in maintenance mode. Only returns
+	 * it; you need to throw it yourself. Like a dog!
+	 */
+	def exception():Exception
+	
+	@BeanProperty var until:Option[DateTime]
+	@BeanProperty var message:Option[String]
+}
+
 @Service
-class MaintenanceModeService extends MaintenanceStatus {
+class MaintenanceModeServiceImpl extends MaintenanceModeService with MaintenanceStatus {
 	private var _enabled:Boolean = false;
 	
 	@BeanProperty def enabled:Boolean = _enabled
