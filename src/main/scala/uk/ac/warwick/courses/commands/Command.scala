@@ -76,6 +76,9 @@ abstract class Description {
 		this
 	}
 	
+	/**
+	 * University IDs
+	 */
 	def studentIds(universityIds:Seq[String]) = {
 		map += "students" -> universityIds
 		this

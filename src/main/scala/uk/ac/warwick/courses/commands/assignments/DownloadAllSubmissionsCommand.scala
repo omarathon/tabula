@@ -27,8 +27,11 @@ class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly
 		renderable
 	}
 	
-	override def describe(d:Description) = d.assignment(assignment).properties(
-			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0)
-	)
+	override def describe(d:Description) = d
+			.assignment(assignment)
+			.studentIds(assignment.submissions.map(_.universityId))
+			.properties(
+				"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0)
+			)
 	
 }

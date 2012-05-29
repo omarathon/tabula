@@ -8,6 +8,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.courses.commands._
 import org.mockito.Matchers.{eq => isEq}
 import uk.ac.warwick.courses.services.MaintenanceModeService
+import org.junit.Before
 
 class EventLoggingAspectTest extends TestBase with Mockito {
 	
@@ -19,6 +20,7 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 			
 		val listener = mock[EventListener]
 		val maintenanceMode = mock[MaintenanceModeService]
+		aspect.enabled = true;
 		aspect.listener = listener
 		aspect.maintenanceMode = maintenanceMode
 		
@@ -34,6 +36,7 @@ class EventLoggingAspectTest extends TestBase with Mockito {
 		}
 		
 		val listener = mock[EventListener]
+		aspect.enabled = true;
 		aspect.listener = listener
 		
 		try {
