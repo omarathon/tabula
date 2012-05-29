@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.data.model
 
-import scala.collection.JavaConversions.asScalaSet
+import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
@@ -18,6 +18,8 @@ import uk.ac.warwick.courses.JavaImports.JSet
 import uk.ac.warwick.courses.actions.Deleteable
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
+import scala.collection.mutable
+import java.util.HashSet
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -54,7 +56,7 @@ class Submission extends GeneratedId with Deleteable {
 	@BeanProperty var universityId:String =_
 
 	@OneToMany(mappedBy="submission", cascade=Array(ALL))
-	@BeanProperty var values:JSet[SavedSubmissionValue] =_
+	@BeanProperty var values:JSet[SavedSubmissionValue] = new HashSet
 	
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 	
