@@ -4,6 +4,13 @@ import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.JavaImports
 import org.springframework.validation.Errors
 
+/**
+ * Trait for a thing that can describe itself to a Description
+ * object. You can put arbitrary properties into Description but
+ * it's always best to use a dedicated method, e.g. assignment(), to
+ * make things more maintainable. assignment() will automatically
+ * record its module and department info.
+ */
 trait Describable[T] {
 	// describe the thing that's happening.
 	def describe(d:Description)
@@ -19,6 +26,12 @@ trait Describable[T] {
  * especially if we might want to audit log it. Anything that
  * adds or changes any data is a candidate. Read-only queries,
  * not so much (unless we're interested in when a thing is observed/downloaded).
+ * 
+ * <h2>Renaming a Command</h2>
+ * 
+ * Think before renaming a command - by default the class name (minus "Command") is
+ * used as the event name in audit trails, so if you rename it the audit events will
+ * change name too. Careful now!
  */
 trait Command[R] extends Describable[R] with JavaImports {
 	def apply(): R
@@ -70,6 +83,9 @@ abstract class Description {
 		this
 	}
 	
+	/**
+	 * Record a Feedback item, plus its assignment, module, department
+	 */
 	def feedback(feedback:Feedback) = {
 		map += "feedback" -> feedback.id
 		if (feedback.assignment != null) assignment(feedback.assignment)
@@ -81,14 +97,23 @@ abstract class Description {
 	 */
 	def studentIds(universityIds:Seq[String]) = property("students" -> universityIds)
 	
+	/**
+	 * List of Submissions IDs
+	 */
 	def submissions(submissions:Seq[Submission]) = property("submissions" -> submissions.map(_.id))
 	
+	/**
+	 * Record assignment, plus its module and department if available.
+	 */
 	def assignment(assignment:Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
 		this
 	}
 	
+	/**
+	 * Record module, plus department.
+	 */
 	def module(module:Module) = properties(
 			"module" -> module.id,
 			"department" -> module.department.code
