@@ -30,8 +30,8 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	
 	override def apply : RenderableZip = {
 		if (submissions.isEmpty) throw new ItemNotFoundException
-		if (submissions.exists(_.assignment!=assignment)) {
-			throw new IllegalStateException("Submissions don't match the assignment") 
+		if (submissions.exists( _.assignment != assignment )) {
+			throw new IllegalStateException("Submissions don't match the assignment")
 		}
 		val zip = zipService.getSomeSubmissionsZip(submissions)
 		val renderable = new RenderableZip(zip)
@@ -41,6 +41,7 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	
 	override def describe(d:Description) = d
 			.assignment(assignment)
+			.submissions(submissions)
 			.studentIds(submissions.map(_.universityId))
 			.properties(
 				"submissionCount" -> Option(submissions).map(_.size).getOrElse(0)

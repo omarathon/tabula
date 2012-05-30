@@ -21,6 +21,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.commands.ReadOnly
 
 /**
  * Send an email confirming the receipt of a submission to the student
@@ -30,7 +31,7 @@ import uk.ac.warwick.courses.web.Routes
 class SendSubmissionReceiptCommand (
 		@BeanProperty var submission:Submission,
 		@BeanProperty var user:CurrentUser
-		) extends Command[Boolean] with FreemarkerRendering {
+		) extends Command[Boolean] with ReadOnly with FreemarkerRendering {
 	
 	def this() = this(null,null)
 	

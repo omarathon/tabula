@@ -79,22 +79,20 @@ abstract class Description {
 	/**
 	 * University IDs
 	 */
-	def studentIds(universityIds:Seq[String]) = {
-		map += "students" -> universityIds
-		this
-	}
+	def studentIds(universityIds:Seq[String]) = property("students" -> universityIds)
+	
+	def submissions(submissions:Seq[Submission]) = property("submissions" -> submissions.map(_.id))
 	
 	def assignment(assignment:Assignment) = {
-		map += "assignment" -> assignment.id
+		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
 		this
 	}
 	
-	def module(module:Module) = {
-		map += "module" -> module.id
-		map += "department" -> module.department.code
-		this
-	}
+	def module(module:Module) = properties(
+			"module" -> module.id,
+			"department" -> module.department.code
+		)
 	
 	// delegate equality to the underlying map
 	override def hashCode = map.hashCode
