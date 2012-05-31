@@ -32,6 +32,7 @@ import uk.ac.warwick.courses.data.model.AuditEvent
 import uk.ac.warwick.courses.helpers.Closeables._
 import uk.ac.warwick.courses.helpers.Stopwatches._
 import uk.ac.warwick.courses.helpers._
+import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
 import scala.actors.threadpool.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
@@ -39,6 +40,79 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.courses.data.model.Module
+import uk.ac.warwick.courses.data.model.Submission
+
+/**
+ * Methods for querying stuff out of the index. Separated out from
+ * the main index service into this trait so they're easier to find.
+ * Possibly the indexer and the index querier should be separate classes
+ * altogether.
+ */
+trait QueryMethods { self:AuditEventIndexService =>
+	
+	/**
+	 * Get recent AuditEvent items.
+	 */
+	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
+		val min = new DateTime().minusYears(2)
+		val docs = search(
+			query = NumericRangeQuery.newLongRange("eventDate", min.getMillis, null, true, true),
+			sort = reverseDateSort,
+			offset = start,
+			max = count
+		)
+		docs flatMap { toAuditEvent(_) }
+	}
+	
+	def student(user:User) = search(termQuery("students", user.getWarwickId))
+	
+	def findByUserId(usercode:String) = search(termQuery("userId", usercode))
+		
+	/**
+	 * Work out which submissions have been downloaded from the admin interface
+	 * based on the audit events.
+	 */
+	def adminDownloadedSubmissions(assignment:Assignment) : Seq[Submission] = {
+		val assignmentTerm = termQuery("assignment", assignment.id)
+		
+		val allDownloaded = parsedAuditEvents(search(
+				all(assignmentTerm, termQuery("eventType", "DownloadAllSubmissions"))
+			))
+		
+		val someDownloaded = parsedAuditEvents(search(
+				all(assignmentTerm, termQuery("eventType", "DownloadSubmissions"))
+			))
+		someDownloaded.flatMap { _.submissionIds }
+		Nil
+	}
+		
+	def whoDownloadedFeedback(assignment:Assignment) =
+		search(all(
+				termQuery("eventType", "DownloadFeedback"),
+				termQuery("assignment", assignment.id)
+			))
+			.flatMap( toAuditEvent(_) )
+			.filterNot( _.hadError )
+			.map{ _.masqueradeUserId }
+			.filterNot{ _ == null }
+			.distinct
+			
+	/**
+	 * Return the most recently created assignment for this Module.
+	 */
+	def recentAssignment(module:Module) : Option[Assignment] = {
+		search(query = all(
+				termQuery("eventType", "AddAssignment"),
+				termQuery("module", module.id)),
+				max=1,
+				sort=reverseDateSort)
+			.flatMap( toParsedAuditEvent )
+			.flatMap( _.assignmentId )
+			.flatMap( assignmentService.getAssignmentById )
+			.headOption
+	}
+	
+}
 
 /**
  * Indexes audit events using Lucene, and does searches on it.
@@ -47,7 +121,8 @@ import uk.ac.warwick.courses.data.model.Module
  *      Maybe put searches in AuditEventService.
  */
 @Component 
-class AuditEventIndexService extends InitializingBean with QueryMethods with Logging with DisposableBean {
+class AuditEventIndexService extends InitializingBean with QueryHelpers with QueryMethods with Logging with DisposableBean {
+	
 	final val LuceneVersion = Version.LUCENE_35
 	
 	// largest batch of event items we'll load in at once.
@@ -166,16 +241,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		}
 	} 
 	
-	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
-		val min = new DateTime().minusYears(2)
-		val docs = search(
-			query = NumericRangeQuery.newLongRange("eventDate", min.getMillis, null, true, true),
-			sort = new Sort(new SortField("eventDate", SortField.LONG, true)),
-			offset = start,
-			max = count
-		)
-		docs flatMap toId flatMap service.getById
-	}
+	
 	
 	/**
 	 * Sets up a new IndexSearcher with a reopened IndexReader so that
@@ -234,12 +300,12 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		reopen // not really necessary as we reopen periodically anyway
 	}
 	
-	private def toId(doc:Document) = documentValue(doc, "id").map{_.toLong}
+	protected def toId(doc:Document) = documentValue(doc, "id").map{_.toLong}
 	
-	private def toAuditEvent(id:Long) = service.getById(id)
-	private def toAuditEvent(doc:Document) :Option[AuditEvent] = toId(doc) flatMap (toAuditEvent)
+	protected def toAuditEvent(id:Long) : Option[AuditEvent] = service.getById(id)
+	protected def toAuditEvent(doc:Document) : Option[AuditEvent] = { toId(doc) flatMap (toAuditEvent) }
 	
-	private def toParsedAuditEvent(doc:Document) : Option[AuditEvent] = toAuditEvent(doc).map { event =>
+	protected def toParsedAuditEvent(doc:Document) : Option[AuditEvent] = toAuditEvent(doc).map { event =>
 		event.parsedData = service.parseData(event.data)
 		event.related.map { e =>
 			e.parsedData = service.parseData(e.data)
@@ -306,40 +372,12 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 		}
 	}
 	
-	def student(student:User) = search(
-		new TermQuery(new Term("students", student.getWarwickId))
-	)
-	
-	def findByUserId(usercode:String) = 
-		search(new TermQuery(new Term("userId", usercode)))
-		
-	def whoDownloadedFeedback(assignment:Assignment) =
-		search(all(
-				new TermQuery(new Term("eventType", "DownloadFeedback")),
-				new TermQuery(new Term("assignment", assignment.id))
-			))
-			.flatMap( toId )
-			.flatMap( service.getById )
-			.filterNot( _.hadError )
-			.map{ _.masqueradeUserId }
-			.filterNot{ _ == null }
-			.distinct
-			
-	def recentAssignment(module:Module) : Option[Assignment] = {
-		search(query = all(
-				new TermQuery(new Term("eventType", "AddAssignment")),
-				new TermQuery(new Term("module", module.id))),
-				max=1,
-				sort=new Sort(new SortField("eventDate", SortField.LONG, true)))
-			.flatMap( toParsedAuditEvent )
-			.flatMap( _.assignmentId )
-			.flatMap( assignmentService.getAssignmentById )
-			.headOption
-	}
-			
 	def search(query:Query, max:Int, sort:Sort=null, offset:Int=0) : Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query:Query) : Seq[Document] = doSearch(query, None, null, 0)
 	def search(query:Query, sort:Sort) : Seq[Document] = doSearch(query, None, sort, 0)
+	
+	protected def auditEvents(docs:Seq[Document]) = docs.flatMap(toAuditEvent(_))
+	protected def parsedAuditEvents(docs:Seq[Document]) = docs.flatMap(toParsedAuditEvent(_))
 	
 	private def doSearch(query:Query, max:Option[Int], sort:Sort, offset:Int) : Seq[Document] = {
 		initialiseSearching
@@ -373,7 +411,7 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	private def toDocument(item:AuditEvent) : Document = {
+	protected def toDocument(item:AuditEvent) : Document = {
 		val doc = new Document
 		doc add plainStringField("id", item.id.toString)
 		if (item.eventId != null) { // null for old events
@@ -441,7 +479,9 @@ class AuditEventIndexService extends InitializingBean with QueryMethods with Log
 	}
 }
 
-trait QueryMethods {
+
+
+trait QueryHelpers {
 	private def boolean(occur:Occur, queries:Query*) = {
 		val query = new BooleanQuery
 		for (q <- queries) query.add(q, occur)
@@ -450,4 +490,10 @@ trait QueryMethods {
 	
 	def all(queries:Query*) = boolean(Occur.MUST, queries:_*)
 	def some(queries:Query*) = boolean(Occur.SHOULD, queries:_*)
+	
+	def termQuery(name:String, value:String) = 
+		new TermQuery(new Term(name, value))
+
+	def dateSort = new Sort(new SortField("eventDate", SortField.LONG, false))
+	def reverseDateSort = new Sort(new SortField("eventDate", SortField.LONG, true))
 }

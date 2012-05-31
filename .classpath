@@ -94,7 +94,6 @@
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-template-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tiles/tiles-el-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/build/log4j/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/cglib/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/build/slf4j-api-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/asm-3.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-beanutils-1.8.0.jar"/>

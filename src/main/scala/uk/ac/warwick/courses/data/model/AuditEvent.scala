@@ -6,6 +6,8 @@ import org.hibernate.annotations.AccessType
 import javax.persistence.Column
 import org.hibernate.annotations.Type
 import javax.persistence.Id
+import uk.ac.warwick.courses.JavaImports._
+import collection.JavaConversions._
 
 /**
  * Represents a single item in the audit trail.
@@ -29,8 +31,11 @@ case class AuditEvent(
 	var eventType:String = null,
 	var eventStage:String = null, // before, after, error
 	
+	// The actual user who did the event.
 	var userId:String = null,
 	
+	// Who appeared to do the event. If you're masqueraded as X, this field will contain X
+	// while userId will contain your ID.
 	var masqueradeUserId:String = null,
 	
 	//todo convert to/from json
@@ -53,6 +58,8 @@ case class AuditEvent(
 	def combinedParsedData = relatedParsedData.foldLeft(Map.empty[String,Any]){ (list, map) => map ++ list }
 	
 	def assignmentId = stringProperty("assignment")
+	def submissionIds = stringListProperty("submissions")
+	def feedbackIds = stringListProperty("feedbacks")
 	
 	/** Was there an "error" stage, indicating an exception was thrown? */
 	def hadError = findStage("error").isDefined
@@ -75,5 +82,10 @@ case class AuditEvent(
 		relatedParsedData 
 			.flatMap { _.get(name) } 
 			.map { _.toString } headOption
+			
+	private def stringListProperty(name:String) : Seq[String] = 
+		relatedParsedData 
+			.flatMap { _.get(name) } 
+			.flatMap { _.asInstanceOf[JList[String]] }
 	
 }

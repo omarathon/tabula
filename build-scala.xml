@@ -80,7 +80,7 @@
 		<mkdir dir="target/unwoven" />
 		<mkdir dir="target/log" />
 		
-		<scalac deprecation="on" unchecked="on" srcref="srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
+		<scalac deprecation="off" unchecked="on" srcref="srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
 		<if>
 			<istrue value="${has.java.src}"></istrue>
 			<then>
@@ -179,10 +179,17 @@
 		<scaladoc 
 			srcdir="${src.scala}"
 			destdir="${docs.dir}"
-			deprecation="yes" unchecked="yes"
+			deprecation="no" unchecked="yes"
 			doctitle="${ant.project.name}"
 			classpathref="build+built.classpath" 
 		/>
+	</target>
+	
+	<target name="scaladoc-artifact" depends="scaladoc">
+		<fail unless="scaladoc.artifact.dir" message="Missing property scaladoc.artifact.dir" />
+		<copy todir="${scaladoc.artifact.dir}">
+			<fileset dir="target/scaladoc" />
+		</copy>
 	</target>
 
 	<target name="test" depends="compile" description="Run unit tests.">
@@ -259,6 +266,8 @@
 			<hbm2ddl export="false" create="true" delimiter=";" format="true" outputfilename="schema.sql" />
 		</hibernate>
 	</target>
+	
+	
 
 
 </project>

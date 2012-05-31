@@ -7,6 +7,10 @@ import uk.ac.warwick.courses.commands.DescriptionImpl
 import uk.ac.warwick.courses.RequestInfo
 import java.io.Serializable
 
+/** Event is a transient object created by the event listener to
+  * track the information we need to log. The class that gets
+  * saved to database is [[uk.ac.warwick.courses.data.model.AuditEvent]].
+  */
 case class Event(
 	val id:String,
     val name:String,
@@ -16,6 +20,10 @@ case class Event(
 	val date:DateTime=new DateTime
 ) extends Serializable
 
+/** Stores an Event with its stage (before, after, error).
+  * This is mainly for serializing in maintenance mode, so that we can
+  * read it back out  
+  */
 case class EventAndStage(event:Event, stage:String) extends Serializable
 
 object Event {

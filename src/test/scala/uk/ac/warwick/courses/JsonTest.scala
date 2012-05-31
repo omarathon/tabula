@@ -5,6 +5,7 @@ import org.junit.Test
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringReader
 import collection.JavaConversions._
+import uk.ac.warwick.courses.JavaImports._
 
 class JsonTest extends TestBase {
 	
@@ -22,7 +23,7 @@ class JsonTest extends TestBase {
 	@Test def parseNumbers {
 		val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
 		val map = m.readValue(new StringReader(props), classOf[Map[String,Any]])
-		map("filetypes").asInstanceOf[java.util.List[_]].toSeq should equal (Seq("pdf","doc","docx"))
+		map("filetypes").asInstanceOf[JList[_]].toSeq should equal (Seq("pdf","doc","docx"))
 		map("age").asInstanceOf[Int] should be (23)
 	}
 	
