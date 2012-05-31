@@ -19,22 +19,43 @@ import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.courses.JsonObjectMapperFactory
 import uk.ac.warwick.courses.helpers.ArrayList
+import java.io.File
 
 class AuditEventIndexServiceTest extends TestBase with Mockito {
 	
+	var indexer:AuditEventIndexService = _
+	var service:AuditEventService = _
+	var TEMP_DIR:File = _
+	
+	@Before def setup {		
+		TEMP_DIR = createTemporaryDirectory
+		
+		service = mock[AuditEventService]
+		service.parseData(any[String]) answers { _ match {
+			case s:String => Some(readJsonMap(s))
+			case _ => None
+		}}
+		
+		val maintenanceMode = mock[MaintenanceModeService]
+		
+		indexer = new AuditEventIndexService
+		indexer.service = service
+		indexer.indexPath = TEMP_DIR
+		indexer.maintenanceService = maintenanceMode
+		indexer.afterPropertiesSet
+	}
+
+//	@Test def downloadedSubmissions = withFakeTime(dateTime(2001, 6)) {
+//		
+//	}
+	
 	@Test def index = withFakeTime(dateTime(2001, 6)) {
-		
-		val TEMP_DIR = createTemporaryDirectory
-		
 		val stopwatch = new StopWatch
-		
-		val jsonMapper = new JsonObjectMapperFactory().createInstance()
 		
 		val jsonData = Map(
 					"students" -> Array("0123456", "0199999")
 				)
 		val jsonDataString = json.writeValueAsString(jsonData)
-		println(jsonDataString)
 		
 		stopwatch.start("creating items")
 		
@@ -56,20 +77,8 @@ class AuditEventIndexServiceTest extends TestBase with Mockito {
 		
 		val events = defendEvents ++ publishEvents
 		
-		val service = mock[AuditEventService]
-		service.parseData(null) returns None
-		service.parseData(jsonDataString) returns Some(readJsonMap(jsonDataString))
-		service.parseData("{}") returns Some(Map())
 		service.listNewerThan(any[DateTime], isEq(1000)) returns events
 		service.getById(any[JLong]) returns events.headOption
-		
-		val maintenanceMode = mock[MaintenanceModeService]
-		
-		val indexer = new AuditEventIndexService
-		indexer.service = service
-		indexer.indexPath = TEMP_DIR
-		indexer.maintenanceService = maintenanceMode
-		indexer.afterPropertiesSet
 		
 		stopwatch.start("indexing")
 		

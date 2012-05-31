@@ -2,6 +2,7 @@ package uk.ac.warwick.courses.services
 
 import java.io.File
 import java.io.FileNotFoundException
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream
 import org.apache.lucene.analysis.standard.StandardAnalyzer
@@ -75,15 +76,25 @@ trait QueryMethods { self:AuditEventIndexService =>
 	def adminDownloadedSubmissions(assignment:Assignment) : Seq[Submission] = {
 		val assignmentTerm = termQuery("assignment", assignment.id)
 		
+		// find events where you downloaded all available submissions
 		val allDownloaded = parsedAuditEvents(search(
 				all(assignmentTerm, termQuery("eventType", "DownloadAllSubmissions"))
 			))
+		// take most recent event and find submissions made before then.
+		val submissions1 : Seq[Submission] = 
+			if (allDownloaded.isEmpty) { Nil } 
+			else {
+				val latestDate = allDownloaded.map{ _.eventDate }.max
+				assignment.submissions.filter{ _.submittedDate isBefore latestDate }
+			}
 		
+		// find events where individual submissions were downloaded
 		val someDownloaded = parsedAuditEvents(search(
 				all(assignmentTerm, termQuery("eventType", "DownloadSubmissions"))
 			))
-		someDownloaded.flatMap { _.submissionIds }
-		Nil
+		val submissions2 = someDownloaded.flatMap( _.submissionIds ).flatMap( id=> assignment.submissions.find(_.id == id) )
+		
+		(submissions1 ++ submissions2).distinct
 	}
 		
 	def whoDownloadedFeedback(assignment:Assignment) =
