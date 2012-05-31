@@ -38,6 +38,12 @@ trait Command[R] extends Describable[R] with JavaImports {
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$","")
 }
 
+/** Defines a function property to be used as a callback, plus a convenience
+  * version of `apply` that provides the callback and runs the command
+  * simultaneously.
+  * 
+  * It doesn't actually call the callback - you do that in your `apply` implementation.
+  */
 trait ApplyWithCallback[R] extends Command[R] {
 	var callback: (R)=>Unit =_
 	def apply(fn:(R)=>Unit) : R = {
@@ -46,6 +52,12 @@ trait ApplyWithCallback[R] extends Command[R] {
 	}
 }
 
+/**
+ * Trait for a command which has a `validate` method. Implementing this trait
+ * doesn't actually make anything magic happen at the moment - you still have
+ * to call the validate method yourself. It does provide a few shortcuts to the
+ * validation methods to simplify validation code.
+ */
 trait SelfValidating {
 	def validate(implicit errors:Errors)
 	
@@ -60,13 +72,24 @@ trait SelfValidating {
  */
 trait ReadOnly
 
-trait Unaudited { self:Describable[_] =>
+/** A Describable (usually a Command) marked as Unaudited will not be recorded
+  * by the audit log when it is applied. This should only really be for read-only
+  * commands that make no database changes and are really uninteresting to log, like
+  * viewing a list of items.
+  */
+trait Unaudited { self: Describable[_] =>
 	// override describe() with nothing, since it'll never be used.
 	override def describe(d:Description) {}
 }
 
 /**
  * Object for a Command to describe what it's just done.
+ * 
+ * You can use the `properties` and `property` methods to add any
+ * arbitrary properties, but it's highly recommended that you use the
+ * dedicated methods such as `assignment` to record which assignment
+ * the command is working on, and to define a new method if the
+ * existing ones don't fulfil your needs.
  */
 abstract class Description {
 	protected var map = Map[String,Any]()
@@ -127,6 +150,10 @@ abstract class Description {
 	}
 }
 
+/** Fully implements Description, adding an accessor
+  * to the underlying properties map for the auditing
+  * framework to use.
+  */
 class DescriptionImpl extends Description {
 	def allProperties = map
 }

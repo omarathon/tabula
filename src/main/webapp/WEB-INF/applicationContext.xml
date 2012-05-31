@@ -333,7 +333,7 @@
 		  
 		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
 			p:definitions="/WEB-INF/defs/views.xml"
-			p:definitionsFactoryClass="uk.ac.warwick.courses.ImpliedDefinitionsFactory">
+			p:definitionsFactoryClass="uk.ac.warwick.courses.web.views.ImpliedDefinitionsFactory">
 			<property name="tilesProperties">
 				<props>
 					<prop key="#{T(org.apache.tiles.definition.DefinitionsFactory).DEFINITION_DAO_INIT_PARAM}">

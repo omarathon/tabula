@@ -5,8 +5,14 @@ package uk.ac.warwick.courses
  * different names like JBoolean, so they can be differentiated
  * from the Scala types.
  * 
- * You can either import uk.ac.warwick.coures.JavaImports._,
- * or you can add the JavaImports trait to your class.
+ * You can either import:
+ * {{{
+ * import uk.ac.warwick.coures.JavaImports._
+ * }}}
+ * or you can add the JavaImports trait to your class:
+ * {{{
+ * class HatStand extends Furniture with JavaImports
+ * }}}
  */
 
 trait JavaImports {

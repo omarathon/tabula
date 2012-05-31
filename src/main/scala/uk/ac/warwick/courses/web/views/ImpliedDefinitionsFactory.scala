@@ -1,13 +1,11 @@
-package uk.ac.warwick.courses
-
-import scala.collection.JavaConversions._
+package uk.ac.warwick.courses.web.views
 
 import org.apache.tiles.context.TilesRequestContext
-import org.apache.tiles.definition._
-import uk.ac.warwick.courses.helpers.Logging
-import org.apache.tiles.Definition
+import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory
 import org.apache.tiles.Attribute
-import scala.collection.mutable
+import org.apache.tiles.Definition
+import scala.collection.JavaConversions.mapAsJavaMap
+import uk.ac.warwick.courses.helpers.Logging
 
 /**
  * DefinitionsFactory for Tiles, which first tries the default behaviour

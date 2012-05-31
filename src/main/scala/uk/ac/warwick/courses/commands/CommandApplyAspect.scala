@@ -14,6 +14,16 @@ import uk.ac.warwick.courses.services.MaintenanceModeEnabledException
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
+/** This is an AspectJ Aspect that matches calls to `apply()` on `Command` objects,
+  * and calls the event handlers.
+  * 
+  * In production the Ant build weaves this aspect code in to the compiled classes,
+  * so no special runtime work is needed.
+  * 
+  * When running in Eclipse, load time weaving is used which relies on running with
+  * the aspectjweaver.jar agent, which reads our aop.xml to weave classes when they
+  * are loaded into the JVM.
+  */
 @Configurable 
 @Aspect
 class CommandApplyAspect extends EventHandling {
