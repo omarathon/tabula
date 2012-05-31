@@ -25,7 +25,7 @@ abstract class Features {
 	@BeanProperty var collectRatings:Boolean = true
 	@BeanProperty var submissions:Boolean = false
 	@BeanProperty var privacyStatement:Boolean = true
-	
+	@BeanProperty var collectMarks:Boolean = false
 }
 
 
