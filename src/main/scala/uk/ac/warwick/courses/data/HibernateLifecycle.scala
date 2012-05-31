@@ -1,51 +1,50 @@
 package uk.ac.warwick.courses.data
 import org.hibernate.event._
 
-/**
- * Method for Hibernate to call whenever it loads an object from the database.
- */
+/** Method for Hibernate to call whenever it loads an object from the database.
+  */
 
-trait PreLoadBehaviour { 
-  def preLoad 
+trait PreLoadBehaviour {
+	def preLoad
 }
 
 trait PreSaveBehaviour {
-  def preSave(newRecord:Boolean)
+	def preSave(newRecord: Boolean)
 }
 
 trait PostLoadBehaviour {
-  def postLoad
+	def postLoad
 }
 
 class HibernateLifecycle extends PostLoadEventListener with PreLoadEventListener with PreInsertEventListener with PreUpdateEventListener {
 	override def onPostLoad(event: PostLoadEvent) {
-	  event.getEntity match {
-	    case listener:PostLoadBehaviour => listener.postLoad
-	    case _ =>
-	  }
+		event.getEntity match {
+			case listener: PostLoadBehaviour => listener.postLoad
+			case _ =>
+		}
 	}
-	
+
 	override def onPreInsert(event: PreInsertEvent) = {
-	  event.getEntity match {
-	    case listener:PreSaveBehaviour => listener.preSave(true)
-	    case _ =>
-	  }
-	  false
+		event.getEntity match {
+			case listener: PreSaveBehaviour => listener.preSave(true)
+			case _ =>
+		}
+		false
 	}
-	
+
 	override def onPreUpdate(event: PreUpdateEvent) = {
-	  event.getEntity match {
-	    case listener:PreSaveBehaviour => listener.preSave(false)
-	    case _ =>
-	  }
-	  false
+		event.getEntity match {
+			case listener: PreSaveBehaviour => listener.preSave(false)
+			case _ =>
+		}
+		false
 	}
-	
+
 	override def onPreLoad(event: PreLoadEvent) {
-	  event.getEntity match {
-	    case listener:PreLoadBehaviour => listener.preLoad
-	    case _ =>
-	  }
+		event.getEntity match {
+			case listener: PreLoadBehaviour => listener.preLoad
+			case _ =>
+		}
 	}
 }
 

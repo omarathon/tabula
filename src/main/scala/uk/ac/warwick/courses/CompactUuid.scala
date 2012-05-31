@@ -5,7 +5,14 @@ import scala.util.matching.Regex
 import org.apache.commons.codec.binary.Base64
 
 /**
- * Unused
+ * Reformats a long UUID string style into the shortest possible ASCII representation,
+ * by parsing it into its byte value and encoding as Base64.
+ * 
+ * When I say shortest possible - you might be able to get it shorter by finding
+ * a few more ASCII characters to use, but probably not many that wouldn't get URL
+ * encoded (since the main purpose of this class would be to shorten URLs).
+ * 
+ * This object isn't currently used, but it is fun to have around.
  */
 object CompactUuid {
 	

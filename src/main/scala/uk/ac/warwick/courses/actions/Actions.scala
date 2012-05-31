@@ -3,7 +3,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 
 /**
  * Actions are part of the permissions system. They are passed along with
- * a user to the [uk.ac.warwick.courses.services.SecurityService] which will
+ * a user to the [[uk.ac.warwick.courses.services.SecurityService]] which will
  * check whether that user can perform that action. The Action instance
  * typically has a reference to the object it is acting on.
  */
