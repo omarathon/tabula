@@ -61,14 +61,14 @@ class ExtractFeedbackZip(cmd:AddFeedbackCommand) extends Command[Unit] {
  * Command which adds feedback for an assignment.
  * It either takes a single uniNumber and file, or it takes a 
  * zip of files with uni numbers embedded in their path.
+ * 
+ * TODO The controller that does single-file upload isn't exposed in the UI
+ * so we could check that this is no longer being accessed by anyone, and then
+ * remove all the code in here that handles it, to simplify it a little.
  */
 @Configurable
 class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser ) extends Command[List[Feedback]] with Daoisms with Logging {
 	
-//  val directoryPattern = new Regex("""*.*?(\d{7}))*.*?/([^/]+)""")
-//  val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
-//  val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
-  
   val uniNumberPattern = new Regex("""(\d{7,})""")
 	
   @Autowired var zipService:ZipService =_
