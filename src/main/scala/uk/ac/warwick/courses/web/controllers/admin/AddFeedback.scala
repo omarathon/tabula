@@ -25,11 +25,7 @@ class AddFeedback extends BaseController {
 	@ModelAttribute
 	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddFeedbackCommand(assignment, user)
-	
-//	validatesWith { (command:AddFeedbackCommand, errors:Errors) =>
-//		command.validation(errors)
-//	}
-	
+
 	def onBind(command:AddFeedbackCommand) {
 		command.onBind
 	}

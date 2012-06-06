@@ -17,7 +17,8 @@ Download selected as ZIP file
 <#if submissions?size gt 0>
 <div class="submission-list">
 	<@form.selector_check_all />
-<#list submissions as submission>
+<#list submissions as item>
+	<#assign submission=item.submission>
 
 	<div class="submission-info">
 		<@form.selector_check_row "submissions" submission.id />
@@ -27,6 +28,9 @@ Download selected as ZIP file
 		<span class="date">Submitted <@fmt.date date=submission.submittedDate seconds=true capitalise=false /></span>
 		<#if submission.late>
 		  <span class="label-red">Late</span>
+		</#if>
+		<#if item.downloaded>
+		  <span class="label-green">Downloaded</span>
 		</#if>
 		</div>
 	</div>

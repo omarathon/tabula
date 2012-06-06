@@ -69,7 +69,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 //  val filePattern = new Regex("""(\d{7}) - ([^/]+)""")
 //  val anyFilePattern = new Regex("""(?:.*?/)?([^/]+)""")
   
-  val uniNumberPattern = new Regex("""(\d{7,})""")
+//  val uniNumberPattern = new Regex("""(\d{7,})""")
 	
   @Autowired var zipService:ZipService =_
   @Autowired var userLookup:UserLookupService =_
@@ -159,7 +159,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 		
 		for ((filename, file) <- bits) {
 			// match uni numbers found in file path
-			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map{_.subgroups(0)}.toList
+			val allNumbers = UniversityId.universityIdPattern.findAllIn(filename).matchData.map{_.subgroups(0)}.toList
 			
 			// ignore any numbers longer than 7 characters.
 			val numbers = allNumbers.filter { _.length == 7 }

@@ -7,12 +7,27 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import uk.ac.warwick.courses.commands.ReadOnly
+import uk.ac.warwick.courses.services.AuditEventIndexService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 
-class ListSubmissionsCommand extends Command[Seq[Submission]] with Unaudited with ReadOnly {
+@Configurable
+class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
 	
 	@BeanProperty var assignment:Assignment =_
 	@BeanProperty var module:Module =_
+
+	@Autowired var auditIndex: AuditEventIndexService =_
 	
-	def apply = assignment.submissions sortBy { _.submittedDate } reverse
+	def apply = {
+		val submissions = assignment.submissions.sortBy( _.submittedDate ).reverse
+		val downloads = auditIndex.adminDownloadedSubmissions(assignment)
+		submissions map { submission =>
+			SubmissionListItem(submission, downloads.contains(submission) )
+		}
+	}
+	
 	
 }
+
+case class SubmissionListItem(val submission:Submission, val downloaded:Boolean)
