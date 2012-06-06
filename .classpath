@@ -7,6 +7,7 @@
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/build/scala-compiler.jar"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
@@ -46,7 +47,6 @@
 	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-all-1.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/scalabeans-0.2.jar" sourcepath="/home/nick/.m2/repository/org/scalastuff/scalabeans/0.2/scalabeans-0.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/scala-library.jar" sourcepath="/home/nick/.m2/repository/org/scala-lang/scala-library/2.9.1/scala-library-2.9.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
