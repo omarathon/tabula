@@ -24,7 +24,7 @@ import java.util.HashSet
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
   
-	def this(universityId:String) {
+	def this(universityId:String=null) {
 		this()
 		this.universityId = universityId
 	}

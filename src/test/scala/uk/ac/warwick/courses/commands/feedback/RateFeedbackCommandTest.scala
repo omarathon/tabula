@@ -36,7 +36,6 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 		errors.hasFieldErrors("wasPrompt") should be (true)
 	}
 
-	
 	def deepFeedback = {
 		val feedback = smartMock[Feedback]
 		val assignment = smartMock[Assignment]

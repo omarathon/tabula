@@ -8,6 +8,7 @@ import org.hibernate.annotations.Type
 import javax.persistence.Id
 import uk.ac.warwick.courses.JavaImports._
 import collection.JavaConversions._
+import uk.ac.warwick.courses.events.Event
 
 /**
  * Represents a single item in the audit trail.
@@ -87,5 +88,16 @@ case class AuditEvent(
 		relatedParsedData 
 			.flatMap { _.get(name) } 
 			.flatMap { _.asInstanceOf[JList[String]] }
+	
+	/** Convert to an Event object (losing the stage information). There's usually
+	 * little reason to do this except maybe during testing.
+	 */
+	def toEvent = Event(
+			eventId, 
+			eventType, 
+			masqueradeUserId, 
+			userId, 
+			parsedData.getOrElse(Map.empty), 
+			eventDate)
 	
 }
