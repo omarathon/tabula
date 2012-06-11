@@ -9,26 +9,48 @@ import org.joda.time.DateTime
 import scala.collection.immutable.SortedMap
 import org.apache.commons.codec.digest.DigestUtils
 
-sealed abstract class FunctionId(val id: Int, val description: String)
-case class CreateAssignmentFunction() extends FunctionId(4, "Create assignment")
-case class SubmitPaperFunction() extends FunctionId(5, "Submit paper")
-case class GenerateReportFunction() extends FunctionId(6, "Generate report")
-
-class Turnitin extends Logging {
-	val endpoint = :/ ("submit.ac.uk") / "api.asp" secure
-	def aid = "299"
-	def said = "8432"
-	var sharedSecretKey = "this is not the shared key"
+/**
+ * Service for accessing the Turnitin plagiarism API.
+ * 
+ * The methods you call to do stuff are defined in [[TurnitinMethods]].
+ */
+class Turnitin extends TurnitinMethods with Logging {
+	
+	import TurnitinDates._
+	
+	/** The top level account ID (usually for University of Warwick account) */
+	var aid = ""
+	/** Sub-account ID underneath University of Warwick */
+	var said = ""
+	/** Shared key as set up on the University of Warwick account's Open API settings */
+	var sharedSecretKey: String = _
+	
+	/** If this is set to true, responses are returned with HTML debug info,
+	  * and also it doesn't make any changes - the server just lets you know whether
+	  * your request looks okay.
+	  */
 	var diagnostic = false
+	
+	val userAgent = "Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
+	
+	/** URL to call for all requests. _could_ make it configurable, I suppoooosse. */
+	val endpoint = url("https://submit.ac.uk/api.asp") <:< Map("User-Agent" -> userAgent)
+	
+	private val http = new Http with thread.Safety
 
-	def submitPaper = {
-		doRequest(SubmitPaperFunction())
-	}
-
-	private def doRequest(f: FunctionId) {
-		val parameters = Map("fid" -> f.id.toString) ++ commonParameters
-		val req = endpoint.POST << parameters << Map("md5" -> md5(parameters))
-		Http(req >>> Console.err)
+		
+	/** All API requests call the same URL and require the same MD5
+	  * signature parameter.
+	  */
+	private[turnitin] def doRequest(functionId: String, params: Pair[String, String]*) {
+		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
+		val req = endpoint <<? parameters + md5hexparam(parameters)
+		// TODO do something useful with the response.
+		http(req >:+ { (headers, req) => {
+				println(headers)
+				req >>> Console.err
+			}
+		})
 	}
 	
 	/**
@@ -41,9 +63,9 @@ class Turnitin extends Logging {
 		"aid" -> aid,
 		"said" -> said,
 		"fcmd" -> "2",
-		"uem" -> "n.howes@warwick.ac.uk",
-		"ufn" -> "Nick",
-		"uln" -> "Howes",
+		"uem" -> "coursework@warwick.ac.uk",
+		"ufn" -> "Coursework",
+		"uln" -> "App",
 		"utp" -> "2"
 	)
 	
@@ -51,16 +73,13 @@ class Turnitin extends Logging {
 	 * Sort parameters by key, concatenate all the values with
 	 * the shared key and MD5hex that.
 	 */
-	def md5(map:Map[String,String]) = {
-		println(map.toSeq sortBy mapKey map mapKey mkString(" + "))
-		println((map.toSeq sortBy mapKey map mapValue mkString("")) + sharedSecretKey)
+	def md5hex(map:Map[String,String]) = {
 		DigestUtils.md5Hex(
 			(map.toSeq sortBy mapKey map mapValue mkString("")) + sharedSecretKey
 		)
 	}
 	
-	val timestampFormat = DateTimeFormat.forPattern("YYYYMMddHHm").withZoneUTC
-	def gmtTimestamp = timestampFormat print DateTime.now
+	def md5hexparam(map:Map[String,String]) = ("md5" -> md5hex(map))
 	
 	private def mapKey[K](pair:Pair[K,_]) = pair._1
 	private def mapValue[V](pair:Pair[_,V]) = pair._2 
