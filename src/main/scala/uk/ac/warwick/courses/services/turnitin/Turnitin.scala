@@ -37,14 +37,21 @@ class Turnitin extends TurnitinMethods with Logging {
 	val endpoint = url("https://submit.ac.uk/api.asp") <:< Map("User-Agent" -> userAgent)
 	
 	private val http = new Http with thread.Safety
+	
+	val excludeFromMd5 = Seq("dtend")
 
 		
 	/** All API requests call the same URL and require the same MD5
 	  * signature parameter.
+	  * 
+	  * If you start getting an "MD5 NOT AUTHENTICATED" on an API method you've
+	  * changed, it's usually because it doesn't recognise one of the parameters.
+	  * We MD5 on all parameters but the server will only MD5 on the parameters
+	  * it recognises, hence the discrepency.
 	  */
 	private[turnitin] def doRequest(functionId: String, params: Pair[String, String]*) {
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val req = endpoint <<? parameters + md5hexparam(parameters)
+		val req = endpoint.POST << debugResult("parameters", parameters + md5hexparam(parameters))
 		// TODO do something useful with the response.
 		http(req >:+ { (headers, req) => {
 				println(headers)
@@ -75,9 +82,11 @@ class Turnitin extends TurnitinMethods with Logging {
 	 */
 	def md5hex(map:Map[String,String]) = {
 		DigestUtils.md5Hex(
-			(map.toSeq sortBy mapKey map mapValue mkString("")) + sharedSecretKey
+			(debugResult("", (map filterKeys includeInMd5)).toSeq sortBy mapKey map mapValue mkString("")) + sharedSecretKey
 		)
 	}
+	
+	def includeInMd5(key:String) = !excludeFromMd5.contains(key) 
 	
 	def md5hexparam(map:Map[String,String]) = ("md5" -> md5hex(map))
 	

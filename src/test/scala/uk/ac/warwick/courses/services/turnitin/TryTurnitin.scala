@@ -25,13 +25,18 @@ object TryTurnitin extends App with Logging {
 	api.sharedSecretKey = props.getProperty("turnitin.key")
 	api.aid = props.getProperty("turnitin.aid")
 	api.said = props.getProperty("turnitin.said")
-	api.diagnostic = true
+	api.diagnostic = false
 	
 	logger.debug("Created instance. Creating class...")
 	
 	api.createClass("Automated submissions")
-	api.createAssignment("Automated submissions", "Test assignment")
 	
 	logger.debug("Created class, maybe")
+	
+	api.createAssignment("Automated submissions", "Test assignment")
+	
+	logger.debug("Created assignment, maybe")
+	
+	
 	
 }

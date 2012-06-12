@@ -26,8 +26,8 @@ trait TurnitinMethods {
 		doRequest(CreateAssignmentFunction, 
 				"ctl" -> className, 
 				"assign" -> assignmentName,
-				"dtstart" -> monthsFromNow(-6), 
-				"dtend" -> monthsFromNow(6))
+				"dtstart" -> monthsFromNow(0), //The start date for this assignment must occur on or after today.
+				"dtdue" -> monthsFromNow(6))
 	}
 	
 	def submitPaper() = 
