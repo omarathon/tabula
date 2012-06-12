@@ -19,9 +19,13 @@ class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaud
 
 	@Autowired var auditIndex: AuditEventIndexService =_
 	
+	var checkIndex = true
+	
 	def apply = {
 		val submissions = assignment.submissions.sortBy( _.submittedDate ).reverse
-		val downloads = auditIndex.adminDownloadedSubmissions(assignment)
+		val downloads = 
+			if (checkIndex) auditIndex.adminDownloadedSubmissions(assignment)
+			else Nil
 		submissions map { submission =>
 			SubmissionListItem(submission, downloads.contains(submission) )
 		}

@@ -32,11 +32,14 @@ class SubmissionsInfoController extends BaseController {
 	val formatter = DateFormats.IsoDateTime
 	
 	def format(i: ReadableInstant) = formatter print i
+	
+	var checkIndex = true
 			
 	@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method=Array(GET, HEAD))
 	def xml(command:ListSubmissionsCommand) = {
 		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 		mustBeAbleTo(Participate(command.module))
+		command.checkIndex = checkIndex
 		
 		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
 		val assignment = command.assignment
