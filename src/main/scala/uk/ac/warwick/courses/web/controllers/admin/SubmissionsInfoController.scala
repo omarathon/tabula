@@ -22,13 +22,14 @@ import uk.ac.warwick.courses.commands.assignments.SubmissionListItem
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.courses.DateFormats
 
 /** Download submissions as XML.
   */
 @Configurable @Controller
 class SubmissionsInfoController extends BaseController {
 	
-	val formatter = ISODateTimeFormat.basicDateTimeNoMillis
+	val formatter = DateFormats.IsoDateTime
 	
 	def format(i: ReadableInstant) = formatter print i
 			
