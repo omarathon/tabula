@@ -138,11 +138,12 @@
 		<property name="customPreReturnValueHandlers">
 			<list>
 				<bean class="uk.ac.warwick.courses.system.MavReturnValueHandler" />
+				<bean class="uk.ac.warwick.courses.system.XmlReturnValueHandler" />
 			</list>
 		</property>
 	</bean>
-		
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+		<!-- 
+	<aop:aspectj-autoproxy proxy-target-class="true" /> -->
 	
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
 	

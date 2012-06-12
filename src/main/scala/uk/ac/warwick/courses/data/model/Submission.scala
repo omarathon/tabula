@@ -61,6 +61,9 @@ class Submission extends GeneratedId with Deleteable {
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 	
 	def allAttachments = valuesWithAttachments.toSeq flatMap { _.attachments }
+	
+	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
+	def zipFileName(attachment:FileAttachment) = assignment.module.code + " - " + universityId + " - "+attachment.name
 }
 
 /**

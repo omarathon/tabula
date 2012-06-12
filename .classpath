@@ -51,7 +51,7 @@
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-all-1.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/scalabeans-0.2.jar" sourcepath="/home/nick/.m2/repository/org/scalastuff/scalabeans/0.2/scalabeans-0.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar" sourcepath="/home/nick/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-aop/3.1.0.RELEASE/spring-aop-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RELEASE.jar"/>
