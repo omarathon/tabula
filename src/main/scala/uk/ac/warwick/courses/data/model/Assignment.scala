@@ -38,10 +38,8 @@ import javax.persistence.CascadeType._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
-	val defaultUploadName = "upload"
-		
-	final val NotDeletedFilter = "notDeleted"
-		
+	val defaultUploadName = "upload"	
+	final val NotDeletedFilter = "notDeleted"		
 	final val MaximumFileAttachments = 50
 }
 
@@ -102,7 +100,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var closeDate:DateTime =_
-	
+		
+	@BeanProperty
 	var collectMarks:Boolean =_
 	@BeanProperty var collectSubmissions:Boolean = false
 	@BeanProperty var restrictSubmissions:Boolean = false
