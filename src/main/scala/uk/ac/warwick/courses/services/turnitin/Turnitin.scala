@@ -2,19 +2,23 @@ package uk.ac.warwick.courses.services.turnitin
 
 import uk.ac.warwick.courses.helpers.Logging
 import dispatch._
+import dispatch.mime.Mime._
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.DateTime
-import scala.collection.immutable.SortedMap
 import org.apache.commons.codec.digest.DigestUtils
+import scala.xml.NodeSeq
+import scala.xml.Elem
+import java.io.File
+import org.springframework.beans.factory.DisposableBean
 
 /**
  * Service for accessing the Turnitin plagiarism API.
  * 
  * The methods you call to do stuff are defined in [[TurnitinMethods]].
  */
-class Turnitin extends TurnitinMethods with Logging {
+class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	
 	import TurnitinDates._
 	
@@ -49,16 +53,26 @@ class Turnitin extends TurnitinMethods with Logging {
 	  * We MD5 on all parameters but the server will only MD5 on the parameters
 	  * it recognises, hence the discrepency.
 	  */
-	private[turnitin] def doRequest(functionId: String, params: Pair[String, String]*) {
+	override def doRequest
+			(functionId: String, // API function ID
+			pdata: Option[File], // optional file to put in "pdata" parameter
+			params: Pair[String, String]*) // POST parameters
+			: TurnitinResponse = {
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val req = endpoint.POST << debugResult("parameters", parameters + md5hexparam(parameters))
-		// TODO do something useful with the response.
-		http(req >:+ { (headers, req) => {
-				println(headers)
-				req >>> Console.err
-			}
-		})
+		val postWithParams = endpoint.POST << parameters + md5hexparam(parameters)
+		val req = addPdata(pdata, postWithParams)
+			
+		http(
+			if (diagnostic) req >- {(text) => TurnitinResponse.fromDiagnostic(text)}
+			else req <> { (node) => TurnitinResponse.fromXml(node) } )
 	}
+	
+	/**
+	 * Returns either the request with a file added on, or the original
+	 * request if there's no file to add.
+	 */
+	def addPdata(file:Option[File], req:Request) = 	
+		file map ( req <<* ("pdata", _) ) getOrElse req
 	
 	/**
 	 * Parameters that we need in every request.
@@ -92,4 +106,8 @@ class Turnitin extends TurnitinMethods with Logging {
 	
 	private def mapKey[K](pair:Pair[K,_]) = pair._1
 	private def mapValue[V](pair:Pair[_,V]) = pair._2 
+	
+	override def destroy {
+		http.shutdown()
+	}
 }

@@ -1,16 +1,45 @@
 package uk.ac.warwick.courses.services.turnitin
 
+import scala.xml.Elem
+
 /** Response from the API.
   */
-class TurnitinResponse(val code:Int) {
+class TurnitinResponse(
+	val code: Int,
+	diagnostic: Option[String] = None,
+	val xml: Option[Elem] = None) {
 	def success = code <= 100
 	def error = !success
 	
+	lazy val assignmentId = xml map { _ \\ "assignmentid" text } filterNot emptyString
+	lazy val classId = xml map { _ \\ "classid" text } filterNot emptyString
+	lazy val userId = xml map { _ \\ "userid" text } filterNot emptyString
+	lazy val objectId = xml map { _ \\ "objectID" text } filterNot emptyString
+	
 	def message = TurnitinResponse.responseCodes.getOrElse(code, unknownMessage)
 	private def unknownMessage = if (success) "Unknown code" else "Unknown error"
+	private def emptyString(s: String) = s.trim.isEmpty
 }
 
 object TurnitinResponse {
+
+	val StatusRegex = "(?s).+rcode&gt;(\\d+)&lt;.+".r
+
+	/** Response in diagnostic mode is all HTML but we can
+	  * regex out the status code at least.
+	  */
+	def fromDiagnostic(string: String) = {
+		val code = string match {
+			case StatusRegex(status) => status.toInt
+			case _ => 1
+		}
+		new TurnitinResponse(code, diagnostic = Some(string))
+	}
+
+	def fromXml(xml: Elem) = {
+		println(xml)
+		new TurnitinResponse((xml \\ "rcode").text.toInt, xml = Some(xml))
+	}
 
 	/** From the API documentation. */
 	val responseCodes = Map(
