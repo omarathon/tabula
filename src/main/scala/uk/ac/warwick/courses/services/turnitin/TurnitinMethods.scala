@@ -13,7 +13,10 @@ abstract class SuccessResponse extends Response { def successful = true }
 abstract class FailureResponse extends Response { def successful = false }
 case class Created(id:String) extends SuccessResponse
 case class AlreadyExists() extends FailureResponse
-case class NotFound() extends FailureResponse
+//case class NotFound() extends FailureResponse
+case class ClassNotFound() extends FailureResponse
+case class AssignmentNotFound() extends FailureResponse
+case class SubmissionNotFound() extends FailureResponse
 case class Failed(reason:String) extends FailureResponse
 
 trait TurnitinMethods {
@@ -26,7 +29,7 @@ trait TurnitinMethods {
 	 * 
 	 * Classes are set to expire in 5 years.
 	 */
-	def createClass(className:String) = {
+	def createClass(className:String): Response = {
 		val response = doRequest(CreateClassFunction, None,
 				"ctl" -> className, 
 				"ced" -> yearsFromNow(5))
@@ -39,7 +42,7 @@ trait TurnitinMethods {
 	 * Create a new Assignment in this class. If there's already an Assignment by this name,
 	 * it will return success with the ID of the existing Assignment.
 	 */
-	def createAssignment(className:String, assignmentName:String, update:Boolean=false) = {
+	def createAssignment(className:String, assignmentName:String, update:Boolean=false): Response = {
 		var params = List("ctl" -> className, 
 				"assign" -> assignmentName,
 				"dtstart" -> monthsFromNow(0), //The start date for this assignment must occur on or after today.
@@ -48,19 +51,21 @@ trait TurnitinMethods {
 		val response = doRequest(CreateAssignmentFunction, None, params:_*)
 		
 		if (response.code == 419) AlreadyExists()
+		else if (response.code == 206) ClassNotFound()
 		else if (response.success) Created(response.assignmentId getOrElse "")
 		else Failed(response.message)
 	}
 	
-	def deleteAssignment(className:String, assignmentName:String) = {
-		doRequest(CreateAssignmentFunction, None, 
+	def deleteAssignment(className:String, assignmentName:String): Response = {
+		val response = doRequest(CreateAssignmentFunction, None, 
 				"ctl" -> className,
 				"assign" -> assignmentName, 
 				"fcmd" -> "6")
+		Failed(response.message)
 		// 411 -> it didn't exist
 	}
 	
-	def submitPaper(className:String, assignmentName:String, paperTitle:String, file:File, authorFirstName:String, authorLastName:String) = { 
+	def submitPaper(className:String, assignmentName:String, paperTitle:String, file:File, authorFirstName:String, authorLastName:String): Response = { 
 		val response = doRequest(SubmitPaperFunction, Some(file),
 				"ctl" -> className,
 				"assign" -> assignmentName,
@@ -73,15 +78,20 @@ trait TurnitinMethods {
 		else Failed(response.message)
 	}
 	
-	def getReport(paperId:String) = {
+	def getReport(paperId:String): Response = {
 		val response = doRequest(GenerateReportFunction, None,
 				"oid" -> paperId)
 				
-		if (response.success) response.xml
-		else Failed(response.message)
+//		if (response.success) Failed response.xml
+		Failed(response.message)
 	}
 	
 	//def listSubmissions
+	
+	def resolveError(response:TurnitinResponse): Response = response.code match {
+		case 419 => AlreadyExists()
+		case _ => Failed(response.message)
+	}
 		
 }
 
