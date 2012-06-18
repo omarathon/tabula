@@ -13,3 +13,5 @@ console.properties
 courses-private.properties
 !/src/test/resources/courses-private.properties
 .ctags
+/.classpath
+junit*.properties

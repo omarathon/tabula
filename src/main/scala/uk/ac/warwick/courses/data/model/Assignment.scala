@@ -196,6 +196,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def addFields(fieldz:FormField*) = for(field<-fieldz) addField(field)
 	
 	def addFeedback(feedback:Feedback) {
+		//if (feedbacks.filter(_.universityId == "a").isEmpty){
 		feedbacks.add(feedback)
 		feedback.assignment = this
 	}
