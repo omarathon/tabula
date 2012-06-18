@@ -16,7 +16,7 @@ class ExcelSheetHandler extends DefaultHandler  with Logging  {
     this.sst = sst;
   }
    
-  def startElement(uri:String, localName:String, name:String, attributes:Attributes) = {
+  override def startElement(uri:String, localName:String, name:String, attributes:Attributes) = {
     // c  a cell
     if(name.equals("c")) {
       logger.info("encountered new cell" )
@@ -29,7 +29,7 @@ class ExcelSheetHandler extends DefaultHandler  with Logging  {
     }
   }
   
-  def endElement(uri:String, localName:String, name:String) = {
+  override def endElement(uri:String, localName:String, name:String) = {
     // Process the last contents as required.		
 	if(nextIsString) {
 	  val idx = Integer.parseInt(lastContents);
@@ -42,7 +42,7 @@ class ExcelSheetHandler extends DefaultHandler  with Logging  {
 	}
   }
   
-  def characters(ch:Array[Char],  start:Int, length:Int) ={
+  override def characters(ch:Array[Char],  start:Int, length:Int) ={
     lastContents += new String(ch, start, length);
   }
   

@@ -106,5 +106,8 @@
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/slf4j-log4j12-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/tika-app-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/ooxml-schemas-1.1.jar"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

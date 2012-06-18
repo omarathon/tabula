@@ -40,7 +40,7 @@ class MarksExtractionListenerTest extends AppContextTestBase {
 	}
     
     @Test def readXSSFExcelFile {
-      val fin:ByteArrayInputStream =  new ByteArrayInputStream(resourceAsBytes("marks.xls"))
+      val fin:ByteArrayInputStream =  new ByteArrayInputStream(resourceAsBytes("marks.xlsx"))
       val pkg:OPCPackage = OPCPackage.open(fin);
       val reader:XSSFReader  = new XSSFReader (pkg)
       val sst:SharedStringsTable = reader.getSharedStringsTable()
@@ -54,7 +54,6 @@ class MarksExtractionListenerTest extends AppContextTestBase {
         sheet close
       }
 	}
-    
     
     def  fetchSheetParser(sst:SharedStringsTable) = {
       val parser:XMLReader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
