@@ -47,8 +47,10 @@ class DeleteSubmission extends BaseController {
 	@Transactional
 	@RequestMapping(method = Array(POST), params=Array("confirmScreen"))
 	def submit(
-			@PathVariable module:Module, @PathVariable assignment:Assignment,
-			@Valid form:DeleteSubmissionCommand, errors: Errors) = {
+			@PathVariable module: Module, 
+			@PathVariable assignment: Assignment,
+			@Valid form: DeleteSubmissionCommand, 
+			errors: Errors) = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 		if (errors.hasErrors) {

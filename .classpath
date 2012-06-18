@@ -6,7 +6,14 @@
 	<classpathentry kind="lib" path="src/main/webapp"/>
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/build/scala-compiler.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/twine_2.9.1-0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-core_2.9.1-0.8.6.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-core_2.9.1/0.8.6/dispatch-core_2.9.1-0.8.6-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-futures_2.9.1-0.8.6.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-http_2.9.1-0.8.6.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-http_2.9.1/0.8.6/dispatch-http_2.9.1-0.8.6-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-jsoup_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-jsoup_2.9.1/0.8.7/dispatch-jsoup_2.9.1-0.8.7-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-mime_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-mime_2.9.1/0.8.7/dispatch-mime_2.9.1-0.8.7-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/httpclient/httpmime-4.1.2.jar"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/runtime/hibernate/hibernate3.jar"/>
@@ -45,9 +52,8 @@
 	<classpathentry kind="lib" path="lib/test/jmock-junit4-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-all-1.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/scalabeans-0.2.jar" sourcepath="/home/nick/.m2/repository/org/scalastuff/scalabeans/0.2/scalabeans-0.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/scala-library.jar" sourcepath="/home/nick/.m2/repository/org/scala-lang/scala-library/2.9.1/scala-library-2.9.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/jackson-module-scala-1.9.2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-io/commons-io-2.1.jar" sourcepath="/home/nick/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/build/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.aop-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-aop/3.1.0.RELEASE/spring-aop-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/spring/org.springframework.asm-3.1.0.RELEASE.jar"/>
@@ -69,7 +75,7 @@
 	<classpathentry kind="lib" path="lib/test/org.springframework.test-3.1.0.RELEASE.jar" sourcepath="/home/nick/.m2/repository/org/springframework/spring-test/3.1.0.RELEASE/spring-test-3.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/javax-mail-1.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/commons-compress/commons-compress-1.3.jar" sourcepath="lib/src/commons-compress-1.3-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/commons-codec/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-codec/commons-codec-1.4.jar" sourcepath="/home/nick/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/lucene/lucene-core-3.5.0.jar" sourcepath="/home/nick/.m2/repository/org/apache/lucene/lucene-core/3.5.0/lucene-core-3.5.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/test/lucene-test-framework-3.5.0.jar" sourcepath="/home/nick/.m2/repository/org/apache/lucene/lucene-test-framework/3.5.0/lucene-test-framework-3.5.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/json/paranamer-2.3.jar"/>

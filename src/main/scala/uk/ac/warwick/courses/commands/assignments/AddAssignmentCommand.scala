@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments;
+package uk.ac.warwick.courses.commands.assignments
 
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType

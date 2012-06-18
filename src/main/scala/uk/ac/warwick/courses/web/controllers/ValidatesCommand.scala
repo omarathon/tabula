@@ -57,10 +57,4 @@ trait ValidatesCommand {
 	  validatesWith(fn)
   }
   
-  class CompositeValidator(val list:Validator*) extends Validator {
-	  override def supports(cls:Class[_]) = list.find{_.supports(cls)}.isDefined
-	  override def validate(target:Object, errors:Errors) =
-	 	  for (v <- list) v.validate(target, errors)
-  }
-	
 }

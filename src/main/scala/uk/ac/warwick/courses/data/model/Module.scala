@@ -26,9 +26,10 @@ import scala.util.matching.Regex
 ))
 class Module extends GeneratedId with Viewable with Manageable with Participatable {
 	
-	def this(code:String=null) {
+	def this(code:String=null, department:Department=null) {
 		this()
 		this.code = code
+		this.department = department
 	}
 	
 	@BeanProperty var code:String = _

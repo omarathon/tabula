@@ -66,9 +66,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 */
 	def getAllFeedbackZips(assignment:Assignment): File = {
 		getZip( resolvePathForFeedback(assignment),
-			assignment.feedbacks.map { (feedback) => 
-				new ZipFolderItem( feedback.universityId, getFeedbackZipItems(feedback) )
-			}
+			assignment.feedbacks flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
 		)
 	}
 	
@@ -79,7 +77,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def getSubmissionZipItems(submission:Submission): Seq[ZipItem] = {
 		val allAttachments = submission.allAttachments
 		allAttachments map { attachment => 
-			new ZipFileItem(submission.assignment.module.code + " - " + submission.universityId+" - "+attachment.name, attachment.dataStream) 
+			new ZipFileItem(submission.zipFileName(attachment), attachment.dataStream) 
 		}
 	}
 	
@@ -88,20 +86,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * for a user, the zip _might_ work but look weird.
 	 */
 	def getSomeSubmissionsZip(submissions:Seq[Submission]): File = 
-		createUnnamedZip( submissions map getSubmissionZipFolder )
-	
-	/**
-	 * A zip folder containing this submission's items.
-	 */
-	private def getSubmissionZipFolder(submission:Submission): ZipItem = 
-		new ZipFolderItem( submission.universityId, getSubmissionZipItems(submission) )
+		createUnnamedZip( submissions flatMap getSubmissionZipItems )
 	
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */
 	def getAllSubmissionsZip(assignment:Assignment): File = 
 		getZip( resolvePathForSubmission(assignment),
-			assignment.submissions map getSubmissionZipFolder
+			assignment.submissions flatMap getSubmissionZipItems
 		)
 	
 	
@@ -112,6 +104,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
  */
 class ZipEntryInputStream(val zip:InputStream, val entry:ZipEntry)
 		extends BoundedInputStream(zip, entry.getSize) {
+	// don't close input stream - we'll close it when we're finished reading the whole file 
 	setPropagateClose(false)
 }
 

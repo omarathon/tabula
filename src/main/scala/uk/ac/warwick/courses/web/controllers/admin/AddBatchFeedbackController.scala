@@ -19,7 +19,7 @@ import uk.ac.warwick.courses.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
-class AddBatchFeedback extends BaseController {
+class AddBatchFeedbackController extends BaseController {
 	@ModelAttribute def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddFeedbackCommand(assignment, user)
 	

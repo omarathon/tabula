@@ -70,8 +70,16 @@
 	</bean>
 	
 	<!-- validation -->
-	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" 
+	<bean id="validatorFactory" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" 
 		p:validationMessageSource-ref="messageSource" />
+		
+	<bean id="validator" class="uk.ac.warwick.courses.validators.CompositeValidator">
+		<constructor-arg>
+			<list>
+				<ref bean="validatorFactory" />
+			</list>
+		</constructor-arg>
+	</bean>
 	
 	<bean id="typeConverter"
       class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
@@ -138,11 +146,12 @@
 		<property name="customPreReturnValueHandlers">
 			<list>
 				<bean class="uk.ac.warwick.courses.system.MavReturnValueHandler" />
+				<bean class="uk.ac.warwick.courses.system.XmlReturnValueHandler" />
 			</list>
 		</property>
 	</bean>
-		
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+		<!-- 
+	<aop:aspectj-autoproxy proxy-target-class="true" /> -->
 	
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
 	

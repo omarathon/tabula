@@ -28,6 +28,7 @@ import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import uk.ac.warwick.sso.client.SSOConfiguration
 import org.springframework.context.MessageSource
 import org.springframework.web.servlet.LocaleResolver
+import uk.ac.warwick.courses.validators.CompositeValidator
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 

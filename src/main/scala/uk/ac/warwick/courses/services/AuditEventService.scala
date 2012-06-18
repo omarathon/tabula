@@ -24,6 +24,7 @@ trait AuditEventService {
 	def mapListToObject(array:Array[Object]): AuditEvent
 	def unclob(any:Object): String
 	def save(event:Event, stage:String):Unit
+	def save(auditevent:AuditEvent):Unit
 	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent]
 	def listRecent(start:Int, count:Int) : Seq[AuditEvent]
 	def parseData(data:String): Option[Map[String,Any]]
@@ -53,6 +54,10 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
 	
+	/**
+	 * Get all AuditEvents with this eventId, i.e. all before/after stages
+	 * that were part of the same action.
+	 */
 	def getByEventId(eventId:String): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(eventIdSql)
 		query.setString("id", eventId)
@@ -85,6 +90,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	def getById(id:Long): Option[AuditEvent] = {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
+//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
 		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])) map addRelated
 	}
 	
@@ -99,6 +105,10 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	
 	def save(event:Event, stage:String) {
 		doSave(event, stage)
+	}
+	
+	def save(auditEvent: AuditEvent) {
+		doSave(auditEvent.toEvent, auditEvent.eventStage)
 	}
 	
 	/**
