@@ -12,12 +12,14 @@ import scala.xml.NodeSeq
 import scala.xml.Elem
 import java.io.File
 import org.springframework.beans.factory.DisposableBean
+import org.springframework.stereotype.Service
 
 /**
  * Service for accessing the Turnitin plagiarism API.
  * 
  * The methods you call to do stuff are defined in [[TurnitinMethods]].
  */
+@Service
 class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	
 	import TurnitinDates._
@@ -27,7 +29,7 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	/** Sub-account ID underneath University of Warwick */
 	var said = ""
 	/** Shared key as set up on the University of Warwick account's Open API settings */
-	var sharedSecretKey: String = _
+	var sharedSecretKey: String = ""
 	
 	/** If this is set to true, responses are returned with HTML debug info,
 	  * and also it doesn't make any changes - the server just lets you know whether
@@ -59,7 +61,7 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 			params: Pair[String, String]*) // POST parameters
 			: TurnitinResponse = {
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val postWithParams = endpoint.POST << parameters + md5hexparam(parameters)
+		val postWithParams = endpoint.POST << (parameters + md5hexparam(parameters))
 		val req = addPdata(pdata, postWithParams)
 			
 		http(
@@ -90,6 +92,8 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 		"utp" -> "2"
 	)
 	
+	def md5hexparam(map:Map[String,String]) = ("md5" -> md5hex(map))
+	
 	/**
 	 * Sort parameters by key, concatenate all the values with
 	 * the shared key and MD5hex that.
@@ -101,8 +105,6 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	}
 	
 	def includeInMd5(key:String) = !excludeFromMd5.contains(key) 
-	
-	def md5hexparam(map:Map[String,String]) = ("md5" -> md5hex(map))
 	
 	private def mapKey[K](pair:Pair[K,_]) = pair._1
 	private def mapValue[V](pair:Pair[_,V]) = pair._2 

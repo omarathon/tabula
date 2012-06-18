@@ -82,11 +82,17 @@ trait TurnitinMethods {
 		val response = doRequest(GenerateReportFunction, None,
 				"oid" -> paperId)
 				
-//		if (response.success) Failed response.xml
 		Failed(response.message)
 	}
 	
-	//def listSubmissions
+	def listSubmissions(className:String, assignmentName:String): Response = {
+		val response = doRequest(ListSubmissionsFunction, None, 
+				"ctl" -> className,
+				"assign" -> assignmentName, 
+				"fcmd" -> "2")
+		println(response)
+		Failed(response.message)
+	}
 	
 	def resolveError(response:TurnitinResponse): Response = response.code match {
 		case 419 => AlreadyExists()
@@ -97,9 +103,10 @@ trait TurnitinMethods {
 
 
 object TurnitinMethods {
-	// API numbers for 
+	// Values for the "fid" parameter of an API call 
 	private val CreateClassFunction = "2"
 	private val CreateAssignmentFunction = "4"
 	private val SubmitPaperFunction = "5"
 	private val GenerateReportFunction = "6"
+	private val ListSubmissionsFunction = "10"
 }
