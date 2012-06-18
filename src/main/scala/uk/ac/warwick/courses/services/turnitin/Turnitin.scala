@@ -100,7 +100,7 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	 */
 	def md5hex(map:Map[String,String]) = {
 		DigestUtils.md5Hex(
-			(map filterKeys includeInMd5).toSeq sortBy mapKey map mapValue mkString("") + sharedSecretKey
+			((map filterKeys includeInMd5).toSeq sortBy mapKey map mapValue mkString("")) + sharedSecretKey
 		)
 	}
 	

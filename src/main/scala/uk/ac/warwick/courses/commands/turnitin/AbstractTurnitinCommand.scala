@@ -12,7 +12,7 @@ abstract class AbstractTurnitinCommand[T] extends Command[T] with Logging {
 	@Autowired var api:Turnitin = _
 	
 	/** The name of the Turnitin Class we should store this Assignment in. */
-	def classNameFor(assignment: Assignment) = "APIClass"
+	def classNameFor(assignment: Assignment) = "CourseworkSubmissionAPIClass"
 		
 	/**
 	 * Create or get an assignment by this name. If the required class doesn't exist

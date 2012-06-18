@@ -1,10 +1,9 @@
 package uk.ac.warwick.courses.services.turnitin
 
+import java.io.File
+
 import TurnitinDates._
 import TurnitinMethods._
-import scala.xml.Elem
-import scala.xml.NodeSeq
-import java.io.File
 
 trait Response {
 	def successful:Boolean
@@ -12,6 +11,7 @@ trait Response {
 abstract class SuccessResponse extends Response { def successful = true }
 abstract class FailureResponse extends Response { def successful = false }
 case class Created(id:String) extends SuccessResponse
+case class GotSubmissions(list:Seq[TurnitinSubmissionInfo]) extends SuccessResponse
 case class AlreadyExists() extends FailureResponse
 //case class NotFound() extends FailureResponse
 case class ClassNotFound() extends FailureResponse
@@ -90,8 +90,8 @@ trait TurnitinMethods {
 				"ctl" -> className,
 				"assign" -> assignmentName, 
 				"fcmd" -> "2")
-		println(response)
-		Failed(response.message)
+		if (response.success) GotSubmissions(response.submissionsList)
+		else Failed(response.message)
 	}
 	
 	def resolveError(response:TurnitinResponse): Response = response.code match {

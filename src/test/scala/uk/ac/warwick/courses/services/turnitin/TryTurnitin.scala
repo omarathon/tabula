@@ -1,5 +1,6 @@
 package uk.ac.warwick.courses.services.turnitin
 
+import collection.JavaConversions._
 import org.apache.commons.codec.digest.DigestUtils
 import java.util.Properties
 import java.io.FileInputStream
@@ -11,6 +12,8 @@ import uk.ac.warwick.courses.services.turnitin._
 import uk.ac.warwick.courses.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.courses.TestFixtures
 import uk.ac.warwick.courses.data.model.Submission
+import uk.ac.warwick.courses.data.model.SavedSubmissionValue
+import uk.ac.warwick.courses.data.model.FileAttachment
 
 /**
  * There should be a functional test for the Turnitin
@@ -27,7 +30,7 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 	
 		val props = new Properties
 		props.load(new FileInputStream( new File("local.properties") ))
-		Seq("turnitin.key").foreach { key =>
+		Seq("turnitin.key", "turnitin.aid", "turnitin.said").foreach { key =>
 			if (!props.containsKey(key)) throw new RuntimeException("Config property " + key + " not set in local.properties")
 		}
 		
@@ -41,18 +44,29 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 		val f = new File("src/test/resources/turnitin-submission.doc")
 		if (!f.exists) throw new IllegalArgumentException("Whoops, test file doesn't exist")
 		
-		/*val deleted = api.deleteAssignment("Automated submissions", "Test assignment")
-		
-		println(deleted)
-		
-		//api.createClass("Automated submissions")
-		api.createAssignment("Automated submissions", "Test assignment", update=true)*/
+//		val deleted = api.deleteAssignment("Automated submissions", "Test assignment")
+//		
+//		println(deleted)
+//		
+//		//api.createClass("Automated submissions")
+//		api.createAssignment("Automated submissions", "Test assignment")
 
+		
+		
+		
+		
 		val assignment = newDeepAssignment()
 		assignment.id = "12345"
 		val submissions = for (i <- 1 to 10) yield {
 			val s = new Submission
 			s.assignment = assignment
+			s.universityId = "%07d" format (123000 + i)
+			s.userId = "abcdef"
+			val attachment1 = new FileAttachment()
+			attachment1.name = "file.doc"
+			attachment1.file = f
+			val attachments = Set(attachment1)
+			s.values.add(SavedSubmissionValue.withAttachments(s, "", attachments))
 			s
 		}
 		

@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.services.turnitin
 
 import scala.xml.Elem
 
-/** Response from the API.
+/** Response from the API. 
   */
 class TurnitinResponse(
 	val code: Int,
@@ -16,9 +16,33 @@ class TurnitinResponse(
 	lazy val userId = xml map { _ \\ "userid" text } filterNot emptyString
 	lazy val objectId = xml map { _ \\ "objectID" text } filterNot emptyString
 	
+	/**
+	 * Convert an <object> list into a list of TurnitinSubmissionInfo items.
+	 * 
+	 * It is assumed that the student's Uni ID was used as the first name, so
+	 * it is used as the firstname element.
+	 */
+	lazy val submissionsList = 	xml map { 
+		_ \\ "object" map { obj =>
+			TurnitinSubmissionInfo(
+				objectId = (obj \\ "objectID" text),
+				title = (obj \\ "title" text),
+				universityId = (obj \\ "firstname" text),
+				similarityScore = (obj \\ "similarityScore" text).toInt,
+				overlap = parseInt(obj \\ "overlap" text),
+				webOverlap = parseInt(obj \\ "web_overlap" text),
+				publicationOverlap = parseInt(obj \\ "publication_overlap" text),
+				studentPaperOverlap = parseInt(obj \\ "student_paper_overlap" text)
+			)
+		}
+	} getOrElse Nil
+	
+	
+	
 	def message = TurnitinResponse.responseCodes.getOrElse(code, unknownMessage)
 	private def unknownMessage = if (success) "Unknown code" else "Unknown error"
 	private def emptyString(s: String) = s.trim.isEmpty
+	private def parseInt(text:String) = if (text.isEmpty) None else Some(text.toInt)
 }
 
 object TurnitinResponse {
@@ -37,7 +61,6 @@ object TurnitinResponse {
 	}
 
 	def fromXml(xml: Elem) = {
-		println(xml)
 		new TurnitinResponse((xml \\ "rcode").text.toInt, xml = Some(xml))
 	}
 
