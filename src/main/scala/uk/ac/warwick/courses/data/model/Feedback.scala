@@ -42,6 +42,15 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	@Type(`type`="uk.ac.warwick.courses.data.model.OptionBooleanUserType")
 	var ratingHelpful:Option[Boolean] = None
 	
+	@BeanProperty
+	var actualMark:Int =_;
+	@BeanProperty
+	var actualGrade:String =_;
+	@BeanProperty
+	var agreedMark:Int =_;
+	@BeanProperty
+	var agreedGrade:String =_;
+	
 	/**
 	 * Returns the released flag of this feedback,
 	 * OR false if unset.
@@ -67,4 +76,11 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	 * need to check that separately. 
 	 */
 	def collectRatings:Boolean = assignment.module.department.collectFeedbackRatings
+	
+	/**
+	 * Whether marks are being collected for this feedback.
+	 * Doesn't take into account whether the marks feature is enabled, so you
+	 * need to check that separately. 
+	 */
+	def collectMarks:Boolean = assignment.collectMarks
 }

@@ -42,6 +42,17 @@ the comments textarea needs to maintain newlines.
 	</@form.labelled_row>
 	<fieldset id="submission-options">
 		<legend>Submission options</legend>
+		<#if features.collectMarks>
+			<@form.row>
+				<@form.label></@form.label>
+				<@form.field>				
+					<label class="checkbox">
+						<@f.checkbox path="collectMarks" />
+						Collect marks
+					</label>
+				</@form.field>	
+			</@form.row>
+		</#if>
 		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>				
