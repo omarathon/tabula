@@ -42,14 +42,12 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	@Type(`type`="uk.ac.warwick.courses.data.model.OptionBooleanUserType")
 	var ratingHelpful:Option[Boolean] = None
 	
-	@BeanProperty
-	var actualMark:Int =_;
-	@BeanProperty
-	var actualGrade:String =_;
-	@BeanProperty
-	var agreedMark:Int =_;
-	@BeanProperty
-	var agreedGrade:String =_;
+	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
+	var actualMark:Option[Int] =_
+	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
+	var agreedMark:Option[Int] =_
+	var actualGrade:String =_
+	var agreedGrade:String =_
 	
 	/**
 	 * Returns the released flag of this feedback,

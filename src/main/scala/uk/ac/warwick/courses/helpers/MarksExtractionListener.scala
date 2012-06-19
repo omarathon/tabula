@@ -17,18 +17,8 @@ import org.apache.poi.util.LittleEndianOutputStream
 import java.io.ByteArrayOutputStream
 import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 
-class MarkItem{
-  
-  var universityId:String =_
-  var actualMark:String =_;
-  var actualGrade:String =_;
-  
-  def this(universityId:String, actualMark:String, actualGrade:String) = {
-	this();
-	this.universityId = universityId;
-	this.actualMark = actualMark;
-	this.actualGrade = actualGrade;
-  }
+class MarkItem(var universityId:String, var actualMark:String, var actualGrade:String) {
+  def this() = this(null,null,null)
 }
 
 class MarksExtractionListener extends HSSFListener with Logging {

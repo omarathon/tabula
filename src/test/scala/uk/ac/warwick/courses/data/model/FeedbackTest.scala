@@ -19,10 +19,10 @@ class FeedbackTest extends TestBase {
 	    // assign marks to even numbered students
 	    if(i % 2 == 0){
 	      val newMark = random.nextInt(101)
-	      feedback.actualMark = newMark
+	      feedback.actualMark = Some(newMark)
 	      val newGrade = random.shuffle(actualGrades).head
 	      feedback.actualGrade = newGrade
-	      feedback.actualMark should be (newMark)
+	      feedback.actualMark.get should be (newMark)
 	      feedback.actualGrade should be (newGrade)
 	    }
 	    assignment.feedbacks add feedback
