@@ -20,8 +20,9 @@ import org.xml.sax.XMLReader
 import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.ContentHandler
 import org.xml.sax.InputSource
+import uk.ac.warwick.courses.TestBase
 
-class MarksExtractionListenerTest extends AppContextTestBase {
+class MarksExtractionListenerTest extends TestBase {
 	
     @Test def readOLE2ExcelFile {
       val fin:ByteArrayInputStream =  new ByteArrayInputStream(resourceAsBytes("marks.xls"))
@@ -45,6 +46,7 @@ class MarksExtractionListenerTest extends AppContextTestBase {
       val reader:XSSFReader  = new XSSFReader (pkg)
       val sst:SharedStringsTable = reader.getSharedStringsTable()
       val parser = fetchSheetParser(sst)
+      
       
       val sheets = reader.getSheetsData
       while(sheets hasNext){
