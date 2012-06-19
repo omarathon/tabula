@@ -23,7 +23,11 @@ trait JavaImports {
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
 	
-	protected implicit def ToJBoolean(b:Option[Boolean]) = b.map{b=>b:JBoolean}.orNull
+	/**
+	 * Converts an Option[Boolean] to a Java Boolean, by interpreting
+	 * None as null. 
+	 */
+	protected implicit def ToJBoolean(b:Option[Boolean]) = b map (b => b: JBoolean) orNull
 }
 
 object JavaImports extends JavaImports

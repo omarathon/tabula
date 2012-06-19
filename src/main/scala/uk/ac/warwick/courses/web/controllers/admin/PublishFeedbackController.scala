@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
-import uk.ac.warwick.courses.commands.PublishFeedbackCommand
+import uk.ac.warwick.courses.commands.feedback.PublishFeedbackCommand
 import uk.ac.warwick.courses.actions.Participate
 import org.springframework.validation.Errors
 

@@ -1,12 +1,8 @@
-package uk.ac.warwick.courses.commands
-
-import scala.collection.mutable.ListBuffer
+package uk.ac.warwick.courses.commands.feedback
 import scala.reflect.BeanProperty
-import org.hibernate.annotations.AccessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import javax.mail.internet.InternetAddress
-import javax.persistence.Entity
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.courses.helpers.FoundUser
@@ -15,6 +11,12 @@ import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import javax.mail.MessagingException
 import uk.ac.warwick.courses.data.model.Module
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import scala.reflect.BeanProperty
+import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.courses.commands.ReadOnly
+import uk.ac.warwick.courses.commands.Unaudited
 
 abstract class RecipientReportItem(val universityId:String, val user:User, val good:Boolean)
 case class MissingUser(id:String) extends RecipientReportItem(id, null, false)

@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands
+package uk.ac.warwick.courses.commands.feedback
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
@@ -23,6 +23,20 @@ import freemarker.template.Configuration
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.web.views.FreemarkerRendering
+import javax.annotation.Resource
+import javax.persistence.Entity
+import javax.persistence.NamedQueries
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.transaction.annotation.Transactional
+import scala.reflect.BeanProperty
+import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.courses.commands.Description
+import uk.ac.warwick.courses.commands.SelfValidating
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
