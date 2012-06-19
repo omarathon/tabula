@@ -3,24 +3,21 @@ package uk.ac.warwick.courses.system.exceptions
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
-
 import freemarker.template.{Configuration => FreemarkerConfiguration}
 import freemarker.template.Template
 import javax.annotation.Resource
 import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.RequestInfo
 import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 case class ExceptionContext(val token:String, val exception:Throwable, val request:Option[HttpServletRequest]=None) {
 	def getHasRequest = request.isDefined

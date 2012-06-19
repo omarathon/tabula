@@ -14,10 +14,10 @@ import org.springframework.validation.ValidationUtils
 import freemarker.template.Configuration
 import freemarker.template.Template
 import javax.annotation.Resource
-import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.util.core.StringUtils._
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 @Configurable
 class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {

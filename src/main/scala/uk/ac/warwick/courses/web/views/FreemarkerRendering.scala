@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.helpers
+package uk.ac.warwick.courses.web.views
 
 import java.io.StringWriter
 import freemarker.template.Template

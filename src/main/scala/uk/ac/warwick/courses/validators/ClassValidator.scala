@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.helpers
+package uk.ac.warwick.courses.validators
 
 import org.springframework.validation.Validator
 import org.springframework.validation.Errors

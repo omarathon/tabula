@@ -16,8 +16,8 @@
 	<classpathentry kind="lib" path="lib/test/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/test/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/tika-core-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-3.8-beta5.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-ooxml-3.8-beta5.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-3.8-beta5.jar" sourcepath="/home/nick/.m2/repository/org/apache/poi/poi/3.8-beta5/poi-3.8-beta5-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-ooxml-3.8-beta5.jar" sourcepath="/home/nick/.m2/repository/org/apache/poi/poi-ooxml/3.8-beta5/poi-ooxml-3.8-beta5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-scratchpad-3.8-beta5.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/ooxml-schemas-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/xmlbeans-2.3.0.jar"/>

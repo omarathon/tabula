@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 object ZipGeneratingApp extends App with ZipCreator {
-	def zipDir = new File(System.getProperty("java.io.tmpdir")) 
+	def zipDir = new File(System.getProperty("java.io.tmpdir"))
 	 
 	implicit def stringStream(text:String):InputStream = new ByteArrayInputStream(text.getBytes("UTF-8"))
 	

@@ -19,9 +19,10 @@ import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
-import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import freemarker.template.Configuration
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {

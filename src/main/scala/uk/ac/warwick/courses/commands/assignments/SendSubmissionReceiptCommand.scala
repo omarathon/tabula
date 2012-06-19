@@ -12,7 +12,6 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.helpers.FreemarkerRendering
 import freemarker.template.Configuration
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.helpers.StringUtils._
@@ -22,6 +21,7 @@ import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.commands.ReadOnly
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 /**
  * Send an email confirming the receipt of a submission to the student
