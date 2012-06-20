@@ -21,36 +21,32 @@ import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.ContentHandler
 import org.xml.sax.InputSource
 import uk.ac.warwick.courses.TestBase
+import uk.ac.warwick.courses.helpers.Closeables._
 
 class MarksExtractionListenerTest extends TestBase {
 	
     @Test def readOLE2ExcelFile {
-      val fin:ByteArrayInputStream =  new ByteArrayInputStream(resourceAsBytes("marks.xls"))
-      val poifs:POIFSFileSystem  = new POIFSFileSystem(fin)
-      val din:InputStream = poifs.createDocumentInputStream("Workbook")
-      val req:HSSFRequest = new HSSFRequest
-      val listener = new MarksExtractionListener()
-      req addListenerForAllRecords(listener)
-      val factory:HSSFEventFactory = new HSSFEventFactory
-      factory.processEvents(req, din)
-      din.close
-      fin.close
-      println(listener.markItems)
-      
-	
+      closeThis(new ByteArrayInputStream(resourceAsBytes("marks.xls"))) { fin => 
+      	  val poifs = new POIFSFileSystem(fin)
+	      closeThis(poifs.createDocumentInputStream("Workbook")) { din =>
+		      val req = new HSSFRequest
+		      val listener = new MarksExtractionListener()
+		      req.addListenerForAllRecords(listener)
+		      val factory = new HSSFEventFactory
+		      factory.processEvents(req, din)
+		      println(listener.markItems)
+      	  }
+      }
 	}
     
     @Test def readXSSFExcelFile {
-      val fin:ByteArrayInputStream =  new ByteArrayInputStream(resourceAsBytes("marks.xlsx"))
-      val pkg:OPCPackage = OPCPackage.open(fin);
-      val reader:XSSFReader  = new XSSFReader (pkg)
-      val sst:SharedStringsTable = reader.getSharedStringsTable()
+      val fin =  new ByteArrayInputStream(resourceAsBytes("marks.xlsx"))
+      val pkg = OPCPackage.open(fin)
+      val reader = new XSSFReader(pkg)
+      val sst = reader.getSharedStringsTable()
       val parser = fetchSheetParser(sst)
       
-      
-      val sheets = reader.getSheetsData
-      while(sheets hasNext){
-        val sheet = sheets.next()
+      for (sheet <- reader.getSheetsData) {
         val sheetSource = new InputSource(sheet)
         parser.parse(sheetSource)
         sheet close
@@ -58,8 +54,8 @@ class MarksExtractionListenerTest extends TestBase {
 	}
     
     def  fetchSheetParser(sst:SharedStringsTable) = {
-      val parser:XMLReader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-      val handler:ContentHandler = new ExcelSheetHandler(sst);
+      val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+      val handler = new ExcelSheetHandler(sst)
       parser.setContentHandler(handler)
       parser
 	}
