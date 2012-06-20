@@ -1,37 +1,20 @@
 package uk.ac.warwick.courses.helpers
 
+import java.lang.Override
+
+import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 import org.apache.poi.hssf.eventusermodel.HSSFListener
+import org.apache.poi.hssf.record.CellRecord
+import org.apache.poi.hssf.record.LabelSSTRecord
+import org.apache.poi.hssf.record.NumberRecord
 import org.apache.poi.hssf.record.Record
-import org.apache.poi.hssf.record.BOFRecord
 import org.apache.poi.hssf.record.RowRecord
 import org.apache.poi.hssf.record.SSTRecord
-import org.apache.poi.hssf.record.BoundSheetRecord
-import org.apache.poi.hssf.record.NumberRecord
-import org.apache.poi.hssf.record.LabelSSTRecord
-import uk.ac.warwick.courses.JavaImports.JList
-import org.apache.poi.hssf.record.EOFRecord
-import org.apache.poi.hssf.record.CellRecord
-import oracle.net.aso.d
-import org.apache.poi.util.LittleEndianOutput
-import org.apache.poi.util.LittleEndianOutputStream
-import java.io.ByteArrayOutputStream
-import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 
-class MarkItem{
-  
-  var universityId:String =_
-  var actualMark:String =_;
-  var actualGrade:String =_;
-  
-  def this(universityId:String, actualMark:String, actualGrade:String) = {
-	this();
-	this.universityId = universityId;
-	this.actualMark = actualMark;
-	this.actualGrade = actualGrade;
-  }
-}
+import uk.ac.warwick.courses.JavaImports._
 
-class MarksExtractionListener extends HSSFListener with Logging {
+
+class XslSheetHandler extends HSSFListener with Logging {
   
 	val markItems:JList[MarkItem] = ArrayList();
     var sstrec:SSTRecord = null
@@ -41,16 +24,13 @@ class MarksExtractionListener extends HSSFListener with Logging {
 	def processRecord(record:Record) = {
 	  record  match {
 	    case record:SSTRecord => {
-	      logger.info("encountered new String Table Record - Saving" )
 	      sstrec = record
 	    }
 	    case record:RowRecord => {
-	      logger.info("encountered new row creating new mark record" )
 	      markItems.add(new MarkItem)
 	    }
 	    case record:CellRecord => {
 	      processCell(record, sstrec)
-	      logger.info("Cell found at row "+record.getRow())
 	    }
 	    case _ =>
 	  }
