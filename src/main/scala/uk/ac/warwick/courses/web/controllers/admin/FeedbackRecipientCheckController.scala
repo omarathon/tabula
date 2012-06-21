@@ -3,7 +3,7 @@ package uk.ac.warwick.courses.web.controllers.admin
 import uk.ac.warwick.courses.web.controllers.BaseController
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import uk.ac.warwick.courses.commands.FeedbackRecipientCheckCommand
+import uk.ac.warwick.courses.commands.feedback.FeedbackRecipientCheckCommand
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.courses.actions.Participate

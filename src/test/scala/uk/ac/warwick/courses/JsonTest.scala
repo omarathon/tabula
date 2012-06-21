@@ -18,6 +18,8 @@ class JsonTest extends TestBase {
 		m.writeValueAsString(Map()) should be("{}")
 		
 		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
+		
+//		m.writeValueAsString(Map("animals" -> List("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
 	}
 	
 	@Test def parseNumbers {

@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.web.controllers
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 import scala.reflect.BeanProperty
-import uk.ac.warwick.courses.helpers.ClassValidator
+import uk.ac.warwick.courses.validators.ClassValidator
 import uk.ac.warwick.courses.commands.SelfValidating
 
 /**

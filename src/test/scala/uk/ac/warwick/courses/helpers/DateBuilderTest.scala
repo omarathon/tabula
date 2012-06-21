@@ -5,6 +5,7 @@ import org.junit.Test
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import collection.JavaConversions._
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 class DateBuilderTest extends TestBase with FreemarkerRendering {
 	

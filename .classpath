@@ -13,6 +13,14 @@
 	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-jsoup_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-jsoup_2.9.1/0.8.7/dispatch-jsoup_2.9.1-0.8.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-mime_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-mime_2.9.1/0.8.7/dispatch-mime_2.9.1-0.8.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/test/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/test/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/tika-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-3.8-beta5.jar" sourcepath="/home/nick/.m2/repository/org/apache/poi/poi/3.8-beta5/poi-3.8-beta5-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-ooxml-3.8-beta5.jar" sourcepath="/home/nick/.m2/repository/org/apache/poi/poi-ooxml/3.8-beta5/poi-ooxml-3.8-beta5-sources.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-scratchpad-3.8-beta5.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/ooxml-schemas-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/apache-tika/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
@@ -105,9 +113,5 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-digester-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/slf4j-log4j12-1.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/tika-app-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/xml-apis.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/ooxml-schemas-1.1.jar"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>
