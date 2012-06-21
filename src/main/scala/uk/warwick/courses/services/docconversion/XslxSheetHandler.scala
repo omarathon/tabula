@@ -1,11 +1,12 @@
-package uk.ac.warwick.courses.helpers
+package uk.warwick.courses.services.docconversion
 
-import org.xml.sax.helpers.DefaultHandler
 import org.apache.poi.xssf.model.SharedStringsTable
-import org.xml.sax.Attributes
 import org.apache.poi.xssf.usermodel.XSSFRichTextString
+import org.xml.sax.Attributes
+import org.xml.sax.helpers.DefaultHandler
 
 import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.helpers.Logging
 
 class XslxSheetHandler extends DefaultHandler with Logging  {
    

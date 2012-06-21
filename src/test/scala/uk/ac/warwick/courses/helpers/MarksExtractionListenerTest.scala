@@ -1,16 +1,15 @@
 package uk.ac.warwick.courses.helpers
 
 import java.io.ByteArrayInputStream
-import java.io.InputStream
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory
 import org.apache.poi.hssf.eventusermodel.HSSFRequest
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.junit.Test
-import org.springframework.stereotype.Service
 
 import uk.ac.warwick.courses.TestBase
-import uk.ac.warwick.courses.helpers.Closeables._
+import uk.ac.warwick.courses.helpers.Closeables.closeThis
+import uk.warwick.courses.services.docconversion._
 
 class MarksExtractionListenerTest extends TestBase with Logging {
 	

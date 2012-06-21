@@ -1,7 +1,6 @@
-package uk.ac.warwick.courses.helpers
+package uk.warwick.courses.services.docconversion
 
 import java.lang.Override
-
 import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 import org.apache.poi.hssf.eventusermodel.HSSFListener
 import org.apache.poi.hssf.record.CellRecord
@@ -10,8 +9,9 @@ import org.apache.poi.hssf.record.NumberRecord
 import org.apache.poi.hssf.record.Record
 import org.apache.poi.hssf.record.RowRecord
 import org.apache.poi.hssf.record.SSTRecord
-
-import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.JavaImports.JList
+import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.helpers.Logging
 
 
 class XslSheetHandler extends HSSFListener with Logging {
