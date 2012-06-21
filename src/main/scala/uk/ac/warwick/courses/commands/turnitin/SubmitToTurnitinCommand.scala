@@ -1,9 +1,7 @@
 package uk.ac.warwick.courses.commands.turnitin
 
-import uk.ac.warwick.courses.commands.Command
-import uk.ac.warwick.courses.commands.Description
-import uk.ac.warwick.courses.data.model.Submission
-import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.commands._
+import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.services.turnitin._
 
 /** Submit some submission to an assignment. */

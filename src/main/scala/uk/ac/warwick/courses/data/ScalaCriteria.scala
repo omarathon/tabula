@@ -1,7 +1,7 @@
 package uk.ac.warwick.courses.data
 
-import org.hibernate.criterion.Criterion
-import org.hibernate.criterion.Order
+import org.hibernate.criterion._
+import collection.JavaConverters._
 
 /** Nice wrapper for a Criteria object. You usually won't create
   * this explicitly - the Daoisms trait adds a newCriteria method
@@ -17,14 +17,16 @@ class ScalaCriteria[T](c: org.hibernate.Criteria) {
 	// Helper to neaten up the above chainable methods
 	@inline private def chainable(fn: => Unit) = { fn; this }
 
-	/** Returns a typed list of the results.
-	  */
+	/** Returns a typed Seq of the results. */
+	def seq: Seq[T] = list.asScala
+
+	/** Returns a typed list of the results.*/
 	def list: java.util.List[T] = c.list().asInstanceOf[java.util.List[T]]
+	
 	/** Return an untyped list of the results, in case you've
-	  * set the projection for the Criteria to return something else.
-	  */
+	  * set the projection for the Criteria to return something else. */
 	def untypedList: java.util.List[_] = c.list()
-	/** Return Some(result), or None if no row matched.
-	  */
+	
+	/** Return Some(result), or None if no row matched. */
 	def uniqueResult: Option[T] = Option(c.uniqueResult().asInstanceOf[T])
 }

@@ -25,7 +25,7 @@
 	<bean id="hibernateLifecycle" class="uk.ac.warwick.courses.data.HibernateLifecycle" />
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
 		p:dataSource-ref="dataSource"
-		p:packagesToScan="uk.ac.warwick.courses.data.model"
+		p:packagesToScan="uk.ac.warwick.courses.data.model, uk.ac.warwick.courses.services"
 		p:lobHandler-ref="lobHandler"
 		p:hibernateProperties-ref="hibernateProperties">
 		<property name="eventListeners"><map>

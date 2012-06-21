@@ -2,7 +2,6 @@ package uk.ac.warwick.courses.data
 import uk.ac.warwick.courses.data.model.Feedback
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.courses.data.model.Assignment
-import org.hibernate.criterion.{ Restrictions => is }
 
 trait FeedbackDao {
 	def getFeedback(id: String): Option[Feedback]
@@ -19,8 +18,8 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 
 	override def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback] =
 		session.newCriteria[Feedback]
-			.add(is eq ("universityId", uniId))
-			.add(is eq ("assignment", assignment))
+			.add(is("universityId", uniId))
+			.add(is("assignment", assignment))
 			.uniqueResult
 
 	override def delete(feedback: Feedback) = session.delete(feedback)

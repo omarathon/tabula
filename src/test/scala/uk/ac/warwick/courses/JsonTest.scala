@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringReader
 import collection.JavaConversions._
 import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.helpers.ArrayList
 
 class JsonTest extends TestBase {
 	
@@ -18,6 +19,7 @@ class JsonTest extends TestBase {
 		m.writeValueAsString(Map()) should be("{}")
 		
 		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
+		m.writeValueAsString(Map("animals" -> ArrayList("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
 		
 //		m.writeValueAsString(Map("animals" -> List("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
 	}
@@ -29,8 +31,8 @@ class JsonTest extends TestBase {
 		map("age").asInstanceOf[Int] should be (23)
 	}
 	
-	// bug in scala jackson module
-	@Test/*(expected=classOf[ArrayIndexOutOfBoundsException])*/ def mutableMapWorks {
+	// was a bug in scala jackson module
+	@Test def mutableMapWorks {
 		m.writeValueAsString(MutableMap()) should be("{}")
 	}
 }

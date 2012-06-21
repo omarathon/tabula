@@ -8,7 +8,11 @@ import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.services.turnitin._
 
 @Configurable
-abstract class AbstractTurnitinCommand[T] extends Command[T] with Logging {
+abstract class AbstractTurnitinCommand[T] extends Command[T] with TurnitinTrait with Logging {
+	
+}
+
+trait TurnitinTrait {
 	@Autowired var api:Turnitin = _
 	
 	/** The name of the Turnitin Class we should store this Assignment in. */

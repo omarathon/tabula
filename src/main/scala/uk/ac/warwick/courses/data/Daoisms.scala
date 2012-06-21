@@ -19,11 +19,13 @@ import org.springframework.transaction.PlatformTransactionManager
   * session factory. If you want to do JDBC stuff or use a
   * different data source you'll need to look elsewhere.
   */
-trait Daoisms {
+trait Daoisms extends Transactions {
 
+	import org.hibernate.criterion.Restrictions._
+	def is = org.hibernate.criterion.Restrictions.eq _
+	
 	@field @Resource(name = "dataSource") var dataSource: DataSource = _
 	@field @Autowired var sessionFactory: SessionFactory = _
-	@field @Autowired var transactionManager: PlatformTransactionManager = _
 
 	protected def session = sessionFactory.getCurrentSession
 
@@ -72,15 +74,5 @@ trait Daoisms {
 			case entity: Any if m.erasure.isInstance(entity) => Some(entity.asInstanceOf[D])
 			case _ => None
 		}
-
-	/** Does some code in a transaction. Usually you can just put @Transactional
-	  * on a method instead, but sometimes that isn't sufficient
-	  */
-	protected def transactional[T](f: TransactionStatus => T) {
-		val template = new TransactionTemplate(transactionManager)
-		template.execute(new TransactionCallback[T] {
-			override def doInTransaction(status: TransactionStatus) = f(status)
-		})
-	}
 
 }

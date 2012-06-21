@@ -7,7 +7,7 @@
   </listener> 
   <context-param>
 	<param-name>contextInitializerClasses</param-name>
-	<param-value>uk.ac.warwick.courses.system.ContextProfileInitializer</param-value>
+	<param-value>uk.ac.warwick.courses.system.ContextProfileInitializer,uk.ac.warwick.courses.system.ContextSetupInitializer</param-value>
   </context-param>
    
   <!-- Servlet will latch on to the context loaded above, and serve requests -->
