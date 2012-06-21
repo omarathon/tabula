@@ -1,27 +1,20 @@
-package uk.ac.warwick.courses.helpers
+package uk.warwick.courses.services.docconversion
 
+import java.lang.Override
+import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 import org.apache.poi.hssf.eventusermodel.HSSFListener
+import org.apache.poi.hssf.record.CellRecord
+import org.apache.poi.hssf.record.LabelSSTRecord
+import org.apache.poi.hssf.record.NumberRecord
 import org.apache.poi.hssf.record.Record
-import org.apache.poi.hssf.record.BOFRecord
 import org.apache.poi.hssf.record.RowRecord
 import org.apache.poi.hssf.record.SSTRecord
-import org.apache.poi.hssf.record.BoundSheetRecord
-import org.apache.poi.hssf.record.NumberRecord
-import org.apache.poi.hssf.record.LabelSSTRecord
 import uk.ac.warwick.courses.JavaImports.JList
-import org.apache.poi.hssf.record.EOFRecord
-import org.apache.poi.hssf.record.CellRecord
-import oracle.net.aso.d
-import org.apache.poi.util.LittleEndianOutput
-import org.apache.poi.util.LittleEndianOutputStream
-import java.io.ByteArrayOutputStream
-import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
+import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.helpers.Logging
 
-class MarkItem(var universityId:String, var actualMark:String, var actualGrade:String) {
-  def this() = this(null,null,null)
-}
 
-class MarksExtractionListener extends HSSFListener with Logging {
+class XslSheetHandler extends HSSFListener with Logging {
   
 	val markItems:JList[MarkItem] = ArrayList();
     var sstrec:SSTRecord = null
@@ -31,16 +24,13 @@ class MarksExtractionListener extends HSSFListener with Logging {
 	def processRecord(record:Record) = {
 	  record  match {
 	    case record:SSTRecord => {
-	      logger.info("encountered new String Table Record - Saving" )
 	      sstrec = record
 	    }
 	    case record:RowRecord => {
-	      logger.info("encountered new row creating new mark record" )
 	      markItems.add(new MarkItem)
 	    }
 	    case record:CellRecord => {
 	      processCell(record, sstrec)
-	      logger.info("Cell found at row "+record.getRow())
 	    }
 	    case _ =>
 	  }
