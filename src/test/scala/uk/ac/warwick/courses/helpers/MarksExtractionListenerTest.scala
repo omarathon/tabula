@@ -22,7 +22,7 @@ class MarksExtractionListenerTest extends TestBase with Logging {
 		  req addListenerForAllRecords(listener)
 		  val factory = new HSSFEventFactory
 		  factory.processEvents(req, din)
-		  listener.markItems.size should be (10)
+		  listener.markItems.size should be (11) //header not skipped
         }
       }
 	}

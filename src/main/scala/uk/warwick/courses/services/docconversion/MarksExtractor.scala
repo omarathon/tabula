@@ -32,6 +32,9 @@ class MarkItem{
 @Service
 class MarksExtractor{
   
+  /**
+   * Method for reading in a xlsx spreadsheet and converting it into a list of MarkItems
+   */
   def readXSSFExcelFile(file:ByteArrayInputStream):JList[MarkItem] = {
     val pkg = OPCPackage.open(file);
     val reader  = new XSSFReader(pkg)
