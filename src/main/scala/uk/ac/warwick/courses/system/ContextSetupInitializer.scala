@@ -21,7 +21,7 @@ import uk.ac.warwick.courses.helpers.Logging
 class ContextSetupInitializer extends ApplicationContextInitializer[ConfigurableWebApplicationContext] with Logging {
 
   override def initialize(ctx:ConfigurableWebApplicationContext) = {
-	  throw new RuntimeException("fuck")
+	  
   }
   
 }

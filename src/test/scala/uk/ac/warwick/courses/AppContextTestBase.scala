@@ -45,7 +45,7 @@ trait TransactionalTesting {
 	
 	def session = sessionFactory.getCurrentSession
 	
-	def transactional[T](f : TransactionStatus=>T) {
+	def transactional[T](f : TransactionStatus=>T) : T = {
 		val template = new TransactionTemplate(transactionManager)
 		template.execute(new TransactionCallback[T] {
 			override def doInTransaction(status:TransactionStatus) = {

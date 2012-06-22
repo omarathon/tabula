@@ -14,6 +14,16 @@ import uk.ac.warwick.courses.data.PreSaveBehaviour
 import uk.ac.warwick.courses.data.model.GeneratedId
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.jobs.JobPrototype
+import uk.ac.warwick.courses.helpers.Logging
+
+object JobInstanceImpl {
+	def fromPrototype(prototype: JobPrototype) = {
+		val instance = new JobInstanceImpl
+		instance.jobType = prototype.identifier
+		instance.json = prototype.map
+		instance
+	}
+}
 
 /**
  * JobDefinition is the database entity that stores
@@ -22,16 +32,10 @@ import uk.ac.warwick.courses.jobs.JobPrototype
  * does not need subclassing. 
  */
 @Configurable 
-@Entity
-class JobInstanceImpl() extends JobInstance with GeneratedId with PreSaveBehaviour with PostLoadBehaviour {
+@Entity(name="Job")
+class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging {
 	
-	def this(prototype: JobPrototype) {
-		this()
-		jobType = prototype.identifier
-		json ++= prototype.map
-	}
-	
-	private type JsonMap = mutable.Map[String,Any]
+	private type JsonMap = Map[String,Any]
 	
 	@transient @Autowired var jsonMapper:ObjectMapper =_
 	
@@ -48,7 +52,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PreSaveBehavio
 	var createdDate: DateTime = new DateTime
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	var finishedDate: DateTime = new DateTime
+	var updatedDate: DateTime = new DateTime
 	
 	@Column(name="progress") var _progress:Int = 0
 	def progress = _progress
@@ -56,15 +60,24 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PreSaveBehavio
 		_progress = p
 	}
 	
-	@Lob private var data:String = "{}"
-	@transient var json: JsonMap = mutable.Map()
+	@Lob var data:String = "{}"
+	@transient private var _json: JsonMap = Map()
+	def json = _json
+	def json_=(map:JsonMap) {
+		_json = map
+		if (jsonMapper != null) {
+			data = jsonMapper.writeValueAsString(json)
+		} else {
+			logger.warn("JSON mapper not set on JobInstanceImpl")
+		}
+	}
 
-	override def propsMap = json
+	def propsMap = json
+	def propsMap_=(map:JsonMap) { json = map }
 	
-	override def preSave(newRecord:Boolean) { data = jsonMapper.writeValueAsString(json) }
 	override def postLoad {
 		val map = jsonMapper.readValue(data, classOf[Map[String,Any]])
-		json = mutable.Map( map.toSeq : _* )
+		json = map
 	}
 	
 }

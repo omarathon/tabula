@@ -13,6 +13,7 @@
 <p><a class="btn" href="/admin/masquerade/"><i class="icon-eye-open"></i> Masquerade</a></p>
 <p><a class="btn" href="/sysadmin/audit/list">List audit events</a></p>
 <p><a class="btn" href="/sysadmin/audit/search">List audit events (Index version)</a></p>
+<p><a class="btn" href="/sysadmin/jobs/list">Background jobs</a></p>
 </div>
 
 <div class="span4">
@@ -54,6 +55,12 @@ Rebuild index from
 </#if>
 
 <p><a href="<@url page="/sysadmin/maintenance"/>">Update settings</a></p>
+
+<p>
+	<@f.form method="post" action="/sysadmin/jobs/create-test">
+		<input class="btn" type="submit" value="Create test job">
+	</@f.form>
+</p>
 
 </div>
 </div>

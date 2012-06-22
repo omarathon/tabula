@@ -1,5 +1,10 @@
 package uk.ac.warwick
 
-package object courses extends JavaImports {
+import uk.ac.warwick.courses.helpers._
+
+package object courses 
+	extends JavaImports {
+	
+	import DateTimeOrdering._
 
 }

@@ -18,8 +18,12 @@ class MockJobDao extends JobDao {
 		instance.id
 	}
 	
+	def unfinishedInstances = instances.iterator.filterNot( _.finished ).toSeq
+	
 	def getById(id:String) = instances.find( id == _.id )
 	
 	def clear = instances.clear
+	
+	def update(instance: JobInstance) {}
 
 }

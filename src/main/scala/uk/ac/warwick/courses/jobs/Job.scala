@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.courses.services.jobs._
 import org.springframework.stereotype.Component
 import uk.ac.warwick.courses.helpers.Logging
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * A Job is a task that is added to a queue and processed in the
@@ -27,6 +28,8 @@ abstract class Job extends Logging {
 	/** Identifies the specific Job in the database. */
 	val identifier:String
 	
+	@Autowired var jobService: JobService =_
+	
 	/**
 	 * Run the job. Job itself is stateless so
 	 * JobInstance provides access to information about
@@ -39,12 +42,14 @@ abstract class Job extends Logging {
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	protected def progress_=(percent:Int) (implicit _status:JobInstance) {
 		_status.progress = percent
+		jobService.update(_status)
 	}
 	
 	protected def status (implicit _status:JobInstance)  = _status.status
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	protected def status_=(status:String) (implicit _status:JobInstance)  {
 		_status.status = status
+		jobService.update(_status)
 	}
 	
 	protected def obsoleteJob = new ObsoleteJobException

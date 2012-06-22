@@ -18,12 +18,16 @@ so you could just get rid of this and the corresponding Ant class.
 <hibernate-configuration>
     <session-factory>
 		<property name="hibernate.show_sql">false</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</property>
+        <property name="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</property>
         <mapping class="uk.ac.warwick.courses.data.model.Department" />
 		<mapping class="uk.ac.warwick.courses.data.model.Module" />
 		<mapping class="uk.ac.warwick.courses.data.model.Assignment" />
+		<mapping class="uk.ac.warwick.courses.data.model.Feedback" />
 		<mapping class="uk.ac.warwick.courses.data.model.FileAttachment" />
 		<mapping class="uk.ac.warwick.courses.data.model.Submission" />
+		<mapping class="uk.ac.warwick.courses.data.model.SavedSubmissionValue" />
 		<mapping class="uk.ac.warwick.courses.data.model.UserGroup" />
+		<mapping class="uk.ac.warwick.courses.data.model.forms.FormField" />
+		<mapping class="uk.ac.warwick.courses.services.jobs.JobInstanceImpl" />
     </session-factory>
 </hibernate-configuration>

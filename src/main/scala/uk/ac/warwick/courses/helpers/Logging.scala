@@ -4,12 +4,12 @@ import uk.ac.warwick.courses.helpers.Stopwatches._
 import org.apache.log4j.Priority
 
 trait Logging {
-    val loggerName = this.getClass.getName
-    lazy val logger = Logger.getLogger(loggerName)
-    lazy val debugEnabled = logger.isDebugEnabled
+    @transient val loggerName = this.getClass.getName
+    @transient lazy val logger = Logger.getLogger(loggerName)
+    @transient lazy val debugEnabled = logger.isDebugEnabled
     
-    val Info = Priority.INFO
-    val Debug = Priority.DEBUG
+    @transient val Info = Priority.INFO
+    @transient val Debug = Priority.DEBUG
     
     /**
      * Logs a debug message, with the given arguments inserted into the

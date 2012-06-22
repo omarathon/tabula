@@ -10,9 +10,10 @@ import uk.ac.warwick.courses.jobs.Job
 import uk.ac.warwick.courses.jobs.JobPrototype
 import uk.ac.warwick.courses.data.Transactions
 import uk.ac.warwick.courses.jobs.ObsoleteJobException
+import uk.ac.warwick.courses.helpers.Logging
 
 @Service
-class JobService extends HasJobDao with Transactions {
+class JobService extends HasJobDao with Transactions with Logging {
 	
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
@@ -31,14 +32,30 @@ class JobService extends HasJobDao with Transactions {
 	
 	def processInstance(instance: JobInstance, job: Job) {
 		start(instance)
-		try {
-			run(instance, job)
-		} catch {
-			case old:ObsoleteJobException => fail(instance)
+		try run(instance, job)
+		catch { 
+			case old:ObsoleteJobException => {
+				logger.info("Job "+instance.id+" obsolete")
+				fail(instance)
+			}
+			case e => {
+				logger.info("Job "+instance.id+" failed", e)
+				fail(instance)
+			}
 		}
 	}
 	
+	def kill(instance: JobInstance) {
+		/**
+		 * TODO no handle on thread to actually kill it if it's running
+		 * right now.
+		 */
+		fail(instance)
+	}
 	
+	def unfinishedInstances = jobDao.unfinishedInstances
+	
+	def update(instance: JobInstance) = jobDao.update(instance)
 	
 	def findJob(identifier: String) = 
 		jobs.find( identifier == _.identifier )
@@ -47,10 +64,8 @@ class JobService extends HasJobDao with Transactions {
 		if ( findJob(prototype.identifier).isEmpty ) {
 			throw new IllegalArgumentException("No Job found to handle '%s'" format (prototype.identifier))
 		}
-		jobDao.saveJob( new JobInstanceImpl(prototype) )
+		jobDao.saveJob( JobInstanceImpl.fromPrototype(prototype) )
 	}
-	
-		
 	
 	@Transactional
 	def run(instance: JobInstance, job: Job) {
@@ -59,16 +74,23 @@ class JobService extends HasJobDao with Transactions {
 	}
 		
 	@Transactional
-	private def start(instance: JobInstance) { instance.started = true	}
+	private def start(instance: JobInstance) { 
+		instance.started = true
+		jobDao.update(instance)
+	}
 	
 	@Transactional
-	private def finish(instance: JobInstance) { instance.finished = true	}
+	private def finish(instance: JobInstance) { 
+		instance.finished = true	
+		jobDao.update(instance)
+	}
 		
 	/** Hmm, no Job exists to handle this JobInstance. */
 	@Transactional
 	private def fail(instance: JobInstance) {
 		instance.succeeded = false
 		instance.finished = true
+		jobDao.update(instance)
 	}
 
 }
