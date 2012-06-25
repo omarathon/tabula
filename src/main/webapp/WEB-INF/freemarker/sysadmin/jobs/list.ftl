@@ -7,6 +7,7 @@
 <tr>
 	<td>Created</td>
 	<td>Type</td>
+	<td>User</td>
 	<td>Status</td>
 	<td>Progress</td>
 	<td>Data</td>
@@ -15,6 +16,11 @@
 <tr>
 	<td><@fmt.date date=job.createdDate seconds=true /></td>
 	<td>${job.jobType}</td>
+	<td>
+		<#if job.user.exists>
+			${job.user.toString}
+		</#if>
+	</td>
 	<td>${job.status!''}</td>
 	<td>
 		<#if job.started>

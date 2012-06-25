@@ -10,26 +10,31 @@ import uk.ac.warwick.courses.NoCurrentUser
 import uk.ac.warwick.courses.services.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.web.Cookies._
-import uk.ac.warwick.userlookup.UserLookup 
+import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.courses.helpers.FoundUser
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
     @Autowired var securityService:SecurityService =_
     @Autowired var userLookup:UserLookupInterface =_
-  
+    
+    type MasqueradeUserCheck = (User, Boolean) => User
+
+	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = {
+		val sysadmin = securityService.isSysadmin(user.getUserId())
+		val god = sysadmin && godModeEnabled
+		val masquerader = securityService.isMasquerader(user.getUserId)
+		new CurrentUser(
+			realUser = user,
+			apparentUser = masqueradeUser(user, sysadmin),
+			sysadmin = sysadmin,
+			masquerader = masquerader,
+			god = god)
+	}
+    
 	override def preHandle(request:HttpServletRequest, response:HttpServletResponse, obj:Any) = {
 	  val currentUser:CurrentUser = request.getAttribute("SSO_USER") match {
-	    case user:User if user.isFoundUser => {
-	    	val sysadmin = securityService.isSysadmin(user.getUserId()) 
-	    	val god = sysadmin && godCookieExists(request)
-	    	val masquerader = securityService.isMasquerader(user.getUserId)
-	    	new CurrentUser(
-	    			realUser=user, 
-	    			apparentUser=apparentUser(request, user, sysadmin), 
-	    			sysadmin=sysadmin, 
-	    			masquerader=masquerader, 
-	    			god=god)
-	    }
+	    case FoundUser(user) => resolveCurrentUser(user, apparentUser(request), godCookieExists(request))
 	    case _ => NoCurrentUser()
 	  }
 	  request.setAttribute(CurrentUser.keyName, currentUser)
@@ -40,7 +45,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
     	request.getCookies().getBoolean("coursesGodMode", false)
     
     // masquerade support
-    private def apparentUser(request:HttpServletRequest, realUser:User, sysadmin:Boolean):User = 
+    private def apparentUser(request:HttpServletRequest)(realUser:User, sysadmin:Boolean):User = 
     	if (sysadmin) {
     		request.getCookies.getString("coursesMasqueradeAs") match {
     			case Some(userid) => userLookup.getUserByUserId(userid) match {

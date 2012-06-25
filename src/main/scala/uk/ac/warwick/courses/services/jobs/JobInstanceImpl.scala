@@ -15,6 +15,10 @@ import uk.ac.warwick.courses.data.model.GeneratedId
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.jobs.JobPrototype
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.courses.system.CurrentUserInterceptor
 
 object JobInstanceImpl {
 	def fromPrototype(prototype: JobPrototype) = {
@@ -38,6 +42,8 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	private type JsonMap = Map[String,Any]
 	
 	@transient @Autowired var jsonMapper:ObjectMapper =_
+	@transient @Autowired var userLookup:UserLookupInterface =_
+	@transient @Autowired var currentUserFinder:CurrentUserInterceptor =_
 	
 	/** Human-readable status of the job */
 	var status:String =_
@@ -47,6 +53,11 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	var started = false
 	var finished = false
 	var succeeded = false
+	
+	var realUser: String = _ 
+	var apparentUser: String =_
+	
+	@transient var user: CurrentUser =_
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = new DateTime
@@ -78,6 +89,18 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	override def postLoad {
 		val map = jsonMapper.readValue(data, classOf[Map[String,Any]])
 		json = map
+		
+		updatedDate = new DateTime
+		
+		def u(id:String) = id match {
+			case id:String => userLookup.getUserByUserId(id)
+			case _ => new AnonymousUser
+		}
+		
+		val realUser = u(this.realUser)
+		val apparentUser = u(this.apparentUser)
+		
+		user = currentUserFinder.resolveCurrentUser(realUser, {(u, s) => apparentUser}, false)
 	}
 	
 }

@@ -22,7 +22,7 @@ class JobController extends BaseController {
 	
 	@RequestMapping(value=Array("/create-test"), method=Array(POST))
 	def test = {
-		val id = jobService.add(TestingJob("sysadmin test", 500))
+		val id = jobService.add(Some(user), TestingJob("sysadmin test", 500))
 		testStatus(id)
 		Redirect("/sysadmin/jobs/job-status?id="+id)
 	}

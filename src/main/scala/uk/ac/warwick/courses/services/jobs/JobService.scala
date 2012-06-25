@@ -11,6 +11,7 @@ import uk.ac.warwick.courses.jobs.JobPrototype
 import uk.ac.warwick.courses.data.Transactions
 import uk.ac.warwick.courses.jobs.ObsoleteJobException
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.CurrentUser
 
 @Service
 class JobService extends HasJobDao with Transactions with Logging {
@@ -60,11 +61,16 @@ class JobService extends HasJobDao with Transactions with Logging {
 	def findJob(identifier: String) = 
 		jobs.find( identifier == _.identifier )
 	
-	def add(prototype: JobPrototype): String = {
+	def add(user: Option[CurrentUser], prototype: JobPrototype): String = {
 		if ( findJob(prototype.identifier).isEmpty ) {
 			throw new IllegalArgumentException("No Job found to handle '%s'" format (prototype.identifier))
 		}
-		jobDao.saveJob( JobInstanceImpl.fromPrototype(prototype) )
+		val instance = JobInstanceImpl.fromPrototype(prototype)
+		user map { u =>
+			instance.realUser = u.realId
+			instance.apparentUser = u.apparentId
+		}
+		jobDao.saveJob( instance )
 	}
 	
 	@Transactional

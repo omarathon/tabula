@@ -4,6 +4,7 @@ import collection.mutable
 import collection.JavaConverters._
 import uk.ac.warwick.courses.JavaImports._
 import org.joda.time.DateTime
+import uk.ac.warwick.courses.CurrentUser
 
 /**
  * Interface for a Job to update its status in the database.
@@ -33,4 +34,6 @@ trait JobInstance {
 	var started: Boolean
 	var finished: Boolean
 	var succeeded: Boolean
+	
+	def user: CurrentUser
 }

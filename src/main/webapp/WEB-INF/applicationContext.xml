@@ -105,10 +105,13 @@
 	    </property>
 	</bean>
 	
+	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
+	<bean id="currentUserInterceptor" class="uk.ac.warwick.courses.system.CurrentUserInterceptor" />
+	
 	<mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
-			<bean class="uk.ac.warwick.courses.system.CurrentUserInterceptor" />
+			<ref bean="currentUserInterceptor" />
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>

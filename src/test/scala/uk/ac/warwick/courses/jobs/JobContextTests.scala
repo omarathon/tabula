@@ -32,15 +32,14 @@ class JobContextTests extends AppContextTestBase {
 		jobService.jobs.size should (be > 1)
 		jobService.jobs map (_.identifier) should contain ("turnitin-submit")
 		
-		val id = jobService.add(TestingJob("anything really"))
+		val id = jobService.add(None, TestingJob("anything really"))
 		jobService.getInstance(id) map { instance =>
 			jobService.run
 		} orElse fail()
 		
-//		transactional { _ => session.clear }
-		
 		// Check that the flags have actually been updated.
 		jobService.getInstance(id) map { instance =>
+			
 			withClue("Started") { instance.started should be (true) }
 			withClue("Finished") { instance.finished should be (true) }
 			withClue("Succeeded") { instance.succeeded should be (true) }
