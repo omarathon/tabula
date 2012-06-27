@@ -1,36 +1,44 @@
 package uk.ac.warwick.courses.commands.assignments
 
-import java.util.zip.ZipEntry
+import java.util.ArrayList
 import java.util.zip.ZipInputStream
+
 import scala.collection.JavaConversions._
-import collection.JavaConverters._
-import scala.reflect.BeanInfo
 import scala.reflect.BeanProperty
-import org.apache.commons.collections.list.LazyList
-import org.apache.commons.collections.FactoryUtils
-import org.hibernate.validator.constraints.NotEmpty
+import scala.util.matching.Regex
+
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.courses.commands._
-import uk.ac.warwick.courses.data.model._
+
+import javax.persistence.Entity
+import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.courses.UniversityId
+import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.courses.commands.Description
+import uk.ac.warwick.courses.commands.UploadedFile
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.FileDao
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.Feedback
+import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.courses.helpers.FoundUser
+import uk.ac.warwick.courses.helpers.LazyLists
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.helpers.NoUser
+import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.services.ZipEntryInputStream
 import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.services.Zips
-import uk.ac.warwick.courses.CurrentUser
-import uk.ac.warwick.courses.UniversityId
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
-import scala.util.matching.Regex
-import uk.ac.warwick.courses.helpers._
-import uk.ac.warwick.userlookup.UserLookup
-import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.courses.services.UserLookupService
-import java.util.ArrayList
 
 class FeedbackItem {
 	@BeanProperty var uniNumber:String =_

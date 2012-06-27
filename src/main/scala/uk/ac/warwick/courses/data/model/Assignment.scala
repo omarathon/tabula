@@ -200,6 +200,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		feedback.assignment = this
 	}
 	
+	// returns feedback for a specified student
+	def findFeedback(uniId:String) = feedbacks.find(_.universityId == uniId)
+
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback:Boolean = 
 			! feedbacks.isEmpty && 
