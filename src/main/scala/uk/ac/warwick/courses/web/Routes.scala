@@ -24,15 +24,23 @@ object Routes {
 		
 		object assignment {
 			def create(module:Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
-			def edit(assignment:Assignment) = "/admin/module/%s/assignments/%s/edit" format (encoded(assignment.module.code), assignment.id)
-			def delete(assignment:Assignment) = "/admin/module/%s/assignments/%s/delete" format (encoded(assignment.module.code), assignment.id)
+			
+			private def assignmentroot(assignment:Assignment) = "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+			
+			def edit(assignment:Assignment) = assignmentroot(assignment) + "/edit"
+			
+			def delete(assignment:Assignment) = assignmentroot(assignment) + "/delete"
 			
 			object submission {
-				def apply(assignment:Assignment) = "/admin/module/%s/assignments/%s/submissions/list" format (encoded(assignment.module.code), assignment.id)
+				def apply(assignment:Assignment) = assignmentroot(assignment) + "/submissions/list"
+			}
+			
+			object turnitin {
+				def status(assignment:Assignment) = assignmentroot(assignment) + "/turnitin"
 			}
 			
 			object feedback {
-				def apply(assignment:Assignment) = "/admin/module/%s/assignments/%s/feedback/list" format (encoded(assignment.module.code), assignment.id)
+				def apply(assignment:Assignment) = assignmentroot(assignment) + "/feedback/list"
 			}
 		}
 	}

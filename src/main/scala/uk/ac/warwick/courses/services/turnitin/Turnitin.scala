@@ -13,6 +13,11 @@ import scala.xml.Elem
 import java.io.File
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Value
+import java.io.FileInputStream
+
+case class FileData(val file:File, val name:String)
 
 /**
  * Service for accessing the Turnitin plagiarism API.
@@ -20,16 +25,16 @@ import org.springframework.stereotype.Service
  * The methods you call to do stuff are defined in [[TurnitinMethods]].
  */
 @Service
-class Turnitin extends TurnitinMethods with Logging with DisposableBean {
+class Turnitin extends TurnitinMethods with Logging with DisposableBean with InitializingBean {
 	
 	import TurnitinDates._
 	
 	/** The top level account ID (usually for University of Warwick account) */
-	var aid = ""
+	@Value("${turnitin.aid}") var aid: String = null
 	/** Sub-account ID underneath University of Warwick */
-	var said = ""
+	@Value("${turnitin.said}") var said: String = null
 	/** Shared key as set up on the University of Warwick account's Open API settings */
-	var sharedSecretKey: String = ""
+	@Value("${turnitin.key}") var sharedSecretKey: String = null
 	
 	/** If this is set to true, responses are returned with HTML debug info,
 	  * and also it doesn't make any changes - the server just lets you know whether
@@ -57,9 +62,10 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	  */
 	override def doRequest
 			(functionId: String, // API function ID
-			pdata: Option[File], // optional file to put in "pdata" parameter
+			pdata: Option[FileData], // optional file to put in "pdata" parameter
 			params: Pair[String, String]*) // POST parameters
 			: TurnitinResponse = {
+		
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
 		val postWithParams = endpoint.POST << (parameters + md5hexparam(parameters))
 		val req = addPdata(pdata, postWithParams)
@@ -73,8 +79,10 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	 * Returns either the request with a file added on, or the original
 	 * request if there's no file to add.
 	 */
-	def addPdata(file:Option[File], req:Request) = 	
-		file map ( req <<* ("pdata", _) ) getOrElse req
+	def addPdata(file:Option[FileData], req:Request) = 	
+		file map ( d => 
+			req <<* ("pdata", d.name, { () => new FileInputStream(d.file) }) 
+		) getOrElse req
 	
 	/**
 	 * Parameters that we need in every request.
@@ -111,5 +119,9 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean {
 	
 	override def destroy {
 		http.shutdown()
+	}
+	
+	override def afterPropertiesSet {
+		
 	}
 }

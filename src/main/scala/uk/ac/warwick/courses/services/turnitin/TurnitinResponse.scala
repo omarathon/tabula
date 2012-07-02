@@ -22,22 +22,22 @@ class TurnitinResponse(
 	 * It is assumed that the student's Uni ID was used as the first name, so
 	 * it is used as the firstname element.
 	 */
-	lazy val submissionsList = 	xml map { 
-		_ \\ "object" map { obj =>
-			TurnitinSubmissionInfo(
-				objectId = (obj \\ "objectID" text),
-				title = (obj \\ "title" text),
-				universityId = (obj \\ "firstname" text),
-				similarityScore = (obj \\ "similarityScore" text).toInt,
-				overlap = parseInt(obj \\ "overlap" text),
-				webOverlap = parseInt(obj \\ "web_overlap" text),
-				publicationOverlap = parseInt(obj \\ "publication_overlap" text),
-				studentPaperOverlap = parseInt(obj \\ "student_paper_overlap" text)
-			)
-		}
-	} getOrElse Nil
-	
-	
+	lazy val submissionsList = {
+		xml map { 
+			_ \\ "object" map { obj =>
+				TurnitinSubmissionInfo(
+					objectId = (obj \\ "objectID" text),
+					title = (obj \\ "title" text),
+					universityId = (obj \\ "firstname" text),
+					similarityScore = (obj \\ "similarityScore" text).toInt,
+					overlap = parseInt(obj \\ "overlap" text),
+					webOverlap = parseInt(obj \\ "web_overlap" text),
+					publicationOverlap = parseInt(obj \\ "publication_overlap" text),
+					studentPaperOverlap = parseInt(obj \\ "student_paper_overlap" text)
+				)
+			}
+		} getOrElse Nil
+	}
 	
 	def message = TurnitinResponse.responseCodes.getOrElse(code, unknownMessage)
 	private def unknownMessage = if (success) "Unknown code" else "Unknown error"

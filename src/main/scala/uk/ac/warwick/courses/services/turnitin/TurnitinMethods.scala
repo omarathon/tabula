@@ -11,6 +11,7 @@ trait Response {
 abstract class SuccessResponse extends Response { def successful = true }
 abstract class FailureResponse extends Response { def successful = false }
 case class Created(id:String) extends SuccessResponse
+case class Deleted() extends SuccessResponse
 case class GotSubmissions(list:Seq[TurnitinSubmissionInfo]) extends SuccessResponse
 case class AlreadyExists() extends FailureResponse
 //case class NotFound() extends FailureResponse
@@ -19,9 +20,9 @@ case class AssignmentNotFound() extends FailureResponse
 case class SubmissionNotFound() extends FailureResponse
 case class Failed(reason:String) extends FailureResponse
 
-trait TurnitinMethods {
+trait TurnitinMethods extends TurnitinAPI {
 
-	def doRequest(functionId: String, pdata: Option[File], params: Pair[String, String]*) : TurnitinResponse
+	def doRequest(functionId: String, pdata: Option[FileData], params: Pair[String, String]*) : TurnitinResponse
 	
 	/**
 	 * Create a new Class by this name. If there's already a Class by this name,
@@ -34,7 +35,7 @@ trait TurnitinMethods {
 				"ctl" -> className, 
 				"ced" -> yearsFromNow(5))
 
-		if (response.success) Created(response.classId getOrElse "")
+		if (response.success && response.classId.isDefined) Created(response.classId.get)
 		else Failed(response.message)
 	}
 	
@@ -66,7 +67,7 @@ trait TurnitinMethods {
 	}
 	
 	def submitPaper(className:String, assignmentName:String, paperTitle:String, file:File, authorFirstName:String, authorLastName:String): Response = { 
-		val response = doRequest(SubmitPaperFunction, Some(file),
+		val response = doRequest(SubmitPaperFunction, Some(FileData(file, paperTitle)),
 				"ctl" -> className,
 				"assign" -> assignmentName,
 				"ptl" -> paperTitle,
@@ -78,10 +79,18 @@ trait TurnitinMethods {
 		else Failed(response.message)
 	}
 	
+	def deleteSubmission(className:String, assignmentName:String, oid:String): Response = {
+		val response = doRequest(DeletePaperFunction, None,
+				"ctl" -> className,
+				"assign" -> assignmentName,
+				"oid" -> oid )
+		if (response.success) Deleted()
+		else Failed(response.message)
+	}
+	
 	def getReport(paperId:String): Response = {
 		val response = doRequest(GenerateReportFunction, None,
 				"oid" -> paperId)
-				
 		Failed(response.message)
 	}
 	
@@ -108,5 +117,6 @@ object TurnitinMethods {
 	private val CreateAssignmentFunction = "4"
 	private val SubmitPaperFunction = "5"
 	private val GenerateReportFunction = "6"
+	private val DeletePaperFunction = "8"
 	private val ListSubmissionsFunction = "10"
 }

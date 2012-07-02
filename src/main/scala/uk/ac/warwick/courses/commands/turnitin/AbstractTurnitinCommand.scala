@@ -12,11 +12,13 @@ abstract class AbstractTurnitinCommand[T] extends Command[T] with TurnitinTrait 
 	
 }
 
-trait TurnitinTrait {
-	@Autowired var api:Turnitin = _
+trait TurnitinTrait extends Logging {
+	@Autowired var api:TurnitinAPI = _
 	
 	/** The name of the Turnitin Class we should store this Assignment in. */
 	def classNameFor(assignment: Assignment) = "CourseworkSubmissionAPIClass"
+		
+	def assignmentNameFor(assignment: Assignment) = assignment.id
 		
 	/**
 	 * Create or get an assignment by this name. If the required class doesn't exist
@@ -27,7 +29,10 @@ trait TurnitinTrait {
 	def createOrGetAssignment(assignment: Assignment, createClass:Boolean=true) : Option[String] = {
 		val className = classNameFor(assignment)
 		api.createAssignment(className, assignment.id) match {
-			case Created(id) => Some(id)
+			case Created(id) => {
+				if (debugEnabled) logger.debug("Created assignment "+className+"/"+assignment.id+"/"+id+" first time")
+				Some(id)
+			}
 			case ClassNotFound() => 
 				if (createClass) {
 					api.createClass(className)
@@ -38,7 +43,10 @@ trait TurnitinTrait {
 				}
 			case AlreadyExists() =>  // do an update which will return the ID
 				api.createAssignment(className, assignment.id, true) match {
-					case Created(id) => Some(id)
+					case Created(id) => {
+						if (debugEnabled) logger.debug("Created assignment "+className+"/"+assignment.id+"/"+id+" second time")
+						Some(id)
+					}
 					case _ => None
 				}
 			case _ => None

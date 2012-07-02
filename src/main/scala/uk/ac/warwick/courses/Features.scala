@@ -35,9 +35,11 @@ abstract class Features {
 
 	@BeanProperty var emailStudents:Boolean = false
 	@BeanProperty var collectRatings:Boolean = true
-	@BeanProperty var submissions:Boolean = false
+	@BeanProperty var submissions:Boolean = true
 	@BeanProperty var privacyStatement:Boolean = true
 	@BeanProperty var collectMarks:Boolean = false
+	@BeanProperty var turnitin:Boolean = false
+	
 }
 
 

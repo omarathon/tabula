@@ -8,26 +8,19 @@ import uk.ac.warwick.courses.Mockito
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.userlookup.User
 
-class JobTests extends TestBase with Mockito {
+class JobTests extends TestBase with Mockito with JobTestHelp {
 	
 	val testingJob = new TestingJob
-	val allJobs = Array[Job](testingJob)
-	
-	val dao = new MockJobDao
-	val service = new JobService
-	service.jobs = allJobs
-	service.jobDao = dao
-	allJobs foreach { _.jobService = service }
+	override def createJobs = Array[Job](testingJob)
 	
 	@Before def setup {
-		dao.clear
-		
+		dao.clear	
 		val realUser = new User("real")
 		val fakeUser = new User("apparent")
 		currentUser = new CurrentUser(realUser, fakeUser)
 	}
 	
-	@Test def testingJobTest {	
+	@Test def testingJobTest {
 		dao.findOutstandingInstances(10).size should be (0)
 		val id = service.add(Some(currentUser), TestingJob("Magic"))
 		dao.findOutstandingInstances(10).size should be (1)

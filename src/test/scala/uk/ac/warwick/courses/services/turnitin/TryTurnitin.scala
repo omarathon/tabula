@@ -44,35 +44,48 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 		val f = new File("src/test/resources/turnitin-submission.doc")
 		if (!f.exists) throw new IllegalArgumentException("Whoops, test file doesn't exist")
 		
-//		val deleted = api.deleteAssignment("Automated submissions", "Test assignment")
+//		api.createClass("TestClass28Jun2012")
+		
+//		val a = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012")
+//		println(a)
 //		
-//		println(deleted)
+//		val b = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012", true)
+//		println(b)
+		
+		api.submitPaper("TestClass28Jun2012", "TestAssignment28Jun2012", "Paper", f, "XXXXX", "XXXXX")
 //		
-//		//api.createClass("Automated submissions")
-//		api.createAssignment("Automated submissions", "Test assignment")
-
+		val subs = api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012")
+		println(subs)
 		
-		
-		
-		
-		val assignment = newDeepAssignment()
-		assignment.id = "12345"
-		val submissions = for (i <- 1 to 10) yield {
-			val s = new Submission
-			s.assignment = assignment
-			s.universityId = "%07d" format (123000 + i)
-			s.userId = "abcdef"
-			val attachment1 = new FileAttachment()
-			attachment1.name = "file.doc"
-			attachment1.file = f
-			val attachments = Set(attachment1)
-			s.values.add(SavedSubmissionValue.withAttachments(s, "", attachments))
-			s
+		subs match {
+			case GotSubmissions(list) => {
+				println("Deleting submissions")
+				for (item <- list) api.deleteSubmission("TestClass28Jun2012", "TestAssignment28Jun2012", item.objectId)
+			}
+				
 		}
 		
-		val cmd = new SubmitToTurnitinCommand(assignment, submissions)
-		cmd.api = api
-		cmd.apply()
+		
+		println(api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012"))
+		
+//		val assignment = newDeepAssignment()
+//		assignment.id = "12345"
+//		val submissions = for (i <- 1 to 10) yield {
+//			val s = new Submission
+//			s.assignment = assignment
+//			s.universityId = "%07d" format (123000 + i)
+//			s.userId = "abcdef"
+//			val attachment1 = new FileAttachment()
+//			attachment1.name = "file.doc"
+//			attachment1.file = f
+//			val attachments = Set(attachment1)
+//			s.values.add(SavedSubmissionValue.withAttachments(s, "", attachments))
+//			s
+//		}
+		
+//		val cmd = new SubmitToTurnitinCommand(assignment, submissions)
+//		cmd.api = api
+//		cmd.apply()
 	
 	} finally {
 		deleteTemporaryDirs

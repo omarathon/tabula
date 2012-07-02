@@ -13,6 +13,11 @@ Download selected as ZIP file
 XML
 </a>
 <a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete' />" id="delete-selected-button">Delete selected</a>
+
+<#if features.turnitin>
+<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+</#if>
+
 </div>
 
 <#if submissions?size gt 0>

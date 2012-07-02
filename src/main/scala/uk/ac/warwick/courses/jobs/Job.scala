@@ -48,6 +48,7 @@ abstract class Job extends Logging {
 	protected def status (implicit _status:JobInstance)  = _status.status
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	protected def status_=(status:String) (implicit _status:JobInstance)  {
+		if (debugEnabled) logger.debug("Job:"+_status.id+" - " + status)
 		_status.status = status
 		jobService.update(_status)
 	}
