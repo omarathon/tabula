@@ -1,7 +1,7 @@
 <div class="submission-received">
 	<#if justSubmitted!false>
 	<div class="alert alert-success">
-		<a class="close" data-dismiss="alert">×</a>Thanks, we've received your submission.
+		<a class="close" data-dismiss="alert">&times;</a>Thanks, we've received your submission.
 	</div>
 	</#if>
 	
