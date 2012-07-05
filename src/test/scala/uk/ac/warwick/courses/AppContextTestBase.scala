@@ -16,6 +16,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.BeanInstantiationException
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy
+import javax.sql.DataSource
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
@@ -29,6 +30,8 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
+	
+	
 }
 
 trait ContextSetup {
@@ -41,6 +44,7 @@ trait ContextSetup {
 
 trait TransactionalTesting {
 	@Autowired var sessionFactory:SessionFactory =_
+	@Autowired var dataSource:DataSource =_
 	@Autowired var transactionManager:PlatformTransactionManager =_
 	
 	def session = sessionFactory.getCurrentSession

@@ -20,6 +20,14 @@ XML
 
 </div>
 
+<#macro originalityReport r>
+Similarity:${r.similarity}, 
+Overlap:${r.overlap}%,
+Web overlap:${r.webOverlap}%,
+Student paper overlap:${r.studentOverlap}%,
+Publication overlap:${r.publicationOverlap}%
+</#macro>
+
 <#if submissions?size gt 0>
 <div class="submission-list">
 	<@form.selector_check_all />
@@ -37,6 +45,11 @@ XML
 		</#if>
 		<#if item.downloaded>
 		  <span class="label-green">Downloaded</span>
+		</#if>
+		<#if item.submission.originalityReport??>
+			<div class="originality-report">
+				<@originalityReport item.submission.originalityReport />
+			</div>
 		</#if>
 		</div>
 	</div>

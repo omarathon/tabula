@@ -27,6 +27,7 @@ trait AssignmentService {
 	def getSubmission(id:String) : Option[Submission]
 	
 	def delete(submission:Submission) : Unit
+	def deleteOriginalityReport(submission:Submission): Unit
 	
 	def getAssignmentByNameYearModule(name:String, year:AcademicYear, module:Module): Option[Assignment]
 	
@@ -54,7 +55,12 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 	
 	def getAssignmentById(id:String) = getById[Assignment](id)
 	def save(assignment:Assignment) = session.saveOrUpdate(assignment)
-	def saveSubmission(submission:Submission) = session.saveOrUpdate(submission)
+	def saveSubmission(submission:Submission) = {
+	    if (submission.originalityReport != null && submission.originalityReport.id == null) {
+	    	session.save(submission.originalityReport)
+	    }
+	    session.saveOrUpdate(submission)
+	}
 	
 	def replaceMembers(template:UpstreamAssessmentGroup, universityIds:Seq[String]) {
 		if (debugEnabled) debugReplace(template, universityIds)
@@ -111,6 +117,21 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 	def delete(submission:Submission) = {
 		submission.assignment.submissions.remove(submission)
 		session.delete(submission)
+	}
+	
+	/**
+	 * Deletes the OriginalityReport attached to this Submission if one
+	 * exists. It flushes the session straight away because otherwise deletes
+	 * don't always happen until after some insert operation that assumes
+	 * we've deleted it.
+	 */
+	def deleteOriginalityReport(submission:Submission) {
+		if (submission.originalityReport != null) {
+			val report = submission.originalityReport
+			submission.originalityReport = null
+			session.delete(report)
+			session.flush()
+		}
 	}
 	
 	def getAssignmentsWithFeedback(universityId:String): Seq[Assignment] =

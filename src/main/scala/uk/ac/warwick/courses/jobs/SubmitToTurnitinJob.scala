@@ -1,24 +1,33 @@
 package uk.ac.warwick.courses.jobs
 
-import collection.mutable.StringBuilder
-import collection.JavaConversions._
-import uk.ac.warwick.courses.commands.turnitin._
-import uk.ac.warwick.courses.services.turnitin._
-import uk.ac.warwick.courses.data.model._
-import uk.ac.warwick.courses.helpers._
-import org.springframework.beans.factory.annotation.Configurable
+import scala.collection.JavaConversions._
+
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.services.AssignmentService
-import uk.ac.warwick.courses.ItemNotFoundException
-import uk.ac.warwick.courses.services.jobs.JobInstance
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.javamail.MimeMailMessage
 import org.springframework.stereotype.Component
-import java.io.PrintWriter
-import java.io.StringWriter
-import scala.annotation.tailrec
-import uk.ac.warwick.util.mail.WarwickMailSender
+
+import freemarker.template.Configuration
 import javax.annotation.Resource
+import javax.persistence.Entity
+import javax.persistence.Table
+import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.commands.Describable
 import uk.ac.warwick.courses.commands.Description
+import uk.ac.warwick.courses.commands.turnitin.TurnitinTrait
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.OriginalityReport
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.services.jobs.JobInstance
+import uk.ac.warwick.courses.services.turnitin.GotSubmissions
+import uk.ac.warwick.courses.services.turnitin.TurnitinSubmissionInfo
+import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -44,12 +53,22 @@ abstract class DescribableJob(instance:JobInstance) extends Describable[Nothing]
  * FIXME send email!
  */
 @Component
-class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
+class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with FreemarkerRendering {
 
 	val identifier = SubmitToTurnitinJob.identifier
 	
+	@Autowired implicit var freemarker: Configuration = _
 	@Autowired var assignmentService: AssignmentService = _
 	@Resource(name="mailSender") var mailer: WarwickMailSender = _
+	
+	@Value("${mail.noreply.to}") var replyAddress:String = _
+    @Value("${mail.exceptions.to}") var fromAddress:String = _
+    @Value("${toplevel.url}") var topLevelUrl:String = _
+	
+	val WaitingRetries = 50
+	val WaitingSleep = 20000
+	
+	var sendEmails = true
 	
 	def run(implicit job:JobInstance) {
 		status = "Submitting to Turnitin"
@@ -74,19 +93,13 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
 		}
 	}
 	
-	def describable(instance:JobInstance) = new DescribableJob(instance) {
-		def describe(description: Description) {
-			
-		}
-	}
-	
 	def removeDefunctSubmissions(assignment: Assignment, existingSubmissions: Seq[TurnitinSubmissionInfo]) {
 		// delete files in turnitin that aren't in the assignment any more
 		for (info <- existingSubmissions) {
 			val exists = assignment.submissions exists { submission => 
 				submission.allAttachments.exists { attachment => 
 					info.universityId == submission.universityId && info.title == attachment.name
-				} 
+				}
 			}
 			if (!exists) {
 				logger.debug("Deleting submission that no longer exists in app: objectId=" + info.objectId + " " + info.universityId)
@@ -100,9 +113,11 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
 		var uploadsDone = 0
 		val allAttachments = assignment.submissions flatMap { _.allAttachments }
 		val uploadsTotal = allAttachments.size
+		
 		assignment.submissions foreach { submission =>
 			if (debugEnabled) logger.debug("Submission ID: " + submission.id)
 			logger.debug("submission.allAttachments: ("+submission.allAttachments.size+")")
+			
 			submission.allAttachments foreach { attachment =>
 				val alreadyUploaded = existingSubmissions.exists( info => info.universityId == submission.universityId && info.title == attachment.name )
 				if (alreadyUploaded) {
@@ -118,6 +133,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
 				}
 				uploadsDone += 1
 			}
+			
 			progress = (10 + ((uploadsDone*80) / uploadsTotal)) // 10% - 90%
 		}
 		
@@ -128,38 +144,60 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
 		// Uploaded all the submissions probably, now we wait til they're all checked
 		status = "Waiting for documents to be checked..."
 			
-		// try 50 times with a 10 sec sleep inbetween until we get a full Turnitin report.
-		val submissions = runCheck(assignment, 50) getOrElse Nil
+		// try WaitingRetries times with a WaitingSleep msec sleep inbetween until we get a full Turnitin report.
+		val submissions = runCheck(assignment, WaitingRetries) getOrElse Nil
 		
 		if (submissions.isEmpty) {
 			logger.error("Waited for complete Turnitin report but didn't get one. Turnitin assignment: "+turnitinId)
-			status = "Failed to generate a report. "
+			status = "Failed to generate a report. The service may be busy - try again later."
 		} else {
 			
-			// TODO persist report
-			// TODO send an email
-			
-			val s = new StringBuilder
-			s append "Originality report for " append assignment.name
-			s append " (" append assignment.module.code.toUpperCase append ")\n"
-			
-			for (submission <- submissions) {
-				s append "---\n"
-				s append submission.universityId append "\n"
-				s append " Similarity=" append submission.similarityScore append "\n"
-				s append " Overlap=" append submission.overlap append "\n"
-				s append " Student Overlap=" append submission.studentPaperOverlap append "\n"
-				s append " Web Overlap=" append submission.webOverlap append "\n"
-				s append " Publication Overlap=" append submission.publicationOverlap append "\n"
+			for (report <- submissions) {
+				val submission = assignment.submissions.find(s => s.universityId == report.universityId)
+				submission.map { submission =>
+					// FIXME this is a clunky way to replace an existing report
+					if (submission.originalityReport != null) {
+						assignmentService.deleteOriginalityReport(submission)
+					}
+					submission.addOriginalityReport({
+						val r = new OriginalityReport
+						r.similarity = Some(report.similarityScore)
+						r.overlap = report.overlap
+						r.webOverlap = report.webOverlap
+						r.publicationOverlap = report.publicationOverlap
+						r.studentOverlap = report.studentPaperOverlap
+						r
+					})
+					assignmentService.saveSubmission(submission)
+				} getOrElse {
+					logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
+				}
 			}
 			
-			logger.info("Here is a report.")
-			logger.info(s.toString)
+			if (sendEmails) {
+				logger.debug("Sending an email to " + job.user.email)
+				val mime = mailer.createMimeMessage()
+    			val email = new MimeMailMessage(mime)
+    			email.setFrom(replyAddress)
+    			email.setTo(job.user.email)
+    			email.setSubject("Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
+    			email.setText(renderEmailText(job.user, assignment))
+    			mailer.send(mime)
+			}
 			
 			status = "Generated a report."
 			progress = 100
 			job.succeeded = true
 		}
+	}
+	
+	def renderEmailText(user: CurrentUser, assignment: Assignment) = {
+		renderToString("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
+            "assignment" -> assignment,
+            "assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
+            "user" -> user,
+            "url" -> (topLevelUrl + Routes.admin.assignment.submission(assignment))
+        ))
 	}
 	
 	/** Recursive function to repeatedly check if all the documents have been scored yet.
@@ -172,7 +210,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging {
 	}
 	
 	def runCheck(assignment:Assignment)(implicit job:JobInstance) : Option[Seq[TurnitinSubmissionInfo]] = {
-		Thread.sleep(10000)
+		Thread.sleep(WaitingSleep)
 		api.listSubmissions(classNameFor(assignment), assignment.id) match {
 			case GotSubmissions(list) => {
 				val checked = list filter { _.hasBeenChecked }

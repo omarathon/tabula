@@ -9,6 +9,8 @@ import uk.ac.warwick.courses.services.jobs.JobService
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.jobs.SubmitToTurnitinJob
 import scala.reflect.BeanProperty
+import collection.JavaConversions._
+import org.apache.commons.io.FilenameUtils
 
 /** 
  * Creates a job that submits the assignment to Turnitin.
@@ -29,5 +31,7 @@ class SubmitToTurnitinCommand(@BeanProperty var user:CurrentUser) extends Comman
 	def apply = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 	
 	def describe(d:Description) = d.assignment(assignment)
+	
+	def incompatibleFiles = assignment.submissions flatMap { _.allAttachments } filterNot Turnitin.validFileType
 	
 }

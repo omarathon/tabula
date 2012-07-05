@@ -52,21 +52,21 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 //		val b = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012", true)
 //		println(b)
 		
-		api.submitPaper("TestClass28Jun2012", "TestAssignment28Jun2012", "Paper", f, "XXXXX", "XXXXX")
+//		api.submitPaper("TestClass28Jun2012", "TestAssignment28Jun2012", "Paper", f, "XXXXX", "XXXXX")
 //		
-		val subs = api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012")
+		val subs = api.listSubmissions("CourseworkSubmissionAPIClass", "7804b3c1-1c29-4ff1-9437-aaba07cb0954")
 		println(subs)
 		
-		subs match {
-			case GotSubmissions(list) => {
-				println("Deleting submissions")
-				for (item <- list) api.deleteSubmission("TestClass28Jun2012", "TestAssignment28Jun2012", item.objectId)
-			}
-				
-		}
-		
-		
-		println(api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012"))
+//		subs match {
+//			case GotSubmissions(list) => {
+//				println("Deleting submissions")
+//				for (item <- list) api.deleteSubmission("TestClass28Jun2012", "TestAssignment28Jun2012", item.objectId)
+//			}
+//				
+//		}
+//		
+//		
+//		println(api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012"))
 		
 //		val assignment = newDeepAssignment()
 //		assignment.id = "12345"

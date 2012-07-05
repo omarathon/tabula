@@ -24,20 +24,20 @@ class TurnitinController extends BaseController {
 	@RequestMapping(method=Array(GET,HEAD), params=Array("!jobId"))
 	def confirm(command: SubmitToTurnitinCommand) = {
 		check(command)
-		Mav("admin/assignments/turnitin/form")
+		Mav("admin/assignments/turnitin/form", "incompatibleFiles" -> command.incompatibleFiles)
 	}
 	
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(method=Array(POST), params=Array("!jobId"))
 	def submit(command: SubmitToTurnitinCommand) = {
 		check(command)
 		val jobId = command.apply()
 		Redirect(Routes.admin.assignment.turnitin.status(command.assignment)+"?jobId="+jobId)
 	}
 	
-	@RequestMapping(method=Array(GET,HEAD), params=Array("jobId"))
-	def status(@RequestParam jobId: String) {
+	@RequestMapping(params=Array("jobId"))
+	def status(@RequestParam jobId: String) = {
 		val job = jobService.getInstance(jobId)
-		Mav("admin/assignments/turnitin/status", "job" -> job)
+		Mav("admin/assignments/turnitin/status", "job" -> job).noLayoutIf(ajax)
 	}
 	
 	def check(command: SubmitToTurnitinCommand) {

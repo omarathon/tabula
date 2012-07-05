@@ -13,6 +13,7 @@ import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.courses.JavaImports.JSet
 import uk.ac.warwick.courses.actions.Deleteable
@@ -20,6 +21,7 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.collection.mutable
 import java.util.HashSet
+import javax.persistence.FetchType
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -31,7 +33,7 @@ class Submission extends GeneratedId with Deleteable {
 	
 	def isLate = submittedDate != null && assignment.closeDate.isBefore(submittedDate)
 	
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE))
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
   
@@ -57,6 +59,19 @@ class Submission extends GeneratedId with Deleteable {
 
 	@OneToMany(mappedBy="submission", cascade=Array(ALL))
 	@BeanProperty var values:JSet[SavedSubmissionValue] = new HashSet
+	
+	@OneToOne(fetch=FetchType.LAZY, cascade=Array(PERSIST), mappedBy="submission")
+	@BeanProperty var originalityReport: OriginalityReport =_
+	
+	def addOriginalityReport(report: OriginalityReport) {
+		if (originalityReport != null) {
+			// would be good if it could just detect an old orphaned report but it doesn't
+			// seem to work so have to delete it manually first.
+			throw new IllegalStateException("Can't add another report without deleting this one")
+		}
+		originalityReport = report
+		originalityReport.submission = this
+	}
 	
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 	

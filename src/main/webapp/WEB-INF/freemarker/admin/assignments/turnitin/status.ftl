@@ -4,9 +4,11 @@
 
 <#else>
 
+	<#assign jobId=job.id/>
+
 	<h1>Job status</h1>
 	
-	<p>Job ID ${jobId}</p>
+	<!-- <p>Job ID ${jobId}</p> -->
 	
 	<div id="job-status-fragment" class="well">
 	<#include "job-status-fragment.ftl" />
@@ -14,25 +16,40 @@
 	
 	<div id="job-progress">
 		<div class="progress progress-striped active">
-		  <div class="bar" style="width: 30%;"></div>
+		  <div class="bar" style="width: ${5 + job.progress*0.95}%;"></div>
 		</div>
 	</div>
 	
 	<script>
 	(function($){
 	
+	var updateProgress = function() {
+		// grab progress from data-progress attribute in response.
+		var $value = $('#job-status-value');
+		var $progress = $('#job-progress .progress');
+		var percent = $value.data('progress');
+		$progress.find('.bar').css('width', Math.floor(5+(percent*0.95))+'%');
+		if ($value.data('finished')) {
+			console.log($progress);
+			$progress.removeClass('active');
+			if ($value.data('succeeded') == false) {
+				$progress.addClass('progress-warning');
+			} else {
+				$progress.addClass('progress-success');
+			}
+		} else {
+			setTimeout(updateFragment, 2000);
+		}
+	}
+	
 	var $fragment = $('#job-status-fragment');
 	var updateFragment = function() {
-		$fragment.load('', {id: '${jobId}'}, function(){
-		
-			// grab progress from data-progress attribute in response.
-			var percent = $('#job-status-value').data('progress');
-			$('#job-progress .bar').css('width', percent+'%');
-			
-			setTimeout(updateFragment, 2000);
+		$fragment.load('?ajax&jobId=${jobId}', function(){
+			updateProgress();
 		});
 	};
 	setTimeout(updateFragment, 2000);
+	updateProgress();
 	
 	})(jQuery);
 	</script>

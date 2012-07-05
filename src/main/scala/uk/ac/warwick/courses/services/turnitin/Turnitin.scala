@@ -16,8 +16,19 @@ import org.springframework.stereotype.Service
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
 import java.io.FileInputStream
+import uk.ac.warwick.courses.data.model.FileAttachment
+import org.apache.commons.io.FilenameUtils
 
 case class FileData(val file:File, val name:String)
+
+object Turnitin {
+	/** Quoted supported types are...
+	  * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format". */
+	val validExtensions = Seq("doc","docx","pdf","rtf","txt","wpd","htm","html","ps")
+	
+	def validFileType(file: FileAttachment): Boolean = 
+		Turnitin.validExtensions contains FilenameUtils.getExtension(file.name).toLowerCase
+}
 
 /**
  * Service for accessing the Turnitin plagiarism API.

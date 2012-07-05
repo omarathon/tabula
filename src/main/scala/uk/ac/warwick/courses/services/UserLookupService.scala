@@ -35,7 +35,7 @@ class SwappableUserLookupService(@BeanProperty var delegate:UserLookupInterface)
 }
 
 @BeanInfo
-class MaintenanceUserLookup extends UserLookupInterface {
+class MaintenanceUserLookup extends UserLookupService {
 	
 	def getUsersInDepartment(arg0: String): List[User] = Nil
 

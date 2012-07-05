@@ -1610,7 +1610,7 @@ table.sitebuilder_sortable tr.even {
 #custom-header p,
 #custom-footer p {
   margin: 0.5em 0;
-  color: #333;
+  /* color: #333; */
 }
 .mceContentBody ul,
 #main-content ul,
