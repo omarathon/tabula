@@ -2,11 +2,9 @@ package uk.ac.warwick.courses.commands.assignments
 
 import java.util.ArrayList
 import java.util.zip.ZipInputStream
-
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.util.matching.Regex
-
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
-
 import javax.persistence.Entity
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.UniversityId
@@ -39,6 +36,8 @@ import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.services.Zips
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import java.nio.charset.Charset
 
 class FeedbackItem {
 	@BeanProperty var uniNumber:String =_
@@ -189,16 +188,19 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	
 	// ZIP has been uploaded. unpack it
 	if (archive != null && !archive.isEmpty()) {
-		val zip = new ZipInputStream(archive.getInputStream)
+		val zip = new ZipArchiveInputStream(archive.getInputStream)
 		
 		val bits = Zips.iterator(zip) { (iterator) =>
 			for (entry <- iterator if !entry.isDirectory) yield {
 				val f = new FileAttachment
-				f.name = filenameOf(entry.getName)
+				// Funny char from Windows? We can't work out what it is so
+				// just turn it into an underscore.
+				val name = entry.getName.replace("\uFFFD","_")
+				f.name = filenameOf(name)
 				f.uploadedData = new ZipEntryInputStream(zip, entry)
 				f.uploadedDataLength = entry.getSize
 				fileDao.saveTemporary(f)
-				(entry.getName, f)
+				(name, f)
 			}
 		}
 		

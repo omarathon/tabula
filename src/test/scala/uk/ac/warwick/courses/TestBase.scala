@@ -171,4 +171,13 @@ trait TestHelpers {
 	def resourceAsString(path: String, encoding: String = "UTF-8"): String = new String(resourceAsBytes(path), encoding)
 	def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
 
+	
+	def containMatching[T](f: (T)=>Boolean) = org.scalatest.matchers.Matcher[Seq[T]] { (v:Seq[T]) =>
+		org.scalatest.matchers.MatchResult(
+    		v exists f,
+    		"Contained a matching value",
+    		"Contained no matching value"
+		)
+	}
+	
 }

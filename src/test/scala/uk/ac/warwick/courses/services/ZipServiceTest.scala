@@ -11,6 +11,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.courses.data.model.forms.FileSubmissionValue
 import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.data.model.FileAttachment
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 
 class ZipServiceTest extends TestBase {
 	
@@ -41,7 +42,7 @@ class ZipServiceTest extends TestBase {
 		names should have ('size(8))
 		names should contain("0123456/")
 		names should contain("0123456/feedback.doc")
-		names should contain("0123456/feedback.mp3")
+		names should contain("0123456/feedböck.mp3")
 		names should contain("0123456/feedback.txt")
 		names should contain("0123457/")
 		names should contain("0123457/crayons.doc")
@@ -50,14 +51,14 @@ class ZipServiceTest extends TestBase {
 	}
 	
 	@Test def iterateZip {
-		val zip = new ZipInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
+		val zip = new ZipArchiveInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
 		val names = Zips.iterator(zip){ (iterator) =>
 			for (i <- iterator) yield i.getName
 		}
 		names should have ('size(8))
 		names should contain("0123456/")
 		names should contain("0123456/feedback.doc")
-		names should contain("0123456/feedback.mp3")
+		names should contain("0123456/feedböck.mp3")
 		names should contain("0123456/feedback.txt")
 		names should contain("0123457/")
 		names should contain("0123457/crayons.doc")

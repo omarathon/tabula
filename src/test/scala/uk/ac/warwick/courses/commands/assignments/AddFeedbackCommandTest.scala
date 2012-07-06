@@ -64,6 +64,22 @@ class AddFeedbackCommandTest extends AppContextTestBase with ClassMocker with Le
 			
 			val attached0123456 = command.items.find { _.uniNumber == "0123456" }.get.file.attached
 			attached0123456.find { _.name == "feedback.txt" }.get.length should be (Some(975))
+			attached0123456.find { _.name == "feedböck.mp3" } should be ('defined)
 		}
+	}
+	
+	/** HFC-228 Windows zips with non-ASCII chars fail to extract */
+	@Transactional @Test def hfc228 {
+		withUser("abc") {
+            val feedbackZip = resourceAsBytes("windows-zip-entry-with-umlaut.zip")
+            val assignment = new Assignment
+            session.save(assignment)
+            val command = new AddFeedbackCommand(assignment, currentUser)
+            command.archive = new MockMultipartFile("archive", "feedback.zip", "application/unknown", feedbackZip)
+            command.onBind
+            
+            val unrecognisedFilenames = command.unrecognisedFiles map { _.file.name }
+            unrecognisedFilenames should contain ("D_g.bmp")
+        }
 	}
 }

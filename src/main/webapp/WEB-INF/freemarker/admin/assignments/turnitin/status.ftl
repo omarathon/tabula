@@ -8,7 +8,7 @@
 
 	<h1>Job status</h1>
 	
-	<p>This page will update itself automatically</p>
+	<p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
 	
 	<!-- <p>Job ID ${jobId}</p> -->
 	
