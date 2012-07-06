@@ -21,11 +21,13 @@ XML
 </div>
 
 <#macro originalityReport r>
-Similarity:${r.similarity}, 
-Overlap:${r.overlap}%,
-Web overlap:${r.webOverlap}%,
-Student paper overlap:${r.studentOverlap}%,
-Publication overlap:${r.publicationOverlap}%
+<img src="<@url resource="/static/images/icons/turnitin-16.png"/>">
+<span class="similarity-${r.similarity}">${r.overlap}% similarity</span>
+<span class="similarity-subcategories">
+(Web: ${r.webOverlap}%,
+Student papers: ${r.studentOverlap}%,
+Publications: ${r.publicationOverlap}%)
+</span>
 </#macro>
 
 <#if submissions?size gt 0>

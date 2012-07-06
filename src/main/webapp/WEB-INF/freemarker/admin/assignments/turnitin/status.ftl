@@ -8,10 +8,16 @@
 
 	<h1>Job status</h1>
 	
+	<p>This page will update itself automatically</p>
+	
 	<!-- <p>Job ID ${jobId}</p> -->
 	
 	<div id="job-status-fragment" class="well">
 	<#include "job-status-fragment.ftl" />
+	</div>
+	
+	<div id="job-done-fragment">
+		
 	</div>
 	
 	<div id="job-progress">
