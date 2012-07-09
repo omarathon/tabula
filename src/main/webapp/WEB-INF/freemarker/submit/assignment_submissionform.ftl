@@ -1,4 +1,4 @@
-<#if !submission??>
+<#if !submission?? && assignment.collectSubmissions>
 	<#include "assignment_deadline.ftl" />
 </#if>
 
@@ -89,12 +89,22 @@
 			This assignment isn't collecting submissions through this system, but you may get
 			an email to retrieve your feedback from here.
 		</p>
+		
+		<h3>Expecting your feedback?</h3>
+		
+		<p>
+			Sorry, but there doesn't seem to be anything here for you. 
+			If you've been told to come here to retrieve your feedback 
+			then you'll need to get in touch directly with your 
+			course/module convenor to see why it hasn't been published yet. 
+			When it's published you'll receive an automated email.
+		</p>
+		
 	<#elseif assignment.closed>
 		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
 			
 			This assignment doesn't allow late submissions.
-			
 		</div>
 	<#elseif !assignment.opened>
 		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true timezone=true />.</p>
