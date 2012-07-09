@@ -35,7 +35,10 @@ trait TurnitinTrait extends Logging {
 			}
 			case ClassNotFound() => 
 				if (createClass) {
-					api.createClass(className)
+					val createdClass = api.createClass(className)
+					if (!createdClass.successful) {
+						logger.warn("Couldn't create class to hold assignment - " + createdClass)
+					}
 					createOrGetAssignment(assignment, false)
 				} else {
 					// tried making a class but it didn't help. give up
@@ -47,9 +50,15 @@ trait TurnitinTrait extends Logging {
 						if (debugEnabled) logger.debug("Created assignment "+className+"/"+assignment.id+"/"+id+" second time")
 						Some(id)
 					}
-					case _ => None
+					case _ => {
+						logger.error("Assignment update failed")
+						None
+					}
 				}
-			case _ => None
+			case x => {
+				logger.error("Unexpected response creating assignment: " + x)
+				None
+			}
 		}
 	}
 }
