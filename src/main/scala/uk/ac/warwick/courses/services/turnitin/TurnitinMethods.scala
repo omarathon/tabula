@@ -18,7 +18,7 @@ case class AlreadyExists() extends FailureResponse
 case class ClassNotFound() extends FailureResponse
 case class AssignmentNotFound() extends FailureResponse
 case class SubmissionNotFound() extends FailureResponse
-case class Failed(reason:String) extends FailureResponse
+case class Failed(code:Int, reason:String) extends FailureResponse
 
 trait TurnitinMethods extends TurnitinAPI {
 
@@ -36,7 +36,7 @@ trait TurnitinMethods extends TurnitinAPI {
 				"ced" -> yearsFromNow(5))
 
 		if (response.success && response.classId.isDefined) Created(response.classId.get)
-		else Failed(response.message)
+		else Failed(response.code, response.message)
 	}
 	
 	/**
@@ -54,7 +54,7 @@ trait TurnitinMethods extends TurnitinAPI {
 		if (response.code == 419) AlreadyExists()
 		else if (response.code == 206) ClassNotFound()
 		else if (response.success) Created(response.assignmentId getOrElse "")
-		else Failed(response.message)
+		else Failed(response.code, response.message)
 	}
 	
 	def deleteAssignment(className:String, assignmentName:String): Response = {
@@ -62,7 +62,7 @@ trait TurnitinMethods extends TurnitinAPI {
 				"ctl" -> className,
 				"assign" -> assignmentName, 
 				"fcmd" -> "6")
-		Failed(response.message)
+		Failed(response.code, response.message)
 		// 411 -> it didn't exist
 	}
 	
@@ -76,7 +76,7 @@ trait TurnitinMethods extends TurnitinAPI {
 				"pln" -> authorLastName)
 				
 		if (response.success) Created(response.objectId getOrElse "")
-		else Failed(response.message)
+		else Failed(response.code, response.message)
 	}
 	
 	def deleteSubmission(className:String, assignmentName:String, oid:String): Response = {
@@ -85,13 +85,13 @@ trait TurnitinMethods extends TurnitinAPI {
 				"assign" -> assignmentName,
 				"oid" -> oid )
 		if (response.success) Deleted()
-		else Failed(response.message)
+		else Failed(response.code, response.message)
 	}
 	
 	def getReport(paperId:String): Response = {
 		val response = doRequest(GenerateReportFunction, None,
 				"oid" -> paperId)
-		Failed(response.message)
+		Failed(response.code, response.message)
 	}
 	
 	def listSubmissions(className:String, assignmentName:String): Response = {
@@ -100,12 +100,12 @@ trait TurnitinMethods extends TurnitinAPI {
 				"assign" -> assignmentName, 
 				"fcmd" -> "2")
 		if (response.success) GotSubmissions(response.submissionsList)
-		else Failed(response.message)
+		else Failed(response.code, response.message)
 	}
 	
 	def resolveError(response:TurnitinResponse): Response = response.code match {
 		case 419 => AlreadyExists()
-		case _ => Failed(response.message)
+		case _ => Failed(response.code, response.message)
 	}
 		
 }
