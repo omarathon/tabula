@@ -12,12 +12,14 @@ import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.services.jobs.JobService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.courses.services.AssignmentService
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/turnitin"))
 class TurnitinController extends BaseController {
 	
 	@Autowired var jobService: JobService =_
+	@Autowired var assignmentService: AssignmentService =_
 	
 	@ModelAttribute def model(user: CurrentUser) = new SubmitToTurnitinCommand(user)
 	
@@ -37,7 +39,14 @@ class TurnitinController extends BaseController {
 	@RequestMapping(params=Array("jobId"))
 	def status(@RequestParam jobId: String) = {
 		val job = jobService.getInstance(jobId)
-		Mav("admin/assignments/turnitin/status", "job" -> job).noLayoutIf(ajax)
+		val mav = Mav("admin/assignments/turnitin/status", "job" -> job).noLayoutIf(ajax)
+		// add assignment object if we can find it. FIXME This is a bit hacky.
+		job foreach { job =>
+			assignmentService.getAssignmentById( job.getString("assignment") ) foreach { assignment =>
+				mav.addObjects("assignment" -> assignment)
+			}
+		}
+		mav
 	}
 	
 	def check(command: SubmitToTurnitinCommand) {

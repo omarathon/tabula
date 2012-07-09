@@ -10,14 +10,15 @@
 	
 	<p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
 	
+	<#if assignment?? >
+		<p>When the job is finished you'll be able to see the results on the 
+		<a href="<@routes.assignmentsubmissions assignment />">submissions page</a>.</p>
+	</#if>
+	
 	<!-- <p>Job ID ${jobId}</p> -->
 	
 	<div id="job-status-fragment" class="well">
 	<#include "job-status-fragment.ftl" />
-	</div>
-	
-	<div id="job-done-fragment">
-		
 	</div>
 	
 	<div id="job-progress">

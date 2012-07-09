@@ -103,13 +103,20 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean with Ini
 		"gmtime" -> gmtTimestamp,
 		"encrypt" -> "0",
 		"aid" -> aid,
-		"said" -> said,
 		"fcmd" -> "2",
 		"uem" -> "coursework@warwick.ac.uk",
 		"ufn" -> "Coursework",
 		"uln" -> "App",
 		"utp" -> "2"
-	)
+	) ++ (subAccountParameter)
+	
+	
+	private def subAccountParameter: Map[String,String] =
+		if (said == null || said.isEmpty) 
+			Map.empty
+		else 
+			Map("said" -> said)
+			
 	
 	def md5hexparam(map:Map[String,String]) = ("md5" -> md5hex(map))
 	
