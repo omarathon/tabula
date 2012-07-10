@@ -12,18 +12,7 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
 import Assignment.defaultCommentFieldName
 import Assignment.defaultUploadName
-import javax.persistence.Access
-import javax.persistence.Basic
-import javax.persistence.Column
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.NamedQueries
-import javax.persistence.OneToMany
-import javax.persistence.OrderBy
+import javax.persistence._
 import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.actions.Viewable
 import uk.ac.warwick.courses.data.model.forms.CommentField
@@ -69,27 +58,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	
 	@transient var occurrence:String =_
 	
-	/**
-	 * Before we allow customising of assignments, we just want the basic
-	 * fields to allow you to 
-	 */
-	def addDefaultFields {
-		val pretext = new CommentField
-		pretext.name = defaultCommentFieldName
-		pretext.value = ""
-		
-		val file = new FileField
-		file.name = defaultUploadName
-		
-		addFields(pretext, file)
-	}
-
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
 	@BeanProperty var fileExtensions:Seq[String] = _
-	
-	def setAllFileTypesAllowed { fileExtensions = Nil } 
-  
+
 	@BeanProperty var attachmentLimit:Int = 1
 	
 	@BeanProperty var name:String =_
@@ -108,6 +80,45 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var allowResubmission:Boolean = false
 	@BeanProperty var displayPlagiarismNotice:Boolean = false
 	
+    @ManyToOne
+    @JoinColumn(name="module_id")
+    @BeanProperty var module:Module =_
+    
+//  @ManyToOne
+//  @JoinColumn(name="upstream_id")
+    @transient @BeanProperty var upstreamAssignment:UpstreamAssignment =_
+    
+    @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
+    @OrderBy("submittedDate")
+    @BeanProperty var submissions:JList[Submission] = ArrayList()
+    
+    @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
+    @BeanProperty var feedbacks:JList[Feedback] = ArrayList()
+    
+    /**
+     * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
+     */
+    @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
+    @IndexColumn(name="position")
+    @BeanProperty var fields:JList[FormField] = ArrayList()
+        
+    def setAllFileTypesAllowed { fileExtensions = Nil } 
+    
+    /**
+     * Before we allow customising of assignments, we just want the basic
+     * fields to allow you to 
+     */
+    def addDefaultFields {
+        val pretext = new CommentField
+        pretext.name = defaultCommentFieldName
+        pretext.value = ""
+        
+        val file = new FileField
+        file.name = defaultUploadName
+        
+        addFields(pretext, file)
+    }
+
 	/**
 	 * Returns whether we're between the opening and closing dates
 	 */
@@ -134,29 +145,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 */
 	def resubmittable = submittable && allowResubmission && !isClosed()
 	
-	@ManyToOne
-	@JoinColumn(name="module_id")
-	@BeanProperty var module:Module =_
-	
-//	@ManyToOne
-//	@JoinColumn(name="upstream_id")
-	@transient @BeanProperty var upstreamAssignment:UpstreamAssignment =_
-	
-	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
-	@OrderBy("submittedDate")
-	@BeanProperty var submissions:JList[Submission] = ArrayList()
-	
-	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
-	@BeanProperty var feedbacks:JList[Feedback] = ArrayList()
-	
 	def mostRecentFeedbackUpload = feedbacks.maxBy{_.uploadedDate}.uploadedDate
-	
-	/**
-	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
-	 */
-	@OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
-	@IndexColumn(name="position")
-	@BeanProperty var fields:JList[FormField] = ArrayList()
 	
 	def addField(field:FormField) {
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name "+field.name+" already exists")
