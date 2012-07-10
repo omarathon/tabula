@@ -6,17 +6,18 @@ import scala.actors.Actor
 import scala.actors.Actor._
 
 class ScheduledJobsTest extends TestBase {
+	import SchedulingConcurrency._
 
 	/** Just a thread that will stop until we call go() on it,
 	 * and will call nonconcurrent to check that an instance of the
 	 * task isn't already running. */
-	case class ControllableTask(sync:SchedulingConcurrency) extends Thread {
+	case class ControllableTask extends Thread {
 		private val lock = new Object
 		private val startLock = new Object
 		private var paused = true
 		var running = false
 		override def run { 
-			sync.nonconcurrent("a") {
+			nonconcurrent("a") {
 				running = true
 				startLock.synchronized { startLock.notifyAll }
 				try while (paused) lock.synchronized { lock.wait }
@@ -39,9 +40,8 @@ class ScheduledJobsTest extends TestBase {
 	 * a second thread will skip that block.
 	 */
 	@Test(timeout=5000) def schedulingConcurrency = for (i <- 1 to 50) {
-		val s = new Object with SchedulingConcurrency
-		val thread = new ControllableTask(s)
-		val thread2 = new ControllableTask(s)
+		val thread = new ControllableTask
+		val thread2 = new ControllableTask
 		
 		// start a paused thread and wait til it's properly running
 		thread.start

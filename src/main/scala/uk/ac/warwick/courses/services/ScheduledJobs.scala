@@ -1,18 +1,22 @@
 package uk.ac.warwick.courses.services
 
-import uk.ac.warwick.courses
-import org.{springframework => spring}
+import java.util.Collections.newSetFromMap
+import java.util.concurrent.ConcurrentHashMap
 
-import spring.scheduling.annotation.Scheduled
-import spring.stereotype.Service
-import spring.beans.factory.annotation.Autowired
-import courses.data.FileDao
-import courses.commands.CleanupTemporaryFilesCommand
-import courses.commands.imports.ImportModulesCommand
-import courses.system.exceptions._
-import courses.services.jobs.JobService
-import reflect.BeanProperty
-import collection.mutable
+import scala.reflect.BeanProperty
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.commands.CleanupTemporaryFilesCommand
+import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
+import uk.ac.warwick.courses.services.jobs.JobService
+import uk.ac.warwick.courses.system.exceptions.ExceptionResolver
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -20,7 +24,8 @@ import collection.mutable
  * the scheduled method in a related class (since it does so little) - nick
  */
 @Service
-class ScheduledJobs extends SchedulingConcurrency {
+class ScheduledJobs {
+	import SchedulingConcurrency._
 	
 	@Autowired @BeanProperty 
 	var exceptionResolver:ExceptionResolver =_
@@ -52,8 +57,10 @@ class ScheduledJobs extends SchedulingConcurrency {
 	def indexAuditEvents:Unit = exceptionResolver.reportExceptions { indexingService.index }
 	
 	@Scheduled(cron="*/10 * * * * *") // every 10 seconds
-	def jobs:Unit = nonconcurrent("jobs") { 
-		exceptionResolver.reportExceptions { jobService.run }
+	def jobs:Unit = nonconcurrent("scheduled-jobs") { 
+		exceptionResolver.reportExceptions { 
+			jobService.run 
+		}
 	}
 }
 
@@ -63,8 +70,9 @@ class ScheduledJobs extends SchedulingConcurrency {
  * ID string also passed). Used to avoid running a task if it's
  * still running already. 
  */
-trait SchedulingConcurrency {
-	var running = collection.mutable.Set[String]() 
+object SchedulingConcurrency {
+	
+	var running = newSetFromMap(new ConcurrentHashMap[String, JBoolean]) 
 	def nonconcurrent[T] (id:String) (f: =>T) =
 		if (running.add(id)) { 
 			try f
