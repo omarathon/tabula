@@ -36,9 +36,10 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 	@BeanProperty var name:String = _
 	
 	// The members are studying the module.
-	@OneToOne(cascade=Array(CascadeType.ALL))
+	// (moved to Assignment)
+	/*@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="membersgroup_id")
-	@BeanProperty var members:UserGroup = new UserGroup
+	@BeanProperty var members:UserGroup = new UserGroup*/
 	
 	// The participants are markers/moderators who upload feedback. 
 	// They can also publish feedback.
@@ -52,18 +53,9 @@ class Module extends GeneratedId with Viewable with Manageable with Participatab
 		participants
 	}
 	
-	def ensuredMembers = {
-		ensureMembersGroup
-		members
-	}
-	
 	/** Create an empty participants group if it's null. */
 	def ensureParticipantsGroup {
 		if (participants == null) participants = new UserGroup
-	}
-	
-	def ensureMembersGroup {
-		if (members == null) members = new UserGroup
 	}
 	
 	@ManyToOne

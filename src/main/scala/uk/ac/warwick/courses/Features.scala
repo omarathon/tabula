@@ -39,6 +39,7 @@ abstract class Features {
 	@BeanProperty var privacyStatement:Boolean = true
 	@BeanProperty var collectMarks:Boolean = false
 	@BeanProperty var turnitin:Boolean = false
+	@BeanProperty var assignmentMembership:Boolean = false
 	
 }
 

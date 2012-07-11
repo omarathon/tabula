@@ -19,6 +19,9 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.DateFormats
+import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.courses.data.model.UpstreamAssignment
+import uk.ac.warwick.courses.data.model.UserGroup
 
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
@@ -56,6 +59,19 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 	
+	/** linked SITS assignment */
+	@BeanProperty var upstreamAssignment: UpstreamAssignment =_
+	
+	/** If copying from existing Assigment, this must be a FULL COPY
+	 * with changes copied back to the original UserGroup, don't pass
+	 * the same UserGroup around because it'll just cause Hibernate
+	 * problems. This copy should be transient.
+	 */
+	@BeanProperty var members: UserGroup = new UserGroup
+	
+	/** MAV_OCCURRENCE as per the value in SITS.  */
+	@BeanProperty var occurrence: String = _
+	
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added
 	 * to all Assignments. When the forms become customisable this will be replaced with
@@ -64,13 +80,18 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@Length(max=2000)
 	@BeanProperty var comment:String = _
 	
-	var prefilled:Boolean = _
+	private var _prefilled:Boolean = _
+	def prefilled = _prefilled
 	
 	def validate(errors:Errors) {
 		service.getAssignmentByNameYearModule(name, academicYear, module)
 			.filterNot{ _ eq assignment }
 			.map{ a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
-			
+		
+		if (upstreamAssignment != null && !(upstreamAssignment.departmentCode equalsIgnoreCase module.department.code)) {
+			errors.rejectValue("upstreamAssignment", "upstreamAssignment.notYours")
+		}
+
 		if (openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
 		}
@@ -91,17 +112,22 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    assignment.allowLateSubmissions = allowLateSubmissions
 	    assignment.allowResubmission = allowResubmission
 	    assignment.displayPlagiarismNotice = displayPlagiarismNotice
-	    findCommentField(assignment) map ( field => field.value = comment )
-	    findFileField(assignment) map { file => 
+	    assignment.upstreamAssignment = upstreamAssignment
+	    
+	    if (assignment.members == null) assignment.members = new UserGroup
+	    assignment.members copyFrom members
+	    	
+	    findCommentField(assignment) foreach ( field => field.value = comment )
+	    findFileField(assignment) foreach { file => 
 	    	file.attachmentLimit = fileAttachmentLimit 
 	    	file.attachmentTypes = fileAttachmentTypes
 		}
 	}
 	
-	def prefillFromRecentAssignment = {
-		service.recentAssignment(module) map { (a) =>
+	def prefillFromRecentAssignment {
+		service.recentAssignment(module) foreach { (a) =>
 			copyNonspecificFrom(a)
-			prefilled = true
+			_prefilled = true
 		}
 	}
 	
@@ -131,7 +157,26 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	def copyFrom(assignment:Assignment) {
 		name = assignment.name
 		academicYear = assignment.academicYear
+		assignment
 		copyNonspecificFrom(assignment)
+	}
+	
+	/**
+	 * If upstream assignment, academic year and occurrence are all set,
+	 * this attempts to return the matching SITS assessment group of people
+	 * who should be studying this assignment.
+	 */
+	def assessmentGroup: Option[UpstreamAssessmentGroup] = {
+		if (upstreamAssignment == null || academicYear == null || occurrence == null) {
+			None
+		} else {
+			val template = new UpstreamAssessmentGroup
+			template.academicYear = academicYear
+			template.assessmentGroup = upstreamAssignment.assessmentGroup
+			template.moduleCode = upstreamAssignment.moduleCode
+			template.occurrence = occurrence
+		    service.getAssessmentGroup(template)
+		}
 	}
 	
 	private def findFileField(assignment:Assignment) = 

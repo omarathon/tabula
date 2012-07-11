@@ -93,6 +93,7 @@
 	            <bean class="uk.ac.warwick.courses.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.AssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.UpstreamAssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.FeedbackIdConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>

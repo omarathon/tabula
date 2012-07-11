@@ -43,8 +43,7 @@ class SecurityService extends Logging {
 	  // Manage module = can modify its permissions.
 	  case Manage(module:Module) => can(user, Manage(module.department))
 	  // View module = see what assignments are in a module
-	  case View(module:Module) => module.ensuredMembers.includes(user.apparentId) || 
-	  							  can(user, View(module.department))
+	  case View(module:Module) => can(user, View(module.department))
 	  
 	  case View(assignment:Assignment) => can(user, View(assignment.module))
 	  case Submit(assignment:Assignment) => can(user, View(assignment.module))

@@ -84,9 +84,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
     @JoinColumn(name="module_id")
     @BeanProperty var module:Module =_
     
-//  @ManyToOne
-//  @JoinColumn(name="upstream_id")
-    @transient @BeanProperty var upstreamAssignment:UpstreamAssignment =_
+    @ManyToOne
+    @JoinColumn(name="upstream_id")
+    @BeanProperty var upstreamAssignment:UpstreamAssignment =_
     
     @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
     @OrderBy("submittedDate")
@@ -101,6 +101,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
     @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
     @IndexColumn(name="position")
     @BeanProperty var fields:JList[FormField] = ArrayList()
+    
+    @OneToOne(cascade=Array(CascadeType.ALL))
+    @JoinColumn(name="membersgroup_id")
+    @BeanProperty var members:UserGroup = new UserGroup
         
     def setAllFileTypesAllowed { fileExtensions = Nil } 
     

@@ -85,6 +85,8 @@ class UserGroup extends GeneratedId {
 	    (baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup))
 	  )
 	  
+	def isEmpty = members.isEmpty
+	  
 	def members =
 	  (includeUsers ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 	  
@@ -92,6 +94,15 @@ class UserGroup extends GeneratedId {
 	  case webgroup:String => groupService.getUserCodesInGroup(webgroup).asScala.toList
 	  case _ => Nil
 	}
+	
+	def copyFrom(other:UserGroup) {
+		baseWebgroup = other.baseWebgroup
+		includeUsers.clear
+		excludeUsers.clear
+		includeUsers.addAll(other.includeUsers)
+		excludeUsers.addAll(other.excludeUsers)
+	}
+	
 }
 
 object UserGroup {

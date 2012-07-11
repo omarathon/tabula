@@ -20,7 +20,7 @@ if [[ $? == 0 ]]; then
   # can just watch for changes to that log file.
   inotifywait --excludei "(open|access|close)" -r -m src > $WATCHFILE &
   while inotifywait $WATCHFILE; do
-    $ANT test
+    nice $ANT test
   done
 else
   echo "The inotifywait command is not available. It is available on Ubuntu from the inotify-tools package."

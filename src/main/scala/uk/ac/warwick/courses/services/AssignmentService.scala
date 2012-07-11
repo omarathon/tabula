@@ -19,9 +19,7 @@ import uk.ac.warwick.courses.helpers.Logging
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
 	def save(assignment:Assignment)
-	def save(assignment:UpstreamAssignment)
-	def save(group:UpstreamAssessmentGroup)
-	def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
+	
 	def saveSubmission(submission:Submission)
 	def getSubmissionByUniId(assignment:Assignment, uniId:String) : Option[Submission]
 	def getSubmission(id:String) : Option[Submission]
@@ -44,6 +42,10 @@ trait AssignmentService {
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	
+	def getUpstreamAssignment(id:String): Option[UpstreamAssignment]
+	def save(assignment:UpstreamAssignment)
+    def save(group:UpstreamAssessmentGroup)
+    def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
 }
 
 @Service
@@ -174,6 +176,8 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 	}
 	
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+	
+	def getUpstreamAssignment(id:String) = getById[UpstreamAssignment](id) 
 	
 	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) = 
 		session.newCriteria[UpstreamAssessmentGroup]

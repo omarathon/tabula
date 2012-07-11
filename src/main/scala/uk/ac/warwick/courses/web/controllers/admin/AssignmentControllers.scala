@@ -51,28 +51,27 @@ class AddAssignment extends BaseController {
 		)
 	}
 	
-	validatesWith { (cmd:AddAssignmentCommand, errors:Errors) =>
+	validatesWith { (cmd:AddAssignmentCommand, errors) =>
 		cmd.validate(errors)
-		
 	}
 	
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
 		new AddAssignmentCommand(mandatory(module))
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping
 	def form(user: CurrentUser, @PathVariable module: Module, 
 			form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
 		form.prefillFromRecentAssignment
-		formView(module)
+		formView(form, module)
 	}
 
-	@RequestMapping(method = Array(RequestMethod.POST))
+	@RequestMapping(method=Array(RequestMethod.POST), params=Array("action!=refresh"))
 	def submit(user: CurrentUser, @PathVariable module: Module,
 			@Valid form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
 		if (errors.hasErrors) {
-			formView(module)
+			formView(form, module)
 		} else {
 			form.apply
 			Redirect(Routes.admin.module(module))
@@ -81,7 +80,7 @@ class AddAssignment extends BaseController {
 	
 	def permCheck(module:Module) = mustBeAbleTo(Participate(module)) 
   
-    def formView(module:Module) = {
+    def formView(form: AddAssignmentCommand, module:Module) = {
 	  Mav("admin/assignments/new",
 	  	"department" -> module.department,
 	  	"module" -> module)
@@ -104,7 +103,7 @@ class EditAssignment extends BaseController {
 	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
 		new EditAssignmentCommand(mandatory(assignment))
 	
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			form:EditAssignmentCommand, errors: Errors) = {
 		
@@ -127,7 +126,7 @@ class EditAssignment extends BaseController {
 		!errors.hasErrors
 	}
 	
-	@RequestMapping(method = Array(RequestMethod.POST))
+	@RequestMapping(method=Array(RequestMethod.POST), params=Array("action!=refresh"))
 	def submit(
 			@PathVariable module: Module,
 			@PathVariable assignment:Assignment,

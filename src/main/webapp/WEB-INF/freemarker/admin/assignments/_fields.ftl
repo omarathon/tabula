@@ -33,6 +33,33 @@ the comments textarea needs to maintain newlines.
 
 </#if>
 
+<#if features.assignmentMembership>
+	<@form.labelled_row "members" "Students">
+
+		<@spring.bind path="members">
+			<#assign membersGroup=status.actualValue />
+		</@spring.bind>
+		<#assign hasMembers=(membersGroup?? && !membersGroup.empty) />
+		
+		<#assign assessmentGroup=command.assessmentGroup />
+		
+		<#if assessmentGroup??>
+		
+			
+		
+		<#elseif hasMembers>
+			
+			
+			
+		<#else>
+		
+			No students have been enrolled.
+			<div><a class="btn">Link to SITS</a> or <a class="btn">Add users manually</a></div>
+		
+		</#if>
+	</@form.labelled_row>
+</#if>
+
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
 		<label class="checkbox">
