@@ -70,8 +70,7 @@ class UserGroup extends GeneratedId {
 	def excludeUser(user:String) = excludeUsers.add(user)
 	def unexcludeUser(user:String) = excludeUsers.remove(user)
 
-	// TODO remove transientness when ready to update database schema
-	@transient var universityIds:Boolean = false
+	var universityIds:Boolean = false
 	
 	/*
 	 * Could implement as `members.contains(user)`
@@ -87,7 +86,7 @@ class UserGroup extends GeneratedId {
 	  
 	def isEmpty = members.isEmpty
 	  
-	def members =
+	def members: Seq[String] =
 	  (includeUsers ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 	  
 	def webgroupMembers:List[String] = baseWebgroup match {

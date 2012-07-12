@@ -22,10 +22,26 @@ import uk.ac.warwick.courses.DateFormats
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.UserGroup
+import uk.ac.warwick.courses.data.model.AssignmentMembership
+import uk.ac.warwick.courses.services.UserLookupService
 
+case class UpstreamGroupOption(
+        assignmentId:String,
+        name:String,
+        sequence:String,
+        occurrence:String,
+        memberCount:Int
+    )
+    
+
+
+/**
+ * Common behaviour 
+ */
 abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@Autowired var service:AssignmentService =_
+	@Autowired var userLookup:UserLookupService =_
 	
 	def module:Module
 	def assignment:Assignment
@@ -160,6 +176,35 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		assignment
 		copyNonspecificFrom(assignment)
 	}
+	
+	
+	/**
+	 * Retrieve a list of possible upstream assignments and occurrences
+	 * to link to SITS data. Includes the upstream assignment and the
+	 * occurrence ID, plus some info like the number of members there.
+	 */
+	def upstreamGroupOptions: Seq[UpstreamGroupOption] = {
+		val assignments = service.getUpstreamAssignments(module)
+		assignments flatMap { assignment => 
+			val groups = service.getAssessmentGroups(assignment, academicYear)
+			groups map { group => 
+                UpstreamGroupOption(
+                    assignmentId = assignment.id,
+                    name = assignment.name,
+                    sequence = assignment.sequence,
+                    occurrence = group.occurrence,
+                    memberCount = group.members.members.size
+                )
+            }
+		}
+	}
+	
+	/**
+	 * Returns a sequence of MembershipItems
+	 */
+	def membershipDetails = 
+		AssignmentMembership.determineMembership(assessmentGroup, members)(userLookup)
+	
 	
 	/**
 	 * If upstream assignment, academic year and occurrence are all set,

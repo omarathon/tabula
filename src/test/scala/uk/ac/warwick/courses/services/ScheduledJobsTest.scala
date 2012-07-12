@@ -11,7 +11,7 @@ class ScheduledJobsTest extends TestBase {
 	/** Just a thread that will stop until we call go() on it,
 	 * and will call nonconcurrent to check that an instance of the
 	 * task isn't already running. */
-	case class ControllableTask extends Thread {
+	class ControllableTask extends Thread {
 		private val lock = new Object
 		private val startLock = new Object
 		private var paused = true

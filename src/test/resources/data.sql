@@ -15,7 +15,7 @@ create table auditevent (
 
 create sequence auditevent_seq increment by 1 minvalue 1 maxvalue 999999999 start with 1;
 
-insert into usergroup (id) values ('1');
+insert into usergroup (id,universityids) values ('1',0);
 insert into usergroupinclude (group_id, usercode) values ('1', 'cusebr')
 insert into usergroupinclude (group_id, usercode) values ('1', 'cusfal')
 

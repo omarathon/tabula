@@ -19,7 +19,8 @@ import uk.ac.warwick.courses.data.PreSaveBehaviour
  * - The module it's in
  * - The academic year
  * - The assessment group code (1 or more assignments in the module will share this code)
- * - The occurrence (Splits a module up into 
+ * - The occurrence (Splits a module up into multiple occurrences/cohorts per year - 99% of the time
+ *          there's only one value but sometimes can be 2 or even 26 in one case)
  */
 @Entity
 class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {

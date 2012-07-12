@@ -2,6 +2,8 @@
 HFC-166 Don't use #compress on this file because
 the comments textarea needs to maintain newlines. 
 -->
+<#escape x as x?html>
+
 <#macro datefield path label>
 <@form.labelled_row path label>
 <@f.input path=path cssClass="date-time-picker" />
@@ -41,22 +43,123 @@ the comments textarea needs to maintain newlines.
 		</@spring.bind>
 		<#assign hasMembers=(membersGroup?? && !membersGroup.empty) />
 		
-		<#assign assessmentGroup=command.assessmentGroup />
+		<#assign assessmentGroup=command.assessmentGroup!'' />
 		
-		<#if assessmentGroup??>
+		<#if assessmentGroup?? && assessmentGroup != ''>
 		
-			
+			${assessmentGroup.members.size} students enrolled from SITS
+			<#if hasMembers>(with adjustments)</#if>
+			<a class="btn" id="show-sits-picker">Change link</a> or <a class="btn" id="show-membership-picker">Adjust membership</a>
 		
 		<#elseif hasMembers>
 			
-			
+			${membersGroup.includeUsers} students enrolled.
+			<div><a class="btn" id="show-membership-picker">Adjust membership</a> or <a class="btn" id="show-sits-picker">Link to SITS</a></div>
 			
 		<#else>
 		
 			No students have been enrolled.
-			<div><a class="btn">Link to SITS</a> or <a class="btn">Add users manually</a></div>
+			<div><a class="btn" id="show-sits-picker">Link to SITS</a> or <a class="btn" id="show-membership-picker">Add users manually</a></div>
 		
 		</#if>
+		
+		<div class="row-fluid">
+		<div class="span8">
+		
+		<#-- Picker to select an upstream assessment group (upstreamassignment+occurrence) -->
+		<div class="sits-picker">
+			Assessment groups for ${command.academicYear.label}
+			<#assign upstreamGroupOptions = command.upstreamGroupOptions />
+			<#if upstreamGroupOptions?? && upstreamGroupOptions?size gt 0>
+			<#assign showOccurrence=true>
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Members</th>
+					<th>Sequence</th>
+					<#if showOccurrence><th>Cohort</th></#if>
+				</tr>
+				<#list upstreamGroupOptions as option>
+				<tr>
+					<td><a href="#">${option.name}</a></td>
+					<td>${option.memberCount}</td>
+					<td>${option.sequence}</td>
+					<#if showOccurrence><td>${option.occurrence}</td></#if>
+				</tr>
+				</#list>
+			</table>
+			<#else>
+			No SITS options available.
+			</#if>
+		</div>
+		
+		<div class="membership-picker">
+			<div>Membership</div>
+			<div>
+				<#assign membershipDetails=command.membershipDetails />
+				<a href="#" class="btn btn-danger disabled">Remove selected</a>
+				<a href="#" class="btn">Paste list of users</a>
+				<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
+				<#if membershipDetails?size gt 0>
+				<table>
+					<tr>
+						<th><input type="checkbox"></th>
+						<th>User</th>
+						<th>Name</th>
+						<th></th>
+					</tr>
+				<#list membershipDetails as item>
+					<#assign u=item.user>
+					<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
+						<td>
+							<input type="checkbox">
+						</td>
+						<td>
+							<#if u.foundUser>
+								${item.userId}
+							<#elseif item.universityId??>
+								Unknown (Uni ID ${item.universityId})
+							<#elseif item.userId??>
+								Unknown (Usercode ${item.userId})
+							<#else><#-- Hmm this bit shouldn't ever happen -->
+								
+							</#if>
+						</td>
+						<td>
+							<#if u.foundUser>
+								${item.fullName}
+							</#if>
+						</td>
+						<td>
+							
+						</td>
+					</tr>
+				</#list>
+				</table>
+				<#else>
+				<p>No students yet.</p>
+				</#if>
+			</div>
+		</div>
+		
+		</div>
+		</div>
+		
+		<script>
+		jQuery(function($){
+			$('.membership-picker, .sits-picker').hide();
+		
+			$('#show-sits-picker').click(function(){
+				$('.membership-picker').hide();
+				$('.sits-picker').toggle();
+			});
+			$('#show-membership-picker').click(function(){
+				$('.sits-picker').hide();
+				$('.membership-picker').toggle();
+			});
+		});
+		</script>
+		
 	</@form.labelled_row>
 </#if>
 
@@ -175,3 +278,4 @@ the comments textarea needs to maintain newlines.
 	
 </#if>
 
+</#escape>

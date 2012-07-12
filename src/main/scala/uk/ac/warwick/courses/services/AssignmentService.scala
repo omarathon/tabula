@@ -43,6 +43,20 @@ trait AssignmentService {
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	
 	def getUpstreamAssignment(id:String): Option[UpstreamAssignment]
+	
+	/** Get all UpstreamAssignments that appear to belong to this module.
+	 *  
+	 *  Typically used to provide possible candidates to link to an app assignment,
+	 *  in conjunction with #getAssessmentGroups.
+	 */
+	def getUpstreamAssignments(module:Module): Seq[UpstreamAssignment]
+
+	/** Get all assessment groups that can serve this assignment this year.
+	 * Should return as many groups as there are distinct OCCURRENCE values for a given
+	 * assessment group code, which most of the time is just 1.
+	 */
+	def getAssessmentGroups(upstreamAssignment:UpstreamAssignment, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
+	
 	def save(assignment:UpstreamAssignment)
     def save(group:UpstreamAssessmentGroup)
     def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
@@ -178,6 +192,25 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
 	
 	def getUpstreamAssignment(id:String) = getById[UpstreamAssignment](id) 
+	
+    def getUpstreamAssignments(module:Module): Seq[UpstreamAssignment] = {
+		session.newCriteria[UpstreamAssignment]
+		        .add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
+		        .addOrder(Order.asc("sequence"))
+		        .list filter isInteresting
+	}
+	
+	private def isInteresting(assignment:UpstreamAssignment) = {
+		!(assignment.name contains "NOT IN USE")
+	}
+
+    def getAssessmentGroups(upstreamAssignment:UpstreamAssignment, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup] = {
+    	session.newCriteria[UpstreamAssessmentGroup]
+                .add(Restrictions.eq("academicYear", academicYear))
+                .add(Restrictions.eq("moduleCode", upstreamAssignment.moduleCode ))
+                .add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup ))
+                .list
+    }
 	
 	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) = 
 		session.newCriteria[UpstreamAssessmentGroup]

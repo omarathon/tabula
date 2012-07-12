@@ -24,13 +24,17 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.ToString
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
+import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"	
 	final val NotDeletedFilter = "notDeleted"		
 	final val MaximumFileAttachments = 50
+
 }
+
 
 /**
  * Represents an assignment within a module, occurring at a certain time.
@@ -57,7 +61,6 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime())
 	
 	@transient var occurrence:String =_
-	
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
 	@BeanProperty var fileExtensions:Seq[String] = _
