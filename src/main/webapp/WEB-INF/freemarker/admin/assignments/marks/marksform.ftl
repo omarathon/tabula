@@ -9,7 +9,7 @@
 <p>
 The marks spreadsheet that you upload must be an .xlsx file (created in Microsoft Office 2007+). 
 The spreadsheet should have three columns in the following order: student ID, mark, grade.
-You can use this <a href="#" >generated spreadsheet</a> as a template.
+You can use this <a href="<@url resource="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
 </p>
 
 
