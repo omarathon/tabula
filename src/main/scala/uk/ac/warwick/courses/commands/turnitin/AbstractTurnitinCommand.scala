@@ -16,7 +16,7 @@ trait TurnitinTrait extends Logging {
 	@Autowired var api:TurnitinAPI = _
 	
 	/** The name of the Turnitin Class we should store this Assignment in. */
-	def classNameFor(assignment: Assignment) = "CourseworkSubmissionAPIClass"
+	def classNameFor(assignment: Assignment) = "Automated-"+assignment.module.code
 		
 	def assignmentNameFor(assignment: Assignment) = assignment.id
 		
