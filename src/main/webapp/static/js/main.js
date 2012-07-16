@@ -56,6 +56,64 @@ jQuery.fn.use = function(callback) {
   return this;
 }
 
+
+jQuery.fn.bigList = function(options) {
+	var $ = jQuery;
+	this.each(function(){
+		var $this = $(this);
+		
+		var checkboxClass = options.checkboxClass || 'collection-checkbox';
+		var checkboxAllClass = options.checkboxClass || 'collection-check-all';
+		
+		var $checkboxes = $this.find('input.'+checkboxClass);
+		var $selectAll = $this.find('input.'+checkboxAllClass);
+		
+		var doNothing = function(){};
+		
+		var onSomeChecked = options.onSomeChecked || doNothing;
+		var onNoneChecked = options.onNoneChecked || doNothing;
+		var onAllChecked = options.onAllChecked || onSomeChecked;
+
+		$checkboxes.change(function(){
+			var allChecked = $checkboxes.not(":checked").length == 0;
+			$selectAll.attr("checked", allChecked);
+			if (allChecked) {
+				$this.data('checked','all');
+				onAllChecked.call($this);
+			} else if ($checkboxes.is(":checked")) {
+				$this.data('checked','some');
+				onSomeChecked.call($this);
+			} else {
+				$this.data('checked','none');
+				onNoneChecked.call($this);
+			}
+		});
+		$selectAll.change(function(){
+			$checkboxes.attr("checked", this.checked);
+			if (this.checked) {
+				$this.data('checked','all');
+				onAllChecked.call($this);
+			} else {
+				$this.data('checked','none');
+				onNoneChecked.call($this);
+			}
+		});
+		
+		options.setup.call($this);
+		
+		$(function(){
+			$checkboxes.change();
+		});
+		
+		// Returns an array of IDs.
+		var getCheckedFeedbacks = function() {
+			return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
+		};
+	});
+	return this;
+}
+
+
 jQuery(function ($) {
 	
 	var exports = {};
@@ -253,43 +311,37 @@ jQuery(function ($) {
 		
 	});
 	
-	$('.submission-list, .feedback-list').each(function(){
-		var $feedbackList = $(this);
-		var $checkboxes = $feedbackList.find('input.collection-checkbox');
-		var $selectAll = $feedbackList.find('input.collection-check-all');
-		var updateButtons = function() {
-			var disabled = !$checkboxes.is(':checked');
-			$('#delete-feedback-button,#delete-selected-button,#download-selected-button').toggleClass('disabled', disabled);
+	
+	$('.submission-list, .feedback-list').bigList({
+		
+		setup : function() {
+			var $container = this;
+			// #delete-selected-button won't work for >1 set of checkboxes on a page.
+			$('#download-selected-button, #delete-selected-button').click(function(event){
+				event.preventDefault();
+				if ($container.data('checked') != 'none') {
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
+			
+		},
+		
+		onSomeChecked : function() {
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
+		},
+		
+		onNoneChecked : function() {
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', true);
 		}
-		updateButtons();
-		$checkboxes.change(function(){
-			var allChecked = $checkboxes.not(":checked").length == 0;
-			$selectAll.attr("checked", allChecked);
-			updateButtons();
-		});
-		$selectAll.change(function(){
-			$checkboxes.attr("checked", this.checked);
-			updateButtons();
-		});
 		
-		// Returns an array of IDs.
-		var getCheckedFeedbacks = function() {
-			return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
-		};
-		
-		// #delete-selected-button won't work for >1 set of checkboxes on a page.
-		$('#download-selected-button, #delete-selected-button').click(function(event){
-			event.preventDefault();
-			var $checkedBoxes = $checkboxes.filter(":checked");
-			if ($checkedBoxes.length > 0) {
-				var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-				$form.append($checkedBoxes.clone());
-				$(document.body).append($form);
-				$form.submit();
-			}
-			return false;
-		});
 	});
+	
+	
+	
 	
 	
 	var _feedbackPopup;

@@ -4,6 +4,9 @@ the comments textarea needs to maintain newlines.
 -->
 <#escape x as x?html>
 
+<#-- Set to "refresh" when posting without submitting -->
+<input type="hidden" name="action" id="action-input" >
+
 <#macro datefield path label>
 <@form.labelled_row path label>
 <@f.input path=path cssClass="date-time-picker" />
@@ -38,16 +41,17 @@ the comments textarea needs to maintain newlines.
 <#if features.assignmentMembership>
 	<@form.labelled_row "members" "Students">
 
+		<@f.hidden path="upstreamAssignment" id="upstreamAssignment" />
+		<@f.hidden path="occurrence" id="occurrence" />
+
 		<@spring.bind path="members">
 			<#assign membersGroup=status.actualValue />
 		</@spring.bind>
 		<#assign hasMembers=(membersGroup?? && !membersGroup.empty) />
 		
-		<#assign assessmentGroup=command.assessmentGroup!'' />
+		<#if assessmentGroup??>
 		
-		<#if assessmentGroup?? && assessmentGroup != ''>
-		
-			${assessmentGroup.members.size} students enrolled from SITS
+			${assessmentGroup.members.members?size} students enrolled from SITS
 			<#if hasMembers>(with adjustments)</#if>
 			<a class="btn" id="show-sits-picker">Change link</a> or <a class="btn" id="show-membership-picker">Adjust membership</a>
 		
@@ -81,7 +85,7 @@ the comments textarea needs to maintain newlines.
 				</tr>
 				<#list upstreamGroupOptions as option>
 				<tr>
-					<td><a href="#">${option.name}</a></td>
+					<td><a href="#" class="sits-picker-option" data-id="${option.assignmentId}" data-occurrence="${option.occurrence}">${option.name}</a></td>
 					<td>${option.memberCount}</td>
 					<td>${option.sequence}</td>
 					<#if showOccurrence><td>${option.occurrence}</td></#if>
@@ -101,6 +105,7 @@ the comments textarea needs to maintain newlines.
 				<a href="#" class="btn">Paste list of users</a>
 				<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
 				<#if membershipDetails?size gt 0>
+				<div class="scroller">
 				<table>
 					<tr>
 						<th><input type="checkbox"></th>
@@ -116,7 +121,7 @@ the comments textarea needs to maintain newlines.
 						</td>
 						<td>
 							<#if u.foundUser>
-								${item.userId}
+								${u.userId}
 							<#elseif item.universityId??>
 								Unknown (Uni ID ${item.universityId})
 							<#elseif item.userId??>
@@ -127,7 +132,7 @@ the comments textarea needs to maintain newlines.
 						</td>
 						<td>
 							<#if u.foundUser>
-								${item.fullName}
+								${u.fullName}
 							</#if>
 						</td>
 						<td>
@@ -136,6 +141,7 @@ the comments textarea needs to maintain newlines.
 					</tr>
 				</#list>
 				</table>
+				</div>
 				<#else>
 				<p>No students yet.</p>
 				</#if>
@@ -147,7 +153,19 @@ the comments textarea needs to maintain newlines.
 		
 		<script>
 		jQuery(function($){
-			$('.membership-picker, .sits-picker').hide();
+			var $sitsPicker = $('.sits-picker');
+			var $membershipPicker = $('.membership-picker');
+			var $form = $sitsPicker.closest('form');
+		
+			$sitsPicker.hide();
+			$membershipPicker.hide();
+			
+			$sitsPicker.find('.sits-picker-option').click(function(e){
+				$('#upstreamAssignment').val( $(e.target).data('id') );
+				$('#occurrence').val( $(e.target).data('occurrence') );
+				$('#action-input').val('refresh');
+				$form.submit();
+			});
 		
 			$('#show-sits-picker').click(function(){
 				$('.membership-picker').hide();

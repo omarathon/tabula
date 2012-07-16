@@ -83,7 +83,8 @@ class AddAssignment extends BaseController {
     def formView(form: AddAssignmentCommand, module:Module) = {
 	  Mav("admin/assignments/new",
 	  	"department" -> module.department,
-	  	"module" -> module)
+	  	"module" -> module,
+        "assessmentGroup" -> form.assessmentGroup)
 	  	.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
@@ -106,7 +107,7 @@ class EditAssignment extends BaseController {
 	@RequestMapping
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			form:EditAssignmentCommand, errors: Errors) = {
-		
+		form.afterBind()
 		if (assignment.module != module) throw new ItemNotFoundException
 		mustBeAbleTo(Participate(module))
 		val couldDelete = canDelete(assignment)
@@ -114,7 +115,8 @@ class EditAssignment extends BaseController {
 			"department" -> module.department,
 			"module" -> module,
 			"assignment" -> assignment,
-			"canDelete" -> couldDelete
+			"canDelete" -> couldDelete,
+			"assessmentGroup" -> form.assessmentGroup
 			)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
@@ -131,7 +133,7 @@ class EditAssignment extends BaseController {
 			@PathVariable module: Module,
 			@PathVariable assignment:Assignment,
 			@Valid form: EditAssignmentCommand, errors: Errors) = {
-		
+		form.afterBind()
 		mustBeAbleTo(Participate(module))
 		if (errors.hasErrors) {
 			showForm(module, assignment, form, errors)

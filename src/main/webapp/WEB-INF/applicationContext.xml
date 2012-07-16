@@ -87,6 +87,9 @@
       <description>
       	Converts arguments in various places.
       	Useful to convert @PathVariable arguments from String to the object it represents.
+      	
+      	Converters are used when binding request values to command.
+      	Formatters are used for displaying command values as a string in views. spring.bind uses formatters.   
       </description>
 	    <property name="converters">
 	        <list>
@@ -102,6 +105,7 @@
 	    <property name="formatters">
 	    	<list>
 	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.UpstreamAssignmentIdConverter"/>
 	        </list>
 	    </property>
 	</bean>

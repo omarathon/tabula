@@ -116,6 +116,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		}
 	}
 	
+	def afterBind() {
+		
+	}
+	
 	def copyTo(assignment:Assignment) {
 		assignment.name = name
 	    assignment.openDate = openDate
