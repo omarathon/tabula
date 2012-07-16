@@ -50,6 +50,8 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	var actualGrade:String =_
 	var agreedGrade:String =_
 	
+	def hasMarkOrGrade = hasMark || hasGrade
+	
 	def hasMark:Boolean = actualMark match{
 		case Some(int) => true
 		case None => false
