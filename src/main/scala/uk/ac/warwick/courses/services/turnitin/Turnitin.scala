@@ -80,6 +80,8 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean with Ini
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
 		val postWithParams = endpoint.POST << (parameters + md5hexparam(parameters))
 		val req = addPdata(pdata, postWithParams)
+		
+		logger.debug("doRequest: " + parameters)
 			
 		http(
 			if (diagnostic) req >- {(text) => TurnitinResponse.fromDiagnostic(text)}
