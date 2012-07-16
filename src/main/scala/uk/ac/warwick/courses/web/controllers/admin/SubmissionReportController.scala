@@ -10,6 +10,7 @@ import uk.ac.warwick.courses.actions.Participate
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.courses.Features
 
 class SubmissionReportCommand {
 	@BeanProperty var assignment:Assignment =_
@@ -20,6 +21,7 @@ class SubmissionReportCommand {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/submissions-report"))
 class SubmissionReportController extends BaseController {
 
+	@Autowired var features:Features =_
 	@Autowired var userLookup:UserLookupInterface =_
 	
 	@RequestMapping()
@@ -30,11 +32,15 @@ class SubmissionReportController extends BaseController {
 	   val report = command.assignment.submissionsReport
 	   val submissionOnly = report.submissionOnly.toList map userByWarwickId sortBy surname
 	   val feedbackOnly   = report.feedbackOnly.toList   map userByWarwickId sortBy surname
+	   val hasNoAttachments = report.withoutAttachments.toList   map userByWarwickId sortBy surname
+	   val hasNoMarks = report.withoutMarks.toList   map userByWarwickId sortBy surname
 	   
-	   Mav("admin/assignments/submissionsreport", 
+	   Mav("admin/assignments/submissionsreport",
 	       "assignment" -> command.assignment,
 	       "submissionOnly" -> submissionOnly,
 	       "feedbackOnly" -> feedbackOnly,
+	       "hasNoAttachments" -> hasNoAttachments,
+	       "hasNoMarks" -> hasNoMarks,
 	       "report" -> report).noLayoutIf(ajax)
 	}
 	

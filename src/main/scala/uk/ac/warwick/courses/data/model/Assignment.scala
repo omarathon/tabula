@@ -26,6 +26,8 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.userlookup.User
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.courses.Features
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -178,7 +180,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[T])
 			case _ => None
 		}
-	
+
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.
 	 * If the old-style assignment-wide published flag is true, then it
@@ -218,7 +220,18 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		val feedbackOnly = feedbackUniIds &~ submissionUniIds
 		val submissionOnly = submissionUniIds &~ feedbackUniIds
 		
-		SubmissionsReport(this, feedbackOnly, submissionOnly)
+		/**
+		 * We want to show a warning if some feedback items are missing either marks or attachments
+		 * If however, all feedback items have only marks or attachments then we don't send a warning.
+		 * 
+		 * We can never have a situation where no feedbacks have marks or attachments as they need to 
+		 * have one or the other to exist in the first place.
+		 */
+		val withoutAttachments = feedbacks.filter(!_.hasAttachments) map {_.universityId} toSet
+		
+		val withoutMarks = feedbacks.filter(feedback => !feedback.hasMark && !feedback.hasGrade) map {_.universityId} toSet
+		
+		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks)
 	}
 	
 	def toStringProps = Seq(
@@ -233,7 +246,14 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 
 
-case class SubmissionsReport(val assignment:Assignment, val feedbackOnly:Set[String], val submissionOnly:Set[String]) {
-	def hasProblems = assignment.collectSubmissions && 
-		(!feedbackOnly.isEmpty || !submissionOnly.isEmpty)
+case class SubmissionsReport(val assignment:Assignment, val feedbackOnly:Set[String], val submissionOnly:Set[String], val withoutAttachments:Set[String], val withoutMarks:Set[String]) {
+	
+	def hasProblems = {
+		var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty)
+		//TODO feature check
+		if(assignment.collectMarks){
+			problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
+		}
+		problems
+	}
 }

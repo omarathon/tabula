@@ -15,6 +15,7 @@ import javax.persistence.CascadeType
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.actions.Viewable
 import uk.ac.warwick.courses.actions.Deleteable
+import org.springframework.beans.factory.annotation.Autowired
 
 @Entity @AccessType("field")
 class Feedback extends GeneratedId with Viewable with Deleteable {
@@ -43,11 +44,24 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	var ratingHelpful:Option[Boolean] = None
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
-	var actualMark:Option[Int] =_
+	var actualMark:Option[Int] = None
 	@Type(`type`="uk.ac.warwick.courses.data.model.OptionIntegerUserType")
-	var agreedMark:Option[Int] =_
+	var agreedMark:Option[Int] = None
 	var actualGrade:String =_
 	var agreedGrade:String =_
+	
+	def hasMark:Boolean = actualMark match{
+		case Some(int) => true
+		case None => false
+	}
+	
+	def hasGrade:Boolean = Option(actualGrade) match{
+		case Some(string) => true
+		case None => false
+	}
+	
+	def hasAttachments:Boolean = !attachments.isEmpty
+	
 	
 	/**
 	 * Returns the released flag of this feedback,

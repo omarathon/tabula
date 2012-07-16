@@ -139,7 +139,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
 	 	 	  }
 	 	 	  
 	 	 	  // Reject if feedback for this student is already uploaded
-	 	 	  assignment.feedbacks.find { _.universityId == uniNumber } match {
+	 	 	  assignment.feedbacks.find { feedback => feedback.universityId == uniNumber && feedback.hasAttachments } match {
 	 	 	 	  case Some(feedback) => errors.rejectValue("uniNumber", "uniNumber.duplicate.feedback")
 	 	 	 	  case None => {}
 	 	 	  }
@@ -230,7 +230,7 @@ class AddFeedbackCommand( val assignment:Assignment, val submitter:CurrentUser )
   override def apply(): List[Feedback] = {
 	  
 	  def saveFeedback(uniNumber:String, file:UploadedFile)= {
-	 	  val feedback = new Feedback
+	 	  val feedback = assignment.findFeedback(uniNumber).getOrElse(new Feedback)	
 		  feedback.assignment = assignment
 		  feedback.uploaderId = submitter.apparentId
 		  feedback.universityId = uniNumber

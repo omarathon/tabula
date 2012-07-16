@@ -66,7 +66,7 @@ class AddMarksCommand( val assignment:Assignment, val submitter:CurrentUser ) ex
 					}
 				}
 	 	 	  	// Reject if marks for this student are already uploaded
-	 	 	  	assignment.feedbacks.find {(feedback) => feedback.universityId == mark.universityId && (!feedback.actualMark.equals(None) || !feedback.actualGrade.equals(None)) } match {
+	 	 	  	assignment.feedbacks.find {(feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade )} match {
 	 	 	  		case Some(feedback) => {
 	 	 	  			errors.rejectValue("universityId", "uniNumber.duplicate.feedback")
 	 	 	  			noErrors = false

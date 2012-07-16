@@ -31,7 +31,36 @@
 	</div>
 	</#if>
 	
-	
+	<#if hasNoAttachments?size == assignment.feedbacks?size>
+		<div class="alert alert-warn">
+			<p><i class="icon-remove"></i> None of the submissions have any feedback.</p>
+		</div>
+	<#elseif hasNoAttachments?size gt 0>
+		<div class="alert alert-error">
+			<p><i class="icon-remove"></i> Submissions received from the following students do not have any feedback.</p>
+			<ul class="user-list">
+			<#list hasNoAttachments as u>
+				<li>${u.warwickId}</li>
+			</#list>
+			</ul>
+		</div>	
+	</#if>
+
+	<#if hasNoMarks?size == assignment.feedbacks?size>
+		<div class="alert alert-warn">
+			<p><i class="icon-remove"></i> None of the submissions have had marks assigned.</p>
+		</div>
+	<#elseif hasNoMarks?size gt 0>
+		<div class="alert alert-error">
+			<p><i class="icon-remove"></i> Submissions received from the following students do not have any marks assigned.</p>
+			<ul class="user-list">
+			<#list hasNoMarks as u>
+				<li>${u.warwickId}</li>
+			</#list>
+			</ul>
+		</div>	
+	</#if>
+
 	<p>
 		The above discrepencies are provided for information.
 		It is up to you to decide whether to continue publishing. 
