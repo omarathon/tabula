@@ -119,7 +119,7 @@ trait TestHelpers {
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */
-	@After def deleteTemporaryDirs = temporaryFiles.par.foreach(FileUtils.recursiveDelete _)
+	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _ => /* squash! will be cleaned from temp eventually anyway */}
 
 	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[java.util.Map[String, Any]]).toMap
 
