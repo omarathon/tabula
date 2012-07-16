@@ -46,7 +46,7 @@ class ScheduledJobs {
     	new ImportModulesCommand().apply()
 	}
 	
-	@Scheduled(cron="0 0 8,30 * * *")
+	@Scheduled(cron="0 30 8 * * *")
     def importAssignments:Unit = exceptionResolver.reportExceptions { 
         new ImportAssignmentsCommand().apply()
     }
