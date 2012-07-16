@@ -2,21 +2,19 @@ package uk.ac.warwick.courses.services
 
 import java.util.Collections.newSetFromMap
 import java.util.concurrent.ConcurrentHashMap
-
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.courses._
 import uk.ac.warwick.courses.commands.CleanupTemporaryFilesCommand
 import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 import uk.ac.warwick.courses.services.jobs.JobService
 import uk.ac.warwick.courses.system.exceptions.ExceptionResolver
+import uk.ac.warwick.courses.commands.imports.ImportAssignmentsCommand
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -47,6 +45,11 @@ class ScheduledJobs {
     def importData:Unit = exceptionResolver.reportExceptions { 
     	new ImportModulesCommand().apply()
 	}
+	
+	@Scheduled(cron="0 0 8,30 * * *")
+    def importAssignments:Unit = exceptionResolver.reportExceptions { 
+        new ImportAssignmentsCommand().apply()
+    }
 	
 	@Scheduled(cron="0 0 2 * * *") // 2am
 	def cleanupTemporaryFiles:Unit = exceptionResolver.reportExceptions {  
