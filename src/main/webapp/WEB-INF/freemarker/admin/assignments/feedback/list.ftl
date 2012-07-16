@@ -42,6 +42,16 @@ Download all as ZIP file
 			</a>
 			</span>
 		</div>
+		<#if feedback.actualMark??>
+			<div class="mark">
+				Mark: ${feedback.actualMark}
+			</div>
+		</#if>
+		<#if feedback.actualGrade??>
+			<div class="grade">
+				Grade: ${feedback.actualGrade}
+			</div>
+		</#if>
 	</div>
 </#list>
 </div>
