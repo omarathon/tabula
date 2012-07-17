@@ -471,8 +471,8 @@ jQuery(function ($) {
 		})
 		.hide()
 		.first().before(
-			$('<p>').html('Empty modules are hidden. ').append(
-				$('<a>').addClass('btn').attr('href','#').html("Show all modules").click(function(event){
+			$('<p>').html('Modules with no assignments are hidden. ').append(
+				$('<a>').addClass('btn btn-success').attr('href','#').html("Show all modules").click(function(event){
 					event.preventDefault();
 					$(this.parentNode).remove();
 					$('.module-info.empty').show();
