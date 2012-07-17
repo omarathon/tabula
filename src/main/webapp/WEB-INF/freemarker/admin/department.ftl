@@ -16,6 +16,7 @@
 <#list modules as module>
 <#assign can_manage=can.manage(module) />
 <#assign has_assignments=(module.assignments!?size gt 0) />
+<#assign has_archived_assignments=false />
 <a id="module-${module.code}"></a>
 <div class="module-info<#if !has_assignments> empty</#if>">
 <h2><@fmt.module_name module /></h2>
@@ -44,9 +45,12 @@
 		</p>
 	<#else>
 		<#list module.assignments as assignment>
+		<#if assignment.archived>
+			<#assign has_archived_assignments=true />
+		</#if>
 		<#if !assignment.deleted>
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
-		<div class="assignment-info">
+		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
 			<h3 class="name">${assignment.name}</h3>
 			<#if assignment.closed>
@@ -97,7 +101,16 @@
 				
 			</div>
 			<div class="assignment-buttons">
-				<a class="btn edit-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit details <i class="icon-edit"></i></a>
+				<div class="btn-toolbar">
+				<div class="btn-group">
+		          <a class="btn dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+		          <ul class="dropdown-menu pull-right">
+		            <li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
+		            <li><a class="archive-assignment-link" data-assignment="${assignment.id}" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">Archive</a></li>
+		          </ul>
+		        </div>
+		        </div>
+			
 				<a class="btn feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
 				<#if assignment.collectMarks >
 					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a>
@@ -120,6 +133,9 @@
 		
 		<div class="btn-group">
 		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
+		<#if has_archived_assignments>
+			<a class="btn" href="#" class="show-archived-assignments">Show archived assignents</a>
+		</#if>
 		</div>
 	</#if>
 	

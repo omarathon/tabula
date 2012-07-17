@@ -83,6 +83,20 @@ to see a personalised view.
 </ul>
 </#if>
 
+<#if archivedAssignments?has_content>
+<div id="archived-assignments-container">
+<ul class="links" id="archived-assignments-list">
+<#list archivedAssignments as assignment>
+	<li class="assignment-info">
+		<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
+		</a>
+	</li>
+</#list>
+</ul>
+</div>
+</#if>
+
 <#--
 <#if moduleWebgroups?? && moduleWebgroups?size gt 0>
 <p>These are the modules we think you're enrolled in.</p>
