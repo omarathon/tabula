@@ -53,20 +53,22 @@
 		</div>
 		<div class="tab-pane " id="webform">
 			<p>
-				Students participating in this assignment are listed below. You can add marks for students not listed by clicking the add button.
+				Click the add button below to enter marks for a student.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
 				<table id="marks-web-form" class="marksUploadTable">
 					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
+					<#-- leave this stuff out until we can specify enrolled students
 					<#if assignment.members??>
-						<#list assignment.members as member>
+						<#list assignment.members.members as member>
 							<tr class="mark-row">
 								<td>${member}<input type="hidden" name="marks[member_index].universityId" value="${member}" /></td>
 								<td><input type="text" name="marks[member_index].actualMark" value="" /></td>
 								<td><input type="text" name="marks[member_index].actualGrade" value="" /></td>
 							</tr>
 						</#list>
-					</#if> 
+					</#if>
+					-->
 				</table>
 				<br /><button id="add-additional-marks" class="btn"><i class="icon-plus"></i> Add</button>
 				<div class="submit-buttons">
@@ -76,33 +78,5 @@
 			</@f.form>
 		</div>
 	</div>
-	<script>
-		jQuery(document).ready(function(){
-			
-			if(jQuery(".mark-row").size() === 0){
-				jQuery(".mark-header").hide();
-			}
-		
-			jQuery('#marks-tabs a').click(function (e) {
-		    	e.preventDefault();
-		    	jQuery(this).tab('show');
-		    });
-		    
-		    var rowMarkup = '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>';
-		    
-		    jQuery('#add-additional-marks').on('click', function(e){
-		    	e.preventDefault();
-		    	jQuery(".mark-header").show(); //show if this was hidden because the table started out empty
-		    	var newIndex = jQuery(".mark-row").size();
-		    	var newRow = jQuery(rowMarkup);
-		    	// add marks[index]. to the input names in the new row
-		    	jQuery("input", newRow).each(function(){
-		    		var name = jQuery(this).attr("name");
-		    		jQuery(this).attr("name", "marks["+newIndex+"]."+name)
-		    	});
-		    	jQuery('#marks-web-form').append(newRow);
-		    });
-		});
-	</script>
 </div>
 </#escape>

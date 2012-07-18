@@ -553,6 +553,32 @@ jQuery(function ($) {
 	
 	window.Courses = exports;
 	
+	// code for the marks tabs and marks web form
+	
+	if($(".mark-row").size() === 0){
+		$(".mark-header").hide();
+	}
+
+	$('#marks-tabs a').click(function (e) {
+    	e.preventDefault();
+    	$(this).tab('show');
+    });
+    
+    var rowMarkup = '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>';
+    
+    $('#add-additional-marks').on('click', function(e){
+    	e.preventDefault();
+    	$(".mark-header").show(); //show if this was hidden because the table started out empty
+    	var newIndex = $(".mark-row").size();
+    	var newRow = $(rowMarkup);
+    	// add marks[index]. to the input names in the new row
+    	$("input", newRow).each(function(){
+    		var name = $(this).attr("name");
+    		$(this).attr("name", "marks["+newIndex+"]."+name)
+    	});
+    	$('#marks-web-form').append(newRow);
+    });
+	
 }); // end domready
 
 }(jQuery));
