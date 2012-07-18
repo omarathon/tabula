@@ -14,17 +14,19 @@ import uk.ac.warwick.courses.actions.Participate
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/archive"))
 class ArchiveAssignmentController extends BaseController {
 
-	@ModelAttribute def model(assignment:Assignment) = new ArchiveAssignmentCommand(assignment)
+	@ModelAttribute("command") def model(assignment:Assignment) = new ArchiveAssignmentCommand(assignment)
 	
 	@RequestMapping(method=Array(GET,HEAD))
-	def confirmation(cmd:ArchiveAssignmentCommand, module:Module) = {
+	def confirmation(@ModelAttribute("command") cmd:ArchiveAssignmentCommand, module:Module) = {
 		check(cmd, module)
 		Mav("admin/assignments/archive").noLayoutIf(ajax)
 	}
 	
 	@RequestMapping(method=Array(POST))
-	def apply(cmd:ArchiveAssignmentCommand, module:Module) = {
+	def apply(@ModelAttribute("command") cmd:ArchiveAssignmentCommand, module:Module) = {
 		check(cmd, module)
+		cmd.apply();
+		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
 	}
 	
 	def check(cmd:ArchiveAssignmentCommand, module:Module) {

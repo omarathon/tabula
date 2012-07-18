@@ -52,7 +52,12 @@
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
 		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
-			<h3 class="name">${assignment.name}</h3>
+			<h3 class="name">
+				${assignment.name}
+				<#if assignment.archived>
+		            (Archived)
+		        </#if>
+			</h3>
 			<#if assignment.closed>
 				<div><span class="label-orange">Closed</span></div>
 			</#if>
@@ -106,7 +111,13 @@
 		          <a class="btn dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
 		          <ul class="dropdown-menu pull-right">
 		            <li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
-		            <li><a class="archive-assignment-link" data-assignment="${assignment.id}" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">Archive</a></li>
+		            <li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">
+		            	<#if assignment.archived>
+		            		Unarchive
+		            	<#else>
+		            		Archive
+		            	</#if>
+		            </a></li>
 		          </ul>
 		        </div>
 		        </div>
@@ -131,10 +142,10 @@
 		</#if>
 		</#list>
 		
-		<div class="btn-group">
+		<div>
 		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
 		<#if has_archived_assignments>
-			<a class="btn" href="#" class="show-archived-assignments">Show archived assignents</a>
+			<a class="btn show-archived-assignments" href="#">Show archived assignents</a>
 		</#if>
 		</div>
 	</#if>
