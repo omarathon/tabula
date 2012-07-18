@@ -75,7 +75,7 @@ class AddMarksCommand( val assignment:Assignment, val submitter:CurrentUser ) ex
 	 	 	  	}
 			}
 		} else {
-			errors.rejectValue("uniNumber", "NotEmpty")
+			errors.rejectValue("universityId", "NotEmpty")
 		}
 		// validate mark (must be int between 0 and 100)
 		if (hasText(mark.actualMark)){
