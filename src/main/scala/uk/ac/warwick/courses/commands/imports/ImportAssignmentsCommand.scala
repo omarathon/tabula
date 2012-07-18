@@ -39,8 +39,10 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	
 	def doGroups {
 		// Split into chunks so we commit transactions periodically.
-		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100))
+		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100)) {
 			saveGroups(groups)
+			groups foreach session.evict
+		}
 	}
 	
 	/**
@@ -91,7 +93,6 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		benchmark("Import "+groups.size+" groups") {
 			for (group <- groups) {
 				assignmentService.save(group)
-				session.evict(group)
 			}
 		}
 	}

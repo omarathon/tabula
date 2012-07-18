@@ -102,10 +102,8 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 		find(assignment)
 			.map { existing =>
 				if (existing needsUpdatingFrom assignment) {
-					// replace existing in session using merge(),
-					// then persist it with update()
-					assignment.id = existing.id
-					session.update(session.merge(assignment))
+					existing.copyFrom(assignment)
+					session.update(existing)
 				}
 			}
 			.getOrElse { session.save(assignment) }
