@@ -3,6 +3,7 @@
   @import "bootstrap/bootstrap.less";
   @import "bootstrap/responsive.less";
 }
+@import "bootstrap/fixes.less";
 
 @grid-size:16px;
 @warning-color: #933;
@@ -121,6 +122,11 @@ ul {
 			margin: 1px 0;
 			text-align: right;
 		}
+		
+		.btn-toolbar {
+		  margin: 0;
+		}
+		
 	}
 	.feedback-published {
 		line-height: 1.4em;
@@ -137,6 +143,11 @@ ul {
 	}
 	.no-unreleased-feedback {
 	  color: @subtle-text-color;
+	}
+	
+	&.archived {
+	  display: none;
+	  background-color: #ddd;
 	}
 }
 

@@ -52,5 +52,13 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 		if (value == null) throw new IllegalStateException("null "+name+" not allowed")
 	}
 	
+	def copyFrom(other:UpstreamAssignment) {
+		moduleCode = other.moduleCode
+		assessmentGroup = other.assessmentGroup
+		sequence = other.sequence
+		departmentCode = other.departmentCode
+		name = other.name
+	}
+	
 }
 

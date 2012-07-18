@@ -101,8 +101,10 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 	def save(assignment:UpstreamAssignment) =
 		find(assignment)
 			.map { existing =>
-				if (existing needsUpdatingFrom assignment)
-					session.update(existing.id, assignment) 
+				if (existing needsUpdatingFrom assignment) {
+					existing.copyFrom(assignment)
+					session.update(existing)
+				}
 			}
 			.getOrElse { session.save(assignment) }
 	

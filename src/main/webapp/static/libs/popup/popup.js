@@ -37,7 +37,7 @@ var WPopupBox = function(config, options) {
 	    rightArr : jsLoadImage(imageroot+'rightarr.png'),
 	    transparent : jsLoadImage(imageroot+'shim.gif')
 	  },
-	   margin : [ 10,14,20,16 ], //top right bottom left 
+	   margin : [ 10,13,20,16 ], //top right bottom left 
 	   padding : [20,24,0,24],
 	   topArr : [38,18],
 	   bottArr : [37,20],
@@ -309,6 +309,11 @@ WPopupBox.prototype.setPosition = function(x,y) {
   s.top = (this.height / 2 - this.imageElements.la.clientHeight/2) + 'px';
   s.marginLeft = '-5px';
   s.marginTop = '-' + Math.floor(this.config.leftArr[1]/2) + 'px';
+  
+  s = this.imageElements.ra.style;
+//  s.top = (this.height / 2 - this.imageElements.ra.clientHeight/2) + 'px';  
+  s.left = (this.width - this.config.margin[1]) + 'px' ;
+  s.marginTop = '-' + Math.floor(this.config.rightArr[1]/2) + 'px';
 
   s = this.imageElements.ba.style;
   s.left = ((this.width - this.imageElements.ba.clientWidth) / 2) + 'px';
@@ -340,6 +345,18 @@ WPopupBox.prototype.setHeightToFit = function() {
   }
 }
 
+WPopupBox.prototype.increaseHeightToFit = function() {
+	  if (this.everShown) {
+		  var height = this.contentElement.clientHeight + this.extraHeight;   
+		  if (height > this.height) {
+			  this.setSize(this.width, height);
+		  }
+	  } else {
+		  this.delayedIncreaseHeight = true;
+	  }
+	}
+
+
 WPopupBox.prototype.hide = function() {
   this.rootElement.className = 'WPopupBox';
   this.showing = false;
@@ -357,6 +374,9 @@ WPopupBox.prototype.show = function() {
 	  this.setSize(this.width, this.height);
 	  if (this.delayedSetHeight) {
 		 this.setHeightToFit();
+	  }
+	  if (this.delayedIncreaseHeight) {
+		 this.increaseHeightToFit();
 	  }
   }
   WPopupBox.hideSelectBoxes();
@@ -703,6 +723,34 @@ WPopupBox.prototype.positionRight = function(el, hideArrows) {
 	} else {
 		var thisPosition = Position.cumulativeOffset(this.rootElement);
 		this.imageElements.la.style.top = parseInt(midpoint.y - thisPosition[1]) + 'px';
+	}
+};
+
+WPopupBox.prototype.positionLeft = function(el, hideArrows) {
+	if (hideArrows) {
+		this.removeArrows();
+	} else {
+		this.setRightArrow();
+	}
+	
+	var midpoint = this.getMidpoint(el);
+	
+	h = this.height;
+	
+	var scrollTop;
+	if (this.jq) scrollTop = jQuery(document.body).scrollTop();
+	else scrollTop = $(document.body).cumulativeScrollOffset()[1];
+	
+	x = Math.floor(midpoint.left) - this.width;
+	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2)); 
+	this.setPosition(x,y);
+	
+	if (this.jq) {
+		var thisPosition = jQuery(this.rootElement).offset();
+		jQuery(this.imageElements.ra).css('top', midpoint.y - thisPosition.top);
+	} else {
+		var thisPosition = Position.cumulativeOffset(this.rootElement);
+		this.imageElements.ra.style.top = parseInt(midpoint.y - thisPosition[1]) + 'px';
 	}
 };
 

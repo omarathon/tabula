@@ -7,6 +7,7 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.model.Feedback
+import uk.ac.warwick.courses.data.model.UpstreamAssignment
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
@@ -52,6 +53,26 @@ class AssignmentServiceTest extends AppContextTestBase {
 		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('defined)
 		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
 		service.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
+	}
+	
+	@Transactional @Test def updateUpstreamAssignment {
+		val upstream = new UpstreamAssignment
+		upstream.departmentCode = "ch"
+		upstream.moduleCode = "ch101"
+		upstream.sequence = "A01"
+		upstream.assessmentGroup = "A"
+		upstream.name = "Egg plants"
+		
+		service.save(upstream)
+		
+		val upstream2 = new UpstreamAssignment
+        upstream2.departmentCode = "ch"
+        upstream2.moduleCode = "ch101"
+        upstream2.sequence = "A01"
+        upstream2.assessmentGroup = "A"
+        upstream2.name = "Greg's plants"
+		
+        service.save(upstream2)
 	}
 	
 	@Transactional @Test def findModulesWithFeedback {
