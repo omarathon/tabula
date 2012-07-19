@@ -31,8 +31,7 @@ class AddBatchFeedbackController extends BaseController {
 	@RequestMapping(method=Array(HEAD,GET))
 	def uploadZipForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
+		doChecks(module, assignment)
 		crumbed(Mav("admin/assignments/feedback/zipform"), module)
 	}
 	
@@ -45,8 +44,7 @@ class AddBatchFeedbackController extends BaseController {
 		} else {
 			cmd.onBind
 			cmd.postExtractValidation(errors)
-			mustBeLinked(assignment,module)
-			mustBeAbleTo(Participate(module))
+			doChecks(module, assignment)
 			crumbed(Mav("admin/assignments/feedback/zipreview"), module)
 		}
 	}
@@ -54,8 +52,7 @@ class AddBatchFeedbackController extends BaseController {
 	@RequestMapping(method=Array(POST), params=Array("confirm=true"))
 	def doUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
+		doChecks(module, assignment)
 		cmd.preExtractValidation(errors)
 		cmd.onBind
 		cmd.postExtractValidation(errors)
@@ -68,5 +65,8 @@ class AddBatchFeedbackController extends BaseController {
 		}
 	}
 	
-	
+	def doChecks(module:Module, assignment:Assignment) = {
+		mustBeLinked(mandatory(assignment),mandatory(module))
+        mustBeAbleTo(Participate(module))
+	}
 }
