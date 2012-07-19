@@ -21,8 +21,6 @@ class AddMarksController extends BaseController{
 	
 	@ModelAttribute def command(@PathVariable assignment:Assignment, user:CurrentUser) = new AddMarksCommand(assignment, user)
 	
-	//def onBind(cmd:AddMarksCommand) = cmd.onBind
-	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	

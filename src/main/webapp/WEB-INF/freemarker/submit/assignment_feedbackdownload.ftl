@@ -9,6 +9,13 @@
 	</div>
 </#if>
 
+<#if feedback.hasMarkOrGrade>
+	<div class="mark-and-grade">
+		<#if feedback.actualMark??><h3>Mark: ${feedback.actualMark}</h3></#if>
+		<#if feedback.actualGrade??><h3>Grade: ${feedback.actualGrade}</h3></#if>
+	</div>
+</#if>
+
 <p>
 	<#assign feedbackcount=feedback.attachments?size>
 	<#-- Only offer a Zip if there's more than one file. -->
