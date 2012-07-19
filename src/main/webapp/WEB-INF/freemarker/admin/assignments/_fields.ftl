@@ -80,14 +80,14 @@ the comments textarea needs to maintain newlines.
 				<tr>
 					<th>Name</th>
 					<th>Members</th>
-					<th>Sequence</th>
+					<th>CATS</th>
 					<#if showOccurrence><th>Cohort</th></#if>
 				</tr>
 				<#list upstreamGroupOptions as option>
 				<tr>
 					<td><a href="#" class="sits-picker-option" data-id="${option.assignmentId}" data-occurrence="${option.occurrence}">${option.name}</a></td>
 					<td>${option.memberCount}</td>
-					<td>${option.sequence}</td>
+					<td>${option.cats!'-'}</td>
 					<#if showOccurrence><td>${option.occurrence}</td></#if>
 				</tr>
 				</#list>
