@@ -124,7 +124,7 @@ class AddMarksCommand( val assignment:Assignment, val submitter:CurrentUser ) ex
 		
 		def processFiles (files:Seq[FileAttachment]) {
 			for(file <- files.filter(_.hasData)){
-				marks = marks ++ marksExtractor.readXSSFExcelFile(file.dataStream)
+				marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
 			}
 		}
 	}
