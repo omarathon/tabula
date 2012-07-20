@@ -87,7 +87,7 @@ class UserGroup extends GeneratedId {
 	def isEmpty = members.isEmpty
 	  
 	def members: Seq[String] =
-	  (includeUsers ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
+	  (includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 	  
 	def webgroupMembers:List[String] = baseWebgroup match {
 	  case webgroup:String => groupService.getUserCodesInGroup(webgroup).asScala.toList
