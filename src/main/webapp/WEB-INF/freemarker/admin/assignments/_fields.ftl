@@ -70,7 +70,7 @@ the comments textarea needs to maintain newlines.
 		<div class="row-fluid">
 		<div class="span8">
 		
-		<#-- Picker to select an upstream assessment group (upstreamassignment+occurrence) -->
+		<!-- Picker to select an upstream assessment group (upstreamassignment+occurrence) -->
 		<div class="sits-picker">
 			Assessment groups for ${command.academicYear.label}
 			<#assign upstreamGroupOptions = command.upstreamGroupOptions />
@@ -103,48 +103,78 @@ the comments textarea needs to maintain newlines.
 				<#assign membershipDetails=command.membershipDetails />
 				<a href="#" class="btn btn-danger disabled">Remove selected</a>
 				<a href="#" class="btn">Paste list of users</a>
-				<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
-				<#if membershipDetails?size gt 0>
-				<div class="scroller">
-				<table>
-					<tr>
-						<th><input type="checkbox"></th>
-						<th>User</th>
-						<th>Name</th>
-						<th></th>
-					</tr>
-				<#list membershipDetails as item>
-					<#assign u=item.user>
-					<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
-						<td>
-							<input type="checkbox">
-						</td>
-						<td>
-							<#if u.foundUser>
-								${u.userId}
-							<#elseif item.universityId??>
-								Unknown (Uni ID ${item.universityId})
-							<#elseif item.userId??>
-								Unknown (Usercode ${item.userId})
-							<#else><#-- Hmm this bit shouldn't ever happen -->
-								
+					<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
+
+				<div class="tabbable">
+
+					<ul class="nav nav-tabs">
+						<li class="active"><a href=="#membership-tab1" data-toggle="tab">Students</a></li>
+						<li><a href=="#membership-tab2" data-toggle="tab">Add more</a></li>
+					</ul>
+
+					<div class="tab-content">
+
+						<div class="tab-pane active" id="membership-tab1">
+							<#if membershipDetails?size gt 0>
+								<div class="scroller">
+									<table>
+										<tr>
+											<th><input type="checkbox"></th>
+											<th>User</th>
+											<th>Name</th>
+											<th></th>
+										</tr>
+										<#list membershipDetails as item>
+											<#assign u=item.user>
+												<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
+													<td>
+														<input type="checkbox">
+													</td>
+													<td>
+														<#if u.foundUser>
+															${u.userId}
+															<#elseif item.universityId??>
+																Unknown (Uni ID ${item.universityId})
+																<#elseif item.userId??>
+																	Unknown (Usercode ${item.userId})
+																	<#else><#-- Hmm this bit shouldn't ever happen -->
+
+														</#if>
+													</td>
+													<td>
+														<#if u.foundUser>
+															${u.fullName}
+														</#if>
+													</td>
+													<td>
+
+													</td>
+												</tr>
+										</#list>
+									</table>
+								</div>
+								<#else>
+									<p>No students yet.</p>
 							</#if>
-						</td>
-						<td>
-							<#if u.foundUser>
-								${u.fullName}
-							</#if>
-						</td>
-						<td>
-							
-						</td>
-					</tr>
-				</#list>
-				</table>
+						</div>
+
+						<div class="tab-pane active" id="membership-tab2">
+							<p>
+								Paste in a list of usercodes or University numbers here to add them.
+								<strong>Is your module in SITS?</strong> It may be better to fix the data there,
+								as other University systems won't know about any changes you make here.
+							</p>
+							<textarea>
+
+							</textarea>
+							<button id="add-members">Add</button>
+						</div>
+
+					</div>
+
 				</div>
-				<#else>
-				<p>No students yet.</p>
-				</#if>
+
+
 			</div>
 		</div>
 		
