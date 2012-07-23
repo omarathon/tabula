@@ -18,42 +18,52 @@ Download all as ZIP file
 </div>
 
 <div class="feedback-list">
-		<@form.selector_check_all />
-<#list assignment.feedbacks as feedback>
-	<div class="feedback-info">
-		<@form.selector_check_row "feedbacks" feedback.id />
-		<#-- TODO show student name if allowed by department -->
-		<h2 class="uni-id">${feedback.universityId}</h2>
-		<div class="date">Uploaded <@fmt.date feedback.uploadedDate /></div>
-		<div>
-		<#if feedback.checkedReleased>
-		<span class="label-green">Published</span>
-		<#else>
-		<span class="label-orange">Not published</span>
-		</#if>
-		</div>
-    	<div class="attachments">Attachments:
-			<#list feedback.attachments as attachment>
-				${attachment.name} 
-			</#list>
-			<span class="actions">
-			<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.zip'/>">
-			Download this feedback as ZIP file
-			</a>
-			</span>
-		</div>
-		<#if feedback.actualMark??>
-			<div class="mark">
-				Mark: ${feedback.actualMark}
-			</div>
-		</#if>
-		<#if feedback.actualGrade??>
-			<div class="grade">
-				Grade: ${feedback.actualGrade}
-			</div>
-		</#if>
-	</div>
-</#list>
+	<@form.selector_check_all />
+	<table id="feedback-table" class="table table-bordered table-striped">
+		<tr>
+            <th></th>
+            <th>University ID</th>
+            <th>Uploaded</th>
+            <th>Status</th>
+            <#if assignment.collectMarks>
+                <th>Mark</th>
+                <th>Grade</th>
+            </#if>
+            <th>Attachment(s)</th>
+            <th></th>
+        </tr>
+		<#list assignment.feedbacks as feedback>
+			<tr class="itemContainer">
+				<td><@form.selector_check_row "feedbacks" feedback.id /></td>
+				<td class="id">${feedback.universityId}</td>
+				<td class="uploaded"><@fmt.date feedback.uploadedDate /></td>
+				<td class="status">
+					<#if feedback.checkedReleased>
+						<span class="label-green">Published</span>
+					<#else>
+						<span class="label-orange">Not published</span>
+					</#if>
+				</td>
+                <#if assignment.collectMarks>
+                    <td class="mark">
+                        <#if feedback.actualMark??>${feedback.actualMark}</#if>
+                    </td>
+                    <td class="grade">
+                        <#if feedback.actualGrade??>${feedback.actualGrade}</#if>
+                    </td>
+                </#if>
+				<td class="attachments">
+					<#list feedback.attachments as attachment>${attachment.name}<#if attachment_has_next>, </#if></#list>
+				</td>
+				<td class="download">
+					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.zip'/>">
+						<i class="icon-download"></i>
+						Download attachments
+					</a>
+				</td>
+			</tr>
+		</#list>
+	</table>
 </div>
 
 </#escape>

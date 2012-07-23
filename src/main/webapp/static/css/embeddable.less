@@ -76,13 +76,19 @@ ul {
 }
 
 .feedback-list, .submission-list {
-	div.checkbox {
-	  float:right;
-	}
 	div.checkbox.check-all {
-	  padding-right: 0.5em;
+	  padding: 0.5em 0 0.3em 1.9em;
 	  input { vertical-align: middle; }
 	}
+}
+
+#feedback-table {
+    tr.selected td {
+        background-color: #F2DEDE;
+        &:hover{
+            background-color: #F2DEDE;
+        }
+    }
 }
 
 .feedback-info, .submission-info {
