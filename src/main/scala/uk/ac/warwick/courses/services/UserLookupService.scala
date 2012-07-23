@@ -13,10 +13,33 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import scala.reflect.BeanProperty
 import scala.annotation.target.field
+import uk.ac.warwick.courses.data.Daoisms
+import uk.ac.warwick.courses.data.model.UpstreamMember
+import uk.ac.warwick.userlookup.UserLookupAdapter
 
-abstract class UserLookupService extends UserLookupInterface
+trait UserLookupService extends UserLookupInterface
 
-class SwappableUserLookupService(@BeanProperty var delegate:UserLookupInterface) extends UserLookupService {
+class UserLookupServiceImpl(d:UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with Daoisms {
+	
+	override def getUserByWarwickUniId(id:String) =
+		getUserByWarwickUniId(id, true)
+	
+	/**
+	 * When looking up a user by University ID, check our internal database first.
+	 */
+	override def getUserByWarwickUniId(id: String, ignored: Boolean) = {
+		getById[UpstreamMember](id) map { member =>
+			member.asSsoUser
+		} getOrElse {
+			super.getUserByWarwickUniId(id, ignored)
+		}
+	}
+	
+}
+
+class SwappableUserLookupService(d:UserLookupService) extends UserLookupServiceAdapter(d)
+
+abstract class UserLookupServiceAdapter(@BeanProperty var delegate:UserLookupService) extends UserLookupService {
 	
 	def getUsersInDepartment(d: String)= delegate.getUsersInDepartment(d)
 	def getUsersInDepartmentCode(c: String)= delegate.getUsersInDepartmentCode(c)

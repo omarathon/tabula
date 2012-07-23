@@ -2,10 +2,9 @@ package uk.ac.warwick.courses
 
 import org.specs.mock.JMocker._
 import org.specs.mock.JMocker.{expect => expecting}
-import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.services.SwappableUserLookupService
+import uk.ac.warwick.courses.services._
 import org.junit.Before
 
 trait LenientUserLookup {
@@ -17,7 +16,7 @@ trait LenientUserLookup {
 	}
 	
 	def lenientUserLookup = {
-	    val backend = mock[UserLookupInterface]
+	    val backend = mock[UserLookupService]
 		expecting {
 			val id = capturingParam[String]
 		    allowing(backend).getUserByWarwickUniId(id.capture) willReturn id.map{

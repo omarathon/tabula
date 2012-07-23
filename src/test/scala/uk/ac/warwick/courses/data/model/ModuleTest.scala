@@ -9,4 +9,9 @@ class ModuleTest extends TestBase {
 		Module.stripCats("md105-5") should be ("md105")
 		intercept[IllegalArgumentException] { Module.stripCats("md105") }
 	}
+	
+	@Test def extractCats {
+		Module.extractCats("md101-15") should be (Some("15"))
+		Module.extractCats("md101") should be (None)
+	}
 }

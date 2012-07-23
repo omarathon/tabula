@@ -45,7 +45,7 @@ object AssignmentMembership {
 			MembershipItem(
 				user = user,
 				universityId = universityId(user, None),
-                userId = userId(user, Some(id)),
+        userId = userId(user, Some(id)),
 				itemType = "include",
 				extraneous = extraneous)
 		}
@@ -56,9 +56,9 @@ object AssignmentMembership {
 			val extraneous = !(sitsUsers exists sameUserIdAs(user))
 			MembershipItem(
 				user = user,
-                universityId = universityId(user, None),
-                userId = userId(user, Some(id)),
-                itemType = "exclude",
+        universityId = universityId(user, None),
+        userId = userId(user, Some(id)),
+        itemType = "exclude",
 				extraneous = extraneous)
 		}
 	
@@ -66,10 +66,10 @@ object AssignmentMembership {
 	private def makeSitsItems(includes: Seq[Pair[String,User]], excludes: Seq[Pair[String,User]], sitsUsers: Seq[Pair[String,User]]) = 
 		sitsUsers filterNot in(includes) filterNot in(excludes) map { case (id,user) =>
 			MembershipItem(
-				user = user,
-                universityId = universityId(user, Some(id)),
-                userId = userId(user, None),
-				itemType = "sits",
+        user = user,
+        universityId = universityId(user, Some(id)),
+        userId = userId(user, None),
+        itemType = "sits",
 				extraneous = false)
 		}
 	

@@ -62,7 +62,7 @@ class AddAssignment extends BaseController {
 	def form(user: CurrentUser, @PathVariable module: Module, 
 			form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
-		form.prefillFromRecentAssignment
+		form.prefillFromRecentAssignment()
 		formView(form, module)
 	}
 

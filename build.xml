@@ -1,4 +1,4 @@
-<project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="package" name="Coursework">
+<project basedir="." default="package" name="Coursework">
   
   <import file="build-scala.xml" />
     
