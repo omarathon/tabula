@@ -36,7 +36,12 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
 	 */
-	def moduleCodeBasic = Module.stripCats(moduleCode)
+	def moduleCodeBasic: String = Module.stripCats(moduleCode)
+	
+	/**
+	 * Returns the CATS as a string if it's present, e.g. 50
+	 */
+	def cats: Option[String] = Module.extractCats(moduleCode)
 	
 	def needsUpdatingFrom(other:UpstreamAssignment) = (
 		this.name != other.name ||

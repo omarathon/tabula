@@ -28,6 +28,7 @@ import uk.ac.warwick.courses.services.UserLookupService
 case class UpstreamGroupOption(
         assignmentId:String,
         name:String,
+        cats:Option[String], // TODO joke about cats and string
         sequence:String,
         occurrence:String,
         memberCount:Int
@@ -195,6 +196,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
                 UpstreamGroupOption(
                     assignmentId = assignment.id,
                     name = assignment.name,
+                    cats = assignment.cats,
                     sequence = assignment.sequence,
                     occurrence = group.occurrence,
                     memberCount = group.members.members.size

@@ -41,7 +41,10 @@ import uk.ac.warwick.courses.data.model.Assignment
   * Also a bunch of methods for generating fake support resources.
   */
 
-abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures
+abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures {
+	// bring in type so we can be lazy and not have to import @Test
+	type Test = org.junit.Test 
+}
 
 /** Various test objects
   */

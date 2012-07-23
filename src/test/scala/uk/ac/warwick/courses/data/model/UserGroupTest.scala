@@ -34,6 +34,14 @@ class UserGroupTest extends PersistenceTestBase {
 			group.includes("eggdog") should be (false)
 			group.includes("superhat") should be (true)
 			group.includes("menace") should be (true)
+			
+			/* check that members works and is consistent.
+			 * At time of writing, staticIncludeUsers would get
+			 * added to includeUsers each time :|
+			 */
+			group.members.size should be (3)
+			group.members.size should be (3)
+			group.members.size should be (3)
 		}
 	} 
 	

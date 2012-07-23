@@ -83,4 +83,9 @@ object Module {
 		case ModuleCatsPattern(module, cats) => module
 		case _ => throw new IllegalArgumentException(fullModuleName + " didn't match pattern")
 	}
+	
+	def extractCats(fullModuleName:String) : Option[String] = fullModuleName match {
+		case ModuleCatsPattern(module, cats) => Some(cats)
+		case _ => None
+	}
 }

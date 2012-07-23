@@ -232,12 +232,14 @@
 		<constructor-arg ref="realUserLookup" />
 	</bean>
 	
-	<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
-		p:ssosUrl="${ssoclient.ssos.url}"
-		p:groupServiceLocation="${ssoclient.webgroups.url}" />
+	<bean id="realUserLookup" class="uk.ac.warwick.courses.services.UserLookupServiceImpl" autowire-candidate="false">
+		<constructor-arg>
+			<bean id="u" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
+				p:ssosUrl="${ssoclient.ssos.url}"
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+		</constructor-arg>
+	</bean>
 	
-	<!-- <util:property-path id="groupService" path="userLookup.groupService"/> -->
- 	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
@@ -301,9 +303,7 @@
 	</beans>
 	
 	<beans profile="dev,production,console">
-		<bean id="realUserLookup" class="uk.ac.warwick.userlookup.UserLookup"
-			p:ssosUrl="${ssoclient.ssos.url}"
-			p:groupServiceLocation="${ssoclient.webgroups.url}" />
+		
 	</beans>
 	
 	<beans profile="dev,production">
