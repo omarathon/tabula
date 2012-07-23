@@ -396,6 +396,8 @@ jQuery(function ($) {
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
 			$('#download-selected-button, #delete-selected-button').click(function(event){
 				event.preventDefault();
+
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
 				if ($container.data('checked') != 'none') {
 					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
 					$form.append($checkedBoxes.clone());
