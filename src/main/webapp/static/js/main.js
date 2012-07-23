@@ -69,13 +69,15 @@ jQuery.fn.bigList = function(options) {
 		var $selectAll = $this.find('input.'+checkboxAllClass);
 		
 		var doNothing = function(){};
-		
+
+		var onChange = options.onChange || doNothing;
 		var onSomeChecked = options.onSomeChecked || doNothing;
 		var onNoneChecked = options.onNoneChecked || doNothing;
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
 		$checkboxes.change(function(){
-			var allChecked = $checkboxes.not(":cheked").length == 0;
+		    onChange.call(jQuery(this)); // pass the checkbox as the context
+			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
 			if (allChecked) {
 				$this.data('checked','all');
@@ -88,8 +90,12 @@ jQuery.fn.bigList = function(options) {
 				onNoneChecked.call($this);
 			}
 		});
+
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
+			$checkboxes.each(function(){
+			    onChange.call(jQuery(this))
+			});
 			if (this.checked) {
 				$this.data('checked','all');
 				onAllChecked.call($this);
@@ -398,9 +404,18 @@ jQuery(function ($) {
 				}
 				return false;
 			});
-			
 		},
-		
+
+        // rather than just toggling the class check the state of the checkbox to avoid silly errors
+		onChange : function() {
+		    var container = this.closest(".itemContainer");
+		    if(this.is(":checked")){
+		        container.addClass("selected");
+		    } else {
+		        container.removeClass("selected");
+		    }
+		},
+
 		onSomeChecked : function() {
 			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
 		},
