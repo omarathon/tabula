@@ -123,19 +123,20 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	def copyTo(assignment:Assignment) {
 		assignment.name = name
-	    assignment.openDate = openDate
-	    assignment.closeDate = closeDate
-	    assignment.collectMarks = collectMarks
-	    assignment.academicYear = academicYear
-	    assignment.collectSubmissions = collectSubmissions
-	    // changes disabled for now
-	    //assignment.restrictSubmissions = restrictSubmissions
-	    assignment.allowLateSubmissions = allowLateSubmissions
-	    assignment.allowResubmission = allowResubmission
-	    assignment.displayPlagiarismNotice = displayPlagiarismNotice
-	    assignment.upstreamAssignment = upstreamAssignment
+    assignment.openDate = openDate
+    assignment.closeDate = closeDate
+    assignment.collectMarks = collectMarks
+    assignment.academicYear = academicYear
+    assignment.collectSubmissions = collectSubmissions
+    // changes disabled for now
+    //assignment.restrictSubmissions = restrictSubmissions
+    assignment.allowLateSubmissions = allowLateSubmissions
+    assignment.allowResubmission = allowResubmission
+    assignment.displayPlagiarismNotice = displayPlagiarismNotice
+    assignment.upstreamAssignment = upstreamAssignment
+    assignment.occurrence = occurrence
 	    
-	    if (assignment.members == null) assignment.members = new UserGroup
+    if (assignment.members == null) assignment.members = new UserGroup
 	    assignment.members copyFrom members
 	    	
 	    findCommentField(assignment) foreach ( field => field.value = comment )
@@ -145,7 +146,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		}
 	}
 	
-	def prefillFromRecentAssignment {
+	def prefillFromRecentAssignment() {
 		service.recentAssignment(module) foreach { (a) =>
 			copyNonspecificFrom(a)
 			_prefilled = true
@@ -178,7 +179,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	def copyFrom(assignment:Assignment) {
 		name = assignment.name
 		academicYear = assignment.academicYear
-		assignment
+		upstreamAssignment = assignment.upstreamAssignment
+    occurrence = assignment.occurrence
 		copyNonspecificFrom(assignment)
 	}
 	

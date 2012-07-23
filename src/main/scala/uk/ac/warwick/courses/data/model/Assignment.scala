@@ -62,7 +62,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Column(nullable=false)
 	var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime())
 	
-	@transient var occurrence:String =_
+	@BeanProperty var occurrence:String =_
 	
 	@Type(`type`="uk.ac.warwick.courses.data.model.StringListUserType")
 	@BeanProperty var fileExtensions:Seq[String] = _

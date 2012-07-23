@@ -16,6 +16,11 @@ import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
 import uk.ac.warwick.courses.helpers.Logging
 
+/**
+ * Service providing access to Assignments and related objects.
+ *
+ * TODO this is getting a bit monstrous and all-encompassing.
+ */
 trait AssignmentService {
 	def getAssignmentById(id:String): Option[Assignment]
 	def save(assignment:Assignment)
@@ -181,14 +186,14 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
 	}
 	
-	def recentAssignment(module:Module) = 
-		auditEventIndexService.recentAssignment(module)
+	def recentAssignment(module:Module) = {
+    auditEventIndexService.recentAssignment(module)
+  }
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
-		Option(assignment.upstreamAssignment).flatMap { upstream =>
-			criteria(assignment.academicYear, upstream.moduleCode, upstream.assessmentGroup, assignment.occurrence)
-					.uniqueResult
-		}
+    val upstream = assignment.upstreamAssignment
+		if (upstream == null) None
+    else criteria(assignment.academicYear, upstream.moduleCode, upstream.assessmentGroup, assignment.occurrence).uniqueResult
 	}
 	
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)

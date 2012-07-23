@@ -123,7 +123,7 @@ the comments textarea needs to maintain newlines.
 							<#if membershipDetails?size gt 0>
 								<a href="#" class="btn disabled">Remove selected</a>
 								<div class="scroller">
-									<table>
+									<table class="table table-bordered table-striped">
 										<tr>
 											<th><input type="checkbox"></th>
 											<th>User</th>
