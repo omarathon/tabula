@@ -151,14 +151,14 @@
 		<touch file="${deploy.dir}/${war.name}/WEB-INF/web.xml" />
 	</target>
 
-	<target name="dev-deploy-views" depends="-require-local-properties">
+	<target name="dev-deploy-views" depends="-require-local-properties" description="Update all FTL templates in the unpacked deployed app">
 		<assert-dir-exists var="deploy.dir" />
 		<sync todir="${deploy.dir}/${war.name}/WEB-INF/freemarker">
 			<fileset dir="src/main/webapp/WEB-INF/freemarker" />
 		</sync>
 	</target>
 
-	<target name="dev-deploy-static" depends="-require-local-properties,compile-scripts">
+	<target name="dev-deploy-static" depends="-require-local-properties,compile-scripts" description="Update all static files in the unpacked deployed app">
 		<assert-dir-exists var="deploy.dir" />
 		<sync todir="${deploy.dir}/${war.name}/static">
 			<fileset dir="target/${war.name}/static" />
