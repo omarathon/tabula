@@ -98,24 +98,30 @@ the comments textarea needs to maintain newlines.
 		</div>
 		
 		<div class="membership-picker">
-			<div>Membership</div>
 			<div>
 				<#assign membershipDetails=command.membershipDetails />
-				<a href="#" class="btn btn-danger disabled">Remove selected</a>
-				<a href="#" class="btn">Paste list of users</a>
-					<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
 
 				<div class="tabbable">
 
+					<#assign has_members=(membershipDetails?size gt 0) />
+					<#assign tab1class=""/>
+					<#assign tab2class=""/>
+					<#if has_members>
+						<#assign tab1class="active"/>
+					<#else>
+						<#assign tab2class="active"/>
+					</#if>
+
 					<ul class="nav nav-tabs">
-						<li class="active"><a href=="#membership-tab1" data-toggle="tab">Students</a></li>
-						<li><a href=="#membership-tab2" data-toggle="tab">Add more</a></li>
+						<li class="${tab1class}"><a href="#membership-tab1" data-toggle="tab">Students</a></li>
+						<li class="${tab2class}"><a href="#membership-tab2" data-toggle="tab">Add more</a></li>
 					</ul>
 
 					<div class="tab-content">
 
-						<div class="tab-pane active" id="membership-tab1">
+						<div class="tab-pane ${tab1class}" id="membership-tab1">
 							<#if membershipDetails?size gt 0>
+								<a href="#" class="btn disabled">Remove selected</a>
 								<div class="scroller">
 									<table>
 										<tr>
@@ -158,15 +164,16 @@ the comments textarea needs to maintain newlines.
 							</#if>
 						</div>
 
-						<div class="tab-pane active" id="membership-tab2">
+						<div class="tab-pane ${tab2class}" id="membership-tab2">
 							<p>
 								Paste in a list of usercodes or University numbers here to add them.
 								<strong>Is your module in SITS?</strong> It may be better to fix the data there,
 								as other University systems won't know about any changes you make here.
 							</p>
-							<textarea>
-
-							</textarea>
+							<div>
+								<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
+							</div>
+							<textarea></textarea>
 							<button id="add-members">Add</button>
 						</div>
 
@@ -204,6 +211,7 @@ the comments textarea needs to maintain newlines.
 			$('#show-membership-picker').click(function(){
 				$('.sits-picker').hide();
 				$('.membership-picker').toggle();
+
 			});
 		});
 		</script>
