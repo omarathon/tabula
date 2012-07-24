@@ -1,12 +1,8 @@
 package uk.ac.warwick.courses.services
-import org.hibernate.annotations.AccessType
-import org.junit.Test
-import javax.persistence.Entity
-import uk.ac.warwick.courses.actions.View
+
+import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.data.model.Department
-import uk.ac.warwick.courses.TestBase
-import uk.ac.warwick.courses.actions.Action
-import uk.ac.warwick.courses.actions.Viewable
+import uk.ac.warwick.courses._
 
 class SecurityServiceTest extends TestBase {
 	
@@ -24,6 +20,17 @@ class SecurityServiceTest extends TestBase {
 	    case _ => fail("Should have matched view")
 	  }
 	}
+
+  @Test def canDo {
+    val service = new SecurityService
+    val department = new Department
+    department.addOwner("cusfal")
+    withUser("cusebr") {
+      val info = RequestInfo.fromThread.get
+      val user = info.user
+      service.can(user, Manage(department)) should be (false)
+    }
+  }
 	
 	@Test def factory {
 		val dept = new Department

@@ -128,7 +128,6 @@ the comments textarea needs to maintain newlines.
 											<th><input type="checkbox"></th>
 											<th>User</th>
 											<th>Name</th>
-											<th></th>
 										</tr>
 										<#list membershipDetails as item>
 											<#assign u=item.user>
@@ -138,12 +137,12 @@ the comments textarea needs to maintain newlines.
 													</td>
 													<td>
 														<#if u.foundUser>
-															${u.userId}
-															<#elseif item.universityId??>
-																Unknown (Uni ID ${item.universityId})
-																<#elseif item.userId??>
-																	Unknown (Usercode ${item.userId})
-																	<#else><#-- Hmm this bit shouldn't ever happen -->
+															${u.userId} <#if item.universityId??>(${item.universityId})</#if>
+														<#elseif item.universityId??>
+															Unknown (Uni ID ${item.universityId})
+														<#elseif item.userId??>
+															Unknown (Usercode ${item.userId})
+														<#else><#-- Hmm this bit shouldn't ever happen -->
 
 														</#if>
 													</td>
@@ -151,9 +150,6 @@ the comments textarea needs to maintain newlines.
 														<#if u.foundUser>
 															${u.fullName}
 														</#if>
-													</td>
-													<td>
-
 													</td>
 												</tr>
 										</#list>
@@ -228,6 +224,7 @@ the comments textarea needs to maintain newlines.
 	</@form.labelled_row>
 	<fieldset id="submission-options">
 		<legend>Submission options</legend>
+
 		<#if features.collectMarks>
 			<@form.row>
 				<@form.label></@form.label>
@@ -239,6 +236,7 @@ the comments textarea needs to maintain newlines.
 				</@form.field>	
 			</@form.row>
 		</#if>
+
 		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>				
@@ -248,6 +246,21 @@ the comments textarea needs to maintain newlines.
 				</label>
 			</@form.field>	
 		</@form.row>
+
+		<#if features.assignmentMembership>
+			<@form.label></@form.label>
+			<@form.field>
+				<label class="checkbox">
+					<@f.checkbox path="restrictSubmissions" />
+					Only allow enrolled students to submit
+				</label>
+				<div class="help-block">
+					If you use this option, only students defined above as members will be able to
+					submit, so make sure that the membership is correct to avoid problems.
+				</div>
+			</@form.field>
+		</#if>
+
 		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>				

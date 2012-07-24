@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.bind.annotation.RequestMethod._
 import javax.validation.Valid
-import uk.ac.warwick.courses.actions.View
+import uk.ac.warwick.courses.actions.{Submit, View}
 import uk.ac.warwick.courses.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.courses.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.courses.data.model.Assignment
@@ -90,7 +90,10 @@ class AssignmentController extends AbstractAssignmentController {
 	
 	
 	def checks(form:SubmitAssignmentCommand) = {
-		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
+    val assignment = form.assignment
+    val module = form.module
+		mustBeLinked(mandatory(assignment),  mandatory(module))
+    mustBeAbleTo(Submit(assignment)) // includes check for restricted submission.
 	}
 	
 	/**

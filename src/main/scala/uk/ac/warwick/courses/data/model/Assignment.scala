@@ -20,14 +20,13 @@ import uk.ac.warwick.courses.data.model.forms.FileField
 import uk.ac.warwick.courses.data.model.forms.FormField
 import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.courses.helpers.ArrayList
-import uk.ac.warwick.courses.AcademicYear
-import uk.ac.warwick.courses.ToString
+import uk.ac.warwick.courses.{CurrentUser, AcademicYear, ToString, Features}
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.services.{AssignmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.Features
+import javax.annotation.Resource
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -50,9 +49,13 @@ object Assignment {
 @FilterDef(name=Assignment.NotDeletedFilter, defaultCondition="deleted = 0")
 @Filter(name=Assignment.NotDeletedFilter)
 @Entity @AccessType("field")
+@Configurable
 class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToString {
-	import Assignment._
-	
+  import Assignment._
+
+  @transient @Resource(name="assignmentService") var assignmentService: AssignmentService = _
+  @transient @Resource(name="userLookup") var userLookup:UserLookupService =_
+
 	def this(_module:Module) {
 	  this()
 	  this.module = _module
@@ -144,6 +147,19 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 */
 	def isClosed(now:DateTime) = now.isAfter(closeDate)
 	def isClosed():Boolean = isClosed(new DateTime)
+
+  def assessmentGroup: Option[UpstreamAssessmentGroup] = {
+    if (upstreamAssignment == null || academicYear == null || occurrence == null) {
+      None
+    } else {
+      val template = new UpstreamAssessmentGroup
+      template.academicYear = academicYear
+      template.assessmentGroup = upstreamAssignment.assessmentGroup
+      template.moduleCode = upstreamAssignment.moduleCode
+      template.occurrence = occurrence
+      assignmentService.getAssessmentGroup(template)
+    }
+  }
 	
 	/**
 	 * Calculates whether we could submit to this assignment.
@@ -204,10 +220,18 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def findFeedback(uniId:String) = feedbacks.find(_.universityId == uniId)
 
 	// Help views decide whether to show a publish button.
-	def canPublishFeedback:Boolean = 
+	def canPublishFeedback: Boolean =
 			! feedbacks.isEmpty && 
 			! unreleasedFeedback.isEmpty && 
 			closeDate.isBeforeNow
+
+  def canSubmit(user: User): Boolean = {
+    if (restrictSubmissions) {
+      assignmentService.isStudentMember(user, assessmentGroup, members)
+    } else {
+      true
+    }
+  }
 		
 	/**
 	 * Report on the submissions and feedbacks, noting

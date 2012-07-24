@@ -22,7 +22,6 @@ import uk.ac.warwick.courses.DateFormats
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.UserGroup
-import uk.ac.warwick.courses.data.model.AssignmentMembership
 import uk.ac.warwick.courses.services.UserLookupService
 
 case class UpstreamGroupOption(
@@ -79,7 +78,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	/** linked SITS assignment */
 	@BeanProperty var upstreamAssignment: UpstreamAssignment =_
 	
-	/** If copying from existing Assigment, this must be a FULL COPY
+	/** If copying from existing Assigment, this must be a DEEP COPY
 	 * with changes copied back to the original UserGroup, don't pass
 	 * the same UserGroup around because it'll just cause Hibernate
 	 * problems. This copy should be transient.
@@ -128,8 +127,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     assignment.collectMarks = collectMarks
     assignment.academicYear = academicYear
     assignment.collectSubmissions = collectSubmissions
-    // changes disabled for now
-    //assignment.restrictSubmissions = restrictSubmissions
+    assignment.restrictSubmissions = restrictSubmissions
     assignment.allowLateSubmissions = allowLateSubmissions
     assignment.allowResubmission = allowResubmission
     assignment.displayPlagiarismNotice = displayPlagiarismNotice
@@ -211,7 +209,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	 * Returns a sequence of MembershipItems
 	 */
 	def membershipDetails = 
-		AssignmentMembership.determineMembership(assessmentGroup, members)(userLookup)
+		service.determineMembership(assessmentGroup, members)
 	
 	
 	/**
