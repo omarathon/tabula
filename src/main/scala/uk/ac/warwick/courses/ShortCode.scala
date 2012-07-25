@@ -9,3 +9,4 @@ import scala.util.Random
 object ShortCode {
 	def random() = Random.alphanumeric.take(5).mkString
 }
+

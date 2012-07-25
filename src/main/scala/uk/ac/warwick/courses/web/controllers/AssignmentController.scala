@@ -21,57 +21,9 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.web.Mav
 
-@Controller
-@RequestMapping(Array("/module/{module}/"))
-class ModuleController extends BaseController {
-  
-	hideDeletedItems
-	
-	@RequestMapping
-	def viewModule(@PathVariable module:Module) = {
-		mustBeAbleTo(View(mandatory(module)))
-		Mav("submit/module", 
-			"module"-> module,
-			"assignments" -> module.assignments.filterNot{_.deleted}.sortBy{ _.closeDate }.reverse
-			)
-	}
-	
-}
 
-@Configurable
-@Controller
-@RequestMapping(value=Array("/module/{module}/{assignment}/resend-receipt"))
-class ResendSubmissionEmail extends AbstractAssignmentController {
-	
-	hideDeletedItems
-	
-	@RequestMapping(method=Array(GET,HEAD))
-	def nope(form:SendSubmissionReceiptCommand) = Redirect( Routes.assignment(mandatory(form.assignment)) )
-	
-	@RequestMapping(method=Array(POST)) 
-	def sendEmail(user:CurrentUser, form:SendSubmissionReceiptCommand) : Mav = {
-		form.user = user
-		mustBeLinked(mandatory(form.assignment),  mandatory(form.module))
-		
-		val submission = assignmentService.getSubmissionByUniId(form.assignment, user.universityId)
-		val hasEmail = user.email.hasText
-		val sent:Boolean = submission match {
-			case Some(submission) if (submission.submitted) =>
-				form.submission = submission
-				form.apply()
-			case None => false
-		}
-		Mav("submit/receipt", 
-				"submission" -> submission,
-				"module"-> form.module,
-				"assignment" -> form.assignment,
-				"sent" -> sent,
-				"hasEmail" -> hasEmail
-		)
-		
-	}
-	
-}
+
+
 
 @Configurable
 @Controller
@@ -87,15 +39,7 @@ class AssignmentController extends AbstractAssignmentController {
 		cmd.module = module
 		cmd
 	}
-	
-	
-	def checks(form:SubmitAssignmentCommand) = {
-    val assignment = form.assignment
-    val module = form.module
-		mustBeLinked(mandatory(assignment),  mandatory(module))
-    mustBeAbleTo(Submit(assignment)) // includes check for restricted submission.
-	}
-	
+
 	/**
 	 * Sitebuilder-embeddable view.
 	 */
@@ -111,7 +55,7 @@ class AssignmentController extends AbstractAssignmentController {
 		
 		form.onBind
 		checks(form)
-		
+
 		val feedback = checkCanGetFeedback(assignment, user)
 		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter{_.submitted}
 		/*
@@ -156,5 +100,18 @@ class AssignmentController extends AbstractAssignmentController {
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}
-			
+
+
+  private def checks(form:SubmitAssignmentCommand) = {
+    val assignment = form.assignment
+    val module = form.module
+    mustBeLinked(mandatory(assignment),  mandatory(module))
+    if (!can(Submit(assignment))) { // includes check for restricted submission.
+      throw new SubmitPermissionDeniedException(assignment)
+    }
+  }
+
+  private def hasPermission(form:SubmitAssignmentCommand) = can(Submit(form.assignment))
+
+
 }

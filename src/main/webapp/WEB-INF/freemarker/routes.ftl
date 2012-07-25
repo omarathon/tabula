@@ -24,4 +24,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#-- non admin -->
 <#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
 <#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
+<#macro assignmentrequestaccess assignment><@url page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
 </#compress>
