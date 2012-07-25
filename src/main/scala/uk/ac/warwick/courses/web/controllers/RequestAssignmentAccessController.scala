@@ -21,11 +21,9 @@ class RequestAssignmentAccessController extends AbstractAssignmentController {
 
   @RequestMapping(method = Array(POST))
   def sendEmail(user: CurrentUser, form: RequestAssignmentAccessCommand): Mav = {
-    mustBeLinked(mandatory(form.assignment), mandatory(form.module))
-
+    mustBeLinked(form.assignment, form.module)
     form.apply()
-
-    Redirect(Routes.assignment(form.assignment))
+    Redirect(Routes.assignment(form.assignment)).addObjects("requestedAccess" -> true)
   }
 
 }

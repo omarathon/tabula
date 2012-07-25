@@ -3,6 +3,14 @@
 		<h1>${module.name} (${module.code?upper_case})
 			<br><strong>${assignment.name}</strong></h1>
 
+		<#if RequestParameters.requestedAccess??>
+			<div class="alert alert-success">
+				<a class="close" data-dismiss="alert">&times;</a>
+				Thanks, we've sent a message to whoever is in charge of the module with all the necessary
+				details.
+			</div>
+		</#if>
+
 		<h2>You're not enrolled</h2>
 
 		<p>
@@ -12,7 +20,7 @@
 		</p>
 
 		<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
-			<button class="btn">Request access</button>
+			<button class=btn>Request access</button>
 		</form>
 
 	</#compress>
