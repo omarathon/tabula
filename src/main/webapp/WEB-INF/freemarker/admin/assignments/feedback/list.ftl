@@ -16,7 +16,7 @@ Download all as ZIP file
 &nbsp;
 <a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete' />" id="delete-selected-button">Delete selected</a>
 </div>
-
+<#if assignment.feedbacks?size gt 0>
 <div class="feedback-list">
 	<@form.selector_check_all />
 	<table id="feedback-table" class="table table-bordered table-striped">
@@ -65,5 +65,10 @@ Download all as ZIP file
 		</#list>
 	</table>
 </div>
+<#else><#-- no feedback -->
+
+<p>There is no feedback for this assignment.</p>
+
+</#if>
 
 </#escape>

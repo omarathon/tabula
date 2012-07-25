@@ -33,30 +33,43 @@ Publications: ${r.publicationOverlap}%)
 <#if submissions?size gt 0>
 <div class="submission-list">
 	<@form.selector_check_all />
-<#list submissions as item>
-	<#assign submission=item.submission>
-
-	<div class="submission-info">
-		<@form.selector_check_row "submissions" submission.id />
-		<#-- TODO show student name if allowed by department -->
-		<h2 class="uni-id">${submission.universityId}</h2>
-		<div>
-		<span class="date">Submitted <@fmt.date date=submission.submittedDate seconds=true capitalise=false /></span>
-		<#if submission.late>
-		  <span class="label-red">Late</span>
-		</#if>
-		<#if item.downloaded>
-		  <span class="label-green">Downloaded</span>
-		</#if>
-		<#if item.submission.originalityReport??>
-			<div class="originality-report">
-				<@originalityReport item.submission.originalityReport />
-			</div>
-		</#if>
-		</div>
-	</div>
-
-</#list>
+    <table id="submission-table" class="table table-bordered table-striped">
+        <tr>
+            <th></th>
+            <th>University ID</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <#if hasOriginalityReport><th>Originality Report</th></#if>
+        </tr>
+        <#list submissions as item>
+	        <#assign submission=item.submission>
+            <tr class="itemContainer">
+                <td><@form.selector_check_row "submissions" submission.id /></td>
+                <td class="id">${submission.universityId}</td>
+                <#-- TODO show student name if allowed by department -->
+		        <td class="submitted">
+                    <span class="date">
+                        <@fmt.date date=submission.submittedDate seconds=true capitalise=true />
+                    </span>
+                </td>
+                <td class="status">
+                    <#if submission.late>
+                        <span class="label-red">Late</span>
+                    </#if>
+                    <#if item.downloaded>
+                        <span class="label-green">Downloaded</span>
+                    </#if>
+                </td>
+                <#if hasOriginalityReport>
+                    <td class="originality-report">
+                        <#if item.submission.originalityReport??>
+                            <@originalityReport item.submission.originalityReport />
+                        </#if>
+                    </td>
+                </#if>
+            </tr>
+        </#list>
+    </table>
 </div>
 <#else><#-- no submissions -->
 

@@ -82,12 +82,15 @@ ul {
 	}
 }
 
-#feedback-table {
+#feedback-table, #submission-table {
     tr.selected td {
         background-color: #F2DEDE;
         &:hover{
             background-color: #F2DEDE;
         }
+    }
+    .status span{
+        display: inline-block;
     }
 }
 
@@ -537,7 +540,7 @@ input[type=text] {
 .similarity-4 { .similarity-box(#ee3333); }
 
 .similarity-subcategories {
-  display: block;
+  margin-left: 0.5em;
   font-size: @very-subtle-font-size;
   color: @very-subtle-text-color;
 }

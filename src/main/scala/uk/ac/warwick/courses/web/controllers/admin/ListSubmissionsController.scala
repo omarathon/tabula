@@ -32,10 +32,12 @@ class ListSubmissionsController extends BaseController {
 		mustBeAbleTo(Participate(command.module))
 		
 		val submissions = command.apply()
-		
+    val hasOriginalityReport = submissions.exists(_.submission.originalityReport != null)
+
 		Mav("admin/assignments/submissions/list",
 				"assignment" -> assignment,
-				"submissions" -> submissions)
+				"submissions" -> submissions,
+        "hasOriginalityReport" -> hasOriginalityReport)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
