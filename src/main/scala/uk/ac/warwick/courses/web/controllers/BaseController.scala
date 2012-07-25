@@ -32,7 +32,7 @@ import uk.ac.warwick.courses.validators.CompositeValidator
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment:Assignment, module:Module) = 
-	 if (assignment.module.id != module.id) {
+	 if (mandatory(assignment).module.id != mandatory(module).id) {
 		logger.info("Not displaying assignment as it doesn't belong to specified module")
   		throw new ItemNotFoundException(assignment)
 	 }
