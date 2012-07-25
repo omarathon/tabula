@@ -3,7 +3,7 @@ package uk.ac.warwick.courses.data.model
 import uk.ac.warwick.courses.TestBase
 import uk.ac.warwick.courses.Mockito
 import org.junit.Test
-import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.services.{AssignmentServiceImpl, AssignmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -25,12 +25,11 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		user.setFullName("Roger " + code.head.toUpper + code.tail)
 		user
 	}
-	
+
+  var assignmentService: AssignmentService = _
 	var userLookup: UserLookupService = _
 	val nobody = new UserGroup
-	
-	
-	
+
 	@Before def before {
 		userLookup = mock[UserLookupService]
 		userLookup.getUserByUserId(any[String]) answers { id =>
@@ -39,16 +38,21 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
 		}
+    assignmentService = {
+      val s = new AssignmentServiceImpl
+      s.userLookup = userLookup
+      s
+    }
 	}
 	
 	@Test def empty {
-		val membership = AssignmentMembership.determineMembership(None, nobody)(userLookup)
+		val membership = assignmentService.determineMembership(None, nobody)
 		membership.size should be (0)
 	}
 	
 	@Test def plainSits {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val membership = AssignmentMembership.determineMembership(Some(upstream), nobody)(userLookup)
+		val membership = assignmentService.determineMembership(Some(upstream), nobody)
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
@@ -59,7 +63,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		val others = new UserGroup
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
-		val membership = AssignmentMembership.determineMembership(Some(upstream), others)(userLookup)
+		val membership = assignmentService.determineMembership(Some(upstream), others)
 		println(membership)
 		membership.size should be (3)
 		
@@ -86,7 +90,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         val others = new UserGroup
         others.includeUsers.add("aaaaf")
         others.excludeUsers.add("aaaah")
-        val membership = AssignmentMembership.determineMembership(Some(upstream), others)(userLookup)
+        val membership = assignmentService.determineMembership(Some(upstream), others)
         println(membership)
         membership.size should be (3)
         

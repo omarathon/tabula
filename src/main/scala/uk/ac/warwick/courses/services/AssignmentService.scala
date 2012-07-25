@@ -14,7 +14,7 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
 import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
-import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.helpers.{FoundUser, Logging}
 
 /**
  * Service providing access to Assignments and related objects.
@@ -65,10 +65,14 @@ trait AssignmentService {
 	def save(assignment:UpstreamAssignment)
     def save(group:UpstreamAssessmentGroup)
     def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
+
+  def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[MembershipItem]
+
+  def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others:UserGroup): Boolean
 }
 
-@Service
-class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging {
+@Service(value="assignmentService")
+class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipMethods with Daoisms with Logging {
 	import Restrictions._
 	
 	@Autowired var userLookup:UserLookupService =_
@@ -218,8 +222,8 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
                 .add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup ))
                 .list
     }
-	
-	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) = 
+
+	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) =
 		session.newCriteria[UpstreamAssessmentGroup]
 				.add(Restrictions.eq("academicYear", academicYear))
 				.add(Restrictions.eq("moduleCode", moduleCode ))
@@ -230,3 +234,96 @@ class AssignmentServiceImpl extends AssignmentService with Daoisms with Logging 
 		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toText))
 	}
 }
+
+
+
+trait AssignmentMembershipMethods { self:AssignmentServiceImpl =>
+
+  def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[MembershipItem] = {
+
+    val sitsUsers = upstream map { upstream =>
+      upstream.members.members map { id =>
+        id -> userLookup.getUserByWarwickUniId(id)
+      }
+    } getOrElse Nil
+    val includes = others.includeUsers map { id => id -> userLookup.getUserByUserId(id) }
+    val excludes = others.excludeUsers map { id => id -> userLookup.getUserByUserId(id) }
+
+    // convert lists of Users to lists of MembershipItems that we can render neatly together.
+
+    val includeItems = makeIncludeItems(includes, sitsUsers)
+    val excludeItems = makeExcludeItems(excludes, sitsUsers)
+    val sitsItems = makeSitsItems(includes, excludes, sitsUsers)
+
+    includeItems ++ excludeItems ++ sitsItems
+  }
+
+  def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others:UserGroup): Boolean = {
+    if (others.excludeUsers contains user.getUserId) false
+    else if (others.includeUsers contains user.getUserId) true
+    else upstream map {
+      _.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
+    } getOrElse false // not in any group at all
+  }
+
+
+  private def sameUserIdAs(user: User) = (other: Pair[String,User]) => { user.getUserId == other._2.getUserId }
+  private def in(seq: Seq[Pair[String,User]]) = (other: Pair[String,User]) => { seq exists sameUserIdAs(other._2) }
+
+  private def makeIncludeItems(includes: Seq[Pair[String,User]], sitsUsers: Seq[Pair[String,User]]) =
+    includes map { case (id, user) =>
+      val extraneous = sitsUsers exists sameUserIdAs(user)
+      MembershipItem(
+        user = user,
+        universityId = universityId(user, None),
+        userId = userId(user, Some(id)),
+        itemType = "include",
+        extraneous = extraneous)
+    }
+
+
+  private def makeExcludeItems(excludes: Seq[Pair[String,User]], sitsUsers: Seq[Pair[String,User]]) =
+    excludes map { case (id, user) =>
+      val extraneous = !(sitsUsers exists sameUserIdAs(user))
+      MembershipItem(
+        user = user,
+        universityId = universityId(user, None),
+        userId = userId(user, Some(id)),
+        itemType = "exclude",
+        extraneous = extraneous)
+    }
+
+
+  private def makeSitsItems(includes: Seq[Pair[String,User]], excludes: Seq[Pair[String,User]], sitsUsers: Seq[Pair[String,User]]) =
+    sitsUsers filterNot in(includes) filterNot in(excludes) map { case (id,user) =>
+      MembershipItem(
+        user = user,
+        universityId = universityId(user, Some(id)),
+        userId = userId(user, None),
+        itemType = "sits",
+        extraneous = false)
+    }
+
+  private def universityId(user:User, fallback:Option[String]) = option(user) map { _.getWarwickId } orElse fallback
+  private def userId(user:User, fallback:Option[String]) = option(user) map { _.getUserId } orElse fallback
+
+  private def option(user:User): Option[User] = user match {
+    case FoundUser(u) => Some(user)
+    case _ => None
+  }
+
+}
+
+
+/** Item in list of members for displaying in view. */
+case class MembershipItem(
+   user: User,
+   universityId: Option[String],
+   userId: Option[String],
+   itemType: String, // sits, include or exclude
+   /**
+    * If include type, this item adds a user who's already in SITS.
+    * If exclude type, this item excludes a user who isn't in the list anyway.
+    */
+   extraneous: Boolean
+ )
