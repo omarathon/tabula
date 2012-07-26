@@ -13,7 +13,9 @@
 	   <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).</p>
 	</#if>
 
-	<#if assignment.closed>
+    <#if isExtended>
+
+	<#elseif assignment.closed>
 		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
 			<p>

@@ -20,6 +20,8 @@ import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.web.Mav
+import uk.ac.warwick.courses.data.model.forms.Extension
+import org.joda.time.DateTime
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
@@ -77,9 +79,9 @@ class ResendSubmissionEmail extends AbstractAssignmentController {
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends AbstractAssignmentController {
-	
+
 	hideDeletedItems
-	
+
 	validatesWith{ (cmd:SubmitAssignmentCommand,errors) => cmd.validate(errors) }
 	
 	@ModelAttribute def form(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = {  
@@ -114,7 +116,11 @@ class AssignmentController extends AbstractAssignmentController {
 		
 		val feedback = checkCanGetFeedback(assignment, user)
 		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter{_.submitted}
-		/*
+
+    val isExtended = assignment.isWithinExtension(user.apparentId)
+    val ext = assignment.extensions.filter(_.userId == user.apparentId)
+
+    /*
 		 * Submission values are an unordered set without any proper name, so
 		 * match them up into an ordered sequence of pairs.
 		 * 
@@ -133,7 +139,9 @@ class AssignmentController extends AbstractAssignmentController {
 				"assignment" -> assignment,
 				"feedback" -> feedback,
 				"submission" -> submission,
-				"justSubmitted" -> form.justSubmitted
+				"justSubmitted" -> form.justSubmitted,
+        "isExtended" -> isExtended,
+        "extension" -> ext
 			)
 		} else {
 			RedirectToSignin() 

@@ -101,6 +101,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
     @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
     @OrderBy("submittedDate")
     @BeanProperty var submissions:JList[Submission] = ArrayList()
+
+    @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
+    @BeanProperty var extensions:JList[Extension] = ArrayList()
     
     @OneToMany(mappedBy="assignment", fetch=LAZY, cascade=Array(ALL))
     @BeanProperty var feedbacks:JList[Feedback] = ArrayList()
@@ -148,6 +151,23 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def isClosed(now:DateTime) = now.isAfter(closeDate)
 	def isClosed():Boolean = isClosed(new DateTime)
 
+  /**
+   * True if the specified user has been granted an extension and that extension has not expired on the specified date
+   */
+  def isWithinExtension(userId:String, time:DateTime) =
+    extensions.exists(e => e.userId == userId && e.approved && e.expiryDate.isAfter(time))
+  /**
+   * True if the specified user has been granted an extension and that extension has not expired now
+   */
+  def isWithinExtension(userId:String):Boolean = isWithinExtension(userId, new DateTime)
+
+  /**
+   * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
+   */
+  def isLate(submission:Submission) =
+    closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
+
+  
   def assessmentGroup: Option[UpstreamAssessmentGroup] = {
     if (upstreamAssignment == null || academicYear == null || occurrence == null) {
       None

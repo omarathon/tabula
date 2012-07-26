@@ -31,7 +31,7 @@ class Submission extends GeneratedId with Deleteable {
 		this.universityId = universityId
 	}
 	
-	def isLate = submittedDate != null && assignment.closeDate.isBefore(submittedDate)
+	def isLate = submittedDate != null && assignment.isLate(this)
 	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
