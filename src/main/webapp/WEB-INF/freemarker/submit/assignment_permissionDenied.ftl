@@ -3,7 +3,8 @@
 		<h1>${module.name} (${module.code?upper_case})
 			<br><strong>${assignment.name}</strong></h1>
 
-		<#if RequestParameters.requestedAccess??>
+		<#assign has_requested_access=RequestParameters.requestedAccess??/>
+		<#if has_requested_access>
 			<div class="alert alert-success">
 				<a class="close" data-dismiss="alert">&times;</a>
 				Thanks, we've sent a message to whoever is in charge of the module with all the necessary
@@ -19,9 +20,13 @@
 			click the button below to send an automated message to the module convenor.
 		</p>
 
-		<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
-			<button class=btn>Request access</button>
-		</form>
+		<#if has_requested_access>
+			<a href="#" class="btn disabled">Request access</a>
+		<#else>
+			<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
+				<button class=btn>Request access</button>
+			</form>
+		</#if>
 
 	</#compress>
 </#escape>
