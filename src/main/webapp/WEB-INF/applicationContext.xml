@@ -57,6 +57,7 @@
 				<entry key="uk.ac.warwick.courses.PermissionDeniedException" value="errors/permissionDenied" />
 				<entry key="uk.ac.warwick.courses.ItemNotFoundException" value="errors/404" />
 				<entry key="uk.ac.warwick.courses.services.MaintenanceModeEnabledException" value="errors/maintenance" />
+                <entry key="uk.ac.warwick.courses.web.controllers.SubmitPermissionDeniedException" value="submit/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>

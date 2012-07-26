@@ -33,12 +33,12 @@ class DownloadFeedbackCommand(user:CurrentUser) extends Command[Option[Renderabl
 	 * In either case if it's not found, None is returned.
 	 */
 	def apply() = { 
-	  val result = feedbackDao.getFeedbackByUniId(assignment, user.universityId) map { (feedback) =>
+	  val result: Option[RenderableFile] = feedbackDao.getFeedbackByUniId(assignment, user.universityId) flatMap { (feedback) =>
 		 filename match {
 			 case filename:String if filename.hasText => {
-				 feedback.attachments.find( _.name == filename ).map( new RenderableAttachment(_) ).orNull
+				 feedback.attachments.find( _.name == filename ).map( new RenderableAttachment(_) )
 			 }
-			 case _ => zipped(feedback)
+			 case _ => Some(zipped(feedback))
 		 }
 	  }
 	  fileFound = result.isDefined
