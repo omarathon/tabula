@@ -42,7 +42,9 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		// Split into chunks so we commit transactions periodically.
 		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100)) {
 			saveGroups(groups)
-			groups foreach session.evict
+      transactional { t =>
+			  groups foreach session.evict
+      }
 		}
 	}
 	
