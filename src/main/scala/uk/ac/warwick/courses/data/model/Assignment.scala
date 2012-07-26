@@ -16,6 +16,7 @@ import javax.persistence._
 import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.actions.Viewable
 import uk.ac.warwick.courses.data.model.forms.CommentField
+import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.data.model.forms.FileField
 import uk.ac.warwick.courses.data.model.forms.FormField
 import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
