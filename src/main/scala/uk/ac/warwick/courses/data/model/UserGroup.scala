@@ -65,10 +65,18 @@ class UserGroup extends GeneratedId {
 	))
 	@BeanProperty var excludeUsers:JList[String] = ArrayList()
 	
-	def addUser(user:String) = includeUsers.add(user)
+	def addUser(user:String) = {
+    if (!includeUsers.contains(user)) {
+      includeUsers.add(user)
+    }
+  }
 	def removeUser(user:String) = includeUsers.remove(user)
 	
-	def excludeUser(user:String) = excludeUsers.add(user)
+	def excludeUser(user:String) = {
+    if (!excludeUsers.contains(user)) {
+      excludeUsers.add(user)
+    }
+  }
 	def unexcludeUser(user:String) = excludeUsers.remove(user)
 
 	var universityIds:Boolean = false
@@ -97,10 +105,12 @@ class UserGroup extends GeneratedId {
 	
 	def copyFrom(other:UserGroup) {
 		baseWebgroup = other.baseWebgroup
-		includeUsers.clear
-		excludeUsers.clear
+		includeUsers.clear()
+		excludeUsers.clear()
+    staticIncludeUsers.clear()
 		includeUsers.addAll(other.includeUsers)
 		excludeUsers.addAll(other.excludeUsers)
+    staticIncludeUsers.addAll(other.staticIncludeUsers)
 	}
 	
 }

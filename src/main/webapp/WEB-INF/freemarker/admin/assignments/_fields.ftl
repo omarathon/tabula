@@ -112,6 +112,21 @@ the comments textarea needs to maintain newlines.
 						<#assign tab2class="active"/>
 					</#if>
 
+					<#list command.members.includeUsers as _u>
+						<input type="hidden" name="includeUsers" value="${_u}">
+					</#list>
+					<#list command.members.excludeUsers as _u>
+						<input type="hidden" name="excludeUsers" value="${_u}">
+					</#list>
+
+					<div>ADD <input type="text" name="includeUsers"></div>
+					<div>ADD <input type="text" name="includeUsers"></div>
+
+					<div>REMOVE <input type="text" name="excludeUsers"></div>
+					<div>REMOVE <input type="text" name="excludeUsers"></div>
+
+					<button class="btn btn-warning btn-big refresh-form">RFRSH FRM</button>
+
 					<ul class="nav nav-tabs">
 						<li class="${tab1class}"><a href="#membership-tab1" data-toggle="tab">Students</a></li>
 						<li class="${tab2class}"><a href="#membership-tab2" data-toggle="tab">Add more</a></li>
@@ -136,6 +151,9 @@ the comments textarea needs to maintain newlines.
 														<input type="checkbox">
 													</td>
 													<td>
+														<#if item.itemType='include'><i class="icon-plus-sign"></i></#if>
+														<#if item.itemType='exclude'><i class="icon-minus-sign"></i></#if>
+
 														<#if u.foundUser>
 															${u.userId} <#if item.universityId??>(${item.universityId})</#if>
 														<#elseif item.universityId??>
@@ -169,7 +187,7 @@ the comments textarea needs to maintain newlines.
 							<div>
 								<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
 							</div>
-							<textarea></textarea>
+							<textarea name="massAddUsers"></textarea>
 							<button id="add-members">Add</button>
 						</div>
 
@@ -194,8 +212,15 @@ the comments textarea needs to maintain newlines.
 			$membershipPicker.hide();
 			
 			$sitsPicker.find('.sits-picker-option').click(function(e){
+				e.preventDefault();
 				$('#upstreamAssignment').val( $(e.target).data('id') );
 				$('#occurrence').val( $(e.target).data('occurrence') );
+				$('#action-input').val('refresh');
+				$form.submit();
+			});
+
+			$('.refresh-form').click(function(e) {
+			  e.preventDefault();
 				$('#action-input').val('refresh');
 				$form.submit();
 			});

@@ -17,8 +17,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
-import uk.ac.warwick.courses.AcademicYear
-import uk.ac.warwick.courses.DateFormats
+import uk.ac.warwick.courses.{UniversityId, AcademicYear, DateFormats}
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.UserGroup
@@ -74,17 +73,44 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
 	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
-	
-	/** linked SITS assignment */
+
+
+
+  // start complicated membership stuff
+
+	/** linked SITS assignment. Optional. */
 	@BeanProperty var upstreamAssignment: UpstreamAssignment =_
-	
-	/** If copying from existing Assigment, this must be a DEEP COPY
-	 * with changes copied back to the original UserGroup, don't pass
-	 * the same UserGroup around because it'll just cause Hibernate
-	 * problems. This copy should be transient.
-	 */
-	@BeanProperty var members: UserGroup = new UserGroup
-	
+
+  /** If copying from existing Assigment, this must be a DEEP COPY
+   * with changes copied back to the original UserGroup, don't pass
+   * the same UserGroup around because it'll just cause Hibernate
+   * problems. This copy should be transient.
+   *
+   * Changes to members are done via includeUsers and excludeUsers, since
+   * it is difficult to bind additions and removals directly to a collection
+   * with Spring binding.
+   */
+  @BeanProperty var members: UserGroup = new UserGroup
+
+  // items added here are added to members.includeUsers.
+  @BeanProperty var includeUsers: JList[String] = ArrayList()
+
+  // items added here are either removed from members.includeUsers or added to members.excludeUsers.
+  @BeanProperty var excludeUsers: JList[String] = ArrayList()
+
+  // bind property for the big free-for-all textarea of usercodes/uniIDs to add.
+  // These are first resolved to userIds and then added to includeUsers
+  @BeanProperty var massAddUsers: String = _
+
+  // parse massAddUsers into a collection of individual tokens
+  def massAddUsersEntries: Seq[String] =
+    if (massAddUsers == null) Nil
+    else massAddUsers split ("\\s+") map ( _.trim ) filterNot ( _.isEmpty )
+
+  ///// end of complicated membership stuff
+
+
+
 	/** MAV_OCCURRENCE as per the value in SITS.  */
 	@BeanProperty var occurrence: String = _
 	
@@ -115,9 +141,46 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 	}
-	
+
+  // Called by controller after Spring has done its basic binding, to do more complex
+  // stuff like resolving users into groups and putting them in the members UserGroup.
 	def afterBind() {
-		
+
+    def addUserId(item:String) {
+      val user = userLookup.getUserByUserId(item)
+      if (user.isFoundUser()) {
+        includeUsers.add(user.getUserId)
+      }
+    }
+
+    // parse items from textarea into includeUsers collection
+    for (item <- massAddUsersEntries) {
+      if (UniversityId.isValid(item)) {
+        val user =  userLookup.getUserByWarwickUniId(item)
+        if (user.isFoundUser()) {
+          includeUsers.add(user.getUserId)
+        } else {
+          addUserId(item)
+        }
+      } else {
+        addUserId(item)
+      }
+    }
+
+    // add includeUsers to members.includeUsers
+    (includeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
+      members.addUser(userId)
+    }
+    // for excludeUsers, either remove from previously-added users or add to excluded users.
+    (excludeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
+      if (members.includeUsers contains userId) members.removeUser(userId)
+      else members.excludeUser(userId)
+    }
+
+    // empty these out to make it clear that we've "moved" the data into members
+    massAddUsers = ""
+    includeUsers.clear()
+    excludeUsers.clear()
 	}
 	
 	def copyTo(assignment:Assignment) {
@@ -135,9 +198,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     assignment.occurrence = occurrence
 	    
     if (assignment.members == null) assignment.members = new UserGroup
-	    assignment.members copyFrom members
+	  assignment.members copyFrom members
 	    	
-	    findCommentField(assignment) foreach ( field => field.value = comment )
+	  findCommentField(assignment) foreach ( field => field.value = comment )
 	    findFileField(assignment) foreach { file => 
 	    	file.attachmentLimit = fileAttachmentLimit 
 	    	file.attachmentTypes = fileAttachmentTypes
@@ -179,6 +242,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		academicYear = assignment.academicYear
 		upstreamAssignment = assignment.upstreamAssignment
     occurrence = assignment.occurrence
+    members copyFrom assignment.members
 		copyNonspecificFrom(assignment)
 	}
 	

@@ -61,7 +61,8 @@ class AddAssignment extends BaseController {
 	@RequestMapping
 	def form(user: CurrentUser, @PathVariable module: Module, 
 			form: AddAssignmentCommand, errors: Errors) = {
-		permCheck(module)
+    permCheck(module)
+    form.afterBind()
 		form.prefillFromRecentAssignment()
 		formView(form, module)
 	}
@@ -69,6 +70,7 @@ class AddAssignment extends BaseController {
 	@RequestMapping(method=Array(RequestMethod.POST), params=Array("action!=refresh"))
 	def submit(user: CurrentUser, @PathVariable module: Module,
 			@Valid form: AddAssignmentCommand, errors: Errors) = {
+    form.afterBind()
 		permCheck(module)
 		if (errors.hasErrors) {
 			formView(form, module)
@@ -80,11 +82,11 @@ class AddAssignment extends BaseController {
 	
 	def permCheck(module:Module) = mustBeAbleTo(Participate(module)) 
   
-    def formView(form: AddAssignmentCommand, module:Module) = {
+  def formView(form: AddAssignmentCommand, module:Module) = {
 	  Mav("admin/assignments/new",
 	  	"department" -> module.department,
 	  	"module" -> module,
-        "assessmentGroup" -> form.assessmentGroup)
+      "assessmentGroup" -> form.assessmentGroup)
 	  	.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
@@ -107,9 +109,10 @@ class EditAssignment extends BaseController {
 	@RequestMapping
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
 			form:EditAssignmentCommand, errors: Errors) = {
-		form.afterBind()
-		if (assignment.module != module) throw new ItemNotFoundException
-		mustBeAbleTo(Participate(module))
+    mustBeLinked(assignment, module)
+		checkPerms(module)
+    form.afterBind()
+
 		val couldDelete = canDelete(assignment)
 		Mav("admin/assignments/edit",
 			"department" -> module.department,
@@ -120,30 +123,36 @@ class EditAssignment extends BaseController {
 			)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
-	
-	private def canDelete(assignment:Assignment):Boolean = {
-		val cmd = new DeleteAssignmentCommand(assignment)
-		val errors = new BeanPropertyBindingResult(cmd, "cmd")
-		cmd.prechecks(errors)
-		!errors.hasErrors
-	}
-	
+
 	@RequestMapping(method=Array(RequestMethod.POST), params=Array("action!=refresh"))
 	def submit(
 			@PathVariable module: Module,
 			@PathVariable assignment:Assignment,
 			@Valid form: EditAssignmentCommand, errors: Errors) = {
-		form.afterBind()
-		mustBeAbleTo(Participate(module))
+    mustBeLinked(assignment, module)
+    checkPerms(module)
 		if (errors.hasErrors) {
 			showForm(module, assignment, form, errors)
 		} else {
+      form.afterBind()
 			form.apply
 			Redirect(Routes.admin.module(module))
 		}
 		
 	}
-	
+
+  private def checkPerms(module: Module) {
+    mustBeAbleTo(Participate(module))
+  }
+
+  private def canDelete(assignment:Assignment):Boolean = {
+    val cmd = new DeleteAssignmentCommand(assignment)
+    val errors = new BeanPropertyBindingResult(cmd, "cmd")
+    cmd.prechecks(errors)
+    !errors.hasErrors
+  }
+
+
 }
 
 @Controller

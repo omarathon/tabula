@@ -17,14 +17,14 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 	@Autowired var modules:ModuleDao =_
 	
 	@Transactional
-	@Test def edit {
+	@Test def edit() {
 		withUser("abc") {
 			
 		}
 	}
 	
 	@Transactional
-	@Test def add {
+	@Test def add() {
 
 		withUser("abc") {
 			
@@ -35,7 +35,7 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 			val module = new Module
 			module.department = dept
 			modules.saveOrUpdate(module)
-			session.flush // get out of my car, get into my database
+			session.flush() // get out of my car, get into my database
 			
 			module.id should not be (null)
 			
@@ -45,8 +45,8 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 			command.comment = "Text at the top"
 			val assignmentNew = command.apply
 			
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 			
 			val assignment = session.get(classOf[Assignment], assignmentNew.id).asInstanceOf[Assignment]
 			
@@ -60,4 +60,16 @@ class AddAssignmentCommandTest extends AppContextTestBase {
 			assignment.fields.get(1).template should be("file")
 		}
 	}
+
+  @Test def massAddUsers {
+    val form = new AddAssignmentCommand()
+    form.massAddUsers =
+      """ cusebr
+          cusfal
+          ecu
+          0123456
+          whatever yep good
+      """
+    form.massAddUsersEntries should be (Seq("cusebr","cusfal","ecu","0123456","whatever","yep","good"))
+  }
 }
