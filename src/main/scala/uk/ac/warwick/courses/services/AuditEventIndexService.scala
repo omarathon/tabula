@@ -4,19 +4,13 @@ import java.io.File
 import java.io.FileNotFoundException
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.collection.immutable.Stream
-import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.analysis.Analyzer
-import org.apache.lucene.analysis.KeywordAnalyzer
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper
-import org.apache.lucene.analysis.WhitespaceAnalyzer
+import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index.FieldInfo.IndexOptions
 import org.apache.lucene.index._
 import org.apache.lucene.queryParser.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
-import org.apache.lucene.search._
 import org.apache.lucene.search._
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.util.Version
@@ -26,22 +20,17 @@ import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.context.Lifecycle
 import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.AuditEvent
+import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.Closeables._
 import uk.ac.warwick.courses.helpers.Stopwatches._
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
-import scala.actors.threadpool.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
-import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.data.model.Submission
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -108,20 +97,36 @@ trait QueryMethods { self:AuditEventIndexService =>
 			.filterNot{ _ == null }
 			.distinct
 
+  def mapToAssignments(seq: Seq[Document]) = seq
+    .flatMap( toParsedAuditEvent )
+    .flatMap( _.assignmentId )
+    .flatMap( assignmentService.getAssignmentById )
+
 	/**
-	 * Return the most recently created assignment for this Module.
+	 * Return the most recently created assignment for this moodule
 	 */
 	def recentAssignment(module:Module) : Option[Assignment] = {
-		search(query = all(
+    mapToAssignments( search(query = all(
 				termQuery("eventType", "AddAssignment"),
 				termQuery("module", module.id)),
 				max=1,
 				sort=reverseDateSort)
-			.flatMap( toParsedAuditEvent )
-			.flatMap( _.assignmentId )
-			.flatMap( assignmentService.getAssignmentById )
-			.headOption
+			).headOption
 	}
+
+  def recentAssignment(department:Department) : Option[Assignment] = {
+    mapToAssignments( search(query = all(
+      termQuery("eventType", "AddAssignment"),
+      termQuery("department", department.code)),
+      max=1,
+      sort=reverseDateSort)
+    ).headOption
+  }
+
+}
+
+
+class RichSearchResults(seq: Seq[Document]) {
 
 }
 
@@ -180,6 +185,8 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 
 	// HFC-189 Reopen index every 2 minutes, even if not the indexing instance.
 	val executor:ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
+  implicit def toRichSearchResults(seq:Seq[Document]) = new RichSearchResults(seq)
 
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
@@ -389,6 +396,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 
 	protected def auditEvents(docs:Seq[Document]) = docs.flatMap(toAuditEvent(_))
 	protected def parsedAuditEvents(docs:Seq[Document]) = docs.flatMap(toParsedAuditEvent(_))
+
 
 	private def doSearch(query:Query, max:Option[Int], sort:Sort, offset:Int) : Seq[Document] = {
 		initialiseSearching

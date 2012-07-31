@@ -109,7 +109,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 
   ///// end of complicated membership stuff
 
-
+  // can be set to false if that's not what you want.
+  @BeanProperty var prefillFromRecent = true
 
 	/** MAV_OCCURRENCE as per the value in SITS.  */
 	@BeanProperty var occurrence: String = _
@@ -208,10 +209,12 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	}
 	
 	def prefillFromRecentAssignment() {
-		service.recentAssignment(module) foreach { (a) =>
-			copyNonspecificFrom(a)
-			_prefilled = true
-		}
+    if (prefillFromRecent) {
+      service.recentAssignment(module.department) foreach { (a) =>
+        copyNonspecificFrom(a)
+        _prefilled = true
+      }
+    }
 	}
 	
 	

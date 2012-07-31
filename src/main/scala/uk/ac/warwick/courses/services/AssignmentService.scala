@@ -40,9 +40,9 @@ trait AssignmentService {
 	def getAssignmentsWithSubmission(universityId:String): Seq[Assignment]
 	
 	/**
-	 * Find a recent assignment within this module. 
+	 * Find a recent assignment within this module or possible department.
 	 */
-	def recentAssignment(module:Module): Option[Assignment]
+	def recentAssignment(department:Department): Option[Assignment]
 	
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
@@ -190,8 +190,8 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
 	}
 	
-	def recentAssignment(module:Module) = {
-    auditEventIndexService.recentAssignment(module)
+	def recentAssignment(department:Department) = {
+    auditEventIndexService.recentAssignment(department)
   }
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {

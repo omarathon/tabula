@@ -14,6 +14,7 @@ the comments textarea needs to maintain newlines.
 <#if command.prefilled>
 <div class="alert alert-success">
 Some fields have been pre-filled from another recently created assignment for convenience.
+<a href="?prefillFromRecent=false">Don't do this</a>
 </div>
 </#if>
 
