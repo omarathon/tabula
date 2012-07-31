@@ -49,10 +49,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@NotEmpty(message="{NotEmpty.assignmentName}")
 	@BeanProperty var name:String = _
 	
-    @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+  @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var openDate:DateTime = new DateTime().withTime(12,0,0,0)
 	
-    @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+  @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate:DateTime = openDate.plusWeeks(2)
 	
 	@BeanProperty var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
