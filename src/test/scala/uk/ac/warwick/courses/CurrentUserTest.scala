@@ -1,7 +1,5 @@
 package uk.ac.warwick.courses
 
-import org.junit.Test
-import org.scalatest.Tracker
 import uk.ac.warwick.userlookup.User
 
 class CurrentUserTest extends TestBase {

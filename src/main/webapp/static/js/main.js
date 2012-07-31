@@ -56,7 +56,17 @@ jQuery.fn.use = function(callback) {
   return this;
 }
 
+/*
+	Provides functionality to lists/tables that have checkboxes,
+	so that you can select some/all rows and do stuff with them.
 
+	Options:
+
+		onSomeChecked($container): callback when at least 1 is checked.
+		onNoneChecked($container): callback when no rows are checked.
+		onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
+		onChange($checkbox): callback when a row is selected/unselected.
+*/
 jQuery.fn.bigList = function(options) {
 	var $ = jQuery;
 	this.each(function(){
@@ -76,7 +86,7 @@ jQuery.fn.bigList = function(options) {
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
 		$checkboxes.change(function(){
-		    onChange.call(jQuery(this)); // pass the checkbox as the context
+			onChange.call(jQuery(this)); // pass the checkbox as the context
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
 			if (allChecked) {
@@ -94,7 +104,7 @@ jQuery.fn.bigList = function(options) {
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
 			$checkboxes.each(function(){
-			    onChange.call(jQuery(this))
+				onChange.call(jQuery(this));
 			});
 			if (this.checked) {
 				$this.data('checked','all');
@@ -205,7 +215,7 @@ jQuery(function ($) {
 				
 				var $contents = $(this.contentElement),
 					$firstname = $contents.find('.userpicker-firstname'),
-					$lastname  = $contents.find('.userpicker-lastname'),
+					$lastname	= $contents.find('.userpicker-lastname'),
 					$results = $contents.find('.userpicker-results'),
 					$xhr,
 					onResultsLoaded;
@@ -298,7 +308,7 @@ jQuery(function ($) {
 			decorateFeedbackForm();
 		});
 	});
-
+	
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",
 		firstDOW: 1
@@ -453,30 +463,21 @@ jQuery(function ($) {
 			});
 		},
 
-        // rather than just toggling the class check the state of the checkbox to avoid silly errors
+		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
-		    var container = this.closest(".itemContainer");
-		    if(this.is(":checked")){
-		        container.addClass("selected");
-		    } else {
-		        container.removeClass("selected");
-		    }
+			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
 		},
 
 		onSomeChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').removeClass('disabled');
 		},
 		
 		onNoneChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', true);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').addClass('disabled');
 		}
 		
 	});
-	
-	
-	
-	
-	
+
 	var _feedbackPopup;
 	var getFeedbackPopup = function() {
 		if (!_feedbackPopup) {
@@ -615,55 +616,32 @@ jQuery(function ($) {
 	
 	window.Courses = exports;
 	
-	// code for the marks tabs
+	// code for the marks tabs and marks web form
+	
+	if($(".mark-row").size() === 0){
+		$(".mark-header").hide();
+	}
+
 	$('#marks-tabs a').click(function (e) {
-    	e.preventDefault();
-    	$(this).tab('show');
-    });
-
-    // code for the marks web forms
-    $('#marks-web-form').tableForm({
-        addButtonClass: 'add-additional-marks',
-        headerClass: 'mark-header',
-        rowClass: 'mark-row',
-        listVariable: 'marks',
-        rowMarkup: '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>'
-    });
-
-    // code for the extension form
-	$('#extension-list').tableForm({
-        addButtonClass: 'add-extensions',
-        headerClass: 'extension-header',
-        rowClass: 'extension-row',
-        listVariable: 'extensions',
-        rowMarkup:
-            '<tr class="extension-row">'+
-                '<td><input name="universityId" type="text" /></td>'+
-                '<td>'+
-                    '<input id="wark" class="extension-date-time-picker" name="expiryDate" type="text" />'+
-                    '<button class="approveExtension btn btn-success"><i class="icon-ok icon-white"></i> Authorise</button>'+
-                    '<button class="hide approveExtension btn btn-danger"><i class="icon-remove icon-white"></i> Deauthorise</button>'+
-                '</td>'+
-            '</tr>',
-
-        setup: function(){
-            // TODO - must ensure all of the inputs have unique IDs picker{index}
-            $('input.extension-date-time-picker').AnyTime_picker({
-                format: "%e-%b-%Y %H:%i:%s",
-            	firstDOW: 1
-            });
-        },
-
-        onAdd: function(){
-            var nextId = $('input.extension-date-time-picker').size()-1;
-            $('input.extension-date-time-picker', this).attr("id", "picker"+nextId)
-                .AnyTime_picker({
-                    format: "%e-%b-%Y %H:%i:%s",
-                    firstDOW: 1
-                });
-        }
-	});
-
+			e.preventDefault();
+			$(this).tab('show');
+		});
+		
+		var rowMarkup = '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>';
+		
+		$('#add-additional-marks').on('click', function(e){
+			e.preventDefault();
+			$(".mark-header").show(); //show if this was hidden because the table started out empty
+			var newIndex = $(".mark-row").size();
+			var newRow = $(rowMarkup);
+			// add marks[index]. to the input names in the new row
+			$("input", newRow).each(function(){
+				var name = $(this).attr("name");
+				$(this).attr("name", "marks["+newIndex+"]."+name)
+			});
+			$('#marks-web-form').append(newRow);
+		});
+	
 }); // end domready
 
 }(jQuery));

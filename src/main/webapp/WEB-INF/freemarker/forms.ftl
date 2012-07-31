@@ -22,7 +22,7 @@
 <#macro label path="" for="" checkbox=false>
 <#local clazz="control-label">
 <#if checkbox>
-  <#local clazz="checkbox" />
+	<#local clazz="checkbox" />
 </#if>
 <#if path!="">
   <@f.label path=path cssClass=clazz><#nested/></@f.label>
