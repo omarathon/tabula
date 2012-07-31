@@ -11,7 +11,7 @@
 	<div class="tab-content">
 		<div class="tab-pane active" id="upload">
 			<p>
-				The marks spreadsheet that you upload must be an .xlsx file (created in Microsoft Office 2007+). 
+				The marks spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
 				The spreadsheet should have three columns in the following order: student ID, mark, grade.
 				You can use this <a href="<@url resource="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
 			</p>
@@ -55,8 +55,8 @@
 			<p>
 				Click the add button below to enter marks for a student.
 			</p>
-			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
-				<table id="marks-web-form" class="marksUploadTable">
+			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
+				<table class="marksUploadTable">
 					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
 					<#-- leave this stuff out until we can specify enrolled students
 					<#if assignment.members??>
@@ -70,7 +70,7 @@
 					</#if>
 					-->
 				</table>
-				<br /><button id="add-additional-marks" class="btn"><i class="icon-plus"></i> Add</button>
+				<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 				<div class="submit-buttons">
 					<input type="submit" class="btn btn-primary" value="Save">
 					or <a href="<@routes.depthome module=assignment.module />" class="btn">Cancel</a>

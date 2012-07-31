@@ -119,6 +119,51 @@ jQuery.fn.bigList = function(options) {
 	return this;
 }
 
+jQuery.fn.tableForm = function(options) {
+	var $ = jQuery;
+	this.each(function(){
+		// this is the form
+		var $this = $(this);
+
+        var doNothing = function(){};
+
+		var addButtonClass = options.addButtonClass || 'add-button';
+		var headerClass = options.headerClass || 'header-row';
+		var rowClass = options.headerRow || 'header-row';
+		var listVariable = options.listVariable || 'items';
+		// should nearly always provide rowMarkup as the default does nothing.
+		var rowMarkup = options.rowMarkup || '<tr class='+rowClass+'><td></td></tr>';
+        var onAdd = options.onAdd || doNothing;
+
+        var $table = $this.find('table');
+		var $addButton = $this.find('.'+addButtonClass);
+		var $header = $this.find('tr.'+headerClass);
+		var $rows = $this.find('tr.'+rowClass);
+
+		if($rows.size() === 0){
+			$header.hide();
+		}
+
+		$addButton.on('click', function(e){
+			e.preventDefault();
+			$header.show();
+			var newIndex = $rows.size;
+			var newRow = $(rowMarkup);
+			 // add items[index]. to the input names in the new row
+			$("input", newRow).each(function(){
+				var name = $(this).attr("name");
+				$(this).attr("name", listVariable+"["+newIndex+"]."+name)
+			});
+			$table.append(newRow);
+			onAdd.call(newRow);
+		});
+
+		options.setup.call($this);
+
+	});
+	return this;
+}
+
 
 jQuery(function ($) {
 	
@@ -253,7 +298,7 @@ jQuery(function ($) {
 			decorateFeedbackForm();
 		});
 	});
-	
+
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",
 		firstDOW: 1
@@ -570,32 +615,55 @@ jQuery(function ($) {
 	
 	window.Courses = exports;
 	
-	// code for the marks tabs and marks web form
-	
-	if($(".mark-row").size() === 0){
-		$(".mark-header").hide();
-	}
-
+	// code for the marks tabs
 	$('#marks-tabs a').click(function (e) {
     	e.preventDefault();
     	$(this).tab('show');
     });
-    
-    var rowMarkup = '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>';
-    
-    $('#add-additional-marks').on('click', function(e){
-    	e.preventDefault();
-    	$(".mark-header").show(); //show if this was hidden because the table started out empty
-    	var newIndex = $(".mark-row").size();
-    	var newRow = $(rowMarkup);
-    	// add marks[index]. to the input names in the new row
-    	$("input", newRow).each(function(){
-    		var name = $(this).attr("name");
-    		$(this).attr("name", "marks["+newIndex+"]."+name)
-    	});
-    	$('#marks-web-form').append(newRow);
+
+    // code for the marks web forms
+    $('#marks-web-form').tableForm({
+        addButtonClass: 'add-additional-marks',
+        headerClass: 'mark-header',
+        rowClass: 'mark-row',
+        listVariable: 'marks',
+        rowMarkup: '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>'
     });
-	
+
+    // code for the extension form
+	$('#extension-list').tableForm({
+        addButtonClass: 'add-extensions',
+        headerClass: 'extension-header',
+        rowClass: 'extension-row',
+        listVariable: 'extensions',
+        rowMarkup:
+            '<tr class="extension-row">'+
+                '<td><input name="universityId" type="text" /></td>'+
+                '<td>'+
+                    '<input id="wark" class="extension-date-time-picker" name="expiryDate" type="text" />'+
+                    '<button class="approveExtension btn btn-success"><i class="icon-ok icon-white"></i> Authorise</button>'+
+                    '<button class="hide approveExtension btn btn-danger"><i class="icon-remove icon-white"></i> Deauthorise</button>'+
+                '</td>'+
+            '</tr>',
+
+        setup: function(){
+            // TODO - must ensure all of the inputs have unique IDs picker{index}
+            $('input.extension-date-time-picker').AnyTime_picker({
+                format: "%e-%b-%Y %H:%i:%s",
+            	firstDOW: 1
+            });
+        },
+
+        onAdd: function(){
+            var nextId = $('input.extension-date-time-picker').size()-1;
+            $('input.extension-date-time-picker', this).attr("id", "picker"+nextId)
+                .AnyTime_picker({
+                    format: "%e-%b-%Y %H:%i:%s",
+                    firstDOW: 1
+                });
+        }
+	});
+
 }); // end domready
 
 }(jQuery));
