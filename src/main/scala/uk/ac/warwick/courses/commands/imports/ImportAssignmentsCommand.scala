@@ -77,6 +77,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	}
 	
 	/** Import basic info about all members in ADS, batched 1000 at a time */
+  @Transactional
 	def doMemberDetails {
 		benchmark("Import all member details") {
     		var list = List[UpstreamMember]()
