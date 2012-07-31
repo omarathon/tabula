@@ -58,9 +58,17 @@
 		            (Archived)
 		        </#if>
 			</h3>
+			<h4>${assignment.academicYear.label}</h4>
+
+			<div>
 			<#if assignment.closed>
-				<div><span class="label-orange">Closed</span></div>
+				<span class="label label-warning">Closed</span>
 			</#if>
+			<#if assignment.upstreamAssignment??>
+			  <span class="label label-info">SITS</span>
+			</#if>
+			</div>
+
 			</div>
 			<div class="stats">
 				<div class="open-date">
