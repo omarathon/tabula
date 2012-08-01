@@ -56,7 +56,17 @@ jQuery.fn.use = function(callback) {
   return this;
 }
 
+/*
+	Provides functionality to lists/tables that have checkboxes,
+	so that you can select some/all rows and do stuff with them.
 
+	Options:
+
+		onSomeChecked($container): callback when at least 1 is checked.
+		onNoneChecked($container): callback when no rows are checked.
+		onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
+		onChange($checkbox): callback when a row is selected/unselected.
+*/
 jQuery.fn.bigList = function(options) {
 	var $ = jQuery;
 	this.each(function(){
@@ -464,22 +474,17 @@ jQuery(function ($) {
 			});
 		},
 
-        // rather than just toggling the class check the state of the checkbox to avoid silly errors
+		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
-		    var container = this.closest(".itemContainer");
-		    if(this.is(":checked")){
-		        container.addClass("selected");
-		    } else {
-		        container.removeClass("selected");
-		    }
+			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
 		},
 
 		onSomeChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').removeClass('disabled');
 		},
 
 		onNoneChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', true);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').addClass('disabled');
 		}
 
 	});
