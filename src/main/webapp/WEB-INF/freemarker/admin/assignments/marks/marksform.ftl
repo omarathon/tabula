@@ -13,7 +13,7 @@
 			<p>
 				The marks spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
 				The spreadsheet should have three columns in the following order: student ID, mark, grade.
-				You can use this <a href="<@url resource="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
+				You can use this <a href="<@url page="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
 				<table role="presentation" class="narrowed-form">
@@ -56,7 +56,21 @@
 				Click the add button below to enter marks for a student.
 			</p>
 			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
-				<table class="marksUploadTable">
+                <table class="hide">
+                    <tbody class="row-markup">
+                        <tr class="mark-row">
+                            <td>
+                                <div class="input-prepend input-append">
+                                    <span class="add-on"><i class="icon-user"></i></span>
+                                    <input class="universityId span2" name="universityId" type="text" />
+                                </div>
+                            </td>
+                            <td><input name="actualMark" type="text" /></td>
+                            <td><input name="actualGrade" type="text" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="marksUploadTable">
 					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
 					<#-- leave this stuff out until we can specify enrolled students
 					<#if assignment.members??>
