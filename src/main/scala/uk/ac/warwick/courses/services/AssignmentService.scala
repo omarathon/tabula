@@ -67,6 +67,8 @@ trait AssignmentService {
     def replaceMembers(group:UpstreamAssessmentGroup, universityIds:Seq[String])
 
   def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[MembershipItem]
+  def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[User]
+  def determineMembershipUsers(assignment: Assignment): Seq[User]
 
   def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others:UserGroup): Boolean
 }
@@ -258,6 +260,20 @@ trait AssignmentMembershipMethods { self:AssignmentServiceImpl =>
     includeItems ++ excludeItems ++ sitsItems
   }
 
+  /**
+   * Returns just a list of User objects who are on this assessment group.
+   */
+  def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[User] = {
+    determineMembership(upstream, others) filter notExclude map toUser filter notNull
+  }
+
+  /**
+   * Returns a simple list of User objects for students who are enrolled on this assignment. May be empty.
+   */
+  def determineMembershipUsers(assignment: Assignment): Seq[User] = {
+    determineMembershipUsers(assignment.assessmentGroup, assignment.members)
+  }
+
   def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others:UserGroup): Boolean = {
     if (others.excludeUsers contains user.getUserId) false
     else if (others.includeUsers contains user.getUserId) true
@@ -312,6 +328,9 @@ trait AssignmentMembershipMethods { self:AssignmentServiceImpl =>
     case _ => None
   }
 
+  private def toUser(item: MembershipItem) = item.user
+  private def notExclude(item: MembershipItem) = item.itemType != "exclude"
+  private def notNull[T](any: T) = { any != null }
 }
 
 

@@ -78,6 +78,13 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		membership(2).user.getFullName should be ("Roger Aaaag")
         membership(2).itemType should be ("sits")
         membership(2).extraneous should be (false)
+
+    // test the simpler methods that return a list of Users
+
+    val users = assignmentService.determineMembershipUsers(Some(upstream), others)
+    users.size should be (2)
+    users(0).getFullName should be ("Roger Aaaaa")
+    users(1).getFullName should be ("Roger Aaaag")
 	}
 	
 	/**
