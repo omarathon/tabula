@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.courses.data.model.forms._
 import uk.ac.warwick.courses.data.model._
 
-class AddAssignmentCommandTest extends AppContextTestBase {
+class AddAssignmentCommandContextTest extends AppContextTestBase {
 	
 	@Autowired var modules:ModuleDao =_
 	

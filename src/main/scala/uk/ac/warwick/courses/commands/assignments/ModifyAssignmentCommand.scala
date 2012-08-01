@@ -245,7 +245,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		academicYear = assignment.academicYear
 		upstreamAssignment = assignment.upstreamAssignment
     occurrence = assignment.occurrence
-    members copyFrom assignment.members
+    if (assignment.members != null) {
+      members copyFrom assignment.members
+    }
 		copyNonspecificFrom(assignment)
 	}
 	
