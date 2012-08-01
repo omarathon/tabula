@@ -56,28 +56,18 @@ jQuery.fn.use = function(callback) {
   return this;
 }
 
-/*
-	Provides functionality to lists/tables that have checkboxes,
-	so that you can select some/all rows and do stuff with them.
 
-	Options:
-
-		onSomeChecked($container): callback when at least 1 is checked.
-		onNoneChecked($container): callback when no rows are checked.
-		onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
-		onChange($checkbox): callback when a row is selected/unselected.
-*/
 jQuery.fn.bigList = function(options) {
 	var $ = jQuery;
 	this.each(function(){
 		var $this = $(this);
-		
+
 		var checkboxClass = options.checkboxClass || 'collection-checkbox';
 		var checkboxAllClass = options.checkboxClass || 'collection-check-all';
-		
+
 		var $checkboxes = $this.find('input.'+checkboxClass);
 		var $selectAll = $this.find('input.'+checkboxAllClass);
-		
+
 		var doNothing = function(){};
 
 		var onChange = options.onChange || doNothing;
@@ -86,7 +76,7 @@ jQuery.fn.bigList = function(options) {
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
 		$checkboxes.change(function(){
-			onChange.call(jQuery(this)); // pass the checkbox as the context
+		    onChange.call(jQuery(this)); // pass the checkbox as the context
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
 			if (allChecked) {
@@ -104,7 +94,7 @@ jQuery.fn.bigList = function(options) {
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
 			$checkboxes.each(function(){
-				onChange.call(jQuery(this));
+			    onChange.call(jQuery(this))
 			});
 			if (this.checked) {
 				$this.data('checked','all');
@@ -114,13 +104,13 @@ jQuery.fn.bigList = function(options) {
 				onNoneChecked.call($this);
 			}
 		});
-		
+
 		options.setup.call($this);
-		
+
 		$(function(){
 			$checkboxes.change();
 		});
-		
+
 		// Returns an array of IDs.
 		var getCheckedFeedbacks = function() {
 			return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
@@ -140,12 +130,15 @@ jQuery.fn.tableForm = function(options) {
 		var addButtonClass = options.addButtonClass || 'add-button';
 		var headerClass = options.headerClass || 'header-row';
 		var rowClass = options.headerRow || 'header-row';
+		var tableClass = options.tableClass || 'table-form';
 		var listVariable = options.listVariable || 'items';
-		// should nearly always provide rowMarkup as the default does nothing.
-		var rowMarkup = options.rowMarkup || '<tr class='+rowClass+'><td></td></tr>';
+
+		var markupClass = options.markupClass || 'row-markup';
+		var rowMarkup = $('.'+markupClass).html();
+
         var onAdd = options.onAdd || doNothing;
 
-        var $table = $this.find('table');
+        var $table = $this.find('table.'+tableClass);
 		var $addButton = $this.find('.'+addButtonClass);
 		var $header = $this.find('tr.'+headerClass);
 		var $rows = $this.find('tr.'+rowClass);
@@ -176,27 +169,27 @@ jQuery.fn.tableForm = function(options) {
 
 
 jQuery(function ($) {
-	
+
 	var exports = {};
-	
+
 	/*function _dbg(msg) {
 		if (window.console && console.debug) console.debug(msg);
 	}
 	var dbg = (window.console && console.debug) ? _dbg : function(){};*/
-	
+
 	var trim = jQuery.trim;
-	
+
 	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
-	
+
 	// Lazily loaded user picker object.
 	var _userPicker = null;
 	function getUserPicker() {
 		var targetWidth = 500, targetHeight=400;
 		if (_userPicker == null) {
-			
+
 			// A popup box enhanced with a few methods for user picker
 			_userPicker = new WPopupBox();
-			
+
 			_userPicker.showPicker = function (element, targetInput) {
 				this.setContent("Loading&hellip;");
 				this.targetInput = targetInput;
@@ -209,22 +202,22 @@ jQuery(function ($) {
 					_userPicker.decorateForm();
 				});
 			};
-			
+
 			/* Give behaviour to user lookup form */
 			_userPicker.decorateForm = function () {
-				
+
 				var $contents = $(this.contentElement),
 					$firstname = $contents.find('.userpicker-firstname'),
-					$lastname	= $contents.find('.userpicker-lastname'),
+					$lastname  = $contents.find('.userpicker-lastname'),
 					$results = $contents.find('.userpicker-results'),
 					$xhr,
 					onResultsLoaded;
-				
+
 				$firstname.focus();
 				$contents.find('input').delayedObserver(function () {
 					// WSOS will search with at least 2 chars, but let's
 					// enforce at least 3 to avoid overly broad searches.
-					if (trim($firstname.val()).length > 2 || 
+					if (trim($firstname.val()).length > 2 ||
 							trim($lastname.val()).length > 2) {
 						$results.html('Loading&hellip;');
 						if ($xhr) $xhr.abort();
@@ -234,7 +227,7 @@ jQuery(function ($) {
 						}, onResultsLoaded);
 					}
 				}, 0.5);
-				
+
 				// wire up each user Id to be clickable
 				onResultsLoaded = function(data) {
 					$results.html(data);
@@ -244,24 +237,40 @@ jQuery(function ($) {
 						_userPicker.hide();
 					});
 				}
-				
+
 			};
-			
+
 		}
 		return _userPicker;
 	}
-	
-	
-	
+
+	function initUserPicker(picker){
+	    var $picker = $(picker),
+            $button = $('<a href="#" class="btn">Search for user</a>'),
+            userPicker;
+        $picker.after("&nbsp;");
+        $picker.after($button);
+        $button.click(function(event){
+            // lazy load on click
+            if (userPicker === undefined){
+                userPicker = getUserPicker();
+            }
+            event.preventDefault();
+            userPicker.showPicker(picker, picker);
+        });
+	}
+
+
+
 	/**
-	 * 
+	 *
 	 */
 	var $rateFeedback;
 	var decorateFeedbackForm = function() {
 		$rateFeedback = $('#feedback-rating');
 		var $form = $rateFeedback.find('form'),
 			action = $form.attr('action');
-		
+
 		if ($form.length > 0) {
 			$form.find('.rating-question').button().each(function(){
 				var $question = $(this);
@@ -308,12 +317,12 @@ jQuery(function ($) {
 			decorateFeedbackForm();
 		});
 	});
-	
+
 	$('input.date-time-picker').AnyTime_picker({
 		format: "%e-%b-%Y %H:%i:%s",
 		firstDOW: 1
 	});
-	
+
 	$('a.long-running').click(function (event) {
 		var $this = $(this);
 		var originalText = $this.html();
@@ -328,41 +337,33 @@ jQuery(function ($) {
 			return false;
 		}
 	});
-	
+
 	$('input.user-code-picker').each(function (i, picker) {
-		var $picker = $(picker),
-			$button = $('<a href="#" class="btn">Search for user</a>'),
-			userPicker = getUserPicker(); // could be even lazier and init on click
-		$picker.after("&nbsp;");
-		$picker.after($button);
-		$button.click(function(event){
-			event.preventDefault();
-			userPicker.showPicker(picker, picker);
-		});
+	    initUserPicker(picker);
 	});
-	
+
 	var ajaxPopup = new WPopupBox();
-	
+
 	/**
 	 * Enhances links with "ajax-popup" class by turning them magically
 	 * into AJAX-driven popup dialogs, without needing much special magic
 	 * on the link itself.
-	 * 
+	 *
 	 * "data-popup-target" attribute can be a CSS selector for a parent
 	 * element for the popup to point at.
 	 */
 	$('a.ajax-popup').click(function(e){
-		var link = e.target, 
+		var link = e.target,
 			$link = $(link),
 			popup = ajaxPopup,
 			width = 300,
 			height = 300,
 			pointAt = link;
-		
+
 		if ($link.data('popup-target') != null) {
 			pointAt = $link.closest($link.data('popup-target'));
 		}
-		
+
 		var decorate = function($root) {
 			if ($root.find('html').length > 0) {
 				// dragged in a whole document from somewhere, whoops. Replace it
@@ -389,7 +390,7 @@ jQuery(function ($) {
 				window.location.reload();
 			}
 		};
-		
+
 		e.preventDefault();
 		popup.setContent("Loading&hellip;");
 		popup.setSize(width, height);
@@ -403,14 +404,14 @@ jQuery(function ($) {
 			popup.positionLeft(pointAt);
 		}, 'html');
 	});
-	
+
 	$('.show-archived-assignments').click(function(e){
 		e.preventDefault();
 		$(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
 	})
-	
+
 	/*
-	var $userCodePickers = $('input.user-code-picker'); 
+	var $userCodePickers = $('input.user-code-picker');
 	$userCodePickers.autocomplete({
 		minLength:2,
 	    source: function(request, response) {
@@ -438,14 +439,14 @@ jQuery(function ($) {
         .appendTo( ul );
 	};
 	*/
-	
+
 	$('input.uni-id-picker').each(function (picker) {
-		
+
 	});
-	
-	
+
+
 	$('.submission-list, .feedback-list').bigList({
-		
+
 		setup : function() {
 			var $container = this;
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -463,20 +464,29 @@ jQuery(function ($) {
 			});
 		},
 
-		// rather than just toggling the class check the state of the checkbox to avoid silly errors
+        // rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
-			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+		    var container = this.closest(".itemContainer");
+		    if(this.is(":checked")){
+		        container.addClass("selected");
+		    } else {
+		        container.removeClass("selected");
+		    }
 		},
 
 		onSomeChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').removeClass('disabled');
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
 		},
-		
+
 		onNoneChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').addClass('disabled');
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', true);
 		}
-		
+
 	});
+
+
+
+
 
 	var _feedbackPopup;
 	var getFeedbackPopup = function() {
@@ -486,7 +496,7 @@ jQuery(function ($) {
 		}
 		return _feedbackPopup;
 	}
-	
+
 	var fillInAppComments = function($form) {
 		BrowserDetect.init();
 		$form.find('#app-comment-os').val(BrowserDetect.OS);
@@ -499,7 +509,7 @@ jQuery(function ($) {
 			$form.find('#app-comment-ipAddress').val(ip);
 		})
 	};
-	
+
 	var TogglingSection = function ($section, $header, options) {
 		var THIS = this;
 		var options = options || {};
@@ -510,7 +520,7 @@ jQuery(function ($) {
 			THIS.toggle();
 			if (options.callback) options.callback();
 		});
-		
+
 		if (!showByDefault) this.hide();
 	};
 	TogglingSection.prototype.toggle = function() {
@@ -525,7 +535,7 @@ jQuery(function ($) {
 		this.$toggleButton.html = 'Show';
 		this.$section.hide();
 	}
-	
+
 	var decorateAppCommentsForm = function($form) {
 		$form.addClass('narrowed-form');
 //		var $browserInfo = $form.find('.browser-info');
@@ -534,16 +544,16 @@ jQuery(function ($) {
 //			getFeedbackPopup().setHeightToFit();
 //		}});
 	}
-	
-	// Fills in non-AJAX app comment form 
-	$('#app-comment-form').each(function() { 
+
+	// Fills in non-AJAX app comment form
+	$('#app-comment-form').each(function() {
 		var $form = $(this);
 		fillInAppComments($form);
 		decorateAppCommentsForm($form);
 	});
-		
+
 	$('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
-	
+
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
 		var popup = getFeedbackPopup();
@@ -564,7 +574,7 @@ jQuery(function ($) {
 			formLoaded(contentElement);
 			fillInAppComments($(contentElement).find('form'));
 		};
-		
+
 		if (popup.isShowing()) {
 			popup.hide();
 		} else {
@@ -573,9 +583,9 @@ jQuery(function ($) {
 				onComplete: formFirstLoaded
 			});
 		}
-		
+
 	});
-	
+
 	var slideMoreOptions = function($checkbox, $slidingDiv) {
 		$checkbox.change(function(){
 			if ($checkbox.is(':checked')) $slidingDiv.stop().slideDown('fast');
@@ -583,25 +593,25 @@ jQuery(function ($) {
 		});
 		$slidingDiv.toggle($checkbox.is(':checked'));
 	};
-	
-	
+
+
 	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
-	
-	
+
+
 	$('.assignment-info .assignment-buttons').css('opacity',0);
-	$('.assignment-info').hover(function() { 
+	$('.assignment-info').hover(function() {
 		$(this).find('.assignment-buttons').stop().fadeTo('fast', 1);
-	}, function() { 
-		$(this).find('.assignment-buttons').stop().fadeTo('fast', 0); 
+	}, function() {
+		$(this).find('.assignment-buttons').stop().fadeTo('fast', 0);
 	});
-	
+
 	$('.module-info.empty').css('opacity',0.66)
 		.find('.module-info-contents').hide().end()
 		.find('h2').prepend($('<small>Click to expand</small>')).end()
-		.click(function(){ 	
+		.click(function(){
 			$(this).css('opacity',1)
 				.find('h2 small').remove().end()
-				.find('.module-info-contents').show().end();	
+				.find('.module-info-contents').show().end();
 		})
 		.hide()
 		.first().before(
@@ -613,35 +623,71 @@ jQuery(function ($) {
 				})
 			)
 		);
-	
-	window.Courses = exports;
-	
-	// code for the marks tabs and marks web form
-	
-	if($(".mark-row").size() === 0){
-		$(".mark-header").hide();
-	}
 
-	$('#marks-tabs a').click(function (e) {
-			e.preventDefault();
-			$(this).tab('show');
-		});
-		
-		var rowMarkup = '<tr class="mark-row"><td><input name="universityId" type="text" /></td><td><input name="actualMark" type="text" /></td><td><input name="actualGrade" type="text" /></td></tr>';
-		
-		$('#add-additional-marks').on('click', function(e){
-			e.preventDefault();
-			$(".mark-header").show(); //show if this was hidden because the table started out empty
-			var newIndex = $(".mark-row").size();
-			var newRow = $(rowMarkup);
-			// add marks[index]. to the input names in the new row
-			$("input", newRow).each(function(){
-				var name = $(this).attr("name");
-				$(this).attr("name", "marks["+newIndex+"]."+name)
-			});
-			$('#marks-web-form').append(newRow);
-		});
-	
+	window.Courses = exports;
+
+    // code for the marks tabs
+    $('#marks-tabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    // code for the marks web forms
+    $('#marks-web-form').tableForm({
+        addButtonClass: 'add-additional-marks',
+        headerClass: 'mark-header',
+        rowClass: 'mark-row',
+        tableClass: 'marksUploadTable',
+        listVariable: 'marks',
+        onAdd: function(){
+            $('input.universityId', this).each(function(i, picker){
+                initUserPicker(picker);
+            });
+        }
+    });
+
+    // code for the extension form
+    $('#extension-list').tableForm({
+        addButtonClass: 'add-extensions',
+        headerClass: 'extension-header',
+        rowClass: 'extension-row',
+        tableClass: 'extensionListTable',
+        listVariable: 'extensions',
+        setup: function(){
+            // TODO - must ensure all of the inputs have unique IDs picker{index}
+            $('input.extension-date-time-picker').AnyTime_picker({
+                format: "%e-%b-%Y %H:%i:%s",
+                firstDOW: 1
+            });
+        },
+
+        onAdd: function(){
+            var nextId = $('input.extension-date-time-picker').size()-1;
+
+            $('button.approveExtension').on('click', function(e){
+                e.preventDefault();
+                $(this).hide().siblings("button.revokeExtension").show();
+                $(this).siblings(".extension-date-time-picker").show();
+            });
+
+            $('button.revokeExtension').on('click', function(e){
+                e.preventDefault();
+                $(this).hide().siblings("button.approveExtension").show();
+                $(this).siblings(".extension-date-time-picker").val("").hide();
+            });
+
+            $('input.universityId', this).each(function(i, picker){
+                initUserPicker(picker);
+            });
+
+            $('input.extension-date-time-picker', this).attr("id", "picker"+nextId)
+                .AnyTime_picker({
+                    format: "%e-%b-%Y %H:%i:%s",
+                    firstDOW: 1
+                });
+        }
+    });
+
 }); // end domready
 
 }(jQuery));
