@@ -95,11 +95,9 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	}
 	
 	def saveMemberDetails(seq:Seq[UpstreamMember]) {
-		transactional { t =>
-    		seq foreach { member =>
-    			session.saveOrUpdate(member)
-    		}
-		}
+    seq foreach { member =>
+      session.saveOrUpdate(member)
+    }
 		session.flush
 		seq foreach session.evict
 	}
