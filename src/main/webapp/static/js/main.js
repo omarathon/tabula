@@ -56,7 +56,17 @@ jQuery.fn.use = function(callback) {
   return this;
 }
 
+/*
+	Provides functionality to lists/tables that have checkboxes,
+	so that you can select some/all rows and do stuff with them.
 
+	Options:
+
+		onSomeChecked($container): callback when at least 1 is checked.
+		onNoneChecked($container): callback when no rows are checked.
+		onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
+		onChange($checkbox): callback when a row is selected/unselected.
+*/
 jQuery.fn.bigList = function(options) {
 	var $ = jQuery;
 	this.each(function(){
@@ -94,7 +104,7 @@ jQuery.fn.bigList = function(options) {
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
 			$checkboxes.each(function(){
-			    onChange.call(jQuery(this))
+				onChange.call(jQuery(this));
 			});
 			if (this.checked) {
 				$this.data('checked','all');
@@ -150,7 +160,7 @@ jQuery.fn.tableForm = function(options) {
 		$addButton.on('click', function(e){
 			e.preventDefault();
 			$header.show();
-			var newIndex = $rows.size;
+			var newIndex = $rows.size();
 			var newRow = $(rowMarkup);
 			 // add items[index]. to the input names in the new row
 			$("input", newRow).each(function(){
@@ -659,22 +669,22 @@ jQuery(function ($) {
                 format: "%e-%b-%Y %H:%i:%s",
                 firstDOW: 1
             });
-        },
 
-        onAdd: function(){
-            var nextId = $('input.extension-date-time-picker').size()-1;
-
-            $('button.approveExtension').on('click', function(e){
+            $('#extension-list').on('click', 'button.approveExtension', function(e){
                 e.preventDefault();
                 $(this).hide().siblings("button.revokeExtension").show();
                 $(this).siblings(".extension-date-time-picker").show();
             });
 
-            $('button.revokeExtension').on('click', function(e){
+            $('#extension-list').on('click', 'button.revokeExtension', function(e){
                 e.preventDefault();
                 $(this).hide().siblings("button.approveExtension").show();
                 $(this).siblings(".extension-date-time-picker").val("").hide();
             });
+        },
+
+        onAdd: function(){
+            var nextId = $('input.extension-date-time-picker').size()-1;
 
             $('input.universityId', this).each(function(i, picker){
                 initUserPicker(picker);
