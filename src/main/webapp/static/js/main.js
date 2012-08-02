@@ -474,22 +474,17 @@ jQuery(function ($) {
 			});
 		},
 
-        // rather than just toggling the class check the state of the checkbox to avoid silly errors
+		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
-		    var container = this.closest(".itemContainer");
-		    if(this.is(":checked")){
-		        container.addClass("selected");
-		    } else {
-		        container.removeClass("selected");
-		    }
+			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
 		},
 
 		onSomeChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', false);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').removeClass('disabled');
 		},
 
 		onNoneChecked : function() {
-			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').toggleClass('disabled', true);
+			$('#delete-feedback-button, #delete-selected-button, #download-selected-button').addClass('disabled');
 		}
 
 	});

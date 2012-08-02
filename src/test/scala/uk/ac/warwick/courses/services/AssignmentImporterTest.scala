@@ -35,15 +35,19 @@ class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 	}
 	
 	@Test def importMembers {
-		val assignmentImporter = new AssignmentImporter
-		assignmentImporter.ads = ads
-		assignmentImporter.afterPropertiesSet
-		
-		var count = 0
-		assignmentImporter.allMembers { mr =>
-			count += 1
-		}
-		count should be (1)
+    withFakeTime(dateTime(2012, 5)) {
+
+      val assignmentImporter = new AssignmentImporter
+      assignmentImporter.ads = ads
+      assignmentImporter.afterPropertiesSet
+
+      var count = 0
+      assignmentImporter.allMembers { mr =>
+        count += 1
+      }
+      count should be (1)
+
+    }
 	}
 
 }
