@@ -267,7 +267,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 */
 	private def reopen = {
 		initialiseSearching
-		searcherManager.maybeReopen
+		if (searcherManager != null) searcherManager.maybeReopen
 	}
 
 	/**
@@ -347,7 +347,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 * from the past year.
 	 */
 	def latestIndexItem:DateTime = {
-		mostRecentIndexedItem.map{ _.minusMinutes(5) }.getOrElse {
+		mostRecentIndexedItem.map{ _.minusMinutes(1) }.getOrElse {
 			// extract possible list of eventDate values from possible newest item and get possible first value as a Long.
 			documentValue(newest(), "eventDate")
 				.map { v => new DateTime(v.toLong) }
