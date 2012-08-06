@@ -195,7 +195,8 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	def recentAssignment(department:Department) = {
 		//auditEventIndexService.recentAssignment(department)
 		session.newCriteria[Assignment]
-			.add(Restrictions.eq("module.department", department))
+			.createAlias("module", "m")
+			.add(Restrictions.eq("m.department", department))
 			.add(Restrictions.isNotNull("createdDate"))
 			.addOrder(Order.desc("createdDate"))
 			.setMaxResults(1)

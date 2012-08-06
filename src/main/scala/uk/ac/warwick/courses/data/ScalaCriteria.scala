@@ -13,8 +13,9 @@ class ScalaCriteria[T](c: org.hibernate.Criteria) {
 	def addOrder(order: Order) = chainable { c.addOrder(order) }
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
+	def createAlias(property:String, alias: String) = chainable { c.createAlias(property, alias) }
 
-	// Helper to neaten up the above chainable methods
+	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria
 	@inline private def chainable(fn: => Unit) = { fn; this }
 
 	/** Returns a typed Seq of the results. */
