@@ -14,7 +14,9 @@
 
 <#if fromIndex>
 <@f.form commandName="auditLogQuery" action=Routes.sysadmin.events.query method="POST">
-Query: <@f.input path="query" /> <input type="submit" value="Search" />
+<div class="input-append input-prepend">
+<span class="add-on"><i class="icon-search"></i></span><@f.input path="query" placeholder="Query..." /><input class="btn" type="submit" value="Search">
+</div>
 </@f.form>
 </#if>
 

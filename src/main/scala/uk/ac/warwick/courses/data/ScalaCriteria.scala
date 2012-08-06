@@ -22,6 +22,8 @@ class ScalaCriteria[T](c: org.hibernate.Criteria) {
 
 	/** Returns a typed list of the results.*/
 	def list: java.util.List[T] = c.list().asInstanceOf[java.util.List[T]]
+
+	def scroll() = c.scroll()
 	
 	/** Return an untyped list of the results, in case you've
 	  * set the projection for the Criteria to return something else. */

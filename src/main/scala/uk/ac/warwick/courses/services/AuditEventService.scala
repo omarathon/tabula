@@ -29,6 +29,8 @@ trait AuditEventService {
 	def listRecent(start:Int, count:Int) : Seq[AuditEvent]
 	def parseData(data:String): Option[Map[String,Any]]
 	def getByEventId(eventId:String): Seq[AuditEvent]
+
+	def addRelated(event:AuditEvent): AuditEvent
 }
 
 @Component
@@ -65,16 +67,20 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	}
 	
 	def mapListToObject(array:Array[Object]): AuditEvent = {
-		val a = new AuditEvent
-		a.eventDate = new DateTime(array(0))
-		a.eventStage = array(1).toString
-		a.eventType = array(2).toString
-		a.masqueradeUserId = array(3).asInstanceOf[String]
-		a.userId = array(4).asInstanceOf[String]
-		a.data = unclob(array(5))
-		a.eventId = array(6).asInstanceOf[String]
-		a.id = toIdType(array(7))
-		a
+		if (array == null) {
+			null
+		} else {
+			val a = new AuditEvent
+			a.eventDate = new DateTime(array(0))
+			a.eventStage = array(1).toString
+			a.eventType = array(2).toString
+			a.masqueradeUserId = array(3).asInstanceOf[String]
+			a.userId = array(4).asInstanceOf[String]
+			a.data = unclob(array(5))
+			a.eventId = array(6).asInstanceOf[String]
+			a.id = toIdType(array(7))
+			a
+		}
 	}
 	
 	def toIdType(any:Object): Long = any match {
@@ -91,7 +97,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
 //		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
-		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])) map addRelated
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map{addRelated}
 	}
 	
 	def addParsedData(event:AuditEvent) = {
@@ -145,7 +151,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		query.setMaxResults(max)
 		query.list()
 			.asInstanceOf[JList[Array[Object]]]
-			.map(mapListToObject _)
+			.map(mapListToObject)
 	}
 
 	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
@@ -154,7 +160,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		query.setMaxResults(count)
 		query.list()
 			.asInstanceOf[JList[Array[Object]]]
-			.map(mapListToObject _)
+			.map(mapListToObject)
 	}
 	
 	// parse the data portion of the AuditEvent

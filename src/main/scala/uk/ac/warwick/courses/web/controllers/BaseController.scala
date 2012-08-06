@@ -96,6 +96,8 @@ trait ControllerImports {
 	final val PUT = RequestMethod.PUT
 	final val HEAD = RequestMethod.HEAD
 	final val POST = RequestMethod.POST
+
+	type RequestMapping = org.springframework.web.bind.annotation.RequestMapping
 }
 
 trait PreRequestHandler {

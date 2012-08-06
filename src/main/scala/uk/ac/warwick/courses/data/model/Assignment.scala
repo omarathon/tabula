@@ -89,6 +89,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var closeDate: DateTime = _
 
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var createdDate = DateTime.now()
+
 	@BeanProperty var collectMarks: Boolean = _
 	@BeanProperty var collectSubmissions: Boolean = false
 	@BeanProperty var restrictSubmissions: Boolean = false
