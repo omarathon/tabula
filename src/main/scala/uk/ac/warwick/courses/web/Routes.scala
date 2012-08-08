@@ -19,7 +19,13 @@ object Routes {
 	
 	object admin {
 		def department(department:Department) = "/admin/department/%s/" format (encoded(department.code))
-		def module(module:Module) = department(module.department) + "#module-" + encoded(module.code)
+
+		object module {
+			def apply(module:Module) = department(module.department) + "#module-" + encoded(module.code)
+
+			def create() = "/admin/module/add"
+		}
+
 		def modulePermissions(module:Module) = "/admin/module/%s/permissions" format (encoded(module.code))
 		
 		object assignment {

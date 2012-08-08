@@ -137,10 +137,16 @@ abstract class Description {
 	/**
 	 * Record module, plus department.
 	 */
-	def module(module:Module) = properties(
-			"module" -> module.id,
-			"department" -> module.department.code
-		)
+	def module(module:Module) = {
+		property("module" -> module.id)
+		if (module.department != null) department(module.department)
+		this
+	}
+
+	def department(department:Department) = {
+		property("department", department.code)
+		this
+	}
 	
 	// delegate equality to the underlying map
 	override def hashCode = map.hashCode

@@ -4,11 +4,26 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
+import uk.ac.warwick.courses.system.TwoWayConverter
 
-class DepartmentCodeConverter extends Converter[String, Department] {
+/**
+ * Converts to and from a Department and its lowercase department code.
+ */
+class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
   
-  @Autowired var service:ModuleAndDepartmentService =_
+	@Autowired var service:ModuleAndDepartmentService =_
   
-  override def convert(code:String) = service.getDepartmentByCode(code).orNull
-  
+	override def convertRight(code: String) = {
+		service.getDepartmentByCode( sanitise(code) ).getOrElse( throw new IllegalArgumentException )
+	}
+
+	override def convertLeft(department: Department) = {
+		department.code
+	}
+
+	def sanitise(code: String) = {
+		if (code == null) throw new IllegalArgumentException
+		else code.toLowerCase
+	}
+
 }

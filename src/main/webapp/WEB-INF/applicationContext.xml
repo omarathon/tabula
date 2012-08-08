@@ -281,12 +281,7 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
-	
 
-
-
-	
-	<!-- /JMX -->
 	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->

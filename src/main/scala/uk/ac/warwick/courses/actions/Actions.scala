@@ -27,6 +27,8 @@ case class Masquerade() extends Action[Unit]
 
 case class Delete(val d:Deleteable) extends Action[Deleteable]
 
+case class Create() extends Action[Unit]
+
 /** Applied to any object that can have the View action on it. */
 trait Viewable
 /** Applied to any object that can have the Manage action on it. */

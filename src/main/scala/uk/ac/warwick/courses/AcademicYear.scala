@@ -43,6 +43,8 @@ case class AcademicYear(val startYear:Int) {
 
 /**
  * Stores academic year as the 4-digit starting year.
+ *
+ * TODO reimplement as a Converter or Formatter.
  */
 class AcademicYearEditor extends PropertyEditorSupport {
 	override def getAsText = getValue() match {
