@@ -387,7 +387,14 @@ jQuery(function ($) {
 			$root.find('input[type=submit]').click(function(e){
 				e.preventDefault();
 				var $form = $(this).closest('form');
-				jQuery.post($form.attr('action'), $form.serialize(), function(data){
+				
+				// added ZLJ Aug 10th to make a unique URL which IE8 will load
+				var $randomNumber = Math.floor(Math.random() * 10000000);
+				
+				// this line doesn't work in IE8 (IE8 bug) - need to make the URL
+				// unique using generated random number
+				//jQuery.post($form.attr('action'), $form.serialize(), function(data){
+				jQuery.post($form.attr('action') + "?rand=" + $randomNumber, $form.serialize(), function(data){
 					popup.setContent(data);
 					decorate($(popup.contentElement));
 				});
