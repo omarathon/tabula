@@ -16,9 +16,9 @@
   </shire>
 
   <credentials>
-    <certificate>file:/Apache Software Foundation/Apache2.2/conf/saligo.warwick.ac.uk.crt</certificate>
-    <key>file:/Apache Software Foundation/Apache2.2/conf/saligo.warwick.ac.uk.key</key>
-    <chain>file:/Apache Software Foundation/Apache2.2/SSL/empty.crt</chain>
+    <certificate>file:/Program Files/Apache Software Foundation/Apache2.2/conf/saligo.warwick.ac.uk.crt</certificate>
+    <key>file:/Program Files/Apache Software Foundation/Apache2.2/conf/saligo.warwick.ac.uk.key</key>
+    <chain>file:/Program Files/Apache Software Foundation/Apache2.2/conf/empty.crt</chain>
   </credentials>
 
 </config>
