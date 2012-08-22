@@ -24,7 +24,8 @@ import scala.util.matching.Regex
 	new NamedQuery(name="module.code", query="select m from Module m where code = :code"),
 	new NamedQuery(name="module.department", query="select m from Module m where department = :department")
 ))
-class Module extends GeneratedId with Viewable with Manageable with Participatable {
+class Module extends GeneratedId
+		with Viewable with Manageable with Participatable {
 	
 	def this(code:String=null, department:Department=null) {
 		this()

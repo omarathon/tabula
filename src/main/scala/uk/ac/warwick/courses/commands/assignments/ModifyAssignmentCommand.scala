@@ -210,7 +210,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	def prefillFromRecentAssignment() {
     if (prefillFromRecent) {
-      service.recentAssignment(module.department) foreach { (a) =>
+      for (a <- service.recentAssignment(module.department)) {
         copyNonspecificFrom(a)
         _prefilled = true
       }

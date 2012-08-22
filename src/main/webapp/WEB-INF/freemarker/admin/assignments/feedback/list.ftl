@@ -56,10 +56,12 @@ Download all as ZIP file
 					<#list feedback.attachments as attachment>${attachment.name}<#if attachment_has_next>, </#if></#list>
 				</td>
 				<td class="download">
+					<#if feedback.attachments?size gt 0>
 					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.zip'/>">
 						<i class="icon-download"></i>
 						Download attachments
 					</a>
+					</#if>
 				</td>
 			</tr>
 		</#list>

@@ -12,7 +12,18 @@ import uk.ac.warwick.courses.data.model.UpstreamAssignment
 class AssignmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AssignmentServiceImpl =_
-	
+
+	@Transactional @Test def recentAssignment {
+		val assignment = newDeepAssignment()
+		val department = assignment.module.department
+
+		session.save(department)
+		session.save(assignment.module)
+		session.save(assignment)
+
+		service.recentAssignment(department).get should be (assignment)
+	}
+
 	/**
 	 * The Hibernate filter that adds deleted != 0
 	 */

@@ -193,8 +193,15 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	}
 	
 	def recentAssignment(department:Department) = {
-    auditEventIndexService.recentAssignment(department)
-  }
+		//auditEventIndexService.recentAssignment(department)
+		session.newCriteria[Assignment]
+			.createAlias("module", "m")
+			.add(Restrictions.eq("m.department", department))
+			.add(Restrictions.isNotNull("createdDate"))
+			.addOrder(Order.desc("createdDate"))
+			.setMaxResults(1)
+			.uniqueResult
+	}
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
     val upstream = assignment.upstreamAssignment

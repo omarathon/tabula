@@ -91,8 +91,8 @@ trait QueryMethods { self:AuditEventIndexService =>
 				termQuery("eventType", "DownloadFeedback"),
 				termQuery("assignment", assignment.id)
 			))
-			.flatMap( toAuditEvent(_) )
-			.filterNot( _.hadError )
+			.flatMap{ toAuditEvent(_) }
+			.filterNot{ _.hadError }
 			.map{ _.masqueradeUserId }
 			.filterNot{ _ == null }
 			.distinct
@@ -123,6 +123,20 @@ trait QueryMethods { self:AuditEventIndexService =>
     ).headOption
   }
 
+	def getAssignmentCreatedDate(assignment:Assignment) : Option[DateTime] = {
+		search(all(term("eventType" -> "AddAssignment"), term("assignment" -> assignment.id)))
+			.flatMap{ doc:Document =>
+			   doc.getFieldable("eventDate") match {
+					case field:NumericField => {
+						Some(new DateTime(field.getNumericValue()))
+					}
+					case a => {
+						None
+					}
+			   }
+			}
+			.headOption
+	}
 }
 
 
@@ -267,7 +281,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 */
 	private def reopen = {
 		initialiseSearching
-		searcherManager.maybeReopen
+		if (searcherManager != null) searcherManager.maybeReopen
 	}
 
 	/**
@@ -347,7 +361,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 * from the past year.
 	 */
 	def latestIndexItem:DateTime = {
-		mostRecentIndexedItem.map{ _.minusMinutes(5) }.getOrElse {
+		mostRecentIndexedItem.map{ _.minusMinutes(1) }.getOrElse {
 			// extract possible list of eventDate values from possible newest item and get possible first value as a Long.
 			documentValue(newest(), "eventDate")
 				.map { v => new DateTime(v.toLong) }
@@ -432,6 +446,11 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 */
 	protected def toDocument(item:AuditEvent) : Document = {
 		val doc = new Document
+
+		if (item.related == null || item.related.isEmpty) {
+			service.addRelated(item)
+		}
+
 		doc add plainStringField("id", item.id.toString)
 		if (item.eventId != null) { // null for old events
 			doc add plainStringField("eventId", item.eventId)
@@ -442,10 +461,14 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 			doc add plainStringField("masqueradeUserId", item.masqueradeUserId)
 		doc add plainStringField("eventType", item.eventType)
 
-		service.parseData(item.data) match {
-			case None => // no valid JSON
-			case Some(data) => addDataToDoc(data, doc)
+		// add data from all stages of the event, before and after.
+		for (i <- item.related) {
+			service.parseData(i.data) match {
+				case None => // no valid JSON
+				case Some(data) => addDataToDoc(data, doc)
+			}
 		}
+
 		doc add dateField("eventDate", item.eventDate)
 		doc
 	}
@@ -460,19 +483,23 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 		docs flatMap toId flatMap service.getById
 	}
 
+	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data:Map[String,Any], doc:Document) = {
 		for (key <- Seq("submission", "feedback", "assignment", "module", "department","studentId")) {
 			data.get(key) match {
-				case Some(value:String) => doc add plainStringField(key, value, stored=false)
+				case Some(value:String) => {
+					doc add plainStringField(key, value, stored=false)
+				}
 				case _ => // missing or not a string
 			}
 		}
+		// sequence-type fields
 		for (key <- Seq("students")) {
 			data.get(key).collect {
 				case ids:JList[_] => doc add seqField(key, ids.asScala)
 				case ids:Seq[_] => doc add seqField(key, ids)
 				case ids:Array[String] => doc add seqField(key, ids)
-				case other:Any => logger.warn("Collection field "+key+" was unexpected type: " + other.getClass.getName)
+				case other:AnyRef => logger.warn("Collection field "+key+" was unexpected type: " + other.getClass.getName)
 				case _ =>
 			}
 		}
@@ -492,7 +519,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	}
 
 	private def dateField(name:String, value:DateTime) = {
-		val field = new NumericField(name)
+		val field = new NumericField(name, Store.YES, true)
 		field.setLongValue(value.getMillis)
 		field
 	}
@@ -501,17 +528,17 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 
 
 trait QueryHelpers {
-	private def boolean(occur:Occur, queries:Query*) = {
+	private def boolean(occur:Occur, queries:Query*): Query = {
 		val query = new BooleanQuery
 		for (q <- queries) query.add(q, occur)
 		query
 	}
 
-	def all(queries:Query*) = boolean(Occur.MUST, queries:_*)
-	def some(queries:Query*) = boolean(Occur.SHOULD, queries:_*)
+	def all(queries:Query*): Query = boolean(Occur.MUST, queries:_*)
+	def some(queries:Query*): Query = boolean(Occur.SHOULD, queries:_*)
 
-	def termQuery(name:String, value:String) =
-		new TermQuery(new Term(name, value))
+	def termQuery(name:String, value:String) = new TermQuery(new Term(name, value))
+	def term(pair:Pair[String,String]) = new TermQuery(new Term(pair._1, pair._2))
 
 	def dateSort = new Sort(new SortField("eventDate", SortField.LONG, false))
 	def reverseDateSort = new Sort(new SortField("eventDate", SortField.LONG, true))

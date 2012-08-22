@@ -56,7 +56,7 @@ class ScheduledJobs {
 		new CleanupTemporaryFilesCommand().apply()
 	}
 	
-	@Scheduled(cron="0 */5 * * * *") // every 5 minutes
+	@Scheduled(cron="0 */1 * * * *") // every minute
 	def indexAuditEvents:Unit = exceptionResolver.reportExceptions { indexingService.index }
 	
 	@Scheduled(cron="*/10 * * * * *") // every 10 seconds

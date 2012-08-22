@@ -8,7 +8,7 @@ import uk.ac.warwick.courses.JavaImports._
 import org.junit.After
 import org.junit.Before
 import org.joda.time.DateTime
-import uk.ac.warwick.courses.data.model.AuditEvent
+import uk.ac.warwick.courses.data.model.{Assignment, AuditEvent, Submission}
 import org.apache.lucene.index.IndexReader
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.search.IndexSearcher
@@ -20,7 +20,7 @@ import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.courses.JsonObjectMapperFactory
 import uk.ac.warwick.courses.helpers.ArrayList
 import java.io.File
-import uk.ac.warwick.courses.commands.assignments.DownloadSubmissionsCommand
+import uk.ac.warwick.courses.commands.assignments.{AddAssignmentCommand, DownloadSubmissionsCommand}
 import uk.ac.warwick.courses.events.EventHandling
 import uk.ac.warwick.courses.events.EventListener
 import uk.ac.warwick.courses.events.Event
@@ -28,7 +28,6 @@ import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.courses.data.model.Submission
 
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	
@@ -81,6 +80,36 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	def addParsedData(event:AuditEvent) = {
 		event.parsedData = service.parseData(event.data)
 		event
+	}
+
+	@Transactional
+	@Test def createdDate = withFakeTime(dateTime(2000, 6)) {
+
+		val eventId = "a"
+		val eventType = "AddAssignment"
+		val userId = "bob"
+		val d = new DateTime(2000,1,1,0,0,0)
+
+		val before = AuditEvent(
+			eventId=eventId, eventType=eventType, userId=userId, eventDate=d,
+			eventStage="before", data="""{}"""
+		)
+		val after = AuditEvent(
+			eventId=eventId, eventType=eventType, userId=userId, eventDate=d,
+			eventStage="after", data="""{"assignment":"12345"}"""
+		)
+
+		for (event <- Seq(before,after)) service.save(addParsedData(event))
+		//indexer.indexEvents(Seq(before))
+		indexer.index
+
+		val assignment = new Assignment()
+		assignment.id = "12345"
+
+		val maybeDate = indexer.getAssignmentCreatedDate(assignment)
+		if (maybeDate.isEmpty) fail("No date found")
+		else for (date <- maybeDate) date should be (d)
+
 	}
 	
 	@Transactional

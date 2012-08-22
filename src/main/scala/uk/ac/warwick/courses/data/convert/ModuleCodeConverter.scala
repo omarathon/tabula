@@ -10,6 +10,6 @@ class ModuleCodeConverter extends Converter[String, Module] {
   
   @Autowired var service:ModuleAndDepartmentService =_
   
-  override def convert(code:String) = service.getModuleByCode(code).orNull
+  override def convert(code:String) = service.getModuleByCode(code).getOrElse(throw new IllegalArgumentException)
   
 }
