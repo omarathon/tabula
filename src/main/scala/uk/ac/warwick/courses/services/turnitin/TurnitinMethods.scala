@@ -4,6 +4,7 @@ import java.io.File
 
 import TurnitinDates._
 import TurnitinMethods._
+import uk.ac.warwick.courses.helpers.Logging
 
 trait Response {
 	def successful:Boolean
@@ -20,7 +21,7 @@ case class AssignmentNotFound() extends FailureResponse
 case class SubmissionNotFound() extends FailureResponse
 case class Failed(code:Int, reason:String) extends FailureResponse
 
-trait TurnitinMethods extends TurnitinAPI {
+trait TurnitinMethods extends TurnitinAPI with Logging {
 
 	def doRequest(functionId: String, pdata: Option[FileData], params: Pair[String, String]*) : TurnitinResponse
 	
@@ -76,7 +77,10 @@ trait TurnitinMethods extends TurnitinAPI {
 				"pln" -> authorLastName)
 				
 		if (response.success) Created(response.objectId getOrElse "")
-		else Failed(response.code, response.message)
+		else{
+			logger.debug("submitPaper failed. Code was '"+response.code+"'. Message was '"+response.message+"'")
+			Failed(response.code, response.message)
+		}
 	}
 	
 	def deleteSubmission(className:String, assignmentName:String, oid:String): Response = {
