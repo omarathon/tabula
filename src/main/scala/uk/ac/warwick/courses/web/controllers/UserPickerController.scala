@@ -18,7 +18,7 @@ class UserPickerController extends BaseController {
 	@Autowired var userLookup:UserLookupService =_
   
 	@RequestMapping(value=Array("/api/userpicker/form"))
-	def form: Mav = Mav("api/userpicker/form").noLayout
+	def form: Mav = Mav("api/userpicker/form").noLayout()
 	
 	@RequestMapping(value=Array("/api/userpicker/query.json"))
 	def queryJson (form:QueryForm, out:Writer) = {
@@ -40,7 +40,7 @@ class UserPickerController extends BaseController {
 	  val (staff, students) = (usersByStaff.getOrElse(true, Seq.empty), usersByStaff.getOrElse(false, Seq.empty))
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
-	      "students" -> students).noLayout
+	      "students" -> students).noLayout()
 	}
 	
 	/**
@@ -77,14 +77,16 @@ object UserPickerController {
 		}
 		def query_=(q:String):Unit = setQuery(q)
 			
-		def filter:Map[String,String] = 
+		def filter:Map[String, String] = {
 		  	item("givenName", firstName) ++ item("sn", lastName)
+		}
 		
 		// filter with surname as firstname and viceversa, in case we get no results
-		def filterBackwards:Map[String,String] = 
+		def filterBackwards:Map[String,String] = {
 			item("givenName", lastName) ++ item("sn", firstName)
+		}
 		  
-		private def item(name:String, value:String) = value match {
+		private def item(name:String, value:String): Map[String, String] = value match {
 		  case s:String if s.hasText => Map(name -> (value + "*"))
 		  case _ => Map.empty
 		}
