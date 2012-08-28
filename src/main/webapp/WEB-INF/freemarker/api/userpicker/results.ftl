@@ -9,12 +9,24 @@
 <table>
 	<tr>
 		<th>Name</th>
-		<th>Usercode</th>
+		<#if RequestParameters.isUniId = "true">
+			<th>University ID</th>
+		<#else>
+			<th>Usercode</th>
+		</#if>
 	</tr>
 <#list collection as u>
 	<tr>
 		<td>${u.fullName}</td>
-		<td class="user-id">${u.userId}</td>
+		
+		<td class="user-id">
+			<#if RequestParameters.isUniId = "true">
+				${u.warwickId}
+			<#else>
+				${u.userId}
+			</#if>
+		
+		</td>
 	</tr>
 </#list>
 </table>

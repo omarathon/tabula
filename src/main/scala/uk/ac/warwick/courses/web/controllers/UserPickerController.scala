@@ -60,7 +60,7 @@ object UserPickerController {
 	class QueryForm {
 		@BeanProperty var firstName:String = ""
 		@BeanProperty var lastName:String = ""
-		
+		  
 		/**
 		 * If one word is given, it's used as surname.
 		 * If more words are given, the first two are used

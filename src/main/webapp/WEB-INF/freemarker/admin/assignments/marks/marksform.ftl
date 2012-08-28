@@ -16,6 +16,7 @@
 				You can use this <a href="<@url page="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
+				<input name="isfile" value="true" type="hidden"/>
 				<table role="presentation" class="narrowed-form">
 					<tr>
 						<td id="multifile-column">
@@ -55,34 +56,42 @@
 			<p>
 				Click the add button below to enter marks for a student.
 			</p>
+
+        	<table class="hide">
+                <tbody class="row-markup">
+                    <tr class="mark-row">
+                        <td>
+                            <div class="input-prepend input-append">
+                                <span class="add-on"><i class="icon-user"></i></span>
+                                <input class="universityId span2" name="universityId" type="text" />
+                            </div>
+                        </td>
+                        <td><input name="actualMark" type="text" /></td>
+                        <td><input name="actualGrade" type="text" /></td>
+                    </tr>
+                </tbody>
+            </table>
+
 			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
-                <table class="hide">
-                    <tbody class="row-markup">
-                        <tr class="mark-row">
-                            <td>
-                                <div class="input-prepend input-append">
-                                    <span class="add-on"><i class="icon-user"></i></span>
-                                    <input class="universityId span2" name="universityId" type="text" />
-                                </div>
-                            </td>
-                            <td><input name="actualMark" type="text" /></td>
-                            <td><input name="actualGrade" type="text" /></td>
-                        </tr>
-                    </tbody>
-                </table>
+				<input name="isfile" value="false" type="hidden"/>
                 <table class="marksUploadTable">
 					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
-					<#-- leave this stuff out until we can specify enrolled students
-					<#if assignment.members??>
-						<#list assignment.members.members as member>
+					<#if marksToDisplay??>
+						<#list marksToDisplay as markItem>
 							<tr class="mark-row">
-								<td>${member}<input type="hidden" name="marks[member_index].universityId" value="${member}" /></td>
-								<td><input type="text" name="marks[member_index].actualMark" value="" /></td>
-								<td><input type="text" name="marks[member_index].actualGrade" value="" /></td>
-							</tr>
+                            	<td>
+                                	<div class="input-prepend input-append">
+                                    	<span class="add-on"><i class="icon-user"></i></span>
+                                    	<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
+                                	</div>
+                            	</td>
+                            	<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
+                            	<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
+                        	</tr>							
 						</#list>
+					
 					</#if>
-					-->
+
 				</table>
 				<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 				<div class="submit-buttons">

@@ -114,8 +114,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BeanProperty var extensions: JList[Extension] = ArrayList()
 
-	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
+    @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+    //@OneToMany(mappedBy = "assignment", fetch = EAGER, cascade = Array(ALL))
+    @BeanProperty var feedbacks: JList[Feedback] = ArrayList()
 
 	/**
 	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!

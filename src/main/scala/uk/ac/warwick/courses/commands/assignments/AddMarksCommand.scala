@@ -3,6 +3,7 @@ package uk.ac.warwick.courses.commands.assignments
 import scala.util.matching.Regex
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +26,7 @@ import uk.ac.warwick.courses.helpers.NoUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.FoundUser
 import uk.ac.warwick.courses.UniversityId
+import org.springframework.beans.factory.annotation.Value
 
 
 @Configurable
@@ -36,28 +38,39 @@ class AddMarksCommand( val assignment:Assignment, val submitter:CurrentUser ) ex
 	@BeanProperty var file:UploadedFile = new UploadedFile
     @BeanProperty var marks:JList[MarkItem] = LazyLists.simpleFactory()
     
-	private def filenameOf(path:String) = new java.io.File(path).getName
+    @Value("${mark.warning}") var markWarning:String = _ 
+    
+    private def filenameOf(path:String) = new java.io.File(path).getName
   
 	
 	def postExtractValidation(errors:Errors) = {
+        val uniIdsSoFar: mutable.Set[String] = mutable.Set()
+        
 		if (marks != null && !marks.isEmpty()) {
 			for (i <- 0 until marks.length) {
 				val mark = marks.get(i)
+                val newPerson = uniIdsSoFar.add(mark.universityId)
 				errors.pushNestedPath("marks["+i+"]")
-	 	 	 	mark.isValid = validateMarkItem(mark, errors)
+	 	 	 	mark.isValid = validateMarkItem(mark, errors, newPerson)
 	 	 	 	errors.popNestedPath()
 			}
 		}
 	}
 	
-	def validateMarkItem(mark:MarkItem, errors:Errors) = {
-		var noErrors = true
+	def validateMarkItem(mark:MarkItem, errors:Errors, newPerson:Boolean) = {
+
+	  var noErrors = true
 		// validate id
 		if (hasText(mark.universityId)){
-			if (!UniversityId.isValid(mark.universityId)) {
+		  if (!UniversityId.isValid(mark.universityId)) {
 	 			errors.rejectValue("universityId", "uniNumber.invalid")
 	 			noErrors = false
-			} else {
+		  } 
+		  else if (!newPerson) {
+		      errors.rejectValue("universityId", "uniNumber.duplicate.mark") 
+		      noErrors = false
+		  }
+		  else {
 				userLookup.getUserByWarwickUniId(mark.universityId) match {
 					case FoundUser(u) => 
 					case NoUser(u) => {
@@ -65,11 +78,10 @@ class AddMarksCommand( val assignment:Assignment, val submitter:CurrentUser ) ex
 						noErrors = false
 					}
 				}
-	 	 	  	// Reject if marks for this student are already uploaded
+	 	 	  	// Warn if marks for this student are already uploaded
 	 	 	  	assignment.feedbacks.find {(feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade )} match {
 	 	 	  		case Some(feedback) => {
-	 	 	  			errors.rejectValue("universityId", "uniNumber.duplicate.feedback")
-	 	 	  			noErrors = false
+	 	 	  		    mark.warningMessage = markWarning	 	 	  		      
 	 	 	  		}
 	 	 	  		case None => {}
 	 	 	  	}

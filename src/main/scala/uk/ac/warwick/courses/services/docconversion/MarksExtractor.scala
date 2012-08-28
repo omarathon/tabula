@@ -17,9 +17,10 @@ import scala.reflect.BeanProperty
 class MarkItem{
   
   @BeanProperty var universityId:String =_
-  @BeanProperty var actualMark:String =_;
-  @BeanProperty var actualGrade:String =_;
-  @BeanProperty var isValid = true;
+  @BeanProperty var actualMark:String =_
+  @BeanProperty var actualGrade:String =_
+  @BeanProperty var isValid = true
+  @BeanProperty var warningMessage:String=_
   
   def this(universityId:String, actualMark:String, actualGrade:String) = {
 	this();
