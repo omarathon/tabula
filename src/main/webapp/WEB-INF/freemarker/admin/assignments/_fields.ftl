@@ -26,7 +26,7 @@ the comments textarea needs to maintain newlines.
 <#if newRecord>
 
 	<@form.labelled_row "academicYear" "Academic year">
-		<@f.select path="academicYear">
+		<@f.select path="academicYear" id="academicYear">
 			<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 		</@f.select>
 	</@form.labelled_row>
@@ -157,7 +157,7 @@ the comments textarea needs to maintain newlines.
 										</tr>
 										<#list membershipDetails as item>
 											<#assign u=item.user>
-												<tr class="membe-inputrship-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
+												<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
 													<td>
 														<#if item.userId??>
 															<#--
@@ -261,11 +261,19 @@ the comments textarea needs to maintain newlines.
 				);
 			});
 
+			var refreshForm = function() {
+				$('#action-input').val('refresh');
+                $form.submit();
+			}
+
 			<#-- controller detects action=refresh and does a bind without submit -->
 			$('.refresh-form').click(function(e) {
-			  e.preventDefault();
-				$('#action-input').val('refresh');
-				$form.submit();
+			    e.preventDefault();
+				refreshForm();
+			});
+
+			$('select#academicYear').change(function(e) {
+				refreshForm();
 			});
 		
 			$('#show-sits-picker').click(function(){
