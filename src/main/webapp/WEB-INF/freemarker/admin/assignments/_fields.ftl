@@ -379,6 +379,32 @@ the comments textarea needs to maintain newlines.
 			</@form.field>
 		</@form.row>
 
+		<#if features.extensions>
+			<@form.row>
+				<@form.label></@form.label>
+				<@form.field>
+					<label class="checkbox">
+						<@f.checkbox path="allowExtensions" id="allowExtensions" />
+						Allow extensions
+					</label>
+				</@form.field>
+			</@form.row>
+			<div id="request-extension-row">
+				<@form.row>
+					<@form.label></@form.label>
+					<@form.field>
+						<label class="checkbox">
+							<@f.checkbox path="allowExtensionRequests" />
+							Allow students to request extensions
+						</label>
+						<div class="help-block">
+							Students will be able to request extensions for this assignment via the submission page.
+						</div>
+					</@form.field>
+				</@form.row>
+			</div>
+		</#if>
+
 		<@form.row>
 			<@form.label path="fileAttachmentLimit">Max attachments per submission</@form.label>
 			<@form.field>

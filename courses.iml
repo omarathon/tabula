@@ -118,7 +118,10 @@
   <component name="FacetManager">
     <facet type="scala" name="Scala">
       <configuration>
-        <option name="fsc" value="true" />
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="scala-library" />
+        <option name="maximumHeapSize" value="1024" />
+        <option name="vmOptions" value="-Xss2m -server" />
       </configuration>
     </facet>
   </component>
@@ -130,7 +133,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />

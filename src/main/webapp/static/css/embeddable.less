@@ -4,6 +4,7 @@
   @import "bootstrap/responsive.less";
 }
 @import "bootstrap/fixes.less";
+@import "bootstrap/variables.less";
 
 @grid-size:16px;
 @warning-color: #933;
@@ -483,6 +484,12 @@ textarea#assignmentComment {
 	.label-ANY();
 }
 
+.label-blue {
+	background: #3A87AD;
+	color: white;
+	.label-ANY();
+}
+
 .extra-data {
   .very-subtle;
 }
@@ -516,6 +523,11 @@ input[type=text] {
 .originality-report {
   text-align: right;
   img { vertical-align: middle }
+}
+
+// fix for the date plugin and models
+.AnyTime-win {
+	z-index: @zindexModal+1;
 }
 
 

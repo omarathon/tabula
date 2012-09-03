@@ -139,7 +139,7 @@ jQuery.fn.tableForm = function(options) {
 
 		var addButtonClass = options.addButtonClass || 'add-button';
 		var headerClass = options.headerClass || 'header-row';
-		var rowClass = options.headerRow || 'header-row';
+		var rowClass = options.rowClass || 'table-row';
 		var tableClass = options.tableClass || 'table-form';
 		var listVariable = options.listVariable || 'items';
 
@@ -608,6 +608,10 @@ jQuery(function ($) {
 
 
 	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
+	// check that the extension UI elements are present
+	if($('input#allowExtensions').length > 0){
+		slideMoreOptions($('input#allowExtensions'), $('#request-extension-row'));
+	}
 
 
 	$('.assignment-info .assignment-buttons').css('opacity',0);
@@ -655,48 +659,6 @@ jQuery(function ($) {
             $('input.universityId', this).each(function(i, picker){
                 initUserPicker(picker);
             });
-        }
-    });
-
-    // code for the extension form
-    $('#extension-list').tableForm({
-        addButtonClass: 'add-extensions',
-        headerClass: 'extension-header',
-        rowClass: 'extension-row',
-        tableClass: 'extensionListTable',
-        listVariable: 'extensions',
-        setup: function(){
-            // TODO - must ensure all of the inputs have unique IDs picker{index}
-            $('input.extension-date-time-picker').AnyTime_picker({
-                format: "%e-%b-%Y %H:%i:%s",
-                firstDOW: 1
-            });
-
-            $('#extension-list').on('click', 'button.approveExtension', function(e){
-                e.preventDefault();
-                $(this).hide().siblings("button.revokeExtension").show();
-                $(this).siblings(".extension-date-time-picker").show();
-            });
-
-            $('#extension-list').on('click', 'button.revokeExtension', function(e){
-                e.preventDefault();
-                $(this).hide().siblings("button.approveExtension").show();
-                $(this).siblings(".extension-date-time-picker").val("").hide();
-            });
-        },
-
-        onAdd: function(){
-            var nextId = $('input.extension-date-time-picker').size()-1;
-
-            $('input.universityId', this).each(function(i, picker){
-                initUserPicker(picker);
-            });
-
-            $('input.extension-date-time-picker', this).attr("id", "picker"+nextId)
-                .AnyTime_picker({
-                    format: "%e-%b-%Y %H:%i:%s",
-                    firstDOW: 1
-                });
         }
     });
 

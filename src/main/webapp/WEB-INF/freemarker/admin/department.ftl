@@ -134,15 +134,18 @@
 				<#if assignment.collectMarks >
 					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a>
 				</#if>
-				<#if has_feedback >
-				<a class="btn list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
-				<#if assignment.canPublishFeedback>
-				  <#if assignment.closed>
-				    <a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
-				  <#else>
-				    <a class="btn disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
-				  </#if>
+				<#if has_feedback>
+					<a class="btn list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
+					<#if assignment.canPublishFeedback>
+						<#if assignment.closed>
+							<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
+						<#else>
+							<a class="btn disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
+						</#if>
+					</#if>
 				</#if>
+				<#if assignment.allowExtensions >
+					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">Manage extensions <i class="icon-calendar"></i></a>
 				</#if>
 			</div>
 			<div class="end-assignment-info"></div>

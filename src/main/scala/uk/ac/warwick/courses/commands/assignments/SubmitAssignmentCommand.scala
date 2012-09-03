@@ -93,7 +93,7 @@ class SubmitAssignmentCommand(val assignment:Assignment, val user:CurrentUser) e
   @Transactional
   override def apply = {
 	assignment.submissions.find(_.universityId == user.universityId).map{ existingSubmission =>
-		if (assignment.resubmittable) {
+		if (assignment.resubmittable(user.apparentId)) {
 			service.delete(existingSubmission)
 		} else { // Validation should prevent ever reaching here.
 			throw new IllegalArgumentException("Submission already exists and can't overwrite it")

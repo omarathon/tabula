@@ -25,18 +25,19 @@ import javax.persistence.FetchType
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
-  
+
 	def this(universityId:String=null) {
 		this()
 		this.universityId = universityId
 	}
 	
 	def isLate = submittedDate != null && assignment.isLate(this)
+	def isAuthorisedLate = submittedDate != null && assignment.isAuthorisedLate(this)
 	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
-  
+
 	@BeanProperty var submitted:Boolean = false
 	
 	@Column(name="submitted_date")
