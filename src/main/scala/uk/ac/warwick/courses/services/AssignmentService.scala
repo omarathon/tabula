@@ -71,6 +71,8 @@ trait AssignmentService {
   def determineMembershipUsers(assignment: Assignment): Seq[User]
 
   def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others:UserGroup): Boolean
+  
+  def getStudentFeedback( assignment : Assignment, warwickId : String) : Option[Feedback]
 }
 
 @Service(value="assignmentService")
@@ -220,6 +222,10 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		        .list filter isInteresting
 	}
 	
+	def getStudentFeedback( assignment : Assignment, uniId : String) = {
+	    assignment.findFeedback(uniId)
+	}
+
 	private def isInteresting(assignment:UpstreamAssignment) = {
 		!(assignment.name contains "NOT IN USE")
 	}
@@ -289,6 +295,7 @@ trait AssignmentMembershipMethods { self:AssignmentServiceImpl =>
     } getOrElse false // not in any group at all
   }
 
+  
 
   private def sameUserIdAs(user: User) = (other: Pair[String,User]) => { user.getUserId == other._2.getUserId }
   private def in(seq: Seq[Pair[String,User]]) = (other: Pair[String,User]) => { seq exists sameUserIdAs(other._2) }

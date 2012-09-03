@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 import org.springframework.web.servlet.ModelAndView
 import uk.ac.warwick.courses.data.model
+import org.springframework.web.servlet.View
 
 /**
  * Scala-y modelandview object. There is a return value processor
@@ -15,7 +16,21 @@ import uk.ac.warwick.courses.data.model
  *   "user" -> myUser
  *   )
  */
-class Mav(var viewName:String) {
+class Mav() {
+  
+    def this(viewName:String) = {
+      this()
+      this.viewName = viewName
+    }
+    
+    def this(view:View) = {
+      this()
+      this.view = view
+    }
+  
+    var view:View = _
+    var viewName:String = _
+    
 	var map = mutable.Map[String,Any]()
 	var classes:List[String] = Nil
 	
@@ -100,6 +115,7 @@ object Mav {
    */
   def apply(view:String, objects:Pair[String,_]*) = new Mav(view).addObjects(objects:_*)
 
+  def apply(view:View, objects:Pair[String,_]*) = new Mav(view).addObjects(objects:_*)
   //def apply(what:String) = null
   
 }

@@ -25,7 +25,12 @@ class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging
 		returnValue match {
 			case mav:Mav => {
 				mavContainer.addAllAttributes(mav.toModel)
-				mavContainer.setViewName(mav.viewName)
+				if (mav.viewName != null) {
+				    mavContainer.setViewName(mav.viewName)				  
+				}
+				else {
+				    mavContainer.setView(mav.view)
+				}
 				mavContainer.setRequestHandled(false)
 			}
 		}

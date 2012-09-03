@@ -136,7 +136,8 @@ jQuery.fn.tableForm = function(options) {
 		var $this = $(this);
 
         var doNothing = function(){};
-
+        var setupFunction = options.setup || doNothing;
+        
 		var addButtonClass = options.addButtonClass || 'add-button';
 		var headerClass = options.headerClass || 'header-row';
 		var rowClass = options.rowClass || 'table-row';
@@ -160,7 +161,7 @@ jQuery.fn.tableForm = function(options) {
 		$addButton.on('click', function(e){
 			e.preventDefault();
 			$header.show();
-			var newIndex = $rows.size();
+			var newIndex = $this.find('tr.'+rowClass).size();
 			var newRow = $(rowMarkup);
 			 // add items[index]. to the input names in the new row
 			$("input", newRow).each(function(){
@@ -171,7 +172,8 @@ jQuery.fn.tableForm = function(options) {
 			onAdd.call(newRow);
 		});
 
-		options.setup.call($this);
+		//options.setup.call($this);
+		setupFunction.call($this);
 
 	});
 	return this;
@@ -199,6 +201,8 @@ jQuery(function ($) {
 
 			// A popup box enhanced with a few methods for user picker
 			_userPicker = new WPopupBox();
+			
+			_userPicker.isUniId = false;
 
 			_userPicker.showPicker = function (element, targetInput) {
 				this.setContent("Loading&hellip;");
@@ -233,7 +237,8 @@ jQuery(function ($) {
 						if ($xhr) $xhr.abort();
 						$xhr = jQuery.get('/api/userpicker/query',  {
 							firstName: $firstname.val(),
-							lastName: $lastname.val()
+							lastName: $lastname.val(),
+							isUniId: _userPicker.isUniId
 						}, onResultsLoaded);
 					}
 				}, 0.5);
@@ -254,7 +259,7 @@ jQuery(function ($) {
 		return _userPicker;
 	}
 
-	function initUserPicker(picker){
+	function initUserPicker(picker, isUniId){
 	    var $picker = $(picker),
             $button = $('<a href="#" class="btn">Search for user</a>'),
             userPicker;
@@ -265,6 +270,7 @@ jQuery(function ($) {
             if (userPicker === undefined){
                 userPicker = getUserPicker();
             }
+            userPicker.isUniId = isUniId;
             event.preventDefault();
             userPicker.showPicker(picker, picker);
         });
@@ -349,7 +355,7 @@ jQuery(function ($) {
 	});
 
 	$('input.user-code-picker').each(function (i, picker) {
-	    initUserPicker(picker);
+	    initUserPicker(picker, false);
 	});
 
 	var ajaxPopup = new WPopupBox();
@@ -657,7 +663,7 @@ jQuery(function ($) {
         listVariable: 'marks',
         onAdd: function(){
             $('input.universityId', this).each(function(i, picker){
-                initUserPicker(picker);
+                initUserPicker(picker, true);
             });
         }
     });

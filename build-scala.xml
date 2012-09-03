@@ -13,14 +13,14 @@
 			<fail unless="@{var}.available" message="@{var} is set but ${@{var}} is not a directory." />
 		</sequential>
 	</macrodef>
-	
+
 	<property file="build.properties" />
 	<property file="local.properties" />
 	<property name="log4j.configuration" value="build-log4j.properties" />
-	
+
 	<property name="src.scala" value="src/main/scala" />
 	<property name="src.java" value="src/main/java" />
-	
+
 	<condition property="has.java.src">
 		<available file="${src.java}" />
 	</condition>
@@ -31,7 +31,7 @@
 		<fileset dir="lib/runtime" includes="**/*.jar" />
 		<fileset dir="lib/build" includes="**/*.jar" />
 	</path>
-	
+
 	<path id="build+built.classpath">
 		<path refid="build.classpath" />
 		<path location="target/unwoven" />
@@ -51,7 +51,7 @@
 			<path path="${src.java}" />
 		</path>
 		<path id="scala.srcpath" path="${src.scala}" />
-		
+
 		<!-- pick the combined one if it's available -->
 		<condition property="_select_srcpath" value="java+scala.srcpath" else="scala.srcpath">
 			<istrue value="${has.java.src}" />
@@ -60,9 +60,9 @@
 	</target>
 
 	<target name="-checks">
-		
+
 	</target>
-	
+
 	<target name="-require-local-properties">
 		<sequential>
 			<available type="file" file="local.properties" property="local.properties.available" />
@@ -79,10 +79,11 @@
 		<mkdir dir="target/${war.name}/WEB-INF/classes" />
 		<mkdir dir="target/unwoven" />
 		<mkdir dir="target/log" />
-		
+
 		<scalac deprecation="off" unchecked="on" srcref="srcpath" destdir="target/unwoven" classpathref="build+built.classpath" />
 		<if>
-			<istrue value="${has.java.src}"></istrue>
+			<istrue value="${has.java.src}">
+			</istrue>
 			<then>
 				<javac srcdir="${src.java}" destdir="target/unwoven" classpathref="build+built.classpath" includeantruntime="no" />
 			</then>
@@ -91,7 +92,7 @@
 		<antcall target="-iajc" />
 
 	</target>
-	
+
 	<target name="-iajc" unless="iajc.disabled">
 		<iajc inpath="target/unwoven" destdir="target/${war.name}/WEB-INF/classes" classpathref="build.classpath" verbose="false" aspectpath="lib/runtime/spring/org.springframework.aspects-3.1.0.RELEASE.jar" log="target/log/iajc.log" />
 		<echo taskname="iajc" message="Woven aspects with IAJC" />
@@ -108,7 +109,7 @@
 			<fileset dir="src/main/webapp" />
 		</copy>
 		<lesscss todir="target/${war.name}/static/css">
-			<fileset dir="target/${war.name}/static/css" includes="*.less" excludes="**/*.inc.less" />
+			<fileset dir="target/${war.name}/static/css" includes="*.less" excludes="*.inc.less" />
 		</lesscss>
 
 		<batchhash propertyfile="target/${war.name}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">
@@ -172,19 +173,13 @@
 		<sortlist delimiter="&#xA;" value="${jars}" property="jars.sorted" />
 		<echo message="${jars.sorted}" taskname="" />
 	</target>
-	
+
 	<target name="scaladoc" depends="compile">
 		<property name="docs.dir" value="target/scaladoc" />
 		<mkdir dir="${docs.dir}" />
-		<scaladoc 
-			srcdir="${src.scala}"
-			destdir="${docs.dir}"
-			deprecation="no" unchecked="yes"
-			doctitle="${ant.project.name}"
-			classpathref="build+built.classpath" 
-		/>
+		<scaladoc srcdir="${src.scala}" destdir="${docs.dir}" deprecation="no" unchecked="yes" doctitle="${ant.project.name}" classpathref="build+built.classpath" />
 	</target>
-	
+
 	<target name="scaladoc-artifact" depends="scaladoc">
 		<fail unless="scaladoc.artifact.dir" message="Missing property scaladoc.artifact.dir" />
 		<copy todir="${scaladoc.artifact.dir}">
@@ -266,8 +261,8 @@
 			<hbm2ddl export="false" create="true" delimiter=";" format="true" outputfilename="schema.sql" />
 		</hibernate>
 	</target>
-	
-	
+
+
 
 
 </project>
