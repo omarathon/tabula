@@ -7,9 +7,9 @@ import uk.ac.warwick.courses.commands.Description
 
 class AddExtensionCommand(val assignment:Assignment, val submitter: CurrentUser) extends ModifyExtensionCommand {
 
-  def describe(d: Description) {
-    d.assignment(assignment)
-    d.module(assignment.module)
-    d.studentIds(extensionItems map (_.universityId))
-  }
+	def describe(d: Description) {
+		d.assignment(assignment)
+		d.module(assignment.module)
+		d.studentIds(extensionItems map (_.universityId))
+	}
 }

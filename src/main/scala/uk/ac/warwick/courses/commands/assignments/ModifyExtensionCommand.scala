@@ -20,81 +20,81 @@ import org.springframework.validation.Errors
  */
 
 @Configurable
-abstract class ModifyExtensionCommand extends Command[List[Extension]] with Daoisms with Logging  {
+abstract class ModifyExtensionCommand extends Command[List[Extension]] with Daoisms with Logging	{
 
-  def submitter:CurrentUser
-  def assignment:Assignment
+	def submitter:CurrentUser
+	def assignment:Assignment
+		
+	@Autowired var userLookup:UserLookupService =_
+	@BeanProperty var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
+	@BeanProperty var extensions:JList[Extension] = LazyLists.simpleFactory()
 
-  @Autowired var userLookup:UserLookupService =_
-  @BeanProperty var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
-  @BeanProperty var extensions:JList[Extension] = LazyLists.simpleFactory()
+	@Transactional def copyExtensions(): List[Extension] = {
 
-  @Transactional def copyExtensions(): List[Extension] = {
+		def retrieveExtension(item:ExtensionItem) = {
+			val extension = assignment.findExtension(item.universityId).getOrElse({
+				val newExtension = new Extension
+				/*
+				 * For manually created extensions we must lookup the user code. When the student requests a extension we can
+				 * capture this on creation
+				 */
+				newExtension.userId = userLookup.getUserByWarwickUniId(item.universityId).getUserId
+				newExtension
+			})
+			extension.assignment = assignment
+			extension.universityId = item.universityId
+			extension.expiryDate = item.expiryDate
+			extension.reason = item.reason
+			extension.approved = true
+			extension.approvedOn = DateTime.now
+			extension
+		}
 
-    def retrieveExtension(item:ExtensionItem) = {
-      val extension = assignment.findExtension(item.universityId).getOrElse({
-        val newExtension = new Extension
-        /*
-         * For manually created extensions we must lookup the user code. When the student requests a extension we can
-         * capture this on creation
-         */
-        newExtension.userId = userLookup.getUserByWarwickUniId(item.universityId).getUserId
-        newExtension
-      })
-      extension.assignment = assignment
-      extension.universityId = item.universityId
-      extension.expiryDate = item.expiryDate
-      extension.reason = item.reason
-      extension.approved = true
-      extension.approvedOn = DateTime.now
-      extension
-    }
+		val extensionList = extensionItems map (retrieveExtension(_))
+		extensionList.toList
+	}
 
-    val extensionList = extensionItems map (retrieveExtension(_))
-    extensionList.toList
-  }
+	@Transactional def persistExtensions() {
+		extensions.foreach(session.saveOrUpdate(_))
+	}
 
-  @Transactional def persistExtensions() {
-    extensions.foreach(session.saveOrUpdate(_))
-  }
+	def validate(errors:Errors) {
+		if (extensionItems != null && !extensionItems.isEmpty) {
+			for (i <- 0 until extensionItems.length) {
+				val extension = extensionItems.get(i)
+				errors.pushNestedPath("extensionItems["+i+"]")
+				validateExtension(extension, errors)
+				errors.popNestedPath()
+			}
+		}
+	}
 
-  def validate(errors:Errors) {
-    if (extensionItems != null && !extensionItems.isEmpty) {
-      for (i <- 0 until extensionItems.length) {
-        val extension = extensionItems.get(i)
-        errors.pushNestedPath("extensionItems["+i+"]")
-        validateExtension(extension, errors)
-        errors.popNestedPath()
-      }
-    }
-  }
+	def validateExtension(extension:ExtensionItem, errors:Errors){
+		if(extension.expiryDate.isBefore(assignment.closeDate)){
+			errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
+		}
+	}
 
-  def validateExtension(extension:ExtensionItem, errors:Errors){
-    if(extension.expiryDate.isBefore(assignment.closeDate)){
-      errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
-    }
-  }
-
-  @Transactional
-  override def apply():List[Extension] = {
-    extensions = copyExtensions()
-    persistExtensions()
-    extensions.toList
-  }
+	@Transactional
+	override def apply():List[Extension] = {
+		extensions = copyExtensions()
+		persistExtensions()
+		extensions.toList
+	}
 
 }
 
 class ExtensionItem{
 
-  @BeanProperty var universityId:String =_
-  @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-  @BeanProperty var expiryDate:DateTime =_
-  @BeanProperty var reason:String =_
+	@BeanProperty var universityId:String =_
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty var expiryDate:DateTime =_
+	@BeanProperty var reason:String =_
 
-  def this(universityId:String, expiryDate:DateTime, reason:String) = {
-    this()
-    this.universityId = universityId
-    this.expiryDate = expiryDate
-    this.reason = reason
-  }
+	def this(universityId:String, expiryDate:DateTime, reason:String) = {
+		this()
+		this.universityId = universityId
+		this.expiryDate = expiryDate
+		this.reason = reason
+	}
 }

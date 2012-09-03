@@ -24,168 +24,172 @@ import javax.validation.Valid
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions"))
 class ExtensionController extends BaseController{
 
-  import ExtensionController.JSON_CONTENT_TYPE
+	import ExtensionController.JSON_CONTENT_TYPE
 
-  @Autowired var assignmentService:AssignmentService =_
-  @Autowired var json:ObjectMapper =_
+	@Autowired var assignmentService:AssignmentService =_
+	@Autowired var json:ObjectMapper =_
+	
 
-  @ModelAttribute
-  def addCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new AddExtensionCommand(assignment, user)
-  @ModelAttribute
-  def editCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new EditExtensionCommand(assignment, user)
-  @ModelAttribute
-  def deleteCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new DeleteExtensionCommand(assignment, user)
+	@ModelAttribute
+	def addCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new AddExtensionCommand(assignment, user)
+	@ModelAttribute
+	def editCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new EditExtensionCommand(assignment, user)
+	@ModelAttribute
+	def deleteCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new DeleteExtensionCommand(assignment, user)
 
-  // Add the common breadcrumbs to the model.
-  def crumbed(mav:Mav, module:Module)
-    = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	// Add the common breadcrumbs to the model.
+	def crumbed(mav:Mav, module:Module)
+		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
-  validatesWith{ (form:ModifyExtensionCommand, errors:Errors) =>
-    form.validate(errors)
-  }
+	validatesWith{ (form:ModifyExtensionCommand, errors:Errors) =>
+		form.validate(errors)
+	}
 
-  @RequestMapping(method=Array(HEAD,GET))
-  def listExtensions(@PathVariable module:Module, @PathVariable assignment:Assignment):Mav = {
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
+	@RequestMapping(method=Array(HEAD,GET))
+	def listExtensions(@PathVariable module:Module, @PathVariable assignment:Assignment):Mav = {
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
 
-    val assignmentMembership = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
-    val existingExtensions = assignment.extensions
+		val assignmentMembership = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
+		val existingExtensions = assignment.extensions
 
-    // users that are members of the assignment but have not yet requested or been granted an extension
-    val potentialExtensions = assignmentMembership -- (existingExtensions.map(_.universityId).toSet)
+		// users that are members of the assignment but have not yet requested or been granted an extension
+		val potentialExtensions = assignmentMembership -- (existingExtensions.map(_.universityId).toSet)
 
-    val model = Mav("admin/assignments/extensions/list",
-      "module" -> module,
-      "assignment" -> assignment,
-      "existingExtensions" -> existingExtensions,
-      "potentialExtensions" -> potentialExtensions
-    )
+		val model = Mav("admin/assignments/extensions/list",
+			"module" -> module,
+			"assignment" -> assignment,
+			"existingExtensions" -> existingExtensions,
+			"potentialExtensions" -> potentialExtensions
+		)
 
-    crumbed(model, module)
-  }
+		crumbed(model, module)
+	}
 
-  @RequestMapping(value=Array("add"), method=Array(GET))
-  def addExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-    @RequestParam("universityId") universityId:String, @ModelAttribute cmd:AddExtensionCommand, errors:Errors):Mav = {
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
+	@RequestMapping(value=Array("add"), method=Array(GET))
+	def addExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
+		@RequestParam("universityId") universityId:String, @ModelAttribute cmd:AddExtensionCommand, errors:Errors):Mav = {
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
 
-    val model = Mav("admin/assignments/extensions/add",
-      "module" -> module,
-      "assignment" -> assignment,
-      "universityId" -> universityId
-    ).noLayout
-    model
-  }
+		val model = Mav("admin/assignments/extensions/add",
+			"module" -> module,
+			"assignment" -> assignment,
+			"universityId" -> universityId
+		).noLayout
+		model
+	}
 
-  @RequestMapping(value=Array("edit/{universityId}"), method=Array(GET))
-  def editExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-    @PathVariable("universityId") universityId:String, @ModelAttribute cmd:EditExtensionCommand, errors:Errors):Mav = {
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
+	@RequestMapping(value=Array("edit/{universityId}"), method=Array(GET))
+	def editExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
+		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:EditExtensionCommand, errors:Errors):Mav = {
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
 
-    val extension = assignment.findExtension(universityId).get
-    cmd.copyFromExtension(extension)
+		val extension = assignment.findExtension(universityId).get
+		cmd.copyFromExtension(extension)
 
-    val model = Mav("admin/assignments/extensions/edit",
-      "module" -> module,
-      "assignment" -> assignment,
-      "universityId" -> universityId
-    ).noLayout
-    model
-  }
+		val model = Mav("admin/assignments/extensions/edit",
+			"module" -> module,
+			"assignment" -> assignment,
+			"universityId" -> universityId
+		).noLayout
+		model
+	}
 
 
-  @RequestMapping(value=Array("delete/{universityId}"), method=Array(GET))
-  def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-    @PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
+	@RequestMapping(value=Array("delete/{universityId}"), method=Array(GET))
+	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
+		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
 
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
 
-    cmd.universityIds.add(universityId)
+		cmd.universityIds.add(universityId)
 
-    val model = Mav("admin/assignments/extensions/delete",
-      "module" -> module,
-      "assignment" -> assignment,
-      "universityId" -> universityId
-    ).noLayout
-    model
-  }
+		val model = Mav("admin/assignments/extensions/delete",
+			"module" -> module,
+			"assignment" -> assignment,
+			"universityId" -> universityId
+		).noLayout
+		model
+	}
 
-  @RequestMapping(value=Array("{action:add}"), method=Array(POST))
-  @ResponseBody
-  def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable action:String,
-                       @Valid @ModelAttribute cmd:AddExtensionCommand, result:BindingResult,
-                       response:HttpServletResponse, errors: Errors){
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
-    /*if(errors.hasErrors){
-      val extensionItem = cmd.extensionItems.last
-      addExtension(module, assignment, extensionItem.universityId, cmd, errors)
-    }
-    else {  */
-      val extensions = cmd.apply()
-      val extensionsJson:JList[Map[String, Object]] = toJson(action, extensions)
-      // TODO use JSONView once zoe has commited it
-      response.setContentType(JSON_CONTENT_TYPE)
-      val out = response.getWriter
-      json.writeValue(out, extensionsJson)
-    //}
-  }
+	@RequestMapping(value=Array("{action:add}"), method=Array(POST))
+	@ResponseBody
+	def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable action:String,
+											 @Valid @ModelAttribute cmd:AddExtensionCommand, result:BindingResult,
+											 response:HttpServletResponse, errors: Errors){
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
+		/*if(errors.hasErrors){
+			val extensionItem = cmd.extensionItems.last
+			addExtension(module, assignment, extensionItem.universityId, cmd, errors)
+		}
+		else {	*/
+			val extensions = cmd.apply()
+			val extensionsJson:JList[Map[String, Object]] = toJson(action, extensions)
 
-  @RequestMapping(value=Array("{action:edit}"), method=Array(POST))
-  @ResponseBody
-  def persistExtensionEdit(@PathVariable module:Module, @PathVariable assignment:Assignment,
-                           @PathVariable action:String, @Valid @ModelAttribute cmd:EditExtensionCommand,
-                           result:BindingResult, response:HttpServletResponse, errors: Errors) {
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
-    // TODO implement validation - see commented-out code in persistExtension
-    val extensions = cmd.apply()
-    val extensionsJson:JList[Map[String, Object]] = toJson(action, extensions)
-    // TODO use JSONView once zoe has commited it
-    response.setContentType(JSON_CONTENT_TYPE)
-    val out = response.getWriter
-    json.writeValue(out, extensionsJson)
-  }
 
-  val dateBuilder = new DateBuilder
 
-  def toJson(action:String, extensions:List[Extension]) = {
+			// TODO use JSONView once zoe has commited it
+			response.setContentType(JSON_CONTENT_TYPE)
+			val out = response.getWriter
+			json.writeValue(out, extensionsJson)
+		//}
+	}
 
-    def toJson(extension:Extension) = Map[String, String](
-      "id" -> extension.universityId,
-      "expiryDate" -> dateBuilder.format(extension.expiryDate),
-      "reason" -> extension.reason,
-      "action" -> action
-    )
+	@RequestMapping(value=Array("{action:edit}"), method=Array(POST))
+	@ResponseBody
+	def persistExtensionEdit(@PathVariable module:Module, @PathVariable assignment:Assignment,
+													 @PathVariable action:String, @Valid @ModelAttribute cmd:EditExtensionCommand,
+													 result:BindingResult, response:HttpServletResponse, errors: Errors) {
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
+		// TODO implement validation - see commented-out code in persistExtension
+		val extensions = cmd.apply()
+		val extensionsJson:JList[Map[String, Object]] = toJson(action, extensions)
+		// TODO use JSONView once zoe has commited it
+		response.setContentType(JSON_CONTENT_TYPE)
+		val out = response.getWriter
+		json.writeValue(out, extensionsJson)
+	}
 
-    val extensionJson = extensions.map(toJson(_))
-    extensionJson
-  }
+	val dateBuilder = new DateBuilder
 
-  @RequestMapping(value=Array("delete"), method=Array(POST))
-  @ResponseBody
-  def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-                       @ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse, errors: Errors){
+	def toJson(action:String, extensions:List[Extension]) = {
 
-    mustBeLinked(assignment,module)
-    mustBeAbleTo(Participate(module))
-    val universityIds = cmd.apply()
+		def toJson(extension:Extension) = Map[String, String](
+			"id" -> extension.universityId,
+			"expiryDate" -> dateBuilder.format(extension.expiryDate),
+			"reason" -> extension.reason,
+			"action" -> action
+		)
 
-    val deletedExtensionsJson:JList[Map[String, Object]] =
-      universityIds.map(universityId => Map[String, String]("id" -> universityId, "action" -> "delete"))
+		val extensionJson = extensions.map(toJson(_))
+		extensionJson
+	}
 
-    response.setContentType(JSON_CONTENT_TYPE)
-    val out = response.getWriter
-    json.writeValue(out, deletedExtensionsJson)
-  }
+	@RequestMapping(value=Array("delete"), method=Array(POST))
+	@ResponseBody
+	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
+											 @ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse, errors: Errors){
 
-  object ExtensionController {
-    val JSON_CONTENT_TYPE = "application/json"
-  }
+		mustBeLinked(assignment,module)
+		mustBeAbleTo(Participate(module))
+		val universityIds = cmd.apply()
+
+		val deletedExtensionsJson:JList[Map[String, Object]] =
+			universityIds.map(universityId => Map[String, String]("id" -> universityId, "action" -> "delete"))
+
+		response.setContentType(JSON_CONTENT_TYPE)
+		val out = response.getWriter
+		json.writeValue(out, deletedExtensionsJson)
+	}
+
+	object ExtensionController {
+		val JSON_CONTENT_TYPE = "application/json"
+	}
 
 }
 
