@@ -2,20 +2,23 @@
 	<#include "assignment_deadline.ftl" />
 </#if>
 
-<#if (assignment.submittable && !submission??) || assignment.resubmittable>
+<#if (canSubmit && !submission??) || canReSubmit>
 
 	<a id="submittop"></a>
 
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
-	<p>You can re-submit your work in case you've made a mistake, up until the deadline, 
-	   <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).</p>
+	<p>You can re-submit your work in case you've made a mistake,
+		<#if isExtended>
+			up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
+		<#else>
+			up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
+	    </#if>
+	</p>
 	</#if>
 
-    <#if isExtended>
-
-	<#elseif assignment.closed>
+	<#if assignment.closed && !isExtended>
 		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
 			<p>

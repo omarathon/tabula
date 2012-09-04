@@ -62,7 +62,10 @@ class AssignmentController extends AbstractAssignmentController {
 		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter{_.submitted}
 
     val isExtended = assignment.isWithinExtension(user.apparentId)
-    val ext = assignment.extensions.filter(_.userId == user.apparentId)
+    val extension = assignment.extensions.find(_.userId == user.apparentId)
+
+    val canSubmit = assignment.submittable(user.apparentId)
+    val canReSubmit = assignment.resubmittable(user.apparentId)
 
     /*
 		 * Submission values are an unordered set without any proper name, so
@@ -84,8 +87,10 @@ class AssignmentController extends AbstractAssignmentController {
 				"feedback" -> feedback,
 				"submission" -> submission,
 				"justSubmitted" -> form.justSubmitted,
-        "isExtended" -> isExtended,
-        "extension" -> ext
+				"isExtended" -> isExtended,
+				"canSubmit" -> canSubmit,
+        "canReSubmit" -> canReSubmit,
+				"extension" -> extension
 			)
 		} else {
 			RedirectToSignin() 

@@ -25,7 +25,9 @@ class DateBuilder extends TemplateMethodModelEx {
 		true -> _relativeWords,
 		false -> _relativeWords.mapValues(_.toLowerCase)
 	)
-	
+
+	def format(date:DateTime):String = format(date, false, true, false, true, true)
+
 	def format(date:DateTime, includeSeconds:Boolean, includeAt:Boolean, includeTimezone:Boolean, capitalise:Boolean, relative:Boolean) = {
 		val pattern = new StringBuilder
 		if (includeAt) pattern.append(" 'at'")

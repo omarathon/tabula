@@ -40,7 +40,7 @@ abstract class Features {
 	@BeanProperty var collectMarks:Boolean = false
 	@BeanProperty var turnitin:Boolean = false
 	@BeanProperty var assignmentMembership:Boolean = false
-	
+	@BeanProperty var extensions:Boolean = false
 }
 
 

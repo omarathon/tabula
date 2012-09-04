@@ -92,12 +92,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var createdDate = DateTime.now()
 
-	@BeanProperty var collectMarks: Boolean = _
-	@BeanProperty var collectSubmissions: Boolean = false
-	@BeanProperty var restrictSubmissions: Boolean = false
-	@BeanProperty var allowLateSubmissions: Boolean = true
-	@BeanProperty var allowResubmission: Boolean = false
-	@BeanProperty var displayPlagiarismNotice: Boolean = false
+	@BeanProperty var collectMarks:Boolean =_
+	@BeanProperty var collectSubmissions:Boolean = false
+	@BeanProperty var restrictSubmissions:Boolean = false
+	@BeanProperty var allowLateSubmissions:Boolean = true
+	@BeanProperty var allowResubmission:Boolean = false
+	@BeanProperty var displayPlagiarismNotice:Boolean = false
+	@BeanProperty var allowExtensions:Boolean = false
+	// allow students to request extensions via the app
+	@BeanProperty var allowExtensionRequests:Boolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -114,9 +117,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BeanProperty var extensions: JList[Extension] = ArrayList()
 
-    @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-    //@OneToMany(mappedBy = "assignment", fetch = EAGER, cascade = Array(ALL))
-    @BeanProperty var feedbacks: JList[Feedback] = ArrayList()
+	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
 
 	/**
 	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
@@ -183,8 +185,19 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def isLate(submission: Submission) =
 		closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
 
+	/**
+	* retrospectively checks if a submission was an 'authorised late'
+	* called by submission.isAuthorisedLate to check against extensions
+	*/
+	def isAuthorisedLate(submission:Submission) =
+		closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.userId, submission.submittedDate)
 
-	def assessmentGroup: Option[UpstreamAssessmentGroup] = {
+	// returns extension for a specified student
+	def findExtension(uniId:String) = extensions.find(_.universityId == uniId)
+
+
+
+  def assessmentGroup: Option[UpstreamAssessmentGroup] = {
 		if (upstreamAssignment == null || academicYear == null || occurrence == null) {
 			None
 		} else {
@@ -200,20 +213,20 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
-	def submittable = active && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed())
+	def submittable(uniId:String) = active && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(uniId))
 
 	/**
 	 * Calculates whether we could re-submit to this assignment (assuming that the current
 	 * student has already submitted).
 	 */
-	def resubmittable = submittable && allowResubmission && !isClosed()
-
-	def mostRecentFeedbackUpload = feedbacks.maxBy {
+	def resubmittable(uniId:String) = submittable(uniId) && allowResubmission && (!isClosed() || isWithinExtension(uniId))
+	
+	def mostRecentFeedbackUpload = feedbacks.maxBy{
 		_.uploadedDate
 	}.uploadedDate
-
-	def addField(field: FormField) {
-		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
+	
+	def addField(field:FormField) {
+		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name "+field.name+" already exists")
 		field.assignment = this
 		field.position = fields.length
 		fields.add(field)

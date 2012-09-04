@@ -55,6 +55,8 @@ Publications: ${r.publicationOverlap}%)
                 <td class="status">
                     <#if submission.late>
                         <span class="label-red">Late</span>
+					<#elseif  submission.authorisedLate>
+						<span class="label-blue">Authorised Late</span>
                     </#if>
                     <#if item.downloaded>
                         <span class="label-green">Downloaded</span>

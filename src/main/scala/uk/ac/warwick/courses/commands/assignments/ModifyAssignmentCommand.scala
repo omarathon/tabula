@@ -65,7 +65,9 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var allowLateSubmissions:Boolean = true
 	@BeanProperty var allowResubmission:Boolean = false
 	@BeanProperty var displayPlagiarismNotice:Boolean = _
-	
+	@BeanProperty var allowExtensions:Boolean = _
+	@BeanProperty var allowExtensionRequests:Boolean = _
+
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
 	
@@ -199,6 +201,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     assignment.displayPlagiarismNotice = displayPlagiarismNotice
     assignment.upstreamAssignment = upstreamAssignment
     assignment.occurrence = occurrence
+    assignment.allowExtensions = allowExtensions
+    assignment.allowExtensionRequests = allowExtensionRequests
 	    
     if (assignment.members == null) assignment.members = new UserGroup
 	  assignment.members copyFrom members
@@ -244,6 +248,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			fileAttachmentLimit = field.attachmentLimit 
 			fileAttachmentTypes = field.attachmentTypes
 		}
+    allowExtensions = assignment.allowExtensions
+    allowExtensionRequests = assignment.allowExtensionRequests
 	}
 	
 	def copyFrom(assignment:Assignment) {

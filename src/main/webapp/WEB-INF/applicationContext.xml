@@ -277,7 +277,7 @@
 		p:order="1" />
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver"
 		p:order="2" />
-  	
+
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
