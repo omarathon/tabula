@@ -123,6 +123,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@Length(max=2000)
 	@BeanProperty var comment:String = _
 	
+	@BeanProperty var prefillAssignment:Assignment = _
+	
 	private var _prefilled:Boolean = _
 	def prefilled = _prefilled
 	
@@ -207,17 +209,21 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	    	file.attachmentTypes = fileAttachmentTypes
 		}
 	}
-	
-	def prefillFromRecentAssignment() {
-    if (prefillFromRecent) {
-      for (a <- service.recentAssignment(module.department)) {
-        copyNonspecificFrom(a)
-        _prefilled = true
-      }
+
+  def prefillFromRecentAssignment() {
+    if (prefillAssignment != null) {
+          copyNonspecificFrom(prefillAssignment)
     }
-	}
-	
-	
+    else {
+      if (prefillFromRecent) {
+        for (a <- service.recentAssignment(module.department)) {
+          copyNonspecificFrom(a)
+          _prefilled = true
+        }
+      }      
+    }
+  }
+
 	/**
 	 * Copy just the fields that it might be useful to
 	 * prefill. The assignment passed in might typically be
