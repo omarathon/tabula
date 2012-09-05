@@ -22,6 +22,7 @@ import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.UserGroup
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.JBoolean
 
 case class UpstreamGroupOption(
         assignmentId:String,
@@ -59,14 +60,14 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	def getAcademicYearString = if (academicYear != null) academicYear.toString() else ""
 	
-	@BeanProperty var collectMarks:Boolean = _
-	@BeanProperty var collectSubmissions:Boolean = _
-	@BeanProperty var restrictSubmissions:Boolean = _
-	@BeanProperty var allowLateSubmissions:Boolean = true
-	@BeanProperty var allowResubmission:Boolean = false
-	@BeanProperty var displayPlagiarismNotice:Boolean = _
-	@BeanProperty var allowExtensions:Boolean = _
-	@BeanProperty var allowExtensionRequests:Boolean = _
+	@BeanProperty var collectMarks:JBoolean = _
+	@BeanProperty var collectSubmissions:JBoolean = _
+	@BeanProperty var restrictSubmissions:JBoolean = _
+	@BeanProperty var allowLateSubmissions:JBoolean = true
+	@BeanProperty var allowResubmission:JBoolean = false
+	@BeanProperty var displayPlagiarismNotice:JBoolean = _
+	@BeanProperty var allowExtensions:JBoolean = _
+	@BeanProperty var allowExtensionRequests:JBoolean = _
 
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
