@@ -36,24 +36,13 @@ class UserPickerController extends BaseController {
 	
 	@RequestMapping(value=Array("/api/userpicker/query"))
 	def query (form:QueryForm, out:Writer) = {
-	  val usersByStaff = fetch(form)
-	  val (staff, students) = (usersByStaff.getOrElse(true, Seq.empty), usersByStaff.getOrElse(false, Seq.empty))
+		val foundUsers = userLookup.findUsersWithFilter(form.filter)
+	  val (staff, students) = foundUsers.partition { _.isStaff }
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
 	      "students" -> students).noLayout()
 	}
-	
-	/**
-	 * Fetches user lookup results, then groups them into a map keyed by
-	 * whether they're staff.
-	 * 
-	 * i.e. result(true) -> collectionOfStaffUsers
-	 * 		result(false) -> nonStaffUsers
-	 */
-	def fetch(form:QueryForm) = {
-	  val users = userLookup.findUsersWithFilter(form.filter)
-	  users.groupBy{ _.isStaff() }
-	}
+
 }
 
 object UserPickerController {
