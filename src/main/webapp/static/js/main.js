@@ -528,39 +528,8 @@ jQuery(function ($) {
 		})
 	};
 
-	var TogglingSection = function ($section, $header, options) {
-		var THIS = this;
-		var options = options || {};
-		var showByDefault = options.showByDefault || false;
-		this.$section = $section;
-		this.$toggleButton = $('<div class="toggle-button>(Show)</div>');
-		$header.append(this.$toggleButton).addClass('clickable-cursor').click(function(){
-			THIS.toggle();
-			if (options.callback) options.callback();
-		});
-
-		if (!showByDefault) this.hide();
-	};
-	TogglingSection.prototype.toggle = function() {
-		if (this.$section.is(':visible')) this.hide();
-		else this.show();
-	};
-	TogglingSection.prototype.show = function() {
-		this.$toggleButton.html = 'Hide';
-		this.$section.show();
-	};
-	TogglingSection.prototype.hide = function() {
-		this.$toggleButton.html = 'Show';
-		this.$section.hide();
-	}
-
 	var decorateAppCommentsForm = function($form) {
 		$form.addClass('narrowed-form');
-//		var $browserInfo = $form.find('.browser-info');
-//		var $heading = $form.find('.browser-info-heading');
-//		new TogglingSection($browserInfo, $heading, {callback: function(){
-//			getFeedbackPopup().setHeightToFit();
-//		}});
 	}
 
 	// Fills in non-AJAX app comment form
@@ -571,6 +540,9 @@ jQuery(function ($) {
 	});
 
 	$('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
+
+	// add .use-tooltip class and title attribute to enable cool looking tooltips.
+	$('.use-tooltip').tooltip();
 
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();

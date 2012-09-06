@@ -41,14 +41,7 @@ class AddAssignment extends BaseController {
 	@Autowired var assignmentService:AssignmentService =_
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices:java.util.List[AcademicYear] = {
-		val thisYear = AcademicYear.guessByDate(DateTime.now)
-		List(
-			thisYear.previous.previous,
-			thisYear.previous,
-			thisYear,
-			thisYear.next,
-			thisYear.next.next
-		)
+		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2,2)
 	}
 	
 	validatesWith { (cmd:AddAssignmentCommand, errors) =>

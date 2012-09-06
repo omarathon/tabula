@@ -1,0 +1,86 @@
+package uk.ac.warwick.courses.commands.assignments
+
+import collection.JavaConversions._
+import reflect.BeanProperty
+import uk.ac.warwick.courses._
+import javax.validation.constraints.{Max, Min}
+import uk.ac.warwick.courses.data.model._
+import uk.ac.warwick.courses.helpers.ArrayList
+import org.hibernate.validator.constraints.Length
+import uk.ac.warwick.courses.data.model.forms.{CommentField, FileField}
+
+class SharedAssignmentPropertiesForm(@BeanProperty var department: Department) extends SharedAssignmentProperties
+
+/**
+ * Contains all the fields that could be collectively assigned to a group of assignments, so that
+ * we can set options for a group of assignments all in one go.
+ */
+trait SharedAssignmentProperties {
+
+	@BeanProperty var collectMarks: JBoolean = _
+	@BeanProperty var collectSubmissions: JBoolean = _
+	@BeanProperty var restrictSubmissions: JBoolean = _
+	@BeanProperty var allowLateSubmissions: JBoolean = true
+	@BeanProperty var allowResubmission: JBoolean = false
+	@BeanProperty var displayPlagiarismNotice: JBoolean = _
+	@BeanProperty var allowExtensions: JBoolean = _
+	@BeanProperty var allowExtensionRequests: JBoolean = _
+
+	@Min(1)
+	@Max(Assignment.MaximumFileAttachments)
+	@BeanProperty var fileAttachmentLimit: Int = 1
+
+	val maxFileAttachments: Int = 10
+	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
+
+	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
+
+	/**
+	 * This isn't actually a property on Assignment, it's one of the default fields added
+	 * to all Assignments. When the forms become customisable this will be replaced with
+	 * a full blown field editor.
+	 */
+	@Length(max = 2000)
+	@BeanProperty var comment: String = _
+
+	def copySharedTo(assignment: Assignment) {
+		assignment.collectMarks = collectMarks
+		assignment.collectSubmissions = collectSubmissions
+		assignment.restrictSubmissions = restrictSubmissions
+		assignment.allowLateSubmissions = allowLateSubmissions
+		assignment.allowResubmission = allowResubmission
+		assignment.displayPlagiarismNotice = displayPlagiarismNotice
+		assignment.allowExtensions = allowExtensions
+		assignment.allowExtensionRequests = allowExtensionRequests
+
+		for (field <- findCommentField(assignment)) field.value = comment
+		for (file <- findFileField(assignment)) {
+			file.attachmentLimit = fileAttachmentLimit
+			file.attachmentTypes = fileAttachmentTypes
+		}
+	}
+
+	def copySharedFrom(assignment: Assignment) {
+		collectMarks = assignment.collectMarks
+		collectSubmissions = assignment.collectSubmissions
+		restrictSubmissions = assignment.restrictSubmissions
+		allowLateSubmissions = assignment.allowLateSubmissions
+		allowResubmission = assignment.allowResubmission
+		displayPlagiarismNotice = assignment.displayPlagiarismNotice
+		allowExtensions = assignment.allowExtensions
+		allowExtensionRequests = assignment.allowExtensionRequests
+
+		for (field <- findCommentField(assignment)) comment = field.value
+		for (file <- findFileField(assignment)) {
+			fileAttachmentLimit = file.attachmentLimit
+			fileAttachmentTypes = file.attachmentTypes
+		}
+	}
+
+	protected def findFileField(assignment: Assignment) =
+		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
+
+	/**Find the standard free-text field if it exists */
+	protected def findCommentField(assignment: Assignment) =
+		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+}
