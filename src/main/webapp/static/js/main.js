@@ -485,11 +485,53 @@ jQuery(function ($) {
 				}
 				return false;
 			});
+			
+		
+			
+			$('#mark-plagiarised-selected-button').click(function(event){
+				event.preventDefault();
+
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
+				
+				if ($container.data('checked') != 'none') {
+		
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
+					
+					if ($container.data("all-plagiarised") === true) {
+						$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+					}
+					
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
 		},
 
 		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
 			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+			var $checkedBoxes = $(".collection-checkbox:checked");
+
+			var allPlagiarised = false;
+			
+			if ($checkedBoxes.length > 0) {
+				allPlagiarised = true;
+				$checkedBoxes.each(function(index){
+					var $checkBox = $(this);
+					if ($checkBox.closest('tr').data('plagiarised') != true) {
+						allPlagiarised = false;
+					}
+				});					
+			}
+			$('.submission-list').data("all-plagiarised", allPlagiarised);
+			if (allPlagiarised) {
+				$('#mark-plagiarised-selected-button').text("UnMark Selected Plagiarised");
+			}
+			else {
+				$('#mark-plagiarised-selected-button').text("Mark Selected Plagiarised");				
+			}
 		},
 
 		onSomeChecked : function() {
@@ -501,10 +543,6 @@ jQuery(function ($) {
 		}
 
 	});
-
-
-
-
 
 	var _feedbackPopup;
 	var getFeedbackPopup = function() {
