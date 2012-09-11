@@ -70,9 +70,10 @@ first page of the form to setup a bunch of assignments from SITS.
     </#if>
 	</th>
 	<th>Module</th>
-	<th>Seq code</th>
+	<th>Seq</th>
 	<th>Assignment name</th>
 	<#if step="options">
+	<th></th>
 	<th></th>
 	</#if>
 </tr>
@@ -87,22 +88,28 @@ first page of the form to setup a bunch of assignments from SITS.
 			<@f.checkbox path="include" cssClass="collection-checkbox" />
 		<#else>
 			<@f.hidden path="include" />
+
 			<input type="checkbox" checked="checked" class="collection-checkbox" />
 		</#if>
 	</td>
-	<td>
+	<td class="selectable">
 		${item.upstreamAssignment.moduleCode?upper_case}
 	</td>
-	<td>
+	<td class="selectable">
 		${item.upstreamAssignment.sequence}
 	</td>
-	<td>
+	<td class="selectable">
 		${item.upstreamAssignment.name}
 	</td>
 	<#if step="options">
  	<td class="assignment-editable-fields-cell">
- 		<@f.input path="openDate" cssClass="date-time-pickfer" placeholder="Open date" />
- 		<@f.input path="closeDate" cssClass="date-time-pickfer" placeholder="Close date" />
+ 		<@f.hidden path="openDate" cssClass="open-date-field" />
+ 		<@f.hidden path="closeDate" cssClass="close-date-field" />
+ 		<span class="dates-label"></span>
+ 	</td>
+ 	<td>
+ 		<@f.hidden path="optionsId" cssClass="options-id-input" />
+ 		<span class="options-id-label"></span>
  	</td>
   </#if>
 </tr>
@@ -128,10 +135,15 @@ first page of the form to setup a bunch of assignments from SITS.
 <#elseif step='options'>
 <div id="options-buttons">
 <div id="selected-count">0 selected</div>
+<div id="selected-deselect"><a href="#">Clear selection</a></div>
 <#-- options sets -->
 <a class="btn btn-warning btn-block" id="set-options-button" data-target="#set-options-modal" href="<@url page="/admin/department/${department.code}/shared-options"/>">
-	Set options
+	Set options&hellip;
 </a>
+<a class="btn btn-warning btn-block" id="set-dates-button" data-target="#set-dates-modal">
+	Set dates&hellip;
+</a>
+
 </div>
 </#if>
 
@@ -157,15 +169,44 @@ first page of the form to setup a bunch of assignments from SITS.
 			<button class="btn btn-primary">Save options</button>
 		</div>
 	</div>
+
+	<div class="modal hide fade" id="set-dates-modal" tabindex="-1" role="dialog" aria-labelledby="set-options-label" aria-hidden="true">
+		<div class="modal-header">
+
+		</div>
+		<div class="modal-body">
+
+			<@form.row>
+				<@form.label>Open date</@form.label>
+				<@form.field>
+					<input type="text" id="modal-open-date" name="openDate" class="date-time-picker">
+				</@form.field>
+			</@form.row>
+
+			<@form.row>
+				<@form.label>Close date</@form.label>
+				<@form.field>
+					<input type="text" id="modal-close-date" name="closeDate" class="date-time-picker">
+				</@form.field>
+			</@form.row>
+
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary">Set dates</button>
+		</div>
+	</div>
 </#if>
 
 <script type="text/javascript">
 //<[![CDATA[
 jQuery(function($){
 
-
+	var optionGroupCount = 0;
 
 	var $form = $('#batch-add-form');
+
+	// When clicking Next, set the action parameter to the relevant value before submitting
 	$form.find('button[data-action=options]').click(function(event){
 		var action = $(this).data('action');
 		if (action) {
@@ -173,26 +214,24 @@ jQuery(function($){
 		}
 	});
 
+	// Set up checkboxes for the big table
+
 	$('#batch-add-table').bigList({
 		setup : function() {
 			var $container = this;
 
-			$('#set-options-buftton').click(function(ev){
-				//ev.preventDefault();
-
-				var $checkedBoxes = $(".collection-checkbox:checked", $container);
-				if ($container.data('checked') != 'none') {
-					// open options dialog with the stuff all ready to roll.
-					//alert('To be implemented');
-				}
-
+			$('#selected-deselect').click(function(){
+				$container.find('.collection-checkbox, .collection-check-all').attr('checked',false);
+				$container.find("tr.selected").removeClass('selected');
+				$('#selected-count').text("0 selected");
+				return false;
 			});
 		},
 
 		onChange : function() {
 			this.closest("tr").toggleClass("selected", this.is(":checked"));
 			var x = $('#batch-add-table .collection-checkbox:checked').length;
-    		$('#selected-count').text(x+" selected");
+    	$('#selected-count').text(x+" selected");
 		},
 
 		onSomeChecked : function() {
@@ -205,6 +244,31 @@ jQuery(function($){
 		}
 	});
 
+	// cool selection mechanism...
+	var batchTableMouseDown = false;
+	$('#batch-add-table td.selectable')
+		.mousedown(function(){
+			batchTableMouseDown = true;
+			var $row = $(this).closest('tr');
+			$row.toggleClass('selected');
+			var checked = $row.hasClass('selected');
+			$row.find('.collection-checkbox').attr('checked', checked);
+			return false;
+		})
+		.mouseover(function(){
+			if (batchTableMouseDown) {
+				var $row = $(this).closest('tr');
+				$row.toggleClass('selected');
+				var checked = $row.hasClass('selected');
+				$row.find('.collection-checkbox').attr('checked', checked);
+			}
+		});
+
+	$(document).mouseup(function(){
+		batchTableMouseDown = false;
+		$('#batch-add-table').bigList('changed');
+	});
+
 	// make "Set options" buttons magically stay where they are
 	var $opts = $('#options-buttons');
 	$opts.width( $opts.width() ); //absolutify width
@@ -212,12 +276,87 @@ jQuery(function($){
 
 	var $optsButton = $('#set-options-button');
 	var $optsModal = $('#set-options-modal');
-	<#--$optsModal.find('.modal-body').load($optsButton.attr('href'), function(){
+	var $optsModalBody = $optsModal.find('.modal-body');
+	var optsUrl = $optsButton.attr('href');
 
-	});-->
-	$optsModal.find('.modal-footer .btn-primary').click(function(e){
+	// eagerly pre-load the options form into the modal.
+	$optsModalBody.load(optsUrl, function(){
+		Courses.decorateSubmissionsForm();
+	});
+
+	$optsButton.click(function(e){
 		e.preventDefault();
-		alert('better submit this form eh');
+		$optsModal.modal();
+		return false;
+	});
+
+	// sets the options ID for all the checked assignments so that they will
+	// use this set of options.
+	var applyGroupNameToSelected = function(groupName) {
+		var $label = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
+		$(".collection-checkbox:checked").closest('tr')
+			.find('.options-id-input').val(groupName).end()
+			.find('.options-id-label').html($label).end();
+	};
+
+	var $datesModal = $('#set-dates-modal');
+	// open dates modal
+	$('#set-dates-button').click(function(){
+		$datesModal.modal();
+		return false;
+	});
+	// set dates
+	$datesModal.find('.modal-footer .btn-primary').click(function(e){
+		var openDate = $('#modal-open-date').val();
+		var closeDate = $('#modal-close-date').val();
+		var $selectedRows = $('#batch-add-table tr.selected');
+		$selectedRows.find('.open-date-field').val(openDate);
+		$selectedRows.find('.close-date-field').val(closeDate);
+		$selectedRows.find('.dates-label').html(openDate +' - ' + closeDate);
+	});
+
+	// complicated handling for when we submit the options modal...
+	// if response contains .ajax-response[data-status=success] then validation succeeded,
+	// and we copy all the form fields out into the main page form to be submitted.
+	$optsModal.find('.modal-footer .btn-primary').click(function(e){
+		$.post(optsUrl, $optsModalBody.find('form').serialize(), function(data){
+			$optsModalBody.html(data);
+			Courses.decorateSubmissionsForm();
+			if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
+				// grab all the submittable fields and clone them to the main page form
+				var fields = $optsModalBody.find('[name]').clone();
+
+				// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
+				// Z. Nobody knows what happens after Z...
+				var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
+				var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
+				optionGroupCount = optionGroupCount + 1;
+
+				var $group = $('<div>').addClass('options-button');
+				var $hidden = $('<div>').addClass('options-group').data('group', groupName);
+				var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
+				$button.data('groupName', groupName);
+				$group.append($button);
+				$group.append($hidden);
+
+				//re-apply options to more items.
+				$button.click(function() {
+					applyGroupNameToSelected($(this).data('groupName'));
+					return false;
+				});
+
+				fields.each(function(i, field){
+					field.name = "optionsMap["+groupName+"]." + field.name;
+					$hidden.append(field);
+				});
+
+				$opts.append($group);
+				$optsModal.modal('hide');
+
+				applyGroupNameToSelected(groupName);
+			}
+		});
+		e.preventDefault();
 		return false;
 	});
 

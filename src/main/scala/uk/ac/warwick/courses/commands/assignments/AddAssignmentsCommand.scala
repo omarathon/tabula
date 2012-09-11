@@ -13,9 +13,6 @@ import uk.ac.warwick.courses.services.AssignmentService
 import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 
-class SharedAssignmentOptions {
-
-}
 
 class AssignmentItem (
 		// whether to create an assignment from this item or not
@@ -40,7 +37,7 @@ class AssignmentItem (
 /** For binding a set of options */
 class OptionsItem (
 	@BeanProperty var id: String,
-	@BeanProperty var options: ModifyAssignmentCommand
+	@BeanProperty var options: SharedAssignmentPropertiesForm
 )
 
 
