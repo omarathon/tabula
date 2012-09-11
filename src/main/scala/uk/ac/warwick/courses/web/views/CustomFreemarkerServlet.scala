@@ -11,6 +11,7 @@ import freemarker.template.Configuration
 import javax.servlet.ServletConfig
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.RequestInfo
+import freemarker.template.utility.DeepUnwrap
 
 /**
  * FreemarkerServlet which adds some useful model stuff to every request.
@@ -29,10 +30,17 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
    */
   override def preTemplateProcess(req:HttpServletRequest,res:HttpServletResponse,template:Template,data:TemplateModel) = {
 	val model = data.asInstanceOf[SimpleHash]
-	val info = RequestInfo.fromThread.map { info =>
+	RequestInfo.fromThread.map { info =>
 		model.put("info", info)
 		model.put("user", info.user)
 	}
+
+	// if we set contentType on the Mav, drag it out and set it on the response
+	DeepUnwrap.permissiveUnwrap(model.get("contentType")) match {
+		case t:String => res.setContentType(t)
+		case _ =>
+	}
+
 	true
   }
   

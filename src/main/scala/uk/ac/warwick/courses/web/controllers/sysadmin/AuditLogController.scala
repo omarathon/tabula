@@ -57,7 +57,7 @@ class AuditLogController extends BaseController {
 	}
 	
 	@RequestMapping(value=Array("/sysadmin/userlookup"))
-	def whois(query:UserLookupQuery) = Mav("sysadmin/userlookup").noLayout
+	def whois(query:UserLookupQuery) = Mav("sysadmin/userlookup").noLayout()
 	
 	@RequestMapping(value=Array("/sysadmin/audit/search"))
 	def searchAll(query:AuditLogQuery): Mav = {
