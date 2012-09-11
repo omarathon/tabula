@@ -8,17 +8,16 @@ apaches:
     - "8080"
     balancer_port: "8080"
     current_port: "8080"
+    rewrite_map: "/etc/apache2/proxy_port.map"
   remotehost: 
   apache_dir: "/etc/apache2"
-  rewrite_map: "/etc/apache2/proxy_port.map"
   restart_command: "echo 'not restarting apache' "
   state: balanced
 build_status: starting
-#apache_htdocs: "/www/sb-dev/apache"
 app: "courses"
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
-repository: "git"
+branch: "master"
 build_user: "nick"
 ant_path: "ant"
 ant_package_target: "clean package"
