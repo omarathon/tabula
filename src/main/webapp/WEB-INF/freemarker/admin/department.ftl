@@ -145,7 +145,7 @@
 					</#if>
 				</#if>
 				<#if assignment.allowExtensions >
-					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">Manage extensions <i class="icon-calendar"></i></a>
+					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">List extensions <i class="icon-calendar"></i></a>
 				</#if>
 			</div>
 			<div class="end-assignment-info"></div>

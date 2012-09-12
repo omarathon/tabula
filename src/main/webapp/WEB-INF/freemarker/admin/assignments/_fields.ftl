@@ -447,7 +447,7 @@ the comments textarea needs to maintain newlines.
 		  <@form.label for="assignmentComment">Text to show on submission form:</@form.label>
 		  	<@form.field>
 				<@f.errors path="comment" cssClass="error" />
-				<@f.textarea path="comment" id="assignmentComment" />
+				<@f.textarea path="comment" id="assignmentComment" class="big-textarea" />
 				<div class="help-block">
 					You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
 				</div>

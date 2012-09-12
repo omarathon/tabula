@@ -16,31 +16,38 @@ import org.joda.time.DateTime
 @Entity @AccessType("field")
 class Extension extends GeneratedId with Deleteable {
 
-  def this(universityId:String=null) {
-    this()
-    this.universityId = universityId
-  }
+	def this(universityId:String=null) {
+		this()
+		this.universityId = universityId
+	}
 
-  @ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-  @JoinColumn(name="assignment_id")
-  @BeanProperty var assignment:Assignment = _
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="assignment_id")
+	@BeanProperty var assignment:Assignment = _
 
-  @NotNull
-  @BeanProperty var userId:String =_
+	@NotNull
+	@BeanProperty var userId:String =_
 
-  @NotNull
-  @BeanProperty var universityId:String =_
+	@NotNull
+	@BeanProperty var universityId:String =_
 
-  @Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-  @BeanProperty var expiryDate:DateTime =_
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var requestedExpiryDate:DateTime =_
 
-  @BeanProperty var reason:String =_
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var expiryDate:DateTime =_
 
-  @BeanProperty var approved:Boolean = false
+	@BeanProperty var reason:String =_
 
-  @Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-  @BeanProperty var approvedOn:DateTime =_
+	@BeanProperty var approved:Boolean = false
+	@BeanProperty var rejected:Boolean = false
 
-  @BeanProperty var approvalComments:String =_
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var requestedOn:DateTime =_
+
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var approvedOn:DateTime =_
+
+	@BeanProperty var approvalComments:String =_
 
 }
