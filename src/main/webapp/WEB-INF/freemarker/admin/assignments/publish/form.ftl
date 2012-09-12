@@ -53,7 +53,7 @@ and be shown the feedback specific to them.
 </p>
 <#else>
 <p>
-Note: notifications are not currently send to students - you will need to distribute the
+Note: notifications are not currently sent to students - you will need to distribute the
 link yourself, by email or by posting it on your module web pages.
 </p>
 </#if>

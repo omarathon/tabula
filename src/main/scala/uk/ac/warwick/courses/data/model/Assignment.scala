@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
 import uk.ac.warwick.courses.JBoolean
 
+
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
@@ -323,7 +324,11 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			_.universityId
 		}.toSet
 
-		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks)
+        val plagiarised = submissions.filter(submission => submission.getSuspectPlagiarised).map {
+            _.universityId
+        }.toSet
+		  
+		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks, plagiarised)
 	}
 
 	def toStringProps = Seq(
@@ -337,10 +342,11 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 }
 
 
-case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String], val withoutAttachments: Set[String], val withoutMarks: Set[String]) {
+case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String], 
+    val withoutAttachments: Set[String], val withoutMarks: Set[String], val plagiarised: Set[String]) {
 
 	def hasProblems = {
-		var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty)
+		var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty || !plagiarised.isEmpty)
 		//TODO feature check
 		if (assignment.collectMarks) {
 			problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty

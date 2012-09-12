@@ -191,9 +191,17 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			)
 	}
 	
+	/* get users whose feedback is not published and who have not submitted work suspected 
+	 * of being plagiarised */
 	def getUsersForFeedback(assignment:Assignment): Seq[Pair[String,User]] = {
-		val uniIds = assignment.unreleasedFeedback.map { _.universityId }
-		uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
+		//val uniIds = assignment.unreleasedFeedback.map { _.universityId }
+		//uniIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
+		
+		val plagiarisedSubmissions = assignment.submissions.filter { submission => submission.suspectPlagiarised }
+		val plagiarisedIds = plagiarisedSubmissions.map {_.universityId }
+		val unreleasedIds = assignment.unreleasedFeedback.map { _.universityId }
+		val unplagiarisedUnreleasedIds = unreleasedIds.filter { uniId => !plagiarisedIds.contains(uniId)}
+		unplagiarisedUnreleasedIds.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }
 	}
 	
 	def recentAssignment(department:Department) = {

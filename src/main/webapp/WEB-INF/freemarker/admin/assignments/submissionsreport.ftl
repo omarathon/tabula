@@ -61,6 +61,17 @@
 		</div>	
 	</#if>
 
+	<#if plagiarised?size gt 0>
+		<div class="alert alert-warn">
+			<p><i class="icon-remove"></i> Submissions received from the following students are suspected to be plagiarised.  They will not be published.</p>
+			<ul class="user-list">
+			<#list plagiarised as u>
+				<li>${u.warwickId}</li>
+			</#list>
+			</ul>
+		</div>	
+	</#if>
+
 	<p>
 		The above discrepencies are provided for information.
 		It is up to you to decide whether to continue publishing. 
