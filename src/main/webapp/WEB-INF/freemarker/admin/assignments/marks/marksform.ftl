@@ -12,8 +12,8 @@
 		<div class="tab-pane active" id="upload">
 			<p>
 				The marks spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
-				The spreadsheet should have three columns in the following order: student ID, mark, grade.
-				You can use this <a href="<@url page="/static/files/example.xlsx"/>" >generated spreadsheet</a> as a template.
+				The spreadsheet should have two columns in the following order: student ID then mark.
+				You can use this <a href="./marks-template" >generated spreadsheet</a> as a template.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
 				<input name="isfile" value="true" type="hidden"/>
