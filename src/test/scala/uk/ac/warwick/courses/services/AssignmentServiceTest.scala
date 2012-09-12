@@ -8,11 +8,13 @@ import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
+import uk.ac.warwick.courses.data.model.Department
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AssignmentServiceImpl =_
-
+    @Autowired var modAndDeptService:ModuleAndDepartmentService =_
+	
 	@Transactional @Test def recentAssignment {
 		val assignment = newDeepAssignment()
 		val department = assignment.module.department
@@ -66,6 +68,18 @@ class AssignmentServiceTest extends AppContextTestBase {
 		service.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
 	
+	@Transactional @Test def getAssignmentsByNameTest {    
+	    val compSciDept = modAndDeptService.getDepartmentByCode("CS")
+	    compSciDept should be ('defined)
+	    
+	    compSciDept.foreach(dept => {    
+	        service.getAssignmentsByName("Test", dept) should have size(2)
+            service.getAssignmentsByName("Computing", dept) should have size(1)	        
+	        service.getAssignmentsByName("Assignment", dept) should have size(3) 
+            service.getAssignmentsByName("xxxx", dept) should have size(0)	        
+	    })
+    }
+
 	@Transactional @Test def updateUpstreamAssignment {
 		val upstream = new UpstreamAssignment
 		upstream.departmentCode = "ch"

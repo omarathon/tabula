@@ -29,6 +29,7 @@
 				<value>classpath:/courses.properties</value>
 				<value>classpath:/courses-private.properties</value>
 				<value>/WEB-INF/build.properties</value>
+				<value>classpath:/messages.properties</value>
 			</list>
 		</property>
 	</bean>

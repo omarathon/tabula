@@ -28,6 +28,7 @@ import uk.ac.warwick.courses.services.{AssignmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
+import uk.ac.warwick.courses.JBoolean
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -79,9 +80,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var attachmentLimit: Int = 1
 
 	@BeanProperty var name: String = _
-	@BeanProperty var active: Boolean = _
+	@BeanProperty var active: JBoolean = _
 
-	@BeanProperty var archived: Boolean = false
+	@BeanProperty var archived: JBoolean = false
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var openDate: DateTime = _
@@ -92,15 +93,18 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var createdDate = DateTime.now()
 
-	@BeanProperty var collectMarks:Boolean =_
-	@BeanProperty var collectSubmissions:Boolean = false
-	@BeanProperty var restrictSubmissions:Boolean = false
-	@BeanProperty var allowLateSubmissions:Boolean = true
-	@BeanProperty var allowResubmission:Boolean = false
-	@BeanProperty var displayPlagiarismNotice:Boolean = false
-	@BeanProperty var allowExtensions:Boolean = false
+	@BeanProperty var collectMarks:JBoolean = false
+	@BeanProperty var collectSubmissions:JBoolean = false
+	@BeanProperty var restrictSubmissions:JBoolean = false
+	@BeanProperty var allowLateSubmissions:JBoolean = true
+	@BeanProperty var allowResubmission:JBoolean = false
+	@BeanProperty var displayPlagiarismNotice:JBoolean = false
+	
+	
+	@BeanProperty var allowExtensions:JBoolean = false
 	// allow students to request extensions via the app
-	@BeanProperty var allowExtensionRequests:Boolean = false
+	
+	@BeanProperty var allowExtensionRequests:JBoolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")

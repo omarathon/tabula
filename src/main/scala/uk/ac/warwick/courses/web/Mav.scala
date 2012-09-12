@@ -32,13 +32,16 @@ class Mav() {
     var viewName:String = _
     
 	var map = mutable.Map[String,Any]()
+
+	// CSS classes to add to <body>. See #bodyClasses
 	var classes:List[String] = Nil
 	
 	def addObjects(items:Pair[String,Any]*) = {
 		map ++= items
 		this
 	}
-	
+
+	// Set the CSS body classes to these strings.
 	def bodyClasses(c:String*) = {
 	 	classes = c.toList
 	 	this
@@ -63,7 +66,7 @@ class Mav() {
 	 * Also sets embedded->true so views can decide whether to 
 	 * render certain elements.
 	 */
-	def noLayout = {
+	def noLayout() = {
 		addObjects("embedded" -> true)
 		layout("none")
 	}
@@ -72,12 +75,26 @@ class Mav() {
 		addObjects("embedded" -> true)
 		layout("embedded")
 	}
+
+	/**
+	 * CustomFreemarkerServlet will use this value if present to set the content type of the response.
+	 */
+	def contentType(contentType:String) = {
+		addObjects("contentType" -> contentType)
+		this
+	}
+
+	/** Removes layout and sets contentType to text/xml */
+	def xml() = {
+		noLayout()
+		contentType("text/xml")
+	}
 	
 	/**
 	 * Changes to noLayout if the given thing is true.
 	 */
 	def noLayoutIf(bool:Boolean): Mav = 
-		if (bool) noLayout
+		if (bool) noLayout()
 		else this
 	
 	def toModel = {

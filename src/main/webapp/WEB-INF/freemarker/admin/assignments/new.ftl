@@ -18,6 +18,12 @@ Some fields have been pre-filled from another recently created assignment for co
 </div>
 </#if>
 
+<#if command.prefillAssignment??>
+<div class="alert alert-success">
+Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
+</div>
+</#if>
+
 <@f.errors cssClass="error form-errors" />
 
 <#assign newRecord=true />

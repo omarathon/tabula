@@ -24,7 +24,7 @@ class FeedbackRecipientCheckController extends BaseController {
 	   val report = command.apply()
 	   Mav("admin/assignments/publish/checkrecipients", 
 	       "assignment" -> command.assignment,
-	       "report" -> report).noLayout
+	       "report" -> report).noLayout()
 	}
 	
 }

@@ -18,8 +18,8 @@ class JsonTest extends TestBase {
 	@Test def encodeMap {
 		m.writeValueAsString(Map()) should be("{}")
 		
-		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
-		m.writeValueAsString(Map("animals" -> ArrayList("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
+		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
+		m.writeValueAsString(Map("animals" -> ArrayList("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
 		
 //		m.writeValueAsString(Map("animals" -> List("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
 	}

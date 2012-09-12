@@ -18,7 +18,7 @@ class UserPickerController extends BaseController {
 	@Autowired var userLookup:UserLookupService =_
   
 	@RequestMapping(value=Array("/api/userpicker/form"))
-	def form: Mav = Mav("api/userpicker/form").noLayout
+	def form: Mav = Mav("api/userpicker/form").noLayout()
 	
 	@RequestMapping(value=Array("/api/userpicker/query.json"))
 	def queryJson (form:QueryForm, out:Writer) = {
@@ -36,24 +36,13 @@ class UserPickerController extends BaseController {
 	
 	@RequestMapping(value=Array("/api/userpicker/query"))
 	def query (form:QueryForm, out:Writer) = {
-	  val usersByStaff = fetch(form)
-	  val (staff, students) = (usersByStaff.getOrElse(true, Seq.empty), usersByStaff.getOrElse(false, Seq.empty))
+		val foundUsers = userLookup.findUsersWithFilter(form.filter)
+	  val (staff, students) = foundUsers.partition { _.isStaff }
 	  Mav("api/userpicker/results",
 	      "staff" -> staff,
-	      "students" -> students).noLayout
+	      "students" -> students).noLayout()
 	}
-	
-	/**
-	 * Fetches user lookup results, then groups them into a map keyed by
-	 * whether they're staff.
-	 * 
-	 * i.e. result(true) -> collectionOfStaffUsers
-	 * 		result(false) -> nonStaffUsers
-	 */
-	def fetch(form:QueryForm) = {
-	  val users = userLookup.findUsersWithFilter(form.filter)
-	  users.groupBy{ _.isStaff() }
-	}
+
 }
 
 object UserPickerController {
@@ -77,14 +66,16 @@ object UserPickerController {
 		}
 		def query_=(q:String):Unit = setQuery(q)
 			
-		def filter:Map[String,String] = 
+		def filter:Map[String, String] = {
 		  	item("givenName", firstName) ++ item("sn", lastName)
+		}
 		
 		// filter with surname as firstname and viceversa, in case we get no results
-		def filterBackwards:Map[String,String] = 
+		def filterBackwards:Map[String,String] = {
 			item("givenName", lastName) ++ item("sn", firstName)
+		}
 		  
-		private def item(name:String, value:String) = value match {
+		private def item(name:String, value:String): Map[String, String] = value match {
 		  case s:String if s.hasText => Map(name -> (value + "*"))
 		  case _ => Map.empty
 		}

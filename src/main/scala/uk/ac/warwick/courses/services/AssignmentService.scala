@@ -44,6 +44,8 @@ trait AssignmentService {
 	 */
 	def recentAssignment(department:Department): Option[Assignment]
 	
+	def getAssignmentsByName(partialName:String, department:Department) : Seq[Assignment]
+	
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup]
 	def getAssessmentGroup(template:UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	
@@ -203,6 +205,16 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.addOrder(Order.desc("createdDate"))
 			.setMaxResults(1)
 			.uniqueResult
+	}
+	
+	def getAssignmentsByName(partialName:String, department:Department) = {
+        session.newCriteria[Assignment]
+            .createAlias("module", "mod")
+            .add(Restrictions.eq("mod.department", department))
+            .add(Restrictions.ilike("name", "%" + partialName + "%"))
+            .addOrder(Order.desc("createdDate"))
+            .setMaxResults(15)
+            .list
 	}
 		
 	def getAssessmentGroup(assignment:Assignment): Option[UpstreamAssessmentGroup] = {
