@@ -61,7 +61,11 @@
 		</div>	
 	</#if>
 
-	<#if plagiarised?size gt 0>
+	<#if plagiarised?size == 0>
+		<div class="alert alert-success">
+			<p><i class="icon-ok"></i> No submissions are suspected of being plagiarised.</p>
+		</div>
+	<#else>
 		<div class="alert alert-warn">
 			<p><i class="icon-remove"></i> Submissions received from the following students are suspected to be plagiarised.  They will not be published.</p>
 			<ul class="user-list">
