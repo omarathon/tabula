@@ -6,12 +6,13 @@ import reflect.BeanProperty
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.helpers.LazyLists
 import uk.ac.warwick.courses.data.model.{Department, UpstreamAssignment}
-import uk.ac.warwick.courses.AcademicYear
+import uk.ac.warwick.courses.{DateFormats, AcademicYear}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import uk.ac.warwick.courses.services.AssignmentService
 import org.springframework.validation.Errors
 import com.google.common.collect.Maps
+import org.springframework.format.annotation.DateTimeFormat
 
 
 class AssignmentItem (
@@ -58,6 +59,15 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
 
 	@BeanProperty var optionsMap: JMap[String, ModifyAssignmentCommand] = Maps.newHashMap()
+
+	// just for prepopulating the date form fields.
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty
+	val defaultOpenDate = new DateTime().withTime(12,0,0,0)
+
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty
+	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
 	override def apply() {
 
