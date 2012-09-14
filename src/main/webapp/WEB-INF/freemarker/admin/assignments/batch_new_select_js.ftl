@@ -8,12 +8,12 @@ It would probably be better as an external js file. Probably!
 
 jQuery(function($){
 
-	var optionGroupCount = 0;
+	var optionGroupCount = $('#options-buttons .options-button').length;
 
 	var $form = $('#batch-add-form');
 
 	// When clicking Next, set the action parameter to the relevant value before submitting
-	$form.find('button[data-action=options]').click(function(event){
+	$form.find('button[data-action]').click(function(event){
 		var action = $(this).data('action');
 		if (action) {
 			$form.find('input[name=action]').val(action);
@@ -91,7 +91,7 @@ jQuery(function($){
 	});
 
 	$optsButton.click(function(e){
-		if (!$(this).hasClass('disabled') {
+		if (!$(this).hasClass('disabled')) {
 			$optsModal.modal();
 		}
 		return false;
@@ -109,7 +109,7 @@ jQuery(function($){
 	var $datesModal = $('#set-dates-modal');
 	// open dates modal
 	$('#set-dates-button').click(function(){
-		if (!$(this).hasClass('disabled') {
+		if (!$(this).hasClass('disabled')) {
 			$datesModal.modal();
 		}
 		return false;
@@ -123,6 +123,12 @@ jQuery(function($){
 		$selectedRows.find('.close-date-field').val(closeDate);
 		$selectedRows.find('.dates-label').html(openDate +' - ' + closeDate);
 		$datesModal.modal('hide');
+	});
+	
+	// Wire all "Re-use options" buttons, present and future
+	$('#options-buttons').on('click', '.options-button > button', function() {
+		applyGroupNameToSelected($(this).data('group'));
+		return false;
 	});
 
 	// complicated handling for when we submit the options modal...
@@ -145,15 +151,11 @@ jQuery(function($){
 				var $group = $('<div>').addClass('options-button');
 				var $hidden = $('<div>').addClass('options-group').data('group', groupName);
 				var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
-				$button.data('groupName', groupName);
+				$button.data('group', groupName);
 				$group.append($button);
 				$group.append($hidden);
 
-				//re-apply options to more items.
-				$button.click(function() {
-					applyGroupNameToSelected($(this).data('groupName'));
-					return false;
-				});
+				// button behaviour already wired by an on() call.
 
 				fields.each(function(i, field){
 					field.name = "optionsMap["+groupName+"]." + field.name;

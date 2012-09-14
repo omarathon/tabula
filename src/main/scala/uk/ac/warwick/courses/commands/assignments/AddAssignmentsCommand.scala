@@ -13,6 +13,7 @@ import uk.ac.warwick.courses.services.AssignmentService
 import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.validation.ValidationUtils
 
 
 class AssignmentItem (
@@ -25,22 +26,19 @@ class AssignmentItem (
 
 	// Name for new assignment. Defaults to the name of the upstream assignment, if provided.
 	@BeanProperty var name: String = Option(upstreamAssignment).map { _.name }.orNull
+	                                 if (upstreamAssignment != null) upstreamAssignment.name else null
 
-	// Will reference the "id" property of an OptionsItem. In this way, many AssignmentItems
+	// Will reference a key of AddAssignmentsCommand.optionsMap. In this way, many AssignmentItems
 	// can share the same set of options without having to post many copies separately.
 	@BeanProperty var optionsId: String = _
-
+	
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var openDate: DateTime = _
+	
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate: DateTime = _
 
 }
-
-/** For binding a set of options */
-class OptionsItem (
-	@BeanProperty var id: String,
-	@BeanProperty var options: SharedAssignmentPropertiesForm
-)
-
 
 /**
  * Command for adding many assignments at once, usually from SITS.
@@ -58,7 +56,10 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	// All the possible assignments, prepopulated from SITS.
 	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
 
-	@BeanProperty var optionsMap: JMap[String, ModifyAssignmentCommand] = Maps.newHashMap()
+	/**
+	 * options which are referenced by key by AssignmentItem.optionsId
+	 */
+	@BeanProperty var optionsMap: JMap[String, SharedAssignmentPropertiesForm] = Maps.newHashMap()
 
 	// just for prepopulating the date form fields.
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -70,11 +71,37 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
 	override def apply() {
-
+	    
 	}
 
 	override def validate(implicit errors: Errors) {
-
+		ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
+		
+		// just get the items we're actually going to import
+        val items = assignmentItems.filter{ _.include }
+		val definedOptionsIds = optionsMap.keySet
+		
+		def missingOptionId(item: AssignmentItem) = {
+			!definedOptionsIds.contains(item.optionsId)
+        }
+			
+		def missingDates(item: AssignmentItem) = {
+        	item.openDate == null || item.closeDate == null
+        }
+		
+		// reject if any items have a missing or garbage optionId value
+		if (items.exists( missingOptionId )) {
+			errors.reject("assignmentItems.missingOptions")
+		}
+        
+        // reject if any items are missing date values
+        if (items.exists( missingDates )) {
+        	errors.reject("assignmentItems.missingDates")
+        }
+		
+		for (item <- items) {
+			
+		}
 	}
 
 	override def describe(description: Description) = {

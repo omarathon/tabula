@@ -7,6 +7,7 @@ import uk.ac.warwick.courses.commands.assignments.SharedAssignmentPropertiesForm
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.data.model.Department
 import javax.validation.Valid
+import org.springframework.web.bind.annotation.PathVariable
 
 /**
  * When setting up a batch of assignments using AddAssignmentsController, we need
@@ -19,25 +20,25 @@ import javax.validation.Valid
 class AssignmentSharedOptionsController extends BaseController {
 
 	@RequestMapping(method=Array(GET))
-	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors) = {
-		mav(form)
+	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
+		mav(form, department)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors) = {
-		mav(form).addObjects(
+	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
+		mav(form, department).addObjects(
 			"submitted" -> true,
 			"hasErrors" -> errors.hasErrors
 		)
 	}
 
-	def mav(form: SharedAssignmentPropertiesForm) = {
+	def mav(form: SharedAssignmentPropertiesForm, @PathVariable("department") department: Department) = {
 		Mav("admin/assignments/shared_options",
-			"department" -> form.department
+			"department" -> department
 		).noLayout()
 	}
 
 	@ModelAttribute
-	def model(department: Department) = new SharedAssignmentPropertiesForm(department)
+	def model(department: Department) = new SharedAssignmentPropertiesForm()
 
 }

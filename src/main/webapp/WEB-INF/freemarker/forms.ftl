@@ -3,6 +3,20 @@
 <#compress>
 <#escape x as x?html>
 
+<#-- Return the textual value of the given command property -->
+<#function getvalue path>
+	<@spring.bind path=path>
+		<#return status.value />
+	</@spring.bind>
+</#function>
+
+<#-- Return whether this given command property is set -->
+<#function hasvalue path>
+	<@spring.bind path=path>
+		<#return status.actualValue?? && status.value != "" /><#-- use actualValue as value will usually be empty string for an empty value -->
+	</@spring.bind>
+</#function>
+
 <#macro row path="" error=false>
 <#if path="">
 <div class="control-group"><#nested/></div>

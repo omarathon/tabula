@@ -9,7 +9,15 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.{CommentField, FileField}
 
-class SharedAssignmentPropertiesForm(@BeanProperty var department: Department) extends SharedAssignmentProperties
+/**
+ * Bound as the value of a Map on a parent form object, to store multiple sets of
+ * assignment properties.
+ * 
+ * Currently relies on having a default empty constructor for lazy map populating to work,
+ * so if you need to add a constructor then any command that has this as a Map value will need
+ * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap). 
+ */
+class SharedAssignmentPropertiesForm extends SharedAssignmentProperties
 
 /**
  * Contains all the fields that could be collectively assigned to a group of assignments, so that
@@ -30,7 +38,8 @@ trait SharedAssignmentProperties {
 	@Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit: Int = 1
 
-	val maxFileAttachments: Int = 10
+	@BeanProperty val maxFileAttachments: Int = 10
+	
 	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
 
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()

@@ -1,4 +1,12 @@
+<#-- 
 
+This section contains the form fields that can apply to a group of
+assignments, as well as to an individual one.
+
+If you add a field it should also be added to _common_fields_hidden.ftl
+so that they can be passed around between requests.
+
+-->
 
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
@@ -98,8 +106,11 @@
 		<@form.row>
 			<@form.label path="fileAttachmentLimit">Max attachments per submission</@form.label>
 			<@form.field>
+				<@spring.bind path="maxFileAttachments">
+					<#assign maxFileAttachments=status.actualValue />
+				</@spring.bind>
 				<@f.select path="fileAttachmentLimit" cssClass="span1">
-					<@f.options items=1..command.maxFileAttachments />
+					<@f.options items=1..maxFileAttachments />
 				</@f.select>
 			</@form.field>
 		</@form.row>

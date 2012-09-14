@@ -12,7 +12,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <h1>Setup assignments</h1>
 
-<#assign step=RequestParameters.action!'select'/>
+<#assign step=action!'select'/>
 
 <@f.form method="post" id="batch-add-form" action="/admin/department/${command.department.code}/setup-assignments" commandName=commandName cssClass="form-horizontal">
 
@@ -36,6 +36,10 @@ first page of the form to setup a bunch of assignments from SITS.
 
 	<div class="row-fluid">
 	<div class="span10">
+	
+	<div id="batch-add-errors">
+	<#include "batch_new_validation.ftl" />
+	</div>
 
 	<p>
 		Now you need to choose how you want these assignments to behave, such as submission dates
@@ -81,7 +85,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					<input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select/unselect all">
 				</label>
 			</div>
-    </#if>
+    	</#if>
 	</th>
 	<th>Module</th>
 	<th>Seq</th>
@@ -119,11 +123,20 @@ first page of the form to setup a bunch of assignments from SITS.
  	<td class="selectable assignment-editable-fields-cell">
  		<@f.hidden path="openDate" cssClass="open-date-field" />
  		<@f.hidden path="closeDate" cssClass="close-date-field" />
- 		<span class="dates-label"></span>
+ 		<span class="dates-label">
+ 			<#if form.hasvalue('openDate') && form.hasvalue('closeDate')>
+ 				${form.getvalue("openDate")} - ${form.getvalue("closeDate")}
+ 			</#if>
+ 		</span>
  	</td>
  	<td>
  		<@f.hidden path="optionsId" cssClass="options-id-input" />
- 		<span class="options-id-label"></span>
+ 		<span class="options-id-label">
+ 			<#if form.hasvalue('optionsId')>
+ 				<#assign optionsIdValue=form.getvalue('optionsId') />
+ 				<span class="label label-${optionsIdValue}">${optionsIdValue}</span>
+ 			</#if>
+ 		</span>
  	</td>
   </#if>
 </tr>
@@ -148,6 +161,10 @@ first page of the form to setup a bunch of assignments from SITS.
 <button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
 <#elseif step='options'>
 <div id="options-buttons">
+
+<button class="btn btn-large btn-primary btn-block" data-action="options">(RE)FRESH!</button>
+<button class="btn btn-large btn-primary btn-block" data-action="submit">Next</button>
+
 <div id="selected-count">0 selected</div>
 <div id="selected-deselect"><a href="#">Clear selection</a></div>
 <#-- options sets -->
@@ -157,6 +174,22 @@ first page of the form to setup a bunch of assignments from SITS.
 <a class="btn btn-primary btn-block" id="set-dates-button" data-target="#set-dates-modal">
 	Set dates&hellip;
 </a>
+
+<#list command.optionsMap?keys as optionsId>
+	<div class="options-button">
+		<button class="btn btn-block" data-group="${optionsId}">
+			Re-use options
+			<span class="label label-${optionsId}">${optionsId}</span>
+		</button>
+		<div class="options-group">
+			<@spring.nestedPath path="optionsMap[${optionsId}]">
+				<#-- Include all the common fields as hidden fields -->
+				<#include "_common_fields_hidden.ftl" />
+			</@spring.nestedPath>
+		</div>
+	</div>
+</#list> 
+ 
 </div>
 </#if>
 
@@ -175,8 +208,6 @@ first page of the form to setup a bunch of assignments from SITS.
 			<h3 id="set-options-label">Set options</h3>
 		</div>
 		<div class="modal-body">
-
-
 
 		</div>
 		<div class="modal-footer">
