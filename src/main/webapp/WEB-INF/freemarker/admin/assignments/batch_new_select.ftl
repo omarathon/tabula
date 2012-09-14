@@ -143,15 +143,22 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <#else>
 
-	<#-- even if they are unselected we still need to remember that fact -->
-	<#-- FIXME these hidden inputs will be between table rows which is invalid HTML -->
-	<@f.hidden path="upstreamAssignment" />
-  <@f.hidden path="include" />
+	<#-- we include the hidden fields of unincluded items below, outside the table -->
 
 </#if>
 </@spring.nestedPath>
 </#list>
 </table>
+
+<#-- Hidden fields for items we unchecked in the first step, just to remember that we unchecked them -->
+<#list command.assignmentItems as item>
+<@spring.nestedPath path="assignmentItems[${item_index}]">
+<#if step!="select" && !item.include>
+	<@f.hidden path="upstreamAssignment" />
+	<@f.hidden path="include" />
+</#if>
+</@spring.nestedPath>
+</#list>
 
 </div>
 
