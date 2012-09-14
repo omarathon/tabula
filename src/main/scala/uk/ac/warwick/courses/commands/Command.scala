@@ -3,6 +3,7 @@ import collection.mutable
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.JavaImports
 import org.springframework.validation.Errors
+import org.springframework.web.bind.WebDataBinder
 
 /**
  * Trait for a thing that can describe itself to a Description

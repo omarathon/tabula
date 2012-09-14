@@ -56,7 +56,8 @@ trait AssignmentService {
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getAssessmentGroups.
 	 */
-	def getUpstreamAssignments(module:Module): Seq[UpstreamAssignment]
+	def getUpstreamAssignments(module: Module): Seq[UpstreamAssignment]
+	def getUpstreamAssignments(department: Department): Seq[UpstreamAssignment]
 
 	/** Get all assessment groups that can serve this assignment this year.
 	 * Should return as many groups as there are distinct OCCURRENCE values for a given
@@ -227,11 +228,19 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	
 	def getUpstreamAssignment(id:String) = getById[UpstreamAssignment](id) 
 	
-    def getUpstreamAssignments(module:Module): Seq[UpstreamAssignment] = {
+	def getUpstreamAssignments(module:Module) = {
 		session.newCriteria[UpstreamAssignment]
 		        .add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
 		        .addOrder(Order.asc("sequence"))
 		        .list filter isInteresting
+	}
+
+	def getUpstreamAssignments(department: Department) = {
+		session.newCriteria[UpstreamAssignment]
+			.add(Restrictions.eq("departmentCode", department.code.toUpperCase))
+			.addOrder(Order.asc("moduleCode"))
+			.addOrder(Order.asc("sequence"))
+			.list filter isInteresting
 	}
 	
 	def getStudentFeedback( assignment : Assignment, uniId : String) = {
@@ -242,13 +251,13 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		!(assignment.name contains "NOT IN USE")
 	}
 
-    def getAssessmentGroups(upstreamAssignment:UpstreamAssignment, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup] = {
-    	session.newCriteria[UpstreamAssessmentGroup]
-                .add(Restrictions.eq("academicYear", academicYear))
-                .add(Restrictions.eq("moduleCode", upstreamAssignment.moduleCode ))
-                .add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup ))
-                .list
-    }
+	def getAssessmentGroups(upstreamAssignment:UpstreamAssignment, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup] = {
+		session.newCriteria[UpstreamAssessmentGroup]
+							.add(Restrictions.eq("academicYear", academicYear))
+							.add(Restrictions.eq("moduleCode", upstreamAssignment.moduleCode ))
+							.add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup ))
+							.list
+	}
 
 	private def criteria(academicYear:AcademicYear, moduleCode:String, assessmentGroup:String, occurrence:String) =
 		session.newCriteria[UpstreamAssessmentGroup]

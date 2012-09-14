@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
+import uk.ac.warwick.courses._
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.data.model.forms.CommentField
 import uk.ac.warwick.courses.data.model.forms.FileField
@@ -22,7 +23,6 @@ import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.UserGroup
 import uk.ac.warwick.courses.services.UserLookupService
-import uk.ac.warwick.courses.JBoolean
 
 case class UpstreamGroupOption(
         assignmentId:String,
@@ -32,13 +32,12 @@ case class UpstreamGroupOption(
         occurrence:String,
         memberCount:Int
     )
-    
 
 
 /**
  * Common behaviour 
  */
-abstract class ModifyAssignmentCommand extends Command[Assignment]  {
+abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAssignmentProperties  {
 	
 	@Autowired var service:AssignmentService =_
 	@Autowired var userLookup:UserLookupService =_
@@ -58,26 +57,11 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	
 	@BeanProperty var academicYear:AcademicYear = AcademicYear.guessByDate(new DateTime)
 	
-	def getAcademicYearString = if (academicYear != null) academicYear.toString() else ""
-	
-	@BeanProperty var collectMarks:JBoolean = _
-	@BeanProperty var collectSubmissions:JBoolean = _
-	@BeanProperty var restrictSubmissions:JBoolean = _
-	@BeanProperty var allowLateSubmissions:JBoolean = true
-	@BeanProperty var allowResubmission:JBoolean = false
-	@BeanProperty var displayPlagiarismNotice:JBoolean = _
-	@BeanProperty var allowExtensions:JBoolean = _
-	@BeanProperty var allowExtensionRequests:JBoolean = _
-
-	@Min(1) @Max(Assignment.MaximumFileAttachments)
-	@BeanProperty var fileAttachmentLimit:Int = 1
-	
-	val maxFileAttachments:Int = 10
-	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
-	
-	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
-
-
+	def getAcademicYearString =
+		if (academicYear != null)
+			academicYear.toString()
+		else
+			""
 
   // start complicated membership stuff
 
@@ -117,14 +101,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 
 	/** MAV_OCCURRENCE as per the value in SITS.  */
 	@BeanProperty var occurrence: String = _
-	
-	/**
-	 * This isn't actually a property on Assignment, it's one of the default fields added
-	 * to all Assignments. When the forms become customisable this will be replaced with
-	 * a full blown field editor. 
-	 */
-	@Length(max=2000)
-	@BeanProperty var comment:String = _
+
 	
 	@BeanProperty var prefillAssignment:Assignment = _
 	
@@ -143,7 +120,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		if (openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
 		}
-		if(fileAttachmentTypes.mkString("").matches(invalidAttatchmentPattern)){
+		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 	}
@@ -193,26 +170,14 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		assignment.name = name
     assignment.openDate = openDate
     assignment.closeDate = closeDate
-    assignment.collectMarks = collectMarks
-    assignment.academicYear = academicYear
-    assignment.collectSubmissions = collectSubmissions
-    assignment.restrictSubmissions = restrictSubmissions
-    assignment.allowLateSubmissions = allowLateSubmissions
-    assignment.allowResubmission = allowResubmission
-    assignment.displayPlagiarismNotice = displayPlagiarismNotice
-    assignment.upstreamAssignment = upstreamAssignment
-    assignment.occurrence = occurrence
-    assignment.allowExtensions = allowExtensions
-    assignment.allowExtensionRequests = allowExtensionRequests
-	    
-    if (assignment.members == null) assignment.members = new UserGroup
-	  assignment.members copyFrom members
-	    	
-	  findCommentField(assignment) foreach ( field => field.value = comment )
-	    findFileField(assignment) foreach { file => 
-	    	file.attachmentLimit = fileAttachmentLimit 
-	    	file.attachmentTypes = fileAttachmentTypes
-		}
+		assignment.academicYear = academicYear
+		assignment.upstreamAssignment = upstreamAssignment
+		assignment.occurrence = occurrence
+		copySharedTo(assignment:Assignment)
+
+		if (assignment.members == null) assignment.members = new UserGroup
+		assignment.members copyFrom members
+
 	}
 
   def prefillFromRecentAssignment() {
@@ -238,19 +203,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	def copyNonspecificFrom(assignment:Assignment) {
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
-		collectMarks = assignment.collectMarks
-		collectSubmissions = assignment.collectSubmissions
-		restrictSubmissions = assignment.restrictSubmissions
-		allowLateSubmissions = assignment.allowLateSubmissions
-		allowResubmission = assignment.allowResubmission
-		displayPlagiarismNotice = assignment.displayPlagiarismNotice
-		findCommentField(assignment) map ( field => comment = field.value )
-		findFileField(assignment) map { field => 
-			fileAttachmentLimit = field.attachmentLimit 
-			fileAttachmentTypes = field.attachmentTypes
-		}
-    allowExtensions = assignment.allowExtensions
-    allowExtensionRequests = assignment.allowExtensionRequests
+		copySharedFrom(assignment)
 	}
 	
 	def copyFrom(assignment:Assignment) {
@@ -311,11 +264,5 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		    service.getAssessmentGroup(template)
 		}
 	}
-	
-	private def findFileField(assignment:Assignment) = 
-		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
-	
-	/** Find the standard free-text field if it exists */
-	private def findCommentField(assignment:Assignment) = 
-		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+
 }
