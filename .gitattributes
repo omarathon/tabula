@@ -11,6 +11,9 @@
 *.jsp text
 *.tag text
 *.properties text
+*.htm text
+*.html text
+*.ics text
 
 # things that should definitely not be text
 *.png binary
