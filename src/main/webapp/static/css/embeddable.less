@@ -84,11 +84,13 @@ ul {
 }
 
 #feedback-table, #submission-table {
-    tr.selected td {
-        background-color: #F2DEDE;
-        &:hover{
-            background-color: #F2DEDE;
-        }
+    tbody {
+    	tr.selected td {
+        	background-color: #F2DEDE;
+        	&:hover{
+	            background-color: #F2DEDE;
+    	    }
+    	}
     }
     .status span{
         display: inline-block;
