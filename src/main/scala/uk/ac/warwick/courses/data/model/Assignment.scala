@@ -275,6 +275,12 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		feedback.assignment = this
 	}
 
+	def addSubmission(submission: Submission) {
+		//if (feedbacks.filter(_.universityId == "a").isEmpty){
+		submissions.add(submission)
+		submission.assignment = this
+	}	
+	
 	// returns feedback for a specified student
 	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
 

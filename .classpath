@@ -113,5 +113,7 @@
 	<classpathentry kind="lib" path="lib/runtime/commons-digester-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/slf4j-log4j12-1.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/httpclient/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/commons-lang/commons-lang.jar"/>
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

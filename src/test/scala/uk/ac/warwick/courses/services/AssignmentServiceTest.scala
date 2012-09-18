@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.data.model.UpstreamAssignment
 import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.data.model.Submission
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
@@ -80,6 +81,63 @@ class AssignmentServiceTest extends AppContextTestBase {
 	    })
     }
 
+	/*
+	 * getUsersForFeedback gets all the users associated with an assignment who:
+	 *     1. have feedback associated with that assignment which has not been released
+	 *     2. have a submission associated with that assignment which is not suspected plagiarised.
+	 */
+	@Transactional @Test def getUsersForFeedbackTest {
+		val assignment = service.getAssignmentById("1");
+		assignment should be('defined)
+
+		assignment.foreach { assmt =>
+			// create a feedback for the assignment, not yet released
+			val feedback = new Feedback
+			feedback.universityId = "0070790"
+			feedback.released = false
+			assmt.addFeedback(feedback)
+			session.save(feedback)
+			
+			// create a submission for the assignment, not plagiarised
+			val submission = new Submission
+
+			submission.setUniversityId("0070790")
+			submission.suspectPlagiarised = false;
+			assmt.addSubmission(submission)
+			session.save(submission)
+			
+			// now check one user who needs to get feedback for this assignment is returned
+			val userPairs = service.getUsersForFeedback(assmt)
+			userPairs.size should be (1)
+
+			// and check it's the right one
+			for (userPair <- userPairs) {
+				val studentId = userPair._1
+				val user = userPair._2
+				
+				studentId should equal ("0070790")
+				user.getWarwickId() should equal ("0070790")
+			}
+			
+			// suppose the feedback was already released - would expect to get no users back
+			feedback.released = true
+			val userPairs2 = service.getUsersForFeedback(assmt)
+			userPairs2.size should be (0)
+
+			// feedback was not released - expect 1
+			feedback.released = false
+			val userPairs3 = service.getUsersForFeedback(assmt)
+			userPairs3.size should be (1)
+			
+			// the only person was suspected of plagiarism - expect 0
+			submission.suspectPlagiarised = true
+			//session.saveOrUpdate(submission)
+			val userPairs4 = service.getUsersForFeedback(assmt)
+			userPairs4.size should be (0)					
+		}
+		
+	}
+	
 	@Transactional @Test def updateUpstreamAssignment {
 		val upstream = new UpstreamAssignment
 		upstream.departmentCode = "ch"
