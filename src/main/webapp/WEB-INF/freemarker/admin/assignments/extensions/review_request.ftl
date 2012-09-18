@@ -19,6 +19,18 @@
 					<@fmt.date date=command.extensions[0].requestedExpiryDate at=true/>
 				</div>
 			</div>
+			<#if command.extensions[0].attachments??>
+				<div class="control-group">
+					<label><strong>Supporting documents</strong></label>
+					<div class="controls">
+						<ul>
+							<#list command.extensions[0].attachments as attachment>
+								<li><a href="review-request/${universityId}/supporting-file/${attachment.name}">${attachment.name}</a></li>
+							</#list>
+						</ul>
+					</div>
+				</div>
+			</#if>
 			<hr/>
 			<@f.input type="hidden" path="extensionItems[0].universityId" value="${universityId}" />
 			<div class="control-group">

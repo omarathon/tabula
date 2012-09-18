@@ -8,7 +8,7 @@
     <h1>Authorise late submissions for ${assignment.name}</h1>
     <p>
 		This assignment closes on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>.
-		To authorise an extension for a student click the "Authorise" button next to the students university ID. If you
+		To authorise an extension for a student click the "Grant" button next to the students university ID. If you
 		wish to grant an extension to a user that is not listed below, please ensure that they appear in the students
 		list on the <a href="/admin/module/${module.code}/assignments/${assignment.id}/edit">assignment edit page</a>.
     </p><br/>
@@ -41,12 +41,6 @@
 							<a class="new-extension btn btn-mini btn-primary" href="review-request/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Review request
 							</a>
-							<!--a class="hide modify-extension btn btn-mini btn-primary" href="edit/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-edit icon-white"></i> Modify
-							</a>
-							<a class="hide revoke-extension btn btn-mini btn-danger" href="delete/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-remove icon-white"></i> Deauthorise
-							</a-->
 						</td>
 					</tr>
 				</#list>
@@ -67,13 +61,13 @@
 						<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
 						<td>
 							<a class="hide new-extension btn btn-mini btn-success" href="add?universityId=${extension.universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-ok icon-white"></i> Authorise
+								<i class="icon-ok icon-white"></i> Grant
 							</a>
 							<a class="modify-extension btn btn-mini btn-primary" href="edit/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
 							<a class="revoke-extension btn btn-mini btn-danger" href="delete/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-remove icon-white"></i> Deauthorise
+								<i class="icon-remove icon-white"></i> Revoke
 							</a>
 						</td>
 					</tr>
@@ -87,13 +81,13 @@
 						<td class="expiryDate"></td>
 						<td>
 							<a class="new-extension btn btn-mini btn-success" href="add?universityId=${universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-ok icon-white"></i> Authorise
+								<i class="icon-ok icon-white"></i> Grant
 							</a>
 							<a class="hide modify-extension btn btn-mini btn-primary" href="edit/${universityId}" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
 							<a class="hide revoke-extension btn btn-mini btn-danger" href="delete/${universityId}" data-toggle="modal" data-target="#extension-model">
-								<i class="icon-remove icon-white"></i> Deauthorise
+								<i class="icon-remove icon-white"></i> Revoke
 							</a>
 						</td>
 					</tr>

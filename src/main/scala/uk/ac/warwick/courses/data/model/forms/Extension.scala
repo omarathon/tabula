@@ -1,17 +1,17 @@
 package uk.ac.warwick.courses.data.model.forms
 
+import scala.collection.JavaConversions._
 import org.hibernate.annotations.{Type, AccessType}
-import uk.ac.warwick.courses.data.model.{Assignment, GeneratedId}
+import uk.ac.warwick.courses.data.model.{FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.courses.actions.Deleteable
 import scala.Array
-import javax.persistence.Entity
-import javax.persistence.FetchType
+import javax.persistence._
 import javax.persistence.CascadeType._
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
 import reflect.BeanProperty
 import org.joda.time.DateTime
+import javax.persistence.FetchType._
+import uk.ac.warwick.courses.JavaImports._
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with Deleteable {
@@ -38,6 +38,18 @@ class Extension extends GeneratedId with Deleteable {
 	@BeanProperty var expiryDate:DateTime =_
 
 	@BeanProperty var reason:String =_
+
+	@OneToMany(mappedBy="extension", fetch=LAZY)
+	@BeanProperty var attachments:JSet[FileAttachment] =_
+
+	def allAttachments = attachments.toSeq filter(_.hasData)
+
+	def addAttachment(attachment:FileAttachment) {
+		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+		attachment.temporary = false
+		attachment.extension = this
+		attachments.add(attachment)
+	}
 
 	@BeanProperty var approved:Boolean = false
 	@BeanProperty var rejected:Boolean = false

@@ -1,6 +1,7 @@
 package uk.ac.warwick.courses.commands.assignments
 
-import uk.ac.warwick.courses.commands.{SelfValidating, Description, Command}
+import scala.collection.JavaConversions._
+import uk.ac.warwick.courses.commands.{UploadedFile, Description, Command}
 import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.data.model.Assignment
 import org.springframework.transaction.annotation.Transactional
@@ -15,15 +16,16 @@ import org.springframework.beans.factory.annotation.Configurable
 
 @Configurable
 class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
-	extends Command[Extension] with SelfValidating with Daoisms {
+	extends Command[Extension] with Daoisms {
 
 	@BeanProperty var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var requestedExpiryDate:DateTime =_
+	@BeanProperty var file:UploadedFile = new UploadedFile
 
 	@BeanProperty var readGuidelines:JBoolean =_
 
-	def validate(implicit errors:Errors){
+	def validate(errors:Errors){
 		if (!readGuidelines){
 			errors.rejectValue("readGuidelines","extension.readGuidelines.mustConfirmRead" )
 		}
@@ -35,6 +37,11 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		if (!reason.hasText){
 			errors.rejectValue("reason", "extension.reason.provideReasons")
 		}
+	}
+
+	@Transactional
+	def onBind() {
+		file.onBind
 	}
 
 	@Transactional
@@ -50,6 +57,13 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		extension.requestedExpiryDate = requestedExpiryDate
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
+
+		if (!file.attached.isEmpty) {
+			for (attachment <- file.attached) {
+				extension addAttachment attachment
+			}
+		}
+
 		session.saveOrUpdate(extension)
 		extension
 	}
