@@ -79,13 +79,13 @@ first page of the form to setup a bunch of assignments from SITS.
 <table class="table table-bordered table-striped" id="batch-add-table">
 <tr>
 	<th>
-		<#if step="options">
+		<#-- <#if step="options"> -->
 			<div class="check-all checkbox">
 				<label><span class="very-subtle"></span>
 					<input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select/unselect all">
 				</label>
 			</div>
-    	</#if>
+    	<#-- </#if> -->
 	</th>
 	<th>Module</th>
 	<th>Seq</th>
@@ -117,7 +117,12 @@ first page of the form to setup a bunch of assignments from SITS.
 		${item.upstreamAssignment.sequence}
 	</td>
 	<td class="selectable">
-		${item.upstreamAssignment.name}
+		<#-- render all field errors for assignmentItems[x] -->
+		<@f.errors path="*" />
+	
+		${item.name}
+		<#-- TODO expose as click-to-edit -->
+		<@f.text path="name" />
 	</td>
 	<#if step="options">
  	<td class="selectable assignment-editable-fields-cell">
@@ -169,16 +174,15 @@ first page of the form to setup a bunch of assignments from SITS.
 <#elseif step='options'>
 <div id="options-buttons">
 
-<button class="btn btn-large btn-primary btn-block" data-action="options">(RE)FRESH!</button>
-<button class="btn btn-large btn-primary btn-block" data-action="submit">Next</button>
+<button class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
 
 <div id="selected-count">0 selected</div>
 <div id="selected-deselect"><a href="#">Clear selection</a></div>
 <#-- options sets -->
-<a class="btn btn-primary btn-block" id="set-options-button" data-target="#set-options-modal" href="<@url page="/admin/department/${department.code}/shared-options"/>">
+<a class="btn btn-info btn-block" id="set-options-button" data-target="#set-options-modal" href="<@url page="/admin/department/${department.code}/shared-options"/>">
 	Set options&hellip;
 </a>
-<a class="btn btn-primary btn-block" id="set-dates-button" data-target="#set-dates-modal">
+<a class="btn btn-info btn-block" id="set-dates-button" data-target="#set-dates-modal">
 	Set dates&hellip;
 </a>
 

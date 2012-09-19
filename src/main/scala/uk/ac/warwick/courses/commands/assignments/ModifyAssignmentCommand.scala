@@ -111,16 +111,16 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 			.filterNot { _ eq assignment }
 			.map { a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
 
+		if (openDate.isAfter(closeDate)) {
+			errors.reject("closeDate.early")
+		}
+
+		validateShared(errors)
+
 		if (upstreamAssignment != null && !(upstreamAssignment.departmentCode equalsIgnoreCase module.department.code)) {
 			errors.rejectValue("upstreamAssignment", "upstreamAssignment.notYours")
 		}
 
-		if (openDate.isAfter(closeDate)) {
-			errors.reject("closeDate.early")
-		}
-		if (fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)) {
-			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
-		}
 	}
 
 	// Called by controller after Spring has done its basic binding, to do more complex

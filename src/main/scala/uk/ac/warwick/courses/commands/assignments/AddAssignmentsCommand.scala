@@ -14,7 +14,18 @@ import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.ModuleDao
+import uk.ac.warwick.courses.data.model.Module
+import org.springframework.beans.factory.annotation.Configurable
+import scala.collection.mutable.HashMap
+import uk.ac.warwick.courses.helpers.LazyMaps
 
+/**
+ * Sub-object on the form for binding each upstream assignment and some other properties.
+ */
+@Configurable
 class AssignmentItem(
 	// whether to create an assignment from this item or not
 	@BeanProperty var include: Boolean = true,
@@ -45,6 +56,7 @@ class AssignmentItem(
 class AddAssignmentsCommand(val department: Department) extends Command[Unit] with SelfValidating {
 
 	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var moduleDao: ModuleDao = _
 
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 6
 	// months, which means it will start defaulting to next year from about February (under the assumption that
@@ -68,8 +80,28 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
+	@Transactional
 	override def apply() {
+		for (item <- assignmentItems if item.include) {
+			val assignment = new Assignment
+			assignment.academicYear = academicYear
+			assignment.name = item.name
+			assignment.upstreamAssignment = item.upstreamAssignment
+			assignment.module = findModule(item.upstreamAssignment).get
+			assignment.openDate = item.openDate
+			assignment.closeDate = item.closeDate
 
+			// validation should have verified that there is an options set for us to use
+			val options = optionsMap.get(item.optionsId)
+			options.copySharedTo(assignment)
+
+			assignmentService.save(assignment)
+		}
+	}
+
+	def findModule(upstreamAssignment: UpstreamAssignment): Option[Module] = {
+		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
+		moduleDao.getByCode(moduleCode)
 	}
 
 	override def validate(implicit errors: Errors) {
@@ -97,9 +129,33 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 			errors.reject("assignmentItems.missingDates")
 		}
 
-		for (item <- items) {
+		val modules = LazyMaps.create { (code: String) => moduleDao.getByCode(code.toLowerCase).orNull }
 
+		for (item <- items) {
+			for (existingAssignment <- assignmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.upstreamAssignment.moduleCodeBasic))) {
+				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
+				errors.rejectValue(path, "name.duplicate.assignment", item.name)
+			}
+			
+			
+
+			def sameNameAs(item: AssignmentItem)(other: AssignmentItem) = {
+				other != item && other.name == item.name
+			}
+
+			// also check that the upstream assignment names don't collide within a module.
+			// group items by module, then look for duplicates within each group.
+			for (
+				(modCode, items) <- items.groupBy { _.upstreamAssignment.moduleCodeBasic };
+				item <- items;
+				duplicate <- items.find(sameNameAs(item))
+			) {
+				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
+				errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
+			}
 		}
+		
+
 	}
 
 	override def describe(description: Description) = {

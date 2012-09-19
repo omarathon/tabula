@@ -79,7 +79,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var attachmentLimit: Int = 1
 
 	@BeanProperty var name: String = _
-	@BeanProperty var active: JBoolean = _
+	@BeanProperty var active: JBoolean = true
 
 	@BeanProperty var archived: JBoolean = false
 

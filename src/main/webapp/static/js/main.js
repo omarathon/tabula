@@ -532,10 +532,10 @@ jQuery(function ($) {
 			}
 			$('.submission-list').data("all-plagiarised", allPlagiarised);
 			if (allPlagiarised) {
-				$('#mark-plagiarised-selected-button').text("UnMark Selected Plagiarised");
+				$('#mark-plagiarised-selected-button').text("Unmark selected plagiarised");
 			}
 			else {
-				$('#mark-plagiarised-selected-button').text("Mark Selected Plagiarised");				
+				$('#mark-plagiarised-selected-button').text("Mark selected plagiarised");				
 			}
 		},
 

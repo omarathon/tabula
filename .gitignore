@@ -18,3 +18,5 @@ junit*.properties
 .*.swp
 /.idea/ant.xml
 /.idea/workspace.xml
+/project/target
+/project/project

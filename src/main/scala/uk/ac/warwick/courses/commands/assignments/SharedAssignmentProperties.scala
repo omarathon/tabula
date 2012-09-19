@@ -2,12 +2,14 @@ package uk.ac.warwick.courses.commands.assignments
 
 import collection.JavaConversions._
 import reflect.BeanProperty
-import uk.ac.warwick.courses._
+import uk.ac.warwick.courses
+import uk.ac.warwick.courses.JavaImports._
 import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.{ CommentField, FileField }
+import org.springframework.validation.Errors
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -25,14 +27,14 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties
  */
 trait SharedAssignmentProperties {
 
-	@BeanProperty var collectMarks: JBoolean = _
-	@BeanProperty var collectSubmissions: JBoolean = _
-	@BeanProperty var restrictSubmissions: JBoolean = _
+	@BeanProperty var collectMarks: JBoolean = false
+	@BeanProperty var collectSubmissions: JBoolean = false
+	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
 	@BeanProperty var allowResubmission: JBoolean = false
-	@BeanProperty var displayPlagiarismNotice: JBoolean = _
-	@BeanProperty var allowExtensions: JBoolean = _
-	@BeanProperty var allowExtensionRequests: JBoolean = _
+	@BeanProperty var displayPlagiarismNotice: JBoolean = false
+	@BeanProperty var allowExtensions: JBoolean = false
+	@BeanProperty var allowExtensionRequests: JBoolean = false
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -51,6 +53,12 @@ trait SharedAssignmentProperties {
 	 */
 	@Length(max = 2000)
 	@BeanProperty var comment: String = _
+	
+	def validateShared(errors: Errors) {
+        if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
+            errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
+        }
+	}
 
 	def copySharedTo(assignment: Assignment) {
 		assignment.collectMarks = collectMarks
