@@ -19,34 +19,34 @@ import org.springframework.beans.factory.annotation.Configurable
 
 @Configurable
 class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
-  
-  @BeanProperty var module: Module = _
-  @BeanProperty var assignment: Assignment = _
-  @BeanProperty var filename: String = _
-  @Autowired var assignmentService:AssignmentService = _
-  
-  private var fileFound: Boolean = _
-  var callback: (RenderableFile) => Unit = _
 
-  def apply() = {
-    val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId);
-    val allAttachments = submission map {_.allAttachments} getOrElse Nil
-    val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
+	@BeanProperty var module: Module = _
+	@BeanProperty var assignment: Assignment = _
+	@BeanProperty var filename: String = _
+	@Autowired var assignmentService: AssignmentService = _
 
-    fileFound = attachment.isDefined
-    if (callback != null) {
-      attachment.map { callback(_) }
-    }
-    attachment
-  }
+	private var fileFound: Boolean = _
+	var callback: (RenderableFile) => Unit = _
 
-  override def describe(d: Description) = {
-    d.assignment(assignment)
-    d.property("filename", filename)
-  }
+	def apply() = {
+		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId);
+		val allAttachments = submission map { _.allAttachments } getOrElse Nil
+		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 
-  override def describeResult(d: Description) {
-    d.property("fileFound", fileFound)
-  }
+		fileFound = attachment.isDefined
+		if (callback != null) {
+			attachment.map { callback(_) }
+		}
+		attachment
+	}
+
+	override def describe(d: Description) = {
+		d.assignment(assignment)
+		d.property("filename", filename)
+	}
+
+	override def describeResult(d: Description) {
+		d.property("fileFound", fileFound)
+	}
 
 }

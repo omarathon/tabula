@@ -21,25 +21,25 @@ import org.springframework.validation.Errors
 @Controller
 class FeedbackRatingController extends AbstractAssignmentController {
 
-	@Autowired @BeanProperty var features:Features =_
-	
+	@Autowired @BeanProperty var features: Features = _
+
 	hideDeletedItems
-	
+
 	@ModelAttribute def cmd(
-			@PathVariable("assignment") assignment:Assignment,
-			@PathVariable("module") module:Module) = {
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("module") module: Module) = {
 		mustBeLinked(assignment, module)
 		new RateFeedbackCommand(mandatory(checkCanGetFeedback(assignment, user).orNull), features)
 	}
-	
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(command:RateFeedbackCommand): Mav = {
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def form(command: RateFeedbackCommand): Mav = {
 		mustBeAbleTo(View(command.feedback))
 		Mav("submit/rating").noLayoutIf(ajax)
 	}
-	
-	@RequestMapping(method=Array(POST))
-	def submit(command:RateFeedbackCommand, errors:Errors): Mav = {
+
+	@RequestMapping(method = Array(POST))
+	def submit(command: RateFeedbackCommand, errors: Errors): Mav = {
 		command.validate(errors)
 		if (errors.hasErrors) {
 			form(command)
@@ -48,5 +48,5 @@ class FeedbackRatingController extends AbstractAssignmentController {
 			Mav("submit/rating", "rated" -> true).noLayoutIf(ajax)
 		}
 	}
-	
+
 }

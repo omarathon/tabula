@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class EventLogger extends Daoisms {
-	
+
 	var logger = Logger.getLogger("AUDIT")
-	
+
 }

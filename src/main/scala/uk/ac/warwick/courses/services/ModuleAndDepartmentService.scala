@@ -20,43 +20,38 @@ import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
  * Handles data about modules and departments
  */
 @Service
-class ModuleAndDepartmentService extends Logging  {
-  
-    @Autowired var moduleDao:ModuleDao =_
-    @Autowired var departmentDao:DepartmentDao =_
-    @Autowired var userLookup:UserLookupService =_
+class ModuleAndDepartmentService extends Logging {
+
+	@Autowired var moduleDao: ModuleDao = _
+	@Autowired var departmentDao: DepartmentDao = _
+	@Autowired var userLookup: UserLookupService = _
 	def groupService = userLookup.getGroupService
 
-    
-    @Transactional(readOnly=true)
-    def allDepartments = departmentDao.allDepartments
-    
-    @Transactional(readOnly=true)
-    def getDepartmentByCode(code:String) = departmentDao.getByCode(code)
-    
-    @Transactional(readOnly=true)
-    def getModuleByCode(code:String) = moduleDao.getByCode(code)
-   
-    def departmentsOwnedBy(usercode:String) = departmentDao.getByOwner(usercode)
-    
-    def modulesManagedBy(usercode:String) = moduleDao.findByParticipant(usercode)
-    def modulesManagedBy(usercode:String, dept:Department) = moduleDao.findByParticipant(usercode, dept)
-    
-    /**
-     * Modules that this user is attending.
-     * FIXME assumes webgroup = module attendance.
-     */
-    def modulesAttendedBy(usercode:String) = groupService.getGroupsForUser(usercode).asScala
+	@Transactional(readOnly = true)
+	def allDepartments = departmentDao.allDepartments
+
+	@Transactional(readOnly = true)
+	def getDepartmentByCode(code: String) = departmentDao.getByCode(code)
+
+	@Transactional(readOnly = true)
+	def getModuleByCode(code: String) = moduleDao.getByCode(code)
+
+	def departmentsOwnedBy(usercode: String) = departmentDao.getByOwner(usercode)
+
+	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
+	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
+
+	/**
+	 * Modules that this user is attending.
+	 * FIXME assumes webgroup = module attendance.
+	 */
+	def modulesAttendedBy(usercode: String) = groupService.getGroupsForUser(usercode).asScala
 		.filter { "Module" equals _.getType }
-		
-    
-    
-    @Transactional
-    def addOwner(dept:Department, owner:String) = dept.owners.addUser(owner)
-    
-    @Transactional
-    def removeOwner(dept:Department, owner:String) = dept.owners.removeUser(owner)
-    
-    
+
+	@Transactional
+	def addOwner(dept: Department, owner: String) = dept.owners.addUser(owner)
+
+	@Transactional
+	def removeOwner(dept: Department, owner: String) = dept.owners.removeUser(owner)
 
 }

@@ -12,12 +12,12 @@ import freemarker.template.TemplateModel
  */
 abstract class BaseTemplateMethodModelEx extends TemplateMethodModelEx {
 
-	def execMethod(args:Seq[_]) : Object
-	
-	override def exec(args: JList[_]): Object = execMethod(unwrapArgs(args)) 
+	def execMethod(args: Seq[_]): Object
 
-	protected def unwrapArgs(list:JList[_]) = 
-		list.asScala.toSeq.map { model => 
-			DeepUnwrap.unwrap( model.asInstanceOf[TemplateModel] )
+	override def exec(args: JList[_]): Object = execMethod(unwrapArgs(args))
+
+	protected def unwrapArgs(list: JList[_]) =
+		list.asScala.toSeq.map { model =>
+			DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 		}
 }

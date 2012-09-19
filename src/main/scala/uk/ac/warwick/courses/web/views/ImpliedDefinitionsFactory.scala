@@ -13,49 +13,47 @@ import uk.ac.warwick.courses.helpers.Logging
  * an absolute path, it generates a tiles definition on the fly, using a base
  * layout and using the view name to generate a Freemarker path to the body
  * template.
- * 
+ *
  * e.g. "time/view" will use a body template of /WEB-INF/freemarker/time/view.ftl
  */
 class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging {
 
-  final val FreemarkerRoot = "/WEB-INF/freemarker/"
-  final val Extension = ".ftl"
-  final val LayoutAttribute = "renderLayout"
-  final val DefaultLayout = "base"
-  final val BodyTileAttribute = "body"
-	
-  /*
+	final val FreemarkerRoot = "/WEB-INF/freemarker/"
+	final val Extension = ".ftl"
+	final val LayoutAttribute = "renderLayout"
+	final val DefaultLayout = "base"
+	final val BodyTileAttribute = "body"
+
+	/*
    * Return a definition if found in XML. Otherwise if it doesn't start with /,
    * generate our own definition based on the base layout
    */
-  override def getDefinition(name: String, ctx: TilesRequestContext) = {
-    if (debugEnabled) logger.trace("Rendering " + name)
-    val request = ctx.getRequestScope()
-    val name2 = name // TODO figure out why using name directly ends up null
-    super.getDefinition(name, ctx) match {
-      case definition:Any => definition
-      case _ if !name2.startsWith("/") => new Definition(layoutDefinition(ctx)) {
-        addAll(Map(
-            BodyTileAttribute -> new Attribute(FreemarkerRoot+name2+Extension)
-        ))
-  	  }
-      case _ => null // Let it be handled by FreemarkerServlet
-    }
-  }
-  
-  def layoutDefinition(ctx:TilesRequestContext) = {
-    val layout = layoutTemplate(ctx)
-    if (debugEnabled) logger.trace("Using layout template " + layout)
-    super.getDefinition(layout, ctx)
-  }
-  
-  def layoutTemplate(ctx:TilesRequestContext) =
-    if (ctx.getRequestScope != null) 
-      ctx.getRequestScope.get(LayoutAttribute) match {
-	    case name:String => name.trim
-	    case _ => DefaultLayout
-	  }
-    else DefaultLayout
+	override def getDefinition(name: String, ctx: TilesRequestContext) = {
+		if (debugEnabled) logger.trace("Rendering " + name)
+		val request = ctx.getRequestScope()
+		val name2 = name // TODO figure out why using name directly ends up null
+		super.getDefinition(name, ctx) match {
+			case definition: Any => definition
+			case _ if !name2.startsWith("/") => new Definition(layoutDefinition(ctx)) {
+				addAll(Map(
+					BodyTileAttribute -> new Attribute(FreemarkerRoot + name2 + Extension)))
+			}
+			case _ => null // Let it be handled by FreemarkerServlet
+		}
+	}
 
-  
+	def layoutDefinition(ctx: TilesRequestContext) = {
+		val layout = layoutTemplate(ctx)
+		if (debugEnabled) logger.trace("Using layout template " + layout)
+		super.getDefinition(layout, ctx)
+	}
+
+	def layoutTemplate(ctx: TilesRequestContext) =
+		if (ctx.getRequestScope != null)
+			ctx.getRequestScope.get(LayoutAttribute) match {
+				case name: String => name.trim
+				case _ => DefaultLayout
+			}
+		else DefaultLayout
+
 }

@@ -22,37 +22,37 @@ import scala.react.Observing
 
 class DatabaseEventListener extends EventListener with Daoisms with InitializingBean with Observing with Logging {
 
-	@Autowired var auditEventService:AuditEventService =_
-	@Autowired var maintenanceModeService:MaintenanceModeService = _
-	@Value("${filesystem.auditlog.dir}") var auditDirectory:File = _
-	@Value("${filesystem.create.missing}") var createMissingDirs:Boolean =false
-	
-	def save(event:Event, stage:String) {
+	@Autowired var auditEventService: AuditEventService = _
+	@Autowired var maintenanceModeService: MaintenanceModeService = _
+	@Value("${filesystem.auditlog.dir}") var auditDirectory: File = _
+	@Value("${filesystem.create.missing}") var createMissingDirs: Boolean = false
+
+	def save(event: Event, stage: String) {
 		if (maintenanceModeService.enabled) {
 			val file = new File(auditDirectory, UUID.randomUUID() + "logentry")
 			closeThis(new ObjectOutputStream(new FileOutputStream(file))) { stream =>
-				stream.writeObject(EventAndStage(event,stage))
+				stream.writeObject(EventAndStage(event, stage))
 			}
 		} else {
 			auditEventService.save(event, stage)
 		}
 	}
-	
-	def beforeCommand(event:Event) = save(event, "before")
-	def afterCommand(event:Event, returnValue: Any) = save(event, "after")
-	def onException(event:Event, exception: Throwable) = save(event, "error")
+
+	def beforeCommand(event: Event) = save(event, "before")
+	def afterCommand(event: Event, returnValue: Any) = save(event, "after")
+	def onException(event: Event, exception: Throwable) = save(event, "error")
 
 	def startLoggingToFile {
 		// nothing to be done, save() will log to file when necessary.
 	}
-	
+
 	def stopLoggingToFile {
 		// persist files back to database
 		logger.info("Writing file based events to database...")
 		for (file <- auditDirectory.listFiles(withSuffix("logentry"))) {
 			closeThis(new ObjectInputStream(new FileInputStream(file))) { stream =>
 				stream.readObject match {
-					case event:EventAndStage => auditEventService.save(event.event, event.stage)
+					case event: EventAndStage => auditEventService.save(event.event, event.stage)
 				}
 			}
 			if (!file.delete()) {
@@ -61,11 +61,11 @@ class DatabaseEventListener extends EventListener with Daoisms with Initializing
 			}
 		}
 	}
-	
+
 	def afterPropertiesSet {
 		if (!auditDirectory.isDirectory) {
 			if (createMissingDirs) auditDirectory.mkdirs()
-			else throw new IllegalArgumentException("Audit directory "+auditDirectory+" is not a directory")
+			else throw new IllegalArgumentException("Audit directory " + auditDirectory + " is not a directory")
 		}
 		// listen for maintenance mode changes
 		observe(maintenanceModeService.changingState) { enabled =>
@@ -74,8 +74,8 @@ class DatabaseEventListener extends EventListener with Daoisms with Initializing
 			true
 		}
 	}
-	
-	def withSuffix(suffix:String):FilenameFilter = new FilenameFilter {
-		def accept(file:File, name:String) = name.endsWith(suffix)
+
+	def withSuffix(suffix: String): FilenameFilter = new FilenameFilter {
+		def accept(file: File, name: String) = name.endsWith(suffix)
 	}
 }

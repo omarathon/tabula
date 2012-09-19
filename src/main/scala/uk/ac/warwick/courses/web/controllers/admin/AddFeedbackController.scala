@@ -19,38 +19,37 @@ import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.courses.web.Routes
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/new"))
 class AddFeedbackController extends BaseController {
-	
+
 	@ModelAttribute
-	def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
+	def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(assignment, user)
 
-	def onBind(command:AddFeedbackCommand) {
+	def onBind(command: AddFeedbackCommand) {
 		command.onBind
 	}
-	
-	@RequestMapping(method=Array(GET,HEAD))
-	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			@ModelAttribute form:AddFeedbackCommand, errors: Errors) = {
-		mustBeLinked(assignment,module)
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
+		@ModelAttribute form: AddFeedbackCommand, errors: Errors) = {
+		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		onBind(form)
 		Mav("admin/assignments/feedback/form",
 			"department" -> module.department,
 			"module" -> module,
-			"assignment" -> assignment
-			)
+			"assignment" -> assignment)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
-	
+
 	@Transactional
 	@RequestMapping(method = Array(POST))
 	def submit(
-			@PathVariable module:Module,
-			@PathVariable assignment:Assignment,
-			@Valid form:AddFeedbackCommand, errors: Errors) = {
-		mustBeLinked(assignment,module)
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@Valid form: AddFeedbackCommand, errors: Errors) = {
+		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		form.preExtractValidation(errors)
 		onBind(form)
@@ -62,5 +61,5 @@ class AddFeedbackController extends BaseController {
 			Mav("redirect:" + Routes.admin.module(module))
 		}
 	}
-	
+
 }

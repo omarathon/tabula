@@ -15,25 +15,25 @@ import org.hibernate.SessionFactory
 /**
  * Selects a Unicode string from the database to see if it gets there and
  * back again in one piece.
- * 
+ *
  * The select query is currently Oracle specific, so this isn't loaded in tests.
  */
-class DatabaseEncodingChecker @Autowired()(val sessionFactory:SessionFactory) extends InitializingBean with Logging {
-  
+class DatabaseEncodingChecker @Autowired() (val sessionFactory: SessionFactory) extends InitializingBean with Logging {
+
 	val testString = "a-\u01ee"
-	val hibernate:HibernateTemplate = new HibernateTemplate(sessionFactory)
-	
+	val hibernate: HibernateTemplate = new HibernateTemplate(sessionFactory)
+
 	override def afterPropertiesSet {
-	  val fetchedString = hibernate.execute { session:Session =>
-	      val query = session.createSQLQuery("select :string from dual")
-	      query.setString("string", testString)
-	      query.uniqueResult().toString()
-	  }
-	  if (!(testString equals fetchedString)) {
-	    throw new BeanInitializationException("Database is ruining strings - expected " + testString + ", got "+fetchedString)
-	  } else {
-	 	  logger.debug("Retrieved Unicode string from database in one piece, international characters should be okay")
-	  }
+		val fetchedString = hibernate.execute { session: Session =>
+			val query = session.createSQLQuery("select :string from dual")
+			query.setString("string", testString)
+			query.uniqueResult().toString()
+		}
+		if (!(testString equals fetchedString)) {
+			throw new BeanInitializationException("Database is ruining strings - expected " + testString + ", got " + fetchedString)
+		} else {
+			logger.debug("Retrieved Unicode string from database in one piece, international characters should be okay")
+		}
 	}
-	
+
 }

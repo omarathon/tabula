@@ -9,51 +9,51 @@ import org.springframework.beans.factory.annotation.Value
  * are hardcoded and repeated.
  */
 object Routes {
-	private def encoded(string:String) = URLEncoder.encode(string, "UTF-8")	
+	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
-	
+
 	object assignment {
-		def apply(assignment:Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
-		def receipt(assignment:Assignment) = apply(assignment)
+		def apply(assignment: Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
+		def receipt(assignment: Assignment) = apply(assignment)
 	}
-	
+
 	object admin {
-		def department(department:Department) = "/admin/department/%s/" format (encoded(department.code))
+		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
 
 		object module {
-			def apply(module:Module) = department(module.department) + "#module-" + encoded(module.code)
+			def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
 
 			def create() = "/admin/module/add"
 		}
 
-		def modulePermissions(module:Module) = "/admin/module/%s/permissions" format (encoded(module.code))
-		
+		def modulePermissions(module: Module) = "/admin/module/%s/permissions" format (encoded(module.code))
+
 		object assignment {
-			def create(module:Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
-			
-			private def assignmentroot(assignment:Assignment) = "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
-			
-			def edit(assignment:Assignment) = assignmentroot(assignment) + "/edit"
-			
-			def delete(assignment:Assignment) = assignmentroot(assignment) + "/delete"
-			
+			def create(module: Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
+
+			private def assignmentroot(assignment: Assignment) = "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+
+			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
+
+			def delete(assignment: Assignment) = assignmentroot(assignment) + "/delete"
+
 			object submission {
-				def apply(assignment:Assignment) = assignmentroot(assignment) + "/submissions/list"
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissions/list"
 			}
-			
+
 			object turnitin {
-				def status(assignment:Assignment) = assignmentroot(assignment) + "/turnitin"
+				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
 			}
-			
+
 			object feedback {
-				def apply(assignment:Assignment) = assignmentroot(assignment) + "/feedback/list"
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/list"
 			}
 		}
 	}
-	
+
 	object sysadmin {
-		def home = "/sysadmin" 
-			
+		def home = "/sysadmin"
+
 		object events {
 			def query = "/sysadmin/audit/search"
 		}

@@ -22,59 +22,59 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.courses.data.model.Feedback
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/marks"))
-class AddMarksController extends BaseController{
-	
-    @Autowired var assignmentService:AssignmentService = _
-    
-    @ModelAttribute def command(@PathVariable assignment:Assignment, user:CurrentUser) = new AddMarksCommand(assignment, user)
-	
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks"))
+class AddMarksController extends BaseController {
+
+	@Autowired var assignmentService: AssignmentService = _
+
+	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
+
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, module:Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-	
-	@RequestMapping(method=Array(HEAD,GET))
-	def uploadZipForm(@PathVariable module:Module, @PathVariable(value="assignment") assignment:Assignment, @ModelAttribute cmd:AddMarksCommand):Mav = {
-		mustBeLinked(assignment,module)
+	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AddMarksCommand): Mav = {
+		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		val members = assignmentService.determineMembershipUsers(assignment)
-		
-        var marksToDisplay = List[MarkItem]()
-        
-        logger.debug("sizeof marksToDisplay is " + marksToDisplay.size)
-        
-        members.foreach ( member => {
-            val feedback = assignmentService.getStudentFeedback( assignment, member.getWarwickId()) 
-            feedback.foreach ( marksToDisplay ::= noteMarkItem(member, _))          
-        });
-        
-        crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
-		
+
+		var marksToDisplay = List[MarkItem]()
+
+		logger.debug("sizeof marksToDisplay is " + marksToDisplay.size)
+
+		members.foreach(member => {
+			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId())
+			feedback.foreach(marksToDisplay ::= noteMarkItem(member, _))
+		});
+
+		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
+
 	}
-    
-  def noteMarkItem(member: User, feedback: Feedback) = {
 
-    logger.debug("in noteMarkItem (logger.debug)");
+	def noteMarkItem(member: User, feedback: Feedback) = {
 
-    val markItem = new MarkItem()
-    markItem.universityId = member.getWarwickId()
-    markItem.actualMark = feedback.actualMark.map{ _.toString() }.getOrElse("")
-    markItem.actualGrade = feedback.actualGrade
+		logger.debug("in noteMarkItem (logger.debug)");
 
-    markItem
-  } 
-    
-	@RequestMapping(method=Array(POST), params=Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, @ModelAttribute cmd:AddMarksCommand, errors: Errors):Mav = {
+		val markItem = new MarkItem()
+		markItem.universityId = member.getWarwickId()
+		markItem.actualMark = feedback.actualMark.map { _.toString() }.getOrElse("")
+		markItem.actualGrade = feedback.actualGrade
+
+		markItem
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("!confirm"))
+	def confirmBatchUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
 		cmd.onBind
 		cmd.postExtractValidation(errors)
-		mustBeLinked(assignment,module)
+		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		crumbed(Mav("admin/assignments/marks/markspreview"), module)
 	}
-	
-	@RequestMapping(method=Array(POST), params=Array("confirm=true"))
-	def doUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, @ModelAttribute cmd:AddMarksCommand, errors: Errors):Mav = {
-		mustBeLinked(assignment,module)
+
+	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
+	def doUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		cmd.onBind
 		cmd.apply()

@@ -22,22 +22,22 @@ import uk.ac.warwick.courses.commands.assignments.SubmissionListItem
 import uk.ac.warwick.courses.data.model.Assignment
 
 @Configurable @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
 class ListSubmissionsController extends BaseController {
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def list(command:ListSubmissionsCommand) = {
+	@RequestMapping(method = Array(GET, HEAD))
+	def list(command: ListSubmissionsCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 		mustBeAbleTo(Participate(command.module))
-		
+
 		val submissions = command.apply()
-    val hasOriginalityReport = submissions.exists(_.submission.originalityReport != null)
+		val hasOriginalityReport = submissions.exists(_.submission.originalityReport != null)
 
 		Mav("admin/assignments/submissions/list",
-				"assignment" -> assignment,
-				"submissions" -> submissions,
-        "hasOriginalityReport" -> hasOriginalityReport)
+			"assignment" -> assignment,
+			"submissions" -> submissions,
+			"hasOriginalityReport" -> hasOriginalityReport)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 

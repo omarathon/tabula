@@ -24,21 +24,21 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends BaseController {
-	
-	@Autowired var userLookup:UserLookupInterface =_
-	
+
+	@Autowired var userLookup: UserLookupInterface = _
+
 	private def checkPermissions() = mustBeAbleTo(Masquerade())
-	
+
 	//@ModelAttribute def model = new HashMap[String,Object]
-	
-	@RequestMapping(method=Array(HEAD,GET))
-	def form():Mav = {
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def form(): Mav = {
 		checkPermissions()
 		Mav("sysadmin/masquerade/form")
 	}
-	
-	@RequestMapping(method=Array(POST),params=Array("!action"))
-	def submit(@RequestParam usercode:String, response:HttpServletResponse):Mav = {
+
+	@RequestMapping(method = Array(POST), params = Array("!action"))
+	def submit(@RequestParam usercode: String, response: HttpServletResponse): Mav = {
 		checkPermissions()
 		userLookup.getUserByUserId(usercode) match {
 			case FoundUser(user) => response addCookie newCookie(usercode)
@@ -46,18 +46,17 @@ class MasqueradeController extends BaseController {
 		}
 		Redirect("/admin/masquerade")
 	}
-	
-	@RequestMapping(method=Array(POST),params=Array("action=remove"))
-	def remove(response:HttpServletResponse):Mav = {
+
+	@RequestMapping(method = Array(POST), params = Array("action=remove"))
+	def remove(response: HttpServletResponse): Mav = {
 		checkPermissions()
 		response addCookie newCookie(null)
 		Redirect("/admin/masquerade")
 	}
-	
-	private def newCookie(usercode:String) = new Cookie(
-					name  = "coursesMasqueradeAs",
-					value = usercode,
-					path  = "/"
-				)
-	
+
+	private def newCookie(usercode: String) = new Cookie(
+		name = "coursesMasqueradeAs",
+		value = usercode,
+		path = "/")
+
 }

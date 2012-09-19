@@ -8,15 +8,14 @@ import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.data.model.Assignment
 
 @Configurable
-class AdminGetAllFeedbackCommand(assignment:Assignment) extends Command[RenderableZip] with ReadOnly {
-	@Autowired var zipService:ZipService =_
-	
+class AdminGetAllFeedbackCommand(assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
+	@Autowired var zipService: ZipService = _
+
 	override def apply = {
 		val zip = zipService.getAllFeedbackZips(assignment)
 		new RenderableZip(zip)
 	}
-	
-	override def describe(d:Description) = d.assignment(assignment).properties(
-			"feedbackCount" -> assignment.feedbacks.size
-	)
+
+	override def describe(d: Description) = d.assignment(assignment).properties(
+		"feedbackCount" -> assignment.feedbacks.size)
 }

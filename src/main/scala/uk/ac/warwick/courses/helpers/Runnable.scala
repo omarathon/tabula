@@ -1,12 +1,12 @@
 package uk.ac.warwick.courses.helpers
 
-import java.lang.{Runnable => JRunnable}
+import java.lang.{ Runnable => JRunnable }
 
 /**
  * Wrapper for java.lang.Runnable that lets you pass in a function to
  * run, which is more concise.
  */
-final class Runnable(f: =>Unit) extends JRunnable {
+final class Runnable(f: => Unit) extends JRunnable {
 	override def run = f
 }
 
@@ -15,8 +15,8 @@ final class Runnable(f: =>Unit) extends JRunnable {
  * val task = Runnable { println("Yeah!") }
  */
 object Runnable {
-	def apply(f: =>Unit) = new Runnable(f)
-	
+	def apply(f: => Unit) = new Runnable(f)
+
 	// Import this if you want implicit conversion.
-	implicit def ImplicitConversion(f: => Unit):JRunnable = Runnable(f)
+	implicit def ImplicitConversion(f: => Unit): JRunnable = Runnable(f)
 }

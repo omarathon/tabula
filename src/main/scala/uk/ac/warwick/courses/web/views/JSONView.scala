@@ -9,14 +9,14 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.JMap
 
 @Configurable
-class JSONView(var json : Any) extends View {
-    @Autowired var objectMapper:ObjectMapper =_
-    
-    override def getContentType() = "application/json"
-      
-    override def render(model : JMap[String, _], request : HttpServletRequest, response : HttpServletResponse ) = {
-        response.setContentType(getContentType)
-        val out = response.getWriter
-        objectMapper.writeValue(out, json)      
-    }
+class JSONView(var json: Any) extends View {
+	@Autowired var objectMapper: ObjectMapper = _
+
+	override def getContentType() = "application/json"
+
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+		response.setContentType(getContentType)
+		val out = response.getWriter
+		objectMapper.writeValue(out, json)
+	}
 }

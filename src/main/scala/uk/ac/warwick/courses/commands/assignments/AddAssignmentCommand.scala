@@ -17,29 +17,28 @@ import uk.ac.warwick.courses.commands._
 import org.springframework.validation.Errors
 
 @Configurable
-class AddAssignmentCommand(val module:Module=null) extends ModifyAssignmentCommand {
-	
-	openDate = new DateTime().withTime(12,0,0,0)
-    closeDate = openDate.plusWeeks(2)
-    
-    def assignment:Assignment = null
-    
+class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
+
+	openDate = new DateTime().withTime(12, 0, 0, 0)
+	closeDate = openDate.plusWeeks(2)
+
+	def assignment: Assignment = null
+
 	@Transactional
-	override def apply:Assignment = {
-	  val assignment = new Assignment(module)
-	  assignment.addDefaultFields
-	  copyTo(assignment)
-	  assignment.active = true
-	  service.save(assignment)
-	  assignment
+	override def apply: Assignment = {
+		val assignment = new Assignment(module)
+		assignment.addDefaultFields
+		copyTo(assignment)
+		assignment.active = true
+		service.save(assignment)
+		assignment
 	}
-	
-	override def describeResult(d:Description, assignment:Assignment) = d.assignment(assignment)
-	
-	override def describe(d:Description) = d.module(module).properties(
+
+	override def describeResult(d: Description, assignment: Assignment) = d.assignment(assignment)
+
+	override def describe(d: Description) = d.module(module).properties(
 		"name" -> name,
 		"openDate" -> openDate,
-		"closeDate" -> closeDate
-	)
+		"closeDate" -> closeDate)
 
 }

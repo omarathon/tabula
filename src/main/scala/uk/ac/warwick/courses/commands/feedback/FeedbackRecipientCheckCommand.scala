@@ -18,16 +18,15 @@ import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.ReadOnly
 import uk.ac.warwick.courses.commands.Unaudited
 
-abstract class RecipientReportItem(val universityId:String, val user:User, val good:Boolean)
-case class MissingUser(id:String) extends RecipientReportItem(id, null, false)
-case class BadEmail(u:User) extends RecipientReportItem(u.getWarwickId, u, false)
-case class GoodUser(u:User) extends RecipientReportItem(u.getWarwickId, u, true)
+abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
+case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
+case class BadEmail(u: User) extends RecipientReportItem(u.getWarwickId, u, false)
+case class GoodUser(u: User) extends RecipientReportItem(u.getWarwickId, u, true)
 
 case class RecipientCheckReport(
-	val users: List[RecipientReportItem]
-) {
-	def hasProblems = users.find{ ! _.good }.isDefined
-	def problems = users.filter{ !_.good }
+	val users: List[RecipientReportItem]) {
+	def hasProblems = users.find { !_.good }.isDefined
+	def problems = users.filter { !_.good }
 }
 
 /**
@@ -38,35 +37,35 @@ case class RecipientCheckReport(
  */
 @Configurable
 class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
-	
-	@BeanProperty var module:Module =_ // optional, mainly for binding from URL
-	@BeanProperty var assignment:Assignment =_
-	@Autowired var assignmentService:AssignmentService =_
-	
+
+	@BeanProperty var module: Module = _ // optional, mainly for binding from URL
+	@BeanProperty var assignment: Assignment = _
+	@Autowired var assignmentService: AssignmentService = _
+
 	override def apply = {
-		val items:Seq[RecipientReportItem] = 
-			for ((id, user) <- assignmentService.getUsersForFeedback(assignment)) 
-				yield resolve(id,user)
+		val items: Seq[RecipientReportItem] =
+			for ((id, user) <- assignmentService.getUsersForFeedback(assignment))
+				yield resolve(id, user)
 		RecipientCheckReport(items.toList)
 	}
-	
-	def resolve(id:String, user:User) = user match {
-			case FoundUser(user) => {
-				if (user.getEmail.hasText && isGoodEmail(user.getEmail)) {
-					GoodUser(user)
-				} else {
-					BadEmail(user)
-				}
-			} 
-			case NoUser(user) => MissingUser(id)
+
+	def resolve(id: String, user: User) = user match {
+		case FoundUser(user) => {
+			if (user.getEmail.hasText && isGoodEmail(user.getEmail)) {
+				GoodUser(user)
+			} else {
+				BadEmail(user)
+			}
 		}
-		
-	def isGoodEmail(email:String): Boolean = {
+		case NoUser(user) => MissingUser(id)
+	}
+
+	def isGoodEmail(email: String): Boolean = {
 		try {
 			new InternetAddress(email).validate
 			true
 		} catch {
-			case e:MessagingException => false
+			case e: MessagingException => false
 		}
 	}
 }

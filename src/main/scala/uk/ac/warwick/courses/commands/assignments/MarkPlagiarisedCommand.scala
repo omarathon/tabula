@@ -19,40 +19,40 @@ import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.JList
 
 @Configurable
-class MarkPlagiarisedCommand(val assignment:Assignment) extends Command[JList[Submission]] with SelfValidating {
-	
-	@BeanProperty var submissions:JList[Submission] = ArrayList() 
-	
-	@Autowired var assignmentService:AssignmentService = _
+class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[JList[Submission]] with SelfValidating {
+
+	@BeanProperty var submissions: JList[Submission] = ArrayList()
+
+	@Autowired var assignmentService: AssignmentService = _
 	//@Autowired var zipService:ZipService = _
-	
-	@BeanProperty var confirm:Boolean = false
-	
-	@BeanProperty var markPlagiarised:Boolean = true
-	
+
+	@BeanProperty var confirm: Boolean = false
+
+	@BeanProperty var markPlagiarised: Boolean = true
+
 	def apply() = {
 		for (submission <- submissions) {
 			submission.suspectPlagiarised = markPlagiarised
 			//zipService.invalidateSubmissionZip(assignment)
-		
+
 			assignmentService.saveSubmission(submission)
 		}
 		submissions
 	}
-	
-	def prevalidate(implicit errors:Errors) {
+
+	def prevalidate(implicit errors: Errors) {
 		if (submissions.find(_.assignment != assignment).isDefined) {
 			reject("submission.bulk.wrongassignment")
 		}
 	}
-	
-	def validate(implicit errors:Errors) {
+
+	def validate(implicit errors: Errors) {
 		prevalidate
 		if (!confirm) rejectValue("confirm", "submission.mark.plagiarised.confirm")
 	}
-	
-	def describe(d:Description) = d
-			.assignment(assignment)
-			.property("submissionCount" -> submissions.size)
-			.property("markPlagiarised" -> markPlagiarised)
+
+	def describe(d: Description) = d
+		.assignment(assignment)
+		.property("submissionCount" -> submissions.size)
+		.property("markPlagiarised" -> markPlagiarised)
 }

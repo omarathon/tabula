@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.web.controllers.admin
 
 import uk.ac.warwick.courses.web.controllers.BaseController
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
 import uk.ac.warwick.courses.commands.assignments.SharedAssignmentPropertiesForm
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.data.model.Department
@@ -16,26 +16,24 @@ import org.springframework.web.bind.annotation.PathVariable
  * original HTML page.
  */
 @Controller
-@RequestMapping(value=Array("/admin/department/{department}/shared-options"))
+@RequestMapping(value = Array("/admin/department/{department}/shared-options"))
 class AssignmentSharedOptionsController extends BaseController {
 
-	@RequestMapping(method=Array(GET))
+	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
 		mav(form, department)
 	}
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(method = Array(POST))
 	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
 		mav(form, department).addObjects(
 			"submitted" -> true,
-			"hasErrors" -> errors.hasErrors
-		)
+			"hasErrors" -> errors.hasErrors)
 	}
 
 	def mav(form: SharedAssignmentPropertiesForm, @PathVariable("department") department: Department) = {
 		Mav("admin/assignments/shared_options",
-			"department" -> department
-		).noLayout()
+			"department" -> department).noLayout()
 	}
 
 	@ModelAttribute

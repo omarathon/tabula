@@ -16,14 +16,14 @@ import uk.ac.warwick.courses.helpers.Ordered
  */
 class RedirectViewResolver extends ViewResolver with Ordered {
 
-  val redirectPattern = new Regex("redirect:(/.+)")
-  
-  @Required
-  @BeanProperty var toplevelUrl:String = _
-  
-  def resolveViewName(viewName: String, locale: Locale): View = viewName match {
-    case redirectPattern(urlPath) => new RedirectView(toplevelUrl + urlPath)
-    case _ => null
-  }
+	val redirectPattern = new Regex("redirect:(/.+)")
+
+	@Required
+	@BeanProperty var toplevelUrl: String = _
+
+	def resolveViewName(viewName: String, locale: Locale): View = viewName match {
+		case redirectPattern(urlPath) => new RedirectView(toplevelUrl + urlPath)
+		case _ => null
+	}
 
 }

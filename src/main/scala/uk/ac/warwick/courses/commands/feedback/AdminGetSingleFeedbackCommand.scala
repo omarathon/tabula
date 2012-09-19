@@ -9,16 +9,15 @@ import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.commands.ReadOnly
 
 @Configurable
-class AdminGetSingleFeedbackCommand(feedback:Feedback) extends Command[RenderableZip] with ReadOnly {
-	@Autowired var zipService:ZipService =_
-	
+class AdminGetSingleFeedbackCommand(feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
+	@Autowired var zipService: ZipService = _
+
 	override def apply = {
 		val zip = zipService.getFeedbackZip(feedback)
 		new RenderableZip(zip)
 	}
-	
-	override def describe(d:Description) = d.feedback(feedback).properties(
-			"studentId" -> feedback.universityId,
-			"attachmentCount" -> feedback.attachments.size
-	)
+
+	override def describe(d: Description) = d.feedback(feedback).properties(
+		"studentId" -> feedback.universityId,
+		"attachmentCount" -> feedback.attachments.size)
 }

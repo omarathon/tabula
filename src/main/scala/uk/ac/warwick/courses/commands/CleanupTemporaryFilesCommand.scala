@@ -6,11 +6,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Configurable
 class CleanupTemporaryFilesCommand extends Command[Unit] {
-	
-	@Autowired var dao:FileDao =_
-	
+
+	@Autowired var dao: FileDao = _
+
 	@Transactional
 	override def apply = dao.deleteOldTemporaryFiles
-	
-	override def describe(d:Description) {}
+
+	override def describe(d: Description) {}
 }

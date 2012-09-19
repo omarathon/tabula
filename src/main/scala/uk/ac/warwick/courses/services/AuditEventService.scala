@@ -20,53 +20,53 @@ import uk.ac.warwick.courses.events.Event
 import org.springframework.transaction.annotation.Propagation
 
 trait AuditEventService {
-	def getById(id:Long): Option[AuditEvent]
-	def mapListToObject(array:Array[Object]): AuditEvent
-	def unclob(any:Object): String
-	def save(event:Event, stage:String):Unit
-	def save(auditevent:AuditEvent):Unit
-	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent]
-	def listRecent(start:Int, count:Int) : Seq[AuditEvent]
-	def parseData(data:String): Option[Map[String,Any]]
-	def getByEventId(eventId:String): Seq[AuditEvent]
+	def getById(id: Long): Option[AuditEvent]
+	def mapListToObject(array: Array[Object]): AuditEvent
+	def unclob(any: Object): String
+	def save(event: Event, stage: String): Unit
+	def save(auditevent: AuditEvent): Unit
+	def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent]
+	def listRecent(start: Int, count: Int): Seq[AuditEvent]
+	def parseData(data: String): Option[Map[String, Any]]
+	def getByEventId(eventId: String): Seq[AuditEvent]
 
-	def addRelated(event:AuditEvent): AuditEvent
+	def addRelated(event: AuditEvent): AuditEvent
 }
 
 @Component
 class AuditEventServiceImpl extends Daoisms with AuditEventService {
 
-	@Autowired var json:ObjectMapper =_
-	
-	@Resource(name="mainDatabaseDialect") var dialect:Dialect = _
-	
+	@Autowired var json: ObjectMapper = _
+
+	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
+
 	private val baseSelect = """select 
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
 		from auditevent a"""
-		
+
 	private val idSql = baseSelect + " where id = :id"
-	
+
 	private val eventIdSql = baseSelect + " where eventid = :id"
-	
+
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
-	
+
 	// for getting events newer than a certain date, for indexing
 	private val indexListSql = baseSelect + """ 
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
-	
+
 	/**
 	 * Get all AuditEvents with this eventId, i.e. all before/after stages
 	 * that were part of the same action.
 	 */
-	def getByEventId(eventId:String): Seq[AuditEvent] = {
+	def getByEventId(eventId: String): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(eventIdSql)
 		query.setString("id", eventId)
 		query.list.asInstanceOf[JList[Array[Object]]] map mapListToObject
 	}
-	
-	def mapListToObject(array:Array[Object]): AuditEvent = {
+
+	def mapListToObject(array: Array[Object]): AuditEvent = {
 		if (array == null) {
 			null
 		} else {
@@ -82,55 +82,55 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 			a
 		}
 	}
-	
-	def toIdType(any:Object): Long = any match {
-		case n:Number => n.longValue
+
+	def toIdType(any: Object): Long = any match {
+		case n: Number => n.longValue
 	}
-	
-	def unclob(any:Object): String = any match {
-		case clob:Clob => FileCopyUtils.copyToString(clob.getCharacterStream)
-		case string:String => string
+
+	def unclob(any: Object): String = any match {
+		case clob: Clob => FileCopyUtils.copyToString(clob.getCharacterStream)
+		case string: String => string
 		case null => ""
 	}
-	
-	def getById(id:Long): Option[AuditEvent] = {
+
+	def getById(id: Long): Option[AuditEvent] = {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
-//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
-		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map{addRelated}
+		//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map { addRelated }
 	}
-	
-	def addParsedData(event:AuditEvent) = {
+
+	def addParsedData(event: AuditEvent) = {
 		event.parsedData = parseData(event.data)
 	}
-	
-	def addRelated(event:AuditEvent) = {
+
+	def addRelated(event: AuditEvent) = {
 		event.related = getByEventId(event.eventId)
 		event
 	}
-	
-	def save(event:Event, stage:String) {
+
+	def save(event: Event, stage: String) {
 		doSave(event, stage)
 	}
-	
+
 	def save(auditEvent: AuditEvent) {
 		doSave(auditEvent.toEvent, auditEvent.eventStage)
 	}
-	
+
 	/**
 	 * Saves the event in a separate transaction to the main one,
 	 * so that it can be committed even if the main operation is
 	 * rolling back.
 	 */
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	def doSave(event:Event, stage:String) {
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	def doSave(event: Event, stage: String) {
 		// Both Oracle and HSQLDB support sequences, but with different select syntax
 		// TODO evaluate this and the SQL once on init
 		val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
-		
+
 		val query = session.createSQLQuery("insert into auditevent " +
-				"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
-				"values("+nextSeq+", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+			"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
+			"values(" + nextSeq + ", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
 		query.setString("eventid", event.id)
 		query.setTimestamp("date", event.date.toDate)
 		query.setString("name", event.name)
@@ -144,8 +144,8 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 		}
 		query.executeUpdate()
 	}
-	
-	def listNewerThan(date:DateTime, max:Int) : Seq[AuditEvent] = {
+
+	def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(indexListSql)
 		query.setTimestamp("eventdate", date.toDate)
 		query.setMaxResults(max)
@@ -154,7 +154,7 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 			.map(mapListToObject)
 	}
 
-	def listRecent(start:Int, count:Int) : Seq[AuditEvent] = {
+	def listRecent(start: Int, count: Int): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(listSql)
 		query.setFirstResult(start)
 		query.setMaxResults(count)
@@ -162,12 +162,12 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 			.asInstanceOf[JList[Array[Object]]]
 			.map(mapListToObject)
 	}
-	
+
 	// parse the data portion of the AuditEvent
-	def parseData(data:String): Option[Map[String,Any]] = try {
-		Option(json.readValue(data, classOf[Map[String,Any]]))
+	def parseData(data: String): Option[Map[String, Any]] = try {
+		Option(json.readValue(data, classOf[Map[String, Any]]))
 	} catch {
-		case e @ (_:JsonParseException | _:JsonMappingException) => None
+		case e @ (_: JsonParseException | _: JsonMappingException) => None
 	}
-	
+
 }

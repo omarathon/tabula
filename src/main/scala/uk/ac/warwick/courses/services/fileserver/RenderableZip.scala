@@ -4,7 +4,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.FileInputStream
 
-class RenderableZip(zip:File) extends RenderableFile {
+class RenderableZip(zip: File) extends RenderableFile {
 	def inputStream: InputStream = new FileInputStream(zip)
 	def filename: String = zip.getName
 	def contentType: String = "application/zip"

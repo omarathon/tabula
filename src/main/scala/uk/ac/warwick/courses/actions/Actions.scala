@@ -9,23 +9,23 @@ import uk.ac.warwick.courses.data.model.Assignment
  */
 sealed abstract class Action[T]
 
+case class View(val item: Viewable) extends Action[Viewable]
 
-case class View(val item:Viewable) extends Action[Viewable]
+case class Submit(val item: Assignment) extends Action[Assignment]
 
-case class Submit(val item:Assignment) extends Action[Assignment]
+/**
+ * At the moment, participating means you can do most admin actions within this object, but
+ * stops short of [Manage]-level things such as editing permissions.
+ */
+case class Participate(val item: Participatable) extends Action[Participatable]
 
-/** At the moment, participating means you can do most admin actions within this object, but
-  * stops short of [Manage]-level things such as editing permissions.   
-  */
-case class Participate(val item:Participatable) extends Action[Participatable]
-
-/** Managing means pretty much full control of a thing - you can edit its details, change its permissions. */ 
-case class Manage(val item:Manageable) extends Action[Manageable]
+/** Managing means pretty much full control of a thing - you can edit its details, change its permissions. */
+case class Manage(val item: Manageable) extends Action[Manageable]
 
 /** Whether you're allowed to masquerade as any user. */
 case class Masquerade() extends Action[Unit]
 
-case class Delete(val d:Deleteable) extends Action[Deleteable]
+case class Delete(val d: Deleteable) extends Action[Deleteable]
 
 case class Create() extends Action[Unit]
 
@@ -38,23 +38,23 @@ trait Participatable
 /** Applied to any object that can have the Delete action on it. */
 trait Deleteable
 
-
 object Action {
-	
+
 	private val PackagePrefix = Action.getClass.getPackage.getName + "."
 
-	/** Create an Action from an action name (e.g. "View") and a target.
-	  * Most likely useful in view templates, for permissions checking.
-	  *
-	  * Note that, like the templates they're used in, the correctness isn't
-	  * checked at runtime.
-	  */
+	/**
+	 * Create an Action from an action name (e.g. "View") and a target.
+	 * Most likely useful in view templates, for permissions checking.
+	 *
+	 * Note that, like the templates they're used in, the correctness isn't
+	 * checked at runtime.
+	 */
 	def of(name: String, target: Object*): Action[_] = {
 		try {
-			val clz = Class.forName(PackagePrefix+name).asSubclass(classOf[Action[_]])
-			clz.getConstructors()(0).newInstance(target:_*).asInstanceOf[Action[_]]
+			val clz = Class.forName(PackagePrefix + name).asSubclass(classOf[Action[_]])
+			clz.getConstructors()(0).newInstance(target: _*).asInstanceOf[Action[_]]
 		} catch {
-			case e:ClassNotFoundException => throw new IllegalArgumentException("Action "+name+" not recognised")
+			case e: ClassNotFoundException => throw new IllegalArgumentException("Action " + name + " not recognised")
 		}
 	}
 

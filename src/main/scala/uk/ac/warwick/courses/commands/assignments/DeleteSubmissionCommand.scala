@@ -18,34 +18,33 @@ import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.services.ZipService
 
 @Configurable
-class DeleteSubmissionCommand(val assignment:Assignment) extends Command[Unit] with SelfValidating {
-	
-	@BeanProperty var submissions:JList[Submission] = ArrayList() 
-	
-	@Autowired var assignmentService:AssignmentService = _
-	@Autowired var zipService:ZipService = _
-	
-	@BeanProperty var confirm:Boolean = false
-	
+class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+
+	@BeanProperty var submissions: JList[Submission] = ArrayList()
+
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var zipService: ZipService = _
+
+	@BeanProperty var confirm: Boolean = false
+
 	def apply() = {
 		for (submission <- submissions) assignmentService.delete(submission)
 		zipService.invalidateSubmissionZip(assignment)
 	}
-	
-	def prevalidate(implicit errors:Errors) {
+
+	def prevalidate(implicit errors: Errors) {
 		if (submissions.find(_.assignment != assignment).isDefined) {
 			reject("submission.bulk.wrongassignment")
 		}
 	}
-	
-	def validate(implicit errors:Errors) {
+
+	def validate(implicit errors: Errors) {
 		prevalidate
 		if (!confirm) rejectValue("confirm", "submission.delete.confirm")
 	}
-	
-	def describe(d:Description) = d
-			.assignment(assignment)
-			.property("submissionCount" -> submissions.size)
-	
-	
+
+	def describe(d: Description) = d
+		.assignment(assignment)
+		.property("submissionCount" -> submissions.size)
+
 }

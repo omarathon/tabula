@@ -3,19 +3,19 @@ package uk.ac.warwick.courses.commands.assignments
 import collection.JavaConversions._
 import reflect.BeanProperty
 import uk.ac.warwick.courses._
-import javax.validation.constraints.{Max, Min}
+import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
-import uk.ac.warwick.courses.data.model.forms.{CommentField, FileField}
+import uk.ac.warwick.courses.data.model.forms.{ CommentField, FileField }
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
  * assignment properties.
- * 
+ *
  * Currently relies on having a default empty constructor for lazy map populating to work,
  * so if you need to add a constructor then any command that has this as a Map value will need
- * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap). 
+ * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap).
  */
 class SharedAssignmentPropertiesForm extends SharedAssignmentProperties
 
@@ -39,7 +39,7 @@ trait SharedAssignmentProperties {
 	@BeanProperty var fileAttachmentLimit: Int = 1
 
 	@BeanProperty val maxFileAttachments: Int = 10
-	
+
 	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
 
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()

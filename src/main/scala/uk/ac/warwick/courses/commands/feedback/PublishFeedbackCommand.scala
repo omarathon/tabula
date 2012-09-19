@@ -34,48 +34,48 @@ import uk.ac.warwick.courses.services.UserLookupService
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
-  
-	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
-	@Autowired var assignmentService:AssignmentService =_
-    @Autowired var userLookup:UserLookupService =_
-    
-	@Autowired implicit var freemarker:Configuration =_
-	
-	@BeanProperty var assignment:Assignment =_
-	@BeanProperty var module:Module =_
-	
-	@BeanProperty var confirm:Boolean = false
-	
-	@Value("${mail.noreply.to}") var replyAddress:String = _
-	@Value("${mail.exceptions.to}") var fromAddress:String = _
-	@Value("${toplevel.url}") var topLevelUrl:String = _
-	
-	case class MissingUser(val universityId:String)
-	case class BadEmail(val user:User, val exception:Exception=null)
-	
+
+	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var userLookup: UserLookupService = _
+
+	@Autowired implicit var freemarker: Configuration = _
+
+	@BeanProperty var assignment: Assignment = _
+	@BeanProperty var module: Module = _
+
+	@BeanProperty var confirm: Boolean = false
+
+	@Value("${mail.noreply.to}") var replyAddress: String = _
+	@Value("${mail.exceptions.to}") var fromAddress: String = _
+	@Value("${toplevel.url}") var topLevelUrl: String = _
+
+	case class MissingUser(val universityId: String)
+	case class BadEmail(val user: User, val exception: Exception = null)
+
 	var missingUsers: JList[MissingUser] = ArrayList()
 	var badEmails: JList[BadEmail] = ArrayList()
-	
+
 	// validation done even when showing initial form.
-	def prevalidate(errors:Errors) {
-	  if (assignment.closeDate.isAfterNow()) {
-	    errors.rejectValue("assignment","feedback.publish.notclosed")
-	  } else if (assignment.feedbacks.isEmpty()) {
-	    errors.rejectValue("assignment","feedback.publish.nofeedback")
-	  }
+	def prevalidate(errors: Errors) {
+		if (assignment.closeDate.isAfterNow()) {
+			errors.rejectValue("assignment", "feedback.publish.notclosed")
+		} else if (assignment.feedbacks.isEmpty()) {
+			errors.rejectValue("assignment", "feedback.publish.nofeedback")
+		}
 	}
-	
-	def validate(implicit errors:Errors) {
-	  prevalidate(errors)
-	  if (!confirm) {
-	    rejectValue("confirm","feedback.publish.confirm")
-	  }
+
+	def validate(implicit errors: Errors) {
+		prevalidate(errors)
+		if (!confirm) {
+			rejectValue("confirm", "feedback.publish.confirm")
+		}
 	}
-	
+
 	@Transactional
 	def apply {
-  
-/*	  for (feedback <- assignment.unreleasedFeedback) {
+
+		/*	  for (feedback <- assignment.unreleasedFeedback) {
 	      val studentId = feedback.universityId
 	      for (submission <- assignment.submissions.find{ _.universityId == studentId }
 	          if !submission.suspectPlagiarised
@@ -87,59 +87,58 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	      }
 	  }*/
 
-      val users = assignmentService.getUsersForFeedback(assignment) 
-	  for ((studentId, user) <- users) {
-        val feedbacks = assignment.feedbacks.find{_.universityId == studentId}
-        for (feedback <- feedbacks)
-            feedback.released = true
-      }
-	  for (info <- users) email(info)
+		val users = assignmentService.getUsersForFeedback(assignment)
+		for ((studentId, user) <- users) {
+			val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
+			for (feedback <- feedbacks)
+				feedback.released = true
+		}
+		for (info <- users) email(info)
 	}
-	
-	private def email(info:Pair[String,User]) {
-	  val (id,user) = info
-	  if (user.isFoundUser()) {
-	    val email = user.getEmail
-	    if (StringUtils.hasText(email)) {
-	      val message = messageFor(user)
-	      try {
-	    	  studentMailSender.send(message)
-	      } catch {
-	     	  case e:MailException => badEmails add BadEmail(user, exception=e)
-	      }
-	    } else {
-	      badEmails add BadEmail(user)
-	    }
-	  } else {
-	    missingUsers add MissingUser(id)
-	  }
+
+	private def email(info: Pair[String, User]) {
+		val (id, user) = info
+		if (user.isFoundUser()) {
+			val email = user.getEmail
+			if (StringUtils.hasText(email)) {
+				val message = messageFor(user)
+				try {
+					studentMailSender.send(message)
+				} catch {
+					case e: MailException => badEmails add BadEmail(user, exception = e)
+				}
+			} else {
+				badEmails add BadEmail(user)
+			}
+		} else {
+			missingUsers add MissingUser(id)
+		}
 	}
-	
-	private def messageFor(user:User): SimpleMailMessage = {
-	  val message = new SimpleMailMessage
-	  val moduleCode = assignment.module.code.toUpperCase
-      message.setFrom(fromAddress)
-      message.setReplyTo(replyAddress)
-      message.setTo(user.getEmail)
-      // TODO configurable subject
-      message.setSubject(moduleCode + ": Your coursework feedback is ready")
-      // TODO configurable body (or at least, FIXME Freemarker this up)
-      message.setText(messageTextFor(user))
-    	
-      return message
+
+	private def messageFor(user: User): SimpleMailMessage = {
+		val message = new SimpleMailMessage
+		val moduleCode = assignment.module.code.toUpperCase
+		message.setFrom(fromAddress)
+		message.setReplyTo(replyAddress)
+		message.setTo(user.getEmail)
+		// TODO configurable subject
+		message.setSubject(moduleCode + ": Your coursework feedback is ready")
+		// TODO configurable body (or at least, FIXME Freemarker this up)
+		message.setText(messageTextFor(user))
+
+		return message
 	}
-	
-	def describe(d:Description) = d
+
+	def describe(d: Description) = d
 		.assignment(assignment)
 		.studentIds(assignment.feedbacks.map { _.universityId })
-  
-  def messageTextFor(user:User) = 
-	  renderToString("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
-    		  "name" -> user.getFirstName,
-    		  "assignmentName" -> assignment.name,
-    		  "moduleCode" -> assignment.module.code.toUpperCase,
-    		  "moduleName" -> assignment.module.name,
-    		  "url" -> (topLevelUrl + Routes.assignment.receipt(assignment))
-      ))
-	
+
+	def messageTextFor(user: User) =
+		renderToString("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
+			"name" -> user.getFirstName,
+			"assignmentName" -> assignment.name,
+			"moduleCode" -> assignment.module.code.toUpperCase,
+			"moduleName" -> assignment.module.name,
+			"url" -> (topLevelUrl + Routes.assignment.receipt(assignment))))
+
 }

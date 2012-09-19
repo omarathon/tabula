@@ -10,4 +10,4 @@ import system.exceptions.UserError
  * the submission/feedback/info page for an assignment. It is just so the
  * exception resolver can send it off to a specific error page.
  */
-class SubmitPermissionDeniedException(assignment:Assignment) extends RuntimeException() with UserError
+class SubmitPermissionDeniedException(assignment: Assignment) extends RuntimeException() with UserError

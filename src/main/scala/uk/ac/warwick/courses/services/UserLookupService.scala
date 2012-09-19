@@ -19,11 +19,11 @@ import uk.ac.warwick.userlookup.UserLookupAdapter
 
 trait UserLookupService extends UserLookupInterface
 
-class UserLookupServiceImpl(d:UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with Daoisms {
-	
-	override def getUserByWarwickUniId(id:String) =
+class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with Daoisms {
+
+	override def getUserByWarwickUniId(id: String) =
 		getUserByWarwickUniId(id, true)
-	
+
 	/**
 	 * When looking up a user by University ID, check our internal database first.
 	 */
@@ -34,47 +34,47 @@ class UserLookupServiceImpl(d:UserLookupInterface) extends UserLookupAdapter(d) 
 			super.getUserByWarwickUniId(id, ignored)
 		}
 	}
-	
+
 }
 
-class SwappableUserLookupService(d:UserLookupService) extends UserLookupServiceAdapter(d)
+class SwappableUserLookupService(d: UserLookupService) extends UserLookupServiceAdapter(d)
 
-abstract class UserLookupServiceAdapter(@BeanProperty var delegate:UserLookupService) extends UserLookupService {
-	
-	def getUsersInDepartment(d: String)= delegate.getUsersInDepartment(d)
-	def getUsersInDepartmentCode(c: String)= delegate.getUsersInDepartmentCode(c)
-	def getUserByToken(t: String)= delegate.getUserByToken(t)
-	def getUsersByUserIds(ids: List[String])= delegate.getUsersByUserIds(ids)
-	def getUserByWarwickUniId(id: String)= delegate.getUserByWarwickUniId(id)
-	def getUserByWarwickUniId(id: String, ignored: Boolean)= delegate.getUserByWarwickUniId(id, ignored)
-	def findUsersWithFilter(map: Map[String,String])= delegate.findUsersWithFilter(map)
-	def findUsersWithFilter(map: Map[String,String], includeInactive: Boolean)= delegate.findUsersWithFilter(map, includeInactive)
+abstract class UserLookupServiceAdapter(@BeanProperty var delegate: UserLookupService) extends UserLookupService {
+
+	def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
+	def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)
+	def getUserByToken(t: String) = delegate.getUserByToken(t)
+	def getUsersByUserIds(ids: List[String]) = delegate.getUsersByUserIds(ids)
+	def getUserByWarwickUniId(id: String) = delegate.getUserByWarwickUniId(id)
+	def getUserByWarwickUniId(id: String, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
+	def findUsersWithFilter(map: Map[String, String]) = delegate.findUsersWithFilter(map)
+	def findUsersWithFilter(map: Map[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
 	def getGroupService() = delegate.getGroupService
 	def getOnCampusService() = delegate.getOnCampusService
-	def getUserByUserId(id: String)= delegate.getUserByUserId(id)
+	def getUserByUserId(id: String) = delegate.getUserByUserId(id)
 	def clearCaches() = delegate.clearCaches()
-	def getUserByIdAndPassNonLoggingIn(u:String,p:String) = delegate.getUserByIdAndPassNonLoggingIn(u,p)
-	
+	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
+
 }
 
 @BeanInfo
 class MaintenanceUserLookup extends UserLookupService {
-	
+
 	def getUsersInDepartment(arg0: String): List[User] = Nil
 
 	def getUsersInDepartmentCode(arg0: String): List[User] = Nil
 
 	def getUserByToken(arg0: String): User = new AnonymousUser()
 
-	def getUsersByUserIds(arg0: List[String]): Map[String,User] = immutable.Map.empty[String,User]
+	def getUsersByUserIds(arg0: List[String]): Map[String, User] = immutable.Map.empty[String, User]
 
 	def getUserByWarwickUniId(arg0: String): User = new AnonymousUser()
 
 	def getUserByWarwickUniId(arg0: String, arg1: Boolean): User = new AnonymousUser()
 
-	def findUsersWithFilter(arg0: Map[String,String]): List[User] = Nil
+	def findUsersWithFilter(arg0: Map[String, String]): List[User] = Nil
 
-	def findUsersWithFilter(arg0: Map[String,String], arg1: Boolean): List[User] = Nil
+	def findUsersWithFilter(arg0: Map[String, String], arg1: Boolean): List[User] = Nil
 
 	// FIXME return an implementation
 	def getGroupService(): GroupService = null

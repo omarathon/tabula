@@ -18,29 +18,29 @@ import javax.validation.Valid
 import uk.ac.warwick.courses.web.Routes
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class AddBatchFeedbackController extends BaseController {
-	@ModelAttribute def command(@PathVariable assignment:Assignment, user:CurrentUser) = 
+	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(assignment, user)
-	
-	def onBind(cmd:AddFeedbackCommand) = cmd.onBind
-	
+
+	def onBind(cmd: AddFeedbackCommand) = cmd.onBind
+
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, module:Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-	
-	@RequestMapping(method=Array(HEAD,GET))
-	def uploadZipForm(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			@ModelAttribute cmd:AddFeedbackCommand):Mav = {
+	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def uploadZipForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
+		@ModelAttribute cmd: AddFeedbackCommand): Mav = {
 		doChecks(module, assignment)
 		crumbed(Mav("admin/assignments/feedback/zipform"), module)
 	}
-	
-	@RequestMapping(method=Array(POST), params=Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
+
+	@RequestMapping(method = Array(POST), params = Array("!confirm"))
+	def confirmBatchUpload(@PathVariable module: Module, @PathVariable assignment: Assignment,
+		@ModelAttribute cmd: AddFeedbackCommand, errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
-			uploadZipForm(module,assignment,cmd)
+			uploadZipForm(module, assignment, cmd)
 		} else {
 			cmd.onBind
 			cmd.postExtractValidation(errors)
@@ -48,10 +48,10 @@ class AddBatchFeedbackController extends BaseController {
 			crumbed(Mav("admin/assignments/feedback/zipreview"), module)
 		}
 	}
-	
-	@RequestMapping(method=Array(POST), params=Array("confirm=true"))
-	def doUpload(@PathVariable module:Module, @PathVariable assignment:Assignment, 
-			@ModelAttribute cmd:AddFeedbackCommand, errors: Errors):Mav = {
+
+	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
+	def doUpload(@PathVariable module: Module, @PathVariable assignment: Assignment,
+		@ModelAttribute cmd: AddFeedbackCommand, errors: Errors): Mav = {
 		doChecks(module, assignment)
 		cmd.preExtractValidation(errors)
 		cmd.onBind
@@ -64,9 +64,9 @@ class AddBatchFeedbackController extends BaseController {
 			Redirect(Routes.admin.module(module))
 		}
 	}
-	
-	def doChecks(module:Module, assignment:Assignment) = {
-		mustBeLinked(mandatory(assignment),mandatory(module))
-        mustBeAbleTo(Participate(module))
+
+	def doChecks(module: Module, assignment: Assignment) = {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		mustBeAbleTo(Participate(module))
 	}
 }

@@ -18,23 +18,20 @@ class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging
 		classOf[Mav] isAssignableFrom methodParam.getMethod.getReturnType
 	}
 
-	override def handleReturnValue(returnValue: Object, 
-			returnType: MethodParameter, 
-			mavContainer: ModelAndViewContainer, 
-			webRequest: NativeWebRequest) =
+	override def handleReturnValue(returnValue: Object,
+		returnType: MethodParameter,
+		mavContainer: ModelAndViewContainer,
+		webRequest: NativeWebRequest) =
 		returnValue match {
-			case mav:Mav => {
+			case mav: Mav => {
 				mavContainer.addAllAttributes(mav.toModel)
 				if (mav.viewName != null) {
-				    mavContainer.setViewName(mav.viewName)				  
-				}
-				else {
-				    mavContainer.setView(mav.view)
+					mavContainer.setViewName(mav.viewName)
+				} else {
+					mavContainer.setView(mav.view)
 				}
 				mavContainer.setRequestHandled(false)
 			}
 		}
-		
-	
 
 }

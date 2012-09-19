@@ -8,10 +8,10 @@ import org.springframework.format.Formatter
 import java.util.Locale
 
 class FileAttachmentIdConverter extends Converter[String, FileAttachment] with Formatter[FileAttachment] {
-	@Autowired @BeanProperty var fileDao:FileDao =_
-	
-	override def convert(code:String) = fileDao.getFileById(code).orNull
-	
-	override def parse(code:String, locale:Locale):FileAttachment = convert(code)
-	override def print(attachment:FileAttachment, locale:Locale):String = attachment.id
+	@Autowired @BeanProperty var fileDao: FileDao = _
+
+	override def convert(code: String) = fileDao.getFileById(code).orNull
+
+	override def parse(code: String, locale: Locale): FileAttachment = convert(code)
+	override def print(attachment: FileAttachment, locale: Locale): String = attachment.id
 }

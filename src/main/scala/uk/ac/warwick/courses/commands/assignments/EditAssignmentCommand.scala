@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.commands.assignments;
 
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
-import org.hibernate.validator.constraints.NotEmpty 
+import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
@@ -16,23 +16,22 @@ import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
 
 @Configurable
-class EditAssignmentCommand(val assignment:Assignment=null) extends ModifyAssignmentCommand {
-	
+class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAssignmentCommand {
+
 	this.copyFrom(assignment)
-	
+
 	def module = assignment.module
-	
+
 	@Transactional
-	override def apply:Assignment = {
-	  copyTo(assignment)
-	  service.save(assignment) 
-	  assignment
+	override def apply: Assignment = {
+		copyTo(assignment)
+		service.save(assignment)
+		assignment
 	}
-	
-	override def describe(d:Description) = d.assignment(assignment).properties(
+
+	override def describe(d: Description) = d.assignment(assignment).properties(
 		"name" -> name,
 		"openDate" -> openDate,
-		"closeDate" -> closeDate
-	)
-	
+		"closeDate" -> closeDate)
+
 }

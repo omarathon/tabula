@@ -13,13 +13,13 @@ import uk.ac.warwick.courses.RequestInfo
  */
 class RequestInfoArgumentResolver extends HandlerMethodArgumentResolver {
 
-	def supportsParameter(parameter: MethodParameter): Boolean = 
+	def supportsParameter(parameter: MethodParameter): Boolean =
 		classOf[RequestInfo] isAssignableFrom parameter.getParameterType
-		
+
 	def resolveArgument(
-	      param: MethodParameter,
-	      container: ModelAndViewContainer, 
-	      req: NativeWebRequest,
-	      binderFactory: WebDataBinderFactory):Object = RequestInfo.fromThread	
+		param: MethodParameter,
+		container: ModelAndViewContainer,
+		req: NativeWebRequest,
+		binderFactory: WebDataBinderFactory): Object = RequestInfo.fromThread
 
 }

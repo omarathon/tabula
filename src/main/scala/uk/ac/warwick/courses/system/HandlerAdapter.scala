@@ -12,8 +12,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
  * to replace them entirely.
  */
 class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter {
-	@BeanProperty var customPreReturnValueHandlers:java.util.List[HandlerMethodReturnValueHandler] = Nil
-	
+	@BeanProperty var customPreReturnValueHandlers: java.util.List[HandlerMethodReturnValueHandler] = Nil
+
 	/*
 	 * There used to be a protected method we could override but now it's all private, so
 	 * we use reflection to modify the private field on startup.
@@ -23,7 +23,7 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		field.setAccessible(true)
 		field
 	}
-	
+
 	override def afterPropertiesSet = {
 		super.afterPropertiesSet()
 		val defaultHandlers = returnValueHandlersField.get(this).asInstanceOf[HandlerMethodReturnValueHandlerComposite]
@@ -32,5 +32,5 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		composite.addHandler(defaultHandlers)
 		returnValueHandlersField.set(this, composite)
 	}
-	
+
 }

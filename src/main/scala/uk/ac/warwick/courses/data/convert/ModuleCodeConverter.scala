@@ -7,9 +7,9 @@ import uk.ac.warwick.courses.services.ModuleAndDepartmentService
 import uk.ac.warwick.courses.data.model.Module
 
 class ModuleCodeConverter extends Converter[String, Module] {
-  
-  @Autowired var service:ModuleAndDepartmentService =_
-  
-  override def convert(code:String) = service.getModuleByCode(code).getOrElse(throw new IllegalArgumentException)
-  
+
+	@Autowired var service: ModuleAndDepartmentService = _
+
+	override def convert(code: String) = service.getModuleByCode(code).getOrElse(throw new IllegalArgumentException)
+
 }

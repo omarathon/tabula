@@ -13,50 +13,50 @@ import org.springframework.beans.factory.annotation.Autowired
  * background by {{uk.ac.warwick.courses.services.jobs.JobService}}.
  * They can post updates on their status and progress which can then
  * be viewed by anyone who knows the Job's ID.
- * 
+ *
  * To make a new Job:
- * 
- * - Extend Job 
+ *
+ * - Extend Job
  * - Add @Component annotation
  * - Make sure to set succeeded=true at the end of your run method
  * - Define a companion object with a method to create a JobPrototype
- *     containing attributes that your Job can read out later. 
+ *     containing attributes that your Job can read out later.
  */
 @Component
 abstract class Job extends Logging {
-	
+
 	/** Identifies the specific Job in the database. */
-	val identifier:String
-	
-	@Autowired var jobService: JobService =_
-	
+	val identifier: String
+
+	@Autowired var jobService: JobService = _
+
 	/**
 	 * Run the job. Job itself is stateless so
 	 * JobInstance provides access to information about
 	 * this specific job instance, and method to update
 	 * status and progress.
 	 */
-	def run(implicit job:JobInstance): Unit
-	
-	protected def progress (implicit _status:JobInstance)  = _status.progress
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	protected def progress_=(percent:Int) (implicit _status:JobInstance) {
+	def run(implicit job: JobInstance): Unit
+
+	protected def progress(implicit _status: JobInstance) = _status.progress
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	protected def progress_=(percent: Int)(implicit _status: JobInstance) {
 		_status.progress = percent
 		jobService.update(_status)
 	}
-	
-	protected def status (implicit _status:JobInstance)  = _status.status
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	protected def status_=(status:String) (implicit _status:JobInstance)  {
-		if (debugEnabled) logger.debug("Job:"+_status.id+" - " + status)
+
+	protected def status(implicit _status: JobInstance) = _status.status
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	protected def status_=(status: String)(implicit _status: JobInstance) {
+		if (debugEnabled) logger.debug("Job:" + _status.id + " - " + status)
 		_status.status = status
 		jobService.update(_status)
 	}
-	
+
 	protected def obsoleteJob = new ObsoleteJobException
-	
+
 	trait DefinitionFactory {
-		
+
 	}
-	
+
 }

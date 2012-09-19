@@ -13,20 +13,20 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.ItemNotFoundException
 
 @Controller
-@RequestMapping(value=Array("/module/{module}/{assignment}"))
-class DownloadAttachmentController extends AbstractAssignmentController{
+@RequestMapping(value = Array("/module/{module}/{assignment}"))
+class DownloadAttachmentController extends AbstractAssignmentController {
 
-	@ModelAttribute def command(user:CurrentUser) = new DownloadAttachmentCommand(user)
-  
-	@Autowired var fileServer:FileServer =_
-  
-	@RequestMapping(value=Array("/attachment/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command:DownloadAttachmentCommand, user:CurrentUser, response:HttpServletResponse):Unit = {
+	@ModelAttribute def command(user: CurrentUser) = new DownloadAttachmentCommand(user)
+
+	@Autowired var fileServer: FileServer = _
+
+	@RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def getAttachment(command: DownloadAttachmentCommand, user: CurrentUser, response: HttpServletResponse): Unit = {
 		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		
+
 		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable, response)	}
-		command.apply().orElse{ throw new ItemNotFoundException() }
+		command.callback = { (renderable) => fileServer.serve(renderable, response) }
+		command.apply().orElse { throw new ItemNotFoundException() }
 	}
 
 }
