@@ -270,13 +270,11 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: Feedback) {
-		//if (feedbacks.filter(_.universityId == "a").isEmpty){
 		feedbacks.add(feedback)
 		feedback.assignment = this
 	}
 
 	def addSubmission(submission: Submission) {
-		//if (feedbacks.filter(_.universityId == "a").isEmpty){
 		submissions.add(submission)
 		submission.assignment = this
 	}	
@@ -352,10 +350,18 @@ case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[S
     val withoutAttachments: Set[String], val withoutMarks: Set[String], val plagiarised: Set[String]) {
 
 	def hasProblems = {
-		var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty || !plagiarised.isEmpty)
+		//var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty || !plagiarised.isEmpty)
+
+		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
+		var problems = assignment.collectSubmissions && shouldBeEmpty.exists { !_.isEmpty }
+
 		//TODO feature check
+		
 		if (assignment.collectMarks) {
-			problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
+			//problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
+			
+			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
+			problems = problems || shouldBeEmptyWhenCollectingMarks.exists { !_.isEmpty }
 		}
 		problems
 	}

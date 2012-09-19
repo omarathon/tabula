@@ -88,8 +88,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	  }*/
 
       val users = assignmentService.getUsersForFeedback(assignment) 
-	  for (userPair <- users) {
-        val studentId = userPair._1
+	  for ((studentId, user) <- users) {
         val feedbacks = assignment.feedbacks.find{_.universityId == studentId}
         for (feedback <- feedbacks)
             feedback.released = true

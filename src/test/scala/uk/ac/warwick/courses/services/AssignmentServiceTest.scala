@@ -131,7 +131,6 @@ class AssignmentServiceTest extends AppContextTestBase {
 			
 			// the only person was suspected of plagiarism - expect 0
 			submission.suspectPlagiarised = true
-			//session.saveOrUpdate(submission)
 			val userPairs4 = service.getUsersForFeedback(assmt)
 			userPairs4.size should be (0)					
 		}

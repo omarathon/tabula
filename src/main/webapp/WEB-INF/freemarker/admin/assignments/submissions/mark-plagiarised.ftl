@@ -28,7 +28,7 @@
 <@form.errors path="submissions" />
 <#assign submissionsList=status.actualValue />
 <p>
-${verb?cap_first}ing <strong><@fmt.p submissionsList?size "submission item" /></strong> as suspected plagiarised.
+${verb?cap_first}ing <strong><@fmt.p submissionsList?size "submission item" /></strong> as suspected of being plagiarised.
 ${message}
 </p>
 <#list submissionsList as submission>
@@ -42,7 +42,14 @@ ${message}
 
 <p>
 <@form.errors path="confirm" />
-<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to ${verb} these submission items as suspected plagiarised.</label></@form.label> 
+<@form.label checkbox=true><@f.checkbox path="confirm" />
+<#if (submissionsList?size > 1)>
+ I confirm that I want to ${verb} these submissions as suspected of being plagiarised.
+<#else>
+ I confirm that I want to ${verb} this submission as suspected of being plagiarised.
+</#if>
+ </label>
+ </@form.label> 
 </p>
 
 <div class="submit-buttons">
