@@ -84,11 +84,13 @@ ul {
 }
 
 #feedback-table, #submission-table {
-    tr.selected td {
-        background-color: #F2DEDE;
-        &:hover{
-            background-color: lighten(#F2DEDE, 20%);
-        }
+    tbody {
+    	tr.selected td {
+        	background-color: #F2DEDE;
+        	&:hover{
+	            background-color: #F2DEDE;
+    	    }
+    	}
     }
     .status span{
         display: inline-block;
@@ -163,20 +165,6 @@ ul {
 
 .end-assignment-info { clear: both; }
 .end-floats { clear: both; }
-
-.assignment-columns {
-	min-width: 928px;
-
-	.assignment-left-fields {
-		width: 50%;
-  		float: left;
-	}
-
-	#assignment-picker {
-		width: 40%;
-		float: right;
-	}
-}
 
 .dev {
 	color: #ccc;

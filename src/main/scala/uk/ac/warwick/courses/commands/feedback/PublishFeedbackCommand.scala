@@ -2,47 +2,43 @@ package uk.ac.warwick.courses.commands.feedback
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
-import org.hibernate.annotations.AccessType
+import scala.reflect.BeanProperty
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
+import freemarker.template.Configuration
 import javax.annotation.Resource
-import javax.persistence.Entity
+import javax.annotation.Resource
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.courses.commands.Description
+import uk.ac.warwick.courses.commands.SelfValidating
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.courses.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
-import freemarker.template.Configuration
-import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.web.Routes
-import uk.ac.warwick.courses.web.views.FreemarkerRendering
-import javax.annotation.Resource
-import javax.persistence.Entity
-import javax.persistence.NamedQueries
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.transaction.annotation.Transactional
-import scala.reflect.BeanProperty
-import uk.ac.warwick.courses.commands.Command
-import uk.ac.warwick.courses.commands.Description
-import uk.ac.warwick.courses.commands.SelfValidating
+import uk.ac.warwick.courses.services.UserLookupService
 
 @Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
   
 	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
 	@Autowired var assignmentService:AssignmentService =_
+    @Autowired var userLookup:UserLookupService =_
+    
 	@Autowired implicit var freemarker:Configuration =_
 	
 	@BeanProperty var assignment:Assignment =_
@@ -78,11 +74,25 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	
 	@Transactional
 	def apply {
-	  val users = assignmentService.getUsersForFeedback(assignment)
-	  // note: after setting these to true, unreleasedFeedback will return empty.
-	  for (feedback <- assignment.unreleasedFeedback) {
-	 	  feedback.released = true
-	  }
+  
+/*	  for (feedback <- assignment.unreleasedFeedback) {
+	      val studentId = feedback.universityId
+	      for (submission <- assignment.submissions.find{ _.universityId == studentId }
+	          if !submission.suspectPlagiarised
+	      ) {
+	          // note: if all are set to true, unreleasedFeedback will return empty.
+	          feedback.released = true
+	          val user = userLookup.getUserByWarwickUniId(studentId, false)
+	          email(Pair(studentId, user))
+	      }
+	  }*/
+
+      val users = assignmentService.getUsersForFeedback(assignment) 
+	  for ((studentId, user) <- users) {
+        val feedbacks = assignment.feedbacks.find{_.universityId == studentId}
+        for (feedback <- feedbacks)
+            feedback.released = true
+      }
 	  for (info <- users) email(info)
 	}
 	

@@ -30,10 +30,11 @@ class SubmissionReportController extends BaseController {
 	   mustBeAbleTo(Participate(command.module))
 	   
 	   val report = command.assignment.submissionsReport
-	   val submissionOnly = report.submissionOnly.toList map userByWarwickId sortBy surname
-	   val feedbackOnly   = report.feedbackOnly.toList   map userByWarwickId sortBy surname
-	   val hasNoAttachments = report.withoutAttachments.toList   map userByWarwickId sortBy surname
-	   val hasNoMarks = report.withoutMarks.toList   map userByWarwickId sortBy surname
+	   val submissionOnly = report.submissionOnly.toList.sorted.map{ userByWarwickId }
+	   val feedbackOnly   = report.feedbackOnly.toList.sorted.map{ userByWarwickId }
+	   val hasNoAttachments = report.withoutAttachments.toList.sorted.map{ userByWarwickId }
+	   val hasNoMarks = report.withoutMarks.toList.sorted.map{ userByWarwickId }
+	   val plagiarised = report.plagiarised.toList.sorted.map{ userByWarwickId }
 	   
 	   Mav("admin/assignments/submissionsreport",
 	       "assignment" -> command.assignment,
@@ -41,6 +42,7 @@ class SubmissionReportController extends BaseController {
 	       "feedbackOnly" -> feedbackOnly,
 	       "hasNoAttachments" -> hasNoAttachments,
 	       "hasNoMarks" -> hasNoMarks,
+	       "plagiarised" -> plagiarised,
 	       "report" -> report).noLayoutIf(ajax)
 	}
 	

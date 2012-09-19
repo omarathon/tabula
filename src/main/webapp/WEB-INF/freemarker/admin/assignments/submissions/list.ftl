@@ -18,6 +18,11 @@ XML
 <a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
 </#if>
 
+<a class="btn btn-warn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark selected plagiarised</a>
+
+
+
+
 </div>
 
 <#macro originalityReport r>
@@ -43,7 +48,8 @@ Publications: ${r.publicationOverlap}%)
         </tr>
         <#list submissions as item>
 	        <#assign submission=item.submission>
-            <tr class="itemContainer">
+            <tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
+       
                 <td><@form.selector_check_row "submissions" submission.id /></td>
                 <td class="id">${submission.universityId}</td>
                 <#-- TODO show student name if allowed by department -->
@@ -60,6 +66,9 @@ Publications: ${r.publicationOverlap}%)
                     </#if>
                     <#if item.downloaded>
                         <span class="label-green">Downloaded</span>
+                    </#if>
+                    <#if submission.suspectPlagiarised>
+                    	<span class="label-orange">Suspected Plagiarised</span>
                     </#if>
                 </td>
                 <#if hasOriginalityReport>

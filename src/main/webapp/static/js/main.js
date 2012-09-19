@@ -90,8 +90,8 @@ jQuery.fn.bigList = function(options) {
 		var onNoneChecked = options.onNoneChecked || doNothing;
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
-		this.checkboxChangedFunction = function(){
-				onChange.call(jQuery(this)); // pass the checkbox as the context
+		$checkboxes.change(function(){
+		    onChange.call(jQuery(this)); // pass the checkbox as the context
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
 			if (allChecked) {
@@ -104,9 +104,7 @@ jQuery.fn.bigList = function(options) {
 				$this.data('checked','none');
 				onNoneChecked.call($this);
 			}
-		}
-
-		$checkboxes.change(this.checkboxChangedFunction);
+		});
 
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
@@ -142,8 +140,8 @@ jQuery.fn.tableForm = function(options) {
 		// this is the form
 		var $this = $(this);
 
-		var doNothing = function(){};
-		var setupFunction = options.setup || doNothing;
+        var doNothing = function(){};
+        var setupFunction = options.setup || doNothing;
         
 		var addButtonClass = options.addButtonClass || 'add-button';
 		var headerClass = options.headerClass || 'header-row';
@@ -154,9 +152,9 @@ jQuery.fn.tableForm = function(options) {
 		var markupClass = options.markupClass || 'row-markup';
 		var rowMarkup = $('.'+markupClass).html();
 
-		var onAdd = options.onAdd || doNothing;
+        var onAdd = options.onAdd || doNothing;
 
-		var $table = $this.find('table.'+tableClass);
+        var $table = $this.find('table.'+tableClass);
 		var $addButton = $this.find('.'+addButtonClass);
 		var $header = $this.find('tr.'+headerClass);
 		var $rows = $this.find('tr.'+rowClass);
@@ -492,11 +490,53 @@ jQuery(function ($) {
 				}
 				return false;
 			});
+			
+		
+			
+			$('#mark-plagiarised-selected-button').click(function(event){
+				event.preventDefault();
+
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
+				
+				if ($container.data('checked') != 'none') {
+		
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
+					
+					if ($container.data("all-plagiarised") === true) {
+						$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+					}
+					
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
 		},
 
 		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
 			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+			var $checkedBoxes = $(".collection-checkbox:checked");
+
+			var allPlagiarised = false;
+			
+			if ($checkedBoxes.length > 0) {
+				allPlagiarised = true;
+				$checkedBoxes.each(function(index){
+					var $checkBox = $(this);
+					if ($checkBox.closest('tr').data('plagiarised') != true) {
+						allPlagiarised = false;
+					}
+				});					
+			}
+			$('.submission-list').data("all-plagiarised", allPlagiarised);
+			if (allPlagiarised) {
+				$('#mark-plagiarised-selected-button').text("UnMark Selected Plagiarised");
+			}
+			else {
+				$('#mark-plagiarised-selected-button').text("Mark Selected Plagiarised");				
+			}
 		},
 
 		onSomeChecked : function() {
@@ -535,8 +575,39 @@ jQuery(function ($) {
 		})
 	};
 
+	var TogglingSection = function ($section, $header, options) {
+		var THIS = this;
+		var options = options || {};
+		var showByDefault = options.showByDefault || false;
+		this.$section = $section;
+		this.$toggleButton = $('<div class="toggle-button>(Show)</div>');
+		$header.append(this.$toggleButton).addClass('clickable-cursor').click(function(){
+			THIS.toggle();
+			if (options.callback) options.callback();
+		});
+
+		if (!showByDefault) this.hide();
+	};
+	TogglingSection.prototype.toggle = function() {
+		if (this.$section.is(':visible')) this.hide();
+		else this.show();
+	};
+	TogglingSection.prototype.show = function() {
+		this.$toggleButton.html = 'Hide';
+		this.$section.show();
+	};
+	TogglingSection.prototype.hide = function() {
+		this.$toggleButton.html = 'Show';
+		this.$section.hide();
+	}
+
 	var decorateAppCommentsForm = function($form) {
 		$form.addClass('narrowed-form');
+//		var $browserInfo = $form.find('.browser-info');
+//		var $heading = $form.find('.browser-info-heading');
+//		new TogglingSection($browserInfo, $heading, {callback: function(){
+//			getFeedbackPopup().setHeightToFit();
+//		}});
 	}
 
 	// Fills in non-AJAX app comment form
@@ -591,15 +662,8 @@ jQuery(function ($) {
 		$slidingDiv.toggle($checkbox.is(':checked'));
 	};
 
-	// export the stuff we do to the submissions form so we can re-run it on demand.
-	var decorateSubmissionsForm = function() {
-		slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
-	};
-	exports.decorateSubmissionsForm = decorateSubmissionsForm;
 
-	decorateSubmissionsForm();
-
-
+	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
 	// check that the extension UI elements are present
 	if($('input#allowExtensions').length > 0){
 		slideMoreOptions($('input#allowExtensions'), $('#request-extension-row'));
@@ -632,7 +696,7 @@ jQuery(function ($) {
 			)
 		);
 
-
+	window.Courses = exports;
 
     // code for the marks tabs
     $('#marks-tabs a').click(function (e) {
