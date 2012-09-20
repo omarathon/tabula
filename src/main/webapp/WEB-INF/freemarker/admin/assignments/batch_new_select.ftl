@@ -65,7 +65,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <@form.labelled_row "academicYear" "Academic year">
 	<#if step="select">
-		<@f.select path="academicYear" id="academicYear">
+		<@f.select path="academicYear" id="academicYearSelect">
 			<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 		</@f.select>
 	<#else>
@@ -88,7 +88,8 @@ first page of the form to setup a bunch of assignments from SITS.
     	<#-- </#if> -->
 	</th>
 	<th>Module</th>
-	<th>Seq</th>
+	<th><abbr title="Sequence">Seq</abbr></th>
+	<th><abbr title="Occurrence/Cohort">Occ</abbr></th>
 	<th>Assignment name</th>
 	<#if step="options">
 	<th></th>
@@ -115,6 +116,10 @@ first page of the form to setup a bunch of assignments from SITS.
 	</td>
 	<td class="selectable">
 		${item.upstreamAssignment.sequence}
+	</td>
+	<td class="selectable">
+		${item.occurrence}
+		<@f.hidden path="occurrence" />
 	</td>
 	<td class="selectable">	
 		<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>

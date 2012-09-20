@@ -37,6 +37,7 @@ class AddAssignmentsController extends BaseController {
 	// The initial load of page 1, where we select the items to import.
 	@RequestMapping(method = Array(GET))
 	def selectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
+		cmd.afterBind()
 		checkPermissions(cmd)
 		cmd.populateWithItems()
 		getMav(cmd).addObjects("action" -> "select")
@@ -45,6 +46,7 @@ class AddAssignmentsController extends BaseController {
 	// Reloads page 1 with a POST, to show any updated information if necessary.
 	@RequestMapping(method = Array(POST), params = Array("action=refresh-select"))
 	def refreshSelectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
+		cmd.afterBind()
 		checkPermissions(cmd)
 		getMav(cmd).addObjects("action" -> "select")
 	}
@@ -52,6 +54,7 @@ class AddAssignmentsController extends BaseController {
 	// Loads page 2 where we set options on all the assignments.
 	@RequestMapping(method = Array(POST), params = Array("action=options"))
 	def optionsForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
+		cmd.afterBind()
 		checkPermissions(cmd)
 		cmd.validateNames(errors)
 		getMav(cmd).addObjects("action" -> "options")
@@ -66,6 +69,7 @@ class AddAssignmentsController extends BaseController {
 	// Final step where we actually do the work.
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
 	def submit(@Valid @ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
+		cmd.afterBind()
 		checkPermissions(cmd)
 		if (errors.hasErrors()) {
 			optionsForm(cmd, errors)

@@ -56,7 +56,7 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 	}
 	
 	def item(assignment: UpstreamAssignment, include: Boolean, optionsId: String) = {
-		val item = new AssignmentItem(include, assignment)
+		val item = new AssignmentItem(include, "A", assignment)
 		item.optionsId = optionsId
 		item.openDate  = dateTime(2012, 9)
 		item.closeDate = dateTime(2012, 11)

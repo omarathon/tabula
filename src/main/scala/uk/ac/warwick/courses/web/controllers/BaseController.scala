@@ -117,7 +117,6 @@ abstract class BaseController extends ControllerMethods
 	with StringUtils
 	with ControllerImports
 	with PreRequestHandler {
-	// make Mav available to controllers without needing to import
 
 	@Required @Resource(name = "validator") var globalValidator: Validator = _
 

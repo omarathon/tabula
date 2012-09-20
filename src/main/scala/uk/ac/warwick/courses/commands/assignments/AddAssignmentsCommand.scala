@@ -21,6 +21,7 @@ import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import scala.collection.mutable.HashMap
 import uk.ac.warwick.courses.helpers.LazyMaps
+import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 
 /**
  * Sub-object on the form for binding each upstream assignment and some other properties.
@@ -28,10 +29,16 @@ import uk.ac.warwick.courses.helpers.LazyMaps
 @Configurable
 class AssignmentItem(
 	// whether to create an assignment from this item or not
-	@BeanProperty var include: Boolean = true,
-	@BeanProperty var upstreamAssignment: UpstreamAssignment = null) {
+	@BeanProperty var include: Boolean,
+	@BeanProperty var occurrence: String,
+	@BeanProperty var upstreamAssignment: UpstreamAssignment) {
+	
+    def this() = this(true, null, null)
+    
+	@Autowired var assignmentService: AssignmentService = _
 
-	def this() = this(true)
+	// set after bind
+	@BeanProperty var assessmentGroup: Option[UpstreamAssessmentGroup] = _
 
 	// Name for new assignment. Defaults to the name of the upstream assignment, if provided.
 	@BeanProperty var name: String = Option(upstreamAssignment).map { _.name }.orNull
@@ -65,8 +72,8 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 
 	// All the possible assignments, prepopulated from SITS.
 	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
-	
-	private def includedItems = assignmentItems.filter{ _.include } 
+
+	private def includedItems = assignmentItems.filter { _.include }
 
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
@@ -89,7 +96,9 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 			assignment.academicYear = academicYear
 			assignment.name = item.name
 			assignment.upstreamAssignment = item.upstreamAssignment
+			assignment.occurrence = item.occurrence
 			assignment.module = findModule(item.upstreamAssignment).get
+
 			assignment.openDate = item.openDate
 			assignment.closeDate = item.closeDate
 
@@ -105,7 +114,6 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
 		moduleDao.getByCode(moduleCode)
 	}
-	
 
 	override def validate(implicit errors: Errors) {
 		ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
@@ -133,7 +141,6 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		}
 
 		validateNames(errors)
-		
 
 	}
 
@@ -153,17 +160,21 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 
 			// also check that the upstream assignment names don't collide within a module.
 			// group items by module, then look for duplicates within each group.
-			for (
-				(modCode, items) <- items.groupBy { _.upstreamAssignment.moduleCodeBasic };
-				item <- items;
-				duplicate <- items.find(sameNameAs(item))
-			) {
+			val groupedByModule = items.groupBy { _.upstreamAssignment.moduleCodeBasic }
+			for ((modCode, moduleItems) <- groupedByModule;
+				  item <- moduleItems
+				  if moduleItems.exists(sameNameAs(item))) {
+				
 				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
-				errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
+				// Can't work out why it will end up trying to add the same error multiple times,
+				// so wrapping in hasFieldErrors to limit it to showing just the first
+				if (!errors.hasFieldErrors(path)) {
+				    errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
+				}
+				
 			}
 		}
 	}
-
 
 	override def describe(description: Description) = {
 		description.department(department)
@@ -173,14 +184,34 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	// the info we need from the request.
 	def populateWithItems() {
 		assignmentItems.clear()
-		assignmentItems.addAll(fetchAssignmentItems())
+		if (academicYear != null) {
+			assignmentItems.addAll(fetchAssignmentItems())
+		}
+	}
+
+	def afterBind() {
+		// re-attach UpstreamAssessmentGroup objects based on the other properties
+		for (item <- assignmentItems if item.assessmentGroup == null) {
+			item.assessmentGroup = assignmentService.getAssessmentGroup(new UpstreamAssessmentGroup {
+				this.academicYear = academicYear
+				this.occurrence = item.occurrence
+				this.moduleCode = item.upstreamAssignment.moduleCode
+				this.assessmentGroup = item.upstreamAssignment.assessmentGroup
+			})
+		}
 	}
 
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
-		for (upstreamAssignment <- assignmentService.getUpstreamAssignments(department)) yield {
-			new AssignmentItem(
+		for {
+			upstreamAssignment <- assignmentService.getUpstreamAssignments(department);
+			assessmentGroup <- assignmentService.getAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
+		} yield {
+			val item = new AssignmentItem(
 				include = shouldIncludeByDefault(upstreamAssignment),
+				occurrence = assessmentGroup.occurrence,
 				upstreamAssignment = upstreamAssignment)
+			item.assessmentGroup = Some(assessmentGroup)
+			item
 		}
 	}
 

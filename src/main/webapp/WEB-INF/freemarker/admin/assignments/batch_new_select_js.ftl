@@ -8,6 +8,7 @@ It would probably be better as an external js file. Probably!
 
 jQuery(function($){
 
+
 	// editable name field
 	$('.editable-name').editable({
 		toggle: '<a class="name-edit-link"><i class="icon-pencil"></i></a>',
@@ -27,6 +28,12 @@ jQuery(function($){
 	var optionGroupCount = $('#options-buttons .options-button').length;
 
 	var $form = $('#batch-add-form');
+	
+	// reload page when academic field dropdown changes, as it changes the contents of the list.
+	$('#academicYearSelect').change(function(){
+		$form.find('input[name=action]').val('refresh-select');
+		$form.submit();
+	}); 
 
 	// When clicking Next, set the action parameter to the relevant value before submitting
 	$form.find('button[data-action]').click(function(event){
