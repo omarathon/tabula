@@ -15,21 +15,19 @@ import java.beans.PropertyDescriptor
 /**
  * Defines flags to turn features on and off.
  *
- * Defaults set in `default.properties`.
+ * Defaults set in this class.
  * App can change startup features in its `courses.properties`,
  *   then modify them at runtime via JMX.
  *
  * ==Adding a new feature==
  *
  * Define a new boolean variable here (with `@BeanProperty` so that it's
- * a valid JavaBean property), and then add an entry to `default.properties`
- * like
+ * a valid JavaBean property), and then to set it to a different value in
+ * `courses.properties` add a line such as 
  *
  * {{{
  * features.yourFeatureName=false
  * }}}
- *
- * Where `false` can of course be `true` if you want that to be the default.
  */
 abstract class Features {
 
@@ -38,7 +36,7 @@ abstract class Features {
 	@BeanProperty var submissions: Boolean = true
 	@BeanProperty var privacyStatement: Boolean = true
 	@BeanProperty var collectMarks: Boolean = false
-	@BeanProperty var turnitin: Boolean = false
+	@BeanProperty var turnitin: Boolean = true
 	@BeanProperty var assignmentMembership: Boolean = false
 	@BeanProperty var extensions: Boolean = false
 }
