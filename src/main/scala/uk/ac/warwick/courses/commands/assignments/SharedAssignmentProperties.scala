@@ -19,7 +19,11 @@ import org.springframework.validation.Errors
  * so if you need to add a constructor then any command that has this as a Map value will need
  * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap).
  */
-class SharedAssignmentPropertiesForm extends SharedAssignmentProperties
+class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
+	// set this as the default for this form, because in the AddAssignmentsCommand
+	// we're linking assignments in from SITS.
+	restrictSubmissions = true
+}
 
 /**
  * Contains all the fields that could be collectively assigned to a group of assignments, so that

@@ -8,6 +8,22 @@ It would probably be better as an external js file. Probably!
 
 jQuery(function($){
 
+	// editable name field
+	$('.editable-name').editable({
+		toggle: '<a class="name-edit-link"><i class="icon-pencil"></i></a>',
+		validate: function(value) {
+		  if ($.trim(value) == '') {
+		    return "A name is required.";
+		  }
+		}
+	}).on('update', function(){
+		// set the hidden field to the new value.
+		var newVal = $(this).data('editable').value;
+		$(this).siblings('input[type=hidden]').val( newVal );
+	});
+	
+	
+
 	var optionGroupCount = $('#options-buttons .options-button').length;
 
 	var $form = $('#batch-add-form');
@@ -52,8 +68,8 @@ jQuery(function($){
 
 	// cool selection mechanism...
 	var batchTableMouseDown = false;
-	$('#batch-add-table td.selectable')
-		.mousedown(function(){
+	$('#batch-add-table')
+		.on('mousedown', 'td.selectable', function(){
 			batchTableMouseDown = true;
 			var $row = $(this).closest('tr');
 			$row.toggleClass('selected');
@@ -61,13 +77,18 @@ jQuery(function($){
 			$row.find('.collection-checkbox').attr('checked', checked);
 			return false;
 		})
-		.mouseover(function(){
+		.on('mouseenter', 'td.selectable', function(){
+			console.log('mouseenter');
 			if (batchTableMouseDown) {
 				var $row = $(this).closest('tr');
 				$row.toggleClass('selected');
 				var checked = $row.hasClass('selected');
 				$row.find('.collection-checkbox').attr('checked', checked);
 			}
+		})
+		.on('mousedown', 'a.name-edit-link', function(e){
+			// prevent td.selected toggling when clicking the edit link. 
+			e.stopPropogation(); 
 		});
 
 	$(document).mouseup(function(){

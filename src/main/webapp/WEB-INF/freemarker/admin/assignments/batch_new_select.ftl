@@ -116,13 +116,15 @@ first page of the form to setup a bunch of assignments from SITS.
 	<td class="selectable">
 		${item.upstreamAssignment.sequence}
 	</td>
-	<td class="selectable">
-		<#-- render all field errors for assignmentItems[x] -->
-		<@f.errors path="*" />
-	
-		${item.name}
+	<td class="selectable">	
+		<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
 		<#-- TODO expose as click-to-edit -->
-		<@f.text path="name" />
+		<@f.hidden path="name" />
+		
+		<#-- render all field errors for assignmentItems[x] -->
+		<@f.errors path="" cssClass="error" />
+		<#-- render all field errors for assignmentItems[x].* -->
+		<@f.errors path="*" cssClass="error" />
 	</td>
 	<#if step="options">
  	<td class="selectable assignment-editable-fields-cell">

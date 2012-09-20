@@ -90,7 +90,7 @@ jQuery.fn.bigList = function(options) {
 		var onNoneChecked = options.onNoneChecked || doNothing;
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
-		$checkboxes.change(function(){
+		this.checkboxChangedFunction = function(){
 		    onChange.call(jQuery(this)); // pass the checkbox as the context
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
@@ -104,7 +104,8 @@ jQuery.fn.bigList = function(options) {
 				$this.data('checked','none');
 				onNoneChecked.call($this);
 			}
-		});
+		};
+		$checkboxes.change(this.checkboxChangedFunction);
 
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
@@ -661,6 +662,14 @@ jQuery(function ($) {
 		});
 		$slidingDiv.toggle($checkbox.is(':checked'));
 	};
+	
+	// export the stuff we do to the submissions form so we can re-run it on demand.
+	var decorateSubmissionsForm = function() {
+		slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
+	};
+	exports.decorateSubmissionsForm = decorateSubmissionsForm;
+
+	decorateSubmissionsForm();
 
 
 	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));

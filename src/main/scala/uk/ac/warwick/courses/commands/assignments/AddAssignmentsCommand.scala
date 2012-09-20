@@ -65,6 +65,8 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 
 	// All the possible assignments, prepopulated from SITS.
 	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
+	
+	private def includedItems = assignmentItems.filter{ _.include } 
 
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
@@ -103,12 +105,13 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
 		moduleDao.getByCode(moduleCode)
 	}
+	
 
 	override def validate(implicit errors: Errors) {
 		ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
 
 		// just get the items we're actually going to import
-		val items = assignmentItems.filter { _.include }
+		val items = includedItems
 		val definedOptionsIds = optionsMap.keySet
 
 		def missingOptionId(item: AssignmentItem) = {
@@ -129,15 +132,20 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 			errors.reject("assignmentItems.missingDates")
 		}
 
+		validateNames(errors)
+		
+
+	}
+
+	def validateNames(errors: Errors) {
+		val items = includedItems
 		val modules = LazyMaps.create { (code: String) => moduleDao.getByCode(code.toLowerCase).orNull }
 
 		for (item <- items) {
 			for (existingAssignment <- assignmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.upstreamAssignment.moduleCodeBasic))) {
 				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
-				errors.rejectValue(path, "name.duplicate.assignment", item.name)
+				errors.rejectValue(path, "name.duplicate.assignment", Array(item.name), null)
 			}
-			
-			
 
 			def sameNameAs(item: AssignmentItem)(other: AssignmentItem) = {
 				other != item && other.name == item.name
@@ -154,9 +162,8 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 				errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
 			}
 		}
-		
-
 	}
+
 
 	override def describe(description: Description) = {
 		description.department(department)
