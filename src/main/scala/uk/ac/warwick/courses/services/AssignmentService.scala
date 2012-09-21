@@ -186,7 +186,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.list.asInstanceOf[JList[Assignment]]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) = {
-		option[Assignment](session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module")
+		option[Assignment](session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
