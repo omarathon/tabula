@@ -185,8 +185,15 @@ jQuery(function($){
 
 				// button behaviour already wired by an on() call.
 
+				// rename all the fields to sit under an optionsMap entry.
 				fields.each(function(i, field){
-					field.name = "optionsMap["+groupName+"]." + field.name;
+					var prefix = "optionsMap["+groupName+"].";
+					// HFC-306 if it starts with _, keep that at the start after renaming
+					if (field.name.indexOf('_') == 0) {
+						field.name = field.name.substring(1);
+						prefix = "_" + prefix;
+					}
+					field.name =  prefix + field.name;
 					$hidden.append(field);
 				});
 
