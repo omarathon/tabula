@@ -6,16 +6,14 @@
 		This assignment closes on  <@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining} remaining).
 		To request an extension for this assignment please read the Extension Guidelines below and submit this form.
 		You will receive a notification when your application has been processed.
-	</p><br/>
-	<ul>
-		<li>Summary of guidelines goes here</li>
-		<li>Only really key points. Detail can be found using the link</li>
-		<li>My dog ate my assignment is not a valid reason for an extension</li>
-		<li>My dog ate my face is a valid reason for an extension</li>
-	</ul><br/>
-	<p>
-	You should read the full <a href="">extension guidelines</a> before submitting your application for an extension.
-	</p><br/>
+	</p>
+	<#if department.extensionGuidelineSummary??>
+		<#include "/WEB-INF/freemarker/submit/formfields/guideline.ftl" >
+	</#if>
+	<#if department.extensionGuidelineLink??>
+		<p>You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>
+		before submitting your application for an extension.</p><br/>
+	</#if>
 	<@f.form method="post" enctype="multipart/form-data" class="form-horizontal" action="/module/${module.code}/${assignment.id}/extension" commandName="extensionRequestCommand">
 
 		<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
@@ -41,13 +39,13 @@
 				</div>
 			</div>
 		</@form.labelled_row>
-	</div>
-	<script>
-		if (Supports.multipleFiles) {
-			jQuery('#multifile-column-description')
-				.html(jQuery('#multifile-column-description-enabled').html());
-		}
-	</script>
+
+		<script>
+			if (Supports.multipleFiles) {
+				jQuery('#multifile-column-description')
+					.html(jQuery('#multifile-column-description-enabled').html());
+			}
+		</script>
 
 		<@form.row>
 			<@form.label></@form.label>

@@ -26,7 +26,8 @@ class ExtensionRequestController extends BaseController{
 		mustBeLinked(assignment,module)
 		val model = Mav("submit/extension_request",
 			"module" -> module,
-			"assignment" -> assignment
+			"assignment" -> assignment,
+			"department" -> module.department
 		)
 		crumbed(model, module)
 	}
@@ -34,7 +35,7 @@ class ExtensionRequestController extends BaseController{
 	@RequestMapping(method=Array(POST))
 	def persistExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
 								cmd:ExtensionRequestCommand, errors: Errors):Mav = {
-		cmd.onBind
+		cmd.onBind()
 		cmd.validate(errors)
 		if(errors.hasErrors){
 			showForm(module, assignment, cmd)

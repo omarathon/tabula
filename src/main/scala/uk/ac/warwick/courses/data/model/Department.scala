@@ -11,6 +11,7 @@ import uk.ac.warwick.courses.data._
 import javax.persistence.CascadeType
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.JavaImports._
+import xml.NodeSeq
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
@@ -27,7 +28,19 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var owners:UserGroup = new UserGroup
 	
 	@BeanProperty var collectFeedbackRatings:Boolean = false
-	
+
+	// settings for extension requests
+	@BeanProperty var allowExtensionRequests:JBoolean = false
+	@BeanProperty var extensionGuidelineSummary:String = null
+	@BeanProperty var extensionGuidelineLink:String = null
+
+	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
+		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
+		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
+		(NodeSeq fromSeq nodes).toString
+	} getOrElse("")
+
+
 	def isOwnedBy(userId:String) = owners.includes(userId)
 	
 	def addOwner(owner:String) = ensureOwners.addUser(owner)

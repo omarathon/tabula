@@ -66,13 +66,12 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 	@BeanProperty var allowResubmission:Boolean = false
 	@BeanProperty var displayPlagiarismNotice:Boolean = _
 	@BeanProperty var allowExtensions:Boolean = _
-	@BeanProperty var allowExtensionRequests:Boolean = _
 
 	@Min(1) @Max(Assignment.MaximumFileAttachments)
 	@BeanProperty var fileAttachmentLimit:Int = 1
 	
 	val maxFileAttachments:Int = 10
-	val invalidAttatchmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
+	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
 	
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 
@@ -140,7 +139,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 		if (openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
 		}
-		if(fileAttachmentTypes.mkString("").matches(invalidAttatchmentPattern)){
+		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 	}
@@ -151,7 +150,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 
     def addUserId(item:String) {
       val user = userLookup.getUserByUserId(item)
-      if (user.isFoundUser()) {
+      if (user.isFoundUser) {
         includeUsers.add(user.getUserId)
       }
     }
@@ -160,7 +159,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     for (item <- massAddUsersEntries) {
       if (UniversityId.isValid(item)) {
         val user =  userLookup.getUserByWarwickUniId(item)
-        if (user.isFoundUser()) {
+        if (user.isFoundUser) {
           includeUsers.add(user.getUserId)
         } else {
           addUserId(item)
@@ -200,7 +199,6 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
     assignment.upstreamAssignment = upstreamAssignment
     assignment.occurrence = occurrence
     assignment.allowExtensions = allowExtensions
-    assignment.allowExtensionRequests = allowExtensionRequests
 	    
     if (assignment.members == null) assignment.members = new UserGroup
 	  assignment.members copyFrom members
@@ -243,7 +241,6 @@ abstract class ModifyAssignmentCommand extends Command[Assignment]  {
 			fileAttachmentTypes = field.attachmentTypes
 		}
     allowExtensions = assignment.allowExtensions
-    allowExtensionRequests = assignment.allowExtensionRequests
 	}
 	
 	def copyFrom(assignment:Assignment) {

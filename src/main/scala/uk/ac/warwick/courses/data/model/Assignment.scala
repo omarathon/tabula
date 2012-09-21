@@ -99,8 +99,6 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var allowResubmission:Boolean = false
 	@BeanProperty var displayPlagiarismNotice:Boolean = false
 	@BeanProperty var allowExtensions:Boolean = false
-	// allow students to request extensions via the app
-	@BeanProperty var allowExtensionRequests:Boolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")

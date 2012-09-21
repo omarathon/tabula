@@ -615,8 +615,8 @@ jQuery(function ($) {
 
 	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
 	// check that the extension UI elements are present
-	if($('input#allowExtensions').length > 0){
-		slideMoreOptions($('input#allowExtensions'), $('#request-extension-row'));
+	if($('input#allowExtensionRequests').length > 0){
+		slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'));
 	}
 
 
