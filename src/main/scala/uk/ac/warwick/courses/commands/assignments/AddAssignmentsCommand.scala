@@ -92,7 +92,8 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@Transactional
 	override def apply() {
 		for (item <- assignmentItems if item.include) {
-			val assignment = new Assignment
+			val assignment = new Assignment()
+			assignment.addDefaultFields()
 			assignment.academicYear = academicYear
 			assignment.name = item.name
 			assignment.upstreamAssignment = item.upstreamAssignment

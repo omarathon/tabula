@@ -139,7 +139,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	/**
 	 * Before we allow customising of assignments, we just want the basic
-	 * fields to allow you to
+	 * fields to allow you to attach a file and display some instructions.
 	 */
 	def addDefaultFields() {
 		val pretext = new CommentField

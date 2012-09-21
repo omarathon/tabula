@@ -38,6 +38,10 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		query.setEntity("module", f.module)
 		val result = query.uniqueResult().asInstanceOf[Assignment]
 		result.name should be ("Assignment 1")
+		
+		//check the default fields were added.
+		withClue("Expecting attachment field.") { result.attachmentField should be ('defined) }
+		withClue("Expecting comment field.") { result.commentField should be ('defined) }
 	} 
 	
 	
