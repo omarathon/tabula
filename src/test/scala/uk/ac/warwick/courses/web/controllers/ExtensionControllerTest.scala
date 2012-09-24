@@ -29,7 +29,7 @@ class ExtensionControllerTest extends TestBase with Mockito {
       val extensions = command.copyExtensions()
       val extensionsJson:JList[Map[String, String]] = controller.toJson("Test", extensions) toList
       val string = json.writeValueAsString(extensionsJson)
-      string should be ("""[{"id":"1170836","expiryDate":"Thu 23rd August 2012 at 12:00:00","reason":"Donec a risus purus nullam.","action":"Test"}]""")
+      string should be ("""[{"id":"1170836","expiryDate":"Thu 23rd August 2012 at 12:00","reason":"Donec a risus purus nullam.","action":"Test"}]""")
     }
   }
 
