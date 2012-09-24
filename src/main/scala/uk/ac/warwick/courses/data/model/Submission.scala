@@ -22,6 +22,7 @@ import javax.persistence.CascadeType._
 import scala.collection.mutable
 import java.util.HashSet
 import javax.persistence.FetchType
+import uk.ac.warwick.courses.JBoolean
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -47,6 +48,8 @@ class Submission extends GeneratedId with Deleteable {
 	@NotNull
 	@BeanProperty var userId:String =_
 	
+	@BeanProperty var suspectPlagiarised: JBoolean = false
+
 	/**
 	 * It isn't essential to record University ID as their user ID
 	 * will identify them, but a lot of processes require the university

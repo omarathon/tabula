@@ -22,7 +22,7 @@ import uk.ac.warwick.courses.web.views.JSONView
 import org.joda.time.DateTime
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/extensions"))
 class ExtensionController extends BaseController{
 
 	@Autowired var assignmentService:AssignmentService =_

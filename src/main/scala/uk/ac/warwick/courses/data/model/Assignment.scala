@@ -28,6 +28,7 @@ import uk.ac.warwick.courses.services.{AssignmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
+import uk.ac.warwick.courses.JBoolean
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -36,7 +37,6 @@ object Assignment {
 	final val MaximumFileAttachments = 50
 
 }
-
 
 /**
  * Represents an assignment within a module, occurring at a certain time.
@@ -79,9 +79,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@BeanProperty var attachmentLimit: Int = 1
 
 	@BeanProperty var name: String = _
-	@BeanProperty var active: Boolean = _
+	@BeanProperty var active: JBoolean = true
 
-	@BeanProperty var archived: Boolean = false
+	@BeanProperty var archived: JBoolean = false
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var openDate: DateTime = _
@@ -92,13 +92,17 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var createdDate = DateTime.now()
 
-	@BeanProperty var collectMarks:Boolean =_
-	@BeanProperty var collectSubmissions:Boolean = false
-	@BeanProperty var restrictSubmissions:Boolean = false
-	@BeanProperty var allowLateSubmissions:Boolean = true
-	@BeanProperty var allowResubmission:Boolean = false
-	@BeanProperty var displayPlagiarismNotice:Boolean = false
-	@BeanProperty var allowExtensions:Boolean = false
+	@BeanProperty var collectMarks: JBoolean = false
+	@BeanProperty var collectSubmissions: JBoolean = false
+	@BeanProperty var restrictSubmissions: JBoolean = false
+	@BeanProperty var allowLateSubmissions: JBoolean = true
+	@BeanProperty var allowResubmission: JBoolean = false
+	@BeanProperty var displayPlagiarismNotice: JBoolean = false
+
+	@BeanProperty var allowExtensions: JBoolean = false
+	// allow students to request extensions via the app
+
+	@BeanProperty var allowExtensionRequests: JBoolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -135,7 +139,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	/**
 	 * Before we allow customising of assignments, we just want the basic
-	 * fields to allow you to
+	 * fields to allow you to attach a file and display some instructions.
 	 */
 	def addDefaultFields() {
 		val pretext = new CommentField
@@ -192,8 +196,6 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	// returns extension for a specified student
 	def findExtension(uniId:String) = extensions.find(_.universityId == uniId)
-
-
 
   def assessmentGroup: Option[UpstreamAssessmentGroup] = {
 		if (upstreamAssignment == null || academicYear == null || occurrence == null) {
@@ -263,9 +265,13 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: Feedback) {
-		//if (feedbacks.filter(_.universityId == "a").isEmpty){
 		feedbacks.add(feedback)
 		feedback.assignment = this
+	}
+
+	def addSubmission(submission: Submission) {
+		submissions.add(submission)
+		submission.assignment = this
 	}
 
 	// returns feedback for a specified student
@@ -317,7 +323,11 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			_.universityId
 		}.toSet
 
-		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks)
+		val plagiarised = submissions.filter(submission => submission.getSuspectPlagiarised).map {
+			_.universityId
+		}.toSet
+
+		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks, plagiarised)
 	}
 
 	def toStringProps = Seq(
@@ -330,14 +340,22 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 }
 
-
-case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String], val withoutAttachments: Set[String], val withoutMarks: Set[String]) {
+case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String],
+	val withoutAttachments: Set[String], val withoutMarks: Set[String], val plagiarised: Set[String]) {
 
 	def hasProblems = {
-		var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty)
+		//var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty || !plagiarised.isEmpty)
+
+		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
+		var problems = assignment.collectSubmissions && shouldBeEmpty.exists { !_.isEmpty }
+
 		//TODO feature check
+
 		if (assignment.collectMarks) {
-			problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
+			//problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
+
+			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
+			problems = problems || shouldBeEmptyWhenCollectingMarks.exists { !_.isEmpty }
 		}
 		problems
 	}

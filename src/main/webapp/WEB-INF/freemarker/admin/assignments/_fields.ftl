@@ -15,7 +15,8 @@ the comments textarea needs to maintain newlines.
 <@f.input path=path cssClass="date-time-picker" />
 </@form.labelled_row>
 </#macro>
-
+<div class="row-fluid">
+<div class="span6">
 <@form.labelled_row "name" "Assignment name">
 <@f.input path="name" cssClass="text" />
 </@form.labelled_row>
@@ -41,8 +42,7 @@ the comments textarea needs to maintain newlines.
 
 </#if>
 
-<#if features.assignmentMembership>
-	<@form.labelled_row "members" "Students">
+</div> <#-- end span6 -->
 
 		<@f.hidden path="upstreamAssignment" id="upstreamAssignment" />
 		<@f.hidden path="occurrence" id="occurrence" />
