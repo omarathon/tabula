@@ -671,8 +671,6 @@ jQuery(function ($) {
 
 	decorateSubmissionsForm();
 
-
-	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
 	// check that the extension UI elements are present
 	if($('input#allowExtensions').length > 0){
 		slideMoreOptions($('input#allowExtensions'), $('#request-extension-row'));
