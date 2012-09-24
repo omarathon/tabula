@@ -13,7 +13,7 @@
 			<p>
 				The marks spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
 				The spreadsheet should have two columns in the following order: student ID then mark.
-				You can use this <a href="./marks-template" >generated spreadsheet</a> as a template.
+				You can use this <a href="<@routes.markstemplate assignment=assignment  />" >generated spreadsheet</a> as a template.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
 				<input name="isfile" value="true" type="hidden"/>
