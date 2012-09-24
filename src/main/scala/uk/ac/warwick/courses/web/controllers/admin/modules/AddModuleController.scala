@@ -12,20 +12,20 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 
 @Controller
-@RequestMapping(value=Array("/admin/module/new"))
+@RequestMapping(value = Array("/admin/module/new"))
 class AddModuleController extends BaseController {
 
 	// set up self validation for when @Valid is used
 	validatesSelf[AddModuleCommand]
 
-	@RequestMapping(method=Array(HEAD, GET))
-	def showForm(cmd:AddModuleCommand, user:CurrentUser) = {
+	@RequestMapping(method = Array(HEAD, GET))
+	def showForm(cmd: AddModuleCommand, user: CurrentUser) = {
 		checkPermissions(user)
 		Mav("admin/modules/add/form")
 	}
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid cmd:AddModuleCommand, errors:Errors, user:CurrentUser) = {
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid cmd: AddModuleCommand, errors: Errors, user: CurrentUser) = {
 		checkPermissions(user)
 		if (errors.hasErrors) {
 			showForm(cmd, user)

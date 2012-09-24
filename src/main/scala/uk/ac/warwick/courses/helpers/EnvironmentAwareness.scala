@@ -9,7 +9,7 @@ import org.springframework.core.env.Environment
  */
 trait EnvironmentAwareness extends EnvironmentAware {
 
-  var environment:Environment = null
-  def setEnvironment(env: Environment): Unit = { environment = env }
+	var environment: Environment = null
+	def setEnvironment(env: Environment): Unit = { environment = env }
 
 }

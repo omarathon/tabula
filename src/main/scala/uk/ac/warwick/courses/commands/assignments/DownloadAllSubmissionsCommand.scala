@@ -14,24 +14,23 @@ import org.springframework.beans.factory.annotation.Configurable
 @Configurable
 class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
-	@BeanProperty var assignment:Assignment =_
-	@BeanProperty var module:Module =_
-	@BeanProperty var filename:String =_
-	
-	@Autowired var zipService:ZipService =_
-	
+	@BeanProperty var assignment: Assignment = _
+	@BeanProperty var module: Module = _
+	@BeanProperty var filename: String = _
+
+	@Autowired var zipService: ZipService = _
+
 	override def apply = {
 		val zip = zipService.getAllSubmissionsZip(assignment)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)
 		renderable
 	}
-	
-	override def describe(d:Description) = d
-			.assignment(assignment)
-			.studentIds(assignment.submissions.map(_.universityId))
-			.properties(
-				"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0)
-			)
-	
+
+	override def describe(d: Description) = d
+		.assignment(assignment)
+		.studentIds(assignment.submissions.map(_.universityId))
+		.properties(
+			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
+
 }

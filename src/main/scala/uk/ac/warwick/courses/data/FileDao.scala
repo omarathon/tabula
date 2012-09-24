@@ -60,8 +60,9 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		case _ => None
 	}
 
-	/** Delete any temporary blobs that are more than 2 days old.
-	  */
+	/**
+	 * Delete any temporary blobs that are more than 2 days old.
+	 */
 	def deleteOldTemporaryFiles = {
 		val oldFiles = findOldTemporaryFiles
 		/*

@@ -16,26 +16,26 @@ import uk.ac.warwick.courses.web.controllers.BaseController
 @RequestMapping
 class DownloadSubmissionsController extends BaseController {
 
-	@Autowired var fileServer:FileServer =_
-	
-	@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
-	def download(command:DownloadSubmissionsCommand, response:HttpServletResponse) {
+	@Autowired var fileServer: FileServer = _
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
+	def download(command: DownloadSubmissionsCommand, response: HttpServletResponse) {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
-		command.apply { renderable => 
+		command.apply { renderable =>
 			fileServer.serve(renderable, response)
 		}
 	}
-	
-	@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
-	def downloadAll(command:DownloadAllSubmissionsCommand, response:HttpServletResponse) {
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
+	def downloadAll(command: DownloadAllSubmissionsCommand, response: HttpServletResponse) {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
-		command.apply { renderable => 
+		command.apply { renderable =>
 			fileServer.serve(renderable, response)
 		}
 	}
-	
+
 }

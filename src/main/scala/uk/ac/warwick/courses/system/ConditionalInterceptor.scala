@@ -15,29 +15,29 @@ import org.springframework.web.context.request.ServletWebRequest
  * Wraps a WebRequestInterceptor, and if it matches an exclude pattern, it doesn't
  * run the interceptor.
  */
-class ConditionalInterceptor(val delegate:WebRequestInterceptor) extends WebRequestInterceptor with InitializingBean {
-	@BeanProperty var excludePath:String =_
-	
-	private var excludeString:String =_
-	
+class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebRequestInterceptor with InitializingBean {
+	@BeanProperty var excludePath: String = _
+
+	private var excludeString: String = _
+
 	override def afterPropertiesSet {
 		if (!excludePath.endsWith("/*")) throw new IllegalArgumentException("excludePath only knows how to end in /*")
 		excludeString = excludePath.substring(0, excludePath.length - 2)
 	}
-	
-	def req(request:WebRequest) = request.asInstanceOf[ServletWebRequest].getRequest
-	def path(request:HttpServletRequest):String = request.getRequestURI.substring(request.getContextPath.length)
-	def path(request:WebRequest):String = path(req(request))
-	
-	def included(request:WebRequest) = !(path(request).startsWith(excludeString))
 
-	override def preHandle(request:WebRequest) = 
+	def req(request: WebRequest) = request.asInstanceOf[ServletWebRequest].getRequest
+	def path(request: HttpServletRequest): String = request.getRequestURI.substring(request.getContextPath.length)
+	def path(request: WebRequest): String = path(req(request))
+
+	def included(request: WebRequest) = !(path(request).startsWith(excludeString))
+
+	override def preHandle(request: WebRequest) =
 		if (included(request)) delegate.preHandle(request)
-	
-	override def postHandle(request:WebRequest, model:ModelMap) = 
-	    if (included(request)) delegate.postHandle(request,model)
-	
-	override def afterCompletion(request:WebRequest, ex:Exception) = 
-	    if (included(request)) delegate.afterCompletion(request,ex)
-	
+
+	override def postHandle(request: WebRequest, model: ModelMap) =
+		if (included(request)) delegate.postHandle(request, model)
+
+	override def afterCompletion(request: WebRequest, ex: Exception) =
+		if (included(request)) delegate.afterCompletion(request, ex)
+
 }

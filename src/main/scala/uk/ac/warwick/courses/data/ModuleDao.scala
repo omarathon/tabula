@@ -33,8 +33,9 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.list().asInstanceOf[JList[Module]].asScala.toSeq
 	}
 
-	/** Find modules managed by this user, in this department.
-	  */
+	/**
+	 * Find modules managed by this user, in this department.
+	 */
 	def findByParticipant(userId: String, dept: Department): Seq[Module] = {
 		session.createQuery("""select m from Module m 
 	 		  join m.department as d

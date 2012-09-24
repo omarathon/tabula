@@ -30,135 +30,127 @@ import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.services.AssignmentImporter
 import uk.ac.warwick.courses.commands.imports.ImportAssignmentsCommand
 
-
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
  */
 
 abstract class BaseSysadminController extends BaseController {
-	@Autowired var moduleService:ModuleAndDepartmentService = null
-	@Autowired var userLookup:UserLookupInterface = _ 
-	
+	@Autowired var moduleService: ModuleAndDepartmentService = null
+	@Autowired var userLookup: UserLookupInterface = _
+
 	def redirectToHome = Redirect("/sysadmin/")
-	
-	def redirectToDeptOwners(deptcode:String) = Mav("redirect:/sysadmin/departments/"+deptcode+"/owners/")
-	
-	def viewDepartmentOwners(@PathVariable dept:Department) : Mav = 
+
+	def redirectToDeptOwners(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/owners/")
+
+	def viewDepartmentOwners(@PathVariable dept: Department): Mav =
 		Mav("sysadmin/departments/owners",
-			  		  "department" -> dept,
-			  		  "owners" -> dept.owners)
-			  		  
+			"department" -> dept,
+			"owners" -> dept.owners)
+
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
-	
-	
-	
+
 }
-	
+
 @Controller
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
-	
-	@Autowired var maintenanceService: MaintenanceModeService =_
-  
+
+	@Autowired var maintenanceService: MaintenanceModeService = _
+
 	@RequestMapping
 	def home = Mav("sysadmin/home").addObjects("maintenanceModeService" -> maintenanceService)
-		
-	@RequestMapping(value=Array("/departments/{dept}/owners/"), method=Array(GET))
-	def departmentOwners(@PathVariable dept:Department) = viewDepartmentOwners(dept)
-	  
+
+	@RequestMapping(value = Array("/departments/{dept}/owners/"), method = Array(GET))
+	def departmentOwners(@PathVariable dept: Department) = viewDepartmentOwners(dept)
+
 	@RequestMapping(Array("/departments/"))
 	def departments = Mav("sysadmin/departments/list",
-			"departments" -> moduleService.allDepartments
-	)
-	
+		"departments" -> moduleService.allDepartments)
+
 	@RequestMapping(Array("/departments/{dept}/"))
-	def department(@PathVariable dept:Department) = {
-  		Mav("sysadmin/departments/single",
-  					  "department" -> dept)
+	def department(@PathVariable dept: Department) = {
+		Mav("sysadmin/departments/single",
+			"department" -> dept)
 	}
-	
-	@RequestMapping(value=Array("/import"), method=Array(POST))
+
+	@RequestMapping(value = Array("/import"), method = Array(POST))
 	def importModules = {
-		  new ImportModulesCommand().apply()
-		  "sysadmin/importdone"
+		new ImportModulesCommand().apply()
+		"sysadmin/importdone"
 	}
 
 }
 
-	
-
-
-@Controller 
+@Controller
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
 class RemoveDeptOwnerController extends BaseSysadminController {
-	@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
+	@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept: Department) = {
 		new RemoveDeptOwnerCommand(dept)
 	}
-	
-	@RequestMapping(method=Array(POST))
-	def addDeptOwner(@PathVariable dept:Department, @Valid @ModelAttribute("removeOwner") form:RemoveDeptOwnerCommand, errors:Errors)  = {
+
+	@RequestMapping(method = Array(POST))
+	def addDeptOwner(@PathVariable dept: Department, @Valid @ModelAttribute("removeOwner") form: RemoveDeptOwnerCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-		  viewDepartmentOwners(dept)
+			viewDepartmentOwners(dept)
 		} else {
-		  logger.info("Passed validation, removing owner")
-		  form.apply()
-		  redirectToDeptOwners(dept.code)
+			logger.info("Passed validation, removing owner")
+			form.apply()
+			redirectToDeptOwners(dept.code)
 		}
 	}
 }
 
-
-@Controller 
+@Controller
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
 class AddDeptOwnerController extends BaseSysadminController {
 
-	validatesWith { (cmd:AddDeptOwnerCommand, errors:Errors) =>
+	validatesWith { (cmd: AddDeptOwnerCommand, errors: Errors) =>
 		if (cmd.getUsercodes.contains(cmd.usercode)) {
 			errors.rejectValue("usercode", "userId.duplicate")
 		} else if (!userLookup.getUserByUserId(cmd.usercode).isFoundUser) {
 			errors.rejectValue("usercode", "userId.notfound")
 		}
 	}
-	
-	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept:Department) = {
+
+	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept: Department) = {
 		new AddDeptOwnerCommand(dept)
 	}
-	
-	@RequestMapping(method=Array(GET))
-	def showForm(@PathVariable dept:Department, @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors) = {
+
+	@RequestMapping(method = Array(GET))
+	def showForm(@PathVariable dept: Department, @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
 		Mav("sysadmin/departments/owners/add",
 			"department" -> dept)
 	}
-	
-	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable dept:Department, @Valid @ModelAttribute("addOwner") form:AddDeptOwnerCommand, errors:Errors)  = {
+
+	@RequestMapping(method = Array(POST))
+	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-		  showForm(dept, form, errors)
+			showForm(dept, form, errors)
 		} else {
-		  logger.info("Passed validation, saving owner")
-		  form.apply()
-		  redirectToDeptOwners(dept.code)
+			logger.info("Passed validation, saving owner")
+			form.apply()
+			redirectToDeptOwners(dept.code)
 		}
 	}
 }
 
 @Configurable
 class ReindexForm {
-	@Autowired @BeanProperty var indexer:AuditEventIndexService =_
-	
+	@Autowired @BeanProperty var indexer: AuditEventIndexService = _
+
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from:DateTime =_
-	
+	@BeanProperty var from: DateTime = _
+
 	def reindex = {
 		indexer.indexFrom(from)
 	}
 }
 
-@Controller 
+@Controller
 @RequestMapping(Array("/sysadmin/index/run"))
-class SysadminIndexController extends BaseSysadminController {	
-	@RequestMapping(method=Array(POST))
-	def reindex(form:ReindexForm)  = {
+class SysadminIndexController extends BaseSysadminController {
+	@RequestMapping(method = Array(POST))
+	def reindex(form: ReindexForm) = {
 		form.reindex
 		redirectToHome
 	}
@@ -167,46 +159,46 @@ class SysadminIndexController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
-	
-	@Autowired var importer:AssignmentImporter =_
-	
-	@RequestMapping(method=Array(POST))
-	def reindex()  = {
+
+	@Autowired var importer: AssignmentImporter = _
+
+	@RequestMapping(method = Array(POST))
+	def reindex() = {
 		val command = new ImportAssignmentsCommand
 		command.apply()
 		redirectToHome
 	}
 }
 
-class MaintenanceModeForm(service:MaintenanceModeService) extends SelfValidating {
-	@BeanProperty var enable:Boolean = service.enabled
-	
+class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {
+	@BeanProperty var enable: Boolean = service.enabled
+
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var until:DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
-	
-	@BeanProperty var message:String = service.message orNull
-	
-	def validate(implicit errors:Errors) {
-		
+	@BeanProperty var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
+
+	@BeanProperty var message: String = service.message orNull
+
+	def validate(implicit errors: Errors) {
+
 	}
 }
 
-@Controller 
+@Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
-	@Autowired var service:MaintenanceModeService =_
-	
+	@Autowired var service: MaintenanceModeService = _
+
 	validatesSelf[MaintenanceModeForm]
-	
+
 	@ModelAttribute def cmd = new MaintenanceModeForm(service)
-	
-	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(form:MaintenanceModeForm, errors:Errors)  = 
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def showForm(form: MaintenanceModeForm, errors: Errors) =
 		Mav("sysadmin/maintenance").noLayoutIf(ajax)
-	
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid form:MaintenanceModeForm, errors:Errors) = {
-		if (errors.hasErrors) 
+
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid form: MaintenanceModeForm, errors: Errors) = {
+		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
 			if (!form.enable) {
@@ -217,9 +209,9 @@ class MaintenanceModeController extends BaseSysadminController {
 			service.until = Option(form.until)
 			if (form.enable) service.enable
 			else service.disable
-			
+
 			Redirect(Routes.sysadmin.home)
 		}
 	}
-	
+
 }

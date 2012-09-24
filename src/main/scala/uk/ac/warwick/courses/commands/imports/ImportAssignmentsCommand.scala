@@ -13,11 +13,11 @@ import uk.ac.warwick.courses.SprCode
 
 @Configurable
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
-	
-	@Autowired var assignmentImporter:AssignmentImporter =_
-	@Autowired var assignmentService:AssignmentService =_
-	
-	def apply() { 
+
+	@Autowired var assignmentImporter: AssignmentImporter = _
+	@Autowired var assignmentService: AssignmentService = _
+
+	def apply() {
 		benchmark("ImportAssignments") {
 			doAssignments
 			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
@@ -26,7 +26,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			doMemberDetails
 		}
 	}
-	
+
 	@Transactional
 	def doAssignments {
 		for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
@@ -37,17 +37,17 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			assignmentService.save(assignment)
 		}
 	}
-	
+
 	def doGroups {
 		// Split into chunks so we commit transactions periodically.
 		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100)) {
 			saveGroups(groups)
-      transactional { t =>
-			  groups foreach session.evict
-      }
+			transactional { t =>
+				groups foreach session.evict
+			}
 		}
 	}
-	
+
 	/**
 	 * This calls the importer method that iterates over ALL module registrations.
 	 * The results are ordered such that it can hold a list of items until it
@@ -66,7 +66,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 					save(registrations)
 					registrations = Nil
 				}
-				registrations = registrations :+ r 
+				registrations = registrations :+ r
 				count += 1
 				if (count % 1000 == 0) {
 					logger.info("Processed " + count + " group members")
@@ -75,39 +75,39 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			logger.info("Processed all " + count + " group members")
 		}
 	}
-	
+
 	/** Import basic info about all members in ADS, batched 1000 at a time */
-  @Transactional
+	@Transactional
 	def doMemberDetails {
 		benchmark("Import all member details") {
-    		var list = List[UpstreamMember]()
-    		assignmentImporter.allMemberDetails { member =>
-    			list = list :+ member 
-    			if (list.size >= 1000) {
-    				saveMemberDetails(list)
-    				list = Nil
-    			}
-    		}
-    		if (!list.isEmpty) {
-    			saveMemberDetails(list)
-    		}
+			var list = List[UpstreamMember]()
+			assignmentImporter.allMemberDetails { member =>
+				list = list :+ member
+				if (list.size >= 1000) {
+					saveMemberDetails(list)
+					list = Nil
+				}
+			}
+			if (!list.isEmpty) {
+				saveMemberDetails(list)
+			}
 		}
 	}
-	
-	def saveMemberDetails(seq:Seq[UpstreamMember]) {
-    seq foreach { member =>
-      session.saveOrUpdate(member)
-    }
+
+	def saveMemberDetails(seq: Seq[UpstreamMember]) {
+		seq foreach { member =>
+			session.saveOrUpdate(member)
+		}
 		session.flush
 		seq foreach session.evict
 	}
-	
+
 	/**
 	 * This sequence of ModuleRegistrations represents the members of an assessment
 	 * group, so save them (and reconcile it with any existing members we have in the
 	 * database).
 	 */
-	def save(group:Seq[ModuleRegistration]) {
+	def save(group: Seq[ModuleRegistration]) {
 		group.headOption map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
 			// Convert ModuleRegistrations to simple uni ID strings.
@@ -115,31 +115,30 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			assignmentService.replaceMembers(assessmentGroup, members)
 		}
 	}
-	
+
 	@Transactional
-	def saveGroups(groups:Seq[UpstreamAssessmentGroup]) = {
-		logger.debug("Importing "+groups.size+" assessment groups")
-		benchmark("Import "+groups.size+" groups") {
+	def saveGroups(groups: Seq[UpstreamAssessmentGroup]) = {
+		logger.debug("Importing " + groups.size + " assessment groups")
+		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {
 				assignmentService.save(group)
 			}
 		}
 	}
-	
-	def equal(s1:Seq[String], s2:Seq[String]) = 
+
+	def equal(s1: Seq[String], s2: Seq[String]) =
 		s1.length == s2.length && s1.sorted == s2.sorted
 
 	def describe(d: Description) {
-		
+
 	}
 
-	
 }
 
 object ImportAssignmentsCommand {
 	case class Result(
-			val assignmentsFound:Int, 
-			val assignmentsChanged:Int, 
-			val groupsFound:Int, 
-			val groupsChanged:Int)
+		val assignmentsFound: Int,
+		val assignmentsChanged: Int,
+		val groupsFound: Int,
+		val groupsChanged: Int)
 }

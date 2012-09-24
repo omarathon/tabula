@@ -16,15 +16,15 @@ import uk.ac.warwick.courses.actions.Participate
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class FeedbackRecipientCheckController extends BaseController {
-	
+
 	@RequestMapping()
-	def confirmation(command:FeedbackRecipientCheckCommand, errors:Errors): Mav = {
-	   mustBeLinked(command.assignment, command.module)
-	   mustBeAbleTo(Participate(command.module))
-	   val report = command.apply()
-	   Mav("admin/assignments/publish/checkrecipients", 
-	       "assignment" -> command.assignment,
-	       "report" -> report).noLayout()
+	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
+		mustBeLinked(command.assignment, command.module)
+		mustBeAbleTo(Participate(command.module))
+		val report = command.apply()
+		Mav("admin/assignments/publish/checkrecipients",
+			"assignment" -> command.assignment,
+			"report" -> report).noLayout()
 	}
-	
+
 }

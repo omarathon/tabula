@@ -5,7 +5,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.commands.Description
 
-class AddExtensionCommand(val assignment:Assignment, val submitter: CurrentUser) extends ModifyExtensionCommand {
+class AddExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends ModifyExtensionCommand {
 
 	def describe(d: Description) {
 		d.assignment(assignment)

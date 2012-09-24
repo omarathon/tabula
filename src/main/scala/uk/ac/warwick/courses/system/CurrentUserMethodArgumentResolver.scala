@@ -12,19 +12,18 @@ import uk.ac.warwick.courses.CurrentUser
 /**
  * Allows you to put a CurrentUser argument in a @RequestMapping method, and it
  * will get resolved automagically by the dispatcher.
- * 
+ *
  * Configured in the XML with <mvc:argument-resolvers>.
  */
 class CurrentUserMethodArgumentResolver extends HandlerMethodArgumentResolver {
- 
-  def supportsParameter(param:MethodParameter) = classOf[CurrentUser] isAssignableFrom param.getParameterType
 
-  def resolveArgument(
-	      param: MethodParameter, 
-	      container: ModelAndViewContainer, 
-	      req: NativeWebRequest, 
-	      binderFactory: WebDataBinderFactory):Object = 
-	  req.getAttribute(CurrentUser.keyName, RequestAttributes.SCOPE_REQUEST)
-  
+	def supportsParameter(param: MethodParameter) = classOf[CurrentUser] isAssignableFrom param.getParameterType
+
+	def resolveArgument(
+		param: MethodParameter,
+		container: ModelAndViewContainer,
+		req: NativeWebRequest,
+		binderFactory: WebDataBinderFactory): Object =
+		req.getAttribute(CurrentUser.keyName, RequestAttributes.SCOPE_REQUEST)
 
 }

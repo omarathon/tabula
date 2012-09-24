@@ -14,35 +14,35 @@ import uk.ac.warwick.courses.JavaImports._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
-  
-	@BeanProperty var code:String = null
-	
-	@BeanProperty var name:String = null
-	
-	@OneToMany(mappedBy="department")
-	@BeanProperty var modules:JList[Module] = List()
-	
-	@OneToOne(cascade=Array(CascadeType.ALL))
-	@JoinColumn(name="ownersgroup_id")
-	@BeanProperty var owners:UserGroup = new UserGroup
-	
-	@BeanProperty var collectFeedbackRatings:Boolean = false
-	
-	def isOwnedBy(userId:String) = owners.includes(userId)
-	
-	def addOwner(owner:String) = ensureOwners.addUser(owner)
-	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
-	
+
+	@BeanProperty var code: String = null
+
+	@BeanProperty var name: String = null
+
+	@OneToMany(mappedBy = "department")
+	@BeanProperty var modules: JList[Module] = List()
+
+	@OneToOne(cascade = Array(CascadeType.ALL))
+	@JoinColumn(name = "ownersgroup_id")
+	@BeanProperty var owners: UserGroup = new UserGroup
+
+	@BeanProperty var collectFeedbackRatings: Boolean = false
+
+	def isOwnedBy(userId: String) = owners.includes(userId)
+
+	def addOwner(owner: String) = ensureOwners.addUser(owner)
+	def removeOwner(owner: String) = ensureOwners.removeUser(owner)
+
 	// If hibernate sets owners to null, make a new empty usergroup
-	override def postLoad { 
-	  ensureOwners
+	override def postLoad {
+		ensureOwners
 	}
-	
+
 	def ensureOwners = {
-	  if (owners == null) owners = new UserGroup
-	  owners
+		if (owners == null) owners = new UserGroup
+		owners
 	}
-	
-	override def toString = "Department("+code+")"
-	
+
+	override def toString = "Department(" + code + ")"
+
 }

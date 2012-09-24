@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.bind.annotation.RequestMethod._
 import javax.validation.Valid
-import uk.ac.warwick.courses.actions.{Submit, View}
+import uk.ac.warwick.courses.actions.{ Submit, View }
 import uk.ac.warwick.courses.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.courses.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.courses.data.model.Assignment
@@ -23,10 +23,6 @@ import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.data.model.forms.Extension
 import org.joda.time.DateTime
 
-
-
-
-
 @Configurable
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
@@ -34,9 +30,9 @@ class AssignmentController extends AbstractAssignmentController {
 
 	hideDeletedItems
 
-	validatesWith{ (cmd:SubmitAssignmentCommand,errors) => cmd.validate(errors) }
-	
-	@ModelAttribute def form(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = {  
+	validatesWith { (cmd: SubmitAssignmentCommand, errors) => cmd.validate(errors) }
+
+	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
 		val cmd = new SubmitAssignmentCommand(mandatory(assignment), user)
 		cmd.module = module
 		cmd
@@ -45,67 +41,66 @@ class AssignmentController extends AbstractAssignmentController {
 	/**
 	 * Sitebuilder-embeddable view.
 	 */
-	@RequestMapping(method=Array(HEAD, GET), params=Array("embedded"))
-	def embeddedView(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
-		view(user,form,errors).embedded
+	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
+	def embeddedView(user: CurrentUser, form: SubmitAssignmentCommand, errors: Errors) = {
+		view(user, form, errors).embedded
 	}
-	
-	@RequestMapping(method=Array(HEAD, GET), params=Array("!embedded"))
-	def view(user:CurrentUser, form:SubmitAssignmentCommand, errors:Errors) = {
+
+	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
+	def view(user: CurrentUser, form: SubmitAssignmentCommand, errors: Errors) = {
 		val assignment = form.assignment
 		val module = form.module
-		
+
 		form.onBind
 		checks(form)
 
 		val feedback = checkCanGetFeedback(assignment, user)
-		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter{_.submitted}
+		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
-    val isExtended = assignment.isWithinExtension(user.apparentId)
-    val extension = assignment.extensions.find(_.userId == user.apparentId)
+		val isExtended = assignment.isWithinExtension(user.apparentId)
+		val extension = assignment.extensions.find(_.userId == user.apparentId)
 
-    val canSubmit = assignment.submittable(user.apparentId)
-    val canReSubmit = assignment.resubmittable(user.apparentId)
+		val canSubmit = assignment.submittable(user.apparentId)
+		val canReSubmit = assignment.resubmittable(user.apparentId)
 
-    /*
+		/*
 		 * Submission values are an unordered set without any proper name, so
 		 * match them up into an ordered sequence of pairs.
 		 * 
 		 * If a submission value is missing, the right hand is None.
 		 * If any submission value doesn't match the assignment fields, it just isn't shown.
 		 */
-		val submissionValues = submission.map{ submission =>
+		val submissionValues = submission.map { submission =>
 			assignment.fields.map { field =>
 				(field, submission.values.find(_.name == field.name))
 			}
 		}.getOrElse(Seq.empty)
-		
+
 		if (user.loggedIn) {
 			Mav("submit/assignment",
-				"module"-> module,
+				"module" -> module,
 				"assignment" -> assignment,
 				"feedback" -> feedback,
 				"submission" -> submission,
 				"justSubmitted" -> form.justSubmitted,
 				"isExtended" -> isExtended,
 				"canSubmit" -> canSubmit,
-        "canReSubmit" -> canReSubmit,
-				"extension" -> extension
-			)
+				"canReSubmit" -> canReSubmit,
+				"extension" -> extension)
 		} else {
-			RedirectToSignin() 
+			RedirectToSignin()
 		}
 	}
-	
+
 	@Transactional
-	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable module:Module, user:CurrentUser, @Valid form:SubmitAssignmentCommand, errors:Errors) = {
+	@RequestMapping(method = Array(POST))
+	def submit(@PathVariable module: Module, user: CurrentUser, @Valid form: SubmitAssignmentCommand, errors: Errors) = {
 		val assignment = form.assignment
 		val module = form.module
 		form.onBind
 		checks(form)
 		if (errors.hasErrors || !user.loggedIn) {
-			view(user,form,errors)
+			view(user, form, errors)
 		} else {
 			val submission = form.apply
 			val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
@@ -114,17 +109,15 @@ class AssignmentController extends AbstractAssignmentController {
 		}
 	}
 
+	private def checks(form: SubmitAssignmentCommand) = {
+		val assignment = form.assignment
+		val module = form.module
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		if (!can(Submit(assignment))) { // includes check for restricted submission.
+			throw new SubmitPermissionDeniedException(assignment)
+		}
+	}
 
-  private def checks(form:SubmitAssignmentCommand) = {
-    val assignment = form.assignment
-    val module = form.module
-    mustBeLinked(mandatory(assignment),  mandatory(module))
-    if (!can(Submit(assignment))) { // includes check for restricted submission.
-      throw new SubmitPermissionDeniedException(assignment)
-    }
-  }
-
-  private def hasPermission(form:SubmitAssignmentCommand) = can(Submit(form.assignment))
-
+	private def hasPermission(form: SubmitAssignmentCommand) = can(Submit(form.assignment))
 
 }

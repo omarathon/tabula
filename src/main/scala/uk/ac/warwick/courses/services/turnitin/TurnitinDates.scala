@@ -9,12 +9,12 @@ import org.joda.time.DateTime
 object TurnitinDates {
 	val timestampFormat = DateTimeFormat.forPattern("YYYYMMddHHmm").withZoneUTC
 	val dateFormat = DateTimeFormat.forPattern("YYYYMMdd")
-	
+
 	def gmtTimestamp = {
 		val s = timestampFormat print DateTime.now
-		s.substring(0, s.length-1) // Must have only the first digit of the minutes! 
+		s.substring(0, s.length - 1) // Must have only the first digit of the minutes! 
 	}
-	
-	def yearsFromNow(years:Int) = dateFormat print DateTime.now.plusYears(years)
-	def monthsFromNow(months:Int) = dateFormat print DateTime.now.plusMonths(months)
+
+	def yearsFromNow(years: Int) = dateFormat print DateTime.now.plusYears(years)
+	def monthsFromNow(months: Int) = dateFormat print DateTime.now.plusMonths(months)
 }

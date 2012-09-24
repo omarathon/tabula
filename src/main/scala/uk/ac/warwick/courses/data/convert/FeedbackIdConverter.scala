@@ -11,9 +11,9 @@ import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.data.FeedbackDao
 
 class FeedbackIdConverter extends Converter[String, Feedback] {
-	
-  @Autowired var service:FeedbackDao =_
-  
-  override def convert(id:String) = service.getFeedback(id).orNull
-  
+
+	@Autowired var service: FeedbackDao = _
+
+	override def convert(id: String) = service.getFeedback(id).orNull
+
 }

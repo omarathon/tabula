@@ -29,10 +29,11 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 
 	def save(department: Department) = session.saveOrUpdate(department)
 
-	/** Get all departments owned by a particular usercode.
-	  * Doesn't work with UserGroups that use a webgroup (it's not possible in the UI
-	  * to use a webgroup for the department admins list.)
-	  */
+	/**
+	 * Get all departments owned by a particular usercode.
+	 * Doesn't work with UserGroups that use a webgroup (it's not possible in the UI
+	 * to use a webgroup for the department admins list.)
+	 */
 	def getByOwner(user: String): Seq[Department] = {
 		val query = session.createQuery("from Department d where :user in elements(d.owners.includeUsers)")
 		query.setString("user", user)

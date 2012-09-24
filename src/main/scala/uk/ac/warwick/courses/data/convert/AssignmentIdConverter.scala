@@ -9,9 +9,9 @@ import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.data.model.Assignment
 
 class AssignmentIdConverter extends Converter[String, Assignment] {
-  
-  @Autowired var service:AssignmentService =_
-  
-  override def convert(code:String) = service.getAssignmentById(code).orNull
-  
+
+	@Autowired var service: AssignmentService = _
+
+	override def convert(code: String) = service.getAssignmentById(code).orNull
+
 }

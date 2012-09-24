@@ -5,13 +5,12 @@ import java.io.InputStream
 import javax.servlet.http.HttpServletResponse
 import org.springframework.util.FileCopyUtils
 
-
 @Service
 class FileServer {
 	/**
 	 * Serves a RenderableFile out to an HTTP response.
 	 */
-	def serve(file:RenderableFile, out:HttpServletResponse) {
+	def serve(file: RenderableFile, out: HttpServletResponse) {
 		/*
 		 * There's no consistent standard for encoding in the optional
 		 * "filename" attribute of Content-Disposition, so you should stick

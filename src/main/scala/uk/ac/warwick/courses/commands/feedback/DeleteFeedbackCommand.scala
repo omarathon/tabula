@@ -15,36 +15,35 @@ import uk.ac.warwick.courses.commands.SelfValidating
 import org.springframework.beans.factory.annotation.Configurable
 
 @Configurable
-class DeleteFeedbackCommand(val assignment:Assignment) extends Command[Unit] with SelfValidating {
-	
-	@BeanProperty var feedbacks:JList[Feedback] = ArrayList() 
-	
-	@Autowired var feedbackDao:FeedbackDao = _
-	
-	@BeanProperty var confirm:Boolean = false
-	
+class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+
+	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
+
+	@Autowired var feedbackDao: FeedbackDao = _
+
+	@BeanProperty var confirm: Boolean = false
+
 	def apply() = {
 		for (feedback <- feedbacks) feedbackDao.delete(feedback)
 	}
-	
-	def prevalidate(implicit errors:Errors) {
+
+	def prevalidate(implicit errors: Errors) {
 		if (feedbacks.find(_.assignment != assignment).isDefined) {
 			reject("feedback.delete.wrongassignment")
 		}
 		// HFC-88 allow deleting released feedback.
-//		if (feedbacks.find(_.released).isDefined) {
-//			reject("feedback.delete.released")
-//		}
+		//		if (feedbacks.find(_.released).isDefined) {
+		//			reject("feedback.delete.released")
+		//		}
 	}
-	
-	def validate(implicit errors:Errors) {
+
+	def validate(implicit errors: Errors) {
 		prevalidate
 		if (!confirm) rejectValue("confirm", "feedback.delete.confirm")
 	}
-	
-	def describe(d:Description) = d
-			.assignment(assignment)
-			.property("feedbackCount" -> feedbacks.size)
-	
-	
+
+	def describe(d: Description) = d
+		.assignment(assignment)
+		.property("feedbackCount" -> feedbacks.size)
+
 }

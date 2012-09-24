@@ -72,6 +72,11 @@ jQuery.fn.bigList = function(options) {
 	this.each(function(){
 		var $this = $(this);
 
+		if (options == 'changed') {
+			this.checkboxChangedFunction();
+			return;
+		}
+
 		var checkboxClass = options.checkboxClass || 'collection-checkbox';
 		var checkboxAllClass = options.checkboxClass || 'collection-check-all';
 
@@ -85,7 +90,7 @@ jQuery.fn.bigList = function(options) {
 		var onNoneChecked = options.onNoneChecked || doNothing;
 		var onAllChecked = options.onAllChecked || onSomeChecked;
 
-		$checkboxes.change(function(){
+		this.checkboxChangedFunction = function(){
 		    onChange.call(jQuery(this)); // pass the checkbox as the context
 			var allChecked = $checkboxes.not(":checked").length == 0;
 			$selectAll.attr("checked", allChecked);
@@ -99,7 +104,8 @@ jQuery.fn.bigList = function(options) {
 				$this.data('checked','none');
 				onNoneChecked.call($this);
 			}
-		});
+		};
+		$checkboxes.change(this.checkboxChangedFunction);
 
 		$selectAll.change(function(){
 			$checkboxes.attr("checked", this.checked);
@@ -485,11 +491,53 @@ jQuery(function ($) {
 				}
 				return false;
 			});
+			
+		
+			
+			$('#mark-plagiarised-selected-button').click(function(event){
+				event.preventDefault();
+
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
+				
+				if ($container.data('checked') != 'none') {
+		
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
+					
+					if ($container.data("all-plagiarised") === true) {
+						$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+					}
+					
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
 		},
 
 		// rather than just toggling the class check the state of the checkbox to avoid silly errors
 		onChange : function() {
 			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+			var $checkedBoxes = $(".collection-checkbox:checked");
+
+			var allPlagiarised = false;
+			
+			if ($checkedBoxes.length > 0) {
+				allPlagiarised = true;
+				$checkedBoxes.each(function(index){
+					var $checkBox = $(this);
+					if ($checkBox.closest('tr').data('plagiarised') != true) {
+						allPlagiarised = false;
+					}
+				});					
+			}
+			$('.submission-list').data("all-plagiarised", allPlagiarised);
+			if (allPlagiarised) {
+				$('#mark-plagiarised-selected-button').text("Unmark selected plagiarised");
+			}
+			else {
+				$('#mark-plagiarised-selected-button').text("Mark selected plagiarised");				
+			}
 		},
 
 		onSomeChecked : function() {
@@ -572,6 +620,9 @@ jQuery(function ($) {
 
 	$('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
 
+	// add .use-tooltip class and title attribute to enable cool looking tooltips.
+	$('.use-tooltip').tooltip();
+
 	$('#app-feedback-link').click(function(event){
 		event.preventDefault();
 		var popup = getFeedbackPopup();
@@ -611,6 +662,14 @@ jQuery(function ($) {
 		});
 		$slidingDiv.toggle($checkbox.is(':checked'));
 	};
+	
+	// export the stuff we do to the submissions form so we can re-run it on demand.
+	var decorateSubmissionsForm = function() {
+		slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
+	};
+	exports.decorateSubmissionsForm = decorateSubmissionsForm;
+
+	decorateSubmissionsForm();
 
 
 	slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
@@ -667,6 +726,10 @@ jQuery(function ($) {
             });
         }
     });
+
+
+  // take anything we've attached to "exports" and expose it as the global "Courses"
+  window.Courses = exports;
 
 }); // end domready
 

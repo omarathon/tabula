@@ -7,7 +7,7 @@ import collection.JavaConverters._
  * value for a variable that needs a mutable java.util.List.
  */
 object ArrayList {
-	def apply[T](elements:T*) : java.util.ArrayList[T] = {
+	def apply[T](elements: T*): java.util.ArrayList[T] = {
 		val list = new java.util.ArrayList[T]()
 		if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
 		list

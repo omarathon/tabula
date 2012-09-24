@@ -29,16 +29,14 @@ package uk.ac.warwick.courses.services.turnitin
  * Information about a submission as returned by the Turnitin API.
  */
 case class TurnitinSubmissionInfo(
-	val objectId:String,
-	val title:String,
-	val universityId:String,
-	val similarityScore:Int,
-	val overlap:Option[Int],
-	val webOverlap:Option[Int],
-	val publicationOverlap:Option[Int],
-	val studentPaperOverlap:Option[Int]
-) 
-{
+	val objectId: String,
+	val title: String,
+	val universityId: String,
+	val similarityScore: Int,
+	val overlap: Option[Int],
+	val webOverlap: Option[Int],
+	val publicationOverlap: Option[Int],
+	val studentPaperOverlap: Option[Int]) {
 	/** If plagiarism checking hasn't been done yet, it will have a score of -1. */
 	def hasBeenChecked = similarityScore != -1
 }

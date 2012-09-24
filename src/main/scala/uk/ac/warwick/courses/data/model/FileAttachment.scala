@@ -25,68 +25,66 @@ import scala.util.matching.Regex
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
-	
-	@transient @Autowired var fileDao:FileDao =_
-	
-	// optional link to a SubmissionValue
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="submission_id")
-	@BeanProperty var submissionValue:SavedSubmissionValue = null
-	
-	// optional link to some Feedback
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="feedback_id")
-	@BeanProperty var feedback:Feedback =_
-	
-	def isAttached = feedback != null || submissionValue != null
-	
-	@BeanProperty var temporary:Boolean = true
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var dateUploaded:DateTime = new DateTime
-	
-	@transient private var _file:File = null
+	@transient @Autowired var fileDao: FileDao = _
+
+	// optional link to a SubmissionValue
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "submission_id")
+	@BeanProperty var submissionValue: SavedSubmissionValue = null
+
+	// optional link to some Feedback
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "feedback_id")
+	@BeanProperty var feedback: Feedback = _
+
+	def isAttached = feedback != null || submissionValue != null
+
+	@BeanProperty var temporary: Boolean = true
+
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var dateUploaded: DateTime = new DateTime
+
+	@transient private var _file: File = null
 	def file = {
 		if (_file == null) _file = fileDao.getData(id).orNull
 		_file
 	}
-	def file_=(f:File) { _file = f }
-	
-	@Column(name="name")
-	private var _name:String =_
+	def file_=(f: File) { _file = f }
+
+	@Column(name = "name")
+	private var _name: String = _
 	def name = _name
 	def getName() = _name
-	def setName(n:String) { name = n }
-	def name_= (n:String) {
+	def setName(n: String) { name = n }
+	def name_=(n: String) {
 		_name = Option(n).map(sanitisedFilename).orNull
 	}
-			
-	def this(n:String) { 
+
+	def this(n: String) {
 		this()
-		name = n 
+		name = n
 	}
-	
-	def length:Option[Long] = Option(file) map {_.length}
-	
+
+	def length: Option[Long] = Option(file) map { _.length }
+
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
 	def dataStream = Option(file) map { new FileInputStream(_) } orNull
-		
-	
-	
+
 	def hasData = file != null
-	
-	@transient @BeanProperty var uploadedData:InputStream = null
-	@transient @BeanProperty var uploadedDataLength:Long = 0
-	
+
+	@transient @BeanProperty var uploadedData: InputStream = null
+	@transient @BeanProperty var uploadedDataLength: Long = 0
+
 }
 
 object FileAttachment {
-	
+
 	private val BadWindowsCharacters = new Regex("""[<\\"|:*/>?]""")
-	
-	def sanitisedFilename(filename:String) = BadWindowsCharacters.replaceAllIn(filename.trim, "")
-	
+
+	def sanitisedFilename(filename: String) = BadWindowsCharacters.replaceAllIn(filename.trim, "")
+
 }

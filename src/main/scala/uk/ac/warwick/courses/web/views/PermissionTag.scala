@@ -12,30 +12,30 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.RequestInfo
 
 /**
- * Freemarker directive to show the contents of the tag  
+ * Freemarker directive to show the contents of the tag
  */
-class PermissionTag/*[A <: Action[_] : ClassManifest]*/ extends TemplateDirectiveModel with Logging {
-	
-	@Autowired var securityService:SecurityService =_
-	
-	override def execute(env:Environment,
-			_params:java.util.Map[_,_],
-			loopVars:Array[TemplateModel],
-			body:TemplateDirectiveBody) = {
-		val params = _params.asInstanceOf[java.util.Map[String,TemplateModel]]
-		
+class PermissionTag /*[A <: Action[_] : ClassManifest]*/ extends TemplateDirectiveModel with Logging {
+
+	@Autowired var securityService: SecurityService = _
+
+	override def execute(env: Environment,
+		_params: java.util.Map[_, _],
+		loopVars: Array[TemplateModel],
+		body: TemplateDirectiveBody) = {
+		val params = _params.asInstanceOf[java.util.Map[String, TemplateModel]]
+
 		val request = RequestInfo.fromThread.get
 		val currentUser = request.user
-		
+
 		val item = DeepUnwrap.unwrap(params.get("object"))
 		val actionName = DeepUnwrap.unwrap(params.get("action")).asInstanceOf[String]
 		val action = Action.of(actionName, item)
-		
-		if ( securityService.can(currentUser, action) ) {
-			if (debugEnabled) logger.debug("Rendering content for "+currentUser+" to "+action)
+
+		if (securityService.can(currentUser, action)) {
+			if (debugEnabled) logger.debug("Rendering content for " + currentUser + " to " + action)
 			body.render(env.getOut)
 		} else {
-			if (debugEnabled) logger.debug("Not rendering content for "+currentUser+" to "+action)
+			if (debugEnabled) logger.debug("Not rendering content for " + currentUser + " to " + action)
 		}
 	}
 }

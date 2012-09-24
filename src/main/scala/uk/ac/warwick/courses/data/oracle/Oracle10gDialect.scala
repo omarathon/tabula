@@ -13,8 +13,8 @@ class Oracle10gDialect extends org.hibernate.dialect.Oracle10gDialect {
 	registerHibernateType(Types.NCLOB, StandardBasicTypes.CLOB.getName)
 	registerHibernateType(Types.NCHAR, StandardBasicTypes.STRING.getName)
 	registerHibernateType(Types.BOOLEAN, "boolean")
-	
+
 	registerColumnType(Types.BOOLEAN, "boolean")
-	
+
 	//registerColumnType(Types.NCLOB, "clob")
 }

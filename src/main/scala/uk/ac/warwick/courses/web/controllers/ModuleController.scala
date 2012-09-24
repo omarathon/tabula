@@ -12,18 +12,17 @@ import collection.JavaConversions._
 @RequestMapping(Array("/module/{module}/"))
 class ModuleController extends BaseController {
 
-  hideDeletedItems
+	hideDeletedItems
 
-  @RequestMapping
-  def viewModule(@PathVariable module: Module) = {
-    mustBeAbleTo(View(mandatory(module)))
-    Mav("submit/module",
-      "module" -> module,
-      "assignments" -> module.assignments
-        .filterNot { _.deleted }
-        .sortBy { _.closeDate }
-        .reverse
-    )
-  }
+	@RequestMapping
+	def viewModule(@PathVariable module: Module) = {
+		mustBeAbleTo(View(mandatory(module)))
+		Mav("submit/module",
+			"module" -> module,
+			"assignments" -> module.assignments
+				.filterNot { _.deleted }
+				.sortBy { _.closeDate }
+				.reverse)
+	}
 
 }

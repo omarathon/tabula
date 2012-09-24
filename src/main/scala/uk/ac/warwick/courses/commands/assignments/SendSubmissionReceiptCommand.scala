@@ -28,24 +28,23 @@ import uk.ac.warwick.courses.web.views.FreemarkerRendering
  * who submitted it.
  */
 @Configurable
-class SendSubmissionReceiptCommand (
-		@BeanProperty var submission:Submission,
-		@BeanProperty var user:CurrentUser
-		) extends Command[Boolean] with ReadOnly with FreemarkerRendering {
-	
-	def this() = this(null,null)
-	
-	@BeanProperty var assignment:Assignment = Option(submission).map{ _.assignment }.orNull
-	@BeanProperty var module:Module = Option(assignment).map{ _.module }.orNull
-	
-	@BeanProperty @Autowired implicit var freemarker:Configuration =_
-	@Resource(name="studentMailSender") var studentMailSender:WarwickMailSender =_
-	@Value("${mail.noreply.to}") var replyAddress:String = _
-	@Value("${mail.exceptions.to}") var fromAddress:String = _
-	@Value("${toplevel.url}") var topLevelUrl:String = _
-	
+class SendSubmissionReceiptCommand(
+	@BeanProperty var submission: Submission,
+	@BeanProperty var user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering {
+
+	def this() = this(null, null)
+
+	@BeanProperty var assignment: Assignment = Option(submission).map { _.assignment }.orNull
+	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
+
+	@BeanProperty @Autowired implicit var freemarker: Configuration = _
+	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
+	@Value("${mail.noreply.to}") var replyAddress: String = _
+	@Value("${mail.exceptions.to}") var fromAddress: String = _
+	@Value("${toplevel.url}") var topLevelUrl: String = _
+
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
-	
+
 	def apply = {
 		if (user.email.hasText) {
 			(studentMailSender send messageFor(user))
@@ -54,27 +53,26 @@ class SendSubmissionReceiptCommand (
 			false
 		}
 	}
-	
-	def messageFor(user:CurrentUser) = {
+
+	def messageFor(user: CurrentUser) = {
 		val message = new SimpleMailMessage
 		val moduleCode = module.code.toUpperCase
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
 		message.setTo(user.email)
 		message.setSubject(moduleCode + ": Submission receipt")
-	    message.setText(renderToString("/WEB-INF/freemarker/emails/submissionreceipt.ftl", Map(
-	    	"submission" -> submission,
-	    	"submissionDate" -> dateFormatter.print(submission.submittedDate),
-	    	"assignment" -> assignment,
-	    	"module" -> module,
-	    	"user" -> user,
-	    	"url" -> (topLevelUrl + Routes.assignment.receipt(assignment))
-	    )))
+		message.setText(renderToString("/WEB-INF/freemarker/emails/submissionreceipt.ftl", Map(
+			"submission" -> submission,
+			"submissionDate" -> dateFormatter.print(submission.submittedDate),
+			"assignment" -> assignment,
+			"module" -> module,
+			"user" -> user,
+			"url" -> (topLevelUrl + Routes.assignment.receipt(assignment)))))
 		message
 	}
-	
-	override def describe(d:Description) {
+
+	override def describe(d: Description) {
 		d.assignment(assignment)
 	}
-	
+
 }

@@ -12,9 +12,9 @@ import uk.ac.warwick.courses.data.FeedbackDao
 import uk.ac.warwick.courses.data.model.Submission
 
 class SubmissionIdConverter extends Converter[String, Submission] {
-	
-  @Autowired var service:AssignmentService =_
-  
-  override def convert(id:String) = service.getSubmission(id).orNull
-  
+
+	@Autowired var service: AssignmentService = _
+
+	override def convert(id: String) = service.getSubmission(id).orNull
+
 }

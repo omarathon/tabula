@@ -13,15 +13,14 @@ import org.springframework.web.context.ConfigurableWebApplicationContext
 
 import uk.ac.warwick.courses.helpers.Logging
 
-
 /**
  * Sets some properties on the application context before we start
  * loading any beans and stuff.
  */
 class ContextSetupInitializer extends ApplicationContextInitializer[ConfigurableWebApplicationContext] with Logging {
 
-  override def initialize(ctx:ConfigurableWebApplicationContext) = {
-	  
-  }
-  
+	override def initialize(ctx: ConfigurableWebApplicationContext) = {
+
+	}
+
 }

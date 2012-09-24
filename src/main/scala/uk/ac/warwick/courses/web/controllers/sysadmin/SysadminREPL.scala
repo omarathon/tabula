@@ -23,65 +23,63 @@ import org.springframework.expression.spel.SpelEvaluationException
 import org.hibernate.Session
 
 @Controller
-@RequestMapping(value=Array("/sysadmin/repl"))
+@RequestMapping(value = Array("/sysadmin/repl"))
 class SysadminREPL extends BaseController with BeanFactoryAware {
-	
-	@BeanProperty var beanFactory:BeanFactory =_
-	@Autowired var assignmentService:AssignmentService =_
-	@Autowired var moduleAndDepartmentService:ModuleAndDepartmentService =_
-	
-	val spel:SpelExpressionParser = new SpelExpressionParser
-	
+
+	@BeanProperty var beanFactory: BeanFactory = _
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
+
+	val spel: SpelExpressionParser = new SpelExpressionParser
+
 	@RequestMapping
-	def evaluate(@RequestParam(value="query", defaultValue="") query:String) = {
+	def evaluate(@RequestParam(value = "query", defaultValue = "") query: String) = {
 		val response = if (query.hasText) {
 			val context = new StandardEvaluationContext(RootObject(session))
 			val expression = spel.parseExpression(query)
 			try Return(expression.getValue(context))
-			catch { case e:Exception => Return(null, e) }
+			catch { case e: Exception => Return(null, e) }
 		} else {
 			Return(null)
 		}
 		Mav("sysadmin/repl", "query" -> query, "response" -> response)
 	}
-	
+
 	/**
 	 * Root object for evaluator. Its properties and methods will be available
 	 * as top-level items in your SpEL query.
 	 */
 	case class RootObject(
-		@BeanProperty val session:Session,
-		@BeanProperty val beanFactory:BeanFactory = beanFactory,
+		@BeanProperty val session: Session,
+		@BeanProperty val beanFactory: BeanFactory = beanFactory,
 		// expose Assignments as a map of ids
-		@BeanProperty val assignments:MapAccessor[Assignment] = MapAccessor { id =>
+		@BeanProperty val assignments: MapAccessor[Assignment] = MapAccessor { id =>
 			assignmentService.getAssignmentById(id).orNull
 		},
-		@BeanProperty val departmentCodes:MapAccessor[Department] = MapAccessor { code =>
+		@BeanProperty val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
 			moduleAndDepartmentService.getDepartmentByCode(code).orNull
-		}
-	)
+		})
 }
-
 
 /**
  * Implements a Java Map that only has a working get() method, to allow
  * you to expose some collection of objects as a String-keyed map.
  */
-abstract class MapAccessor[T] extends JMap[String,T] {
-	def fetch(key:String):T 
-	override def get(key:Any) = fetch(key.asInstanceOf[String]) 
-	override def put(key:String, value:T) = throw strop
+abstract class MapAccessor[T] extends JMap[String, T] {
+	def fetch(key: String): T
+	override def get(key: Any) = fetch(key.asInstanceOf[String])
+	override def put(key: String, value: T) = throw strop
 	override def keySet = throw strop
 	override def entrySet = throw strop
 	override def values = throw strop
-	override def putAll(map:JMap[_ <: String, _ <: T]) = throw strop
+	override def putAll(map: JMap[_ <: String, _ <: T]) = throw strop
 	override def size = 1
 	override def isEmpty = false
 	override def clear = throw strop
-	override def containsKey(s:Any) = throw strop
-	override def containsValue(v:Any) = throw strop
-	override def remove(v:Any) = throw strop
-		
+	override def containsKey(s: Any) = throw strop
+	override def containsValue(v: Any) = throw strop
+	override def remove(v: Any) = throw strop
+
 	def strop = new UnsupportedOperationException
 }
 
@@ -90,12 +88,12 @@ object MapAccessor {
 	 * Creates a MapAccessor that uses the given function to resolve
 	 * the string to an object.
 	 */
-	def apply[T](fn: String=>T) = new MapAccessor[T] {
-		override def fetch(id:String) = fn(id)
+	def apply[T](fn: String => T) = new MapAccessor[T] {
+		override def fetch(id: String) = fn(id)
 	}
 }
 
-case class Return(val value:Any, val exception:Exception = null) {
+case class Return(val value: Any, val exception: Exception = null) {
 	lazy val stringValue = value.toString
 	lazy val isNone = value match {
 		case None => true
@@ -110,8 +108,8 @@ case class Return(val value:Any, val exception:Exception = null) {
 	}
 	lazy val valueType = {
 		value match {
-			case Some(any:Any) => any.getClass.getSimpleName
-			case any:Any => any.getClass.getSimpleName
+			case Some(any: Any) => any.getClass.getSimpleName
+			case any: Any => any.getClass.getSimpleName
 			case _ => "?"
 		}
 	}

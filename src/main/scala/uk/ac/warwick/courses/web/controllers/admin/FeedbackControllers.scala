@@ -35,13 +35,13 @@ import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.services.AuditEventIndexService
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadFeedback extends BaseController {
-	@Autowired var feedbackDao:FeedbackDao =_
-	@Autowired var fileServer:FileServer =_
-	
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable feedbackId:String, @PathVariable filename:String, response:HttpServletResponse) {
+	@Autowired var feedbackDao: FeedbackDao = _
+	@Autowired var fileServer: FileServer = _
+
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 
@@ -57,11 +57,11 @@ class DownloadFeedback extends BaseController {
 }
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
 class DownloadAllFeedback extends BaseController {
-	@Autowired var fileServer:FileServer =_
+	@Autowired var fileServer: FileServer = _
 	@RequestMapping
-	def download(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable filename:String, response:HttpServletResponse) {
+	def download(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		val renderable = new AdminGetAllFeedbackCommand(assignment).apply()
@@ -70,18 +70,17 @@ class DownloadAllFeedback extends BaseController {
 }
 
 @Configurable @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
 class ListFeedback extends BaseController {
-	
+
 	@Autowired var auditIndexService: AuditEventIndexService = _
-	
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(@PathVariable module:Module, @PathVariable assignment:Assignment) = {
+
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def get(@PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		Mav("admin/assignments/feedback/list",
-				"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment)
-			)
+			"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment))
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 }

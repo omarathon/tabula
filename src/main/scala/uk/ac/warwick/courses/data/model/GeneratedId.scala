@@ -10,8 +10,8 @@ import scala.reflect.BeanProperty
  */
 trait GeneratedId {
 	@BeanProperty
-	@Id 
-	@GeneratedValue(generator="system-uuid") 
-	@GenericGenerator(name="system-uuid", strategy="org.hibernate.id.UUIDGenerator")
-	var id:String = null
+	@Id
+	@GeneratedValue(generator = "system-uuid")
+	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
+	var id: String = null
 }

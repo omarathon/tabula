@@ -10,17 +10,16 @@ import uk.ac.warwick.courses.helpers.Logging
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	@Autowired @BeanProperty var listener:EventListener = _
-	
+	@Autowired @BeanProperty var listener: EventListener = _
 
 	/**
 	 * Records the various stages of an event: before, and either
 	 * after or error. All of them should have the same eventid to
 	 * join them together (though they also have unique primary keys).
 	 */
-	def recordEvent[T](d:Describable[T])(f: =>T): T = 
+	def recordEvent[T](d: Describable[T])(f: => T): T =
 		d match {
-			case _:Unaudited => f // don't audit unaudited events!
+			case _: Unaudited => f // don't audit unaudited events!
 			case _ => {
 				val event = Event.fromDescribable(d)
 				try {

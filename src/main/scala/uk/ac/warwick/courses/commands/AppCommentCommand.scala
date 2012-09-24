@@ -20,38 +20,38 @@ import uk.ac.warwick.util.core.StringUtils._
 import uk.ac.warwick.courses.web.views.FreemarkerRendering
 
 @Configurable
-class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
+class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
 
-	@Resource(name="mailSender")
-	@BeanProperty var mailSender:WarwickMailSender =_
-	
-	@Value("${mail.admin.to}") var adminMailAddress:String =_
-	
+	@Resource(name = "mailSender")
+	@BeanProperty var mailSender: WarwickMailSender = _
+
+	@Value("${mail.admin.to}") var adminMailAddress: String = _
+
 	@Autowired
-	@BeanProperty var freemarker:Configuration =_
-	var template:Template = _
-	
-	@BeanProperty var message:String =_
-//	@BeanProperty var pleaseRespond:Boolean =_
-	@BeanProperty var usercode:String =_
-	@BeanProperty var name:String =_
-	@BeanProperty var email:String =_
-	@BeanProperty var currentPage:String =_
-	@BeanProperty var browser:String =_
-	@BeanProperty var os:String =_
-	@BeanProperty var resolution:String =_
-	@BeanProperty var ipAddress:String =_
-	
+	@BeanProperty var freemarker: Configuration = _
+	var template: Template = _
+
+	@BeanProperty var message: String = _
+	//	@BeanProperty var pleaseRespond:Boolean =_
+	@BeanProperty var usercode: String = _
+	@BeanProperty var name: String = _
+	@BeanProperty var email: String = _
+	@BeanProperty var currentPage: String = _
+	@BeanProperty var browser: String = _
+	@BeanProperty var os: String = _
+	@BeanProperty var resolution: String = _
+	@BeanProperty var ipAddress: String = _
+
 	def apply = {
 		val mail = new SimpleMailMessage
 		mail setTo adminMailAddress
 		mail setFrom adminMailAddress
 		mail setSubject "Coursework application feedback"
 		mail setText generateText
-		
+
 		mailSender send mail
 	}
-	
+
 	def prefill = {
 		if (user != null && user.loggedIn) {
 			if (!hasText(usercode)) usercode = user.apparentId
@@ -59,27 +59,24 @@ class AppCommentCommand(user:CurrentUser) extends Command[Future[Boolean]] with 
 			if (!hasText(email)) email = user.email
 		}
 	}
-	
+
 	def generateText = renderToString(template, Map(
-			"user" -> user,
-			"info" -> this
-	))
-	
+		"user" -> user,
+		"info" -> this))
+
 	def afterPropertiesSet {
 		template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 	}
-	
-	def validate(errors:Errors) {
+
+	def validate(errors: Errors) {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "message", "NotEmpty")
 	}
-	
-	def describe(d:Description) {}
-	
-	override def describeResult(d:Description) = d.properties(
-			"name" -> name,
-			"email" -> email,
-			"message" -> message
-		)
-	
-	
+
+	def describe(d: Description) {}
+
+	override def describeResult(d: Description) = d.properties(
+		"name" -> name,
+		"email" -> email,
+		"message" -> message)
+
 }

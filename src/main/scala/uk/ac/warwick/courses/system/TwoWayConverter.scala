@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.system
 
 import org.springframework.core.convert.converter.GenericConverter
 import org.springframework.core.convert.TypeDescriptor
-import java.{util => j}
+import java.{ util => j }
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair
 import com.google.common.collect.Sets._
 
@@ -23,35 +23,34 @@ import com.google.common.collect.Sets._
  * If a value is invalid, throw IllegalArgumentException. Spring will pick it up and correctly
  * treat it as a type mismatch.
  */
-abstract class TwoWayConverter[A<:AnyRef : ClassManifest, B<:AnyRef : ClassManifest] extends GenericConverter {
+abstract class TwoWayConverter[A <: AnyRef: ClassManifest, B <: AnyRef: ClassManifest] extends GenericConverter {
 	// JVM can't normally remember types at runtime, so store them as Manifests here
 	val typeA = classManifest[A]
 	val typeB = classManifest[B]
 
-	val convertibleTypes:j.Set[ConvertiblePair] = newHashSet(
+	val convertibleTypes: j.Set[ConvertiblePair] = newHashSet(
 		new ConvertiblePair(typeA.erasure, typeB.erasure),
-		new ConvertiblePair(typeB.erasure, typeA.erasure)
-	)
+		new ConvertiblePair(typeB.erasure, typeA.erasure))
 
 	def getConvertibleTypes = convertibleTypes
 
 	// implement these. throw an IllegalArgumentException if input is invalid - don't just return null!
-	def convertRight(source: A) : B
-	def convertLeft(source: B) : A
+	def convertRight(source: A): B
+	def convertLeft(source: B): A
 
 	// Convert either left or right, depending on the two types.
 	def convert(source: Any, sourceType: TypeDescriptor, targetType: TypeDescriptor) = {
 		// normally a match statement is cleaner but they are almost as messy when manifests are involved.
-		if ( matching(sourceType, typeA) && matching(targetType, typeB) ) {
-			convertRight( source.asInstanceOf[A] )
-		} else if ( matching(sourceType, typeB) && matching(targetType, typeA) ) {
-			convertLeft( source.asInstanceOf[B] )
+		if (matching(sourceType, typeA) && matching(targetType, typeB)) {
+			convertRight(source.asInstanceOf[A])
+		} else if (matching(sourceType, typeB) && matching(targetType, typeA)) {
+			convertLeft(source.asInstanceOf[B])
 		} else {
 			// ought never to happen as Spring checks getConvertibleTypes beforehand.
 			throw new IllegalArgumentException("Unexpected source type " + sourceType.getType.getName)
 		}
 	}
 
-	private def matching (descriptor: TypeDescriptor, manifest: ClassManifest[_]) =
+	private def matching(descriptor: TypeDescriptor, manifest: ClassManifest[_]) =
 		descriptor.getType().isAssignableFrom(manifest.erasure)
 }

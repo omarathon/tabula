@@ -20,35 +20,34 @@ import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.web.Routes
 
 trait ModulePermissionControllerMethods extends BaseController {
-	
+
 	@ModelAttribute("addCommand") def addCommandModel = new AddModulePermissionCommand()
 	@ModelAttribute("removeCommand") def removeCommandModel = new RemoveModulePermissionCommand()
-	
-	def form(module:Module) : Mav = {
+
+	def form(module: Module): Mav = {
 		checks(module)
-		Mav("admin/modules/permissions/form", "module"->module)
+		Mav("admin/modules/permissions/form", "module" -> module)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
-	
-	
-	def checks(module:Module) = {
+
+	def checks(module: Module) = {
 		mustBeAbleTo(Manage(module))
 		module.ensureParticipantsGroup
 	}
 }
 
-@Controller @RequestMapping(value=Array("/admin/module/{module}/permissions"))
+@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
 class ModulePermissionController extends BaseController with ModulePermissionControllerMethods {
 	@RequestMapping
-	def permissionsForm(@PathVariable("module") module:Module) : Mav = 
+	def permissionsForm(@PathVariable("module") module: Module): Mav =
 		form(module)
 }
 
-@Controller @RequestMapping(value=Array("/admin/module/{module}/permissions"))
+@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
 class ModuleAddPermissionController extends BaseController with ModulePermissionControllerMethods {
-	
-	@RequestMapping(method=Array(POST), params=Array("_command=add"))
-	def addPermission( @ModelAttribute("addCommand") command:AddModulePermissionCommand, errors:Errors ) : Mav = {
+
+	@RequestMapping(method = Array(POST), params = Array("_command=add"))
+	def addPermission(@ModelAttribute("addCommand") command: AddModulePermissionCommand, errors: Errors): Mav = {
 		val module = command.module
 		checks(module)
 		command.validate(errors)
@@ -58,14 +57,14 @@ class ModuleAddPermissionController extends BaseController with ModulePermission
 			command.apply()
 			Redirect(Routes.admin.modulePermissions(module))
 		}
-		
+
 	}
 }
 
-@Controller @RequestMapping(value=Array("/admin/module/{module}/permissions"))
-class ModuleRemovePermissionController extends BaseController with ModulePermissionControllerMethods {	
-	@RequestMapping(method=Array(POST), params=Array("_command=remove"))
-	def addPermission( @ModelAttribute("removeCommand") command:RemoveModulePermissionCommand, errors:Errors ) : Mav = {
+@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
+class ModuleRemovePermissionController extends BaseController with ModulePermissionControllerMethods {
+	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
+	def addPermission(@ModelAttribute("removeCommand") command: RemoveModulePermissionCommand, errors: Errors): Mav = {
 		val module = command.module
 		checks(module)
 		command.validate(errors)
@@ -75,6 +74,6 @@ class ModuleRemovePermissionController extends BaseController with ModulePermiss
 			command.apply()
 			Redirect(Routes.admin.modulePermissions(module))
 		}
-		
+
 	}
 }

@@ -9,16 +9,16 @@ import scala.reflect.BeanProperty
 
 /** Simply marks an assignment as archived. */
 class ArchiveAssignmentCommand(val assignment: Assignment) extends Command[Unit] {
-	
-	@BeanProperty var unarchive:Boolean = false
-	
+
+	@BeanProperty var unarchive: Boolean = false
+
 	@Transactional
 	def apply {
 		assignment.archived = !unarchive
 	}
-	
-	def describe(description:Description) = description
-	        .assignment(assignment)
-	        .property("unarchive" -> unarchive)
-	
+
+	def describe(description: Description) = description
+		.assignment(assignment)
+		.property("unarchive" -> unarchive)
+
 }

@@ -84,11 +84,13 @@ ul {
 }
 
 #feedback-table, #submission-table {
-    tr.selected td {
-        background-color: #F2DEDE;
-        &:hover{
-            background-color: #F2DEDE;
-        }
+    tbody {
+    	tr.selected td {
+        	background-color: #F2DEDE;
+        	&:hover{
+	            background-color: #F2DEDE;
+    	    }
+    	}
     }
     .status span{
         display: inline-block;
@@ -163,20 +165,6 @@ ul {
 
 .end-assignment-info { clear: both; }
 .end-floats { clear: both; }
-
-.assignment-columns {
-	min-width: 928px;
-
-	.assignment-left-fields {
-		width: 50%;
-  		float: left;
-	}
-
-	#assignment-picker {
-		width: 40%;
-		float: right;
-	}
-}
 
 .dev {
 	color: #ccc;
@@ -513,6 +501,11 @@ textarea#assignmentComment {
   td,th { padding: 4px; }
 }
 
+.uneditable-value {
+	display: inline-block;
+	margin-top: 5px;
+}
+
 // Bootstrap additions
 
 // For single button wrappers that shouldn't have extra margin
@@ -597,6 +590,41 @@ input[type=text] {
 
 	// checkbox column
   table tr > td:nth-of-type(1) { width: 16px; }
+}
+
+// setup assignments - hidden options groups
+.options-button .options-group {
+	display: none;
+}
+
+#main-content {
+// distinct coloured labels for assigning options groups.
+.label-A { background-color: #FFB300; }
+.label-B { background-color: #803E75; }
+.label-C { background-color: #FF6800; }
+.label-D { background-color: #A6BDD7; }
+.label-E { background-color: #C10020; }
+.label-F { background-color: #CEA262; }
+.label-G { background-color: #817066; }
+.label-H { background-color: #007D34; }
+.label-I { background-color: #F6768E; }
+.label-J { background-color: #00538A; }
+.label-K { background-color: #FF7A5C; }
+.label-L { background-color: #53377A; }
+.label-M { background-color: #FF8E00; }
+.label-N { background-color: #B32851; }
+.label-O { background-color: #F4C800; }
+.label-P { background-color: #7F180D; }
+.label-Q { background-color: #93AA00; }
+.label-R { background-color: #593315; }
+.label-S { background-color: #F13A13; }
+.label-T { background-color: #232C16; }
+// if you've gone past T then you have too many options. Grey for you!
+}
+
+// highlightable table rows
+tr.selected td {
+	background-color: #F2DEDE !important;
 }
 
 } // .coursework-page

@@ -13,25 +13,24 @@ import org.springframework.beans.factory.annotation.Configurable
 
 @Configurable
 class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
-	
-	@BeanProperty var assignment:Assignment =_
-	@BeanProperty var module:Module =_
 
-	@Autowired var auditIndex: AuditEventIndexService =_
-	
+	@BeanProperty var assignment: Assignment = _
+	@BeanProperty var module: Module = _
+
+	@Autowired var auditIndex: AuditEventIndexService = _
+
 	var checkIndex = true
-	
+
 	def apply = {
-		val submissions = assignment.submissions.sortBy( _.submittedDate ).reverse
-		val downloads = 
+		val submissions = assignment.submissions.sortBy(_.submittedDate).reverse
+		val downloads =
 			if (checkIndex) auditIndex.adminDownloadedSubmissions(assignment)
 			else Nil
 		submissions map { submission =>
-			SubmissionListItem(submission, downloads.contains(submission) )
+			SubmissionListItem(submission, downloads.contains(submission))
 		}
 	}
-	
-	
+
 }
 
-case class SubmissionListItem(val submission:Submission, val downloaded:Boolean)
+case class SubmissionListItem(val submission: Submission, val downloaded: Boolean)

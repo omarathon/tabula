@@ -7,7 +7,7 @@ import scala.math
  * to tell your code how to sort DateTime objects
  */
 object DateTimeOrdering {
-	implicit def orderedDateTime(d:DateTime): math.Ordered[DateTime] = new math.Ordered[DateTime] {
-		override def compare(d2:DateTime) = d.compareTo(d2)
+	implicit def orderedDateTime(d: DateTime): math.Ordered[DateTime] = new math.Ordered[DateTime] {
+		override def compare(d2: DateTime) = d.compareTo(d2)
 	}
 }

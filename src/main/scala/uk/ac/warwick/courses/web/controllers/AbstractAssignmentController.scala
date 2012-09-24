@@ -9,15 +9,14 @@ import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.services.AssignmentService
 
-
 abstract class AbstractAssignmentController extends BaseController {
-	@Autowired var feedbackDao:FeedbackDao =_
-	@Autowired var assignmentService:AssignmentService =_
-	
-	def checkCanGetFeedback(assignment:Assignment, user:CurrentUser): Option[Feedback] = {
+	@Autowired var feedbackDao: FeedbackDao = _
+	@Autowired var assignmentService: AssignmentService = _
+
+	def checkCanGetFeedback(assignment: Assignment, user: CurrentUser): Option[Feedback] = {
 		notDeleted(assignment)
 		val feedback = feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
-		
+
 		/*
 		 * When feedback has been released and we have some for that user,
 		 * we should allow them to view. Otherwise, restrict to those who can

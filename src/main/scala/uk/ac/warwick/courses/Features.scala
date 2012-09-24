@@ -14,55 +14,52 @@ import java.beans.PropertyDescriptor
 
 /**
  * Defines flags to turn features on and off.
- * 
- * Defaults set in `default.properties`.
+ *
+ * Defaults set in this class.
  * App can change startup features in its `courses.properties`,
  *   then modify them at runtime via JMX.
- *   
+ *
  * ==Adding a new feature==
- * 
+ *
  * Define a new boolean variable here (with `@BeanProperty` so that it's
- * a valid JavaBean property), and then add an entry to `default.properties`
- * like
- * 
+ * a valid JavaBean property), and then to set it to a different value in
+ * `courses.properties` add a line such as 
+ *
  * {{{
  * features.yourFeatureName=false
  * }}}
- * 
- * Where `false` can of course be `true` if you want that to be the default.
  */
 abstract class Features {
 
-	@BeanProperty var emailStudents:Boolean = false
-	@BeanProperty var collectRatings:Boolean = true
-	@BeanProperty var submissions:Boolean = true
-	@BeanProperty var privacyStatement:Boolean = true
-	@BeanProperty var collectMarks:Boolean = false
-	@BeanProperty var turnitin:Boolean = false
-	@BeanProperty var assignmentMembership:Boolean = false
-	@BeanProperty var extensions:Boolean = false
+	@BeanProperty var emailStudents: Boolean = false
+	@BeanProperty var collectRatings: Boolean = true
+	@BeanProperty var submissions: Boolean = true
+	@BeanProperty var privacyStatement: Boolean = true
+	@BeanProperty var collectMarks: Boolean = false
+	@BeanProperty var turnitin: Boolean = true
+	@BeanProperty var assignmentMembership: Boolean = false
+	@BeanProperty var extensions: Boolean = false
 }
 
-
-class FeaturesImpl(properties:Properties) extends Features {
+class FeaturesImpl(properties: Properties) extends Features {
 	// begin black magic that converts features.* properties into values
 	// to inject into this instance.
-	
+
 	private val featuresPrefix = "features."
-	
+
 	private val bean = new BeanWrapperImpl(this)
-	private def featureKeys = properties.keysIterator.filter( _ startsWith featuresPrefix )
-	def capitalise(string:String) = string.head.toUpper + string.tail
-	def removePrefix(string:String) = string.substring(featuresPrefix.length)
-	def camelise(string:String) = removePrefix(string).split("\\.").toList match {
+	private def featureKeys = properties.keysIterator.filter(_ startsWith featuresPrefix)
+	def capitalise(string: String) = string.head.toUpper + string.tail
+	def removePrefix(string: String) = string.substring(featuresPrefix.length)
+	def camelise(string: String) = removePrefix(string).split("\\.").toList match {
 		case Nil => ""
 		case head :: tail => head + tail.map(capitalise).mkString("")
 	}
-	
+
 	for (key <- featureKeys) bean.setPropertyValue(camelise(key), properties.getProperty(key))
 }
 
 object Features {
 	def empty = new FeaturesImpl(new Properties)
-	def fromProperties(p:Properties) = new FeaturesImpl(p)
+	def fromProperties(p: Properties) = new FeaturesImpl(p)
 }

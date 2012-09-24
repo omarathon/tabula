@@ -33,48 +33,48 @@ object JobInstanceImpl {
  * JobDefinition is the database entity that stores
  * data about the job request, its status and progress.
  * There can be many Job subclasses but JobDefinition
- * does not need subclassing. 
+ * does not need subclassing.
  */
-@Configurable 
-@Entity(name="Job")
+@Configurable
+@Entity(name = "Job")
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging {
-	
-	private type JsonMap = Map[String,Any]
-	
-	@transient @Autowired var jsonMapper:ObjectMapper =_
-	@transient @Autowired var userLookup:UserLookupInterface =_
-	@transient @Autowired var currentUserFinder:CurrentUserInterceptor =_
-	
+
+	private type JsonMap = Map[String, Any]
+
+	@transient @Autowired var jsonMapper: ObjectMapper = _
+	@transient @Autowired var userLookup: UserLookupInterface = _
+	@transient @Autowired var currentUserFinder: CurrentUserInterceptor = _
+
 	/** Human-readable status of the job */
-	var status:String =_
-	
-	var jobType:String =_
-	
+	var status: String = _
+
+	var jobType: String = _
+
 	var started = false
 	var finished = false
 	var succeeded = false
-	
-	var realUser: String = _ 
-	var apparentUser: String =_
-	
-	@transient var user: CurrentUser =_
-	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+
+	var realUser: String = _
+	var apparentUser: String = _
+
+	@transient var user: CurrentUser = _
+
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = new DateTime
-	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var updatedDate: DateTime = new DateTime
-	
-	@Column(name="progress") var _progress:Int = 0
+
+	@Column(name = "progress") var _progress: Int = 0
 	def progress = _progress
 	def progress_=(p: Int) = {
 		_progress = p
 	}
-	
-	@Lob var data:String = "{}"
+
+	@Lob var data: String = "{}"
 	@transient private var _json: JsonMap = Map()
 	def json = _json
-	def json_=(map:JsonMap) {
+	def json_=(map: JsonMap) {
 		_json = map
 		if (jsonMapper != null) {
 			data = jsonMapper.writeValueAsString(json)
@@ -84,23 +84,23 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	}
 
 	def propsMap = json
-	def propsMap_=(map:JsonMap) { json = map }
-	
+	def propsMap_=(map: JsonMap) { json = map }
+
 	override def postLoad {
-		val map = jsonMapper.readValue(data, classOf[Map[String,Any]])
+		val map = jsonMapper.readValue(data, classOf[Map[String, Any]])
 		json = map
-		
+
 		updatedDate = new DateTime
-		
-		def u(id:String) = id match {
-			case id:String => userLookup.getUserByUserId(id)
+
+		def u(id: String) = id match {
+			case id: String => userLookup.getUserByUserId(id)
 			case _ => new AnonymousUser
 		}
-		
+
 		val realUser = u(this.realUser)
 		val apparentUser = u(this.apparentUser)
-		
-		user = currentUserFinder.resolveCurrentUser(realUser, {(u, s) => apparentUser}, false)
+
+		user = currentUserFinder.resolveCurrentUser(realUser, { (u, s) => apparentUser }, false)
 	}
-	
+
 }

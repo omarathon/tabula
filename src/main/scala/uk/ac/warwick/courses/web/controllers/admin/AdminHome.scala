@@ -42,7 +42,7 @@ import uk.ac.warwick.courses.services.AuditEventIndexService
 class AdminHome extends BaseController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
-	
+
 	hideDeletedItems
 
 	@RequestMapping(Array("/admin/"))
@@ -54,7 +54,7 @@ class AdminHome extends BaseController {
 	@RequestMapping(Array("/admin/department/{dept}/"))
 	def adminDepartment(@PathVariable dept: Department, user: CurrentUser) = {
 		val isDeptManager = can(Manage(mandatory(dept)))
-		val modules:JList[Module] = if (isDeptManager) {
+		val modules: JList[Module] = if (isDeptManager) {
 			dept.modules
 		} else {
 			moduleService.modulesManagedBy(user.idForPermissions, dept).toList
@@ -64,8 +64,8 @@ class AdminHome extends BaseController {
 		}
 		Mav("admin/department",
 			"department" -> dept,
-			"modules" -> modules.sortBy{ (module) => (module.assignments.isEmpty, module.code) })
-			
+			"modules" -> modules.sortBy { (module) => (module.assignments.isEmpty, module.code) })
+
 	}
-	
+
 }

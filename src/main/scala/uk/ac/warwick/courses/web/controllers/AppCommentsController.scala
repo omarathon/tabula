@@ -15,21 +15,21 @@ import uk.ac.warwick.courses.CurrentUser
  * App to receive comments/feedback about the app.
  */
 @Controller
-@RequestMapping(value=Array("/app/tell-us"))
+@RequestMapping(value = Array("/app/tell-us"))
 class AppCommentsController extends BaseController {
-	
-	@ModelAttribute def command(user:CurrentUser) = new AppCommentCommand(user)
-	
-	@RequestMapping(method=Array(GET, HEAD))
-	def form (command:AppCommentCommand, errors:Errors) : Mav = {
+
+	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def form(command: AppCommentCommand, errors: Errors): Mav = {
 		command.prefill
 		formView
 	}
-	
+
 	def formView = chooseLayout(Mav("app/comments/form"))
-	
-	@RequestMapping(method=Array(POST))
-	def submit (command:AppCommentCommand, errors:Errors) : Mav = {
+
+	@RequestMapping(method = Array(POST))
+	def submit(command: AppCommentCommand, errors: Errors): Mav = {
 		command validate errors
 		if (errors hasErrors) {
 			formView
@@ -38,7 +38,7 @@ class AppCommentsController extends BaseController {
 			chooseLayout(Mav("app/comments/success"))
 		}
 	}
-	
-	private def chooseLayout(mav:Mav) = mav.noLayoutIf(ajax)
+
+	private def chooseLayout(mav: Mav) = mav.noLayoutIf(ajax)
 
 }
