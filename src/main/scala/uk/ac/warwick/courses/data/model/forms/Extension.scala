@@ -1,46 +1,65 @@
 package uk.ac.warwick.courses.data.model.forms
 
-import org.hibernate.annotations.{ Type, AccessType }
-import uk.ac.warwick.courses.data.model.{ Assignment, GeneratedId }
+import scala.collection.JavaConversions._
+import org.hibernate.annotations.{Type, AccessType}
+import uk.ac.warwick.courses.data.model.{FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.courses.actions.Deleteable
 import scala.Array
-import javax.persistence.Entity
-import javax.persistence.FetchType
+import javax.persistence._
 import javax.persistence.CascadeType._
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
 import reflect.BeanProperty
 import org.joda.time.DateTime
+import javax.persistence.FetchType._
+import uk.ac.warwick.courses.JavaImports._
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with Deleteable {
 
-	def this(universityId: String = null) {
+	def this(universityId:String=null) {
 		this()
 		this.universityId = universityId
 	}
 
-	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = FetchType.LAZY)
-	@JoinColumn(name = "assignment_id")
-	@BeanProperty var assignment: Assignment = _
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="assignment_id")
+	@BeanProperty var assignment:Assignment = _
 
 	@NotNull
-	@BeanProperty var userId: String = _
+	@BeanProperty var userId:String =_
 
 	@NotNull
-	@BeanProperty var universityId: String = _
+	@BeanProperty var universityId:String =_
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var expiryDate: DateTime = _
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var requestedExpiryDate:DateTime =_
 
-	@BeanProperty var reason: String = _
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var expiryDate:DateTime =_
 
-	@BeanProperty var approved: Boolean = false
+	@BeanProperty var reason:String =_
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var approvedOn: DateTime = _
+	@OneToMany(mappedBy="extension", fetch=LAZY)
+	@BeanProperty var attachments:JSet[FileAttachment] =_
 
-	@BeanProperty var approvalComments: String = _
+	def allAttachments = attachments.toSeq filter(_.hasData)
+
+	def addAttachment(attachment:FileAttachment) {
+		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+		attachment.temporary = false
+		attachment.extension = this
+		attachments.add(attachment)
+	}
+
+	@BeanProperty var approved:Boolean = false
+	@BeanProperty var rejected:Boolean = false
+
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var requestedOn:DateTime =_
+
+	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var approvedOn:DateTime =_
+
+	@BeanProperty var approvalComments:String =_
 
 }

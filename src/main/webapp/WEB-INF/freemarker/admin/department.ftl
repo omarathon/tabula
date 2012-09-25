@@ -9,9 +9,21 @@
 	-<br>
 	<@fmt.date end /> (${closeTZ})
 </#macro>
- 
+
+
 <#if department??>
-<h1>${department.name}</h1>
+
+<#assign can_manage_dept=can.manage(department) />
+<#if features.extensions && can_manage_dept>
+	<h1>
+		${department.name}&nbsp;
+		<a href="settings" class="btn btn-mini">
+			<i class="icon-wrench"></i> Department settings
+		</a>
+	</h1>
+<#else>
+	<h1>${department.name}</h1>
+</#if>
 
 <#list modules as module>
 <#assign can_manage=can.manage(module) />
@@ -145,7 +157,7 @@
 					</#if>
 				</#if>
 				<#if assignment.allowExtensions >
-					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">Manage extensions <i class="icon-calendar"></i></a>
+					<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">List extensions <i class="icon-calendar"></i></a>
 				</#if>
 			</div>
 			<div class="end-assignment-info"></div>

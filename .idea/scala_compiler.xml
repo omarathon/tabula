@@ -3,6 +3,8 @@
   <component name="ScalacSettings">
     <option name="COMPILER_LIBRARY_NAME" value="scala-library" />
     <option name="COMPILER_LIBRARY_LEVEL" value="Project" />
+    <option name="MAXIMUM_HEAP_SIZE" value="512" />
+    <option name="VM_PARAMETERS" value="-Xms1024m -Xss1m -server" />
   </component>
 </project>
 

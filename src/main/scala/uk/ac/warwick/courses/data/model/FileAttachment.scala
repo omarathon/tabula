@@ -18,7 +18,7 @@ import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import uk.ac.warwick.courses.data.FileDao
 import javax.persistence.FetchType
-import uk.ac.warwick.courses.data.model.forms.SubmissionValue
+import forms.{Extension, SubmissionValue}
 import scala.util.matching.Regex
 
 @Configurable
@@ -37,6 +37,11 @@ class FileAttachment extends GeneratedId {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_id")
 	@BeanProperty var feedback: Feedback = _
+
+	// optional link to an Extension
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="extension_id")
+	@BeanProperty var extension:Extension =_
 
 	def isAttached = feedback != null || submissionValue != null
 
