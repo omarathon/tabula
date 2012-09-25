@@ -42,6 +42,11 @@ jQuery(function($){
 			$form.find('input[name=action]').val(action);
 		}
 	});
+	
+	// Disable submit buttons after form is submitted.
+	$form.submit(function() {
+		$('button[data-action], #batch-add-submit-button').attr('disabled',true).addClass('disabled');
+	});
 
 	// Set up checkboxes for the big table
 

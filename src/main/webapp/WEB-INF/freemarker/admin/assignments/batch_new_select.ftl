@@ -181,7 +181,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#elseif step='options'>
 <div id="options-buttons">
 
-<button class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
+<button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
 
 <div id="selected-count">0 selected</div>
 <div id="selected-deselect"><a href="#">Clear selection</a></div>
