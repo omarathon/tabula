@@ -30,11 +30,11 @@ class MarksTemplateController extends BaseController {
 		val sheet = generateNewMarkSheet(assignment, workbook)
 
 		// populate the mark sheet with ids
-		for (member <- members.zipWithIndex) {
-			val row = sheet.createRow(member._2 + 1)
-			row.createCell(0).setCellValue(member._1.getWarwickId)
+		for ((member, i) <- members.zipWithIndex) {
+			val row = sheet.createRow(i + 1)
+			row.createCell(0).setCellValue(member.getWarwickId)
 			val marksCell = row.createCell(1)
-			val feedback = assignmentService.getStudentFeedback(assignment, member._1.getWarwickId)
+			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
 			feedback.foreach {
 				_.actualMark.foreach(marksCell.setCellValue(_))
 			}
@@ -43,7 +43,7 @@ class MarksTemplateController extends BaseController {
 		// add conditional formatting for invalid marks
 		addConditionalFormatting(sheet)
 
-		Mav(new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", workbook))
+		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", workbook)
 	}
 
 	def generateNewMarkSheet(assignment: Assignment, workbook: XSSFWorkbook) = {
