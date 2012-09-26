@@ -221,6 +221,11 @@
 					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
 				);
 			});
+			
+			var $removeSelected = $('#membership-remove-selected');
+			$membershipPicker.on('change', 'input.collection-checkbox', function() {
+				$removeSelected.toggleClass('disabled', $membershipPicker.find('input.collection-checkbox:checked').length == 0);
+			});
 
 			var refreshForm = function() {
 				$('#action-input').val('refresh');
@@ -247,7 +252,7 @@
 				$membershipPicker.toggle();
 				// switch straight to "Add more" tab if the group is empty
 				if ($membershipPicker.is(":visible") && $membershipPicker.find('.tab-content table').length == 0) {
-      		$membershipPicker.find('a[href=#membership-tab2]').click();
+					$membershipPicker.find('a[href=#membership-tab2]').click();
 				}
 			});
 
