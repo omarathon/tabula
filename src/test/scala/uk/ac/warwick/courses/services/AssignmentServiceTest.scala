@@ -48,7 +48,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.enableFilter("notDeleted")
 		service.getAssignmentById(assignment.id) should be (None)
 		
-		service.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be (None)
+		service.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be ('empty)
 	}
 	
 	@Transactional @Test def findDuplicateAssignmentNames {
@@ -64,7 +64,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.save(assignment)
 		session.flush()
 		
-		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('defined)
+		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
 		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
 		service.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
