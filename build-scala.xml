@@ -1,6 +1,8 @@
 <!--
 
-  generic Scala project buildfile
+  generic Scala project buildfile.
+  
+  Any app-specific stuff should go in the app's main build.xml that includes this file.
 
 -->
 <project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="package">
@@ -108,6 +110,7 @@
 		<copy todir="target/${war.name}">
 			<fileset dir="src/main/webapp" />
 		</copy>
+		
 		<lesscss todir="target/${war.name}/static/css">
 			<fileset dir="target/${war.name}/static/css" includes="*.less" excludes="*.inc.less" />
 		</lesscss>
@@ -115,7 +118,14 @@
 		<batchhash propertyfile="target/${war.name}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">
 			<fileset dir="target/${war.name}" includes="static/**" excludes="**/*.less" />
 		</batchhash>
-
+		
+		<property name="js.dir" value="target/${war.name}/static/js" />
+		
+		<antcall target="custom-compile-scripts" />
+	</target>
+	
+	<target name="custom-compile-scripts">
+		<!-- override in your build file for custom script compilation. -->
 	</target>
 
 	<target name="package" depends="compile,compile-scripts" description="Compile and package application into a WAR file">

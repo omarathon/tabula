@@ -1,0 +1,48 @@
+/**
+ * This files contains small bits of script that haven't been refactored
+ * into separate files. Generally new script should go in a different file, but
+ * if something is used everywhere and would be overkill in a separate file, then
+ * it can go in here.
+ */
+(function ($) { "use strict";
+
+window.Supports = {};
+window.Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
+
+// All WPopupBoxes will inherit this default configuration.
+WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
+
+jQuery(function ($) {
+
+	$('input.date-time-picker').AnyTime_picker({
+		format: "%e-%b-%Y %H:%i:%s",
+		firstDOW: 1
+	});
+
+    /* When a .long-running link is clicked it will be
+     * replaced with "Please wait" text, to tell the user to expect to
+     * wait a few seconds.
+     */ 
+	$('a.long-running').click(function (event) {
+		var $this = $(this);
+		var originalText = $this.html();
+		if (!$this.hasClass('clicked') && !$this.hasClass('disabled')) {
+			$this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
+			setTimeout(function(){
+				$this.removeClass('clicked').css({opacity:1}).html(originalText);
+			}, 5000);
+			return true;
+		} else {
+			event.preventDefault();
+			return false;
+		}
+	});
+	
+    $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
+
+    // add .use-tooltip class and title attribute to enable cool looking tooltips.
+    $('.use-tooltip').tooltip();
+
+}); // end domready
+
+}(jQuery));
