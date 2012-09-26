@@ -13,20 +13,32 @@
 		</@spring.bind>
 		<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
 
+		<#macro what_is_this>
+			<a href="#" class="use-popover" 
+			   data-title="Student membership" 
+			   data-content="&lt;p&gt;Here you can specify where this assignment should get its list of enrolled students from.
+			     You can link to a central SITS assignment and a live list of students will be maintained.
+			     If you are not using SITS you can manually specify a list of users.&lt;/p&gt;&lt;p&gt;
+			     It is also possible to tweak the membership even when using SITS data, but this is only to be used
+			     when necessary and you still need to ensure that the upstream SITS data gets fixed.
+			     &lt;/p&gt;"
+			   >What's this?</a>
+		</#macro>
+
 		<#if assessmentGroup??>
 
-			${assessmentGroup.members.members?size} students enrolled from SITS
+			${assessmentGroup.members.members?size} students enrolled from SITS <@what_is_this />
 			<#if hasMembers>(with adjustments)</#if>
 			<a class="btn" id="show-sits-picker">Change link</a> or <a class="btn" id="show-membership-picker">Adjust membership</a>
 
 		<#elseif hasMembers>
 
-			${membersGroup.includeUsers?size} students enrolled.
+			${membersGroup.includeUsers?size} students enrolled. <@what_is_this />
 			<div><a class="btn" id="show-membership-picker">Adjust membership</a> or <a class="btn" id="show-sits-picker">Link to SITS</a></div>
 
 		<#else>
 
-			No students have been enrolled.
+			No students have been enrolled. <@what_is_this />
 			<div><a class="btn" id="show-sits-picker">Link to SITS</a> or <a class="btn" id="show-membership-picker">Add users manually</a></div>
 
 		</#if>

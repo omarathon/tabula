@@ -41,7 +41,12 @@ jQuery(function ($) {
     $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
 
     // add .use-tooltip class and title attribute to enable cool looking tooltips.
+    // http://twitter.github.com/bootstrap/javascript.html#tooltips
     $('.use-tooltip').tooltip();
+    
+    // add .use-popover and optional data- attributes to enable a cool popover. 
+    // http://twitter.github.com/bootstrap/javascript.html#popovers
+    $('.use-popover').popover().click(function(){ return false; });
 
 }); // end domready
 
