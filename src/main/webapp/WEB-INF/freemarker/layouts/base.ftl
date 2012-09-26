@@ -125,7 +125,7 @@
 					<div class="content">
 						<div id="site-header-container">
 							<h1 id="site-header">
-								<span id="current-site-header"><a href="<@url page="/" />">Coursework submission</a></span>
+								<span id="current-site-header"><a href="<@url page="/" />">Coursework management</a></span>
 							</h1>
 							
 							<h2 id="strapline">
