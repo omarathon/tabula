@@ -32,7 +32,7 @@ trait AssignmentService {
 	def delete(submission: Submission): Unit
 	def deleteOriginalityReport(submission: Submission): Unit
 
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Option[Assignment]
+	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
 
@@ -186,11 +186,11 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.list.asInstanceOf[JList[Assignment]]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) = {
-		option[Assignment](session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
+		session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
-			.uniqueResult)
+			.list().asInstanceOf[JList[Assignment]]
 	}
 
 	/* get users whose feedback is not published and who have not submitted work suspected 

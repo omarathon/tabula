@@ -107,9 +107,12 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 	def prefilled = _prefilled
 
 	def validate(errors: Errors) {
-		service.getAssignmentByNameYearModule(name, academicYear, module)
-			.filterNot { _ eq assignment }
-			.map { a => errors.rejectValue("name", "name.duplicate.assignment", Array(name), "") }
+		
+		val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module)
+		                    .filterNot { _ eq assignment }
+		for (duplicate <- duplicates.headOption) {
+			errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+		}
 
 		if (openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
