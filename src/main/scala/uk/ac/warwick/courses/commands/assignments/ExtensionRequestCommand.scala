@@ -60,7 +60,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 
 		if (!file.attached.isEmpty) {
 			for (attachment <- file.attached) {
-				extension addAttachment attachment
+				extension.addAttachment(attachment)
 			}
 		}
 
@@ -71,7 +71,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(assignment.module)
-		//d.studentIds(Seq(submitter.apparentUser.getWarwickId))
-		//d.properties("requestedExpiryDate" -> requestedExpiryDate)
+		d.studentIds(Seq(submitter.apparentUser.getWarwickId))
+		d.properties("requestedExpiryDate" -> requestedExpiryDate)
 	}
 }

@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <#compress>
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
-	<h1>Request an extension for <strong>${assignment.name}</strong></h1><br/>
+	<h1>Request an extension for <strong>${assignment.name}</strong></h1>
 	<p>
 		This assignment closes on  <@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining} remaining).
 		To request an extension for this assignment please read the Extension Guidelines below and submit this form.
@@ -12,7 +12,7 @@
 	</#if>
 	<#if department.extensionGuidelineLink??>
 		<p>You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>
-		before submitting your application for an extension.</p><br/>
+		before submitting your application for an extension.</p>
 	</#if>
 	<@f.form method="post" enctype="multipart/form-data" class="form-horizontal" action="/module/${module.code}/${assignment.id}/extension" commandName="extensionRequestCommand">
 

@@ -58,17 +58,16 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 	 * Copies the specified extensions to the extensionItems array ready for editing
 	 */
 	def copyExtensions(extensions:List[Extension]){
-		def copyExtension(extension:Extension) = {
-			val item:ExtensionItem = new ExtensionItem
+
+		val extensionItemsList = for (extension <- extensions) yield {
+			val item = new ExtensionItem
 			item.universityId =  extension.universityId
 			item.approvalComments = extension.approvalComments
 			item.expiryDate = extension.expiryDate
 			item
 		}
 
-		this.extensions = extensions
-		val extensionItemsList = extensions map (copyExtension(_))
-		extensionItems ++ extensionItemsList.toList
+		extensionItems.addAll(extensionItemsList)
 	}
 
 	@Transactional

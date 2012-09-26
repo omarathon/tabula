@@ -9,6 +9,6 @@
 		If your circumstances change and you wish to provide additional information then you can edit your request by
 		revisiting this page.
 	</p>
-	<a href=".">Back to ${assignment.name}</a>
+	<a href="<@routes.assignment assignment=assignment />">Back to ${assignment.name}</a>
 </#compress>
 </#escape>

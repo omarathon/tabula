@@ -42,7 +42,7 @@ class Extension extends GeneratedId with Deleteable {
 	@OneToMany(mappedBy="extension", fetch=LAZY)
 	@BeanProperty var attachments:JSet[FileAttachment] =_
 
-	def allAttachments = attachments.toSeq filter(_.hasData)
+	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
 
 	def addAttachment(attachment:FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
