@@ -90,7 +90,6 @@ jQuery(function($){
 			return false;
 		})
 		.on('mouseenter', 'td.selectable', function(){
-			console.log('mouseenter');
 			if (batchTableMouseDown) {
 				var $row = $(this).closest('tr');
 				$row.toggleClass('selected');
@@ -100,7 +99,7 @@ jQuery(function($){
 		})
 		.on('mousedown', 'a.name-edit-link', function(e){
 			// prevent td.selected toggling when clicking the edit link. 
-			e.stopPropogation(); 
+			e.stopPropagation(); 
 		});
 
 	$(document).mouseup(function(){
