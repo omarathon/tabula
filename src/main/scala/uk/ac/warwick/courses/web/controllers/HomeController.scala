@@ -32,22 +32,22 @@ import uk.ac.warwick.courses.Features
 			val filter = session.getEnabledFilter("notDeleted")
 
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
+			val enrolledAssignments = 
+				if (features.assignmentMembership) assignmentService.getEnrolledAssignments(user.apparentUser)
+				else Seq.empty
 			val assignmentsWithSubmission =
 				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
 				else Seq.empty
 
-			if (false /*disabled*/ && moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
-				debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
-				Mav("redirect:/admin/department/%s/".format(ownedDepartments.head.code))
-			} else {
-				Mav("home/view",
-					"assignmentsWithFeedback" -> assignmentsWithFeedback,
-					"assignmentsWithSubmission" -> (assignmentsWithSubmission filterNot (assignmentsWithFeedback contains)),
-					"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
-					"ownedDepartments" -> ownedDepartments,
-					"ownedModule" -> ownedModules,
-					"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)
-			}
+			Mav("home/view",
+				"assignmentsWithFeedback" -> assignmentsWithFeedback,
+				"enrolledAssignments" -> enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission),
+				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
+				"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
+				"ownedDepartments" -> ownedDepartments,
+				"ownedModule" -> ownedModules,
+				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)
+
 		} else {
 			Mav("home/view")
 		}

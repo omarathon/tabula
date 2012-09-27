@@ -337,6 +337,22 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		"closeDate" -> closeDate,
 		"module" -> module)
 
+	/**
+	 * Defines equality via the entity's ID. 
+	 */
+	override def equals(other: Any) = other match {
+		case o:Assignment => 
+			if (o.id != null && this.id != null) o.id == this.id
+			else super.equals(other)
+		case _ => false
+	}
+	
+	override def hashCode() =
+		if (id != null) 
+			id.hashCode()
+		else 
+			super.hashCode()
+	
 }
 
 case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String],
