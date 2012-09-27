@@ -180,6 +180,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
                   select distinct a.* from usergroupinclude ugi 
                   join assignment a on a.membersgroup_id = ugi.group_id
                   where ugi.usercode = :userId
+                  and a.deleted = 0
                 )
                 union
                 (
@@ -193,6 +194,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
                     and uag.occurrence = a.occurrence
                   join usergroupstatic ugs on uag.membersgroup_id = ugs.group_id
                   where ugs.usercode = :universityId
+				  and a.deleted = 0
                 )
               )
               where id not in

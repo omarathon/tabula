@@ -29,8 +29,6 @@ import uk.ac.warwick.courses.Features
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
 
-			val filter = session.getEnabledFilter("notDeleted")
-
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 			val enrolledAssignments = 
 				if (features.assignmentMembership) assignmentService.getEnrolledAssignments(user.apparentUser)
@@ -38,10 +36,20 @@ import uk.ac.warwick.courses.Features
 			val assignmentsWithSubmission =
 				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
 				else Seq.empty
+				
+			// exclude assignments already included in other lists.
+			val enrolledAssignmentsTrimmed = enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission)
+			// adorn the enrolled assignments with extra data.
+			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield Map(
+			    "assignment" -> assignment,
+			    "extension" -> assignment.extensions.find(_.userId == user.apparentId),
+			    "isExtended" -> assignment.isWithinExtension(user.apparentId),
+			    "submittable" -> assignment.submittable(user.apparentId)
+			)
 
 			Mav("home/view",
 				"assignmentsWithFeedback" -> assignmentsWithFeedback,
-				"enrolledAssignments" -> enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission),
+				"enrolledAssignments" -> enrolledAssignmentsInfo,
 				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
 				"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
 				"ownedDepartments" -> ownedDepartments,

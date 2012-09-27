@@ -8,19 +8,30 @@
 <#macro format_name assignment>
 	${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
 </#macro>
-<#macro format_assignment_link assignment>
+<#macro assignment_link assignment>
 	<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-		<@format_name assignment />	
+		<#nested />	
 	</a>
 </#macro>
 
 <ul class="links">
 
 <#if has_assignments>
-<#list enrolledAssignments as assignment>
+<#macro enrolled_assignment info>
+	<#local assignment = info.assignment />
+	<#local extension = info.extension!false />
+	<#local isExtended = info.isExtended!false />
+	<@assignment_link assignment>
+		<@format_name assignment />	
+	</@assignment_link>
+	<#if info.submittable>
+		<#include "../submit/assignment_deadline.ftl" />
+	</#if>
+</#macro>
+<#list enrolledAssignments as info>
 	<li class="assignment-info">
 		<span class="label label-info">Enrolled</span>
-		<@format_assignment_link assignment />
+		<@enrolled_assignment info />
 	</li>
 </#list>
 </#if>
@@ -29,7 +40,9 @@
 <#list assignmentsWithFeedback as assignment>
 	<li class="assignment-info">
 		<span class="label-green">Marked</span>
-		<@format_assignment_link assignment />
+		<@assignment_link assignment>
+			<@format_name assignment />	
+		</@assignment_link>
 	</li>
 </#list>
 </#if>
@@ -38,7 +51,9 @@
 <#list assignmentsWithSubmission as assignment>
 	<li class="assignment-info">
 		<span class="label-orange">Submitted</span>
-		<@format_assignment_link assignment />
+		<@assignment_link assignment>
+			<@format_name assignment />	
+		</@assignment_link>
 	</li>
 </#list>
 </#if>
@@ -51,7 +66,9 @@
 <ul class="links" id="archived-assignments-list">
 <#list archivedAssignments as assignment>
 	<li class="assignment-info">
-		<@format_assignment_link assignment />
+		<@assignment_link assignment>
+			<@format_name assignment />	
+		</@assignment_link>
 	</li>
 </#list>
 </ul>
