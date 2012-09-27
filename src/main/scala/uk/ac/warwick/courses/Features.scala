@@ -37,8 +37,9 @@ abstract class Features {
 	@BeanProperty var privacyStatement: Boolean = true
 	@BeanProperty var collectMarks: Boolean = false
 	@BeanProperty var turnitin: Boolean = true
-	@BeanProperty var assignmentMembership: Boolean = false
+	@BeanProperty var assignmentMembership: Boolean = true
 	@BeanProperty var extensions: Boolean = false
+	
 }
 
 class FeaturesImpl(properties: Properties) extends Features {
