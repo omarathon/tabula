@@ -43,15 +43,16 @@ trait Daoisms extends Transactions {
 		try fn(sess) finally sess.close()
 	}
 
-	class NiceCriteriaCreator(session: Session) {
+	class NiceQueryCreator(session: Session) {
 		def newCriteria[T](implicit m: Manifest[T]) = new ScalaCriteria[T](session.createCriteria(m.erasure))
+		def newQuery[T](sql: String)(implicit m: Manifest[T]) = new ScalaQuery[T](session.createQuery(sql))
 	}
 
 	/**
-	 * Adds a method to Session which returns a wrapped Criteria that works
+	 * Adds a method to Session which returns a wrapped Criteria or Query that works
 	 * better with Scala's generics support.
 	 */
-	implicit def niceCriteriaCreator(session: Session) = new NiceCriteriaCreator(session)
+	implicit def niceCriteriaCreator(session: Session) = new NiceQueryCreator(session)
 
 	/**
 	 * Returns Some(obj) if it matches the expected type, otherwise None.

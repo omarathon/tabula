@@ -57,8 +57,8 @@ class AssignmentController extends AbstractAssignmentController {
 		val feedback = checkCanGetFeedback(assignment, user)
 		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
-		val isExtended = assignment.isWithinExtension(user.apparentId)
 		val extension = assignment.extensions.find(_.userId == user.apparentId)
+		val isExtended = assignment.isWithinExtension(user.apparentId)
 
 		val canSubmit = assignment.submittable(user.apparentId)
 		val canReSubmit = assignment.resubmittable(user.apparentId)
@@ -69,24 +69,24 @@ class AssignmentController extends AbstractAssignmentController {
 		 * 
 		 * If a submission value is missing, the right hand is None.
 		 * If any submission value doesn't match the assignment fields, it just isn't shown.
-		 */
+		 */		
 		val submissionValues = submission.map { submission =>
-			assignment.fields.map { field =>
-				(field, submission.values.find(_.name == field.name))
-			}
+			for (field <- assignment.fields) yield ( field -> submission.getValue(field) )
 		}.getOrElse(Seq.empty)
 
+
 		if (user.loggedIn) {
-			Mav("submit/assignment",
+			Mav(
+				"submit/assignment",
 				"module" -> module,
 				"assignment" -> assignment,
 				"feedback" -> feedback,
 				"submission" -> submission,
 				"justSubmitted" -> form.justSubmitted,
-				"isExtended" -> isExtended,
 				"canSubmit" -> canSubmit,
-				"canReSubmit" -> canReSubmit,
-				"extension" -> extension)
+                "canReSubmit" -> canReSubmit,
+				"extension" -> extension,
+				"isExtended" -> isExtended)
 		} else {
 			RedirectToSignin()
 		}

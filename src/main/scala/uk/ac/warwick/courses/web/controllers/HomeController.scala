@@ -29,25 +29,33 @@ import uk.ac.warwick.courses.Features
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
 
-			val filter = session.getEnabledFilter("notDeleted")
-
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
+			val enrolledAssignments = 
+				if (features.assignmentMembership) assignmentService.getEnrolledAssignments(user.apparentUser)
+				else Seq.empty
 			val assignmentsWithSubmission =
 				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
 				else Seq.empty
+				
+			// exclude assignments already included in other lists.
+			val enrolledAssignmentsTrimmed = enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission)
+			// adorn the enrolled assignments with extra data.
+			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield Map(
+			    "assignment" -> assignment,
+			    "extension" -> assignment.extensions.find(_.userId == user.apparentId),
+			    "isExtended" -> assignment.isWithinExtension(user.apparentId),
+			    "submittable" -> assignment.submittable(user.apparentId)
+			)
 
-			if (false /*disabled*/ && moduleWebgroups.isEmpty && ownedModules.isEmpty && ownedDepartments.size == 1) {
-				debug("%s is just admin of %s, so redirecting straight there.", user, ownedDepartments.head)
-				Mav("redirect:/admin/department/%s/".format(ownedDepartments.head.code))
-			} else {
-				Mav("home/view",
-					"assignmentsWithFeedback" -> assignmentsWithFeedback,
-					"assignmentsWithSubmission" -> (assignmentsWithSubmission filterNot (assignmentsWithFeedback contains)),
-					"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
-					"ownedDepartments" -> ownedDepartments,
-					"ownedModule" -> ownedModules,
-					"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)
-			}
+			Mav("home/view",
+				"assignmentsWithFeedback" -> assignmentsWithFeedback,
+				"enrolledAssignments" -> enrolledAssignmentsInfo,
+				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
+				"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
+				"ownedDepartments" -> ownedDepartments,
+				"ownedModule" -> ownedModules,
+				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)
+
 		} else {
 			Mav("home/view")
 		}

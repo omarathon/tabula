@@ -1,3 +1,8 @@
+<#--
+
+  Referenced by home/_student
+
+-->
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
 <#if isExtended>
     <#assign extension_time_remaining=durationFormatter(extension.expiryDate) />

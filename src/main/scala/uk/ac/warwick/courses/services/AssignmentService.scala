@@ -36,6 +36,7 @@ trait AssignmentService {
 
 	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
 
+	def getEnrolledAssignments(user: User): Seq[Assignment]
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
 
@@ -168,6 +169,46 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			session.delete(report)
 			session.flush()
 		}
+	}
+	
+	def getEnrolledAssignments(user: User): Seq[Assignment] = {
+		session.createSQLQuery("""
+              select * from 
+              (
+                (
+                  -- manually included users
+                  select distinct a.* from usergroupinclude ugi 
+                  join assignment a on a.membersgroup_id = ugi.group_id
+                  where ugi.usercode = :userId
+                  and a.deleted = 0
+                )
+                union
+                (
+                  -- sits assessment groups
+                  select distinct a.* from assignment a
+                  join upstreamassignment ua on a.upstream_id = ua.id
+                  join upstreamassessmentgroup uag 
+                    on uag.modulecode = ua.modulecode 
+                    and uag.assessmentgroup = ua.assessmentgroup
+                    and uag.academicyear = a.academicyear
+                    and uag.occurrence = a.occurrence
+                  join usergroupstatic ugs on uag.membersgroup_id = ugs.group_id
+                  where ugs.usercode = :universityId
+				  and a.deleted = 0
+                )
+              )
+              where id not in
+              (
+                -- manually excluded users
+                select distinct a.id from usergroupexclude uge 
+                join assignment a on a.membersgroup_id = uge.group_id
+                where uge.usercode = :userId
+              )
+		""")
+		    .addEntity(classOf[Assignment])
+            .setString("universityId", user.getWarwickId())
+            .setString("userId", user.getUserId())
+            .list.asInstanceOf[JList[Assignment]]
 	}
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =

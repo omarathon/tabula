@@ -23,6 +23,7 @@ import scala.collection.mutable
 import java.util.HashSet
 import javax.persistence.FetchType
 import uk.ac.warwick.courses.JBoolean
+import uk.ac.warwick.courses.data.model.forms.FormField
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with Deleteable {
@@ -63,6 +64,10 @@ class Submission extends GeneratedId with Deleteable {
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BeanProperty var values: JSet[SavedSubmissionValue] = new HashSet
+	
+	def getValue(field: FormField): Option[SavedSubmissionValue] = {
+		values.find( _.name == field.name )
+	}
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "submission")
 	@BeanProperty var originalityReport: OriginalityReport = _
