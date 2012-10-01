@@ -72,7 +72,9 @@ class Module extends GeneratedId
 
 object Module {
 
-	private val ModuleCatsPattern = new Regex("(.+?)-(\\d+)")
+	// <modulecode> "-" <cats>
+	// where cats can be a decimal number.
+	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
 
 	def nameFromWebgroupName(groupName: String): String = groupName.indexOf("-") match {
 		case -1 => groupName
