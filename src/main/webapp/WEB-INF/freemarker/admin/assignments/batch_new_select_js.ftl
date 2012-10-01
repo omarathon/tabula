@@ -117,9 +117,58 @@ jQuery(function($){
 	var $optsModalBody = $optsModal.find('.modal-body');
 	var optsUrl = $optsButton.attr('href');
 
+	var decorateOptionsModal = function() {
+		Courses.decorateSubmissionsForm();
+		// do all sorts of clever stuff when we submit this form.
+		$optsModalBody.find('form').on('submit', function(e){
+			e.preventDefault();
+			$.post(optsUrl, $optsModalBody.find('form').serialize(), function(data){
+				$optsModalBody.html(data);
+				decorateOptionsModal();
+				if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
+					// grab all the submittable fields and clone them to the main page form
+					var fields = $optsModalBody.find('[name]').clone();
+	
+					// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
+					// Z. Nobody knows what happens after Z...
+					var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
+					var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
+					optionGroupCount = optionGroupCount + 1;
+	
+					var $group = $('<div>').addClass('options-button');
+					var $hidden = $('<div>').addClass('options-group').data('group', groupName);
+					var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
+					$button.data('group', groupName);
+					$group.append($button);
+					$group.append($hidden);
+	
+					// button behaviour already wired by an on() call.
+	
+					// rename all the fields to sit under an optionsMap entry.
+					fields.each(function(i, field){
+						var prefix = "optionsMap["+groupName+"].";
+						// HFC-306 if it starts with _, keep that at the start after renaming
+						if (field.name.indexOf('_') == 0) {
+							field.name = field.name.substring(1);
+							prefix = "_" + prefix;
+						}
+						field.name =  prefix + field.name;
+						$hidden.append(field);
+					});
+	
+					$opts.append($group);
+					$optsModal.modal('hide');
+	
+					applyGroupNameToSelected(groupName);
+				}
+			});
+			return false;
+		});
+	};
+
 	// eagerly pre-load the options form into the modal.
 	$optsModalBody.load(optsUrl, function(){
-		Courses.decorateSubmissionsForm();
+		decorateOptionsModal();
 	});
 
 	$optsButton.click(function(e){
@@ -166,49 +215,8 @@ jQuery(function($){
 	// complicated handling for when we submit the options modal...
 	// if response contains .ajax-response[data-status=success] then validation succeeded,
 	// and we copy all the form fields out into the main page form to be submitted.
-	$optsModal.find('.modal-footer .btn-primary').click(function(e){
-		$.post(optsUrl, $optsModalBody.find('form').serialize(), function(data){
-			$optsModalBody.html(data);
-			Courses.decorateSubmissionsForm();
-			if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
-				// grab all the submittable fields and clone them to the main page form
-				var fields = $optsModalBody.find('[name]').clone();
-
-				// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
-				// Z. Nobody knows what happens after Z...
-				var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
-				var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
-				optionGroupCount = optionGroupCount + 1;
-
-				var $group = $('<div>').addClass('options-button');
-				var $hidden = $('<div>').addClass('options-group').data('group', groupName);
-				var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
-				$button.data('group', groupName);
-				$group.append($button);
-				$group.append($hidden);
-
-				// button behaviour already wired by an on() call.
-
-				// rename all the fields to sit under an optionsMap entry.
-				fields.each(function(i, field){
-					var prefix = "optionsMap["+groupName+"].";
-					// HFC-306 if it starts with _, keep that at the start after renaming
-					if (field.name.indexOf('_') == 0) {
-						field.name = field.name.substring(1);
-						prefix = "_" + prefix;
-					}
-					field.name =  prefix + field.name;
-					$hidden.append(field);
-				});
-
-				$opts.append($group);
-				$optsModal.modal('hide');
-
-				applyGroupNameToSelected(groupName);
-			}
-		});
-		e.preventDefault();
-		return false;
+	$optsModal.find('.modal-footer .btn-primary').click(function() {
+		$optsModal.find('form').trigger('submit');
 	});
 
 });
