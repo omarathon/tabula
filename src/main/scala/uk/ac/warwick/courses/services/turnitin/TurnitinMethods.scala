@@ -1,10 +1,10 @@
 package uk.ac.warwick.courses.services.turnitin
 
 import java.io.File
-
 import TurnitinDates._
 import TurnitinMethods._
 import uk.ac.warwick.courses.helpers.Logging
+import dispatch.Request
 
 trait Response {
 	def successful: Boolean
@@ -21,9 +21,97 @@ case class AssignmentNotFound() extends FailureResponse
 case class SubmissionNotFound() extends FailureResponse
 case class Failed(code: Int, reason: String) extends FailureResponse
 
-trait TurnitinMethods extends TurnitinAPI with Logging {
 
-	def doRequest(functionId: String, pdata: Option[FileData], params: Pair[String, String]*): TurnitinResponse
+trait TurnitinMethods { self:Session =>
+
+	// Create a session in turnitin and return a session ID.
+	def login() = {
+            
+		val response = doRequestAdvanced(LoginFunction, None,
+			"fcmd" -> "2",
+			"utp" -> "2",
+			"uem" -> userEmail,
+			"ufn" -> userFirstName,
+			"uln" -> userLastName,
+			"create_session" -> "1") { request =>
+				request >:+ { (headers, request) =>
+                    println("Login request")
+                    println(headers)
+                    request <> { (node) => TurnitinResponse.fromXml(node) }
+                }
+			}
+		if (logger.isDebugEnabled) {
+			logger.debug("Login %s : %s" format (userEmail, response))
+		}
+		if (response.success) Created(response.sessionId.getOrElse(""))
+		else Failed (response.code, response.message)
+	}
+	
+	def getLoginLink() = {
+		doRequest(LoginFunction, None,
+            "fcmd" -> "1",
+            "utp" -> "2",
+            "uem" -> userEmail,
+            "ufn" -> userFirstName,
+            "uln" -> userLastName)
+            .redirectUrl
+	}
+    
+    def logout() = {
+    	val response = doRequest(LogoutFunction, None,
+            "utp" -> "2",
+            "fcmd" -> "2",
+            "uem" -> userEmail,
+            "ufn" -> userFirstName,
+            "uln" -> userLastName,
+            "create_session" -> "1"
+        )
+        println(response)
+    }
+    
+    /**
+     * Gets/creates this user and returns the userid
+     * if successful. Used for some commands that 
+     */
+    def getUserId(): Option[String] = {
+    	doRequest(LoginFunction, None,
+            "fcmd" -> "2",
+            "utp" -> "2",
+            "uem" -> userEmail,
+            "ufn" -> userFirstName,
+            "uln" -> userLastName)
+            .userId
+    }
+    
+    def x(classId:String, className: String): Response = {
+        val response = doRequestAdvanced(CreateClassFunction, None,
+            "utp" -> "2",
+            "fcmd" -> "3",
+            "uem" -> userEmail,
+            "cid" -> classId,
+            "uid" -> userId,
+            "ufn" -> userFirstName,
+            "uln" -> userLastName,
+            "ctl" -> className) { request =>
+        	request >- { t => TurnitinResponse.fromDiagnostic(t) }
+        }
+        for (d <- response.diagnostic) println(d)
+        Failed(response.code, response.message)
+    }
+
+	def addTutor(classId:String, className: String): Response = {
+		val response = doRequest(CreateClassFunction, None,
+			"utp" -> "2",
+			"fcmd" -> "2",
+			"uem" -> userEmail,
+			"cid" -> classId,
+			"uid" -> userId,
+			"ufn" -> userFirstName,
+			"uln" -> userLastName,
+			"ctl" -> className)
+		for (d <- response.diagnostic) println(d)
+		Failed(response.code, response.message)
+	}
 
 	/**
 	 * Create a new Class by this name. If there's already a Class by this name,
@@ -57,6 +145,13 @@ trait TurnitinMethods extends TurnitinAPI with Logging {
 		else if (response.success) Created(response.assignmentId getOrElse "")
 		else Failed(response.code, response.message)
 	}
+	
+	def createOrUpdateAssignment(className: String, assignmentName: String): Response = {
+		createAssignment(className, assignmentName, false) match {
+			case AlreadyExists() => createAssignment(className, assignmentName, true)
+			case anythingElse => anythingElse
+		}
+	}
 
 	def deleteAssignment(className: String, assignmentName: String): Response = {
 		val response = doRequest(CreateAssignmentFunction, None,
@@ -67,10 +162,13 @@ trait TurnitinMethods extends TurnitinAPI with Logging {
 		// 411 -> it didn't exist
 	}
 
-	def submitPaper(className: String, assignmentName: String, paperTitle: String, file: File, authorFirstName: String, authorLastName: String): Response = {
+	def submitPaper(classId: String, assignmentId: String, paperTitle: String, file: File, authorFirstName: String, authorLastName: String): Response = {
 		val response = doRequest(SubmitPaperFunction, Some(FileData(file, paperTitle)),
-			"ctl" -> className,
-			"assign" -> assignmentName,
+			"cid" -> classId,
+			"ctl" -> "Class name",
+			"assignid" -> assignmentId,
+			"assign" -> "TestAss1",
+			"uid" -> userId,
 			"ptl" -> paperTitle,
 			"ptype" -> "2",
 			"pfn" -> authorFirstName,
@@ -116,10 +214,13 @@ trait TurnitinMethods extends TurnitinAPI with Logging {
 
 object TurnitinMethods {
 	// Values for the "fid" parameter of an API call 
+	private val LoginFunction = "1"
 	private val CreateClassFunction = "2"
 	private val CreateAssignmentFunction = "4"
 	private val SubmitPaperFunction = "5"
 	private val GenerateReportFunction = "6"
 	private val DeletePaperFunction = "8"
 	private val ListSubmissionsFunction = "10"
+	private val LogoutFunction = "18"
+	private val ListEnrollmentFunction = "19"
 }

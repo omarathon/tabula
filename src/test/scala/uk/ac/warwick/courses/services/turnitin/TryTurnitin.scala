@@ -38,54 +38,73 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 		
 		api.sharedSecretKey = props.getProperty("turnitin.key")
 		api.aid = props.getProperty("turnitin.aid")
-		api.said = props.getProperty("turnitin.said")
+		//api.said = props.getProperty("turnitin.said")
+		api.integrationId = "80"
+		api.apiEndpoint = props.getProperty("turnitin.url")
 		api.diagnostic = false
-		
+
+		println("Hello")
+//		val nick = api.login("nickhowes@gmail.com", "Nick","Howes")
+		val nick = api.login("greg.evigan@nickhowes.co.uk", "Greg","Evigan")
+		println(nick)
+
+		val testClassName = "TestClass1"
+		val testAssName = "TestAss1"
+			
 		val f = new File("src/test/resources/turnitin-submission.doc")
 		if (!f.exists) throw new IllegalArgumentException("Whoops, test file doesn't exist")
+
+		for (session <- nick) {
+			println("logged in " + session.userEmail)
+
+			val nickid = session.getUserId()
+			for (userid <- nickid) {
+				println("userid is %s" format userid)
+				session.userId = userid
+
+				val addTutor = session.addTutor("4320278", testClassName)
+				println(addTutor)
+				
+//				session.createClass(testClassName) match {
+//					case Created(id) => {
+//						println("Created class %s" format id)
+//						val addTutor = session.addTutor(id, testClassName)
+//						println(addTutor)
+//						
+//						val ass = session.createOrUpdateAssignment(testClassName, testAssName)
+//						println("Assignment " + ass)
+//						ass match {
+//							case Created(assignmentId) => {
+//								val submit = session.submitPaper(id, assignmentId, "Paper", f, "XXXXX", "XXXXX")
+//					            println("Submission " + submit)
+//							}
+//						}
+//						
+//					}
+//					case a => println(a)
+//				}
+			}
+			
+			println("Login URL")
+			println(session.getLoginLink())
 		
-//		api.createClass("TestClass28Jun2012")
-		
-//		val a = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012")
-//		println(a)
+			// don't logout as this will invalidate any URLs we've generated.
+			//session.logout()
+		}
 //		
-//		val b = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012", true)
-//		println(b)
-		
-//		api.submitPaper("TestClass28Jun2012", "TestAssignment28Jun2012", "Paper", f, "XXXXX", "XXXXX")
-//		
-		val subs = api.listSubmissions("CourseworkSubmissionAPIClass", "7804b3c1-1c29-4ff1-9437-aaba07cb0954")
-		println(subs)
-		
-//		subs match {
-//			case GotSubmissions(list) => {
-//				println("Deleting submissions")
-//				for (item <- list) api.deleteSubmission("TestClass28Jun2012", "TestAssignment28Jun2012", item.objectId)
+//		val nick2 = api.login("nick@nickhowes.co.uk", "Nick","Howestwo")
+//		for (session <- nick2) {
+//			println("logged in nick2.")
+//            
+//            session.createClass(testClassName) match {
+//				case Created(id) => println("Created class %s" format id)
 //			}
-//				
-//		}
-//		
-//		
-//		println(api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012"))
-		
-//		val assignment = newDeepAssignment()
-//		assignment.id = "12345"
-//		val submissions = for (i <- 1 to 10) yield {
-//			val s = new Submission
-//			s.assignment = assignment
-//			s.universityId = "%07d" format (123000 + i)
-//			s.userId = "abcdef"
-//			val attachment1 = new FileAttachment()
-//			attachment1.name = "file.doc"
-//			attachment1.file = f
-//			val attachments = Set(attachment1)
-//			s.values.add(SavedSubmissionValue.withAttachments(s, "", attachments))
-//			s
+//            
+//        
+//            session.logout()
 //		}
 		
-//		val cmd = new SubmitToTurnitinCommand(assignment, submissions)
-//		cmd.api = api
-//		cmd.apply()
+		
 	
 	} finally {
 		deleteTemporaryDirs

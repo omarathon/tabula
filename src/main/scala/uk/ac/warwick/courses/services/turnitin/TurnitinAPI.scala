@@ -13,5 +13,7 @@ trait TurnitinAPI {
 	 * Delete submission from assignment. Not fully synchronous, i.e. if you list submissions straight after
 	 * deletion it may still list the submission as present.
 	 */
-	def deleteSubmission(className: String, assignmentName: String, oid: String): Response
+	def deleteSubmission(className:String, assignmentName:String, oid:String): Response
+
+	def addTutor(classId: String, className:String): Response
 }
