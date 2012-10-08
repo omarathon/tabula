@@ -1,23 +1,18 @@
 package uk.ac.warwick.courses.data.model
-import scala.reflect.BeanProperty
+
+import reflect.BeanProperty
+import util.matching.Regex
+import collection.JavaConversions._
+
+import javax.validation.constraints._
+import javax.persistence._
+
+import org.hibernate.annotations.FetchMode
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.GenericGenerator
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.validation.constraints._
-import javax.persistence.ManyToOne
-import javax.persistence.CascadeType
-import javax.persistence.JoinColumn
-import javax.persistence.NamedQuery
-import javax.persistence.NamedQueries
-import javax.persistence.OneToMany
-import collection.JavaConversions._
-import org.hibernate.annotations.FetchMode
-import javax.persistence.FetchType
-import javax.persistence.OneToOne
+import org.hibernate.annotations.Type
+
 import uk.ac.warwick.courses.actions._
-import scala.util.matching.Regex
 
 @Entity
 @NamedQueries(Array(

@@ -9,7 +9,7 @@ import uk.ac.warwick.courses.CurrentUser
 /**
  * Interface for a Job to update its status in the database.
  *
- * The main implementation of this is JobDefinition which is
+ * The main implementation of this is JobInstanceImpl which is
  * stores in the database.
  */
 trait JobInstance {

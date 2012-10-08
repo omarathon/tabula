@@ -93,8 +93,8 @@ trait TestHelpers {
 		val commandAspect = Aspects.aspectOf(classOf[CommandApplyAspect])
 		commandAspect.enabled = false
 	} catch {
-    case e:NoAspectBoundException => println("No Aspects bound, many tests may fail.")
-  }
+		case e: NoAspectBoundException => println("No Aspects bound, many tests may fail.")
+	}
 
 	/** Returns a new temporary directory that will get cleaned up
 	  * automatically at the end of the test.
@@ -115,11 +115,15 @@ trait TestHelpers {
 		file
 	}
 
-	private def findTempFile: File =
-		Stream.range(1, 10)
-			.map { i => new File(IoTmpDir, "JavaTestTmp-" + random.nextLong()) }
+	private def findTempFile: File = {
+		def randomTempFile() = new File(IoTmpDir, "JavaTestTmp-" + random.nextLong())
+		
+		// Create a Stream that will generate random files forever, then take the first 10.
+		// The Iterator will only calculate its elements on demand so it won't always generate 10 Files. 
+		Iterator.continually( randomTempFile ).take(10)
 			.find(!_.exists)
 			.getOrElse(throw new IllegalStateException("Couldn't find unique filename!"))
+	}
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */

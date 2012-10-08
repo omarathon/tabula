@@ -29,7 +29,7 @@ case class TurnitinResponse(
 		xml map {
 			_ \\ "object" map { obj =>
 				TurnitinSubmissionInfo(
-					objectId = (obj \\ "objectID" text),
+					objectId = DocumentId(obj \\ "objectID" text),
 					title = (obj \\ "title" text),
 					universityId = (obj \\ "firstname" text),
 					similarityScore = (obj \\ "similarityScore" text).toInt,

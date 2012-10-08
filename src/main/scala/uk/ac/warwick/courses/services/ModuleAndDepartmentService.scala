@@ -41,13 +41,6 @@ class ModuleAndDepartmentService extends Logging {
 	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
 	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
 
-	/**
-	 * Modules that this user is attending.
-	 * FIXME assumes webgroup = module attendance.
-	 */
-	def modulesAttendedBy(usercode: String) = groupService.getGroupsForUser(usercode).asScala
-		.filter { "Module" equals _.getType }
-
 	@Transactional
 	def addOwner(dept: Department, owner: String) = dept.owners.addUser(owner)
 

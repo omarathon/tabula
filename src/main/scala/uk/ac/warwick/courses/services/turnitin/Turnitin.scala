@@ -1,27 +1,26 @@
 package uk.ac.warwick.courses.services.turnitin
 
-import uk.ac.warwick.courses.helpers.Logging
-import dispatch._
-import dispatch.mime.Mime._
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.format.DateTimeFormatter
-import org.joda.time.DateTime
-import org.apache.commons.codec.digest.DigestUtils
-import scala.xml.NodeSeq
-import scala.xml.Elem
 import java.io.File
-import org.springframework.beans.factory.DisposableBean
-import org.springframework.stereotype.Service
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.beans.factory.annotation.Value
-import java.io.FileInputStream
-import uk.ac.warwick.courses.data.model.FileAttachment
 import org.apache.commons.io.FilenameUtils
-import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
+import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import dispatch._
+import dispatch.Request.toRequestVerbs
+import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.CurrentUser
+import org.apache.http.cookie.CookieSpec
+import org.apache.commons.httpclient.cookie.IgnoreCookiesSpec
+import org.apache.http.cookie.CookieSpecRegistry
+import org.apache.http.client.params.ClientPNames
+import org.apache.http.client.params.CookiePolicy
+import uk.ac.warwick.courses.data.model.Assignment
 
 case class FileData(val file: File, val name: String)
 
@@ -34,7 +33,35 @@ object Turnitin {
 
 	def validFileType(file: FileAttachment): Boolean =
 		Turnitin.validExtensions contains FilenameUtils.getExtension(file.name).toLowerCase
+		
+	/**
+     * ID that we should store classes under. They are per-module so we base it on the module code.
+     * This ID is stored within Turnitin and requests for the same ID should return the same class.
+     */
+    def classIdFor(assignment: Assignment) = ClassId("Module-" + assignment.module.code)
+    
+    /**
+     * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
+     * This ID is stored within Turnitin and requests for the same ID should return the same assignment.
+     */
+    def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
+    
+    def classNameFor(assignment: Assignment) = {
+        val module = assignment.module
+        ClassName(module.code.toUpperCase() + " - " + module.name)
+    }
+    
+    def assignmentNameFor(assignment: Assignment) = {
+        AssignmentName(assignment.name)
+    } 
 }
+
+// Typed strings and other value containers
+case class ClassName(val value: String)
+case class ClassId(val value: String)
+case class AssignmentName(val value: String)
+case class AssignmentId(val value: String)
+case class DocumentId(val value: String)
 
 /**
  * Service for accessing the Turnitin plagiarism API.
@@ -72,12 +99,11 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
 	val http: Http = new Http with thread.Safety {
-		override def make_client = {
-			val client = new ConfiguredHttpClient(new Http.CurrentCredentials(None))
-			client.setRedirectStrategy(new DefaultRedirectStrategy {
+		override def make_client = new ConfiguredHttpClient(new Http.CurrentCredentials(None)) {
+			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
-			client
+			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
@@ -88,6 +114,8 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	override def afterPropertiesSet {
 
 	}
+	
+	def login(user: CurrentUser): Option[Session] = login( user.email, user.firstName, user.lastName )
 	
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
@@ -100,6 +128,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 				session.userEmail = email
 				session.userFirstName = firstName
 				session.userLastName = lastName
+				session.acquireUserId()
 				Some(session)
 			}
 			case _ => None
@@ -108,117 +137,3 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 }
 
-/**
- * Acquired from a call to Turnitin.login(), this will call Turnitin methods as a particular
- * user.
- */
-class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods with Logging {
-	
-    import TurnitinDates._
-
-	val excludeFromMd5 = Seq("dtend", "create_session", "session-id", "src", "apilang")
-
-	var userEmail = "coursework@warwick.ac.uk"
-	var userFirstName = "Coursework"
-	var userLastName = "App"
-	var userId = ""
-		
-	private val http = turnitin.http
-	private def diagnostic = turnitin.diagnostic
-
-	/**
-	 * All API requests call the same URL and require the same MD5
-	 * signature parameter.
-	 *
-	 * If you start getting an "MD5 NOT AUTHENTICATED" on an API method you've
-	 * changed, it's usually because it doesn't recognise one of the parameters.
-	 * We MD5 on all parameters but the server will only MD5 on the parameters
-	 * it recognises, hence the discrepency.
-	 */
-	def doRequest(
-    		functionId: String, // API function ID
-    		pdata: Option[FileData], // optional file to put in "pdata" parameter
-    		params: Pair[String, String]*) : TurnitinResponse = {
-
-		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filter { case (key, value) => value != null }
-		val postWithParams = turnitin.endpoint.POST << (parameters + md5hexparam(parameters))
-		val req = addPdata(pdata, postWithParams)
-
-		logger.debug("doRequest: " + parameters)
-
-		val request: Handler[TurnitinResponse] =
-			req >:+ { (headers, req) => 
-				val location = headers("location").headOption
-				if (location.isDefined) req >- { (text) => TurnitinResponse.redirect(location.get) }
-				else if (turnitin.diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-    			else req <> { (node) => TurnitinResponse.fromXml(node) }
-			}
-		http.x(request)
-	}
-
-	def doRequestAdvanced(functionId: String, // API function ID
-		pdata: Option[FileData], // optional file to put in "pdata" parameter
-		params: Pair[String, String]*) // POST parameters
-		(transform: (Request) => (Handler[TurnitinResponse])): TurnitinResponse = {
-
-		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val postWithParams = turnitin.endpoint.POST << (parameters + md5hexparam(parameters))
-		val req = addPdata(pdata, postWithParams)
-
-		logger.debug("doRequest: " + parameters)
-
-		http.x(
-			if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-			else transform(req))
-	}
-
-    
-
-	/**
-	 * Returns either the request with a file added on, or the original
-	 * request if there's no file to add.
-	 */
-	def addPdata(file: Option[FileData], req: Request) =
-		file map (d =>
-			req <<* ("pdata", d.name, { () => new FileInputStream(d.file) })) getOrElse req
-
-	/**
-	 * Parameters that we need in every request.
-	 */
-	def commonParameters = Map(
-		"diagnostic" -> (if (diagnostic) "1" else "0"),
-		"gmtime" -> gmtTimestamp,
-		"encrypt" -> "0",
-		"aid" -> turnitin.aid,
-		"fcmd" -> "2",
-		"uem" -> userEmail,
-		"ufn" -> userFirstName,
-		"uln" -> userLastName,
-		"utp" -> "2",
-		"src" -> turnitin.integrationId) ++ (subAccountParameter) ++ (sessionIdParameter)
-
-	private def subAccountParameter: Map[String, String] =
-		if (turnitin.said == null || turnitin.said.isEmpty) Map.empty
-		else Map("said" -> turnitin.said)
-
-	private def sessionIdParameter: Map[String, String] =
-		if (sessionId == null) Map.empty
-		else Map("session-id" -> sessionId)
-
-	def md5hexparam(map: Map[String, String]) = ("md5" -> md5hex(map))
-
-	/**
-	 * Sort parameters by key, concatenate all the values with
-	 * the shared key and MD5hex that.
-	 */
-	def md5hex(params: Map[String, String]) = {
-		val sortedJoinedParams = params.filterKeys(!excludeFromMd5.contains(_)).toSeq
-			.sortBy(_._1) // sort by key (left part of Pair)
-			.map(_._2)    // map to value (right part of Pair)
-			.mkString("")
-		DigestUtils.md5Hex(sortedJoinedParams + turnitin.sharedSecretKey)
-	}
-
-	
-
-}

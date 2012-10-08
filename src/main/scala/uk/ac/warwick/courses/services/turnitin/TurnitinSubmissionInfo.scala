@@ -29,9 +29,9 @@ package uk.ac.warwick.courses.services.turnitin
  * Information about a submission as returned by the Turnitin API.
  */
 case class TurnitinSubmissionInfo(
-	val objectId: String,
-	val title: String,
-	val universityId: String,
+	val objectId: DocumentId,
+	val title: String, // paper title
+	val universityId: String, // stored under student's first name in Turnitin
 	val similarityScore: Int,
 	val overlap: Option[Int],
 	val webOverlap: Option[Int],

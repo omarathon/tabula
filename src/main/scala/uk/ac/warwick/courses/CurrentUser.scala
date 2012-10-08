@@ -37,6 +37,8 @@ class CurrentUser(
 	def fullName = apparentUser.getFullName
 	/** First name of the apparent user. */
 	def firstName = apparentUser.getFirstName
+	/** Surname of the apparent user. */
+	def lastName = apparentUser.getLastName
 	/** Warwick Uni ID of the apparent user. */
 	def universityId = apparentUser.getWarwickId
 	/** Department name of the apparent user. */
