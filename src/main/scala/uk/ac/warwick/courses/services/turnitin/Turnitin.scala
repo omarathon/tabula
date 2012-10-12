@@ -1,23 +1,28 @@
 package uk.ac.warwick.courses.services.turnitin
 
-import uk.ac.warwick.courses.helpers.Logging
-import dispatch._
-import dispatch.mime.Mime._
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.format.DateTimeFormatter
-import org.joda.time.DateTime
-import org.apache.commons.codec.digest.DigestUtils
-import scala.xml.NodeSeq
-import scala.xml.Elem
 import java.io.File
+import org.apache.commons.io.FilenameUtils.getExtension
+import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
+import org.apache.http.impl.client.DefaultRedirectStrategy
+import org.apache.http.protocol.HttpContext
 import org.springframework.beans.factory.DisposableBean
-import org.springframework.stereotype.Service
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
-import java.io.FileInputStream
+import org.springframework.stereotype.Service
+import dispatch._
+import dispatch.Request.toRequestVerbs
 import uk.ac.warwick.courses.data.model.FileAttachment
-import org.apache.commons.io.FilenameUtils
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.CurrentUser
+import org.apache.http.cookie.CookieSpec
+import org.apache.commons.httpclient.cookie.IgnoreCookiesSpec
+import org.apache.http.cookie.CookieSpecRegistry
+import org.apache.http.client.params.ClientPNames
+import org.apache.http.client.params.CookiePolicy
+import uk.ac.warwick.courses.data.model.Assignment
+import scala.util.matching.Regex
+import dispatch.thread.ThreadSafeHttpClient
 
 case class FileData(val file: File, val name: String)
 
@@ -29,18 +34,40 @@ object Turnitin {
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps")
 
 	def validFileType(file: FileAttachment): Boolean =
-		Turnitin.validExtensions contains FilenameUtils.getExtension(file.name).toLowerCase
+		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
+		
+	/**
+     * ID that we should store classes under. They are per-module so we base it on the module code.
+     * This ID is stored within Turnitin and requests for the same ID should return the same class.
+     */
+    def classIdFor(assignment: Assignment) = ClassId("Module-" + assignment.module.code)
+    
+    /**
+     * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
+     * This ID is stored within Turnitin and requests for the same ID should return the same assignment.
+     */
+    def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
+    
+    def classNameFor(assignment: Assignment) = {
+        val module = assignment.module
+        ClassName(module.code.toUpperCase() + " - " + module.name)
+    }
+    
+    def assignmentNameFor(assignment: Assignment) = {
+        AssignmentName(assignment.name)
+    } 
 }
 
 /**
  * Service for accessing the Turnitin plagiarism API.
  *
- * The methods you call to do stuff are defined in [[TurnitinMethods]].
+ * You call login() first with a user's details, which if successful will give you a 
+ * Session that has methods that will be called as that user. When done you can call
+ * logout() to end the session.
  */
 @Service
-class Turnitin extends TurnitinMethods with Logging with DisposableBean with InitializingBean {
+class Turnitin extends Logging with DisposableBean with InitializingBean {
 
-	import TurnitinDates._
 
 	/** The top level account ID (usually for University of Warwick account) */
 	@Value("${turnitin.aid}") var aid: String = null
@@ -48,6 +75,11 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean with Ini
 	@Value("${turnitin.said}") var said: String = null
 	/** Shared key as set up on the University of Warwick account's Open API settings */
 	@Value("${turnitin.key}") var sharedSecretKey: String = null
+
+	@Value("${turnitin.url}") var apiEndpoint: String = _
+
+	// Warwick's API version
+	@Value("${turnitin.integration}") var integrationId: String = _
 
 	/**
 	 * If this is set to true, responses are returned with HTML debug info,
@@ -58,81 +90,17 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean with Ini
 
 	val userAgent = "Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
-	/** URL to call for all requests. _could_ make it configurable, I suppoooosse. */
-	val endpoint = url("https://submit.ac.uk/api.asp") <:< Map("User-Agent" -> userAgent)
+	// URL to call for all requests.
+	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
-	private val http = new Http with thread.Safety
-
-	val excludeFromMd5 = Seq("dtend")
-
-	/**
-	 * All API requests call the same URL and require the same MD5
-	 * signature parameter.
-	 *
-	 * If you start getting an "MD5 NOT AUTHENTICATED" on an API method you've
-	 * changed, it's usually because it doesn't recognise one of the parameters.
-	 * We MD5 on all parameters but the server will only MD5 on the parameters
-	 * it recognises, hence the discrepency.
-	 */
-	override def doRequest(functionId: String, // API function ID
-		pdata: Option[FileData], // optional file to put in "pdata" parameter
-		params: Pair[String, String]*) // POST parameters
-		: TurnitinResponse = {
-
-		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val postWithParams = endpoint.POST << (parameters + md5hexparam(parameters))
-		val req = addPdata(pdata, postWithParams)
-
-		logger.debug("doRequest: " + parameters)
-
-		http(
-			if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-			else req <> { (node) => TurnitinResponse.fromXml(node) })
+	val http: Http = new Http with thread.Safety {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			setRedirectStrategy(new DefaultRedirectStrategy {
+				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
+			})
+			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+		}	
 	}
-
-	/**
-	 * Returns either the request with a file added on, or the original
-	 * request if there's no file to add.
-	 */
-	def addPdata(file: Option[FileData], req: Request) =
-		file map (d =>
-			req <<* ("pdata", d.name, { () => new FileInputStream(d.file) })) getOrElse req
-
-	/**
-	 * Parameters that we need in every request.
-	 */
-	def commonParameters = Map(
-		"diagnostic" -> (if (diagnostic) "1" else "0"),
-		"gmtime" -> gmtTimestamp,
-		"encrypt" -> "0",
-		"aid" -> aid,
-		"fcmd" -> "2",
-		"uem" -> "coursework@warwick.ac.uk",
-		"ufn" -> "Coursework",
-		"uln" -> "App",
-		"utp" -> "2") ++ (subAccountParameter)
-
-	private def subAccountParameter: Map[String, String] =
-		if (said == null || said.isEmpty)
-			Map.empty
-		else
-			Map("said" -> said)
-
-	def md5hexparam(map: Map[String, String]) = ("md5" -> md5hex(map))
-
-	/**
-	 * Sort parameters by key, concatenate all the values with
-	 * the shared key and MD5hex that.
-	 */
-	def md5hex(map: Map[String, String]) = {
-		DigestUtils.md5Hex(
-			((map filterKeys includeInMd5).toSeq sortBy mapKey map mapValue mkString ("")) + sharedSecretKey)
-	}
-
-	def includeInMd5(key: String) = !excludeFromMd5.contains(key)
-
-	private def mapKey[K](pair: Pair[K, _]) = pair._1
-	private def mapValue[V](pair: Pair[_, V]) = pair._2
 
 	override def destroy {
 		http.shutdown()
@@ -141,4 +109,26 @@ class Turnitin extends TurnitinMethods with Logging with DisposableBean with Ini
 	override def afterPropertiesSet {
 
 	}
+	
+	def login(user: CurrentUser): Option[Session] = login( user.email, user.firstName, user.lastName )
+	
+	def login(email:String, firstName:String, lastName:String): Option[Session] = {
+		val session = new Session(this, null)
+		session.userEmail = email
+		session.userFirstName = firstName
+		session.userLastName = lastName
+		session.login() match {
+			case Created(sessionId) if sessionId != "" => {
+				val session = new Session(this, sessionId)
+				session.userEmail = email
+				session.userFirstName = firstName
+				session.userLastName = lastName
+				session.acquireUserId()
+				Some(session)
+			}
+			case _ => None
+		}
+	}
+
 }
+

@@ -38,25 +38,25 @@ abstract class Job extends Logging {
 	 */
 	def run(implicit job: JobInstance): Unit
 
-	protected def progress(implicit _status: JobInstance) = _status.progress
+	protected def getProgress(implicit job: JobInstance) = job.progress
+	
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	protected def progress_=(percent: Int)(implicit _status: JobInstance) {
-		_status.progress = percent
-		jobService.update(_status)
+	protected def updateProgress(percent: Int)(implicit job: JobInstance) {
+		job.progress = percent
+		jobService.update(job)
 	}
 
-	protected def status(implicit _status: JobInstance) = _status.status
+	protected def getStatus(implicit job: JobInstance) = job.status
+	
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	protected def status_=(status: String)(implicit _status: JobInstance) {
-		if (debugEnabled) logger.debug("Job:" + _status.id + " - " + status)
-		_status.status = status
-		jobService.update(_status)
+	protected def updateStatus(status: String)(implicit job: JobInstance) {
+		if (debugEnabled) logger.debug("Job:" + job.id + " - " + status)
+		job.status = status
+		jobService.update(job)
 	}
 
+	/** An exception you can throw when a Job is obsolete, e.g. it references an entity that no longer exists.
+	 * JobService will catch this and remove the job. */
 	protected def obsoleteJob = new ObsoleteJobException
-
-	trait DefinitionFactory {
-
-	}
 
 }

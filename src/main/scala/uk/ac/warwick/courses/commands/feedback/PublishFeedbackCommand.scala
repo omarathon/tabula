@@ -123,7 +123,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		message.setTo(user.getEmail)
 		// TODO configurable subject
 		message.setSubject(moduleCode + ": Your coursework feedback is ready")
-		// TODO configurable body (or at least, FIXME Freemarker this up)
+		// TODO configurable body
 		message.setText(messageTextFor(user))
 
 		return message

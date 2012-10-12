@@ -1,5 +1,8 @@
 package uk.ac.warwick.courses
 
+import collection.JavaConverters._
+import collection.mutable
+
 /**
  * Quick way to expose a bunch of Java type names under
  * different names like JBoolean, so they can be differentiated
@@ -22,6 +25,8 @@ trait JavaImports {
 	type JSet[V] = java.util.Set[V]
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
+	
+	def JSet[T](items: T*) = mutable.Set(items: _*).asJava
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting

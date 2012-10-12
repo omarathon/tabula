@@ -8,12 +8,12 @@ import java.io.File
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.TestHelpers
 import java.io.FileWriter
-import uk.ac.warwick.courses.services.turnitin._
 import uk.ac.warwick.courses.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.courses.TestFixtures
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.util.web.UriBuilder
 
 /**
  * There should be a functional test for the Turnitin
@@ -38,54 +38,76 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 		
 		api.sharedSecretKey = props.getProperty("turnitin.key")
 		api.aid = props.getProperty("turnitin.aid")
-		api.said = props.getProperty("turnitin.said")
+		//api.said = props.getProperty("turnitin.said")
+		api.integrationId = "80"
+		api.apiEndpoint = props.getProperty("turnitin.url")
 		api.diagnostic = false
+
+		println("Hello")
+		val nick = api.login("nick@nickhowes.co.uk", "Nick","Howes")
 		
+		val ginty = api.login("test00002@nickhowes.co.uk", "Test00002", "Johnson")
+		
+		println(nick)
+		
+
+		val testClassName = ClassName("TestClass1")
+		val testAssName = AssignmentName("TestAss1")
+		// think we just have to store these and know them.
+        val classId = ClassId("ExtNewClassId")
+        val assId = AssignmentId("ExtNewAssId")
+			
 		val f = new File("src/test/resources/turnitin-submission.doc")
 		if (!f.exists) throw new IllegalArgumentException("Whoops, test file doesn't exist")
-		
-//		api.createClass("TestClass28Jun2012")
-		
-//		val a = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012")
-//		println(a)
-//		
-//		val b = api.createAssignment("TestClass28Jun2012", "TestAssignment28Jun2012", true)
-//		println(b)
-		
-//		api.submitPaper("TestClass28Jun2012", "TestAssignment28Jun2012", "Paper", f, "XXXXX", "XXXXX")
-//		
-		val subs = api.listSubmissions("CourseworkSubmissionAPIClass", "7804b3c1-1c29-4ff1-9437-aaba07cb0954")
-		println(subs)
-		
-//		subs match {
-//			case GotSubmissions(list) => {
-//				println("Deleting submissions")
-//				for (item <- list) api.deleteSubmission("TestClass28Jun2012", "TestAssignment28Jun2012", item.objectId)
-//			}
-//				
+
+		for (session <- nick) {
+			println("logged in " + session.userEmail)
+
+			println("userid is %s" format session.userId)
+			
+//			println(session.createClass(classId, ClassName(classId.value + " Name")))
+//			println(session.createAssignment(classId, testClassName, assId, testAssName))
+
+			//			val addTutor = session.addTutor(ClassId("KevinBacon"), ClassName("Roger Moore"))
+			//			println("add Tutor: " + addTutor)
+
+			//			println(session.createAssignment(classId, testAssName))
+
+			val submit = session.submitPaper(classId, testClassName, assId, testAssName, "Cool paper", "coolpaper.doc", f, "Johnny", "Badessay")
+
+			val submissions = session.listSubmissions(classId, assId)
+			println(submissions)
+			submissions match {
+				case GotSubmissions(list) => for (submission <- list) {
+					println(submission)
+					println("REPORT: " + session.getReport( submission.objectId ))
+//					println("Doc Viewer: " + session.getDocumentViewerLink( submission.objectId ))
+				}
+				case other => println("Oh no some problem getting submissions :( " + other)
+			}
+//
+			println("Login URL")
+			println(session.getLoginLink().get)
+
+			// don't logout as this will invalidate any URLs we've generated.
+			//session.logout()
+		}
+
+//		for (session <- ginty) {
+//			println("Graham coxon")
+//
+//			//			val submissions = session.listSubmissions(classId, assId)
+//			//            submissions match {
+//			//                case GotSubmissions(list) => for (submission <- list) {
+//			//                	println(submission)
+//			//                    //println("REPORT: " + session.getReport( submission.objectId ))
+//			//                    //println("Doc Viewer: " + session.getDocumentViewerLink( submission.objectId ))
+//			//                }
+//			//                case other => println("Oh no some problem getting submissions :( " + other)
+//			//            }
+//			println(session.getLoginLink().get)
 //		}
-//		
-//		
-//		println(api.listSubmissions("TestClass28Jun2012", "TestAssignment28Jun2012"))
 		
-//		val assignment = newDeepAssignment()
-//		assignment.id = "12345"
-//		val submissions = for (i <- 1 to 10) yield {
-//			val s = new Submission
-//			s.assignment = assignment
-//			s.universityId = "%07d" format (123000 + i)
-//			s.userId = "abcdef"
-//			val attachment1 = new FileAttachment()
-//			attachment1.name = "file.doc"
-//			attachment1.file = f
-//			val attachments = Set(attachment1)
-//			s.values.add(SavedSubmissionValue.withAttachments(s, "", attachments))
-//			s
-//		}
-		
-//		val cmd = new SubmitToTurnitinCommand(assignment, submissions)
-//		cmd.api = api
-//		cmd.apply()
 	
 	} finally {
 		deleteTemporaryDirs

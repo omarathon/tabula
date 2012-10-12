@@ -25,7 +25,10 @@ XML
 
 </div>
 
-<#macro originalityReport r>
+<#macro originalityReport attachment>
+<#local r=attachment.originalityReport />
+<div>
+${attachment.name}
 <img src="<@url resource="/static/images/icons/turnitin-16.png"/>">
 <span class="similarity-${r.similarity}">${r.overlap}% similarity</span>
 <span class="similarity-subcategories">
@@ -33,6 +36,7 @@ XML
 Student papers: ${r.studentOverlap}%,
 Publications: ${r.publicationOverlap}%)
 </span>
+<div>
 </#macro>
 
 <#if submissions?size gt 0>
@@ -73,9 +77,13 @@ Publications: ${r.publicationOverlap}%)
                 </td>
                 <#if hasOriginalityReport>
                     <td class="originality-report">
-                        <#if item.submission.originalityReport??>
-                            <@originalityReport item.submission.originalityReport />
+                    	<#list item.submission.allAttachments as attachment>
+                    	<!-- Checking originality report for ${attachment.name} ... -->
+                        <#if attachment.originalityReport??>
+                            <@originalityReport attachment />
                         </#if>
+                        <a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View report</a>
+                        </#list>
                     </td>
                 </#if>
             </tr>

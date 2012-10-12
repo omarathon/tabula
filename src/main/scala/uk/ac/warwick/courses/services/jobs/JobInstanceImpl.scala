@@ -32,7 +32,7 @@ object JobInstanceImpl {
 /**
  * JobDefinition is the database entity that stores
  * data about the job request, its status and progress.
- * There can be many Job subclasses but JobDefinition
+ * There can be many Job subclasses but JobInstance
  * does not need subclassing.
  */
 @Configurable

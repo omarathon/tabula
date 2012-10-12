@@ -25,7 +25,6 @@ import uk.ac.warwick.courses.Features
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
 		if (user.loggedIn) {
-			val moduleWebgroups = moduleService.modulesAttendedBy(user.idForPermissions) //groupsFor(user),
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
 
@@ -51,7 +50,6 @@ import uk.ac.warwick.courses.Features
 				"assignmentsWithFeedback" -> assignmentsWithFeedback,
 				"enrolledAssignments" -> enrolledAssignmentsInfo,
 				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
-				"moduleWebgroups" -> webgroupsToMap(moduleWebgroups),
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
 				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)

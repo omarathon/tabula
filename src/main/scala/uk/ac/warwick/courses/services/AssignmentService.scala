@@ -30,8 +30,10 @@ trait AssignmentService {
 	def getSubmission(id: String): Option[Submission]
 
 	def delete(submission: Submission): Unit
-	def deleteOriginalityReport(submission: Submission): Unit
-
+	
+	def deleteOriginalityReport(attachment: FileAttachment): Unit
+	def saveOriginalityReport(attachment: FileAttachment): Unit
+	
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
@@ -91,9 +93,6 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	def getAssignmentById(id: String) = getById[Assignment](id)
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission: Submission) = {
-		if (submission.originalityReport != null && submission.originalityReport.id == null) {
-			session.save(submission.originalityReport)
-		}
 		session.saveOrUpdate(submission)
 	}
 
@@ -162,13 +161,18 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	 * don't always happen until after some insert operation that assumes
 	 * we've deleted it.
 	 */
-	def deleteOriginalityReport(submission: Submission) {
-		if (submission.originalityReport != null) {
-			val report = submission.originalityReport
-			submission.originalityReport = null
+	def deleteOriginalityReport(attachment: FileAttachment) {
+		if (attachment.originalityReport != null) {
+			val report = attachment.originalityReport
+			attachment.originalityReport = null
 			session.delete(report)
 			session.flush()
 		}
+	}
+	
+	def saveOriginalityReport(attachment: FileAttachment) {
+		attachment.originalityReport.attachment = attachment
+		session.save(attachment.originalityReport)
 	}
 	
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {

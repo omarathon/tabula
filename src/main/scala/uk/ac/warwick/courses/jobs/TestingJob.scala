@@ -19,13 +19,13 @@ class TestingJob extends Job {
 	def run(implicit job: JobInstance) {
 		val name = job.getString("name")
 		val sleepTime = job.getString("sleepTime").toInt
-		status = "Running the job with name %s." format (name)
+		updateStatus("Running the job with name %s." format (name))
 		for (i <- 1 to 50) {
-			progress = i * 2
+			updateProgress(i*2)
 			if (sleepTime != 0) Thread.sleep(50)
 		}
 		job.succeeded = true
-		status = "Finished the job!"
+		updateStatus("Finished the job!")
 	}
 
 }
