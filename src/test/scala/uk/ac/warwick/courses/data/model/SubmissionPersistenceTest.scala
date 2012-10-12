@@ -7,6 +7,7 @@ import uk.ac.warwick.courses.Fixtures
 import uk.ac.warwick.courses.services.AssignmentServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.JavaImports._
 
 class SubmissionPersistenceTest extends PersistenceTestBase {
 	
@@ -19,32 +20,42 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
         	val submission = Fixtures.submission()
         	val assignment = newDeepAssignment()
         	submission.assignment = assignment
+        	
+        	val attachment = new FileAttachment()
+        	
+        	val value = SavedSubmissionValue.withAttachments(submission, "upload", JSet(attachment))
+        	submission.values.add(value)
+        	
         	session.save(assignment.module.department)
         	session.save(assignment.module)
         	session.save(assignment)
         	session.save(submission)
+        	session.save(value)
+        	session.save(attachment)
         	
         	val report1 = newReport
-        	
-        	submission addOriginalityReport report1
-        	session.update(submission)
-        	session.save(submission.originalityReport)
+        	attachment.originalityReport = report1
+        	report1.attachment = attachment
+
+        	session.save(report1)
         	
         	session.flush
         	
         	val retrievedSubmission = session.get(classOf[Submission], submission.id).asInstanceOf[Submission]
-        	retrievedSubmission.originalityReport.overlap should be (Some(1))
-        	retrievedSubmission.originalityReport.webOverlap should be (None)
+        	val report2 = retrievedSubmission.allAttachments.find(_.originalityReport != null).get.originalityReport
+        	report2.overlap should be (Some(1))
+        	report2.webOverlap should be (None)
         	
         	// check that previous reports are removed, otherwise the @OneToOne will explode
-        	retrievedSubmission.originalityReport = null
-        	session.delete(report1)
+        	attachment.originalityReport = null
+        	session.delete(report2)
         	session.flush // hmm, need to flush to delete.
         	
-        	val report2 = newReport
-        	retrievedSubmission addOriginalityReport report2
-        	session.update(retrievedSubmission)
-        	session.save(retrievedSubmission.originalityReport)
+        	val report3 = newReport
+        	attachment.originalityReport = report3
+        	report3.attachment = attachment
+        	session.update(attachment)
+        	session.save(report3)
             
             session.flush
             session.clear

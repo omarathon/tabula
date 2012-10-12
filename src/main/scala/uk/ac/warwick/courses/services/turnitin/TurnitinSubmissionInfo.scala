@@ -1,5 +1,7 @@
 package uk.ac.warwick.courses.services.turnitin
 
+import uk.ac.warwick.courses.data.model.FileAttachment
+
 /*
  * Typical <object> response when listing submissions
  * 
@@ -39,4 +41,9 @@ case class TurnitinSubmissionInfo(
 	val studentPaperOverlap: Option[Int]) {
 	/** If plagiarism checking hasn't been done yet, it will have a score of -1. */
 	def hasBeenChecked = similarityScore != -1
+	
+	/** Whether this appears to match up with the given FileAttachment according to our naming conventions,
+	 * which is to extract the ID from the paper title and compare that against the FileAttachment ID. 
+	 */
+	def matches(attachment: FileAttachment) = title == attachment.id
 }

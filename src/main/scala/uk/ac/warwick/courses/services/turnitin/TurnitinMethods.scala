@@ -12,21 +12,21 @@ import dispatch.Request
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.util.web._
 
-trait Response {
+abstract class Response(val message: String) {
 	def successful: Boolean
 }
-abstract class SuccessResponse extends Response { def successful = true }
-abstract class FailureResponse extends Response { def successful = false }
-case class Created(id: String) extends SuccessResponse
-case class Deleted() extends SuccessResponse
-case class Done() extends SuccessResponse
-case class GotSubmissions(list: Seq[TurnitinSubmissionInfo]) extends SuccessResponse
-case class AlreadyExists() extends FailureResponse
-case class DuplicateClass() extends FailureResponse
-case class ClassNotFound() extends FailureResponse
-case class AssignmentNotFound() extends FailureResponse
-case class SubmissionNotFound() extends FailureResponse
-case class Failed(code: Int, reason: String) extends FailureResponse
+abstract class SuccessResponse(message: String) extends Response(message) { def successful = true}
+abstract class FailureResponse(message: String) extends Response(message) { def successful = false }
+case class Created(id: String) extends SuccessResponse("Created")
+case class Deleted() extends SuccessResponse("Deleted")
+case class Done() extends SuccessResponse("Done")
+case class GotSubmissions(list: Seq[TurnitinSubmissionInfo]) extends SuccessResponse("Got submissions")
+case class AlreadyExists() extends FailureResponse("Object already exists")
+case class DuplicateClass() extends FailureResponse("Class already exists")
+case class ClassNotFound() extends FailureResponse("Class not found")
+case class AssignmentNotFound() extends FailureResponse("Assignment not found")
+case class SubmissionNotFound() extends FailureResponse("Submission not found")
+case class Failed(code: Int, reason: String) extends FailureResponse(reason)
 
 /**
  * Contains the main API methods that can be called from Session.
@@ -257,11 +257,12 @@ trait TurnitinMethods { self: Session =>
 			assignmentId: AssignmentId, // lot 
 			assignmentName:AssignmentName, // of
 			paperTitle: String, // arguments.
+			filename: String,
 			file: File, 
 			authorFirstName: String, 
 			authorLastName: String): Response = {
 		
-		val response = doRequest(SubmitPaperFunction, Some(FileData(file, paperTitle)),
+		val response = doRequest(SubmitPaperFunction, Some(FileData(file, filename)),
 			"cid" -> classId.value,
 			"ctl" -> className.value,
 			"assignid" -> assignmentId.value,

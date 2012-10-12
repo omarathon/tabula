@@ -73,7 +73,7 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 
 			//			println(session.createAssignment(classId, testAssName))
 
-			val submit = session.submitPaper(classId, testClassName, assId, testAssName, "Cool paper", f, "Johnny", "Badessay")
+			val submit = session.submitPaper(classId, testClassName, assId, testAssName, "Cool paper", "coolpaper.doc", f, "Johnny", "Badessay")
 
 			val submissions = session.listSubmissions(classId, assId)
 			println(submissions)

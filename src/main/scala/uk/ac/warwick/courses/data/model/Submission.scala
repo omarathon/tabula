@@ -22,7 +22,7 @@ import javax.persistence.CascadeType._
 import scala.collection.mutable
 import java.util.HashSet
 import javax.persistence.FetchType
-import uk.ac.warwick.courses.JBoolean
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model.forms.FormField
 
 @Entity @AccessType("field")
@@ -69,22 +69,11 @@ class Submission extends GeneratedId with Deleteable {
 		values.find( _.name == field.name )
 	}
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "submission")
-	@BeanProperty var originalityReport: OriginalityReport = _
-
-	def addOriginalityReport(report: OriginalityReport) {
-		if (originalityReport != null) {
-			// would be good if it could just detect an old orphaned report but it doesn't
-			// seem to work so have to delete it manually first.
-			throw new IllegalStateException("Can't add another report without deleting this one")
-		}
-		originalityReport = report
-		originalityReport.submission = this
-	}
-
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 
 	def allAttachments = valuesWithAttachments.toSeq flatMap { _.attachments }
+	
+	def hasOriginalityReport: JBoolean = allAttachments.exists( _.originalityReport != null )
 
 	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
 	def zipFileName(attachment: FileAttachment) = assignment.module.code + " - " + universityId + " - " + attachment.name

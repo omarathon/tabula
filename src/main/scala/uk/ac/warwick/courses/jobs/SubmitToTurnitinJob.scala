@@ -2,12 +2,10 @@ package uk.ac.warwick.courses.jobs
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMailMessage
 import org.springframework.stereotype.Component
-
 import freemarker.template.Configuration
 import javax.annotation.Resource
 import uk.ac.warwick.courses.CurrentUser
@@ -84,7 +82,11 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 		// Get existing submissions. 
 		val existingSubmissions = session.listSubmissions(classId, assignmentId) match {
-			case ClassNotFound() | AssignmentNotFound() => Nil // class or assignment don't exist, so clearly there are no submissions yet.
+			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist, so clearly there are no submissions yet.
+				// ensure assignment and course are created, as submitPaper doesn't always do that for you
+				session.createAssignment(classId, className, assignmentId, assignmentName)
+				Nil 
+			}
 			case GotSubmissions(list) => list
 			case _ => Nil // FIXME this is probably an error response, don't just assume it's an empty collection.
 		}
@@ -130,10 +132,11 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 						debug("Not uploading attachment again because it looks like it's been uploaded before: " + attachment.name + "(by " + submission.universityId + ")")
 					} else {
 						debug("Uploading attachment: " + attachment.name + " (by " + submission.universityId + ")")
-						val submitResponse = session.submitPaper(classId, className, assignmentId, assignmentName, attachment.id, attachment.file, submission.universityId, attachment.name)
+						val submitResponse = session.submitPaper(classId, className, assignmentId, assignmentName, attachment.id, attachment.name, attachment.file, submission.universityId, "Student")
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							debug("Failed to upload document " + attachment.name)
+							throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 						}
 					}
 					uploadsDone += 1
@@ -144,39 +147,48 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 			debug("Done uploads (" + uploadsDone + ")")
 		}
+		
+		
 
 		def retrieveReport() {
 			// Uploaded all the submissions probably, now we wait til they're all checked
 			updateStatus("Waiting for documents to be checked...")
 
 			// try WaitingRetries times with a WaitingSleep msec sleep inbetween until we get a full Turnitin report.
-			val submissions = runCheck(WaitingRetries) getOrElse Nil
+			val reports = runCheck(WaitingRetries) getOrElse Nil
 
-			if (submissions.isEmpty) {
-//				logger.error("Waited for complete Turnitin report but didn't get one. Turnitin assignment: " + turnitinId)
+			if (reports.isEmpty) {
+				logger.error("Waited for complete Turnitin report but didn't get one.")
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
 			} else {
 
-				for (report <- submissions) {
-					val submission = assignment.submissions.find(s => s.universityId == report.universityId)
-					submission.map { submission =>
-						// FIXME this is a clunky way to replace an existing report
-						if (submission.originalityReport != null) {
-							assignmentService.deleteOriginalityReport(submission)
+				val attachments = assignment.submissions.flatMap(_.allAttachments)
+				
+				for (report <- reports) {
+
+					val matchingAttachment = attachments.find(attachment => report.matches(attachment))
+
+					matchingAttachment match {
+						case Some(attachment) => {
+							// FIXME this is a clunky way to replace an existing report
+							if (attachment.originalityReport != null) {
+								assignmentService.deleteOriginalityReport(attachment)
+							}
+							val r = {
+								val r = new OriginalityReport
+								r.similarity = Some(report.similarityScore)
+								r.overlap = report.overlap
+								r.webOverlap = report.webOverlap
+								r.publicationOverlap = report.publicationOverlap
+								r.studentOverlap = report.studentPaperOverlap
+								r
+							}
+							attachment.originalityReport = r
+							assignmentService.saveOriginalityReport(attachment)
 						}
-						submission.addOriginalityReport({
-							val r = new OriginalityReport
-							r.similarity = Some(report.similarityScore)
-							r.overlap = report.overlap
-							r.webOverlap = report.webOverlap
-							r.publicationOverlap = report.publicationOverlap
-							r.studentOverlap = report.studentPaperOverlap
-							r
-						})
-						assignmentService.saveSubmission(submission)
-					} getOrElse {
-						logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
+						case None => logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
 					}
+		
 				}
 
 				if (sendEmails) {
@@ -214,6 +226,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 							updateStatus("All documents checked, preparing report...")
 							Some(list)
 						} else {
+							logger.debug("Waiting for documents to be checked (%d/%d)..." format (checked.size, list.size))
 							updateStatus("Waiting for documents to be checked (%d/%d)..." format (checked.size, list.size))
 							None
 						}

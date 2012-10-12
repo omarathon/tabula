@@ -16,10 +16,13 @@ import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.FileDao
 import javax.persistence.FetchType
 import forms.{Extension, SubmissionValue}
 import scala.util.matching.Regex
+import javax.persistence.OneToOne
+import javax.persistence.CascadeType._
 
 @Configurable
 @Entity @AccessType("field")
@@ -42,10 +45,13 @@ class FileAttachment extends GeneratedId {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="extension_id")
 	@BeanProperty var extension:Extension =_
+	
+	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
+    @BeanProperty var originalityReport: OriginalityReport = _
 
-	def isAttached = feedback != null || submissionValue != null
+	def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
 
-	@BeanProperty var temporary: Boolean = true
+	@BeanProperty var temporary: JBoolean = true
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var dateUploaded: DateTime = new DateTime

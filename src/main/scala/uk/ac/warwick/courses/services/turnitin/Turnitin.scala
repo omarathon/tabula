@@ -1,7 +1,7 @@
 package uk.ac.warwick.courses.services.turnitin
 
 import java.io.File
-import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.FilenameUtils.getExtension
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.impl.client.DefaultRedirectStrategy
@@ -21,6 +21,8 @@ import org.apache.http.cookie.CookieSpecRegistry
 import org.apache.http.client.params.ClientPNames
 import org.apache.http.client.params.CookiePolicy
 import uk.ac.warwick.courses.data.model.Assignment
+import scala.util.matching.Regex
+import dispatch.thread.ThreadSafeHttpClient
 
 case class FileData(val file: File, val name: String)
 
@@ -32,7 +34,7 @@ object Turnitin {
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps")
 
 	def validFileType(file: FileAttachment): Boolean =
-		Turnitin.validExtensions contains FilenameUtils.getExtension(file.name).toLowerCase
+		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
 		
 	/**
      * ID that we should store classes under. They are per-module so we base it on the module code.
@@ -55,13 +57,6 @@ object Turnitin {
         AssignmentName(assignment.name)
     } 
 }
-
-// Typed strings and other value containers
-case class ClassName(val value: String)
-case class ClassId(val value: String)
-case class AssignmentName(val value: String)
-case class AssignmentId(val value: String)
-case class DocumentId(val value: String)
 
 /**
  * Service for accessing the Turnitin plagiarism API.
@@ -99,13 +94,12 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
 	val http: Http = new Http with thread.Safety {
-		override def make_client = new ConfiguredHttpClient(new Http.CurrentCredentials(None)) {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
 			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
+		}	}
 
 	override def destroy {
 		http.shutdown()

@@ -12,6 +12,7 @@ import uk.ac.warwick.courses.data.Transactions
 import uk.ac.warwick.courses.jobs.ObsoleteJobException
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.courses.jobs.FailedJobException
 
 @Service
 class JobService extends HasJobDao with Transactions with Logging {
@@ -33,17 +34,7 @@ class JobService extends HasJobDao with Transactions with Logging {
 
 	def processInstance(instance: JobInstance, job: Job) {
 		start(instance)
-		try run(instance, job)
-		catch {
-			case old: ObsoleteJobException => {
-				logger.info("Job " + instance.id + " obsolete")
-				fail(instance)
-			}
-			case e => {
-				logger.info("Job " + instance.id + " failed", e)
-				fail(instance)
-			}
-		}
+		run(instance, job)
 	}
 
 	def kill(instance: JobInstance) {
@@ -75,7 +66,23 @@ class JobService extends HasJobDao with Transactions with Logging {
 
 	@Transactional
 	def run(instance: JobInstance, job: Job) {
-		job.run(instance)
+		try job.run(instance)
+		catch {
+			case old: ObsoleteJobException => {
+				logger.info("Job " + instance.id + " obsolete")
+				fail(instance)
+			}
+			case failed: FailedJobException => {
+				logger.info("Job " + instance.id + " failed: " + failed.status)
+				instance.status = failed.status
+				fail(instance)
+			}
+			case e => {
+				logger.info("Job " + instance.id + " failed", e)
+				instance.status = "Sorry, there was an error: " + e.getMessage()
+				fail(instance)
+			}
+		}
 		finish(instance)
 	}
 
