@@ -99,7 +99,8 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
 			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}	}
+		}	
+	}
 
 	override def destroy {
 		http.shutdown()
