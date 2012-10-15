@@ -34,15 +34,15 @@ class DepartmentSettings extends BaseController {
 	}
 
 	@RequestMapping(method=Array(RequestMethod.POST))
-	def saveSettings(@PathVariable dept:Department, user:CurrentUser, cmd:DepartmentSettingsCommand, errors:Errors) = {
-		mustBeAbleTo(Manage(dept))
+	def saveSettings(cmd:DepartmentSettingsCommand, errors:Errors) = {
+		mustBeAbleTo(Manage(cmd.department))
 		cmd.validate(errors)
 		if (errors.hasErrors){
-			viewSettings(dept,user,cmd,errors)
+			viewSettings(cmd.department, user, cmd, errors)
 		}
 		else{
 			cmd.apply()
-			Redirect(Routes.admin.department(dept))
+			Redirect(Routes.admin.department(cmd.department))
 		}
 	}
 }
