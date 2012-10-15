@@ -37,6 +37,8 @@ class ExtensionController extends BaseController{
 	def crumbed(mav:Mav, module:Module)
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
+	val dateBuilder = new DateBuilder
+
 	validatesWith{ (form:ModifyExtensionCommand, errors:Errors) =>
 		form.validate(errors)
 	}
@@ -65,6 +67,7 @@ class ExtensionController extends BaseController{
 		crumbed(model, module)
 	}
 
+	// manually add an extension - requests will not be handled here
 	@RequestMapping(value=Array("add"), method=Array(GET))
 	def addExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
 		@RequestParam("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
@@ -79,6 +82,7 @@ class ExtensionController extends BaseController{
 		model
 	}
 
+	// edit an existing manually created extension
 	@RequestMapping(value=Array("edit/{universityId}"), method=Array(GET))
 	def editExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
 		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
@@ -97,6 +101,7 @@ class ExtensionController extends BaseController{
 		model
 	}
 
+	// review an extension request (can delete or
 	@RequestMapping(value=Array("review-request/{universityId}"), method=Array(GET))
 	def reviewExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
 					  @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
@@ -115,6 +120,7 @@ class ExtensionController extends BaseController{
 		model
 	}
 
+	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(value=Array("delete/{universityId}"), method=Array(GET))
 	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
 		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
@@ -132,9 +138,10 @@ class ExtensionController extends BaseController{
 		model
 	}
 
+
 	@RequestMapping(value=Array("{action:add}", "{action:edit}"), method=Array(POST))
 	@ResponseBody
-	def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable action:String,
+	def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("action") action:String,
 											@Valid @ModelAttribute cmd:ModifyExtensionCommand, result:BindingResult,
 											response:HttpServletResponse, errors: Errors):Mav = {
 		mustBeLinked(assignment,module)
@@ -147,13 +154,26 @@ class ExtensionController extends BaseController{
 		}
 		else {
 			val extensions = cmd.apply()
+			extensions.foreach(sendPersistExtensionMessage(_, action))
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> action, "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))
 		}
 	}
 
-	val dateBuilder = new DateBuilder
+	def sendPersistExtensionMessage(extension: Extension, action:String) = {
+		if (extension.isManual){
+			if (action == "add") {
+				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				message.apply()
+			}
+			else if (action == "edit") {
+				val message = new ExtensionChangedMessage(extension, extension.universityId)
+				message.apply()
+			}
+		}
+		false // TODO implement remaining messages
+	}
 
 	def toJson(extensions:List[Extension]) = {
 
@@ -183,13 +203,18 @@ class ExtensionController extends BaseController{
 
 	@RequestMapping(value=Array("delete"), method=Array(POST))
 	@ResponseBody
-	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
+	def deleteExtension(@PathVariable module:Module, @PathVariable("assignment") assignment:Assignment,
 						@ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse,
 						errors: Errors):Mav = {
 
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 		val universityIds = cmd.apply()
+		// send messages
+		universityIds.foreach(id => {
+			val message = new ExtensionDeletedMessage(assignment, id)
+			message.apply()
+		})
 		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit
 		val result = Map() ++ universityIds.map(id => id -> Map("id" -> id))
 		val deletedJson = Map("status" -> "success", "action" -> "delete", "result" -> result)

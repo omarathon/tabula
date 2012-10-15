@@ -62,4 +62,8 @@ class Extension extends GeneratedId with Deleteable {
 
 	@BeanProperty var approvalComments:String =_
 
+	// this was not requested by a student. i.e. was manually created by an administrator
+	def isManual = requestedOn == null
+	def isAwaitingApproval = !isManual && !approved && !rejected
+
 }
