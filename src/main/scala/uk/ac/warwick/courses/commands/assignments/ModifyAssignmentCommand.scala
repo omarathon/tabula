@@ -164,7 +164,8 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
 		includeUsers.clear()
-		excludeUsers.clear()
+		// HFC-327
+		//excludeUsers.clear()
 	}
 
 	def copyTo(assignment: Assignment) {

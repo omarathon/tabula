@@ -101,6 +101,9 @@
 					<#list command.members.excludeUsers as _u>
 						<input type="hidden" name="excludeUsers" value="${_u}">
 					</#list>
+					<#list command.excludeUsers as _u>
+						<input type="hidden" name="excludeUsers" value="${_u}">
+					</#list>
 
 					<ul class="nav nav-tabs">
 						<li class="${tab1class}"><a href="#membership-tab1" data-toggle="tab">Students</a></li>
