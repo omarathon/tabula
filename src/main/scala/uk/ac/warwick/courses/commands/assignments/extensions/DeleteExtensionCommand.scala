@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments
+package uk.ac.warwick.courses.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.{ Autowired, Configurable }

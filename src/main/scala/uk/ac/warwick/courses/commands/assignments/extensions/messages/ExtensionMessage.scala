@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments
+package uk.ac.warwick.courses.commands.assignments.extensions.messages
 
 import org.springframework.beans.factory.annotation.{Value, Autowired, Configurable}
 import reflect.BeanProperty

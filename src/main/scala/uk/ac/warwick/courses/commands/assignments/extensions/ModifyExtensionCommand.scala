@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments
+package uk.ac.warwick.courses.commands.assignments.extensions
 
 import uk.ac.warwick.courses.commands.{Description, Command}
 import scala.collection.JavaConversions._

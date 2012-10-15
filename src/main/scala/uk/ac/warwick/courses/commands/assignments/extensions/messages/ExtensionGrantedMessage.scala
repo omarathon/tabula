@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments
+package uk.ac.warwick.courses.commands.assignments.extensions.messages
 
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.mail.SimpleMailMessage

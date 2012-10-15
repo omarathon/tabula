@@ -10,21 +10,21 @@
 			<div class="control-group">
 				<label><strong>Reason for extension request</strong></label>
 				<div class="controls">
-					${command.extensions[0].reason}
+					${extension.reason}
 				</div>
 			</div>
 			<div class="control-group">
 				<label><strong>Requested extension deadline</strong></label>
 				<div class="controls">
-					<@fmt.date date=command.extensions[0].requestedExpiryDate at=true/>
+					<@fmt.date date=extension.requestedExpiryDate at=true/>
 				</div>
 			</div>
-			<#if command.extensions[0].attachments??>
+			<#if extension.attachments??>
 				<div class="control-group">
 					<label><strong>Supporting documents</strong></label>
 					<div class="controls">
 						<ul>
-							<#list command.extensions[0].attachments as attachment>
+							<#list extension.attachments as attachment>
 								<li><a href="review-request/${universityId}/supporting-file/${attachment.name}">${attachment.name}</a></li>
 							</#list>
 						</ul>

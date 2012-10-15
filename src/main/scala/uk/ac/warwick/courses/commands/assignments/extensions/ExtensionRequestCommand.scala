@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.commands.assignments
+package uk.ac.warwick.courses.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.commands.{UploadedFile, Description, Command}
@@ -71,7 +71,5 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(assignment.module)
-		d.studentIds(Seq(submitter.apparentUser.getWarwickId))
-		d.properties("requestedExpiryDate" -> requestedExpiryDate)
 	}
 }

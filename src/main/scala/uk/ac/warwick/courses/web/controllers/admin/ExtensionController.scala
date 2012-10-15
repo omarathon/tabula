@@ -6,7 +6,8 @@ import uk.ac.warwick.courses.web.controllers.BaseController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.courses.data.model.{ Assignment, Module }
-import uk.ac.warwick.courses.commands.assignments._
+import uk.ac.warwick.courses.commands.assignments.extensions._
+import uk.ac.warwick.courses.commands.assignments.extensions.messages._
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
@@ -101,7 +102,7 @@ class ExtensionController extends BaseController{
 		model
 	}
 
-	// review an extension request (can delete or
+	// review an extension request
 	@RequestMapping(value=Array("review-request/{universityId}"), method=Array(GET))
 	def reviewExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
 					  @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
@@ -113,6 +114,7 @@ class ExtensionController extends BaseController{
 
 		val model = Mav("admin/assignments/extensions/review_request",
 			"command" -> cmd,
+			"extension" ->  extension,
 			"module" -> module,
 			"assignment" -> assignment,
 			"universityId" -> universityId
@@ -171,8 +173,17 @@ class ExtensionController extends BaseController{
 				val message = new ExtensionChangedMessage(extension, extension.universityId)
 				message.apply()
 			}
+		} else {
+			if (extension.rejected) {
+				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				message.apply()
+			}
+			else if (extension.approved) {
+				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				message.apply()
+			}
 		}
-		false // TODO implement remaining messages
+		false // TODO what if request was modified
 	}
 
 	def toJson(extensions:List[Extension]) = {
