@@ -59,13 +59,16 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 		if (!assignment.collectSubmissions) {
 			reject("assignment.submit.disabled")
 		}
-		if (!assignment.allowLateSubmissions && assignment.isClosed()) {
+
+		val hasExtension = assignment.isWithinExtension(user.apparentUser.getUserId)
+
+		if (!assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
 			reject("assignment.submit.closed")
 		}
 		// HFC-164
 		if (assignment.submissions.exists(_.universityId == user.universityId)) {
 			if (assignment.allowResubmission) {
-				if (assignment.allowLateSubmissions && assignment.isClosed()) {
+				if (assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
 					reject("assignment.resubmit.closed")
 				}
 			} else {
