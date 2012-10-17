@@ -23,6 +23,9 @@ import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.data.model.forms.Extension
 import org.joda.time.DateTime
 
+/** This is the main student-facing controller for handling esubmission and return of feedback.
+ *
+ */
 @Configurable
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
@@ -30,7 +33,7 @@ class AssignmentController extends AbstractAssignmentController {
 
 	hideDeletedItems
 
-	validatesWith { (cmd: SubmitAssignmentCommand, errors) => cmd.validate(errors) }
+	validatesSelf[SubmitAssignmentCommand]
 
 	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
 		val cmd = new SubmitAssignmentCommand(mandatory(assignment), user)
@@ -51,31 +54,33 @@ class AssignmentController extends AbstractAssignmentController {
 		val assignment = form.assignment
 		val module = form.module
 
-		form.onBind
-		checks(form)
+		if (!user.loggedIn) {
+			RedirectToSignin()
+		} else {
 
-		val feedback = checkCanGetFeedback(assignment, user)
-		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
+			form.onBind
+			checks(form)
 
-		val extension = assignment.extensions.find(_.userId == user.apparentId)
-		val isExtended = assignment.isWithinExtension(user.apparentId)
+			val feedback = checkCanGetFeedback(assignment, user)
+			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
-		val canSubmit = assignment.submittable(user.apparentId)
-		val canReSubmit = assignment.resubmittable(user.apparentId)
+			val extension = assignment.extensions.find(_.userId == user.apparentId)
+			val isExtended = assignment.isWithinExtension(user.apparentId)
 
-		/*
-		 * Submission values are an unordered set without any proper name, so
-		 * match them up into an ordered sequence of pairs.
-		 * 
-		 * If a submission value is missing, the right hand is None.
-		 * If any submission value doesn't match the assignment fields, it just isn't shown.
-		 */		
-		val submissionValues = submission.map { submission =>
-			for (field <- assignment.fields) yield ( field -> submission.getValue(field) )
-		}.getOrElse(Seq.empty)
+			val canSubmit = assignment.submittable(user.apparentId)
+			val canReSubmit = assignment.resubmittable(user.apparentId)
 
+			/*
+			 * Submission values are an unordered set without any proper name, so
+			 * match them up into an ordered sequence of pairs.
+			 * 
+			 * If a submission value is missing, the right hand is None.
+			 * If any submission value doesn't match the assignment fields, it just isn't shown.
+			 */		
+			val submissionValues = submission.map { submission =>
+				for (field <- assignment.fields) yield ( field -> submission.getValue(field) )
+			}.getOrElse(Seq.empty)
 
-		if (user.loggedIn) {
 			Mav(
 				"submit/assignment",
 				"module" -> module,
@@ -84,11 +89,10 @@ class AssignmentController extends AbstractAssignmentController {
 				"submission" -> submission,
 				"justSubmitted" -> form.justSubmitted,
 				"canSubmit" -> canSubmit,
-                "canReSubmit" -> canReSubmit,
+				"canReSubmit" -> canReSubmit,
 				"extension" -> extension,
 				"isExtended" -> isExtended)
-		} else {
-			RedirectToSignin()
+
 		}
 	}
 
