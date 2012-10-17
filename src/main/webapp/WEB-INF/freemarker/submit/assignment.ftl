@@ -4,6 +4,8 @@
 <h1>${module.name} (${module.code?upper_case})
 <br><strong>${assignment.name}</strong></h1>
 
+<a id="submittop"></a>
+
 <#if feedback??>
 
 	<#include "assignment_feedbackdownload.ftl" />

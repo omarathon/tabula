@@ -4,8 +4,6 @@
 
 <#if (canSubmit && !submission??) || canReSubmit>
 
-	<a id="submittop"></a>
-
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
