@@ -48,7 +48,7 @@
 	</head>
 	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses?default('')}">
 		<div id="container">
-			<#if user.masquerading>
+			<#if (user.masquerading)!false >
 			<div id="masquerade-notice">
 			Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/admin/masquerade"/>">Change</a>
 			</div>

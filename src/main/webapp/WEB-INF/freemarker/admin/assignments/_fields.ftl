@@ -82,9 +82,9 @@ the comments textarea needs to maintain newlines.
 					var assignmentId = assignmentPickerMappings[mapKey];
 					$("#prefillAssignment").val(assignmentId);
 					$(".assignment-picker-input").val(mapKey);
-					$("#action-input").val("refresh");
+					$("#action-input").val("prefill");
 					$("#addAssignmentCommand").submit();
-					return assignmentName;
+					return assignmentPickerMappings[mapKey] || '';
 				},
 				minLength:1
 			});

@@ -51,7 +51,8 @@ class AddAssignment extends BaseController {
 	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
 		new AddAssignmentCommand(mandatory(module))
 
-	@RequestMapping
+	// Used for initial load and for prefilling from a chosen assignment
+	@RequestMapping()
 	def form(user: CurrentUser, @PathVariable module: Module,
 		form: AddAssignmentCommand, errors: Errors) = {
 		permCheck(module)
@@ -60,7 +61,16 @@ class AddAssignment extends BaseController {
 		formView(form, module)
 	}
 
-	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action!=refresh"))
+	// when reloading the form
+	@RequestMapping(params = Array("action=refresh"))
+	def formRefresh(user: CurrentUser, @PathVariable module: Module,
+		form: AddAssignmentCommand, errors: Errors) = {
+		permCheck(module)
+		form.afterBind()
+		formView(form, module)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("!action"))
 	def submit(user: CurrentUser, @PathVariable module: Module,
 		@Valid form: AddAssignmentCommand, errors: Errors) = {
 		form.afterBind()

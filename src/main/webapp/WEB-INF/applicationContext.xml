@@ -106,6 +106,7 @@
 	    <property name="formatters">
 	    	<list>
 	            <bean class="uk.ac.warwick.courses.data.convert.FileAttachmentIdConverter"/>
+	            <bean class="uk.ac.warwick.courses.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.courses.data.convert.UpstreamAssignmentIdConverter"/>
 	        </list>
 	    </property>
