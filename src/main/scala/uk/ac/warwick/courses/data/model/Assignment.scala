@@ -295,40 +295,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 * Report on the submissions and feedbacks, noting
 	 * where the lists of students don't match up.
 	 */
-	def submissionsReport = {
-		// Get sets of University IDs
-		val feedbackUniIds = feedbacks.map {
-			_.universityId
-		}.toSet
-		val submissionUniIds = submissions.map {
-			_.universityId
-		}.toSet
-
-		// Subtract the sets from each other to obtain discrepencies
-		val feedbackOnly = feedbackUniIds &~ submissionUniIds
-		val submissionOnly = submissionUniIds &~ feedbackUniIds
-
-		/**
-		 * We want to show a warning if some feedback items are missing either marks or attachments
-		 * If however, all feedback items have only marks or attachments then we don't send a warning.
-		 *
-		 * We can never have a situation where no feedbacks have marks or attachments as they need to
-		 * have one or the other to exist in the first place.
-		 */
-		val withoutAttachments = feedbacks.filter(!_.hasAttachments).map {
-			_.universityId
-		}.toSet
-
-		val withoutMarks = feedbacks.filter(feedback => !feedback.hasMark && !feedback.hasGrade).map {
-			_.universityId
-		}.toSet
-
-		val plagiarised = submissions.filter(submission => submission.getSuspectPlagiarised).map {
-			_.universityId
-		}.toSet
-
-		SubmissionsReport(this, feedbackOnly, submissionOnly, withoutAttachments, withoutMarks, plagiarised)
-	}
+	def submissionsReport = SubmissionsReport(this)
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -352,26 +319,46 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			id.hashCode()
 		else 
 			super.hashCode()
-	
+			
 }
 
-case class SubmissionsReport(val assignment: Assignment, val feedbackOnly: Set[String], val submissionOnly: Set[String],
-	val withoutAttachments: Set[String], val withoutMarks: Set[String], val plagiarised: Set[String]) {
+case class SubmissionsReport(val assignment: Assignment) {
 
-	def hasProblems = {
-		//var problems = assignment.collectSubmissions && (!feedbackOnly.isEmpty || !submissionOnly.isEmpty || !plagiarised.isEmpty)
+	private def feedbacks = assignment.feedbacks
+	private def submissions = assignment.submissions
 
+	// Get sets of University IDs
+	private val feedbackUniIds = feedbacks.map(toUniId).toSet
+	private val submissionUniIds = submissions.map(toUniId).toSet
+
+	// Subtract the sets from each other to obtain discrepancies
+	val feedbackOnly = feedbackUniIds &~ submissionUniIds
+	val submissionOnly = submissionUniIds &~ feedbackUniIds
+
+	/**
+	 * We want to show a warning if some feedback items are missing either marks or attachments
+	 * If however, all feedback items have only marks or attachments then we don't send a warning.
+	 *
+	 * We can never have a situation where no feedbacks have marks or attachments as they need to
+	 * have one or the other to exist in the first place.
+	 */
+	val withoutAttachments = feedbacks.filter(!_.hasAttachments).map(toUniId).toSet
+	val withoutMarks = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
+	val plagiarised = submissions.filter(_.suspectPlagiarised).map(toUniId).toSet
+
+	def hasProblems: Boolean = {
 		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
-		var problems = assignment.collectSubmissions && shouldBeEmpty.exists { !_.isEmpty }
-
-		//TODO feature check
+		val problems = assignment.collectSubmissions && shouldBeEmpty.exists { !_.isEmpty }
 
 		if (assignment.collectMarks) {
-			//problems = problems || !withoutAttachments.isEmpty || !withoutMarks.isEmpty
-
 			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-			problems = problems || shouldBeEmptyWhenCollectingMarks.exists { !_.isEmpty }
+			problems || shouldBeEmptyWhenCollectingMarks.exists { !_.isEmpty }
+		} else {
+		    problems
 		}
-		problems
 	}
+    
+	// To make map() calls neater
+    private def toUniId(f: Feedback) = f.universityId
+    private def toUniId(s: Submission) = s.universityId
 }
