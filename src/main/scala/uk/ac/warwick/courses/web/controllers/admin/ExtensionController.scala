@@ -175,11 +175,11 @@ class ExtensionController extends BaseController{
 			}
 		} else {
 			if (extension.rejected) {
-				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				val message = new ExtensionRequestApprovedMessage(extension, extension.universityId)
 				message.apply()
 			}
 			else if (extension.approved) {
-				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				val message = new ExtensionRequestRejectedMessage(extension, extension.universityId)
 				message.apply()
 			}
 		}

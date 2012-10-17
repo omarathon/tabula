@@ -6,15 +6,15 @@ import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.data.model.forms.Extension
 
 @Configurable
-class ExtensionChangedMessage(extension: Extension, userId: String)
+class ExtensionRequestRejectedMessage(extension: Extension, userId: String)
 	extends ExtensionMessage(extension: Extension, userId: String) {
 
 	// applied to a base message to set a context specific subject and body
 	def setMessageContent(baseMessage: SimpleMailMessage) = {
-		baseMessage.setSubject(module.code + ": Extension details have been changed")
-		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/modified_manual_extension.ftl", Map(
+		baseMessage.setSubject(module.code + ": Extension request rejected")
+		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/extension_request_rejected.ftl", Map(
 			"extension" -> extension,
-			"newExpiryDate" -> dateFormatter.print(extension.getExpiryDate),
+			"newExpirtyDate" -> dateFormatter.print(extension.getExpiryDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,

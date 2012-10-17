@@ -3,7 +3,7 @@ package uk.ac.warwick.courses.commands.assignments.extensions
 import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.commands.{UploadedFile, Description, Command}
 import uk.ac.warwick.courses.data.model.forms.Extension
-import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.courses.data.model.{FileAttachment, Assignment}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
 import org.joda.time.DateTime
@@ -22,7 +22,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var requestedExpiryDate:DateTime =_
 	@BeanProperty var file:UploadedFile = new UploadedFile
-
+	@BeanProperty var attachedFiles:JSet[FileAttachment] =_
 	@BeanProperty var readGuidelines:JBoolean =_
 
 	def validate(errors:Errors){
@@ -37,6 +37,12 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		if (!reason.hasText){
 			errors.rejectValue("reason", "extension.reason.provideReasons")
 		}
+	}
+
+	def presetValues(extension:Extension){
+		reason = extension.reason
+		requestedExpiryDate = extension.requestedExpiryDate
+		attachedFiles = extension.attachments
 	}
 
 	@Transactional
@@ -57,6 +63,12 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		extension.requestedExpiryDate = requestedExpiryDate
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
+
+		// delete attachments that have been removed
+		if(attachedFiles == null){
+			attachedFiles = Set[FileAttachment]()
+		}
+		(extension.attachments -- attachedFiles).foreach(session.delete(_))
 
 		if (!file.attached.isEmpty) {
 			for (attachment <- file.attached) {

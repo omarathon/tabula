@@ -40,6 +40,34 @@
 			</div>
 		</@form.labelled_row>
 
+		<#if command.attachedFiles?has_content >
+			<@form.labelled_row "attachedFiles" "Supporting documents">
+			<ul>
+				<#list command.attachedFiles as attachment>
+					<li id="attachment-${attachment.id}" class="attachment">
+						<a href="<@routes.extensionrequestattachment assignment=assignment filename=attachment.name />">
+							${attachment.name}
+						</a>&nbsp;
+						<@f.hidden path="attachedFiles" value="${attachment.id}" />
+						<a class="remove-attachment" href="">Remove</a>
+					</li>
+				</#list>
+			</ul>
+			<script>
+				jQuery(function($){
+					$(".remove-attachment").on("click", function(e){
+						e.preventDefault();
+						$(this).closest("li.attachment").remove();
+					});
+				});
+			</script>
+			<div class="help-block">
+				This is a list of all supporting documents that have been attached to this extension request. Click the
+				remove link next to a document to delete it.
+			</div>
+			</@form.labelled_row>
+		</#if>
+
 		<script>
 			if (Supports.multipleFiles) {
 				jQuery('#multifile-column-description')

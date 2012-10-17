@@ -4,9 +4,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.courses.data.model.{Module, Assignment}
 import uk.ac.warwick.courses.CurrentUser
-import uk.ac.warwick.courses.commands.assignments.ExtensionRequestCommand
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.validation.Errors
+import uk.ac.warwick.courses.commands.assignments.extensions.ExtensionRequestCommand
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -24,10 +24,14 @@ class ExtensionRequestController extends BaseController{
 	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment,
 				 @ModelAttribute cmd:ExtensionRequestCommand):Mav = {
 		mustBeLinked(assignment,module)
+
+		val existingRequest = assignment.findExtension(user.universityId).foreach(cmd.presetValues(_))
+
 		val model = Mav("submit/extension_request",
 			"module" -> module,
 			"assignment" -> assignment,
-			"department" -> module.department
+			"department" -> module.department,
+			"command" -> cmd
 		)
 		crumbed(model, module)
 	}

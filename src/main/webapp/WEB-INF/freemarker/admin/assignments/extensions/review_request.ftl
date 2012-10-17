@@ -25,7 +25,11 @@
 					<div class="controls">
 						<ul>
 							<#list extension.attachments as attachment>
-								<li><a href="review-request/${universityId}/supporting-file/${attachment.name}">${attachment.name}</a></li>
+								<li>
+									<a href="<@routes.extensionreviewattachment assignment=assignment userid=universityId filename=attachment.name />">
+										${attachment.name}
+									</a>
+								</li>
 							</#list>
 						</ul>
 					</div>

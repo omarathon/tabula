@@ -11,7 +11,8 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.web.controllers.BaseController
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
+@RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}",
+							"/module/{module}/{assignment}/extension"))
 class DownloadSupportingFilesController extends BaseController{
 
 	@ModelAttribute def command(user:CurrentUser) = new DownloadSupportingFilesCommand(user)
