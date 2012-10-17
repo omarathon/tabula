@@ -72,7 +72,7 @@ Publications: ${r.publicationOverlap}%)
                         <span class="label-green">Downloaded</span>
                     </#if>
                     <#if submission.suspectPlagiarised>
-                    	<span class="label-orange">Suspected Plagiarised</span>
+                    	<span class="label-orange">Suspect Plagiarised</span>
                     </#if>
                 </td>
                 <#if hasOriginalityReport>

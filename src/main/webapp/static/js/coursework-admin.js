@@ -80,7 +80,7 @@ $(function(){
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
     })
     
-    $('.submission-list, .feedback-list').bigList({
+    $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     
         setup : function() {
             var $container = this;

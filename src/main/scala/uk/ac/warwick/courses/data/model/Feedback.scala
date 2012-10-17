@@ -96,4 +96,9 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	 * need to check that separately.
 	 */
 	def collectMarks: Boolean = assignment.collectMarks
+
+    def getUploadedDateString = {
+        val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
+        format.format(uploadedDate)
+    }
 }

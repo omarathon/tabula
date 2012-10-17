@@ -115,6 +115,13 @@
 					</span>
 				</#if>
 				</div>
+				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>	
+					<div class="submission-and-feedback-count">							
+						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
+							${assignment.submissions?size} submissions and ${assignment.feedbacks?size} feedback
+						</a>
+					</div>	
+				</#if>			
 				
 				<#if assignment.anyReleasedFeedback || features.submissions>
 				<p class="feedback-published">

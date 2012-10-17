@@ -304,6 +304,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		"closeDate" -> closeDate,
 		"module" -> module)
 
+    def getUniIdsWithSubmissionOrFeedback = {
+        var idsWithSubmissionOrFeedback: Set[String] = Set()
+        
+        for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
+        for (feedback <- feedbacks) idsWithSubmissionOrFeedback += feedback.universityId
+        
+        idsWithSubmissionOrFeedback
+    }   
+		
 	/**
 	 * Defines equality via the entity's ID. 
 	 */
