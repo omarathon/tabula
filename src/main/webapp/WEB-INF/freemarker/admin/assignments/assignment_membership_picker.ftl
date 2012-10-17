@@ -15,7 +15,8 @@
 
 		<#macro what_is_this>
 			<a href="#" class="use-popover" 
-			   data-title="Student membership" 
+			   data-title="Student membership"
+			   data-trigger="hover"
 			   data-content="&lt;p&gt;Here you can specify where this assignment should get its list of enrolled students from.
 			     You can link to a central SITS assignment and a live list of students will be maintained.
 			     If you are not using SITS you can manually specify a list of users.&lt;/p&gt;&lt;p&gt;
