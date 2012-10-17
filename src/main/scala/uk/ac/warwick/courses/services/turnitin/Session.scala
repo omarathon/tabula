@@ -21,7 +21,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	import TurnitinDates._
 
 	// Some parameters are not included in the MD5 signature calculation.
-	val excludeFromMd5 = Seq("dtend", "create_session", "session-id", "src", "apilang")
+	val excludeFromMd5 = Seq("dtend", "create_session", "session-id", "src", "apilang","dis")
 
 	// These are overriden within Turnitin.login().
 	var userEmail = ""
@@ -122,8 +122,8 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		"ufn" -> userFirstName,
 		"uln" -> userLastName,
 		"utp" -> "2",
+		"dis" -> "1", // disable emails
 		"src" -> turnitin.integrationId) ++ (subAccountParameter) /*++ (sessionIdParameter)*/
-
 	/** Optional sub-account ID */
 	private def subAccountParameter: Map[String, String] = {
 		if (turnitin.said == null || turnitin.said.isEmpty) 
