@@ -77,7 +77,8 @@
 				<span class="label label-warning">Closed</span>
 			</#if>
 			<#if assignment.upstreamAssignment??>
-			  <span class="label label-info">SITS</span>
+			  <#assign _upstream=assignment.upstreamAssignment />
+			  <span class="label label-info">SITS : ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
 			</#if>
 			</div>
 
