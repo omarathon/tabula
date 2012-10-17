@@ -173,41 +173,39 @@ To not bind:
 		</#if>
 	</div>
 	
-	<#if multiple>
-		<script><!--
-		
-		jQuery(function($){
-			var $container = $('#${elementId}'), 
-			    $file = $container.find('input[type=file]'),
-			    $addButton; 
-			if (Supports.multipleFiles) {
-				// nothing, already works
-			} else {
-				// Add button which generates more file inputs
-			    $addButton = $('<a>').addClass('btn btn-mini').append($('<i class="icon-plus"></i>').attr('title','Add another attachment'));
-			    $addButton.click(function(){
-			    	$addButton
-			    		.before($('<br/>'))
-			    		.before($('<input type="file">').attr('name',"${basename}.upload"));
-			    	if ($container.find('input[type=file]').length >= ${max}) {
-			    	    $addButton.hide(); // you've got enough file input thingies now.
-			    	}
-			    });
-				$file.after($addButton);
+	<script><!--
+	
+	jQuery(function($){
+		var $container = $('#${elementId}'), 
+		    $file = $container.find('input[type=file]'),
+		    $addButton; 
+		if (Supports.multipleFiles) {
+			// nothing, already works
+		} else {
+			// Add button which generates more file inputs
+		    $addButton = $('<a>').addClass('btn btn-mini').append($('<i class="icon-plus"></i>').attr('title','Add another attachment'));
+		    $addButton.click(function(){
+			$addButton
+				.before($('<br/>'))
+				.before($('<input type="file">').attr('name',"${basename}.upload"));
+			if ($container.find('input[type=file]').length >= ${max}) {
+			    $addButton.hide(); // you've got enough file input thingies now.
 			}
-			
-			$container.find('.hidden-attachment a').click(function(ev){
-			    ev.preventDefault();
-			    $(this).parent('.hidden-attachment').remove(); 
-			    if ($addButton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
-			       $addButton.show();
-			    }
-			    return false;
-			});
-		});
+		    });
+			$file.after($addButton);
+		}
 		
-		//--></script>
-	</#if>
+		$container.find('.hidden-attachment a').click(function(ev){
+		    ev.preventDefault();
+		    $(this).parent('.hidden-attachment').remove(); 
+		    if ($addButton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
+		       $addButton.show();
+		    }
+		    return false;
+		});
+	});
+	
+	//--></script>
 	
 	</@spring.bind>
 	</@field>
