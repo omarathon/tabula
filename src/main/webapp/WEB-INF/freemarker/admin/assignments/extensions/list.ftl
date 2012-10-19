@@ -38,7 +38,7 @@
 						</td>
 						<td class="expiryDate"></td>
 						<td>
-							<a class="new-extension btn btn-mini btn-primary" href="review-request/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="new-extension btn btn-mini btn-primary" href="<@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Review request
 							</a>
 						</td>
@@ -60,13 +60,13 @@
 						</td>
 						<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
 						<td>
-							<a class="hide new-extension btn btn-mini btn-success" href="add?universityId=${extension.universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="hide new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-ok icon-white"></i> Grant
 							</a>
-							<a class="modify-extension btn btn-mini btn-primary" href="edit/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
-							<a class="revoke-extension btn btn-mini btn-danger" href="delete/${extension.universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
 						</td>
@@ -80,13 +80,13 @@
 						<td  class="status"></td>
 						<td class="expiryDate"></td>
 						<td>
-							<a class="new-extension btn btn-mini btn-success" href="add?universityId=${universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-ok icon-white"></i> Grant
 							</a>
-							<a class="hide modify-extension btn btn-mini btn-primary" href="edit/${universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="hide modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
-							<a class="hide revoke-extension btn btn-mini btn-danger" href="delete/${universityId}" data-toggle="modal" data-target="#extension-model">
+							<a class="hide revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
 						</td>
