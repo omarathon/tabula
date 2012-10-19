@@ -39,7 +39,7 @@ class TurnitinReportController extends BaseController {
 		session match {
 			case Some(session) => {
 
-				val classId = Turnitin.classIdFor(command.assignment)
+				val classId = Turnitin.classIdFor(command.assignment, turnitinService.classPrefix)
 				val assignmentId = Turnitin.assignmentIdFor(command.assignment)
 				session.listSubmissions(classId, assignmentId) match {
 					case GotSubmissions(list) => {

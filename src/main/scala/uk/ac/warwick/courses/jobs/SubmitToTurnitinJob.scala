@@ -44,7 +44,6 @@ abstract class DescribableJob(instance: JobInstance) extends Describable[Nothing
  */
 @Component
 class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with FreemarkerRendering {
-
 	val identifier = SubmitToTurnitinJob.identifier
 
 	@Autowired implicit var freemarker: Configuration = _
@@ -73,7 +72,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			val id = job.getString("assignment")
 			assignmentService.getAssignmentById(id) getOrElse (throw obsoleteJob)
 		}
-		val classId = classIdFor(assignment)
+		val classId = classIdFor(assignment, api.classPrefix)
 		val assignmentId = assignmentIdFor(assignment)
 		val className = classNameFor(assignment)
 		val assignmentName = assignmentNameFor(assignment)

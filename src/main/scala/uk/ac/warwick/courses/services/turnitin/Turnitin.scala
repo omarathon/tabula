@@ -40,7 +40,7 @@ object Turnitin {
      * ID that we should store classes under. They are per-module so we base it on the module code.
      * This ID is stored within Turnitin and requests for the same ID should return the same class.
      */
-    def classIdFor(assignment: Assignment) = ClassId("Module-" + assignment.module.code)
+    def classIdFor(assignment: Assignment, prefix: String) = ClassId(prefix+"-" + assignment.module.code)
     
     /**
      * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
@@ -80,6 +80,8 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 	// Warwick's API version
 	@Value("${turnitin.integration}") var integrationId: String = _
+	
+	@Value("${turnitin.class.prefix}") var classPrefix: String =_
 
 	/**
 	 * If this is set to true, responses are returned with HTML debug info,
