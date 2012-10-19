@@ -159,6 +159,7 @@ trait TestHelpers {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
 				val user = new User(code)
+				user.setIsLoggedIn(true)
 				user.setWarwickId(universityId)
 				currentUser = new CurrentUser(user, user)
 				new RequestInfo(currentUser, null)

@@ -22,6 +22,7 @@ import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.data.model.forms.Extension
 import org.joda.time.DateTime
+import uk.ac.warwick.courses.data.model.Feedback
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -57,11 +58,11 @@ class AssignmentController extends AbstractAssignmentController {
 		if (!user.loggedIn) {
 			RedirectToSignin()
 		} else {
+		    val feedback = checkCanGetFeedback(assignment, user)
 
 			form.onBind
-			checks(form)
+			checks(form, feedback)
 
-			val feedback = checkCanGetFeedback(assignment, user)
 			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
 			val extension = assignment.extensions.find(_.userId == user.apparentId)
@@ -102,7 +103,7 @@ class AssignmentController extends AbstractAssignmentController {
 		val assignment = form.assignment
 		val module = form.module
 		form.onBind
-		checks(form)
+		checks(form, None)
 		if (errors.hasErrors || !user.loggedIn) {
 			view(user, form, errors)
 		} else {
@@ -113,11 +114,11 @@ class AssignmentController extends AbstractAssignmentController {
 		}
 	}
 
-	private def checks(form: SubmitAssignmentCommand) = {
+	private def checks(form: SubmitAssignmentCommand, feedback: Option[Feedback]) = {
 		val assignment = form.assignment
 		val module = form.module
 		mustBeLinked(mandatory(assignment), mandatory(module))
-		if (!can(Submit(assignment))) { // includes check for restricted submission.
+		if (feedback.isEmpty && !can(Submit(assignment))) { // includes check for restricted submission.
 			throw new SubmitPermissionDeniedException(assignment)
 		}
 	}

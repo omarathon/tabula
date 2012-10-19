@@ -111,6 +111,11 @@ class Mav() {
 		mav.addAllObjects(toModel)
 		mav
 	}
+	
+	override def toString = {
+		val v = if (view != null) view else viewName
+		"Mav("+v+", "+map+")"
+	}
 }
 
 /**

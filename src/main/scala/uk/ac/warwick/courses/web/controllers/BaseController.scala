@@ -80,7 +80,7 @@ trait ControllerViews {
 
 	private def currentUri = requestInfo.get.requestedUri
 	private def currentPath: String = currentUri.getPath
-	private def loginUrl = {
+	def loginUrl = {
 		val generator = new SSOLoginLinkGenerator
 		generator.setConfig(SSOConfiguration.getConfig)
 		generator.setTarget(currentUri.toString)
