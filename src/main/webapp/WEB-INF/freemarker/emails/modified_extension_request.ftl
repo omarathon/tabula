@@ -1,9 +1,12 @@
 Dear ${user.firstName}
 
-This email confirms that your extension request has been approved for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
-Your new submission date for this assignment is ${newExpirtyDate}. Any submissions made after this date will be subject to the usual late penalties.
+${student.fullName} has amended their extension request for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}. The date or reason fields may have been changed
 
-Your new deadline is now displayed at the top of the submission page:
+They have requested until ${requestedExpirtyDate} to complete the assignment. The following reasons were given for the request
+
+${reasonForRequest}
+
+To review this extension request and any supporting documentation, please click the link below.
 
 ${url}
 

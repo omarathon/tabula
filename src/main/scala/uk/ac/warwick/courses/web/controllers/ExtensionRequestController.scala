@@ -1,5 +1,6 @@
 package uk.ac.warwick.courses.web.controllers
 
+import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.courses.data.model.{Module, Assignment}
@@ -7,6 +8,8 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.commands.assignments.extensions.ExtensionRequestCommand
+import uk.ac.warwick.courses.data.model.forms.Extension
+import uk.ac.warwick.courses.commands.assignments.extensions.messages.NewExtensionRequestMessage
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -25,7 +28,7 @@ class ExtensionRequestController extends BaseController{
 				 @ModelAttribute cmd:ExtensionRequestCommand):Mav = {
 		mustBeLinked(assignment,module)
 
-		val existingRequest = assignment.findExtension(user.universityId).foreach(cmd.presetValues(_))
+		assignment.findExtension(user.universityId).foreach(cmd.presetValues(_))
 
 		val model = Mav("submit/extension_request",
 			"module" -> module,
@@ -45,12 +48,23 @@ class ExtensionRequestController extends BaseController{
 			showForm(module, assignment, cmd)
 		}
 		else {
-			cmd.apply()
+			val extension = cmd.apply()
+			sendExtensionRequestMessage(extension, cmd.modified)
 			val model = Mav("submit/extension_request_success",
 				"module" -> module,
 				"assignment" -> assignment
 			)
 			crumbed(model, module)
+		}
+	}
+
+	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
+		val assignment = extension.assignment
+		val moduleManagers = assignment.module.participants.includeUsers
+		if (modified){
+			//TODO separate message for modified requests
+		} else {
+			moduleManagers.foreach(new NewExtensionRequestMessage(extension, _).apply())
 		}
 	}
 }

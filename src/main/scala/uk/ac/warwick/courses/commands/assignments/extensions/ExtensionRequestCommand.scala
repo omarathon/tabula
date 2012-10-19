@@ -24,6 +24,8 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 	@BeanProperty var file:UploadedFile = new UploadedFile
 	@BeanProperty var attachedFiles:JSet[FileAttachment] =_
 	@BeanProperty var readGuidelines:JBoolean =_
+	// true if this command is modifying an existing extension. False otherwise
+	@BeanProperty var modified:JBoolean = false
 
 	def validate(errors:Errors){
 		if (!readGuidelines){
@@ -43,6 +45,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		reason = extension.reason
 		requestedExpiryDate = extension.requestedExpiryDate
 		attachedFiles = extension.attachments
+		modified = true
 	}
 
 	@Transactional
@@ -64,12 +67,12 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
 
-		// delete attachments that have been removed
-		if(attachedFiles == null){
-			attachedFiles = Set[FileAttachment]()
+		if (extension.attachments != null){// delete attachments that have been removed
+			if(attachedFiles == null){
+				attachedFiles = Set[FileAttachment]()
+			}
+			(extension.attachments -- attachedFiles).foreach(session.delete(_))
 		}
-		(extension.attachments -- attachedFiles).foreach(session.delete(_))
-
 		if (!file.attached.isEmpty) {
 			for (attachment <- file.attached) {
 				extension.addAttachment(attachment)

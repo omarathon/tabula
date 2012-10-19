@@ -14,7 +14,7 @@ class ExtensionChangedMessage(extension: Extension, userId: String)
 		baseMessage.setSubject(module.code + ": Extension details have been changed")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/modified_manual_extension.ftl", Map(
 			"extension" -> extension,
-			"newExpiryDate" -> dateFormatter.print(extension.getExpiryDate),
+			"newExpiryDate" -> dateFormatter.print(extension.expiryDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,

@@ -4,6 +4,12 @@ Your extension request has been rejected for the assignment '${assignment.name}'
 The deadline for the assignment is ${originalAssignmentDate}. Any submissions made after the deadline will be
 subject to the usual late penalties.
 
+<#if extension.approvalComments??>
+The administrator left the following comments:
+
+${extension.approvalComments}
+
+</#if>
 The assignment deadline is displayed at the top of the submission page:
 
 ${url}

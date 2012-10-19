@@ -11,7 +11,7 @@ import uk.ac.warwick.courses.commands.assignments.extensions.messages._
 import uk.ac.warwick.courses.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.courses.services.AssignmentService
+import uk.ac.warwick.courses.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.courses.CurrentUser
 import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.courses.data.model.forms.Extension
@@ -27,6 +27,7 @@ import org.joda.time.DateTime
 class ExtensionController extends BaseController{
 
 	@Autowired var assignmentService:AssignmentService =_
+	@Autowired var userLookup: UserLookupService = _
 	@Autowired var json:ObjectMapper =_
 
 	@ModelAttribute
@@ -36,7 +37,7 @@ class ExtensionController extends BaseController{
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
-		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	val dateBuilder = new DateBuilder
 
@@ -71,7 +72,7 @@ class ExtensionController extends BaseController{
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(value=Array("add"), method=Array(GET))
 	def addExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-		@RequestParam("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
+					 @RequestParam("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 
@@ -86,7 +87,7 @@ class ExtensionController extends BaseController{
 	// edit an existing manually created extension
 	@RequestMapping(value=Array("edit/{universityId}"), method=Array(GET))
 	def editExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
+					  @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 
@@ -105,7 +106,7 @@ class ExtensionController extends BaseController{
 	// review an extension request
 	@RequestMapping(value=Array("review-request/{universityId}"), method=Array(GET))
 	def reviewExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
-					  @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
+							   @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 
@@ -125,7 +126,7 @@ class ExtensionController extends BaseController{
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(value=Array("delete/{universityId}"), method=Array(GET))
 	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-		@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
+						@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
 
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
@@ -144,8 +145,8 @@ class ExtensionController extends BaseController{
 	@RequestMapping(value=Array("{action:add}", "{action:edit}"), method=Array(POST))
 	@ResponseBody
 	def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("action") action:String,
-											@Valid @ModelAttribute cmd:ModifyExtensionCommand, result:BindingResult,
-											response:HttpServletResponse, errors: Errors):Mav = {
+						 @Valid @ModelAttribute cmd:ModifyExtensionCommand, result:BindingResult,
+						 response:HttpServletResponse, errors: Errors):Mav = {
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 		if(errors.hasErrors){
@@ -166,20 +167,20 @@ class ExtensionController extends BaseController{
 	def sendPersistExtensionMessage(extension: Extension, action:String) = {
 		if (extension.isManual){
 			if (action == "add") {
-				val message = new ExtensionGrantedMessage(extension, extension.universityId)
+				val message = new ExtensionGrantedMessage(extension, extension.userId)
 				message.apply()
 			}
 			else if (action == "edit") {
-				val message = new ExtensionChangedMessage(extension, extension.universityId)
+				val message = new ExtensionChangedMessage(extension, extension.userId)
 				message.apply()
 			}
 		} else {
-			if (extension.rejected) {
-				val message = new ExtensionRequestApprovedMessage(extension, extension.universityId)
+			if (extension.approved) {
+				val message = new ExtensionRequestApprovedMessage(extension, extension.userId)
 				message.apply()
 			}
-			else if (extension.approved) {
-				val message = new ExtensionRequestRejectedMessage(extension, extension.universityId)
+			else if (extension.rejected) {
+				val message = new ExtensionRequestRejectedMessage(extension, extension.userId)
 				message.apply()
 			}
 		}
@@ -223,7 +224,8 @@ class ExtensionController extends BaseController{
 		val universityIds = cmd.apply()
 		// send messages
 		universityIds.foreach(id => {
-			val message = new ExtensionDeletedMessage(assignment, id)
+			val user = userLookup.getUserByWarwickUniId(id);
+			val message = new ExtensionDeletedMessage(assignment, user.getUserId)
 			message.apply()
 		})
 		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit

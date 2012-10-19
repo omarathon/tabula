@@ -19,7 +19,7 @@
 					<@fmt.date date=extension.requestedExpiryDate at=true/>
 				</div>
 			</div>
-			<#if extension.attachments??>
+			<#if extension.attachments?has_content>
 				<div class="control-group">
 					<label><strong>Supporting documents</strong></label>
 					<div class="controls">

@@ -20,7 +20,7 @@ import uk.ac.warwick.courses.services.UserLookupService
  */
 @Configurable
 abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanProperty var assignment: Assignment,
-								@BeanProperty var uniId: String)
+								@BeanProperty var userId: String)
 	extends Command[Boolean] with ReadOnly with FreemarkerRendering with Logging {
 
 	def this(assignment:Assignment, uniId:String) = this(null, assignment, uniId)
@@ -40,7 +40,7 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
-	def recipient = userLookup.getUserByWarwickUniId(uniId)
+	def recipient = userLookup.getUserByUserId(userId)
 
 	def apply() = {
 		if (recipient.getEmail.hasText) {

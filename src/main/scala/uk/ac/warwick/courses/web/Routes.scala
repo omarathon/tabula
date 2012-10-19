@@ -2,7 +2,6 @@ package uk.ac.warwick.courses.web
 
 import uk.ac.warwick.courses.data.model._
 import java.net.URLEncoder
-import org.springframework.beans.factory.annotation.Value
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -47,6 +46,10 @@ object Routes {
 
 			object feedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/list"
+			}
+
+			object extension {
+				def review(assignment: Assignment) = assignmentroot(assignment) + "/extensions"
 			}
 		}
 	}

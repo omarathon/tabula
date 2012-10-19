@@ -14,7 +14,7 @@ class ExtensionRequestRejectedMessage(extension: Extension, userId: String)
 		baseMessage.setSubject(module.code + ": Extension request rejected")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/extension_request_rejected.ftl", Map(
 			"extension" -> extension,
-			"newExpirtyDate" -> dateFormatter.print(extension.getExpiryDate),
+			"originalAssignmentDate" -> dateFormatter.print(assignment.closeDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
