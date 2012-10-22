@@ -82,13 +82,19 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 		// Get existing submissions. 
 		val existingSubmissions = session.listSubmissions(classId, assignmentId) match {
-			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist, so clearly there are no submissions yet.
+			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
 				// ensure assignment and course are created, as submitPaper doesn't always do that for you
+				debug("Missing class or assignment, creating...")
 				session.createAssignment(classId, className, assignmentId, assignmentName)
-				Nil 
+				Nil // clearly there are no submissions yet.
 			}
-			case GotSubmissions(list) => list
-			case _ => Nil // FIXME this is probably an error response, don't just assume it's an empty collection.
+			case GotSubmissions(list) => {
+				debug("Got list of " + list.size + " existing submissions: " + list.map(_.title))
+				list
+			}
+			case failure => {
+				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
+			}
 		}
 
 		def run() {
@@ -103,7 +109,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		def removeDefunctSubmissions() {
 			// delete files in turnitin that aren't in the assignment any more
 			for (info <- existingSubmissions) {
-				val exists = assignment.submissions exists { submission =>
+				val exists = assignment.submissions.exists { submission =>
 					submission.allAttachments.exists { attachment =>
 						attachment.id == info.title // title is used to store ID
 					}
@@ -112,6 +118,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					debug("Deleting submission that no longer exists in app: title="+info.title+" objectId=" + info.objectId + " " + info.universityId)
 					val deleted = session.deleteSubmission(classId, assignmentId, info.objectId)
 					debug(deleted.toString)
+				} else {
+					debug("Submission still exists so not deleting: title/id="+info.title)
 				}
 			}
 		}
@@ -126,12 +134,12 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				debug("submission.allAttachments: (" + submission.allAttachments.size + ")")
 
 				submission.allAttachments foreach { attachment =>
-					val alreadyUploaded = existingSubmissions.exists(info => info.universityId == submission.universityId && info.title == attachment.name)
+					val alreadyUploaded = existingSubmissions.exists(_.matches(attachment))
 					if (alreadyUploaded) {
 						// we don't need to upload it again, probably
 						debug("Not uploading attachment again because it looks like it's been uploaded before: " + attachment.name + "(by " + submission.universityId + ")")
 					} else {
-						debug("Uploading attachment: " + attachment.name + " (by " + submission.universityId + ")")
+						debug("Uploading attachment: " + attachment.name + " (by " + submission.universityId + "). Paper title: " + attachment.id)
 						val submitResponse = session.submitPaper(classId, className, assignmentId, assignmentName, attachment.id, attachment.name, attachment.file, submission.universityId, "Student")
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
@@ -203,8 +211,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				}
 
 				updateStatus("Generated a report.")
-				updateProgress(100)
 				job.succeeded = true
+				updateProgress(100)
 			}
 		}
 
@@ -216,7 +224,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		 */
 		@tailrec
 		private def runCheck(retries: Int): Option[Seq[TurnitinSubmissionInfo]] = {
-			def attemptCheck() = {
+			// getSubmissions isn't recusive, it just makes the code after it clearer.
+			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
 				session.listSubmissions(classId, assignmentId) match {
 					case GotSubmissions(list) => {
@@ -231,18 +240,18 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 							None
 						}
 					}
-					case _ => None
+					case a => {
+						debug("listSubmissions returned " + a)
+						None
+					}
 				}
 			}
 
 			if (retries == 0) None
-			else {
-				attemptCheck() match {
-					case Some(list) => Some(list)
-					case None => runCheck(retries - 1)
-				}
+			else getSubmissions() match {
+				case Some(list) => Some(list)
+				case None => runCheck(retries - 1)
 			}
-
 		}
 
 	}

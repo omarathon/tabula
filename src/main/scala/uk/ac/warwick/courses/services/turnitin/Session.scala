@@ -5,6 +5,7 @@ import dispatch.mime.Mime._
 import java.io.FileInputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.helpers.Products._
 
 /**
  * Acquired from a call to Turnitin.login(), this will call Turnitin methods as a particular
@@ -74,9 +75,8 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	}
 	
 	def calculateParameters(functionId: String, params: Pair[String, String]*) = {
-		def nonNullValue(pair: Pair[String,String]) = pair._2 != null
-		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filter(nonNullValue)
-        (parameters + md5hexparam(parameters))
+		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filterNot(nullValue)
+        	(parameters + md5hexparam(parameters))
 	}
 
 	/**
@@ -122,8 +122,8 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		"ufn" -> userFirstName,
 		"uln" -> userLastName,
 		"utp" -> "2",
-		"src" -> turnitin.integrationId) ++ (subAccountParameter) /*++ (sessionIdParameter)*/
-
+		"dis" -> "1", // disable emails
+		"src" -> turnitin.integrationId) ++ (subAccountParameter) ++ (sessionIdParameter)
 	/** Optional sub-account ID */
 	private def subAccountParameter: Map[String, String] = {
 		if (turnitin.said == null || turnitin.said.isEmpty) 

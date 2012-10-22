@@ -96,6 +96,7 @@ trait TurnitinMethods { self: Session =>
 			"utp" -> "2",
 			"uem" -> userEmail,
 			"ufn" -> userFirstName,
+			"session-id" -> null, // don't provide session-id; force a new session, as it seems to fail otherwise.
 			"uln" -> userLastName)
 			.redirectUrl.map { path =>
 			 
