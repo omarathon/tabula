@@ -109,7 +109,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		def removeDefunctSubmissions() {
 			// delete files in turnitin that aren't in the assignment any more
 			for (info <- existingSubmissions) {
-				val exists = assignment.submissions exists { submission =>
+				val exists = assignment.submissions.exists { submission =>
 					submission.allAttachments.exists { attachment =>
 						attachment.id == info.title // title is used to store ID
 					}
@@ -134,7 +134,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				debug("submission.allAttachments: (" + submission.allAttachments.size + ")")
 
 				submission.allAttachments foreach { attachment =>
-					val alreadyUploaded = existingSubmissions.exists(info => info.universityId == submission.universityId && info.title == attachment.name)
+					val alreadyUploaded = existingSubmissions.exists(_.matches(attachment))
 					if (alreadyUploaded) {
 						// we don't need to upload it again, probably
 						debug("Not uploading attachment again because it looks like it's been uploaded before: " + attachment.name + "(by " + submission.universityId + ")")
@@ -211,8 +211,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				}
 
 				updateStatus("Generated a report.")
-				updateProgress(100)
 				job.succeeded = true
+				updateProgress(100)
 			}
 		}
 
@@ -224,7 +224,6 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		 */
 		@tailrec
 		private def runCheck(retries: Int): Option[Seq[TurnitinSubmissionInfo]] = {
-			// 
 			// getSubmissions isn't recusive, it just makes the code after it clearer.
 			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
