@@ -4,9 +4,9 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.web.controllers.admin.ExtensionController
 import uk.ac.warwick.courses.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.courses.{Mockito, TestBase}
-import uk.ac.warwick.courses.commands.assignments.{ModifyExtensionCommand, ExtensionItem}
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.data.model.forms.Extension
+import uk.ac.warwick.courses.commands.assignments.extensions.{ExtensionItem, ModifyExtensionCommand}
 
 
 class ExtensionControllerTest extends TestBase with Mockito {
