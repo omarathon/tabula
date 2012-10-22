@@ -27,7 +27,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@JoinColumn(name="ownersgroup_id")
 	@BeanProperty var owners:UserGroup = new UserGroup
 	
-	@BeanProperty var collectFeedbackRatings:Boolean = false
+	@BeanProperty var collectFeedbackRatings:Boolean = true
 
 	// settings for extension requests
 	@BeanProperty var allowExtensionRequests:JBoolean = false
