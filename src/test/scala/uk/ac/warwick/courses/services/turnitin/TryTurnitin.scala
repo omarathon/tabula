@@ -46,9 +46,9 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 		println("Hello")
 		val nick = api.login("nick@nickhowes.co.uk", "Nick","Howes")
 		
-		val ginty = api.login("test00002@nickhowes.co.uk", "Test00002", "Johnson")
+		val ritchie = api.login("ritchie.allen@warwick.ac.uk", "Ritchie", "Allllen")
 		
-		println(nick)
+		println(ritchie)
 		
 
 		val testClassName = ClassName("TestClass1")
@@ -92,21 +92,6 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 			// don't logout as this will invalidate any URLs we've generated.
 			//session.logout()
 		}
-
-//		for (session <- ginty) {
-//			println("Graham coxon")
-//
-//			//			val submissions = session.listSubmissions(classId, assId)
-//			//            submissions match {
-//			//                case GotSubmissions(list) => for (submission <- list) {
-//			//                	println(submission)
-//			//                    //println("REPORT: " + session.getReport( submission.objectId ))
-//			//                    //println("Doc Viewer: " + session.getDocumentViewerLink( submission.objectId ))
-//			//                }
-//			//                case other => println("Oh no some problem getting submissions :( " + other)
-//			//            }
-//			println(session.getLoginLink().get)
-//		}
 		
 	
 	} finally {
