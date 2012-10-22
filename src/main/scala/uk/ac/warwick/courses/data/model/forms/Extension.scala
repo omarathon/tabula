@@ -12,7 +12,6 @@ import reflect.BeanProperty
 import org.joda.time.DateTime
 import javax.persistence.FetchType._
 import uk.ac.warwick.courses.JavaImports._
-import java.util
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with Deleteable {
@@ -41,7 +40,7 @@ class Extension extends GeneratedId with Deleteable {
 	@BeanProperty var reason:String =_
 
 	@OneToMany(mappedBy="extension", fetch=LAZY)
-	@BeanProperty var attachments:JSet[FileAttachment] = new util.HashSet[FileAttachment]
+	@BeanProperty var attachments:JSet[FileAttachment] = JSet()
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
 
