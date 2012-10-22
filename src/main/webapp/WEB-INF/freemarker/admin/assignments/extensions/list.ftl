@@ -21,10 +21,21 @@
 				<th><!-- Actions column--></th>
 			</tr>
 
+			<#if RequestParameters.highlight??>
+				<#assign highlightId = RequestParameters.highlight>
+			<#else>
+				<#assign highlightId = "">
+			</#if>
+
 			<!-- list extension requests -->
 			<#if extensionRequests??>
 				<#list extensionRequests as extension>
-					<tr id="row${extension.universityId}" class="extension-row">
+					<#if (highlightId == extension.universityId)>
+						<#assign highlightClass = "highlight">
+					<#else>
+						<#assign highlightClass = "">
+					</#if>
+					<tr id="row${extension.universityId}" class="extension-row ${highlightClass}">
 						<td>${extension.universityId}</td>
 						<td class="status">
 							<#if extension.approved>
@@ -97,6 +108,18 @@
 		<div id="extension-model" class="modal fade"></div>
 		<script type="text/javascript">
 			jQuery(function($){
+
+				var highlightId = "${highlightId}";
+				if (highlightId != "") {
+					var container = $("#extension-list");
+					var highlightRow = $("#row"+highlightId);
+					if(highlightRow.length > 0){
+						container.animate({
+							scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
+						}, 1000);
+					}
+				}
+
 				// models use ajax to retrieve their contents
 				$('#extension-list').on('click', 'a[data-toggle=modal]', function(e){
 					e.preventDefault();

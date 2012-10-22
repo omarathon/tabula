@@ -20,7 +20,7 @@ class NewExtensionRequestMessage(extension: Extension, userId: String)
 			"student" -> userLookup.getUserByUserId(extension.getUserId),
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.admin.assignment.extension.review(assignment)))))
+			"url" -> (topLevelUrl + Routes.admin.assignment.extension.review(assignment, extension.universityId)))))
 		baseMessage
 	}
 

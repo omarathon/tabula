@@ -18,7 +18,7 @@ class ModifiedExtensionRequestMessage(extension: Extension, userId: String)
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.assignment.apply(assignment)))))
+			"url" -> (topLevelUrl + Routes.admin.assignment.extension.review(assignment, extension.universityId)))))
 		baseMessage
 	}
 

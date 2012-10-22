@@ -224,7 +224,7 @@ class ExtensionController extends BaseController{
 		val universityIds = cmd.apply()
 		// send messages
 		universityIds.foreach(id => {
-			val user = userLookup.getUserByWarwickUniId(id);
+			val user = userLookup.getUserByWarwickUniId(id)git a
 			val message = new ExtensionDeletedMessage(assignment, user.getUserId)
 			message.apply()
 		})
