@@ -7,6 +7,7 @@ import uk.ac.warwick.courses.commands.assignments._
 import org.springframework.validation.BindException
 import uk.ac.warwick.courses.data._
 import uk.ac.warwick.courses.data.model._
+import org.junit.Ignore
 
 class AssignmentControllerTest extends TestBase with Mockito {
 
@@ -27,6 +28,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		controller.feedbackDao = feedbackDao
 	}
 	
+	@Ignore
 	@Test
 	def feedbackAccess {
 		withUser("cusebr", "0123456") {
