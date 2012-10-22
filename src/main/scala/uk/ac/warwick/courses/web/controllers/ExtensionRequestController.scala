@@ -30,13 +30,17 @@ class ExtensionRequestController extends BaseController{
 
 		assignment.findExtension(user.universityId).foreach(cmd.presetValues(_))
 
-		val model = Mav("submit/extension_request",
-			"module" -> module,
-			"assignment" -> assignment,
-			"department" -> module.department,
-			"command" -> cmd
-		)
-		crumbed(model, module)
+		if (user.loggedIn){
+			Mav("submit/extension_request",
+				"module" -> module,
+				"assignment" -> assignment,
+				"department" -> module.department,
+				"command" -> cmd
+			)
+		} else {
+			RedirectToSignin()
+		}
+
 	}
 
 	@RequestMapping(method=Array(POST))
