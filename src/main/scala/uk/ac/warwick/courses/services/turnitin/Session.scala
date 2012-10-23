@@ -4,6 +4,7 @@ import dispatch._
 import dispatch.mime.Mime._
 import java.io.FileInputStream
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.entity.mime.content.FileBody
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.helpers.Products._
 
@@ -103,10 +104,13 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	/**
 	 * Returns either the request with a file added on, or the original
 	 * request if there's no file to add.
+	 * It's important to pass in the file and not a stream of the file because the production Turnitin
+	 * server will explode with a confusing error if you don't provide a Content-Length header.
 	 */
-	def addPdata(file: Option[FileData], req: Request) =
-		file map (d =>
-			req <<* ("pdata", d.name, { () => new FileInputStream(d.file) })) getOrElse req
+	def addPdata(file: Option[FileData], req: Request) = file match {
+		case Some(data) => req.add("pdata", new FileBody(data.file, data.name, "application/octet-stream", null))
+		case None => req
+	}
 
 	/**
 	 * Parameters that we need in every request.
@@ -124,13 +128,13 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		"utp" -> "2",
 		"dis" -> "1", // disable emails
 		"src" -> turnitin.integrationId) ++ (subAccountParameter) ++ (sessionIdParameter)
-	/** Optional sub-account ID */
-	private def subAccountParameter: Map[String, String] = {
+
+	/** Optional sub-account ID */ 
+	private def subAccountParameter: Map[String, String] = 
 		if (turnitin.said == null || turnitin.said.isEmpty) 
 			Map.empty
 		else 
 			Map("said" -> turnitin.said)
-    }
 			
 	/** Optional session ID */
 	private def sessionIdParameter: Map[String, String] = {
@@ -149,9 +153,9 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 */
 	def md5hex(params: Map[String, String]) = {
 		val sortedJoinedParams = params.filterKeys(!excludeFromMd5.contains(_)).toSeq
-			.sortBy(_._1) // sort by key (left part of Pair)
-			.map(_._2) // map to value (right part of Pair)
-			.mkString("")
+			.sortBy(toKey) // sort by key (left part of Pair)
+			.map(toValue) // map to value (right part of Pair)
+			.mkString
 		DigestUtils.md5Hex(sortedJoinedParams + turnitin.sharedSecretKey)
 	}
 
