@@ -28,13 +28,23 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	def importModules {
 		logger.info("Importing modules")
 		for (dept <- moduleService.allDepartments) {
-			for (mod <- moduleImporter.getModules(dept.code)) {
-				moduleService.getModuleByCode(mod.code) match {
-					case None => {
-						debug("Mod code %s not found in database, so inserting", mod.code)
-						session.saveOrUpdate(newModuleFrom(mod, dept))
+			importModules(moduleImporter.getModules(dept.code), dept)
+		}
+	}
+
+	def importModules(modules: Seq[ModuleInfo], dept: Department) {
+		for (mod <- modules) {
+			moduleService.getModuleByCode(mod.code) match {
+				case None => {
+					debug("Mod code %s not found in database, so inserting", mod.code)
+					session.saveOrUpdate(newModuleFrom(mod, dept))
+				}
+				case Some(module) => {
+					// HFC-354 Update module name if it changes.
+					if (mod.name != module.name) {
+						module.name = mod.name
+						session.saveOrUpdate(module)
 					}
-					case Some(module) => {}
 				}
 			}
 		}
@@ -45,7 +55,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		for (dept <- moduleImporter.getDepartments) {
 			moduleService.getDepartmentByCode(dept.code) match {
 				case None => session.save(newDepartmentFrom(dept))
-				case Some(dept) => { debug("Skipping %s as it is already in the database", dept.code) }
+				case Some(dept) => {debug("Skipping %s as it is already in the database", dept.code) }
 			}
 		}
 	}
