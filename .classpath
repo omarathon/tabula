@@ -7,11 +7,6 @@
 	<classpathentry kind="lib" path="lib/runtime/scala-react_2.9.1-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/build/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/dispatch/twine_2.9.1-0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-core_2.9.1-0.8.6.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-core_2.9.1/0.8.6/dispatch-core_2.9.1-0.8.6-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-futures_2.9.1-0.8.6.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-http_2.9.1-0.8.6.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-http_2.9.1/0.8.6/dispatch-http_2.9.1-0.8.6-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-jsoup_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-jsoup_2.9.1/0.8.7/dispatch-jsoup_2.9.1-0.8.7-sources.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-mime_2.9.1-0.8.7.jar" sourcepath="/home/nick/.m2/repository/net/databinder/dispatch-mime_2.9.1/0.8.7/dispatch-mime_2.9.1-0.8.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/httpclient/httpmime-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/test/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/test/xml-apis.jar"/>
@@ -21,6 +16,13 @@
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/poi-scratchpad-3.8-beta5.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/ooxml-schemas-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/apache-tika/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-core_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-futures_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-http_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-jsoup_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-mime_2.9.1-0.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/dispatch/dispatch-tagsoup_2.9.1-0.8.8.jar"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="src/test/resources"/>
