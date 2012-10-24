@@ -42,6 +42,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 				case Some(module) => {
 					// HFC-354 Update module name if it changes.
 					if (mod.name != module.name) {
+						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
 						module.name = mod.name
 						session.saveOrUpdate(module)
 					}
