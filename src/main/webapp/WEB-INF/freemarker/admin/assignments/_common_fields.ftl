@@ -148,7 +148,7 @@ so that they can be passed around between requests.
 		  <@form.label for="assignmentComment">Text to show on submission form:</@form.label>
 		  	<@form.field>
 				<@f.errors path="comment" cssClass="error" />
-				<@f.textarea path="comment" id="assignmentComment" />
+				<@f.textarea path="comment" id="assignmentComment" rows="6" cssClass="span6" />
 				<div class="help-block">
 					You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
 				</div>
