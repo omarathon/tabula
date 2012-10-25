@@ -63,8 +63,13 @@
 	<@form.row>
 	<label class="control-label">Plagiarism declaration</label>
 	<@form.field>
-		<#-- Do not modify the plagiarism notice - see HFC-360 -->
-		<p class="plagiarism-field">No substantial part(s) of the work submitted here has also been submitted by me in other assessments for accredited courses of study whether at Warwick or elsewhere, and I acknowledge that if this has been done an appropriate reduction in the mark I may otherwise have received will be made.</p>
+		<p class="plagiarism-field">
+			Work submitted to the University of Warwick for official
+			assessment must be all your own work and any parts that
+			are copied or used from other people must be appropriately
+			acknowledged. Failure to properly acknowledge any copied 
+			work is plagiarism and may result in a mark of zero. 
+		</p>
 		<p>
 			<@f.errors path="plagiarismDeclaration" cssClass="error" />
 			<label><@f.checkbox path="plagiarismDeclaration" /> I confirm that this assignment is all my own work</label>
