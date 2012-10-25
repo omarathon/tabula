@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.web.controllers.BaseController
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.ModuleAndDepartmentService
-import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.courses.{Features, CurrentUser}
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.actions.Manage
@@ -15,10 +15,11 @@ import uk.ac.warwick.courses.web.{Mav, Routes}
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings"))
-class DepartmentSettings extends BaseController {
+class DepartmentSettingsController extends BaseController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
-	@ModelAttribute def departmentSettingsCommand(@PathVariable dept:Department) = new DepartmentSettingsCommand(dept)
+	@Autowired var features: Features = _
+	@ModelAttribute def departmentSettingsCommand(@PathVariable dept:Department) = new DepartmentSettingsCommand(dept, features)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))

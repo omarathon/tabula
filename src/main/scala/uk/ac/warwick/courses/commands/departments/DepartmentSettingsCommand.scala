@@ -7,9 +7,10 @@ import reflect.BeanProperty
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.StringUtils._
+import uk.ac.warwick.courses.Features
 
 @Configurable
-class DepartmentSettingsCommand (val department:Department) extends Command[Unit]{
+class DepartmentSettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
 
 	@BeanProperty var allowExtensionRequests:JBoolean =_
 	@BeanProperty var extensionGuidelineSummary:String =_
@@ -18,26 +19,31 @@ class DepartmentSettingsCommand (val department:Department) extends Command[Unit
 	val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
 	def validate(errors:Errors){
-		if (allowExtensionRequests && !(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)){
-			errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
-		}
-		if(extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)){
-			errors.rejectValue("extensionGuidelineLink", "department.settings.invalidURL")
+		if (features.extensions){
+			if (allowExtensionRequests && !(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)){
+				errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
+			}
+			if(extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)){
+				errors.rejectValue("extensionGuidelineLink", "department.settings.invalidURL")
+			}
 		}
 	}
 
-
 	def copySettings() {
-		this.allowExtensionRequests = department.allowExtensionRequests
-		this.extensionGuidelineSummary = department.extensionGuidelineSummary
-		this.extensionGuidelineLink = department.extensionGuidelineLink
+		if (features.extensions){
+			this.allowExtensionRequests = department.allowExtensionRequests
+			this.extensionGuidelineSummary = department.extensionGuidelineSummary
+			this.extensionGuidelineLink = department.extensionGuidelineLink
+		}
 	}
 
 	@Transactional
 	override def apply() {
-		department.allowExtensionRequests = this.allowExtensionRequests
-		department.extensionGuidelineSummary = this.extensionGuidelineSummary
-		department.extensionGuidelineLink = this.extensionGuidelineLink
+		if (features.extensions){
+			department.allowExtensionRequests = this.allowExtensionRequests
+			department.extensionGuidelineSummary = this.extensionGuidelineSummary
+			department.extensionGuidelineLink = this.extensionGuidelineLink
+		}
 	}
 
 	// describe the thing that's happening.
