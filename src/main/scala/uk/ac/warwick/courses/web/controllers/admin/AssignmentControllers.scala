@@ -70,7 +70,7 @@ class AddAssignment extends BaseController {
 		formView(form, module)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array("!action"))
+	@RequestMapping(method = Array(POST), params = Array("action=submit"))
 	def submit(user: CurrentUser, @PathVariable module: Module,
 		@Valid form: AddAssignmentCommand, errors: Errors) = {
 		form.afterBind()

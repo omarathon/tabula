@@ -5,7 +5,7 @@ the comments textarea needs to maintain newlines.
 <#escape x as x?html>
 
 <#-- Set to "refresh" when posting without submitting -->
-<input type="hidden" name="action" id="action-input" >
+<input type="hidden" name="action" id="action-input" value="submit" >
 
 <#-- ignored by controller but used by this FTL to determine what popups to pre-open -->
 <input type="hidden" name="focusOn" id="focusOn">
