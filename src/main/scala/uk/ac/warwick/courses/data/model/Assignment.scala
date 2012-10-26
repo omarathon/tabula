@@ -132,6 +132,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "membersgroup_id")
 	@BeanProperty var members: UserGroup = new UserGroup
+	
+	@ManyToOne
+	@JoinColumn(name="markscheme_id")
+	@BeanProperty var markScheme: MarkScheme = _
 
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
@@ -361,4 +365,6 @@ case class SubmissionsReport(val assignment: Assignment) {
 	// To make map() calls neater
     private def toUniId(f: Feedback) = f.universityId
     private def toUniId(s: Submission) = s.universityId
+    
+    
 }
