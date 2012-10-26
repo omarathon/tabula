@@ -45,6 +45,12 @@ class CurrentUser(
 	def departmentName = apparentUser.getDepartment
 	/** Email address of the apparent user. */
 	def email = apparentUser.getEmail
+	
+	/** Is of type Student? (includes PGT) */
+	def isStudent = apparentUser.isStudent
+	
+	/** Is of type Staff? (includes PGR) */
+	def isStaff = apparentUser.isStaff
 
 	override def toString = {
 		val builder = new StringBuilder("User ")
