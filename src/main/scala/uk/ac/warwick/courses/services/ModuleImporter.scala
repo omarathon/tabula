@@ -48,15 +48,18 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 
 object ModuleImporter {
 
-	final val GetDepartmentsSql = """
-		select d.name name, department_code code, f.name faculty from department d
+	final val GetDepartmentsSql = 
+		"""select d.name name, department_code code, f.name faculty from department d
 			join faculty f on f.faculty_code = d.faculty_code"""
-	final val GetModulesSql = """
-	    select distinct(substr(m.module_code,0,5)) as code, 
-              m.name as name from module m 
-              where m.module_code like '_____-%'
-		      and department_code = ?
-              and in_use = 'Y' """
+	final val GetModulesSql = 
+        """select xcode code, name from (
+          select substr(module_code,0,5) as xcode, max(modified_date) maxmod from module x
+                      where module_code like '_____-%'
+                      and department_code = ?
+                      and in_use = 'Y'
+                      group by substr(module_code,0,5)
+        ) x inner join module m on substr(m.module_code,0,5) = xcode and m.modified_date = maxmod"""
+
 
 	class DepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[DepartmentInfo](ds, GetDepartmentsSql) {
 		compile()
