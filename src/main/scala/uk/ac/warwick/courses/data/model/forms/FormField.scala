@@ -173,6 +173,10 @@ class FileField extends FormField {
 	// This is before onBind is called, so multipart files have not been persisted
 	// as attachments yet.
 	override def validate(value: SubmissionValue, errors: Errors) {
+		
+		/** Are there any duplicate values (ignoring case)? */
+		def hasDuplicates(names: Seq[String]) = names.size != names.map(_.toLowerCase()).distinct.size
+		
 		value match {
 			case v: FileSubmissionValue => {
 				if (v.file.isMissing) {
@@ -180,6 +184,8 @@ class FileField extends FormField {
 				} else if (v.file.size > attachmentLimit) {
 					if (attachmentLimit == 1) errors.rejectValue("file", "file.toomany.one")
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit: JInteger), "")
+				} else if (hasDuplicates(v.file.fileNames)) {
+					errors.rejectValue("file", "file.duplicate")
 				} else if (!attachmentTypes.isEmpty) {
 					val attachmentStrings = attachmentTypes.map(s => "." + s)
 					val fileNames = v.file.fileNames map (_.toLowerCase)
