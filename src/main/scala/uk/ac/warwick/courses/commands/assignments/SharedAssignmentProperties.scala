@@ -39,6 +39,8 @@ trait SharedAssignmentProperties {
 	@BeanProperty var displayPlagiarismNotice: JBoolean = false
 	@BeanProperty var allowExtensions: JBoolean = false
 	@BeanProperty var allowExtensionRequests: JBoolean = false
+	// linked feedback template (optional)
+	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -73,6 +75,7 @@ trait SharedAssignmentProperties {
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
 		assignment.allowExtensionRequests = allowExtensionRequests
+		assignment.feedbackTemplate = feedbackTemplate
 
 		for (field <- findCommentField(assignment)) field.value = comment
 		for (file <- findFileField(assignment)) {
@@ -90,6 +93,7 @@ trait SharedAssignmentProperties {
 		displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
+		feedbackTemplate = assignment.feedbackTemplate
 
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {

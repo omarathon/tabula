@@ -8,6 +8,17 @@ so that they can be passed around between requests.
 
 -->
 
+<#if features.feedbackTemplates>
+	<@form.labelled_row "feedbackTemplate" "Feedback template">
+		<@f.select path="feedbackTemplate">
+			<@f.option value="" label=""/>
+			<#list  department.feedbackTemplates as template>
+				<@f.option value="${template.id}" label="${template.name}"/>
+			</#list>
+		</@f.select>
+	</@form.labelled_row>
+</#if>
+
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
 		<label class="checkbox">

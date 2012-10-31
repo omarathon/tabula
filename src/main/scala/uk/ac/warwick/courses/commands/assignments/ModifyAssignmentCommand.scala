@@ -11,17 +11,14 @@ import org.springframework.validation.Errors
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 import uk.ac.warwick.courses._
+import commands.assignments.UpstreamGroupOption
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.data.model.forms.CommentField
 import uk.ac.warwick.courses.data.model.forms.FileField
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.Module
+import data.model._
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.{ UniversityId, AcademicYear, DateFormats }
-import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.courses.data.model.UpstreamAssignment
-import uk.ac.warwick.courses.data.model.UserGroup
 import uk.ac.warwick.courses.services.UserLookupService
 
 case class UpstreamGroupOption(
@@ -173,6 +170,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 		assignment.openDate = openDate
 		assignment.closeDate = closeDate
 		assignment.academicYear = academicYear
+		assignment.feedbackTemplate = feedbackTemplate
 		assignment.upstreamAssignment = upstreamAssignment
 		assignment.occurrence = occurrence
 		copySharedTo(assignment: Assignment)
@@ -210,6 +208,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 	def copyFrom(assignment: Assignment) {
 		name = assignment.name
 		academicYear = assignment.academicYear
+		feedbackTemplate = assignment.feedbackTemplate
 		upstreamAssignment = assignment.upstreamAssignment
 		occurrence = assignment.occurrence
 		if (assignment.members != null) {
