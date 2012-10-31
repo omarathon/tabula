@@ -18,7 +18,7 @@ object Routes {
 
 	object admin {
 		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
-
+		def feedbackTemplates (department: Department) = "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
 		object module {
 			def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
 

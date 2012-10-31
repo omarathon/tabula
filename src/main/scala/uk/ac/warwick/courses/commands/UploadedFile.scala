@@ -39,8 +39,8 @@ class UploadedFile {
 	@BeanProperty var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
 
 	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
-	def attatchedFileNames: Seq[String] = attached.map(file => file.getName())
-	def fileNames = uploadedFileNames ++ attatchedFileNames
+	def attachedFileNames: Seq[String] = attached.map(file => file.getName)
+	def fileNames = uploadedFileNames ++ attachedFileNames
 
 	def isMissing = !isExists
 	def isExists = hasUploads || hasAttachments
