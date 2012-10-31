@@ -140,10 +140,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@JoinColumn(name = "membersgroup_id")
 	@BeanProperty var members: UserGroup = new UserGroup
 	
-	@ManyToOne
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	@BeanProperty var markScheme: MarkScheme = _
-
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
 	}

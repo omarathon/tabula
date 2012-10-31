@@ -168,6 +168,10 @@ abstract class Description {
 		if (assignment.module != null) module(assignment.module)
 		this
 	}
+	
+	def markScheme(scheme: MarkScheme) = {
+		property("markScheme" -> scheme.id)
+	}
 
 	/**
 	 * Record module, plus department.

@@ -21,9 +21,10 @@ class MarkScheme extends GeneratedId {
 	}
 
 	/** A descriptive name for the users's reference. */
+	@Basic(optional = false)
 	var name: String = null
 
-	@ManyToOne
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
 
@@ -38,5 +39,8 @@ class MarkScheme extends GeneratedId {
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = new UserGroup()
+	
+	/** If true, the submitter chooses their first marker from a dropdown */
+	var studentsChooseMarker = false
 
 }
