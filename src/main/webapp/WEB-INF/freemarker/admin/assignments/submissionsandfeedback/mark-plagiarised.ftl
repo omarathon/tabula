@@ -4,7 +4,7 @@
 
 
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissions/mark-plagiarised" commandName="markPlagiarisedCommand">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised" commandName="markPlagiarisedCommand">
 
 
 <#if markPlagiarisedCommand.markPlagiarised> 
@@ -24,15 +24,15 @@
 
 <input type="hidden" name="confirmScreen" value="true" />
 
-<@spring.bind path="submissions">
-<@form.errors path="submissions" />
-<#assign submissionsList=status.actualValue />
+<@spring.bind path="students">
+<@form.errors path="students" />
+<#assign students=status.actualValue />
 <p>
-${verb?cap_first}ing <strong><@fmt.p submissionsList?size "submission item" /></strong> as suspected of being plagiarised.
+${verb?cap_first}ing <strong><@fmt.p students?size "student" /></strong> as suspected of being plagiarised.
 ${message}
 </p>
-<#list submissionsList as submission>
-<input type="hidden" name="submissions" value="${submission.id}" />
+<#list students as student>
+<input type="hidden" name="students" value="${student.uniId}" />
 </#list>
 </@spring.bind>
 

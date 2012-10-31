@@ -1,21 +1,22 @@
 package uk.ac.warwick.courses.data.model
-import uk.ac.warwick.courses.JavaImports._
-import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
-import org.joda.time.DateTime
-import javax.persistence.Entity
-import uk.ac.warwick.courses.helpers.ArrayList
-import javax.persistence.Column
-import org.hibernate.annotations.Type
-import javax.persistence.ManyToOne
+
+import java.text.SimpleDateFormat
 import scala.reflect.BeanProperty
-import javax.persistence.FetchType
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Configurable
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.CascadeType
 import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.actions.Viewable
 import uk.ac.warwick.courses.actions.Deleteable
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.courses.actions.Viewable
+import uk.ac.warwick.courses.helpers.ArrayList
+import javax.persistence.FetchType
 
 @Entity @AccessType("field")
 class Feedback extends GeneratedId with Viewable with Deleteable {
@@ -96,9 +97,4 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	 * need to check that separately.
 	 */
 	def collectMarks: Boolean = assignment.collectMarks
-
-    def getUploadedDateString = {
-        val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
-        format.format(uploadedDate)
-    }
 }

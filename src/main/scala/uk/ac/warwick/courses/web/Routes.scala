@@ -40,6 +40,10 @@ object Routes {
 			object submission {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissions/list"
 			}
+			
+			object submissionsandfeedback {
+                def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissionsandfeedback/list"				
+			}
 
 			object turnitin {
 				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"

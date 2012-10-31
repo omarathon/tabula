@@ -19,18 +19,18 @@ import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
 import uk.ac.warwick.courses.commands.assignments.MarkPlagiarisedCommand
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/mark-plagiarised"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class MarkPlagiarisedController extends BaseController {
 	@ModelAttribute
 	def command(@PathVariable assignment: Assignment) = new MarkPlagiarisedCommand(assignment)
 
 	validatesSelf[MarkPlagiarisedCommand]
 
-	def formView(assignment: Assignment) = Mav("admin/assignments/submissions/mark-plagiarised",
+	def formView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/mark-plagiarised",
 		"assignment" -> assignment)
 		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submission(assignment))
+	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
@@ -41,7 +41,7 @@ class MarkPlagiarisedController extends BaseController {
 		form: MarkPlagiarisedCommand, errors: Errors) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
-		form.prevalidate(errors)
+		//form.prevalidate(errors)
 		formView(assignment)
 	}
 
