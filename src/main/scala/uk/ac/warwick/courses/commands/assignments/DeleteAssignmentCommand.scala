@@ -38,7 +38,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null) extends Command
 	}
 
 	@Transactional
-	override def apply {
+	override def work {
 		assignment.markDeleted
 	}
 

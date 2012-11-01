@@ -27,7 +27,7 @@ class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] 
 
 	@BeanProperty var confirm: Boolean = false
 
-	def apply() = {
+	def work() = {
 		for (submission <- submissions) assignmentService.delete(submission)
 		zipService.invalidateSubmissionZip(assignment)
 	}

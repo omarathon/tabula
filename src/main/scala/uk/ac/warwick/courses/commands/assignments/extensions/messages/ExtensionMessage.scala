@@ -42,7 +42,7 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 
 	def recipient = userLookup.getUserByUserId(userId)
 
-	def apply() = {
+	def work() = {
 		if (recipient.getEmail.hasText) {
 			val baseMessage = generateBaseMessage()
 			val message = setMessageContent(baseMessage)

@@ -19,7 +19,7 @@ class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentU
 	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
 
 	@Transactional
-	override def apply(): List[String] = {
+	override def work(): List[String] = {
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true
 		def deleteExtension(universityId: String): Boolean = {

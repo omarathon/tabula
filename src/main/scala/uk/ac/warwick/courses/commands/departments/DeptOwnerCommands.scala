@@ -15,7 +15,7 @@ class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with
 	@BeanProperty var usercode: String = _
 
 	@Transactional
-	override def apply = department.addOwner(usercode)
+	override def work = department.addOwner(usercode)
 
 	override def describe(d: Description) = d.properties(
 		"department" -> department.code,
@@ -30,7 +30,7 @@ class RemoveDeptOwnerCommand(val department: Department) extends Command[Unit] w
 	@BeanProperty var usercode: String = _
 
 	@Transactional
-	override def apply = department.removeOwner(usercode)
+	override def work = department.removeOwner(usercode)
 
 	override def describe(d: Description) = d.properties(
 		"department" -> department.code,

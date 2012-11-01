@@ -34,7 +34,7 @@ class DepartmentSettingsCommand (val department:Department) extends Command[Unit
 	}
 
 	@Transactional
-	override def apply() {
+	override def work() {
 		department.allowExtensionRequests = this.allowExtensionRequests
 		department.extensionGuidelineSummary = this.extensionGuidelineSummary
 		department.extensionGuidelineLink = this.extensionGuidelineLink

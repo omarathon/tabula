@@ -58,7 +58,7 @@ case class ProblemFile(
 
 // Purely to generate an audit log event
 class ExtractFeedbackZip(cmd: AddFeedbackCommand) extends Command[Unit] {
-	def apply() {}
+	def work() {}
 	def describe(d: Description) = d.assignment(cmd.assignment).properties(
 		"archive" -> cmd.archive.getOriginalFilename())
 }
@@ -224,7 +224,7 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 	}
 
 	@Transactional
-	override def apply(): List[Feedback] = {
+	override def work(): List[Feedback] = {
 
 		def saveFeedback(uniNumber: String, file: UploadedFile) = {
 			val feedback = assignment.findFeedback(uniNumber).getOrElse(new Feedback)

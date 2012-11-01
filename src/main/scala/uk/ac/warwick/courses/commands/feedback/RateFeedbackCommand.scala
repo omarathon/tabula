@@ -42,7 +42,7 @@ class RateFeedbackCommand(val feedback: Feedback, val features: Features) extend
 	val maximumStars = 5
 
 	@Transactional
-	def apply {
+	def work {
 		feedback.ratingHelpful = wasHelpful.toBoolean
 		feedback.ratingPrompt = wasPrompt.toBoolean
 	}

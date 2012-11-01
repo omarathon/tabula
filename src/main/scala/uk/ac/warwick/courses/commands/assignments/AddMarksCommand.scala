@@ -104,7 +104,7 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 	}
 
 	@Transactional
-	override def apply(): List[Feedback] = {
+	override def work(): List[Feedback] = {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
 			feedback.assignment = assignment

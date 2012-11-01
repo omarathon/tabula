@@ -11,7 +11,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 class AdminGetAllFeedbackCommand(assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
 	@Autowired var zipService: ZipService = _
 
-	override def apply = {
+	override def work = {
 		val zip = zipService.getAllFeedbackZips(assignment)
 		new RenderableZip(zip)
 	}

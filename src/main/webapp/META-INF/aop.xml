@@ -14,6 +14,5 @@ weaving. The actual application uses compile-time weaving which doesn't depend o
 	</weaver>
 	<aspects>
 		<aspect name="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
-		<aspect name="uk.ac.warwick.courses.commands.CommandApplyAspect"/>
 	</aspects>
 </aspectj>

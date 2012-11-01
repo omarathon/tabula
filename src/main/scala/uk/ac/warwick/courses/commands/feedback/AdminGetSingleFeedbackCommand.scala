@@ -12,7 +12,7 @@ import uk.ac.warwick.courses.commands.ReadOnly
 class AdminGetSingleFeedbackCommand(feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
 	@Autowired var zipService: ZipService = _
 
-	override def apply = {
+	override def work = {
 		val zip = zipService.getFeedbackZip(feedback)
 		new RenderableZip(zip)
 	}

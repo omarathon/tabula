@@ -23,7 +23,7 @@ class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] wi
 
 	@BeanProperty var confirm: Boolean = false
 
-	def apply() = {
+	def work() = {
 		for (feedback <- feedbacks) feedbackDao.delete(feedback)
 	}
 

@@ -73,7 +73,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	}
 
 	@Transactional
-	def apply {
+	def work {
 
 		/*	  for (feedback <- assignment.unreleasedFeedback) {
 	      val studentId = feedback.universityId

@@ -54,7 +54,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 	}
 
 	@Transactional
-	override def apply() = {
+	override def work() = {
 
 		val universityId = submitter.apparentUser.getWarwickId
 		val extension = assignment.findExtension(universityId).getOrElse({

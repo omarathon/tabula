@@ -45,7 +45,7 @@ class SendSubmissionReceiptCommand(
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
-	def apply = {
+	def work = {
 		if (user.email.hasText) {
 			(studentMailSender send messageFor(user))
 			true

@@ -93,7 +93,7 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 	}
 
 	@Transactional
-	override def apply = {
+	override def work = {
 		assignment.submissions.find(_.universityId == user.universityId).map { existingSubmission =>
 			if (assignment.resubmittable(user.apparentId)) {
 				service.delete(existingSubmission)

@@ -32,7 +32,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	@Value("${mail.noreply.to}") var replyAddress: String = _
 	@Value("${mail.exceptions.to}") var fromAddress: String = _
 
-	override def apply() {
+	override def work() {
 		val admins =
 			if (!module.participants.isEmpty) module.participants
 			else module.department.owners

@@ -6,6 +6,13 @@ import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.Unaudited
 import uk.ac.warwick.courses.helpers.Logging
 
+object EventHandling {
+	/**
+	 * You'd only ever disable this in testing.
+	 */
+	var enabled = true
+}
+
 /**
  * Gives a class the ability to record events from a Describable object.
  */

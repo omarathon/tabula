@@ -10,7 +10,7 @@ class CleanupTemporaryFilesCommand extends Command[Unit] {
 	@Autowired var dao: FileDao = _
 
 	@Transactional
-	override def apply = dao.deleteOldTemporaryFiles
+	override def work = dao.deleteOldTemporaryFiles
 
 	override def describe(d: Description) {}
 }

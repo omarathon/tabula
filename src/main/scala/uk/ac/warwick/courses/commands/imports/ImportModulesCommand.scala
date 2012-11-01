@@ -16,7 +16,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
 	@Transactional
-	def apply() {
+	def work() {
 		importDepartments
 		importModules
 	}

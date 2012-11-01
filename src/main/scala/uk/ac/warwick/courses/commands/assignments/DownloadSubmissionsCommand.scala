@@ -28,7 +28,7 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 
 	@Autowired var zipService: ZipService = _
 
-	override def apply: RenderableZip = {
+	override def work: RenderableZip = {
 		if (submissions.isEmpty) throw new ItemNotFoundException
 		if (submissions.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")

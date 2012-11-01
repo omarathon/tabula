@@ -1,9 +1,13 @@
 package uk.ac.warwick.courses.commands
+
 import collection.mutable
-import uk.ac.warwick.courses.data.model._
-import uk.ac.warwick.courses.JavaImports
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
+import uk.ac.warwick.courses.data.model._
+import uk.ac.warwick.courses.events.EventHandling
+import uk.ac.warwick.courses.JavaImports
+import uk.ac.warwick.courses.services.MaintenanceModeService
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -27,6 +31,8 @@ trait Describable[T] {
  * especially if we might want to audit log it. Anything that
  * adds or changes any data is a candidate. Read-only queries,
  * not so much (unless we're interested in when a thing is observed/downloaded).
+ * 
+ * Commands should implement work(), and 
  *
  * <h2>Renaming a Command</h2>
  *
@@ -34,9 +40,32 @@ trait Describable[T] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-trait Command[R] extends Describable[R] with JavaImports {
-	def apply(): R
+abstract class Command[R] extends Describable[R] with JavaImports with EventHandling {
+	@Autowired var maintenanceMode: MaintenanceModeService = _
+
+	final def apply(): R = {
+		if (EventHandling.enabled) {
+			if (maintenanceCheck(this)) recordEvent(this) { work() }
+			else throw maintenanceMode.exception()
+		} else {
+			work()
+		}
+	} 
+
+	/** 
+		Subclasses do their work in here.
+
+		Classes using a command should NOT call this method! call apply().
+		The method here is protected but subclasses can easily override it
+		to be publicly visible, so there's little to stop you from calling it.
+		TODO somehow stop this being callable
+	*/
+	protected def work(): R
+
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
+
+	private def maintenanceCheck(callee: Describable[_]) = 
+		!maintenanceMode.enabled || callee.isInstanceOf[ReadOnly]
 }
 
 /**
@@ -50,7 +79,7 @@ trait ApplyWithCallback[R] extends Command[R] {
 	var callback: (R) => Unit = _
 	def apply(fn: (R) => Unit): R = {
 		callback = fn
-		apply
+		apply()
 	}
 }
 

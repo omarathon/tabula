@@ -17,7 +17,7 @@ class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[R
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def apply() = {
+	def work() = {
 		val extension = assignment.findExtension(user.universityId)
 		val allAttachments = extension map {_.nonEmptyAttachments} getOrElse Nil
 		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))

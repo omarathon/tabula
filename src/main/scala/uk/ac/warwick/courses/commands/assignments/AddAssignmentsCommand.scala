@@ -90,7 +90,7 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
 	@Transactional
-	override def apply() {
+	override def work() {
 		for (item <- assignmentItems if item.include) {
 			val assignment = new Assignment()
 			assignment.addDefaultFields()

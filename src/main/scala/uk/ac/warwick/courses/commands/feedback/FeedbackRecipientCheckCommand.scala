@@ -42,7 +42,7 @@ class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with U
 	@BeanProperty var assignment: Assignment = _
 	@Autowired var assignmentService: AssignmentService = _
 
-	override def apply = {
+	override def work = {
 		val items: Seq[RecipientReportItem] =
 			for ((id, user) <- assignmentService.getUsersForFeedback(assignment))
 				yield resolve(id, user)

@@ -22,7 +22,7 @@ class AddModulePermissionCommand extends Command[Unit] {
 	@Autowired var userLookup: UserLookupService = _
 
 	@Transactional
-	def apply {
+	def work() {
 		for (user <- usercodes)
 			module.participants.addUser(user)
 	}
