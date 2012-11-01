@@ -30,7 +30,7 @@
 			</#if>
 		</ul>
 	</div>
-<#else>                                       gir
+<#else>
 	<h1>${department.name}</h1>
 </#if>
 
