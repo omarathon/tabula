@@ -19,7 +19,7 @@ import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.Closeables._
@@ -279,34 +279,37 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 * per minute in order for the index to lag behind, and even then it would catch
 	 * up as soon as it reached a quiet time.
 	 */
-	@Transactional
-	def index() = ifNotIndexing {
-		val stopWatch = StopWatch()
-		stopWatch.record("Incremental index") {
-			val startDate = latestIndexItem
-			val newItems = service.listNewerThan(startDate, IncrementalBatchSize).filter { _.eventStage == "before" }
-			if (newItems.isEmpty) {
-				logger.debug("No new items to index.")
-			} else {
-				if (debugEnabled) logger.debug("Indexing items from " + startDate)
-				doIndexEvents(newItems)
+	def index() = transactional() {
+		ifNotIndexing {
+			val stopWatch = StopWatch()
+			stopWatch.record("Incremental index") {
+				val startDate = latestIndexItem
+				val newItems = service.listNewerThan(startDate, IncrementalBatchSize).filter { _.eventStage == "before" }
+				if (newItems.isEmpty) {
+					logger.debug("No new items to index.")
+				} else {
+					if (debugEnabled) logger.debug("Indexing items from " + startDate)
+					doIndexEvents(newItems)
+				}
 			}
+			lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
+			lastIndexTime = Some(new DateTime())
 		}
-		lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
-		lastIndexTime = Some(new DateTime())
 	}
 
-	@Transactional
-	def indexFrom(startDate: DateTime) = ifNotIndexing {
-		val newItems = service.listNewerThan(startDate, MaxBatchSize).filter { _.eventStage == "before" }
-		doIndexEvents(newItems)
+	def indexFrom(startDate: DateTime) = transactional() {
+		ifNotIndexing {
+			val newItems = service.listNewerThan(startDate, MaxBatchSize).filter { _.eventStage == "before" }
+			doIndexEvents(newItems)
+		}
 	}
 
 	/**
 	 * Indexes a specific given list of events.
 	 */
-	@Transactional
-	def indexEvents(events: Seq[AuditEvent]) = ifNotIndexing { doIndexEvents(events) }
+	def indexEvents(events: Seq[AuditEvent]) = transactional() {
+		ifNotIndexing { doIndexEvents(events) }
+	}
 
 	private def doIndexEvents(events: Seq[AuditEvent]) {
 		val writerConfig = new IndexWriterConfig(LuceneVersion, analyzer)

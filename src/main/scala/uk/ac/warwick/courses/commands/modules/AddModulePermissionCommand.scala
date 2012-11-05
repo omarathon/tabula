@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.UserLookupService
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
 
 @Configurable
@@ -21,10 +21,10 @@ class AddModulePermissionCommand extends Command[Unit] {
 
 	@Autowired var userLookup: UserLookupService = _
 
-	@Transactional
 	def work() {
-		for (user <- usercodes)
-			module.participants.addUser(user)
+		transactional() {
+			for (user <- usercodes) module.participants.addUser(user)
+		}
 	}
 
 	def validate(errors: Errors) {

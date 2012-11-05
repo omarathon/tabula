@@ -2,7 +2,7 @@ package uk.ac.warwick.courses.web.controllers.admin
 
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.commands.assignments.AddFeedbackCommand
@@ -43,22 +43,23 @@ class AddFeedbackController extends BaseController {
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
-	@Transactional
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: AddFeedbackCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		form.preExtractValidation(errors)
-		onBind(form)
-		form.postExtractValidation(errors)
-		if (errors.hasErrors) {
-			showForm(module, assignment, form, errors)
-		} else {
-			form.apply
-			Mav("redirect:" + Routes.admin.module(module))
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@Valid form: AddFeedbackCommand, errors: Errors) = {
+		transactional() {
+			mustBeLinked(assignment, module)
+			mustBeAbleTo(Participate(module))
+			form.preExtractValidation(errors)
+			onBind(form)
+			form.postExtractValidation(errors)
+			if (errors.hasErrors) {
+				showForm(module, assignment, form, errors)
+			} else {
+				form.apply
+				Mav("redirect:" + Routes.admin.module(module))
+			}
 		}
 	}
 

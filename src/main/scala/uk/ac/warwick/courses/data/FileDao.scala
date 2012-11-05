@@ -16,8 +16,8 @@ import java.io.InputStream
 import org.hibernate.criterion.{ Restrictions => Is }
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.spring.FileUtils
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.annotation.Propagation
+import uk.ac.warwick.courses.data.Transactions._
+import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.courses.helpers.Logging
 
 @Repository
@@ -75,30 +75,32 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		oldFiles.size
 	}
 
-	@Transactional
-	private def findOldTemporaryFiles = session.newCriteria[FileAttachment]
-		.add(Is.eq("temporary", true))
-		.add(Is.lt("dateUploaded", now minusDays (2)))
-		.setMaxResults(TemporaryFileBatch)
-		.list
+	private def findOldTemporaryFiles = transactional() {
+		session.newCriteria[FileAttachment]
+			.add(Is.eq("temporary", true))
+			.add(Is.lt("dateUploaded", now minusDays (2)))
+			.setMaxResults(TemporaryFileBatch)
+			.list
+	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	private def deleteSomeFiles(files: Seq[FileAttachment]) {
-		// To be safe, split off temporary files which are attached to non-temporary things
-		// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
-		val grouped = files groupBy (_.isAttached)
-		val okayToDelete = grouped.getOrElse(false, Nil)
-		val dontDelete = grouped.getOrElse(true, Nil)
+		transactional(propagation = REQUIRES_NEW) {
+			// To be safe, split off temporary files which are attached to non-temporary things
+			// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
+			val grouped = files groupBy (_.isAttached)
+			val okayToDelete = grouped.getOrElse(false, Nil)
+			val dontDelete = grouped.getOrElse(true, Nil)
 
-		if (dontDelete.size > 0) {
-			// Somewhere else in the app is failing to set temporary=false
-			logger.error("%d fileAttachments are temporary but are attached to another entity! I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size)
+			if (dontDelete.size > 0) {
+				// Somewhere else in the app is failing to set temporary=false
+				logger.error("%d fileAttachments are temporary but are attached to another entity! I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size)
+			}
+
+			session.createQuery("delete FileAttachment f where f.id in :ids")
+				.setParameterList("ids", okayToDelete.map(_.id))
+				.executeUpdate()
+			for (file <- files) targetFile(file.id).delete()
 		}
-
-		session.createQuery("delete FileAttachment f where f.id in :ids")
-			.setParameterList("ids", okayToDelete.map(_.id))
-			.executeUpdate()
-		for (file <- files) targetFile(file.id).delete()
 	}
 
 	def afterPropertiesSet {

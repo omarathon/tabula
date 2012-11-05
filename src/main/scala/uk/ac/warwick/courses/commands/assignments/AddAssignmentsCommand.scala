@@ -14,7 +14,6 @@ import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
-import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.ModuleDao
 import uk.ac.warwick.courses.data.model.Module
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import scala.collection.mutable.HashMap
 import uk.ac.warwick.courses.helpers.LazyMaps
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.courses.data.Transactions._
 
 /**
  * Sub-object on the form for binding each upstream assignment and some other properties.
@@ -89,25 +89,26 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
-	@Transactional
 	override def work() {
-		for (item <- assignmentItems if item.include) {
-			val assignment = new Assignment()
-			assignment.addDefaultFields()
-			assignment.academicYear = academicYear
-			assignment.name = item.name
-			assignment.upstreamAssignment = item.upstreamAssignment
-			assignment.occurrence = item.occurrence
-			assignment.module = findModule(item.upstreamAssignment).get
+		transactional() {
+			for (item <- assignmentItems if item.include) {
+				val assignment = new Assignment()
+				assignment.addDefaultFields()
+				assignment.academicYear = academicYear
+				assignment.name = item.name
+				assignment.upstreamAssignment = item.upstreamAssignment
+				assignment.occurrence = item.occurrence
+				assignment.module = findModule(item.upstreamAssignment).get
 
-			assignment.openDate = item.openDate
-			assignment.closeDate = item.closeDate
+				assignment.openDate = item.openDate
+				assignment.closeDate = item.closeDate
 
-			// validation should have verified that there is an options set for us to use
-			val options = optionsMap.get(item.optionsId)
-			options.copySharedTo(assignment)
+				// validation should have verified that there is an options set for us to use
+				val options = optionsMap.get(item.optionsId)
+				options.copySharedTo(assignment)
 
-			assignmentService.save(assignment)
+				assignmentService.save(assignment)
+			}
 		}
 	}
 

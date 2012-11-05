@@ -7,7 +7,7 @@ import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 
 @Configurable
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
@@ -15,10 +15,11 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	@Autowired var moduleImporter: ModuleImporter = _
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
-	@Transactional
 	def work() {
-		importDepartments
-		importModules
+		transactional() {
+			importDepartments
+			importModules
+		}
 	}
 
 	def describe(d: Description) {

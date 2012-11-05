@@ -9,7 +9,7 @@ import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.services.UserLookupService
 import reflect.BeanProperty
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 
 @Configurable
 class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
@@ -18,8 +18,7 @@ class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentU
 	@Autowired var userLookup: UserLookupService = _
 	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
 
-	@Transactional
-	override def work(): List[String] = {
+	override def work(): List[String] = transactional() {
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true
 		def deleteExtension(universityId: String): Boolean = {

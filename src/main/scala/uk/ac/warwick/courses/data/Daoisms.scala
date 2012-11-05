@@ -20,7 +20,8 @@ import org.springframework.transaction.PlatformTransactionManager
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends Transactions {
+trait Daoisms {
+	import Transactions._
 
 	import org.hibernate.criterion.Restrictions._
 	def is = org.hibernate.criterion.Restrictions.eq _

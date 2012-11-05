@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
@@ -22,8 +22,7 @@ class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAss
 
 	def module = assignment.module
 
-	@Transactional
-	override def work: Assignment = {
+	override def work: Assignment = transactional() {
 		copyTo(assignment)
 		service.save(assignment)
 		assignment

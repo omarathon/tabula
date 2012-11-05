@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 import javax.persistence.Entity
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.UniversityId
 import uk.ac.warwick.courses.commands.Command
@@ -148,7 +148,6 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 		}
 	}
 
-	@Transactional
 	def onBind {
 		file.onBind
 
@@ -223,8 +222,7 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 
 	}
 
-	@Transactional
-	override def work(): List[Feedback] = {
+	override def work(): List[Feedback] = transactional() {
 
 		def saveFeedback(uniNumber: String, file: UploadedFile) = {
 			val feedback = assignment.findFeedback(uniNumber).getOrElse(new Feedback)

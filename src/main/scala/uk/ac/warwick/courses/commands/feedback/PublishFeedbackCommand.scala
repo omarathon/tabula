@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import freemarker.template.Configuration
 import javax.annotation.Resource
@@ -72,28 +71,16 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		}
 	}
 
-	@Transactional
 	def work {
-
-		/*	  for (feedback <- assignment.unreleasedFeedback) {
-	      val studentId = feedback.universityId
-	      for (submission <- assignment.submissions.find{ _.universityId == studentId }
-	          if !submission.suspectPlagiarised
-	      ) {
-	          // note: if all are set to true, unreleasedFeedback will return empty.
-	          feedback.released = true
-	          val user = userLookup.getUserByWarwickUniId(studentId, false)
-	          email(Pair(studentId, user))
-	      }
-	  }*/
-
-		val users = assignmentService.getUsersForFeedback(assignment)
-		for ((studentId, user) <- users) {
-			val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
-			for (feedback <- feedbacks)
-				feedback.released = true
+		transactional() {
+			val users = assignmentService.getUsersForFeedback(assignment)
+			for ((studentId, user) <- users) {
+				val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
+				for (feedback <- feedbacks)
+					feedback.released = true
+			}
+			for (info <- users) email(info)
 		}
-		for (info <- users) email(info)
 	}
 
 	private def email(info: Pair[String, User]) {

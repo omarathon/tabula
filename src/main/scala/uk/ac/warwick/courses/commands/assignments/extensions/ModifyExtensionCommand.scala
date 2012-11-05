@@ -7,7 +7,7 @@ import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.helpers.{LazyLists, Logging}
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.{DateFormats, CurrentUser}
@@ -70,9 +70,10 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 		extensionItems.addAll(extensionItemsList)
 	}
 
-	@Transactional
 	def persistExtensions() {
-		extensions.foreach(session.saveOrUpdate(_))
+		transactional() {
+			extensions.foreach(session.saveOrUpdate(_))
+		}
 	}
 
 	def validate(errors:Errors) {
@@ -96,8 +97,7 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 		}
 	}
 
-	@Transactional
-	override def work():List[Extension] = {
+	override def work():List[Extension] = transactional() {
 		extensions = copyExtensionItems()
 		persistExtensions()
 		extensions.toList

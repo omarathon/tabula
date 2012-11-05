@@ -4,7 +4,7 @@ import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.commands.{Description, Command}
 import org.springframework.beans.factory.annotation.Configurable
 import reflect.BeanProperty
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.StringUtils._
 
@@ -33,11 +33,12 @@ class DepartmentSettingsCommand (val department:Department) extends Command[Unit
 		this.extensionGuidelineLink = department.extensionGuidelineLink
 	}
 
-	@Transactional
 	override def work() {
-		department.allowExtensionRequests = this.allowExtensionRequests
-		department.extensionGuidelineSummary = this.extensionGuidelineSummary
-		department.extensionGuidelineLink = this.extensionGuidelineLink
+		transactional() {
+			department.allowExtensionRequests = this.allowExtensionRequests
+			department.extensionGuidelineSummary = this.extensionGuidelineSummary
+			department.extensionGuidelineLink = this.extensionGuidelineLink
+		}
 	}
 
 	// describe the thing that's happening.

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.actions.Participate
@@ -43,20 +43,21 @@ class DeleteSubmission extends BaseController {
 		formView(assignment)
 	}
 
-	@Transactional
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: DeleteSubmissionCommand,
-		errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		if (errors.hasErrors) {
-			formView(assignment)
-		} else {
-			form.apply()
-			RedirectBack(assignment)
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@Valid form: DeleteSubmissionCommand,
+			errors: Errors) = {
+		transactional() {
+			mustBeLinked(assignment, module)
+			mustBeAbleTo(Participate(module))
+			if (errors.hasErrors) {
+				formView(assignment)
+			} else {
+				form.apply()
+				RedirectBack(assignment)
+			}
 		}
 	}
 }

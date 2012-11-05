@@ -5,7 +5,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.DepartmentDao
 import uk.ac.warwick.courses.data.ModuleDao
@@ -27,24 +27,30 @@ class ModuleAndDepartmentService extends Logging {
 	@Autowired var userLookup: UserLookupService = _
 	def groupService = userLookup.getGroupService
 
-	@Transactional(readOnly = true)
-	def allDepartments = departmentDao.allDepartments
+	
+	def allDepartments = transactional(readOnly = true) {
+		departmentDao.allDepartments
+	}
 
-	@Transactional(readOnly = true)
-	def getDepartmentByCode(code: String) = departmentDao.getByCode(code)
+	def getDepartmentByCode(code: String) = transactional(readOnly = true) {
+		departmentDao.getByCode(code)
+	}
 
-	@Transactional(readOnly = true)
-	def getModuleByCode(code: String) = moduleDao.getByCode(code)
+	def getModuleByCode(code: String) = transactional(readOnly = true) {
+		moduleDao.getByCode(code)
+	}
 
 	def departmentsOwnedBy(usercode: String) = departmentDao.getByOwner(usercode)
 
 	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
 	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
 
-	@Transactional
-	def addOwner(dept: Department, owner: String) = dept.owners.addUser(owner)
+	def addOwner(dept: Department, owner: String) = transactional() {
+		dept.owners.addUser(owner)
+	}
 
-	@Transactional
-	def removeOwner(dept: Department, owner: String) = dept.owners.removeUser(owner)
+	def removeOwner(dept: Department, owner: String) = transactional() {
+		dept.owners.removeUser(owner)
+	}
 
 }

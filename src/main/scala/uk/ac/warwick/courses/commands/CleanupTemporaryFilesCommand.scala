@@ -2,15 +2,16 @@ package uk.ac.warwick.courses.commands
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 
 @Configurable
 class CleanupTemporaryFilesCommand extends Command[Unit] {
 
 	@Autowired var dao: FileDao = _
 
-	@Transactional
-	override def work = dao.deleteOldTemporaryFiles
+	override def work = transactional() {
+		dao.deleteOldTemporaryFiles
+	}
 
 	override def describe(d: Description) {}
 }

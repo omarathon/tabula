@@ -5,7 +5,7 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.courses.data.model.Feedback
@@ -103,8 +103,7 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 		noErrors
 	}
 
-	@Transactional
-	override def work(): List[Feedback] = {
+	override def work(): List[Feedback] = transactional() {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
 			feedback.assignment = assignment
@@ -122,16 +121,17 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 		markList.toList
 	}
 
-	@Transactional
 	def onBind {
-		file.onBind
-		if (!file.attached.isEmpty()) {
-			processFiles(file.attached)
-		}
+		transactional() {
+			file.onBind
+			if (!file.attached.isEmpty()) {
+				processFiles(file.attached)
+			}
 
-		def processFiles(files: Seq[FileAttachment]) {
-			for (file <- files.filter(_.hasData)) {
-				marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+			def processFiles(files: Seq[FileAttachment]) {
+				for (file <- files.filter(_.hasData)) {
+					marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package uk.ac.warwick.courses.commands.assignments
 
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
 import uk.ac.warwick.courses.data.model.Assignment
@@ -37,8 +37,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null) extends Command
 		commonChecks(errors)
 	}
 
-	@Transactional
-	override def work {
+	override def work = transactional() {
 		assignment.markDeleted
 	}
 
