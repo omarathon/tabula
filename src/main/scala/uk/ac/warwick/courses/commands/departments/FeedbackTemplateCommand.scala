@@ -1,13 +1,14 @@
 package uk.ac.warwick.courses.commands.departments
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import uk.ac.warwick.courses.commands.{UploadedFile, Description, Command}
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
 import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.services.ZipService
 
 @Configurable
 abstract class FeedbackTemplateCommand(val department:Department)
@@ -48,10 +49,11 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 
 class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) {
 
+	@Autowired var zipService: ZipService = _
+
 	@BeanProperty var id:String = _
 	@BeanProperty var name:String = _
 	@BeanProperty var description:String = _
-
 	@BeanProperty var template:FeedbackTemplate = _  // retained in case errors are found
 
 	@Transactional
@@ -66,5 +68,7 @@ class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 			}
 		}
 		session.update(feedbackTemplate)
+		// invalidate any zip files for linked assignments
+		feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
 	}
 }
