@@ -24,8 +24,7 @@ class FeedbackTemplate extends GeneratedId {
 	@OneToMany(mappedBy = "feedbackTemplate", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BeanProperty var assignments: JList[Assignment] = ArrayList()
 
-	def countLinkedAssignments = Option(assignments) match {
-		case Some(a) => a.size()
+	def countLinkedAssignments = Option(assignments) match { case Some(a) => a.size()
 		case None => 0
 	}
 

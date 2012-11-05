@@ -56,6 +56,7 @@
 				<tr>
 					<th>Name</th>
 					<th>Description</th>
+					<th>Assignments</th>
 					<th><!-- Actions column--></th>
 				</tr>
 				<#list bulkFeedbackTemplateCommand.feedbackTemplates as template>
@@ -63,19 +64,54 @@
 						<td>${template.name}</td>
 						<td>${template.description!""}</td>
 						<td>
+							<#if template.hasAssignments>
+								<span class="label label-info">${template.countLinkedAssignments}</span>&nbsp;
+								<a id="tool-tip-${template.id}" class="btn btn-mini" data-toggle="button" href="#">
+									<i class="icon-list"></i>
+									List
+								</a>
+								<div id="tip-content-${template.id}" class="hide">
+									<ul><#list template.assignments as assignment>
+										<li>
+											<a href="<@routes.depthome module=assignment.module />">
+												${assignment.module.code} - ${assignment.name}
+											</a>
+										</li>
+									</#list></ul>
+								</div>
+								<script type="text/javascript">
+									jQuery(function($){
+										var markup = $('#tip-content-${template.id}').html();
+										$("#tool-tip-${template.id}").popover({
+											placement: 'right',
+											html: true,
+											content: markup,
+											title: 'Assignments linked to ${template.name}'
+										});
+									});
+								</script>
+							<#else>
+								<span class="label">None</span>
+							</#if>
+						</td>
+						<td>
 							<#if template.attachment??>
-							<a class="btn btn-mini btn-primary" href="<@routes.feedbacktemplatedownload department=department feedbacktemplate=template />">
-								<i class="icon-white icon-download"></i> Download
+							<a class="btn btn-mini" href="<@routes.feedbacktemplatedownload department=department feedbacktemplate=template />">
+								<i class="icon-download"></i> Download
 							</a>
 							</#if>
-							<a class="btn btn-mini btn-primary" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.feedbacktemplateedit department=department feedbacktemplate=template />">
-								<i class="icon-white icon-pencil"></i> Edit
+							<a class="btn btn-mini" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.feedbacktemplateedit department=department feedbacktemplate=template />">
+								<i class="icon-pencil"></i> Edit
 							</a>
-							<!-- TODO implement when we have a link between assignment -> feedback form (must not allow delete if any present)
-							<a class="btn btn-mini btn-danger" href="#">
-								<i class="icon-white icon-trash"></i> Delete
-							</a>
-							-->
+							<#if !template.hasAssignments>
+								<a class="btn btn-mini btn-danger" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.feedbacktemplatedelete department=department feedbacktemplate=template />">
+									<i class="icon-white icon-trash"></i> Delete
+								</a>
+							<#else>
+								<a class="btn btn-mini btn-danger disabled" href="#" title="You cannot delete a feedback template with linked assignments">
+									<i class="icon-white icon-trash"></i> Delete
+								</a>
+							</#if>
 						</td>
 					</tr>
 				</#list>
@@ -87,7 +123,7 @@
 				</div>
 				<div class="modal-body"></div>
 				<div class="modal-footer">
-					<input type="submit" value="Save" class="btn btn-primary">
+					<input type="submit" value="Confirm" class="btn btn-primary">
 					<a data-dismiss="modal" class="close-model btn" href="#">Cancel</a>
 				</div>
 			</div>

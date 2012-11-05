@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMethod, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.data.model.{FeedbackTemplate, Department}
-import uk.ac.warwick.courses.commands.departments.{EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
+import uk.ac.warwick.courses.commands.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
 import uk.ac.warwick.courses.web.Mav
 import scala.Array
 import org.springframework.validation.Errors
@@ -18,6 +18,8 @@ class FeedbackTemplateController extends BaseController {
 		= new BulkFeedbackTemplateCommand(dept)
 	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department)
 		= new EditFeedbackTemplateCommand(dept)
+	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department)
+		= new DeleteFeedbackTemplateCommand(dept)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
@@ -36,7 +38,6 @@ class FeedbackTemplateController extends BaseController {
 	def saveBulk(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
 		mustBeAbleTo(Manage(cmd.department))
 		cmd.onBind()
-		//TODO cmd.validate(errors)
 		if (errors.hasErrors){
 			list(cmd.department, cmd, errors)
 		}
@@ -48,7 +49,7 @@ class FeedbackTemplateController extends BaseController {
 
 	@RequestMapping(value=Array("edit/{template}"), method=Array(GET))
 	def edit(@PathVariable dept: Department, @PathVariable template:FeedbackTemplate,
-			cmd:EditFeedbackTemplateCommand, errors:Errors) = {
+	cmd:EditFeedbackTemplateCommand, errors:Errors) = {
 		mustBeAbleTo(Manage(dept))
 
 		cmd.template = template
@@ -66,7 +67,6 @@ class FeedbackTemplateController extends BaseController {
 	def save(cmd:EditFeedbackTemplateCommand, errors:Errors) = {
 		mustBeAbleTo(Manage(cmd.department))
 		cmd.onBind()
-		//TODO cmd.validate(errors)
 		if (errors.hasErrors){
 			edit(cmd.department, cmd.template, cmd, errors)
 		}
@@ -75,6 +75,28 @@ class FeedbackTemplateController extends BaseController {
 			val model = Mav("ajax_success").noNavigation()
 			model
 		}
+	}
+
+	@RequestMapping(value=Array("delete/{template}"), method=Array(GET))
+	def deleteCheck(@PathVariable dept: Department, @PathVariable template:FeedbackTemplate,
+			   cmd:DeleteFeedbackTemplateCommand, errors:Errors) = {
+		mustBeAbleTo(Manage(dept))
+
+		cmd.id = template.id
+		val model = Mav("admin/feedbackforms/delete-feedback-template",
+			"department" -> dept
+		).noNavigation()
+		model
+
+	}
+
+	@RequestMapping(value=Array("delete"), method=Array(POST))
+	def delete(@PathVariable dept: Department, cmd:DeleteFeedbackTemplateCommand, errors:Errors) = {
+		mustBeAbleTo(Manage(dept))
+
+		cmd.apply()
+		val model = Mav("ajax_success").noNavigation()
+		model
 	}
 
 }

@@ -7,7 +7,7 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
-import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.helpers.{Logging, ArrayList}
 import uk.ac.warwick.courses.services.ZipService
 
 @Configurable
@@ -70,5 +70,19 @@ class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 		session.update(feedbackTemplate)
 		// invalidate any zip files for linked assignments
 		feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
+	}
+}
+
+class DeleteFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) with Logging {
+
+	@BeanProperty var id:String = _
+
+	@Transactional
+	override def apply() {
+		val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
+		if (feedbackTemplate.hasAssignments)
+			logger.error("Cannot delete feedbackt template "+feedbackTemplate.id+" - it is still linked to assignments")
+		else
+			session.delete(feedbackTemplate)
 	}
 }
