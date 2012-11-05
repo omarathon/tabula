@@ -14,6 +14,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import uk.ac.warwick.courses.helpers.Closeables._
 import uk.ac.warwick.courses.Features
+import uk.ac.warwick.userlookup.User
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -44,6 +45,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
 	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
+
 
 	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
@@ -97,9 +99,21 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			assignment.submissions flatMap getSubmissionZipItems)
 
 	/**
+	 * A zip of feedback templates for each student registered on the assignment
+	 * assumes a feedback template exists
+	 */
+	def getMemberFeedbackTemplates(users: Seq[User], assignment: Assignment): File = {
+		val templateFile = assignment.feedbackTemplate.attachment
+		val zipItems:Seq[ZipItem] = for (user <- users) yield {
+			val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
+			new ZipFileItem(filename, templateFile.dataStream)
+		}
+		createUnnamedZip(zipItems)
+	}
+
+	/**
 	 * Returns a sequence with a single ZipItem (the feedback template) or an empty
 	 * sequence if no feedback template exists
-	 *
 	 */
 	def generateFeedbackSheet(submission: Submission): Seq[ZipItem] = {
 		// wrap template in an option to deal with nulls

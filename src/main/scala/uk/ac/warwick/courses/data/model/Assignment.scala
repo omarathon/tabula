@@ -126,6 +126,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@JoinColumn(name = "feedback_template_id")
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 
+	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
+
 	/**
 	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
 	 */

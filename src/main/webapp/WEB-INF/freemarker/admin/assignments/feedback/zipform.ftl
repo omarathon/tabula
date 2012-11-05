@@ -14,6 +14,17 @@
 	(e.g. <span class="example-filename">0123456/feedback.doc</span>).
 </p>
 
+<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+	<p>
+		You can download a zip containing copies of this assignments feedback template for each student with the
+		university IDs added for you.
+		<a class="btn btn-mini long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"><i class="icon-download"></i>
+			Download feedback templates
+		</a>
+	</p>
+</#if>
+
+
 
 <table role="presentation" class="narrowed-form">
 <tr>

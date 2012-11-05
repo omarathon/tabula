@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.actions.Participate
-import uk.ac.warwick.courses.commands.assignments.DownloadAllSubmissionsCommand
-import uk.ac.warwick.courses.commands.assignments.DownloadSubmissionsCommand
+import uk.ac.warwick.courses.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
 import uk.ac.warwick.courses.services.fileserver.FileServer
 import uk.ac.warwick.courses.web.controllers.BaseController
 
@@ -33,6 +32,16 @@ class DownloadSubmissionsController extends BaseController {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
+		command.apply { renderable =>
+			fileServer.serve(renderable, response)
+		}
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback-templates.zip"))
+	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand, response: HttpServletResponse) {
+		val assignment = command.assignment
+		mustBeLinked(assignment, assignment.module)
+		mustBeAbleTo(Participate(assignment.module))
 		command.apply { renderable =>
 			fileServer.serve(renderable, response)
 		}
