@@ -122,6 +122,12 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
 
+	@ManyToOne
+	@JoinColumn(name = "feedback_template_id")
+	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
+
+	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
+
 	/**
 	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
 	 */

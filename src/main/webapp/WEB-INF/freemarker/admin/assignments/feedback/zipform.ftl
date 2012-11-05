@@ -13,7 +13,12 @@
 	a folder whose name includes the University ID
 	(e.g. <span class="example-filename">0123456/feedback.doc</span>).
 </p>
-
+<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+	<p>
+		You can <a  href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>">download a zip</a>
+		containing copies of this assignments feedback template for each student with the university IDs added for you.
+	</p>
+</#if>
 
 <table role="presentation" class="narrowed-form">
 <tr>

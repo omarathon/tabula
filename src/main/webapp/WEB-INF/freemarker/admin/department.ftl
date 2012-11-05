@@ -14,13 +14,22 @@
 <#if department??>
 
 <#assign can_manage_dept=can.manage(department) />
-<#if features.extensions && can_manage_dept>
-	<h1>
-		${department.name}&nbsp;
-		<a href="settings" class="btn btn-mini">
-			<i class="icon-wrench"></i> Department settings
-		</a>
+<#if (features.extensions || features.feedbackTemplates) && can_manage_dept>
+	<h1 class="with-settings">
+		${department.name}
 	</h1>
+	<div class="btn-group dept-settings">
+		<a class="btn btn-primary btn-mini" href="#"><i class="icon-white icon-wrench"></i> Department settings</a>
+		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<#if features.extensions>
+				<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
+			</#if>
+			<#if features.feedbackTemplates>
+				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
+			</#if>
+		</ul>
+	</div>
 <#else>
 	<h1>${department.name}</h1>
 </#if>
