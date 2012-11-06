@@ -19,7 +19,7 @@ class DownloadFeedbackSheetsCommand extends Command[RenderableZip]
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]
 
-	override def apply():RenderableZip = {
+	override def work():RenderableZip = {
 		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - "+assignment.id)
 		val members = assignmentService.determineMembershipUsers(assignment)
 		val zip = zipService.getMemberFeedbackTemplates(members, assignment)

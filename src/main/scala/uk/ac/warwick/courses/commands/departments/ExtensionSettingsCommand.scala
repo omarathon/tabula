@@ -36,7 +36,7 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 		}
 	}
 
-	override def apply() {
+	override def work() {
 		transactional() {
 			if (features.extensions){
 				department.allowExtensionRequests = this.allowExtensionRequests

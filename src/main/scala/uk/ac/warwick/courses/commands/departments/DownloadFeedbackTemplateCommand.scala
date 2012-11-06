@@ -16,7 +16,7 @@ class DownloadFeedbackTemplateCommand(user: CurrentUser) extends Command[Option[
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def apply() = {
+	def work() = {
 
 		val attachment = Option(template.attachment)
 		val renderableAttachment = attachment find (_.name == filename) map (a => new RenderableAttachment(a))
