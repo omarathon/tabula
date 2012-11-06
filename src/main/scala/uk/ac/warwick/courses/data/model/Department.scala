@@ -44,6 +44,8 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	def addOwner(owner:String) = ensureOwners.addUser(owner)
 	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
 
+	def canRequestExtension = allowExtensionRequests != null && allowExtensionRequests
+
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 	
 	// If hibernate sets owners to null, make a new empty usergroup
