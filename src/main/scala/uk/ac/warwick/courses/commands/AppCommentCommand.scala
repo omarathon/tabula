@@ -18,17 +18,14 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.util.core.StringUtils._
 import uk.ac.warwick.courses.web.views.FreemarkerRendering
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
 
-	@Resource(name = "mailSender")
-	@BeanProperty var mailSender: WarwickMailSender = _
-
-	@Value("${mail.admin.to}") var adminMailAddress: String = _
-
-	@Autowired
-	@BeanProperty var freemarker: Configuration = _
+	var mailSender = Wire[WarwickMailSender]("mailSender")
+	var adminMailAddress = Wire.property("${mail.admin.to}")
+	var freemarker = Wire.auto[Configuration]
+	
 	var template: Template = _
 
 	@BeanProperty var message: String = _

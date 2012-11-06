@@ -10,14 +10,13 @@ import uk.ac.warwick.courses.commands.ReadOnly
 import uk.ac.warwick.courses.services.AuditEventIndexService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
+  var auditIndex = Wire.auto[AuditEventIndexService]
 
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
-
-	@Autowired var auditIndex: AuditEventIndexService = _
 
 	var checkIndex = true
 

@@ -30,24 +30,22 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
 
-	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var userLookup: UserLookupService = _
+	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
+	var assignmentService = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
+	implicit var freemarker = Wire.auto[Configuration]
 
-	@Autowired implicit var freemarker: Configuration = _
-
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var topLevelUrl = Wire.property("${toplevel.url}")
+	
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
-
 	@BeanProperty var confirm: Boolean = false
-
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
 
 	case class MissingUser(val universityId: String)
 	case class BadEmail(val user: User, val exception: Exception = null)

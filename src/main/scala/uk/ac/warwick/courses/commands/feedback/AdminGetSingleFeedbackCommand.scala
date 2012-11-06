@@ -7,10 +7,10 @@ import uk.ac.warwick.courses.data.model.Feedback
 import uk.ac.warwick.courses.services.fileserver.RenderableZip
 import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.commands.ReadOnly
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class AdminGetSingleFeedbackCommand(feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
-	@Autowired var zipService: ZipService = _
+	var zipService = Wire.auto[ZipService]
 
 	override def work = {
 		val zip = zipService.getFeedbackZip(feedback)

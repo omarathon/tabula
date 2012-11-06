@@ -16,7 +16,6 @@ import uk.ac.warwick.courses.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.data.Transactions._
 
-@Configurable
 class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
 
 	openDate = new DateTime().withTime(12, 0, 0, 0)

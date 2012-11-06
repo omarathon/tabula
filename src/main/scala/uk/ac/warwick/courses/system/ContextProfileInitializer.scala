@@ -1,17 +1,15 @@
 package uk.ac.warwick.courses.system
 
 import java.util.Properties
-
 import scala.collection.JavaConversions._
-
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.MutablePropertySources
 import org.springframework.core.env.PropertiesPropertySource
 import org.springframework.core.env.PropertySource
 import org.springframework.core.io.ClassPathResource
 import org.springframework.web.context.ConfigurableWebApplicationContext
-
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.spring.Wire
 
 /**
  * We load config.properties in our Spring config, but that is too late for Spring
@@ -28,6 +26,8 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
 	override def initialize(ctx: ConfigurableWebApplicationContext) = {
 		logger.info("Initialising context")
+		
+		Wire.ignoreMissingContext = true
 
 		val profiles = resolve()
 		ctx.getEnvironment().setActiveProfiles(profiles: _*)

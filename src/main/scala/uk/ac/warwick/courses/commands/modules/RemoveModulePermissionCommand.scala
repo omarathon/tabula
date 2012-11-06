@@ -11,15 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class RemoveModulePermissionCommand extends Command[Unit] {
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var usercodes: JList[String] = _
 	@BeanProperty val permissionType: String = "Participate"
 
-	@Autowired var userLookup: UserLookupService = _
+	var userLookup = Wire.auto[UserLookupService]
 
 	def work() {
 		transactional() {

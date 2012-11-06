@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.data.Transactions._
 import collection.JavaConversions._
 import uk.ac.warwick.courses.SprCode
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
-	@Autowired var assignmentImporter: AssignmentImporter = _
-	@Autowired var assignmentService: AssignmentService = _
+	var assignmentImporter = Wire.auto[AssignmentImporter]
+	var assignmentService = Wire.auto[AssignmentService]
 
 	def work() {
 		benchmark("ImportAssignments") {

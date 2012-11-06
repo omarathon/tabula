@@ -2,7 +2,6 @@ package uk.ac.warwick.courses.commands
 
 import scala.annotation.target._
 import collection.mutable
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.courses.data.model._
@@ -10,6 +9,7 @@ import uk.ac.warwick.courses.events.EventHandling
 import uk.ac.warwick.courses.JavaImports
 import uk.ac.warwick.courses.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.spring.Wire
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -42,9 +42,8 @@ trait Describable[T] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-@Configurable
 abstract class Command[R] extends Describable[R] with JavaImports with EventHandling {
-	@Autowired(required=true) var maintenanceMode: MaintenanceModeService = _
+	var maintenanceMode = Wire.auto[MaintenanceModeService]
 
 	final def apply(): R = {
 		if (EventHandling.enabled) {

@@ -92,7 +92,18 @@
 		</if>
 
 		<antcall target="-iajc" />
+		<antcall target="-no-iajc" />
 
+	</target>
+				
+	<target name="-no-iajc" if="iajc.disabled">
+		<description>
+			If AOP disabled, move the compiled classes into the correct place.
+			Could make this more efficient by simply setting the scalac destdir based on iajc.disabled.
+		</description>
+		<sync todir="target/${war.name}/WEB-INF/classes" >
+			<fileset dir="target/unwoven" />
+		</sync>
 	</target>
 
 	<target name="-iajc" unless="iajc.disabled">

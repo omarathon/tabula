@@ -16,14 +16,14 @@ import uk.ac.warwick.courses.services.fileserver.RenderableFile
 import uk.ac.warwick.courses.services.AssignmentService
 import scala.None
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
+  var assignmentService = Wire.auto[AssignmentService]
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var filename: String = _
-	@Autowired var assignmentService: AssignmentService = _
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _

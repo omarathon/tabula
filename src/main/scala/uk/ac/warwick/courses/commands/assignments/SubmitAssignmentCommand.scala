@@ -17,12 +17,12 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.courses.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.ZipService
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating {
 
-	@Autowired var service: AssignmentService = _
-	@Autowired var zipService: ZipService = _
+	var service = Wire.auto[AssignmentService]
+	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var fields = buildEmptyFields
 

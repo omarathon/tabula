@@ -13,7 +13,6 @@ import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
 import org.springframework.beans.factory.annotation.Configurable
 
-@Configurable
 class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidating {
 
 	@BeanProperty var department: Department = _

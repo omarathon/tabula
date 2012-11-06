@@ -7,7 +7,6 @@ import reflect.BeanProperty
 import uk.ac.warwick.courses.data.model.{Assignment, Module}
 import uk.ac.warwick.courses.CurrentUser
 
-@Configurable
 class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 
 	@BeanProperty var module: Module = _

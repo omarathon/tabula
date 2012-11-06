@@ -16,15 +16,14 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.services.ZipService
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
 
+	var assignmentService = Wire.auto[AssignmentService]
+	var zipService = Wire.auto[ZipService]
+
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
-
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var zipService: ZipService = _
-
 	@BeanProperty var confirm: Boolean = false
 
 	def work() = {

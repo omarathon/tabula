@@ -32,6 +32,7 @@ import org.aspectj.lang.{NoAspectBoundException, Aspects}
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.spring.Wire
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.

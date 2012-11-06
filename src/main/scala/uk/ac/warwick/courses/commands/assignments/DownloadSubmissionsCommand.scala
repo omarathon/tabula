@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.ItemNotFoundException
+import uk.ac.warwick.spring.Wire
 
 /**
  * Download one or more submissions from an assignment, as a Zip.
  */
-@Configurable
 class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+  var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
@@ -26,7 +27,6 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
 
-	@Autowired var zipService: ZipService = _
 
 	override def work: RenderableZip = {
 		if (submissions.isEmpty) throw new ItemNotFoundException

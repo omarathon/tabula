@@ -11,13 +11,13 @@ import uk.ac.warwick.courses.jobs.SubmitToTurnitinJob
 import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
+import uk.ac.warwick.spring.Wire
 
 /**
  * Creates a job that submits the assignment to Turnitin.
  *
  * Returns the job instance ID for status tracking.
  */
-@Configurable
 class SubmitToTurnitinCommand(@BeanProperty var user: CurrentUser) extends Command[String] {
 
 	@BeanProperty var assignment: Assignment = _
@@ -26,7 +26,7 @@ class SubmitToTurnitinCommand(@BeanProperty var user: CurrentUser) extends Comma
 	// empty constructor for Spring binding
 	def this() = this(null)
 
-	@Autowired var jobService: JobService = _
+	var jobService = Wire.auto[JobService]
 
 	def work() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 

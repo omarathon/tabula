@@ -1,19 +1,15 @@
 package uk.ac.warwick.courses.commands
 
 import java.io.File
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.web.multipart.MultipartFile
-
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model.FileAttachment
 import uk.ac.warwick.courses.data.FileDao
 import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.spring.Wire
 
 /**
  * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -28,9 +24,8 @@ import uk.ac.warwick.courses.helpers.ArrayList
  * Works well with the filewidget macro in forms.ftl. Remember to set the
  * multipart/form-data encoding type on your form.
  */
-@Configurable
 class UploadedFile {
-	@Autowired var fileDao: FileDao = _
+	var fileDao = Wire.auto[FileDao]
 
 	// files bound from an upload request, prior to being persisted
 	@BeanProperty var upload: JList[MultipartFile] = ArrayList()

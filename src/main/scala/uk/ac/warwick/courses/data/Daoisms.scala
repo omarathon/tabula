@@ -11,6 +11,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.PlatformTransactionManager
+import uk.ac.warwick.spring.Wire
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -26,8 +27,8 @@ trait Daoisms {
 	import org.hibernate.criterion.Restrictions._
 	def is = org.hibernate.criterion.Restrictions.eq _
 
-	@field @Resource(name = "dataSource") var dataSource: DataSource = _
-	@field @Autowired var sessionFactory: SessionFactory = _
+	var dataSource = Wire[DataSource]("dataSource")
+	var sessionFactory = Wire.auto[SessionFactory]
 
 	protected def session = sessionFactory.getCurrentSession
 

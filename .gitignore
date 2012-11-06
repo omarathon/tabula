@@ -20,3 +20,4 @@ junit*.properties
 /.idea/workspace.xml
 /project/target
 /project/project
+.externalToolBuilders

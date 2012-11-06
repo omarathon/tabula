@@ -27,7 +27,6 @@ import uk.ac.warwick.courses.data.model.Feedback
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
  */
-@Configurable
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends AbstractAssignmentController {

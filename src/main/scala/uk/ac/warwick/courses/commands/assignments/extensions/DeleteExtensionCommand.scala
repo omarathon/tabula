@@ -10,12 +10,13 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.services.UserLookupService
 import reflect.BeanProperty
 import uk.ac.warwick.courses.data.Transactions._
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
 
-	@Autowired var userLookup: UserLookupService = _
+	var userLookup = Wire.auto[UserLookupService]
+	
 	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
 
 	override def work(): List[String] = transactional() {

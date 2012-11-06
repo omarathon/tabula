@@ -33,12 +33,13 @@ import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.services.AuditEventIndexService
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadFeedback extends BaseController {
-	@Autowired var feedbackDao: FeedbackDao = _
-	@Autowired var fileServer: FileServer = _
+	var feedbackDao = Wire.auto[FeedbackDao]
+	var fileServer = Wire.auto[FileServer]
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, response: HttpServletResponse) {
@@ -59,7 +60,8 @@ class DownloadFeedback extends BaseController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
 class DownloadAllFeedback extends BaseController {
-	@Autowired var fileServer: FileServer = _
+	var fileServer = Wire.auto[FileServer]
+	
 	@RequestMapping
 	def download(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
@@ -69,11 +71,10 @@ class DownloadAllFeedback extends BaseController {
 	}
 }
 
-@Configurable @Controller
+@Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
 class ListFeedback extends BaseController {
-
-	@Autowired var auditIndexService: AuditEventIndexService = _
+	var auditIndexService = Wire.auto[AuditEventIndexService]
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module: Module, @PathVariable assignment: Assignment) = {

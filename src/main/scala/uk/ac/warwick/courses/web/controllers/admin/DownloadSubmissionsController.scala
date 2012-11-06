@@ -4,19 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.actions.Participate
 import uk.ac.warwick.courses.commands.assignments.DownloadAllSubmissionsCommand
 import uk.ac.warwick.courses.commands.assignments.DownloadSubmissionsCommand
 import uk.ac.warwick.courses.services.fileserver.FileServer
 import uk.ac.warwick.courses.web.controllers.BaseController
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.spring.Wire
 
-@Configurable @Controller
-@RequestMapping
 class DownloadSubmissionsController extends BaseController {
 
-	@Autowired var fileServer: FileServer = _
+	var fileServer = Wire.auto[FileServer]
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
 	def download(command: DownloadSubmissionsCommand, response: HttpServletResponse) {

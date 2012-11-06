@@ -14,7 +14,6 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.beans.factory.annotation.Configurable
 
-@Configurable
 class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
 	extends Command[Extension] with Daoisms {
 

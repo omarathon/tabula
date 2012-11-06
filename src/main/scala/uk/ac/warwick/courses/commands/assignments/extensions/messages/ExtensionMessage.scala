@@ -14,11 +14,11 @@ import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.courses.helpers.StringUtils._
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
 /**
  * Send an email confirming the creation of a manual extension request to the student
  */
-@Configurable
 abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanProperty var assignment: Assignment,
 								@BeanProperty var userId: String)
 	extends Command[Boolean] with ReadOnly with FreemarkerRendering with Logging {
@@ -27,9 +27,9 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	def this(extension:Extension, uniId:String) = this(extension, extension.assignment, uniId)
 	def this() = this(null, null, null)
 
-	@BeanProperty @Autowired var userLookup: UserLookupService = _
-	@BeanProperty @Autowired implicit var freemarker: Configuration = _
-	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
+	var userLookup = Wire.auto[UserLookupService]
+	implicit var freemarker= Wire.auto[Configuration]
+	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 
 	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
 

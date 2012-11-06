@@ -17,6 +17,7 @@ import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.ReadOnly
 import uk.ac.warwick.courses.commands.Unaudited
+import uk.ac.warwick.spring.Wire
 
 abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
 case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
@@ -35,12 +36,12 @@ case class RecipientCheckReport(
  * email address. Used to show to the admin user which users may not receive an email
  * when feedback is published.
  */
-@Configurable
 class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
+
+	var assignmentService = Wire.auto[AssignmentService]
 
 	@BeanProperty var module: Module = _ // optional, mainly for binding from URL
 	@BeanProperty var assignment: Assignment = _
-	@Autowired var assignmentService: AssignmentService = _
 
 	override def work = {
 		val items: Seq[RecipientReportItem] =

@@ -38,6 +38,7 @@ import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import java.nio.charset.Charset
+import uk.ac.warwick.spring.Wire
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
@@ -72,14 +73,13 @@ class ExtractFeedbackZip(cmd: AddFeedbackCommand) extends Command[Unit] {
  * so we could check that this is no longer being accessed by anyone, and then
  * remove all the code in here that handles it, to simplify it a little.
  */
-@Configurable
 class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 
-	@Autowired var zipService: ZipService = _
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var fileDao: FileDao = _
+	var zipService = Wire.auto[ZipService]
+	var userLookup = Wire.auto[UserLookupService]
+	var fileDao = Wire.auto[FileDao]
 
 	/* for single upload */
 	@BeanProperty var uniNumber: String = _

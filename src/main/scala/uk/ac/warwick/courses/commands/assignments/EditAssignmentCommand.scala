@@ -15,7 +15,6 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
 
-@Configurable
 class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAssignmentCommand {
 
 	this.copyFrom(assignment)

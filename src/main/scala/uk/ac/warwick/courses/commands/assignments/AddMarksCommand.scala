@@ -27,17 +27,18 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.FoundUser
 import uk.ac.warwick.courses.UniversityId
 import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
 
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var marksExtractor: MarksExtractor = _
+	var userLookup = Wire.auto[UserLookupService]
+	var marksExtractor = Wire.auto[MarksExtractor]
 
+  var markWarning = Wire.property("${mark.warning}")
+  
 	@BeanProperty var file: UploadedFile = new UploadedFile
 	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()
 
-	@Value("${mark.warning}") var markWarning: String = _
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 

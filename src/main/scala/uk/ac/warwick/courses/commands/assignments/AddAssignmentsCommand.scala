@@ -22,11 +22,11 @@ import scala.collection.mutable.HashMap
 import uk.ac.warwick.courses.helpers.LazyMaps
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.courses.data.Transactions._
+import uk.ac.warwick.spring.Wire
 
 /**
  * Sub-object on the form for binding each upstream assignment and some other properties.
  */
-@Configurable
 class AssignmentItem(
 	// whether to create an assignment from this item or not
 	@BeanProperty var include: Boolean,
@@ -35,7 +35,7 @@ class AssignmentItem(
 	
     def this() = this(true, null, null)
     
-	@Autowired var assignmentService: AssignmentService = _
+	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
 	@BeanProperty var assessmentGroup: Option[UpstreamAssessmentGroup] = _
@@ -59,11 +59,10 @@ class AssignmentItem(
 /**
  * Command for adding many assignments at once, usually from SITS.
  */
-@Configurable
 class AddAssignmentsCommand(val department: Department) extends Command[Unit] with SelfValidating {
 
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var moduleDao: ModuleDao = _
+	var assignmentService = Wire.auto[AssignmentService]
+	var moduleDao = Wire.auto[ModuleDao]
 
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 6
 	// months, which means it will start defaulting to next year from about February (under the assumption that

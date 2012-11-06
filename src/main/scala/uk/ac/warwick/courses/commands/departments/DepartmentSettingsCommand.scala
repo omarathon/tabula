@@ -8,7 +8,6 @@ import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.StringUtils._
 
-@Configurable
 class DepartmentSettingsCommand (val department:Department) extends Command[Unit]{
 
 	@BeanProperty var allowExtensionRequests:JBoolean =_

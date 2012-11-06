@@ -22,9 +22,12 @@
 
 	<import resource="common-context.xml" />
 	<import resource="persistence-context.xml" />
+	
+	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
 
 	<!-- fire up annotation driven everything -->
-	<context:spring-configured />
+	<!-- <context:spring-configured /> -->
 	<context:annotation-config />
 	<context:component-scan base-package="uk.ac.warwick.courses.web.controllers" />
 	<context:component-scan base-package="uk.ac.warwick.courses.services" />

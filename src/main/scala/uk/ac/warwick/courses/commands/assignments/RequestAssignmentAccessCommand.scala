@@ -14,23 +14,23 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.courses.web.Routes
 import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
 /**
  * Sends a message to one or more admins to let them know that the current
  * user thinks they should have access to an assignment.
  */
-@Configurable
 class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering {
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _
 
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired implicit var freemarker: Configuration = _
-	@Resource(name = "mailSender") var mailSender: WarwickMailSender = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
+	var userLookup = Wire.auto[UserLookupService]
+	implicit var freemarker = Wire.auto[Configuration]
+	var mailSender = Wire[WarwickMailSender]("mailSender")
+	var topLevelUrl = Wire.property("${toplevel.url}")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	override def work() {
 		val admins =

@@ -13,11 +13,11 @@ import uk.ac.warwick.courses.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.courses.services.fileserver._
 import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
-	@Autowired var zip: ZipService = _
-	@Autowired var feedbackDao: FeedbackDao = _
+	var zip = Wire.auto[ZipService]
+	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _

@@ -14,16 +14,17 @@ import uk.ac.warwick.courses.{DateFormats, CurrentUser}
 import uk.ac.warwick.courses.services.UserLookupService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
-@Configurable
 class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUser)
 		extends Command[List[Extension]] with Daoisms with Logging	{
 		
-	@Autowired var userLookup:UserLookupService =_
+	var userLookup = Wire.auto[UserLookupService]
+	
 	@BeanProperty var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
 	@BeanProperty var extensions:JList[Extension] = LazyLists.simpleFactory()
 

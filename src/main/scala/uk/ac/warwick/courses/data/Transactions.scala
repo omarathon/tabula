@@ -6,14 +6,14 @@ import org.springframework.transaction.annotation._
 import org.springframework.transaction.interceptor._
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import scala.annotation.target.field
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 object Transactions extends TransactionAspectSupport {
 
 	// unused as we skip the method that calls it, but it checks that an attribute source is set.
 	setTransactionAttributeSource(new MatchAlwaysTransactionAttributeSource)
 	
-	@Autowired var transactionManager: PlatformTransactionManager = _
+	var transactionManager = Wire.auto[PlatformTransactionManager]
 	override def getTransactionManager() = transactionManager
 	
 	private var enabled = true
