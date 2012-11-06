@@ -81,7 +81,8 @@ trait SharedAssignmentProperties {
 		assignment.allowExtensions = allowExtensions
 		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.feedbackTemplate = feedbackTemplate
-		zipService.invalidateSubmissionZip(assignment)
+		if (assignment.id != null) // this is an edit
+			zipService.invalidateSubmissionZip(assignment)
 
 		for (field <- findCommentField(assignment)) field.value = comment
 		for (file <- findFileField(assignment)) {
