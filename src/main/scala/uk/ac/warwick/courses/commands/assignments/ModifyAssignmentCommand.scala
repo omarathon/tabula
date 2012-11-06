@@ -11,7 +11,6 @@ import org.springframework.validation.Errors
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 import uk.ac.warwick.courses._
-import commands.assignments.UpstreamGroupOption
 import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.data.model.forms.CommentField
 import uk.ac.warwick.courses.data.model.forms.FileField
