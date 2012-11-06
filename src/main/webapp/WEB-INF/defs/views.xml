@@ -16,6 +16,12 @@
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
+
+	<!-- Layout without navigation but including scripts and styles - used for iframes -->
+	<definition name="nonav" template="/WEB-INF/freemarker/layouts/nonav.ftl">
+		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
+		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
+	</definition>
   
   <!-- Embedded layout - no surrounding HTML, but includes scripts required
   	for embedding in a Sitebuilder page. TODO implement embedded.ftl -->

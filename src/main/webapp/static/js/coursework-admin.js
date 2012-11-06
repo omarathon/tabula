@@ -55,8 +55,8 @@ $(function(){
             )
         );
     
-    // code for the marks tabs
-    $('#marks-tabs a').click(function (e) {
+    // code for tabs
+    $('.nav.nav-tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });

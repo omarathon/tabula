@@ -29,5 +29,6 @@ so you could just get rid of this and the corresponding Ant class.
 		<mapping class="uk.ac.warwick.courses.data.model.UserGroup" />
 		<mapping class="uk.ac.warwick.courses.data.model.forms.FormField" />
 		<mapping class="uk.ac.warwick.courses.services.jobs.JobInstanceImpl" />
+		<mapping class="uk.ac.warwick.courses.data.model.FeedbackTemplate" />
     </session-factory>
 </hibernate-configuration>

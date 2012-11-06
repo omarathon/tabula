@@ -33,11 +33,6 @@ class ScheduledJobs {
 	@Autowired @BeanProperty
 	var jobService: JobService = _
 
-	/*
-	 * Don't think @Transactional works on these methods so it should be put
-	 * on the method that we call through to.
-	 */
-
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = exceptionResolver.reportExceptions {
 		new ImportModulesCommand().apply()

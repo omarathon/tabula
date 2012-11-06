@@ -25,7 +25,7 @@
 		</@form.labelled_row>
 
 		<@form.labelled_row "file.upload" "Upload supporting documentation relevant to your request">
-			<input type="file" name="file.upload" multiple />
+			<input type="file" name="file.upload" />
 			<div id="multifile-column-description" class="help-block">
 				Your browser doesn't seem able to handle uploading multiple files<noscript>
 				(or it does, but your browser is not running the Javascript needed to support it)

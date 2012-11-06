@@ -71,6 +71,11 @@ class Mav() {
 		layout("none")
 	}
 
+	def noNavigation() = {
+		addObjects("embedded" -> true)
+		layout("nonav")
+	}
+
 	def embedded = {
 		addObjects("embedded" -> true)
 		layout("embedded")
