@@ -28,4 +28,4 @@ lost between requests.
 <@f.hidden path="fileAttachmentLimit" />
 <@f.hidden path="fileAttachmentTypes" />
 <@f.hidden path="comment" />
-<@f.hidden path="feedbackTemplate">
+<@f.hidden path="feedbackTemplate" />
