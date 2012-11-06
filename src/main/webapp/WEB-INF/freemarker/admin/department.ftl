@@ -19,8 +19,11 @@
 		${department.name}
 	</h1>
 	<div class="btn-group dept-settings">
-		<a class="btn btn-primary btn-mini" href="#"><i class="icon-white icon-wrench"></i> Department settings</a>
-		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-white icon-wrench"></i>
+			Department settings
+			<span class="caret"></span>
+		</a>
 		<ul class="dropdown-menu">
 			<#if features.extensions>
 				<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
