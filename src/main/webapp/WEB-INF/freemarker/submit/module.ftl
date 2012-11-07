@@ -17,8 +17,12 @@
 		</#if>
 		</h2>
 		<div class="date end-date">
-			Submission ${assignment.active?string("closes", "closed")} 
-			<@fmt.date date=assignment.closeDate seconds=true timezone=true />
+			<#if assignment.openEnded>
+				Open-ended submission
+			<#else>
+				Submission ${assignment.active?string("closes", "closed")} 
+				<@fmt.date date=assignment.closeDate seconds=true timezone=true />
+			</#if>
 		</div>
 	</div>
 

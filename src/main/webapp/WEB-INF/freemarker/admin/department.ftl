@@ -96,12 +96,19 @@
 
 			</div>
 			<div class="stats">
-				<div class="open-date">
-					<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
-				</div>
-				<div class="close-date">
-					<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
-				</div>
+				<#if assignment.openEnded>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />, never closes
+						<span class="label-like">(open-ended)<span class="label-like">
+					</div>
+				<#else>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />
+					</div>
+					<div class="close-date">
+						<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate />
+					</div>
+				</#if>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>

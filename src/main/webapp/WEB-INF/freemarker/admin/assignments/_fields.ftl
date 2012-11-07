@@ -24,6 +24,25 @@ the comments textarea needs to maintain newlines.
 <@datefield path="openDate" label="Open date" />
 <@datefield path="closeDate" label="Close date" />
 
+<@form.labelled_row "openEnded" "Open-ended">
+	<label class="checkbox">
+		<@f.checkbox path="openEnded" id="openEnded" />
+		<a href="#" class="use-popover" 
+		   data-title="Open-ended assignments"
+		   data-html="true"
+		   data-trigger="hover"
+		   data-content="&lt;p&gt;
+		   Check this box to mark the assignment as open-ended.
+		   &lt;/p&gt;&lt;ul&gt;
+		   &lt;li&gt;The close date entered above will have no effect.&lt;/li&gt;
+		   &lt;li&gt;The options below to allow extensions and submission after the close date will have no effect.&lt;/li&gt;
+		   &lt;li&gt;The close date will not be shown to students.&lt;/li&gt;
+		   &lt;li&gt;There will be no warnings for lateness, and no automatic deductions to marks.&lt;/li&gt;
+		   &lt;/ul&gt;"
+		   >What's this?</a>
+	</label>
+</@form.labelled_row>
+
 <#if newRecord>
 
 	<@form.labelled_row "academicYear" "Academic year">

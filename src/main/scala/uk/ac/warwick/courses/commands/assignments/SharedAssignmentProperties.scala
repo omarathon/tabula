@@ -34,7 +34,8 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
 trait SharedAssignmentProperties {
 
 
-	@BeanProperty var collectMarks: JBoolean = false
+  @BeanProperty var openEnded: JBoolean = false
+  @BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -72,6 +73,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
@@ -92,6 +94,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedFrom(assignment: Assignment) {
+		openEnded = assignment.openEnded
 		collectMarks = assignment.collectMarks
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
