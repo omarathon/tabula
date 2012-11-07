@@ -1,6 +1,8 @@
 /bin
+*/bin
 /dist
 /target
+*/target
 /hs_err*
 local.properties
 .cache

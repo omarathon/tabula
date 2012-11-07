@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>courses</name>
-	<comment>Assignment Management</comment>
+	<name>tabula</name>
+	<comment>Tabula</comment>
 	<projects>
 	</projects>
 	<buildSpec>
