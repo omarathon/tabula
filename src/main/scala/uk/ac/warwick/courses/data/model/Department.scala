@@ -47,7 +47,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	def canRequestExtension = allowExtensionRequests != null && allowExtensionRequests
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
-	
+
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureOwners

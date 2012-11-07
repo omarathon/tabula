@@ -10,7 +10,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.courses.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.commands.assignments.extensions.messages.NewExtensionRequestMessage
-import uk.ac.warwick.courses.actions.{View, Create}
+import uk.ac.warwick.courses.actions.View
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -32,11 +32,17 @@ class ExtensionRequestController extends BaseController{
 			throw new PermissionDeniedException(user, View(assignment))
 		else {
 			if (user.loggedIn){
-				assignment.findExtension(user.universityId).foreach(cmd.presetValues(_))
+				val existingRequest = assignment.findExtension(user.universityId)
+				existingRequest.foreach(cmd.presetValues(_))
+				// is this an edit of an existing request
+				val isModification = existingRequest.isDefined && !existingRequest.get.isManual
 				Mav("submit/extension_request",
 					"module" -> module,
 					"assignment" -> assignment,
+					"isClosed" -> assignment.isClosed,
 					"department" -> module.department,
+					"isModification" -> isModification,
+					"existingRequest" -> existingRequest.getOrElse(null),
 					"command" -> cmd
 				)
 			} else {
