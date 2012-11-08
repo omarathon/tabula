@@ -2,6 +2,7 @@ package uk.ac.warwick.courses.services
 
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.data.model.Department
+import uk.ac.warwick.courses.data.Transactions
 import uk.ac.warwick.courses._
 
 class SecurityServiceTest extends TestBase {
@@ -22,14 +23,16 @@ class SecurityServiceTest extends TestBase {
 	}
 
   @Test def canDo {
-    val service = new SecurityService
-    val department = new Department
-    department.addOwner("cusfal")
-    withUser("cusebr") {
-      val info = RequestInfo.fromThread.get
-      val user = info.user
-      service.can(user, Manage(department)) should be (false)
-    }
+  	Transactions.disable {
+		val service = new SecurityService
+		val department = new Department
+		department.addOwner("cusfal")
+		withUser("cusebr") {
+			val info = RequestInfo.fromThread.get
+			val user = info.user
+			service.can(user, Manage(department)) should be (false)
+		}
+	}
   }
 	
 	@Test def factory {

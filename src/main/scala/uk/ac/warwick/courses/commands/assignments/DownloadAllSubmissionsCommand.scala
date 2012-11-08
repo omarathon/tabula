@@ -10,17 +10,17 @@ import uk.ac.warwick.courses.commands.Description
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
 	@BeanProperty var filename: String = _
 
-	@Autowired var zipService: ZipService = _
+	var zipService = Wire.auto[ZipService]
 
-	override def apply = {
+	override def work = {
 		val zip = zipService.getAllSubmissionsZip(assignment)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)

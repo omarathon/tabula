@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
-import org.springframework.transaction.annotation.Transactional
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.actions.Participate
@@ -17,6 +16,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.commands.assignments.DeleteSubmissionCommand
 import uk.ac.warwick.courses.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.courses.data.Transactions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/mark-plagiarised"))
@@ -37,28 +37,30 @@ class MarkPlagiarisedController extends BaseController {
 	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-		form: MarkPlagiarisedCommand, errors: Errors) = {
+	def showForm(
+			@PathVariable module: Module, 
+			@PathVariable assignment: Assignment,
+			form: MarkPlagiarisedCommand, errors: Errors) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		form.prevalidate(errors)
 		formView(assignment)
 	}
 
-	@Transactional
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: MarkPlagiarisedCommand,
-		errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		if (errors.hasErrors) {
-			formView(assignment)
-		} else {
-			form.apply()
-			RedirectBack(assignment)
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@Valid form: MarkPlagiarisedCommand, errors: Errors) = {
+		transactional() {
+			mustBeLinked(assignment, module)
+			mustBeAbleTo(Participate(module))
+			if (errors.hasErrors) {
+				formView(assignment)
+			} else {
+				form.apply()
+				RedirectBack(assignment)
+			}
 		}
 	}
 }

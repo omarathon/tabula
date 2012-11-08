@@ -7,23 +7,24 @@ import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.helpers.{LazyLists, Logging}
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.{DateFormats, CurrentUser}
 import uk.ac.warwick.courses.services.UserLookupService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
-@Configurable
 class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUser)
 		extends Command[List[Extension]] with Daoisms with Logging	{
 		
-	@Autowired var userLookup:UserLookupService =_
+	var userLookup = Wire.auto[UserLookupService]
+	
 	@BeanProperty var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
 	@BeanProperty var extensions:JList[Extension] = LazyLists.simpleFactory()
 
@@ -70,9 +71,10 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 		extensionItems.addAll(extensionItemsList)
 	}
 
-	@Transactional
 	def persistExtensions() {
-		extensions.foreach(session.saveOrUpdate(_))
+		transactional() {
+			extensions.foreach(session.saveOrUpdate(_))
+		}
 	}
 
 	def validate(errors:Errors) {
@@ -96,8 +98,7 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 		}
 	}
 
-	@Transactional
-	override def apply():List[Extension] = {
+	override def work():List[Extension] = transactional() {
 		extensions = copyExtensionItems()
 		persistExtensions()
 		extensions.toList

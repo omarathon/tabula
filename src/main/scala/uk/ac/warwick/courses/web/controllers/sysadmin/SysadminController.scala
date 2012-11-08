@@ -29,14 +29,15 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.services.AssignmentImporter
 import uk.ac.warwick.courses.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.spring.Wire
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
  */
 
 abstract class BaseSysadminController extends BaseController {
-	@Autowired var moduleService: ModuleAndDepartmentService = null
-	@Autowired var userLookup: UserLookupInterface = _
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var userLookup = Wire.auto[UserLookupInterface]
 
 	def redirectToHome = Redirect("/sysadmin/")
 
@@ -55,7 +56,7 @@ abstract class BaseSysadminController extends BaseController {
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
 
-	@Autowired var maintenanceService: MaintenanceModeService = _
+	var maintenanceService = Wire.auto[MaintenanceModeService]
 
 	@RequestMapping
 	def home = Mav("sysadmin/home").addObjects("maintenanceModeService" -> maintenanceService)
@@ -134,9 +135,8 @@ class AddDeptOwnerController extends BaseSysadminController {
 	}
 }
 
-@Configurable
 class ReindexForm {
-	@Autowired @BeanProperty var indexer: AuditEventIndexService = _
+	var indexer = Wire.auto[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
@@ -159,8 +159,7 @@ class SysadminIndexController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
-
-	@Autowired var importer: AssignmentImporter = _
+	var importer = Wire.auto[AssignmentImporter]
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
@@ -186,7 +185,7 @@ class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidatin
 @Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
-	@Autowired var service: MaintenanceModeService = _
+	var service = Wire.auto[MaintenanceModeService]
 
 	validatesSelf[MaintenanceModeForm]
 

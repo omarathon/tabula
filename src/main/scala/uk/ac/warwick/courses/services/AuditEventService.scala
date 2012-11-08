@@ -10,14 +10,14 @@ import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.util.FileCopyUtils
 import javax.annotation.Resource
 import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.data.model.AuditEvent
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.events.Event
-import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Propagation._
 
 trait AuditEventService {
 	def getById(id: Long): Option[AuditEvent]
@@ -122,27 +122,28 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	 * so that it can be committed even if the main operation is
 	 * rolling back.
 	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	def doSave(event: Event, stage: String) {
-		// Both Oracle and HSQLDB support sequences, but with different select syntax
-		// TODO evaluate this and the SQL once on init
-		val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
+		transactional(propagation = REQUIRES_NEW) {
+			// Both Oracle and HSQLDB support sequences, but with different select syntax
+			// TODO evaluate this and the SQL once on init
+			val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
 
-		val query = session.createSQLQuery("insert into auditevent " +
-			"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
-			"values(" + nextSeq + ", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
-		query.setString("eventid", event.id)
-		query.setTimestamp("date", event.date.toDate)
-		query.setString("name", event.name)
-		query.setString("stage", stage)
-		query.setString("user_id", event.realUserId)
-		query.setString("masquerade_user_id", event.userId)
-		if (event.extra != null) {
-			val data = new StringWriter()
-			json.writeValue(data, event.extra)
-			query.setString("data", data.toString)
+			val query = session.createSQLQuery("insert into auditevent " +
+				"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
+				"values(" + nextSeq + ", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+			query.setString("eventid", event.id)
+			query.setTimestamp("date", event.date.toDate)
+			query.setString("name", event.name)
+			query.setString("stage", stage)
+			query.setString("user_id", event.realUserId)
+			query.setString("masquerade_user_id", event.userId)
+			if (event.extra != null) {
+				val data = new StringWriter()
+				json.writeValue(data, event.extra)
+				query.setString("data", data.toString)
+			}
+			query.executeUpdate()
 		}
-		query.executeUpdate()
 	}
 
 	def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent] = {

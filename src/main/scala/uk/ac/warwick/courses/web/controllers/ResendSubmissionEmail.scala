@@ -7,7 +7,6 @@ import uk.ac.warwick.courses.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.courses.web.{ Mav, Routes }
 import uk.ac.warwick.courses.CurrentUser
 
-@Configurable
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/resend-receipt"))
 class ResendSubmissionEmail extends AbstractAssignmentController {

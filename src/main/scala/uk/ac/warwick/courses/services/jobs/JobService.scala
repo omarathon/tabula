@@ -4,7 +4,6 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.hibernate.criterion._
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.jobs.Job
 import uk.ac.warwick.courses.jobs.JobPrototype
@@ -15,7 +14,8 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.jobs.FailedJobException
 
 @Service
-class JobService extends HasJobDao with Transactions with Logging {
+class JobService extends HasJobDao with Logging {
+	import Transactions._
 
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
@@ -64,46 +64,50 @@ class JobService extends HasJobDao with Transactions with Logging {
 		jobDao.saveJob(instance)
 	}
 
-	@Transactional
 	def run(instance: JobInstance, job: Job) {
-		try job.run(instance)
-		catch {
-			case old: ObsoleteJobException => {
-				logger.info("Job " + instance.id + " obsolete")
-				fail(instance)
+		transactional() {
+			try job.run(instance)
+			catch {
+				case old: ObsoleteJobException => {
+					logger.info("Job " + instance.id + " obsolete")
+					fail(instance)
+				}
+				case failed: FailedJobException => {
+					logger.info("Job " + instance.id + " failed: " + failed.status)
+					instance.status = failed.status
+					fail(instance)
+				}
+				case e => {
+					logger.info("Job " + instance.id + " failed", e)
+					instance.status = "Sorry, there was an error: " + e.getMessage()
+					fail(instance)
+				}
 			}
-			case failed: FailedJobException => {
-				logger.info("Job " + instance.id + " failed: " + failed.status)
-				instance.status = failed.status
-				fail(instance)
-			}
-			case e => {
-				logger.info("Job " + instance.id + " failed", e)
-				instance.status = "Sorry, there was an error: " + e.getMessage()
-				fail(instance)
-			}
+			finish(instance)
 		}
-		finish(instance)
 	}
 
-	@Transactional
 	private def start(instance: JobInstance) {
-		instance.started = true
-		jobDao.update(instance)
+		transactional() {
+			instance.started = true
+			jobDao.update(instance)
+		}
 	}
 
-	@Transactional
 	private def finish(instance: JobInstance) {
-		instance.finished = true
-		jobDao.update(instance)
+		transactional() {
+			instance.finished = true
+			jobDao.update(instance)
+		}
 	}
 
 	/** Hmm, no Job exists to handle this JobInstance. */
-	@Transactional
 	private def fail(instance: JobInstance) {
-		instance.succeeded = false
-		instance.finished = true
-		jobDao.update(instance)
+		transactional() {
+			instance.succeeded = false
+			instance.finished = true
+			jobDao.update(instance)
+		}
 	}
 
 }

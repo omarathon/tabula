@@ -4,7 +4,7 @@ import uk.ac.warwick.courses.commands.Command
 import uk.ac.warwick.courses.commands.Description
 import uk.ac.warwick.courses.data.model.Feedback
 import scala.reflect.BeanProperty
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.Features
 import uk.ac.warwick.courses.JavaImports._
@@ -41,8 +41,7 @@ class RateFeedbackCommand(val feedback: Feedback, val features: Features) extend
 
 	val maximumStars = 5
 
-	@Transactional
-	def apply {
+	def work() = transactional() {
 		feedback.ratingHelpful = wasHelpful.toBoolean
 		feedback.ratingPrompt = wasPrompt.toBoolean
 	}

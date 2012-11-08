@@ -5,7 +5,6 @@ import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.data.model.Assignment
 
-@Configurable
 class ExtensionDeletedMessage(assignment:Assignment, userId: String)
 	extends ExtensionMessage(assignment:Assignment, userId: String) {
 

@@ -19,13 +19,13 @@ import forms.Extension
 import scala.util.matching.Regex
 import javax.persistence.OneToOne
 import javax.persistence.CascadeType._
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
-	@transient @Autowired var fileDao: FileDao = _
+	@transient var fileDao = Wire.auto[FileDao]
 
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)

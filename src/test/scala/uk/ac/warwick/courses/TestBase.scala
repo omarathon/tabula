@@ -29,10 +29,10 @@ import org.junit.Before
 import java.io.StringWriter
 import java.io.StringReader
 import org.aspectj.lang.{NoAspectBoundException, Aspects}
-import uk.ac.warwick.courses.commands.CommandApplyAspect
 import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.model.Assignment
+import uk.ac.warwick.spring.Wire
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -89,11 +89,8 @@ trait TestHelpers {
 
 	@Before def emptyTempDirSet = temporaryFiles = Set.empty
 
-	@Before def setupAspects = try {
-		val commandAspect = Aspects.aspectOf(classOf[CommandApplyAspect])
-		commandAspect.enabled = false
-	} catch {
-		case e: NoAspectBoundException => println("No Aspects bound, many tests may fail.")
+	@Before def setupAspects = {
+		
 	}
 
 	/** Returns a new temporary directory that will get cleaned up

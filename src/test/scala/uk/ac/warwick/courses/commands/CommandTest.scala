@@ -7,7 +7,7 @@ class CommandTest extends TestBase {
 	
 	class TestCommand extends Command[Unit] {
 		def describe(d:Description) {}
-		def apply {}
+		def work {}
 	}
 	
 	// set event name via overriding value

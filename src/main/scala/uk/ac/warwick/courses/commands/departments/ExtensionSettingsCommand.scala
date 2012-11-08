@@ -4,12 +4,11 @@ import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.commands.{Description, Command}
 import org.springframework.beans.factory.annotation.Configurable
 import reflect.BeanProperty
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.StringUtils._
 import uk.ac.warwick.courses.Features
+import uk.ac.warwick.courses.data.Transactions._
 
-@Configurable
 class ExtensionSettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
 
 	@BeanProperty var allowExtensionRequests:JBoolean =_
@@ -37,12 +36,13 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 		}
 	}
 
-	@Transactional
-	override def apply() {
-		if (features.extensions){
-			department.allowExtensionRequests = this.allowExtensionRequests
-			department.extensionGuidelineSummary = this.extensionGuidelineSummary
-			department.extensionGuidelineLink = this.extensionGuidelineLink
+	override def work() {
+		transactional() {
+			if (features.extensions){
+				department.allowExtensionRequests = this.allowExtensionRequests
+				department.extensionGuidelineSummary = this.extensionGuidelineSummary
+				department.extensionGuidelineLink = this.extensionGuidelineLink
+			}
 		}
 	}
 

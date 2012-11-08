@@ -3,7 +3,7 @@ package uk.ac.warwick.courses.web.controllers
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
@@ -19,7 +19,6 @@ import uk.ac.warwick.courses.data.model.Feedback
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
  */
-@Configurable
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends AbstractAssignmentController {
@@ -91,20 +90,21 @@ class AssignmentController extends AbstractAssignmentController {
 		}
 	}
 
-	@Transactional
 	@RequestMapping(method = Array(POST))
 	def submit(@PathVariable module: Module, user: CurrentUser, @Valid form: SubmitAssignmentCommand, errors: Errors) = {
-		val assignment = form.assignment
-		val module = form.module
-		form.onBind
-		checks(form, None)
-		if (errors.hasErrors || !user.loggedIn) {
-			view(user, form, errors)
-		} else {
-			val submission = form.apply
-			val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
-			sendReceipt.apply()
-			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
+		transactional() {
+			val assignment = form.assignment
+			val module = form.module
+			form.onBind
+			checks(form, None)
+			if (errors.hasErrors || !user.loggedIn) {
+				view(user, form, errors)
+			} else {
+				val submission = form.apply
+				val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
+				sendReceipt.apply()
+				Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
+			}
 		}
 	}
 

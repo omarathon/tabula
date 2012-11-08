@@ -19,6 +19,7 @@ import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.courses.system.CurrentUserInterceptor
+import uk.ac.warwick.spring.Wire
 
 object JobInstanceImpl {
 	def fromPrototype(prototype: JobPrototype) = {
@@ -35,15 +36,14 @@ object JobInstanceImpl {
  * There can be many Job subclasses but JobInstance
  * does not need subclassing.
  */
-@Configurable
 @Entity(name = "Job")
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging {
 
 	private type JsonMap = Map[String, Any]
 
-	@transient @Autowired var jsonMapper: ObjectMapper = _
-	@transient @Autowired var userLookup: UserLookupInterface = _
-	@transient @Autowired var currentUserFinder: CurrentUserInterceptor = _
+	@transient var jsonMapper = Wire.auto[ObjectMapper]
+	@transient var userLookup = Wire.auto[UserLookupInterface]
+	@transient var currentUserFinder = Wire.auto[CurrentUserInterceptor]
 
 	/** Human-readable status of the job */
 	var status: String = _

@@ -9,12 +9,13 @@ import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.Features
+import uk.ac.warwick.spring.Wire
 
 @Controller class HomeController extends BaseController {
-	@Autowired var moduleService: ModuleAndDepartmentService = _
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var features: Features = _
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var assignmentService = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
+	var features = Wire.auto[Features]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems

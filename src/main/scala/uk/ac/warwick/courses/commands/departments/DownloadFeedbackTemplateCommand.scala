@@ -7,18 +7,16 @@ import uk.ac.warwick.courses.services.fileserver.{RenderableAttachment, Renderab
 import reflect.BeanProperty
 import uk.ac.warwick.courses.data.model.{Department, FeedbackTemplate}
 
-@Configurable
 class DownloadFeedbackTemplateCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 
 	@BeanProperty var template: FeedbackTemplate = _
 	@BeanProperty var department: Department = _
 	@BeanProperty var filename: String = _
 
-
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def apply() = {
+	def work() = {
 
 		val attachment = Option(template.attachment)
 		val renderableAttachment = attachment find (_.name == filename) map (a => new RenderableAttachment(a))

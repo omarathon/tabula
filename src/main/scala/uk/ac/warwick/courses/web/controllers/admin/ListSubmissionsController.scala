@@ -21,7 +21,7 @@ import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.commands.assignments.SubmissionListItem
 import uk.ac.warwick.courses.data.model.Assignment
 
-@Configurable @Controller
+@Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
 class ListSubmissionsController extends BaseController {
 

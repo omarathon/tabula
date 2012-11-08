@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.services.turnitin._
+import uk.ac.warwick.spring.Wire
 
 
-trait TurnitinTrait extends Logging {
-	@Autowired var api: Turnitin = _
-
-	
-
+trait TurnitinTrait {
+	var api: Turnitin = Wire.auto[Turnitin]
 }

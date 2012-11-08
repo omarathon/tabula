@@ -13,17 +13,16 @@ import uk.ac.warwick.courses.data.FeedbackDao
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.commands.SelfValidating
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
 
+	var feedbackDao = Wire.auto[FeedbackDao]
+
 	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
-
-	@Autowired var feedbackDao: FeedbackDao = _
-
 	@BeanProperty var confirm: Boolean = false
 
-	def apply() = {
+	def work() = {
 		for (feedback <- feedbacks) feedbackDao.delete(feedback)
 	}
 

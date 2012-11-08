@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 import javax.persistence.Entity
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.UniversityId
 import uk.ac.warwick.courses.commands.Command
@@ -38,6 +38,7 @@ import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import java.nio.charset.Charset
+import uk.ac.warwick.spring.Wire
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
@@ -58,7 +59,7 @@ case class ProblemFile(
 
 // Purely to generate an audit log event
 class ExtractFeedbackZip(cmd: AddFeedbackCommand) extends Command[Unit] {
-	def apply() {}
+	def work() {}
 	def describe(d: Description) = d.assignment(cmd.assignment).properties(
 		"archive" -> cmd.archive.getOriginalFilename())
 }
@@ -72,14 +73,13 @@ class ExtractFeedbackZip(cmd: AddFeedbackCommand) extends Command[Unit] {
  * so we could check that this is no longer being accessed by anyone, and then
  * remove all the code in here that handles it, to simplify it a little.
  */
-@Configurable
 class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 
-	@Autowired var zipService: ZipService = _
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var fileDao: FileDao = _
+	var zipService = Wire.auto[ZipService]
+	var userLookup = Wire.auto[UserLookupService]
+	var fileDao = Wire.auto[FileDao]
 
 	/* for single upload */
 	@BeanProperty var uniNumber: String = _
@@ -148,7 +148,6 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 		}
 	}
 
-	@Transactional
 	def onBind {
 		file.onBind
 
@@ -223,8 +222,7 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 
 	}
 
-	@Transactional
-	override def apply(): List[Feedback] = {
+	override def work(): List[Feedback] = transactional() {
 
 		def saveFeedback(uniNumber: String, file: UploadedFile) = {
 			val feedback = assignment.findFeedback(uniNumber).getOrElse(new Feedback)

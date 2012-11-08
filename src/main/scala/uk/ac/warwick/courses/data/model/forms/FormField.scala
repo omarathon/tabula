@@ -23,6 +23,7 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.courses.data.model.FileAttachment
+import uk.ac.warwick.spring.Wire
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -38,7 +39,6 @@ import uk.ac.warwick.courses.data.model.FileAttachment
  * SavedSubmissionValue class.
  *
  */
-@Configurable
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
@@ -49,7 +49,7 @@ abstract class FormField extends GeneratedId {
 		assignment = a
 	}
 
-	@Autowired @transient var json: ObjectMapper = _
+	@transient var json = Wire.auto[ObjectMapper]
 
 	//	var fieldType:String =_
 
