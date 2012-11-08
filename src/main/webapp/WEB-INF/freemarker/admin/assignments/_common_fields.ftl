@@ -8,14 +8,18 @@ so that they can be passed around between requests.
 
 -->
 
-<#if features.feedbackTemplates>
+<#if features.feedbackTemplates && department.feedbackTemplates?has_content>
 	<@form.labelled_row "feedbackTemplate" "Feedback template">
 		<@f.select path="feedbackTemplate">
-			<@f.option value="" label=""/>
-			<#list  department.feedbackTemplates as template>
+			<@f.option value="" label="No template"/>
+			<#list department.feedbackTemplates as template>
 				<@f.option value="${template.id}" label="${template.name}"/>
 			</#list>
 		</@f.select>
+		<div class="help-block">
+			Select the feedback template that will be used for this assignment. Copies of the template will be
+			distributed along with student submissions.
+		</div>
 	</@form.labelled_row>
 </#if>
 
@@ -98,7 +102,7 @@ so that they can be passed around between requests.
 					</label>
 				</@form.field>
 			</@form.row>
-			<div id="request-extension-row">
+			<!--div id="request-extension-row">
 				<@form.row>
 					<@form.label></@form.label>
 					<@form.field>
@@ -111,7 +115,7 @@ so that they can be passed around between requests.
 						</div>
 					</@form.field>
 				</@form.row>
-			</div>
+			</div-->
 		</#if>
 
 		<@form.row>

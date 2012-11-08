@@ -32,6 +32,7 @@
 			<#local assignment = info.assignment />
 			<#local extension = info.extension!false />
 			<#local isExtended = info.isExtended!false />
+			<#local extensionRequested = info.extensionRequested!false />
 			<@assignment_link assignment>
 				<@format_name assignment />	
 			</@assignment_link>
