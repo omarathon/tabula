@@ -28,7 +28,7 @@ import uk.ac.warwick.courses.services.{ AssignmentService, UserLookupService }
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
-import uk.ac.warwick.courses.JBoolean
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.spring.Wire
 
 object Assignment {

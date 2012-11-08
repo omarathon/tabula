@@ -13,8 +13,11 @@ import collection.JavaConversions._
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import org.springframework.web.bind.WebDataBinder
-import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.web.Routes
+import org.springframework.web.bind.annotation.RequestMethod._
+import uk.ac.warwick.courses.AcademicYear
+import uk.ac.warwick.courses.PermissionDeniedException
 
 /**
  * Controller that handles the multi-step process of creating many assignments from SITS data.

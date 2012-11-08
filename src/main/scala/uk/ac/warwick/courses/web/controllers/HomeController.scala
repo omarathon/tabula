@@ -10,6 +10,7 @@ import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.Features
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.courses.helpers.ArrayList
 
 @Controller class HomeController extends BaseController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
