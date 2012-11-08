@@ -12,6 +12,7 @@ import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.spring.Wire
 
+@Controller
 class DownloadSubmissionsController extends BaseController {
 
 	var fileServer = Wire.auto[FileServer]
