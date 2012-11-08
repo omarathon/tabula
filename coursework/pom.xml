@@ -31,6 +31,25 @@
 
 			<build>
 				<plugins>
+					<!-- Make sure we build the _exploded_ war -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>prepare-war</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>exploded</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<warName>${project.build.finalName}</warName>
+						</configuration>
+					</plugin>
+				
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
@@ -155,11 +174,12 @@
 					<execution>
 						<id>prepare-war</id>
 						<phase>prepare-package</phase>
-						<goals>
-							<goal>exploded</goal>
-						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<outputDirectory>${tabula.basedir}/dist</outputDirectory>
+					<warName>${project.artifactId}</warName>
+				</configuration>
 			</plugin>
 
 			<plugin>
