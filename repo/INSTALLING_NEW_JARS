@@ -1,0 +1,18 @@
+This local Maven repository allows us to use JARs without needing
+to run a full Maven repository. This is likely to be superceded
+in the future by our own Maven repository.
+
+To install a new JAR, run the following from the command-line (from
+the base of the project):
+
+  $ mvn install:install-file \ 
+  		-DlocalRepositoryPath=repo \ 
+  		-DcreateChecksum=true \ 
+  		-Dpackaging=jar \
+  		-Dfile=PATH_TO_JAR \ 
+  		-DgroupId=GROUP_ID \
+  		-DartifactId=ARTIFACT_ID \ 
+  		-Dversion=VERSION
+  		
+This will create the necessary directories and POM files in repo.
+  

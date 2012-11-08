@@ -15,7 +15,7 @@
   	</description>
 	<url>http://warwick.ac.uk/tabula</url>
 
-  <!--    I   N   C   E   P   T   I   O   N    -->
+	<!-- I N C E P T I O N -->
 	<inceptionYear>2012</inceptionYear>
 
 	<properties>
@@ -126,7 +126,7 @@
 
 		<profile>
 			<id>deploy</id>
-			
+
 			<build>
 				<defaultGoal>install</defaultGoal>
 			</build>
@@ -134,19 +134,19 @@
 
 		<profile>
 			<id>dev-deploy-views</id>
-			
+
 			<build>
 				<defaultGoal>process-resources</defaultGoal>
 			</build>
 		</profile>
-		
+
 		<!-- sync static -->
 		<profile>
 			<id>dev-deploy-static</id>
-			
+
 			<build>
 				<defaultGoal>package</defaultGoal>
-				
+
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -253,6 +253,17 @@
 			<id>oauth</id>
 			<url>http://oauth.googlecode.com/svn/code/maven</url>
 		</repository>
+		<repository>
+			<id>local-repo</id>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>ignore</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>file://${tabula.basedir}/repo</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -260,6 +271,17 @@
 			<name>oss.sonatype.org</name>
 			<id>oss.sonatype.org</id>
 			<url>http://oss.sonatype.org/content/groups/public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>local-repo</id>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>ignore</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>file://${tabula.basedir}/repo</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -690,30 +712,22 @@
 			<dependency>
 				<groupId>uk.ac.warwick</groupId>
 				<artifactId>warwickutils-all</artifactId>
-				<version>LATEST</version>
-				<scope>system</scope>
-				<systemPath>${tabula.basedir}/unmanaged-libs/warwickutils-all.jar</systemPath>
+				<version>20111018</version>
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick</groupId>
 				<artifactId>sso-client</artifactId>
 				<version>1.88-SNAPSHOT</version>
-				<scope>system</scope>
-				<systemPath>${tabula.basedir}/unmanaged-libs/sso-client-1.88a.jar</systemPath>
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick</groupId>
 				<artifactId>spring-scala-glue_2.9.2</artifactId>
 				<version>0.1-SNAPSHOT</version>
-				<scope>system</scope>
-				<systemPath>${tabula.basedir}/unmanaged-libs/spring-scala-glue_2.9.2-0.1-SNAPSHOT.jar</systemPath>
 			</dependency>
 			<dependency>
 				<groupId>github.com.ingoem</groupId>
 				<artifactId>spring-react_2.9.1</artifactId>
 				<version>1.0</version>
-				<scope>system</scope>
-				<systemPath>${tabula.basedir}/unmanaged-libs/scala-react_2.9.1-1.0.jar</systemPath>
 			</dependency>
 
 			<dependency>

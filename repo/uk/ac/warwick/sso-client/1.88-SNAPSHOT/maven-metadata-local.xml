@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>uk.ac.warwick</groupId>
+  <artifactId>sso-client</artifactId>
+  <version>1.88-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <lastUpdated>20121108094010</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>1.88-SNAPSHOT</value>
+        <updated>20121108094010</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>1.88-SNAPSHOT</value>
+        <updated>20121108094010</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

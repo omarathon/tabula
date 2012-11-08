@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>uk.ac.warwick</groupId>
+  <artifactId>sso-client</artifactId>
+  <versioning>
+    <versions>
+      <version>1.88-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20121108094010</lastUpdated>
+  </versioning>
+</metadata>
