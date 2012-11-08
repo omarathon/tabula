@@ -10,16 +10,11 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>coursework</artifactId>
+	<artifactId>courses</artifactId>
 	<packaging>war</packaging>
 
 	<name>Tabula Coursework Management</name>
-	<description>
-		Coursework Management is a new service for managing coursework assignments and feedback. 
-		If you're a student, you might start getting emails containing links to download your 
-		feedback from here, while staff members will be able to receive submitted assignments 
-		and return feedback on them.
-	</description>
+	<description>Coursework Management is a new service for managing coursework assignments and feedback. If you're a student, you might start getting emails containing links to download your feedback from here, while staff members will be able to receive submitted assignments and return feedback on them.</description>
 
 	<properties>
 		<tabula.basedir>${project.basedir}/..</tabula.basedir>
@@ -123,9 +118,6 @@
 	</profiles>
 
 	<build>
-		<sourceDirectory>src/main/scala</sourceDirectory>
-		<testSourceDirectory>src/test/scala</testSourceDirectory>
-
 		<testResources>
 			<testResource>
 				<targetPath>WEB-INF</targetPath>
