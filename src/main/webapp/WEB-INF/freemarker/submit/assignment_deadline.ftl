@@ -30,7 +30,7 @@
 <#else>
 	<div class="alert alert-info deadline">
 		Submission deadline: <strong><@fmt.date date=assignment.closeDate timezone=true /></strong> (${time_remaining})
-		<#if assignment.module.department.allowExtensionRequests && assignment.allowExtensions>
+		<#if assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
 			<#if extensionRequested>
 				<@extensionButton "Review extension request" assignment/>
 			<#else>
