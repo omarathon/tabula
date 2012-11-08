@@ -212,8 +212,9 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.6</version>
 				</plugin>
-				
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -598,6 +599,11 @@
 				<version>3.6.10.Final</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-annotations</artifactId>
+				<version>3.5.6-Final</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate.javax.persistence</groupId>
 				<artifactId>hibernate-jpa-2.0-api</artifactId>
 				<version>1.0.1.Final</version>
@@ -617,6 +623,13 @@
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>1.0.0.GA</version>
+			</dependency>
+
+			<!-- Needed to stop version clashing with Jboss5 common/lib http://stackoverflow.com/questions/4097567/jboss-and-different-versions-of-hibernate -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator-legacy</artifactId>
+				<version>4.0.2.GA</version>
 			</dependency>
 
 			<dependency>
@@ -657,9 +670,14 @@
 				<version>20090617</version>
 			</dependency>
 			<dependency>
-				<groupId>org.opensaml</groupId>
+				<groupId>xfire</groupId>
 				<artifactId>opensaml</artifactId>
-				<version>1.1</version>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.santuario</groupId>
+				<artifactId>xmlsec</artifactId>
+				<version>1.4.3</version>
 			</dependency>
 
 			<dependency>

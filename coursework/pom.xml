@@ -28,8 +28,8 @@
 		<!-- deploy to jboss -->
 		<profile>
 			<id>deploy</id>
-			
-			<build>		
+
+			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -39,11 +39,13 @@
 								<id>dev-deploy-unpacked</id>
 								<phase>install</phase>
 								<configuration>
-									<target>										
+									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war">
-											<fileset dir="${project.build.directory}/${project.build.finalName}" />
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
-										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+										<touch
+											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -55,11 +57,11 @@
 				</plugins>
 			</build>
 		</profile>
-		
+
 		<!-- sync views -->
 		<profile>
 			<id>dev-deploy-views</id>
-			
+
 			<build>
 				<plugins>
 					<plugin>
@@ -71,7 +73,8 @@
 								<phase>process-resources</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
+										<sync
+											todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
 											<fileset dir="${basedir}/src/main/webapp/WEB-INF/freemarker" />
 										</sync>
 									</target>
@@ -85,12 +88,12 @@
 				</plugins>
 			</build>
 		</profile>
-		
+
 		<!-- sync static -->
 		<profile>
 			<id>dev-deploy-static</id>
-			
-			<build>			
+
+			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -102,7 +105,8 @@
 								<configuration>
 									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war/static">
-											<fileset dir="${project.build.directory}/${project.build.finalName}/static" />
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}/static" />
 										</sync>
 									</target>
 								</configuration>
@@ -205,10 +209,14 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<target>
-								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="maven.plugin.classpath" />
-								
-								<lesscss todir="${project.build.directory}/${project.build.finalName}/static/css">
-									<fileset dir="${project.build.directory}/${project.build.finalName}/static/css" includes="*.less" excludes="*.inc.less" />
+								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
+									classpathref="maven.plugin.classpath" />
+
+								<lesscss
+									todir="${project.build.directory}/${project.build.finalName}/static/css">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}/static/css"
+										includes="*.less" excludes="*.inc.less" />
 								</lesscss>
 							</target>
 						</configuration>
@@ -221,10 +229,15 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<target>
-								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask" classpathref="maven.plugin.classpath" />
-								
-								<batchhash propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">
-									<fileset dir="${project.build.directory}/${project.build.finalName}" includes="static/**" excludes="**/*.less" />
+								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
+									classpathref="maven.plugin.classpath" />
+
+								<batchhash
+									propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
+									maxhashlength="12" salt="a">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}"
+										includes="static/**" excludes="**/*.less" />
 								</batchhash>
 							</target>
 						</configuration>
@@ -272,7 +285,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -422,6 +435,10 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.0-api</artifactId>
 		</dependency>
@@ -437,6 +454,10 @@
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-legacy</artifactId>
 		</dependency>
 
 		<dependency>
@@ -484,8 +505,12 @@
 			<artifactId>oauth-provider</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.opensaml</groupId>
+			<groupId>xfire</groupId>
 			<artifactId>opensaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec</artifactId>
 		</dependency>
 
 		<dependency>
