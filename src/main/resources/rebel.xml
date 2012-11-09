@@ -7,8 +7,8 @@
 	</classpath>
 	
 	<web>
-		<link target="/WEB-INF/freemarker">
-			<dir name="${rebel.workspace.path}/courses/src/main/webapp/WEB-INF/freemarker" />
+		<link target="/">
+			<dir name="${rebel.workspace.path}/courses/src/main/webapp/" />
 		</link>
 	</web>
 		
