@@ -4,7 +4,7 @@ import uk.ac.warwick.courses.commands._
 import uk.ac.warwick.courses.data.model._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.AssignmentService
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.CurrentUser
 import org.springframework.validation.Errors
@@ -17,12 +17,12 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.courses.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.ZipService
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating {
 
-	@Autowired var service: AssignmentService = _
-	@Autowired var zipService: ZipService = _
+	var service = Wire.auto[AssignmentService]
+	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var fields = buildEmptyFields
 
@@ -92,8 +92,7 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 
 	}
 
-	@Transactional
-	override def apply = {
+	override def work = transactional() {
 		assignment.submissions.find(_.universityId == user.universityId).map { existingSubmission =>
 			if (assignment.resubmittable(user.apparentId)) {
 				service.delete(existingSubmission)

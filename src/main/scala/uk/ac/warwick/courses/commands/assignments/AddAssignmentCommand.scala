@@ -6,7 +6,6 @@ import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.transaction.annotation.Transactional
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
 import uk.ac.warwick.courses.data.model.Assignment
@@ -15,8 +14,8 @@ import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.helpers._
 import uk.ac.warwick.courses.commands._
 import org.springframework.validation.Errors
+import uk.ac.warwick.courses.data.Transactions._
 
-@Configurable
 class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
 
 	openDate = new DateTime().withTime(12, 0, 0, 0)
@@ -24,8 +23,7 @@ class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCo
 
 	def assignment: Assignment = null
 
-	@Transactional
-	override def apply: Assignment = {
+	override def work: Assignment = transactional() {
 		val assignment = new Assignment(module)
 		assignment.addDefaultFields()
 		copyTo(assignment)

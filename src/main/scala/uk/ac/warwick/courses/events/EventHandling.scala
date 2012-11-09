@@ -5,12 +5,20 @@ import org.springframework.beans.factory.annotation.Configurable
 import scala.reflect.BeanProperty
 import uk.ac.warwick.courses.commands.Unaudited
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.spring.Wire
+
+object EventHandling {
+	/**
+	 * You'd only ever disable this in testing.
+	 */
+	var enabled = true
+}
 
 /**
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	@Autowired @BeanProperty var listener: EventListener = _
+	val listener = Wire.auto[EventListener]
 
 	/**
 	 * Records the various stages of an event: before, and either

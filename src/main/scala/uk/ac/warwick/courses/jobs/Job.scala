@@ -1,7 +1,8 @@
 package uk.ac.warwick.courses.jobs
 
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation._
+import org.springframework.transaction.annotation.Propagation._
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.courses.services.jobs._
 import org.springframework.stereotype.Component
@@ -40,19 +41,21 @@ abstract class Job extends Logging {
 
 	protected def getProgress(implicit job: JobInstance) = job.progress
 	
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	protected def updateProgress(percent: Int)(implicit job: JobInstance) {
-		job.progress = percent
-		jobService.update(job)
+		transactional(propagation = REQUIRES_NEW) {
+			job.progress = percent
+			jobService.update(job)
+		}
 	}
 
 	protected def getStatus(implicit job: JobInstance) = job.status
 	
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	protected def updateStatus(status: String)(implicit job: JobInstance) {
-		if (debugEnabled) logger.debug("Job:" + job.id + " - " + status)
-		job.status = status
-		jobService.update(job)
+		transactional(propagation = REQUIRES_NEW) {
+			if (debugEnabled) logger.debug("Job:" + job.id + " - " + status)
+			job.status = status
+			jobService.update(job)
+		}
 	}
 
 	/** An exception you can throw when a Job is obsolete, e.g. it references an entity that no longer exists.

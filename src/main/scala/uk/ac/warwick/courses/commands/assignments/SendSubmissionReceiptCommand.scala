@@ -22,12 +22,12 @@ import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.commands.ReadOnly
 import uk.ac.warwick.courses.web.views.FreemarkerRendering
+import uk.ac.warwick.spring.Wire
 
 /**
  * Send an email confirming the receipt of a submission to the student
  * who submitted it.
  */
-@Configurable
 class SendSubmissionReceiptCommand(
 	@BeanProperty var submission: Submission,
 	@BeanProperty var user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering {
@@ -37,15 +37,15 @@ class SendSubmissionReceiptCommand(
 	@BeanProperty var assignment: Assignment = Option(submission).map { _.assignment }.orNull
 	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
 
-	@BeanProperty @Autowired implicit var freemarker: Configuration = _
-	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
+	implicit var freemarker = Wire.auto[Configuration]
+	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var topLevelUrl = Wire.property("${toplevel.url}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
-	def apply = {
+	def work = {
 		if (user.email.hasText) {
 			(studentMailSender send messageFor(user))
 			true

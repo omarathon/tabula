@@ -19,6 +19,7 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
 case class UpstreamGroupOption(
 	assignmentId: String,
@@ -33,8 +34,8 @@ case class UpstreamGroupOption(
  */
 abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAssignmentProperties {
 
-	@Autowired var service: AssignmentService = _
-	@Autowired var userLookup: UserLookupService = _
+	var service = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	def module: Module
 	def assignment: Assignment

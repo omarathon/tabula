@@ -37,6 +37,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbacktemplatedelete department feedbacktemplate><@url page="/admin/department/${department.code}/settings/feedback-templates/delete/${feedbacktemplate.id}" /></#macro>
 <#-- non admin -->
 <#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
+<#macro extensionRequest assignment><@url page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@url page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
 </#compress>

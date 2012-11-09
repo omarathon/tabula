@@ -7,7 +7,6 @@ import reflect.BeanProperty
 import uk.ac.warwick.courses.data.model.{Assignment, Module}
 import uk.ac.warwick.courses.CurrentUser
 
-@Configurable
 class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 
 	@BeanProperty var module: Module = _
@@ -17,7 +16,7 @@ class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[R
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def apply() = {
+	def work() = {
 		val extension = assignment.findExtension(user.universityId)
 		val allAttachments = extension map {_.nonEmptyAttachments} getOrElse Nil
 		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))

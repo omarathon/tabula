@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.courses.commands.{UploadedFile, Description, Command}
 import uk.ac.warwick.courses.data.model.forms.Extension
 import uk.ac.warwick.courses.data.model.{FileAttachment, Assignment}
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.courses.{DateFormats, CurrentUser}
@@ -14,7 +14,6 @@ import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.beans.factory.annotation.Configurable
 
-@Configurable
 class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
 	extends Command[Extension] with Daoisms {
 
@@ -48,13 +47,11 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		modified = true
 	}
 
-	@Transactional
-	def onBind() {
+	def onBind() = transactional() {
 		file.onBind
 	}
 
-	@Transactional
-	override def apply() = {
+	override def work() = transactional() {
 
 		val universityId = submitter.apparentUser.getWarwickId
 		val extension = assignment.findExtension(universityId).getOrElse({

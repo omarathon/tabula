@@ -5,10 +5,10 @@ import uk.ac.warwick.util.core.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.CurrentUser
-import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.courses.PermissionDeniedException
 import uk.ac.warwick.courses.actions._
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.data.Transactions._
 
 /**
  * Checks permissions.
@@ -81,17 +81,18 @@ class SecurityService extends Logging {
 	 * Returns whether the given user can do the given Action on the object
 	 * specified by the Action.
 	 */
-	@Transactional(readOnly = true)
 	def can(user: CurrentUser, action: Action[_]): Boolean = {
-		// loop through checks, seeing if any of them return Allow or Deny
-		for (check <- checks) {
-			val response = check(user, action)
-			response map { canDo =>
-				if (debugEnabled) logger.debug("can " + user + " do " + action + "? " + (if (canDo) "Yes" else "NO"))
-				return canDo
+		transactional(readOnly=true) {
+			// loop through checks, seeing if any of them return Allow or Deny
+			for (check <- checks) {
+				val response = check(user, action)
+				response map { canDo =>
+					if (debugEnabled) logger.debug("can " + user + " do " + action + "? " + (if (canDo) "Yes" else "NO"))
+					return canDo
+				}
 			}
+			throw new IllegalStateException("No security rule handled request for " + user + " doing " + action)
 		}
-		throw new IllegalStateException("No security rule handled request for " + user + " doing " + action)
 	}
 
 	def check(user: CurrentUser, action: Action[_]) = if (!can(user, action)) {

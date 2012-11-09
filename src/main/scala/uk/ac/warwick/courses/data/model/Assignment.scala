@@ -28,7 +28,8 @@ import uk.ac.warwick.courses.services.{ AssignmentService, UserLookupService }
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
-import uk.ac.warwick.courses.JBoolean
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.spring.Wire
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -51,15 +52,14 @@ object Assignment {
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @AccessType("field")
-@Configurable
 class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToString {
 
 	import Assignment._
 
 	@transient
-	@Resource(name = "assignmentService") var assignmentService: AssignmentService = _
+	var assignmentService = Wire[AssignmentService]("assignmentService")
 	@transient
-	@Resource(name = "userLookup") var userLookup: UserLookupService = _
+	var userLookup = Wire[UserLookupService]("userLookup")
 
 	def this(_module: Module) {
 		this()

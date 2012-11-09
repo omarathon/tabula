@@ -16,21 +16,18 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.services.ZipService
-import uk.ac.warwick.courses.JList
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[JList[Submission]] with SelfValidating {
 
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
+  var assignmentService = Wire.auto[AssignmentService]
 
-	@Autowired var assignmentService: AssignmentService = _
-	//@Autowired var zipService:ZipService = _
-
+  @BeanProperty var submissions: JList[Submission] = ArrayList()
 	@BeanProperty var confirm: Boolean = false
-
 	@BeanProperty var markPlagiarised: Boolean = true
 
-	def apply() = {
+	def work() = {
 		for (submission <- submissions) {
 			submission.suspectPlagiarised = markPlagiarised
 			//zipService.invalidateSubmissionZip(assignment)

@@ -27,7 +27,7 @@ import uk.ac.warwick.courses.DateFormats
 /**
  * Download submissions as XML.
  */
-@Configurable @Controller
+@Controller
 class SubmissionsInfoController extends BaseController {
 
 	val formatter = DateFormats.IsoDateTime

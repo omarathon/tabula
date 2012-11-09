@@ -8,7 +8,6 @@ import uk.ac.warwick.courses.web.{ Mav, Routes }
 import uk.ac.warwick.courses.CurrentUser
 import collection.mutable
 
-@Configurable
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/request-access"))
 class RequestAssignmentAccessController extends AbstractAssignmentController {

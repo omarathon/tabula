@@ -2,6 +2,7 @@ package uk.ac.warwick.courses.commands.modules
 
 import uk.ac.warwick.courses
 import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.data.Transactions._
 
 import commands.{ Description, SelfValidating }
 import data.Daoisms
@@ -9,11 +10,9 @@ import data.model._
 
 import collection.JavaConversions._
 import reflect.BeanProperty
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.{ ValidationUtils, Errors }
 import org.springframework.beans.factory.annotation.Configurable
 
-@Configurable
 class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidating {
 
 	@BeanProperty var department: Department = _
@@ -23,8 +22,7 @@ class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidat
 
 	def sanitisedCode = Option(code).map(_.toLowerCase).orNull
 
-	@Transactional
-	def apply() = {
+	def work() = transactional() {
 		val module = new Module()
 		module.department = department
 		module.name = name

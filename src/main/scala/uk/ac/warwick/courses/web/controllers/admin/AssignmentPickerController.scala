@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.courses.CurrentUser
-import uk.ac.warwick.courses.JList
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.services.AssignmentService

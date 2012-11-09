@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import freemarker.template.Configuration
 import javax.annotation.Resource
@@ -31,24 +30,22 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
 
-	@Resource(name = "studentMailSender") var studentMailSender: WarwickMailSender = _
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var userLookup: UserLookupService = _
+	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
+	var assignmentService = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
+	implicit var freemarker = Wire.auto[Configuration]
 
-	@Autowired implicit var freemarker: Configuration = _
-
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var topLevelUrl = Wire.property("${toplevel.url}")
+	
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
-
 	@BeanProperty var confirm: Boolean = false
-
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
 
 	case class MissingUser(val universityId: String)
 	case class BadEmail(val user: User, val exception: Exception = null)
@@ -72,28 +69,16 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		}
 	}
 
-	@Transactional
-	def apply {
-
-		/*	  for (feedback <- assignment.unreleasedFeedback) {
-	      val studentId = feedback.universityId
-	      for (submission <- assignment.submissions.find{ _.universityId == studentId }
-	          if !submission.suspectPlagiarised
-	      ) {
-	          // note: if all are set to true, unreleasedFeedback will return empty.
-	          feedback.released = true
-	          val user = userLookup.getUserByWarwickUniId(studentId, false)
-	          email(Pair(studentId, user))
-	      }
-	  }*/
-
-		val users = assignmentService.getUsersForFeedback(assignment)
-		for ((studentId, user) <- users) {
-			val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
-			for (feedback <- feedbacks)
-				feedback.released = true
+	def work {
+		transactional() {
+			val users = assignmentService.getUsersForFeedback(assignment)
+			for ((studentId, user) <- users) {
+				val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
+				for (feedback <- feedbacks)
+					feedback.released = true
+			}
+			for (info <- users) email(info)
 		}
-		for (info <- users) email(info)
 	}
 
 	private def email(info: Pair[String, User]) {

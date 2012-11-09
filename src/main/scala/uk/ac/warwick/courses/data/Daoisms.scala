@@ -11,6 +11,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.PlatformTransactionManager
+import uk.ac.warwick.spring.Wire
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -20,13 +21,14 @@ import org.springframework.transaction.PlatformTransactionManager
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends Transactions {
+trait Daoisms {
+	import Transactions._
 
 	import org.hibernate.criterion.Restrictions._
 	def is = org.hibernate.criterion.Restrictions.eq _
 
-	@field @Resource(name = "dataSource") var dataSource: DataSource = _
-	@field @Autowired var sessionFactory: SessionFactory = _
+	var dataSource = Wire[DataSource]("dataSource")
+	var sessionFactory = Wire.auto[SessionFactory]
 
 	protected def session = sessionFactory.getCurrentSession
 

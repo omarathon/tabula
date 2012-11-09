@@ -5,7 +5,6 @@ import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.data.model.forms.Extension
 
-@Configurable
 class ExtensionGrantedMessage(extension: Extension, userId: String)
 	extends ExtensionMessage(extension: Extension, userId: String) {
 

@@ -3,18 +3,17 @@ package uk.ac.warwick.courses.data.model;
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-
 import javax.persistence.Column
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.JoinTable
 import javax.persistence.JoinColumn
-import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.spring.Wire
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -36,11 +35,9 @@ import uk.ac.warwick.courses.services.UserLookupService
  * Depending on context, the usercodes may be university IDs.
  */
 @Entity
-@Configurable
 class UserGroup extends GeneratedId {
 
-	// Not created by Spring but @Autowiring works thanks to compile-time weaving.
-	@Autowired @transient private var userLookup: UserLookupService = _
+	@transient private lazy val userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	@BeanProperty var baseWebgroup: String = _

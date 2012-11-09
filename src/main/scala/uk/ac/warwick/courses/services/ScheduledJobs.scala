@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.CleanupTemporaryFilesCommand
 import uk.ac.warwick.courses.commands.imports.ImportModulesCommand
 import uk.ac.warwick.courses.services.jobs.JobService
@@ -33,11 +32,6 @@ class ScheduledJobs {
 
 	@Autowired @BeanProperty
 	var jobService: JobService = _
-
-	/*
-	 * Don't think @Transactional works on these methods so it should be put
-	 * on the method that we call through to.
-	 */
 
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = exceptionResolver.reportExceptions {

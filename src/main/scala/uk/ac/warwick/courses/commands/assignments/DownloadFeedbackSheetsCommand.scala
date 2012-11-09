@@ -7,19 +7,19 @@ import uk.ac.warwick.courses.services.{AssignmentService, ZipService}
 import uk.ac.warwick.courses.services.fileserver.RenderableZip
 import uk.ac.warwick.courses.commands.{ApplyWithCallback, ReadOnly, Command, Description}
 import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.spring.Wire
 
 /**
  * Downloads a feedback sheet per student in the assignment member list
  */
-@Configurable
 class DownloadFeedbackSheetsCommand extends Command[RenderableZip]
 	with ReadOnly with ApplyWithCallback[RenderableZip] with Logging {
 
 	@BeanProperty var assignment: Assignment = _
-	@Autowired var zipService: ZipService = _
-	@Autowired var assignmentService:AssignmentService =_
+	var zipService = Wire.auto[ZipService]
+	var assignmentService = Wire.auto[AssignmentService]
 
-	override def apply():RenderableZip = {
+	override def work():RenderableZip = {
 		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - "+assignment.id)
 		val members = assignmentService.determineMembershipUsers(assignment)
 		val zip = zipService.getMemberFeedbackTemplates(members, assignment)

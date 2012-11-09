@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.web.servlet.View
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.courses.JMap
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class JSONView(var json: Any) extends View {
-	@Autowired var objectMapper: ObjectMapper = _
+	var objectMapper = Wire.auto[ObjectMapper]
 
 	override def getContentType() = "application/json"
 

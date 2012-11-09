@@ -15,15 +15,15 @@ import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.courses.data.model.AuditEvent
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.spring.Wire
 
 class AuditLogQuery {
 	@BeanProperty var page: Int = 0
 	@BeanProperty var query: String = ""
 }
 
-@Configurable
 case class UserLookupQuery() {
-	@Autowired var userLookup: UserLookupInterface = _
+	var userLookup = Wire.auto[UserLookupInterface]
 	@BeanProperty var userId: String = _
 	@BeanProperty var uniId: String = _
 
@@ -35,9 +35,9 @@ case class UserLookupQuery() {
 @Controller
 class AuditLogController extends BaseController {
 
-	@Autowired var auditEventService: AuditEventService = _
-	@Autowired var auditEventIndexService: AuditEventIndexService = _
-	@Autowired var json: ObjectMapper = _
+	var auditEventService = Wire.auto[AuditEventService]
+	var auditEventIndexService = Wire.auto[AuditEventIndexService]
+	var json = Wire.auto[ObjectMapper]
 
 	val pageSize = 100
 

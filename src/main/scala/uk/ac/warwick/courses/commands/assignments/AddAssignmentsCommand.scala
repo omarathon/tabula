@@ -14,7 +14,6 @@ import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
-import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.ModuleDao
 import uk.ac.warwick.courses.data.model.Module
@@ -22,11 +21,12 @@ import org.springframework.beans.factory.annotation.Configurable
 import scala.collection.mutable.HashMap
 import uk.ac.warwick.courses.helpers.LazyMaps
 import uk.ac.warwick.courses.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.courses.data.Transactions._
+import uk.ac.warwick.spring.Wire
 
 /**
  * Sub-object on the form for binding each upstream assignment and some other properties.
  */
-@Configurable
 class AssignmentItem(
 	// whether to create an assignment from this item or not
 	@BeanProperty var include: Boolean,
@@ -35,7 +35,7 @@ class AssignmentItem(
 	
     def this() = this(true, null, null)
     
-	@Autowired var assignmentService: AssignmentService = _
+	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
 	@BeanProperty var assessmentGroup: Option[UpstreamAssessmentGroup] = _
@@ -59,11 +59,10 @@ class AssignmentItem(
 /**
  * Command for adding many assignments at once, usually from SITS.
  */
-@Configurable
 class AddAssignmentsCommand(val department: Department) extends Command[Unit] with SelfValidating {
 
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var moduleDao: ModuleDao = _
+	var assignmentService = Wire.auto[AssignmentService]
+	var moduleDao = Wire.auto[ModuleDao]
 
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 6
 	// months, which means it will start defaulting to next year from about February (under the assumption that
@@ -89,25 +88,26 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
-	@Transactional
-	override def apply() {
-		for (item <- assignmentItems if item.include) {
-			val assignment = new Assignment()
-			assignment.addDefaultFields()
-			assignment.academicYear = academicYear
-			assignment.name = item.name
-			assignment.upstreamAssignment = item.upstreamAssignment
-			assignment.occurrence = item.occurrence
-			assignment.module = findModule(item.upstreamAssignment).get
+	override def work() {
+		transactional() {
+			for (item <- assignmentItems if item.include) {
+				val assignment = new Assignment()
+				assignment.addDefaultFields()
+				assignment.academicYear = academicYear
+				assignment.name = item.name
+				assignment.upstreamAssignment = item.upstreamAssignment
+				assignment.occurrence = item.occurrence
+				assignment.module = findModule(item.upstreamAssignment).get
 
-			assignment.openDate = item.openDate
-			assignment.closeDate = item.closeDate
+				assignment.openDate = item.openDate
+				assignment.closeDate = item.closeDate
 
-			// validation should have verified that there is an options set for us to use
-			val options = optionsMap.get(item.optionsId)
-			options.copySharedTo(assignment)
+				// validation should have verified that there is an options set for us to use
+				val options = optionsMap.get(item.optionsId)
+				options.copySharedTo(assignment)
 
-			assignmentService.save(assignment)
+				assignmentService.save(assignment)
+			}
 		}
 	}
 

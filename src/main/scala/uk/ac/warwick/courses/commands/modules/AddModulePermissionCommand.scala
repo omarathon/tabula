@@ -9,22 +9,22 @@ import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.courses.services.UserLookupService
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class AddModulePermissionCommand extends Command[Unit] {
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var usercodes: JList[String] = _
 	@BeanProperty val permissionType: String = "Participate"
 
-	@Autowired var userLookup: UserLookupService = _
+	var userLookup = Wire.auto[UserLookupService]
 
-	@Transactional
-	def apply {
-		for (user <- usercodes)
-			module.participants.addUser(user)
+	def work() {
+		transactional() {
+			for (user <- usercodes) module.participants.addUser(user)
+		}
 	}
 
 	def validate(errors: Errors) {

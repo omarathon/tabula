@@ -5,7 +5,7 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.courses.data.model.Feedback
@@ -27,17 +27,18 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.courses.helpers.FoundUser
 import uk.ac.warwick.courses.UniversityId
 import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
 
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var marksExtractor: MarksExtractor = _
+	var userLookup = Wire.auto[UserLookupService]
+	var marksExtractor = Wire.auto[MarksExtractor]
 
+  var markWarning = Wire.property("${mark.warning}")
+  
 	@BeanProperty var file: UploadedFile = new UploadedFile
 	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()
 
-	@Value("${mark.warning}") var markWarning: String = _
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
@@ -103,8 +104,7 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 		noErrors
 	}
 
-	@Transactional
-	override def apply(): List[Feedback] = {
+	override def work(): List[Feedback] = transactional() {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
 			feedback.assignment = assignment
@@ -122,16 +122,17 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 		markList.toList
 	}
 
-	@Transactional
 	def onBind {
-		file.onBind
-		if (!file.attached.isEmpty()) {
-			processFiles(file.attached)
-		}
+		transactional() {
+			file.onBind
+			if (!file.attached.isEmpty()) {
+				processFiles(file.attached)
+			}
 
-		def processFiles(files: Seq[FileAttachment]) {
-			for (file <- files.filter(_.hasData)) {
-				marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+			def processFiles(files: Seq[FileAttachment]) {
+				for (file <- files.filter(_.hasData)) {
+					marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+				}
 			}
 		}
 	}

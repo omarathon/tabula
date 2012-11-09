@@ -7,17 +7,17 @@ import uk.ac.warwick.courses.helpers.Logging
 import uk.ac.warwick.courses.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.courses.data.Transactions._
 import collection.JavaConversions._
 import uk.ac.warwick.courses.SprCode
+import uk.ac.warwick.spring.Wire
 
-@Configurable
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
-	@Autowired var assignmentImporter: AssignmentImporter = _
-	@Autowired var assignmentService: AssignmentService = _
+	var assignmentImporter = Wire.auto[AssignmentImporter]
+	var assignmentService = Wire.auto[AssignmentService]
 
-	def apply() {
+	def work() {
 		benchmark("ImportAssignments") {
 			doAssignments
 			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
@@ -27,14 +27,15 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	@Transactional
 	def doAssignments {
-		for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
-			if (assignment.name == null) {
-				// Some SITS data is bad, but try to carry on.
-				assignment.name = "Assignment"
+		transactional() {
+			for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
+				if (assignment.name == null) {
+					// Some SITS data is bad, but try to carry on.
+					assignment.name = "Assignment"
+				}
+				assignmentService.save(assignment)
 			}
-			assignmentService.save(assignment)
 		}
 	}
 
@@ -42,7 +43,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		// Split into chunks so we commit transactions periodically.
 		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100)) {
 			saveGroups(groups)
-			transactional { t =>
+			transactional() {
 				groups foreach session.evict
 			}
 		}
@@ -55,41 +56,43 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	 * what it's got and starts a new list. This way we don't have to load many
 	 * things into memory at once.
 	 */
-	@Transactional
 	def doGroupMembers {
-		benchmark("Import all group members") {
-			var registrations = List[ModuleRegistration]()
-			var count = 0
-			assignmentImporter.allMembers { r =>
-				if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
-					// This element r is for a new group, so save this group and start afresh
-					save(registrations)
-					registrations = Nil
+		transactional() {
+			benchmark("Import all group members") {
+				var registrations = List[ModuleRegistration]()
+				var count = 0
+				assignmentImporter.allMembers { r =>
+					if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
+						// This element r is for a new group, so save this group and start afresh
+						save(registrations)
+						registrations = Nil
+					}
+					registrations = registrations :+ r
+					count += 1
+					if (count % 1000 == 0) {
+						logger.info("Processed " + count + " group members")
+					}
 				}
-				registrations = registrations :+ r
-				count += 1
-				if (count % 1000 == 0) {
-					logger.info("Processed " + count + " group members")
-				}
+				logger.info("Processed all " + count + " group members")
 			}
-			logger.info("Processed all " + count + " group members")
 		}
 	}
 
 	/** Import basic info about all members in ADS, batched 1000 at a time */
-	@Transactional
 	def doMemberDetails {
-		benchmark("Import all member details") {
-			var list = List[UpstreamMember]()
-			assignmentImporter.allMemberDetails { member =>
-				list = list :+ member
-				if (list.size >= 1000) {
-					saveMemberDetails(list)
-					list = Nil
+		transactional() {
+			benchmark("Import all member details") {
+				var list = List[UpstreamMember]()
+				assignmentImporter.allMemberDetails { member =>
+					list = list :+ member
+					if (list.size >= 1000) {
+						saveMemberDetails(list)
+						list = Nil
+					}
 				}
-			}
-			if (!list.isEmpty) {
-				saveMemberDetails(list)
+				if (!list.isEmpty) {
+					saveMemberDetails(list)
+				}
 			}
 		}
 	}
@@ -116,8 +119,8 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	@Transactional
-	def saveGroups(groups: Seq[UpstreamAssessmentGroup]) = {
+	
+	def saveGroups(groups: Seq[UpstreamAssessmentGroup]) = transactional() {
 		logger.debug("Importing " + groups.size + " assessment groups")
 		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {
