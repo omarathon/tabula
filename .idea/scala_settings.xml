@@ -46,6 +46,7 @@
         <option value="scala.collection.mutable._" />
       </array>
     </option>
+    <option name="sortImports" value="true" />
   </component>
 </project>
 
