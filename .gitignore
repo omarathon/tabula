@@ -9,8 +9,8 @@ local.properties
 *~
 CVS
 ajcore*
-/scripts/dev/courses.properties
-/scripts/dev/courses-private.properties
+/etc/scripts/dev/courses.properties
+/etc/scripts/dev/courses-private.properties
 console.properties
 courses-private.properties
 !/src/test/resources/courses-private.properties
