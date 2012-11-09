@@ -492,7 +492,7 @@
 
 		<dependency>
 			<groupId>github.com.ingoem</groupId>
-			<artifactId>spring-react_2.9.1</artifactId>
+			<artifactId>scala-react_2.9.1</artifactId>
 		</dependency>
 
 		<dependency>

@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>uk.ac.warwick</groupId>
+		<artifactId>warwick</artifactId>
+		<version>2</version>
+	</parent>
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
@@ -28,11 +34,7 @@
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 	</properties>
-
-	<prerequisites>
-		<maven>2.2.1</maven>
-	</prerequisites>
-
+	
 	<!-- ====================================================================== -->
 	<!-- S C M -->
 	<!-- ====================================================================== -->
@@ -53,84 +55,13 @@
 	<!-- C I M A N A G E M E N T -->
 	<!-- ====================================================================== -->
 	<ciManagement>
+		<system>Bamboo</system>
 		<url>http://build.elab.warwick.ac.uk/browse/TAB</url>
 	</ciManagement>
-
-	<!-- ====================================================================== -->
-	<!-- P E O P L E -->
-	<!-- ====================================================================== -->
-	<organization>
-		<name>Web Publishing, University of Warwick</name>
-		<url>http://warwick.ac.uk/webteam</url>
-	</organization>
-
-	<developers>
-		<developer>
-			<id>wga_csucew</id>
-			<name>Nick Howes</name>
-			<email>N.Howes@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-			<roles>
-				<role>Project Lead</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>cuslaj</id>
-			<name>Ritchie Allen</name>
-			<email>Ritchie.Allen@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-		</developer>
-		<developer>
-			<id>zoe</id>
-			<name>Zoe James</name>
-			<email>Zoe.James@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-		</developer>
-		<developer>
-			<id>mat</id>
-			<name>Mat Mannion</name>
-			<email>M.Mannion@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-			<roles>
-				<role>Project Sponsor</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>cusxad</id>
-			<name>Nick Kaijaks</name>
-			<email>Nick.Kaijaks@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-		</developer>
-		<developer>
-			<id>cuslat</id>
-			<name>Steve Woodward</name>
-			<email>S.Woodward@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-		</developer>
-		<developer>
-			<id>sarah</id>
-			<name>Sarah O'Toole</name>
-			<email>S.O-Toole@warwick.ac.uk</email>
-			<organization>Web Publishing</organization>
-		</developer>
-	</developers>
 
 	<modules>
 		<module>coursework</module>
 	</modules>
-
-	<distributionManagement>
-		<repository>
-			<id>nexus</id>
-			<name>Internal Releases</name>
-			<url>http://aki-nada:8888/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus</id>
-			<name>Internal Releases</name>
-			<url>http://aki-nada:8888/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<profiles>
 		<profile>
@@ -343,55 +274,6 @@
 	</build>
 
 	<!-- ====================================================================== -->
-	<!-- R E P O S I T O R I E S -->
-	<!-- ====================================================================== -->
-	<repositories>
-		<repository>
-			<id>nexus</id>
-			<name>Internal Nexus Repository</name>
-			<url>http://aki-nada:8888/nexus/content/groups/public</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>central</id>
-			<name>Maven Repository Switchboard</name>
-			<layout>default</layout>
-			<url>http://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>oauth</id>
-			<url>http://oauth.googlecode.com/svn/code/maven</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>nexus</id>
-			<name>Internal Nexus Repository</name>
-			<url>http://aki-nada:8888/nexus/content/groups/public</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<name>oss.sonatype.org</name>
-			<id>oss.sonatype.org</id>
-			<url>http://oss.sonatype.org/content/groups/public</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<!-- ====================================================================== -->
 	<!-- D E P E N D E N C I E S -->
 	<!-- ====================================================================== -->
 	<dependencies>
@@ -419,10 +301,6 @@
 			<version>1.6.2</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- <classpathentry kind="lib" path="lib/build/jta-spec1_0_1.jar"/> <classpathentry 
-			kind="lib" path="lib/build/jsp-api.jar"/> <classpathentry kind="lib" path="lib/build/ojdbc6.jar"/> 
-			<classpathentry kind="lib" path="lib/build/lesscss-engine-1.3.1-SNAPSHOT.jar"/> -->
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -849,7 +727,7 @@
 			</dependency>
 			<dependency>
 				<groupId>github.com.ingoem</groupId>
-				<artifactId>spring-react_2.9.1</artifactId>
+				<artifactId>scala-react_2.9.1</artifactId>
 				<version>1.0</version>
 			</dependency>
 
