@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.{ CommentField, FileField }
 import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -46,7 +47,7 @@ trait SharedAssignmentProperties {
 	// linked feedback template (optional)
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
-	@Autowired var zipService: ZipService = _
+	var zipService: ZipService = Wire.auto[ZipService]
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
