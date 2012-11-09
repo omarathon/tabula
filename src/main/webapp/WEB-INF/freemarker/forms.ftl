@@ -17,16 +17,19 @@
 	</@spring.bind>
 </#function>
 
-<#macro row path="" error=false>
-<#if path="">
-<div class="control-group"><#nested/></div>
-<#elseif error>
-<div class="control-group error"><#nested/></div>
-<#else>
-<@spring.bind path=path>
-<div class="control-group<#if status.error> error</#if>"><#nested/></div>
-</@spring.bind>
-</#if>
+<#macro row path="" cssClass="">
+	<#if cssClass="">
+		<#assign baseClass="control-group"/>
+	<#else>
+		<#assign baseClass="control-group " + cssClass />
+	</#if>
+	<#if path="">
+		<div class="${baseClass}"><#nested/></div>
+	<#else>
+		<@spring.bind path=path>
+			<div class="${baseClass}<#if status.error> error</#if>"><#nested/></div>
+		</@spring.bind>
+	</#if>
 </#macro>
 
 <#macro field>
@@ -64,8 +67,8 @@
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label>
-<@row path=path>
+<#macro labelled_row path label cssClass="">
+<@row path=path cssClass=cssClass>
 	<@_label path=path>
 	${label}
 	</@_label>
