@@ -53,8 +53,24 @@ class AssignmentTest extends TestBase {
 		assignment.collectSubmissions = true
 		report should be ('hasProblems) // be has problems.
 		report.feedbackOnly.toSeq.sorted should be ((1 to 7) map idFormat)
-		report.submissionOnly.toSeq.sorted should be ((11 to 20) map idFormat)
+		report.submissionOnly.toSeq.sorted should be ((11 to 20) map idFormat)		
+	}
+	
+	@Test def openEnded {
+		val assignment = new Assignment
+		// assign to a val so that 'should' can cope with JBoolean
+		val isOpenEnded: Boolean = assignment.openEnded
+		// test default
+		isOpenEnded should be (false)
 		
+		// past assignment should be closed
+		assignment.openDate = new DateTime().minusDays(3)
+		assignment.closeDate = new DateTime().minusDays(2)
+	  assignment.isClosed should be (true)
+		
+		// Open Gangnam Style
+		assignment.openEnded = true
+		assignment.isClosed should be (false)
 	}
 	
 	/** Zero-pad integer to a 7 digit string */
