@@ -162,6 +162,21 @@
 		</profile>
 	</profiles>
 
+	<!-- Need to add the local repository in order to get the parent pom -->
+	<repositories>
+                <repository>
+                        <id>nexus</id>
+                        <name>Internal Nexus Repository</name>
+                        <url>http://mvn.elab.warwick.ac.uk/nexus/content/groups/public</url>
+                        <releases>
+                                <enabled>true</enabled>
+                        </releases>
+                        <snapshots>
+                                <enabled>true</enabled>
+                        </snapshots>
+                </repository>
+	</repositories>
+
 	<!-- ====================================================================== -->
 	<!-- B U I L D -->
 	<!-- ====================================================================== -->
