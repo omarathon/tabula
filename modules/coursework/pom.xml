@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick.tabula</groupId>
+		<artifactId>tabula-project</artifactId>
+		<version>1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>courses</artifactId>
+	<packaging>war</packaging>
+
+	<name>Tabula Coursework Management</name>
+	<description>Coursework Management is a new service for managing coursework assignments and feedback. If you're a student, you might start getting emails containing links to download your feedback from here, while staff members will be able to receive submitted assignments and return feedback on them.</description>
+
+	<properties>
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+	</properties>
+
+	<scm>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/coursework</url>
+	</scm>
+
+	<profiles>
+		<!-- deploy to jboss -->
+		<profile>
+			<id>deploy</id>
+
+			<build>
+				<plugins>				
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-unpacked</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war">
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}" />
+										</sync>
+										<touch
+											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- sync views -->
+		<profile>
+			<id>dev-deploy-views</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-views</id>
+								<phase>process-resources</phase>
+								<configuration>
+									<target>
+										<sync
+											todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
+											<fileset dir="${basedir}/src/main/webapp/WEB-INF/freemarker" />
+										</sync>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- sync static -->
+		<profile>
+			<id>dev-deploy-static</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-static</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war/static">
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}/static" />
+										</sync>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<build>
+		<testResources>
+			<testResource>
+				<targetPath>WEB-INF</targetPath>
+				<directory>${basedir}/src/main/webapp/WEB-INF</directory>
+			</testResource>
+			<testResource>
+				<directory>${basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+
+		<plugins>
+			<!-- Scala support in maven -->
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Build the war -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-war</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>exploded</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<warName>${project.build.finalName}</warName>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${tabula.basedir}/dist</outputDirectory>
+					<warName>${project.artifactId}</warName>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>compress</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nosuffix>true</nosuffix>
+					<excludes>
+						<exclude>**/static/libs/**/*.*</exclude>
+					</excludes>
+					<jswarn>false</jswarn>
+					<aggregations>
+						<aggregation>
+							<!-- insert new line after each concatenation (default: false) -->
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/main.js</output>
+							<includes>
+								<include>scripts.js</include>
+								<include>jquery-copyable.js</include>
+								<include>jquery-biglist.js</include>
+								<include>jquery-tableform.js</include>
+								<include>userpicker.js</include>
+								<include>coursework-admin.js</include>
+								<include>coursework-submission.js</include>
+								<include>ajax-popup.js</include>
+								<include>app-comments.js</include>
+							</includes>
+						</aggregation>
+					</aggregations>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>lesscss</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
+									classpathref="maven.plugin.classpath" />
+
+								<lesscss
+									todir="${project.build.directory}/${project.build.finalName}/static/css">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}/static/css"
+										includes="*.less" excludes="*.inc.less" />
+								</lesscss>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>batchhash</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
+									classpathref="maven.plugin.classpath" />
+
+								<batchhash
+									propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
+									maxhashlength="12" salt="a">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}"
+										includes="static/**" excludes="**/*.less" />
+								</batchhash>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>generate-build-timestamp</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<tstamp>
+									<format property="build.time" pattern="yyyy-MM-dd'T'HH:mm:ssZ" />
+								</tstamp>
+								<propertyfile
+									file="${project.build.directory}/${project.build.finalName}/WEB-INF/build.properties"
+									comment="Generated by maven.">
+									<entry key="build.time" value="${build.time}" />
+								</propertyfile>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>uk.ac.warwick</groupId>
+						<artifactId>warwickutils-all</artifactId>
+						<version>20111018</version>
+					</dependency>
+					<dependency>
+						<groupId>com.asual.lesscss</groupId>
+						<artifactId>lesscss-engine</artifactId>
+						<version>1.3.0</version>
+					</dependency>
+					<dependency>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+						<version>1.2.17</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>3.1.0</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.joda</groupId>
+			<artifactId>joda-convert</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-asm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-instrument</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-instrument-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-core_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-futures_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-http_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-jsoup_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-mime_${scala.version}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.databinder</groupId>
+			<artifactId>dispatch-tagsoup_${scala.version}</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>ooxml-schemas</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-annotation-processor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-legacy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time-hibernate</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.ac.warwick</groupId>
+			<artifactId>warwickutils-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick</groupId>
+			<artifactId>sso-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick</groupId>
+			<artifactId>spring-scala-glue_2.9.2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>github.com.ingoem</groupId>
+			<artifactId>scala-react_2.9.1</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth-httpclient3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth-provider</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xfire</groupId>
+			<artifactId>opensaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml</groupId>
+			<artifactId>jackson-module-scala</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.apache.commons.io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-compat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-el</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-extras</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-freemarker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-jsp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-servlet-wildcard</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-template</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsuereth</groupId>
+			<artifactId>scala-arm_${scala.version}</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.scala-tools.testing</groupId>
+			<artifactId>specs_${scala.version}</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-test-framework</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
