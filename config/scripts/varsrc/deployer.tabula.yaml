@@ -1,7 +1,7 @@
 --- !ruby/object:Deployment 
 apaches: 
 - !ruby/object:Apache 
-  name: coursework
+  name: tabula
   port_balancer: !ruby/object:LoadBalancedPortTracker 
     balanced_ports: 
     - "8080"
@@ -14,7 +14,9 @@ apaches:
   restart_command: "echo 'not restarting apache' "
   state: balanced
 build_status: starting
-app: "courses"
+app: "tabula"
+war_names:
+- courses
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
@@ -22,10 +24,10 @@ build_user: "build"
 ant_path: "ant"
 ant_package_target: "package"
 jbosses: 
-  coursework:
+  tabula:
   - !ruby/object:Jboss 
     deployment_state: old
-    name: courses-primary
+    name: tabula-primary
     port: "8080"
     state: running
     mode: smf
@@ -35,7 +37,7 @@ jbosses:
        /courses/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
-    name: courses-secondary
+    name: tabula-secondary
     port: "8080"
     state: running
     mode: smf
@@ -43,5 +45,5 @@ jbosses:
     test_path: /courses/test/up
     requests: 
        /courses/test/up: 200
-lockfile: /tmp/courses_deploy.running
+lockfile: /tmp/tabula_deploy.running
 notification_emails: n.howes@warwick.ac.uk
