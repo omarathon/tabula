@@ -148,7 +148,7 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 		}
 	}
 
-	def onBind {
+	def onBind = transactional() {
 		file.onBind
 
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =

@@ -34,22 +34,23 @@ class UploadedFile {
 	@BeanProperty var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
 
 	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
-	def attatchedFileNames: Seq[String] = attached.map(file => file.getName())
-	def fileNames = uploadedFileNames ++ attatchedFileNames
+	def attachedFileNames: Seq[String] = attached.map(file => file.getName)
+	def fileNames = uploadedFileNames ++ attachedFileNames
 
 	def isMissing = !isExists
 	def isExists = hasUploads || hasAttachments
 
-	def size: Int = if (hasAttachments) attached.size
-	else if (hasUploads) nonEmptyUploads.size
-	else 0
+	def size: Int = 
+		if (hasAttachments) attached.size
+		else if (hasUploads) nonEmptyUploads.size
+		else 0
 
-	def attachedOrEmpty = Option(attached) getOrElse ArrayList()
-	def uploadOrEmpty = Option(upload) getOrElse ArrayList()
+	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse ArrayList()
+	def uploadOrEmpty: JList[MultipartFile] = nonEmptyUploads
 
 	def hasAttachments = attached != null && !attached.isEmpty()
 	def hasUploads = !nonEmptyUploads.isEmpty
-	def nonEmptyUploads = Option(upload).getOrElse(ArrayList()).filterNot { _.isEmpty }
+	def nonEmptyUploads: JList[MultipartFile] = Option(upload).getOrElse(ArrayList()).filterNot { _.isEmpty }
 	def isUploaded = hasUploads
 
 	/**
@@ -66,7 +67,7 @@ class UploadedFile {
 		}
 		if (hasUploads) {
 			// convert MultipartFiles into FileAttachments
-			val newAttachments = for (item <- upload) yield {
+			val newAttachments = for (item <- nonEmptyUploads) yield {
 				val a = new FileAttachment
 				a.name = new File(item.getOriginalFilename()).getName
 				a.uploadedData = item.getInputStream

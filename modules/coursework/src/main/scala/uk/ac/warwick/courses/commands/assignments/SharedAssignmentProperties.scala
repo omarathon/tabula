@@ -3,6 +3,7 @@ package uk.ac.warwick.courses.commands.assignments
 import collection.JavaConversions._
 import reflect.BeanProperty
 import uk.ac.warwick.courses
+import courses.services.ZipService
 import uk.ac.warwick.courses.JavaImports._
 import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.courses.data.model._
@@ -10,6 +11,8 @@ import uk.ac.warwick.courses.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.{ CommentField, FileField }
 import org.springframework.validation.Errors
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -31,7 +34,9 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
  */
 trait SharedAssignmentProperties {
 
-	@BeanProperty var collectMarks: JBoolean = false
+
+  @BeanProperty var openEnded: JBoolean = false
+  @BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -39,6 +44,10 @@ trait SharedAssignmentProperties {
 	@BeanProperty var displayPlagiarismNotice: JBoolean = false
 	@BeanProperty var allowExtensions: JBoolean = false
 	@BeanProperty var allowExtensionRequests: JBoolean = false
+	// linked feedback template (optional)
+	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
+	// if we change a feedback template we may need to invalidate existing zips
+	var zipService: ZipService = Wire.auto[ZipService]
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -65,6 +74,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
@@ -73,6 +83,9 @@ trait SharedAssignmentProperties {
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
 		assignment.allowExtensionRequests = allowExtensionRequests
+		assignment.feedbackTemplate = feedbackTemplate
+		if (assignment.id != null) // this is an edit
+			zipService.invalidateSubmissionZip(assignment)
 
 		for (field <- findCommentField(assignment)) field.value = comment
 		for (file <- findFileField(assignment)) {
@@ -82,6 +95,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedFrom(assignment: Assignment) {
+		openEnded = assignment.openEnded
 		collectMarks = assignment.collectMarks
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
@@ -90,6 +104,7 @@ trait SharedAssignmentProperties {
 		displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
+		feedbackTemplate = assignment.feedbackTemplate
 
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {

@@ -5,17 +5,29 @@
 
 var exports = {};
 
-var slideMoreOptions = function($checkbox, $slidingDiv) {
-    $checkbox.change(function(){
-        if ($checkbox.is(':checked')) $slidingDiv.stop().slideDown('fast');
-        else $slidingDiv.stop().slideUp('fast');
-    });
-    $slidingDiv.toggle($checkbox.is(':checked'));
+var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
+	if (showWhenChecked) {
+	    $checkbox.change(function(){
+	        if ($checkbox.is(':checked'))
+	        	$slidingDiv.stop().slideDown('fast');
+	        else
+	        	$slidingDiv.stop().slideUp('fast');
+	    });
+	    $slidingDiv.toggle($checkbox.is(':checked'));
+	} else {
+	    $checkbox.change(function(){
+	        if ($checkbox.is(':checked'))
+	        	$slidingDiv.stop().slideUp('fast');
+	        else
+	        	$slidingDiv.stop().slideDown('fast');
+	    });
+	    $slidingDiv.toggle($checkbox.not(':checked'));
+	}
 };
 
 // export the stuff we do to the submissions form so we can re-run it on demand.
 var decorateSubmissionsForm = function() {
-    slideMoreOptions($('input#collectSubmissions'), $('#submission-options'));
+    slideMoreOptions($('input#collectSubmissions'), $('#submission-options'), true);
 };
 exports.decorateSubmissionsForm = decorateSubmissionsForm;
 
@@ -23,9 +35,12 @@ $(function(){
 
     decorateSubmissionsForm();
     
+    // hide stuff that makes no sense when open-ended
+    slideMoreOptions($('input#openEnded'), $('.has-close-date'), false);
+
     // check that the extension UI elements are present
     if($('input#allowExtensionRequests').length > 0){
-        slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'));
+        slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'), true);
     }
     
     
@@ -55,8 +70,8 @@ $(function(){
             )
         );
     
-    // code for the marks tabs
-    $('#marks-tabs a').click(function (e) {
+    // code for tabs
+    $('.nav.nav-tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });
@@ -78,7 +93,7 @@ $(function(){
     $('.show-archived-assignments').click(function(e){
         e.preventDefault();
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
-    })
+    });
     
     $('.submission-list, .feedback-list').bigList({
     

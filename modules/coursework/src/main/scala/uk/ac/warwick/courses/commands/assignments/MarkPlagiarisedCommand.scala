@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.services.ZipService
-import uk.ac.warwick.courses.JList
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.spring.Wire
 
 class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[JList[Submission]] with SelfValidating {

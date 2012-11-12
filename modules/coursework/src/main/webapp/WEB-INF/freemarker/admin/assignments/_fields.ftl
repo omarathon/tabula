@@ -10,11 +10,12 @@ the comments textarea needs to maintain newlines.
 <#-- ignored by controller but used by this FTL to determine what popups to pre-open -->
 <input type="hidden" name="focusOn" id="focusOn">
 
-<#macro datefield path label>
-<@form.labelled_row path label>
-<@f.input path=path cssClass="date-time-picker" />
-</@form.labelled_row>
+<#macro datefield path label cssClass="">
+	<@form.labelled_row path label cssClass>
+		<@f.input path=path cssClass="date-time-picker" />
+	</@form.labelled_row>
 </#macro>
+
 <div class="row-fluid">
 <div class="span6">
 <@form.labelled_row "name" "Assignment name">
@@ -22,7 +23,28 @@ the comments textarea needs to maintain newlines.
 </@form.labelled_row>
 
 <@datefield path="openDate" label="Open date" />
-<@datefield path="closeDate" label="Close date" />
+
+<@form.labelled_row "openEnded" "Open-ended">
+	<label class="checkbox">
+		<@f.checkbox path="openEnded" id="openEnded" />
+		<a href="#" class="use-popover" 
+		   data-title="Open-ended assignments"
+		   data-html="true"
+		   data-trigger="hover"
+		   data-content="&lt;p&gt;
+		   Check this box to mark the assignment as open-ended.
+		   &lt;/p&gt;&lt;ul&gt;
+		   &lt;li&gt;Any close date previously entered will have no effect.&lt;/li&gt;
+		   &lt;li&gt;Allowing extensions and submission after the close date will have no effect.&lt;/li&gt;
+		   &lt;li&gt;No close date will be shown to students.&lt;/li&gt;
+		   &lt;li&gt;There will be no warnings for lateness, and no automatic deductions to marks.&lt;/li&gt;
+		   &lt;li&gt;You will be able to publish feedback individually at any time.&lt;/li&gt;
+		   &lt;/ul&gt;"
+		   >What's this?</a>
+	</label>
+</@form.labelled_row>
+
+<@datefield path="closeDate" label="Close date" cssClass="has-close-date" />
 
 <#if newRecord>
 

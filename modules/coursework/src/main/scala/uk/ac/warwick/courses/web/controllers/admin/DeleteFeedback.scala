@@ -21,7 +21,7 @@ import uk.ac.warwick.courses.web.Routes
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/delete"))
 class DeleteFeedback extends BaseController {
 	@ModelAttribute
-	def command(@PathVariable assignment: Assignment) = new DeleteFeedbackCommand(assignment)
+	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteFeedbackCommand(assignment)
 
 	validatesSelf[DeleteFeedbackCommand]
 
@@ -30,10 +30,10 @@ class DeleteFeedback extends BaseController {
 		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = Redirect(Routes.admin.assignment.feedback(assignment))
+	def get(@PathVariable("assignment") assignment: Assignment) = Redirect(Routes.admin.assignment.feedback(assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
+	def showForm(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
 		form: DeleteFeedbackCommand, errors: Errors) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Delete(mandatory(form.feedbacks.headOption)))
@@ -43,7 +43,7 @@ class DeleteFeedback extends BaseController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable module: Module, @PathVariable assignment: Assignment,
+		@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
 		@Valid form: DeleteFeedbackCommand, errors: Errors) = {
 		transactional() {
 			mustBeLinked(assignment, module)

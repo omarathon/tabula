@@ -39,6 +39,7 @@ abstract class Features {
 	@BeanProperty var turnitin: Boolean = true
 	@BeanProperty var assignmentMembership: Boolean = true
 	@BeanProperty var extensions: Boolean = false
+	@BeanProperty var feedbackTemplates: Boolean = true
 	
 }
 

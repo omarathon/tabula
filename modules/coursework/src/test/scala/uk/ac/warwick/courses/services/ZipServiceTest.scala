@@ -1,23 +1,21 @@
 package uk.ac.warwick.courses.services
 import uk.ac.warwick.courses.TestBase
-import org.junit.Test
 import java.util.zip.ZipInputStream
 import org.springframework.core.io.ClassPathResource
-import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.data.model.Module
 import uk.ac.warwick.courses.data.model.Assignment
 import collection.JavaConversions._
-import uk.ac.warwick.courses.data.model.forms.FileSubmissionValue
 import uk.ac.warwick.courses.data.model.SavedSubmissionValue
 import uk.ac.warwick.courses.data.model.FileAttachment
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 
 class ZipServiceTest extends TestBase {
 	
-	@Test def generateSubmissionDownload {
+	@Test def generateSubmissionDownload() {
 		val service = new ZipService
 		service.zipDir = createTemporaryDirectory
+		service.features = emptyFeatures
 		
 		val module = new Module(code="ph105")
 		val assignment = new Assignment
@@ -36,7 +34,7 @@ class ZipServiceTest extends TestBase {
 		items.head.name should be ("ph105 - 0678888 - garble.doc")
 	}
 	
-	@Test def readZip {
+	@Test def readZip() {
 		val zip = new ZipInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
 		val names = Zips.map(zip){ _.getName }.sorted
 		names should have ('size(8))
@@ -50,7 +48,7 @@ class ZipServiceTest extends TestBase {
 		names should contain("marks.csv")
 	}
 	
-	@Test def iterateZip {
+	@Test def iterateZip() {
 		val zip = new ZipArchiveInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
 		val names = Zips.iterator(zip){ (iterator) =>
 			for (i <- iterator) yield i.getName

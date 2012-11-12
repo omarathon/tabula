@@ -7,13 +7,17 @@
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
-	<p>You can re-submit your work in case you've made a mistake,
-		<#if isExtended>
-			up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
-		<#else>
-			up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
-	    </#if>
-	</p>
+	<#if assignment.openEnded>
+		<p>You can still re-submit your work in case you've made a mistake.</p>
+	<#else>
+		<p>You can re-submit your work in case you've made a mistake,
+			<#if isExtended>
+				up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
+			<#else>
+				up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
+		    </#if>
+		</p>
+		</#if>
 	</#if>
 
 	<#if assignment.closed && !isExtended>

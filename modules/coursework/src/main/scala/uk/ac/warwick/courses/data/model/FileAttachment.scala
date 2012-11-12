@@ -2,24 +2,20 @@ package uk.ac.warwick.courses.data.model
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
-import java.sql.Blob
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.stereotype.Repository
-import javax.persistence.Basic
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
-import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.data.FileDao
 import javax.persistence.FetchType
-import forms.{Extension, SubmissionValue}
+import forms.Extension
 import scala.util.matching.Regex
 import javax.persistence.OneToOne
 import javax.persistence.CascadeType._
@@ -49,6 +45,9 @@ class FileAttachment extends GeneratedId {
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
     @BeanProperty var originalityReport: OriginalityReport = _
 
+	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
+	@BeanProperty var feedbackForm: FeedbackTemplate = _
+
 	def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
 
 	@BeanProperty var temporary: JBoolean = true
@@ -66,7 +65,7 @@ class FileAttachment extends GeneratedId {
 	@Column(name = "name")
 	private var _name: String = _
 	def name = _name
-	def getName() = _name
+	def getName = _name
 	def setName(n: String) { name = n }
 	def name_=(n: String) {
 		_name = Option(n).map(sanitisedFilename).orNull

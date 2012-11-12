@@ -6,22 +6,14 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.courses.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import org.springframework.web.bind.annotation.RequestMethod._
 import javax.validation.Valid
-import uk.ac.warwick.courses.actions.{ Submit, View }
+import uk.ac.warwick.courses.actions.Submit
 import uk.ac.warwick.courses.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.courses.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.courses.data.model.Assignment
 import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.data.FeedbackDao
-import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
-import uk.ac.warwick.courses.services.AssignmentService
 import uk.ac.warwick.courses.web.Routes
 import uk.ac.warwick.courses.CurrentUser
-import uk.ac.warwick.courses.ItemNotFoundException
-import uk.ac.warwick.courses.web.Mav
-import uk.ac.warwick.courses.data.model.forms.Extension
-import org.joda.time.DateTime
 import uk.ac.warwick.courses.data.model.Feedback
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
@@ -66,6 +58,7 @@ class AssignmentController extends AbstractAssignmentController {
 
 			val extension = assignment.extensions.find(_.userId == user.apparentId)
 			val isExtended = assignment.isWithinExtension(user.apparentId)
+			val extensionRequested = extension.isDefined && !extension.get.isManual
 
 			val canSubmit = assignment.submittable(user.apparentId)
 			val canReSubmit = assignment.resubmittable(user.apparentId)
@@ -91,7 +84,8 @@ class AssignmentController extends AbstractAssignmentController {
 				"canSubmit" -> canSubmit,
 				"canReSubmit" -> canReSubmit,
 				"extension" -> extension,
-				"isExtended" -> isExtended)
+				"isExtended" -> isExtended,
+				"extensionRequested" -> extensionRequested)
 
 		}
 	}

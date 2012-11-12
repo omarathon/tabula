@@ -14,13 +14,25 @@
 <#if department??>
 
 <#assign can_manage_dept=can.manage(department) />
-<#if features.extensions && can_manage_dept>
-	<h1>
-		${department.name}&nbsp;
-		<a href="settings" class="btn btn-mini">
-			<i class="icon-wrench"></i> Department settings
-		</a>
+<#if (features.extensions || features.feedbackTemplates) && can_manage_dept>
+	<h1 class="with-settings">
+		${department.name}
 	</h1>
+	<div class="btn-group dept-settings">
+		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-white icon-wrench"></i>
+			Department settings
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			<#if features.extensions>
+				<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
+			</#if>
+			<#if features.feedbackTemplates>
+				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
+			</#if>
+		</ul>
+	</div>
 <#else>
 	<h1>${department.name}</h1>
 </#if>
@@ -84,12 +96,19 @@
 
 			</div>
 			<div class="stats">
-				<div class="open-date">
-					<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
-				</div>
-				<div class="close-date">
-					<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
-				</div>
+				<#if assignment.openEnded>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />, never closes
+						<span class="label-like">(open-ended)<span class="label-like">
+					</div>
+				<#else>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />
+					</div>
+					<div class="close-date">
+						<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate />
+					</div>
+				</#if>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>
@@ -150,11 +169,7 @@
 				<#if has_feedback>
 					<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
 					<#if assignment.canPublishFeedback>
-						<#if assignment.closed>
-							<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
-						<#else>
-							<a class="btn btn-block disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
-						</#if>
+						<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
 					</#if>
 				</#if>
 				<#if assignment.allowExtensions >

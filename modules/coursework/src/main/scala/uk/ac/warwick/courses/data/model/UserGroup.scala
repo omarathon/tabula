@@ -10,7 +10,7 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.JoinTable
 import javax.persistence.JoinColumn
-import uk.ac.warwick.courses._
+import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.services.UserLookupService
 import uk.ac.warwick.spring.Wire
