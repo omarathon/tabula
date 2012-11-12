@@ -29,7 +29,7 @@ class EditMarkSchemeController extends BaseController {
 	def form(@ModelAttribute("command") cmd: EditMarkSchemeCommand): Mav = {
 		mustBeAbleTo(Manage(cmd.department))
 		doBind(cmd)
-		Mav("admin/markschemes/add")
+		Mav("admin/markschemes/edit")
 	}
 	
 	@RequestMapping(method=Array(POST))

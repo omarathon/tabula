@@ -9,15 +9,18 @@ import org.springframework.validation.Errors
 /** Edit an existing markscheme. */
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
 
+	// fill in the properties on construction
 	copyFrom(markScheme)
 
 	def work() = {
 		transactional() {
-			copyTo(markScheme)
+			this.copyTo(markScheme)
 			session.update(markScheme)
 			markScheme
 		}
 	}
+	
+	def currentMarkScheme = Some(markScheme)
 
 	override def validate(implicit errors: Errors) {
 		super.validate(errors)

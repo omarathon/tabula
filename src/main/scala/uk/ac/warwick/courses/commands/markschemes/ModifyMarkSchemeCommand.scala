@@ -23,11 +23,27 @@ abstract class ModifyMarkSchemeCommand(
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
 	@BeanProperty var studentsChooseMarker: Boolean = _
+	
+	// Subclasses can provide the "current" markscheme if one applies, for validation.
+	def currentMarkScheme: Option[MarkScheme]
 
 	def validate(implicit errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
+		if (department.markSchemes.exists(sameName)) {
+			errors.rejectValue("name", "name.duplicate.markScheme", Array(this.name), null)
+		}
 	}
-
+	
+	// If there's a current markscheme, returns whether "other" is a different
+	// scheme with the same name we're trying to use.
+	// If there's no current markscheme we just check if it's just the same name.
+	def sameName(other: MarkScheme) = currentMarkScheme match {
+		case Some(existing) => 
+			other.id != existing.id && other.name == name
+		case None => 
+			other.name == name
+	}
+		
 	// Called manually by controller.
 	def doBind() {
 		def removeEmpty(strings: JList[String]) = strings.filter{_.hasText}

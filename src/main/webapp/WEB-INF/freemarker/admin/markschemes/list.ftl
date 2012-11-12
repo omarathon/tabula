@@ -18,7 +18,10 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 </tr>
 <#list markSchemes as markScheme>
 <tr>
-	<td>${markScheme.name}</td><td><a href="<@routes.markschemeedit markScheme />">Edit</a></td>
+	<td>${markScheme.name}</td>
+	<td>
+		<a class="btn btn-mini" href="<@routes.markschemeedit markScheme />"><i class="icon-edit"></i> Modify</a>
+	</td>
 </tr>
 </#list>
 </table>
