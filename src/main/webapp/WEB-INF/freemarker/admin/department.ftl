@@ -169,11 +169,7 @@
 				<#if has_feedback>
 					<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
 					<#if assignment.canPublishFeedback>
-						<#if assignment.closed>
-							<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
-						<#else>
-							<a class="btn btn-block disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
-						</#if>
+						<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
 					</#if>
 				</#if>
 				<#if assignment.allowExtensions >
