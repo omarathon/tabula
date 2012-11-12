@@ -5,8 +5,8 @@
 
 var exports = {};
 
-var slideMoreOptions = function($checkbox, $slidingDiv, $showWhenChecked) {
-	if ($showWhenChecked) {
+var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
+	if (showWhenChecked) {
 	    $checkbox.change(function(){
 	        if ($checkbox.is(':checked'))
 	        	$slidingDiv.stop().slideDown('fast');

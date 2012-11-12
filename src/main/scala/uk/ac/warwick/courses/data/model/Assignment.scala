@@ -92,7 +92,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var createdDate = DateTime.now()
 
-  @BeanProperty var openEnded: JBoolean = false
+	@BeanProperty var openEnded: JBoolean = false
 	@BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
@@ -292,7 +292,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def canPublishFeedback: Boolean =
 		!feedbacks.isEmpty &&
 			!unreleasedFeedback.isEmpty &&
-			(closeDate.isBeforeNow && !openEnded)
+			(closeDate.isBeforeNow || openEnded)
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {

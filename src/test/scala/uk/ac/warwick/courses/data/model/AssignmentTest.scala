@@ -66,11 +66,30 @@ class AssignmentTest extends TestBase {
 		// past assignment should be closed
 		assignment.openDate = new DateTime().minusDays(3)
 		assignment.closeDate = new DateTime().minusDays(2)
-	  assignment.isClosed should be (true)
+		assignment.isClosed should be (true)
 		
 		// Open Gangnam Style
 		assignment.openEnded = true
 		assignment.isClosed should be (false)
+	}
+	
+	@Test def canPublishFeedback {
+		val assignment = new Assignment
+		assignment.feedbacks add new Feedback
+		assignment.openDate = new DateTime().minusDays(3)
+		assignment.closeDate = new DateTime().plusDays(10)
+		assignment.openEnded = false
+		// can't publish until closed
+		assignment.canPublishFeedback should be (false)
+		
+		// unless open-ended
+		assignment.openEnded = true
+		assignment.canPublishFeedback should be (true)
+		
+		// now it's closed
+		assignment.openEnded = false
+		assignment.closeDate = new DateTime().minusDays(1)
+		assignment.canPublishFeedback should be (true)
 	}
 	
 	/** Zero-pad integer to a 7 digit string */
