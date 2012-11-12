@@ -94,7 +94,7 @@
 	    </bean>
 		
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:/CoursesDS"/>
+		   <property name="jndiName" value="java:/TabulaDS"/>
 	    </bean>
 	    
 	    <bean id="academicDataStore" class="org.springframework.jndi.JndiObjectFactoryBean">
