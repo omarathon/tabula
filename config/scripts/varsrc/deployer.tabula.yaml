@@ -21,8 +21,8 @@ checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
-ant_path: "ant"
-ant_package_target: "package"
+builder: !ruby/object:MavenBuilder
+  path: "/usr/local/apache-maven/bin/mvn"
 jbosses: 
   tabula:
   - !ruby/object:Jboss 
