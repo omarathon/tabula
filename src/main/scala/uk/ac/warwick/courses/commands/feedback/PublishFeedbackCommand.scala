@@ -55,7 +55,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
-		if (assignment.closeDate.isAfterNow()) {
+		if (assignment.isClosed()) {
 			errors.rejectValue("assignment", "feedback.publish.notclosed")
 		} else if (assignment.feedbacks.isEmpty()) {
 			errors.rejectValue("assignment", "feedback.publish.nofeedback")
