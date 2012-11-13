@@ -11,6 +11,8 @@ import uk.ac.warwick.courses.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.courses.validators.UsercodeListValidator
 
 /**
  * Command for adding permissions to a module.
@@ -37,16 +39,11 @@ class AddModulePermissionCommand extends Command[Unit] {
 	}
 
 	def validate(errors: Errors) {
-		if (usercodesEmpty) {
-			errors.rejectValue("usercodes", "NotEmpty")
-		} else if (alreadyHasCode) {
-			errors.rejectValue("usercodes", "userId.duplicate")
-		} else {
-			val anonUsers = userLookup.getUsersByUserIds(usercodes).values().find { !_.isFoundUser() }
-			for (user <- anonUsers) {
-				errors.rejectValue("usercodes", "userId.notfound.specified", Array(user.getUserId), "")
-			}
+		val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+			override def alreadyHasCode = usercodes.find { module.participants.includes(_) }.isDefined
 		}
+		
+		usercodeValidator.validate(errors)
 	}
 
 	private def alreadyHasCode = usercodes.find { module.participants.includes(_) }.isDefined
@@ -58,3 +55,4 @@ class AddModulePermissionCommand extends Command[Unit] {
 		"type" -> permissionType)
 
 }
+

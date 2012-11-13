@@ -13,8 +13,11 @@ import uk.ac.warwick.courses.data.model.Department
 import uk.ac.warwick.courses.data.model.MarkScheme
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
-import uk.ac.warwick.courses.helpers.StringUtils._
 import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.courses.validators.UsercodeListValidator
 
 /** Abstract base command for either creating or editing a MarkScheme */
 abstract class ModifyMarkSchemeCommand(
@@ -29,9 +32,14 @@ abstract class ModifyMarkSchemeCommand(
 
 	def validate(implicit errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
+		
 		if (department.markSchemes.exists(sameName)) {
 			errors.rejectValue("name", "name.duplicate.markScheme", Array(this.name), null)
 		}
+		
+		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers")
+		firstMarkersValidator.validate(errors)
+		
 	}
 	
 	// If there's a current markscheme, returns whether "other" is a different
@@ -46,8 +54,7 @@ abstract class ModifyMarkSchemeCommand(
 		
 	// Called manually by controller.
 	def doBind() {
-		def removeEmpty(strings: JList[String]) = strings.filter{_.hasText}
-	  firstMarkers = removeEmpty(firstMarkers)
+	  firstMarkers = firstMarkers.filter(StringUtils.hasText)
 	}
 
 	def copyTo(scheme: MarkScheme) {
