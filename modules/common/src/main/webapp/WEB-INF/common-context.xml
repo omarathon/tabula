@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
+		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
+
+	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
+
+	<!-- fire up annotation driven everything -->
+	<context:annotation-config />
+	<context:component-scan base-package="uk.ac.warwick.tabula.web.controllers" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.services" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basename="messages" />
+	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+		p:order="1"
+		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
+		
+	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
+	
+	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter"
+		p:encoding="UTF-8" p:forceEncoding="true" />
+		
+	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
+	
+	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
+		<constructor-arg value="4" type="int" />
+	</bean>
+	
+	<beans profile="scheduling">
+		<!-- @Scheduled -->
+		<task:annotation-driven/>
+	</beans>
+	
+	<beans profile="web">
+		
+	</beans>
+	
+	<beans profile="dev">
+	</beans>
+	
+	<beans profile="production">
+	</beans>
+	
+	<beans profile="dev,production,console">
+		
+	</beans>
+	
+	<beans profile="dev,production">
+	
+			<!-- JMX -->
+	
+			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer 
+		       when there is a choice of MBeanServers (such as when jconsole
+		       support is installed). -->
+		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
+		
+		  <!-- ## auto exported beans ## -->
+		  
+		  
+		  <!-- ## auto exporters ## -->
+		  
+		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+		  
+		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		    <property name="attributeSource" ref="jmxAttributeSource" />
+		  </bean>
+		  <bean id="jmxNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		        <property name="attributeSource" ref="jmxAttributeSource"/>
+		  </bean>
+		  <bean id="autoExporter" class="org.springframework.jmx.export.MBeanExporter">
+		  	<description>Exports beans annotated with @ManagedResource</description>
+		  	<property name="autodetect" value="true" />  
+		  	<property name="assembler" ref="jmxAssembler"/>
+		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
+		    <property name="server" ref="jmxServerLocator" />
+		  </bean>
+		  
+		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
+			p:definitions="/WEB-INF/defs/views.xml"
+			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory">
+			<property name="tilesProperties">
+				<props>
+					<prop key="#{T(org.apache.tiles.definition.DefinitionsFactory).DEFINITION_DAO_INIT_PARAM}">
+						org.apache.tiles.definition.dao.ResolvingLocaleUrlDefinitionDAO
+					</prop>
+				</props>
+			</property>
+		</bean>
+	</beans>
+
+</beans>

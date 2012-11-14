@@ -20,10 +20,10 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 	
-	<bean id="hibernateLifecycle" class="uk.ac.warwick.courses.data.HibernateLifecycle" />
+	<bean id="hibernateLifecycle" class="uk.ac.warwick.tabula.data.HibernateLifecycle" />
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
 		p:dataSource-ref="dataSource"
-		p:packagesToScan="uk.ac.warwick.courses.data.model, uk.ac.warwick.courses.services"
+		p:packagesToScan="uk.ac.warwick.tabula.coursework.data.model, uk.ac.warwick.tabula.coursework.services"
 		p:lobHandler-ref="lobHandler"
 		p:hibernateProperties-ref="hibernateProperties">
 		<property name="eventListeners"><map>
@@ -38,7 +38,6 @@
 		p:sessionFactory-ref="sessionFactory" />
 
 	<beans profile="console">
-	
 		<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
 		    <property name="url" value="${db.url}"/>
@@ -67,7 +66,7 @@
 	
 	<beans profile="dev,production,console">
 	
-		<bean class="uk.ac.warwick.courses.system.DatabaseEncodingChecker"
+		<bean class="uk.ac.warwick.tabula.system.DatabaseEncodingChecker"
 			c:sessionFactory-ref="sessionFactory"
 		 />
 		<util:properties id="jdbcProperties">
@@ -75,12 +74,12 @@
 		</util:properties>
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.oracle.Oracle10gDialect</prop>
+			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.oracle.Oracle10gDialect</prop>
 			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
 		
-		<bean id="mainDatabaseDialect" class="uk.ac.warwick.courses.data.oracle.Oracle10gDialect" />
+		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />
 		
 	</beans>
 	
@@ -109,23 +108,23 @@
 		<jdbc:embedded-database id="academicDataStore" />
 		
 		<!-- never read or written - just need a DataSource to exist -->
-    	<!-- <bean id="academicDataStore" class="uk.ac.warwick.courses.system.UnusableDataSource" /> -->
+    	<!-- <bean id="academicDataStore" class="uk.ac.warwick.tabula.system.UnusableDataSource" /> -->
 		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 		
 		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
 
-		<bean id="dataSourceInitialiser" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
+		<bean id="dataSourceInitialiser" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="dataSource"
 			p:scripts="#{{'schema.sql', 'data.sql'}}" />
 			
-		<bean id="adsInit" class="uk.ac.warwick.courses.system.DatabaseScriptRunner" 
+		<bean id="adsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="academicDataStore"
 			p:scripts="ads.sql" />
 		
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.courses.data.hsql.HSQLDialect</prop>
+			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.hsql.HSQLDialect</prop>
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
 			<!-- <prop key="hibernate.show_sql">true</prop>  -->
 		</util:properties>

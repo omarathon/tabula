@@ -1,0 +1,69 @@
+package uk.ac.warwick.tabula.coursework.services
+import uk.ac.warwick.tabula.coursework.TestBase
+import java.util.zip.ZipInputStream
+import org.springframework.core.io.ClassPathResource
+import uk.ac.warwick.tabula.coursework.data.model.Submission
+import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import collection.JavaConversions._
+import uk.ac.warwick.tabula.coursework.data.model.SavedSubmissionValue
+import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+
+
+
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+
+class ZipServiceTest extends TestBase {
+	
+	@Test def generateSubmissionDownload() {
+		val service = new ZipService
+		service.zipDir = createTemporaryDirectory
+		service.features = emptyFeatures
+		
+		val module = new Module(code="ph105")
+		val assignment = new Assignment
+		val submission = new Submission
+		submission.universityId = "0678888"
+		submission.assignment = assignment
+		
+		val attachment = new FileAttachment
+		attachment.name = "garble.doc"
+		attachment.file = createTemporaryFile
+		
+		submission.values = Set(SavedSubmissionValue.withAttachments(submission, "files", Set(attachment)))
+		assignment.module = module
+		val items = service.getSubmissionZipItems(submission)
+		items.size should be (1)
+		items.head.name should be ("ph105 - 0678888 - garble.doc")
+	}
+	
+	@Test def readZip() {
+		val zip = new ZipInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
+		val names = Zips.map(zip){ _.getName }.sorted
+		names should have ('size(8))
+		names should contain("0123456/")
+		names should contain("0123456/feedback.doc")
+		names should contain("0123456/feedböck.mp3")
+		names should contain("0123456/feedback.txt")
+		names should contain("0123457/")
+		names should contain("0123457/crayons.doc")
+		names should contain("0123457/feedback.mp3")
+		names should contain("marks.csv")
+	}
+	
+	@Test def iterateZip() {
+		val zip = new ZipArchiveInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
+		val names = Zips.iterator(zip){ (iterator) =>
+			for (i <- iterator) yield i.getName
+		}
+		names should have ('size(8))
+		names should contain("0123456/")
+		names should contain("0123456/feedback.doc")
+		names should contain("0123456/feedböck.mp3")
+		names should contain("0123456/feedback.txt")
+		names should contain("0123457/")
+		names should contain("0123457/crayons.doc")
+		names should contain("0123457/feedback.mp3")
+		names should contain("marks.csv")
+	}
+}

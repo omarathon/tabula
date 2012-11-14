@@ -1,7 +1,7 @@
 
 import org.springframework.context._
 import org.springframework.context.support._
-import uk.ac.warwick.courses.system._
+import uk.ac.warwick.tabula.system._
 import org.hibernate._
 
 println("Starting Spring")
