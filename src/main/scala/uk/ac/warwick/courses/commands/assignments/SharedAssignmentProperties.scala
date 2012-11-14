@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.courses.data.model.forms.{ CommentField, FileField }
 import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -34,7 +35,8 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
 trait SharedAssignmentProperties {
 
 
-	@BeanProperty var collectMarks: JBoolean = false
+  @BeanProperty var openEnded: JBoolean = false
+  @BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -45,7 +47,7 @@ trait SharedAssignmentProperties {
 	// linked feedback template (optional)
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
-	@Autowired var zipService: ZipService = _
+	var zipService: ZipService = Wire.auto[ZipService]
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -72,6 +74,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
@@ -92,6 +95,7 @@ trait SharedAssignmentProperties {
 	}
 
 	def copySharedFrom(assignment: Assignment) {
+		openEnded = assignment.openEnded
 		collectMarks = assignment.collectMarks
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions

@@ -96,12 +96,19 @@
 
 			</div>
 			<div class="stats">
-				<div class="open-date">
-					<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate /> 
-				</div>
-				<div class="close-date">
-					<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
-				</div>
+				<#if assignment.openEnded>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />, never closes
+						<span class="label-like">(open-ended)<span class="label-like">
+					</div>
+				<#else>
+					<div class="open-date">
+						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />
+					</div>
+					<div class="close-date">
+						<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate />
+					</div>
+				</#if>
 				<#if features.submissions && assignment.collectSubmissions>
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>
@@ -162,11 +169,7 @@
 				<#if has_feedback>
 					<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
 					<#if assignment.canPublishFeedback>
-						<#if assignment.closed>
-							<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
-						<#else>
-							<a class="btn btn-block disabled" href="#" title="You can only publish feedback after the close date.">Publish feedback <i class="icon-envelope"></i></a>
-						</#if>
+						<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
 					</#if>
 				</#if>
 				<#if assignment.allowExtensions >

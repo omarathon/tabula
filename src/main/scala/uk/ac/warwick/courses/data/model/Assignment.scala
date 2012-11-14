@@ -92,6 +92,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var createdDate = DateTime.now()
 
+	@BeanProperty var openEnded: JBoolean = false
 	@BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
@@ -176,7 +177,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 * Whether it's after the close date. Depending on the assignment
 	 * we might still be allowing submissions, though.
 	 */
-	def isClosed(now: DateTime) = now.isAfter(closeDate)
+	def isClosed(now: DateTime) = !openEnded && now.isAfter(closeDate)
 
 	def isClosed(): Boolean = isClosed(new DateTime)
 
@@ -195,14 +196,14 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
 	 */
 	def isLate(submission: Submission) =
-		closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
 
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
 	 */
 	def isAuthorisedLate(submission: Submission) =
-		closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.userId, submission.submittedDate)
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
@@ -291,7 +292,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def canPublishFeedback: Boolean =
 		!feedbacks.isEmpty &&
 			!unreleasedFeedback.isEmpty &&
-			closeDate.isBeforeNow
+			(closeDate.isBeforeNow || openEnded)
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {

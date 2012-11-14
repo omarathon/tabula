@@ -7,13 +7,17 @@
 	<#if submission??>
 	<hr>
 	<h2>Re-submit</h2>
-	<p>You can re-submit your work in case you've made a mistake,
-		<#if isExtended>
-			up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
-		<#else>
-			up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
-	    </#if>
-	</p>
+	<#if assignment.openEnded>
+		<p>You can still re-submit your work in case you've made a mistake.</p>
+	<#else>
+		<p>You can re-submit your work in case you've made a mistake,
+			<#if isExtended>
+				up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
+			<#else>
+				up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
+		    </#if>
+		</p>
+		</#if>
 	</#if>
 
 	<#if assignment.closed && !isExtended>
@@ -25,7 +29,7 @@
 		</div>
 	</#if>
 
-	<@f.form cssClass="submission-form form-horizontal" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
+	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
 	<@f.errors cssClass="error form-errors">
 	</@f.errors>
 	

@@ -69,7 +69,7 @@ so that they can be passed around between requests.
 			</@form.field>
 		</#if>
 
-		<@form.row>
+		<@form.row cssClass="has-close-date">
 			<@form.label></@form.label>
 			<@form.field>
 				<label class="checkbox">
@@ -93,7 +93,7 @@ so that they can be passed around between requests.
 		</@form.row>
 
 		<#if features.extensions>
-			<@form.row>
+			<@form.row cssClass="has-close-date">
 				<@form.label></@form.label>
 				<@form.field>
 					<label class="checkbox">
