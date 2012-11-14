@@ -26,7 +26,9 @@ class ExtensionSettingsController extends BaseController {
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) = {
-		cmd.copySettings()
+		if(!errors.hasErrors){
+			cmd.copySettings()
+		}
 		mustBeAbleTo(Manage(dept))
 		val model = Mav("admin/extension-settings",
 			"department" -> dept
