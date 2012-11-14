@@ -141,6 +141,11 @@
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
 		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" /> 
+		
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+		p:order="1"
+		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
+		
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.tabula.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">

@@ -23,7 +23,7 @@
 	<bean id="hibernateLifecycle" class="uk.ac.warwick.tabula.data.HibernateLifecycle" />
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
 		p:dataSource-ref="dataSource"
-		p:packagesToScan="uk.ac.warwick.tabula.coursework.data.model, uk.ac.warwick.tabula.coursework.services"
+		p:packagesToScan="uk.ac.warwick.tabula.coursework.data.model, uk.ac.warwick.tabula.services, uk.ac.warwick.tabula.coursework.services"
 		p:lobHandler-ref="lobHandler"
 		p:hibernateProperties-ref="hibernateProperties">
 		<property name="eventListeners"><map>
