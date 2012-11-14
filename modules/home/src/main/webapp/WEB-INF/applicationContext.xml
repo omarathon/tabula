@@ -24,16 +24,21 @@
 	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
 
 	<!-- fire up annotation driven everything -->
+	<!-- <context:spring-configured /> -->
 	<context:annotation-config />
-	<context:component-scan base-package="uk.ac.warwick.tabula.web.controllers" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
-	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
-		p:basename="messages" />
-			
+	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.tabula.system.CommonPropertyEditors" />
+	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+		p:order="1"
+		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
+	
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
+	
+	<!-- get app server to handle static content -->
+	<mvc:default-servlet-handler />
 	
 	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter"
 		p:encoding="UTF-8" p:forceEncoding="true" />
@@ -43,6 +48,62 @@
 	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
 		<constructor-arg value="4" type="int" />
 	</bean>
+	
+	<filter-stack id="allFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
+		<mapping>
+			<filter ref="characterEncodingFilter" />
+			<url-pattern>/*</url-pattern>
+			<excluded-url-pattern>/static/*</excluded-url-pattern>
+			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+			<excluded-url-pattern>*.ftl</excluded-url-pattern>
+		</mapping>
+		<mapping>
+			<filter ref="ssoClientFilter" />
+			<filter ref="oAuthFilter" />
+			<url-pattern>/*</url-pattern>
+			<excluded-url-pattern>/static/*</excluded-url-pattern>
+			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+			<excluded-url-pattern>*.ftl</excluded-url-pattern>
+			<excluded-url-pattern>/test/up</excluded-url-pattern>
+		</mapping>
+	</filter-stack>
+	
+	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
+		p:detectAnonymousOnCampusUsers="true"
+		p:userLookup-ref="userLookup"
+		p:configLocation="/tabula-sso-config.xml" />
+		
+	<!-- TODO probably want to use a service here once it's been refactored into common -->
+	<bean id="userLookup" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
+				p:ssosUrl="${ssoclient.ssos.url}"
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+	
+	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
+		p:templateLoaderPath="/WEB-INF/freemarker/"
+		p:configuration-ref="freemarkerConfiguration" />
+	
+	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
+	
+	<bean id="freemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration">
+		<property name="sharedVariables">
+			<map>
+				<entry key="dateBuilder"><bean class="uk.ac.warwick.tabula.helpers.DateBuilder" /></entry>
+			</map>
+		</property>
+	</bean>
+	<bean class="org.springframework.web.context.support.ServletContextAttributeExporter">
+		<property name="attributes"><map>
+			<entry key="freemarkerConfiguration" value-ref="freemarkerConfiguration" />
+		</map></property>
+	</bean>
+			
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver"
+		p:order="1" />
+
+	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
 	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
@@ -105,5 +166,6 @@
 			</property>
 		</bean>
 	</beans>
+
 
 </beans>

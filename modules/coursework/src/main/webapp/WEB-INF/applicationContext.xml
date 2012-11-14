@@ -20,16 +20,25 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 
+	<import resource="common-context.xml" />
 	<import resource="persistence-context.xml" />
-	<import resource="properties-context.xml" />
 	
+	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
+
 	<!-- fire up annotation driven everything -->
+	<!-- <context:spring-configured /> -->
 	<context:annotation-config />
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.web.controllers" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.services" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.jobs" />
 	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basename="messages" />
+		
 	<bean id="eventListener" class="uk.ac.warwick.tabula.coursework.events.CompositeEventListener">
 		<constructor-arg>
 			<list>
@@ -137,15 +146,14 @@
 	
 	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.tabula.system.CommonPropertyEditors" />
 	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+		p:order="1"
+		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
+	
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
 		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" /> 
-		
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
-		p:order="1"
-		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
-		
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.tabula.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">
@@ -159,6 +167,22 @@
 				<bean class="uk.ac.warwick.tabula.coursework.system.XmlReturnValueHandler" />
 			</list>
 		</property>
+	</bean>
+		<!-- 
+	<aop:aspectj-autoproxy proxy-target-class="true" /> -->
+	
+	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
+	
+	<!-- get app server to handle static content -->
+	<mvc:default-servlet-handler />
+	
+	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter"
+		p:encoding="UTF-8" p:forceEncoding="true" />
+		
+	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
+	
+	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
+		<constructor-arg value="4" type="int" />
 	</bean>
 	
 	<bean id="studentMailSender" class="uk.ac.warwick.tabula.coursework.services.RedirectingMailSender">
@@ -225,11 +249,11 @@
 		</constructor-arg>
 	</bean>
 	
-	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
-	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
+	
+	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
 	
 	<bean id="freemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration">
 		<property name="sharedVariables">
@@ -265,9 +289,59 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
+	
+	<beans profile="scheduling">
+		<!-- @Scheduled -->
+		<task:annotation-driven/>
+	</beans>
+	
+	<beans profile="web">
+		
+	</beans>
+	
+	<beans profile="dev">
+	</beans>
+	
+	<beans profile="production">
+	</beans>
+	
+	<beans profile="dev,production,console">
+		
+	</beans>
 	
 	<beans profile="dev,production">
-		  <!-- ## manually exported beans ## -->
+	
+			<!-- JMX -->
+	
+			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer 
+		       when there is a choice of MBeanServers (such as when jconsole
+		       support is installed). -->
+		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
+		
+		  <!-- ## auto exported beans ## -->
+		  
+		  
+		  <!-- ## auto exporters ## -->
+		  
+		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+		  
+		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		    <property name="attributeSource" ref="jmxAttributeSource" />
+		  </bean>
+		  <bean id="jmxNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		        <property name="attributeSource" ref="jmxAttributeSource"/>
+		  </bean>
+		  <bean id="autoExporter" class="org.springframework.jmx.export.MBeanExporter">
+		  	<description>Exports beans annotated with @ManagedResource</description>
+		  	<property name="autodetect" value="true" />  
+		  	<property name="assembler" ref="jmxAssembler"/>
+		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
+		    <property name="server" ref="jmxServerLocator" />
+		  </bean>
+		  
+		    <!-- ## manually exported beans ## -->
+
 		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" 
 		  		lazy-init="false"
 		  		autowire="no"> <!-- don't autowire the Annotation assembler below. -->
@@ -278,6 +352,19 @@
 		      </map>
 		    </property>
 		  </bean>
+		  
+		<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
+			p:definitions="/WEB-INF/defs/views.xml"
+			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory">
+			<property name="tilesProperties">
+				<props>
+					<prop key="#{T(org.apache.tiles.definition.DefinitionsFactory).DEFINITION_DAO_INIT_PARAM}">
+						org.apache.tiles.definition.dao.ResolvingLocaleUrlDefinitionDAO
+					</prop>
+				</props>
+			</property>
+		</bean>
 	</beans>
-	
+
+
 </beans>

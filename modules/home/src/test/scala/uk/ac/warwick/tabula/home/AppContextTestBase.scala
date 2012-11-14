@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework
+package uk.ac.warwick.tabula.home
 import org.junit.runner.RunWith
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.ActiveProfiles
@@ -17,20 +17,12 @@ import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.BeanInstantiationException
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy
 import javax.sql.DataSource
+import uk.ac.warwick.tabula.TestBase
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @ActiveProfiles(Array("test"))
-abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
-	
-}
-
-@RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/common-context.xml","/WEB-INF/persistence-context.xml"))
-@ActiveProfiles(Array("test"))
-abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
-	
-	
+abstract class AppContextTestBase extends TestBase with ContextSetup {
 	
 }
 
@@ -39,22 +31,5 @@ trait ContextSetup {
 	
 	@Before def setupCtx {
 		
-	}
-}
-
-trait TransactionalTesting {
-	@Autowired var sessionFactory:SessionFactory =_
-	@Autowired var dataSource:DataSource =_
-	@Autowired var transactionManager:PlatformTransactionManager =_
-	
-	def session = sessionFactory.getCurrentSession
-	
-	def transactional[T](f : TransactionStatus=>T) : T = {
-		val template = new TransactionTemplate(transactionManager)
-		template.execute(new TransactionCallback[T] {
-			override def doInTransaction(status:TransactionStatus) = {
-				f(status)
-			}
-		})
 	}
 }

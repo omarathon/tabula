@@ -319,6 +319,12 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>common</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>courses</artifactId>
 			<type>war</type>
 			<scope>runtime</scope>
