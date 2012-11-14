@@ -70,7 +70,7 @@
 				<@f.textarea path="reason" cssClass="text big-textarea" />
 			</@form.labelled_row>
 
-			<@form.labelled_row "requestedExpiryDate" "Until when do you request an extension?">
+			<@form.labelled_row "requestedExpiryDate" "Requested extension date">
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
 
