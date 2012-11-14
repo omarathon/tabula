@@ -20,8 +20,8 @@ import uk.ac.warwick.spring.Wire
  */
 class ContextProfileInitializer extends ApplicationContextInitializer[ConfigurableWebApplicationContext] with Logging {
 
-	var mainConfig = "/courses.properties"
-	var optionalConfig = "/courses-instance.properties"
+	var mainConfig = "/tabula.properties"
+	var optionalConfig = "/tabula-instance.properties"
 	val profilesProperty = "spring.profiles.active"
 
 	override def initialize(ctx: ConfigurableWebApplicationContext) = {

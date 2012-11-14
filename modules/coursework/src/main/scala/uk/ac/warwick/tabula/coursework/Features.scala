@@ -16,14 +16,14 @@ import java.beans.PropertyDescriptor
  * Defines flags to turn features on and off.
  *
  * Defaults set in this class.
- * App can change startup features in its `courses.properties`,
+ * App can change startup features in its `tabula.properties`,
  *   then modify them at runtime via JMX.
  *
  * ==Adding a new feature==
  *
  * Define a new boolean variable here (with `@BeanProperty` so that it's
  * a valid JavaBean property), and then to set it to a different value in
- * `courses.properties` add a line such as 
+ * `tabula.properties` add a line such as 
  *
  * {{{
  * features.yourFeatureName=false

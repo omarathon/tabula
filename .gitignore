@@ -9,11 +9,11 @@ local.properties
 *~
 CVS
 ajcore*
-/etc/scripts/dev/courses.properties
-/etc/scripts/dev/courses-private.properties
+/config/scripts/dev/tabula.properties
+/config/scripts/dev/tabula-private.properties
 console.properties
-courses-private.properties
-!/src/test/resources/courses-private.properties
+tabula-private.properties
+!/modules/*/src/test/resources/tabula-private.properties
 .ctags
 /.classpath
 junit*.properties

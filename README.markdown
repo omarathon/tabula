@@ -10,9 +10,9 @@ Set up an empty JBoss 5 server.
 
 The conf directory should contain:
 
-- courses-sso-config.xml modified to your details.
-- courses.properties modified to your details
-- courses-private.properties (may be empty but must exist)
+- tabula-sso-config.xml modified to your details.
+- tabula.properties modified to your details
+- tabula-private.properties (may be empty but must exist)
 
 You can get versions of these from the servers directory
 

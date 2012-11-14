@@ -14,6 +14,9 @@ import javax.annotation.Resource
  *
  */
 class UrlMethodModel extends TemplateDirectiveModel {
+  
+	// TODO have context configurable if/when we move this into common
+	val context: String = "/courses"
 
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
@@ -25,7 +28,7 @@ class UrlMethodModel extends TemplateDirectiveModel {
 		body: TemplateDirectiveBody) {
 
 		val path: String = if (params.containsKey("page")) {
-			params.get("page").toString()
+			context + params.get("page").toString()
 		} else if (params.containsKey("resource")) {
 			addSuffix(params.get("resource").toString())
 		} else {

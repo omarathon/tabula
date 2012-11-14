@@ -27,8 +27,8 @@
 			<list>
 				<value>classpath:/default.properties</value>
 				<value>classpath:/messages.properties</value>
-				<value>classpath:/courses.properties</value>
-				<value>classpath:/courses-private.properties</value>
+				<value>classpath:/tabula.properties</value>
+				<value>classpath:/tabula-private.properties</value>
 				<value>/WEB-INF/build.properties</value>
 				<value>classpath:/messages.properties</value>
 			</list>
@@ -37,7 +37,7 @@
 	
 	<bean id="features" class="uk.ac.warwick.tabula.coursework.FeaturesImpl">
 		<constructor-arg>
-			<util:properties location="classpath:/courses.properties" />
+			<util:properties location="classpath:/tabula.properties" />
 		</constructor-arg>
 	</bean>
 

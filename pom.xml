@@ -233,6 +233,15 @@
 									<include>WEB-INF/**/*</include>
 								</includes>
 							</overlay>
+							<overlay>
+								<groupId>uk.ac.warwick.tabula</groupId>
+								<artifactId>home</artifactId>
+								<type>zip</type>
+								<classifier>static-hashes</classifier>
+								<includes>
+									<include>WEB-INF/**/*</include>
+								</includes>
+							</overlay>
 						</overlays>
 					</configuration>
 				</plugin>
@@ -326,6 +335,46 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.4,)
+										</versionRange>
+										<goals>
+											<goal>
+												unpack-dependencies
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-assembly-plugin
+										</artifactId>
+										<versionRange>
+											[2.2-beta-5,)
+										</versionRange>
+										<goals>
+											<goal>single</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -393,14 +442,10 @@
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>courses</artifactId>
-				<version>${project.version}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>home</artifactId>
 				<version>${project.version}</version>
+				<type>zip</type>
+				<classifier>static-hashes</classifier>
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>

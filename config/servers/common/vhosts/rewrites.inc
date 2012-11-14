@@ -16,10 +16,14 @@ RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
 # Add trailing slash because otherwise ensadness occurs
 RewriteRule ^/courses$ /courses/ [QSA,L,R=301]
 
+# Remove /home context
+RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
+
 # Rewrite everything that isn't in a module to the home module
-RewriteCond %{REQUEST_URI} !^/courses.* [OR]
-RewriteCond %{REQUEST_URI} !^/static.*
-RewriteRule (.*) /home$1 [QSA]
+RewriteCond %{REQUEST_URI} !^/courses/(.*)
+RewriteCond %{REQUEST_URI} !^/home/(.*)
+RewriteCond %{REQUEST_URI} !^/profiles/(.*)
+RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 
 # Else, go straight to Jboss
 RewriteRule (.*) http://127.0.0.1:${proxy:port}$1 [QSA,P,L]

@@ -134,18 +134,8 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!-- Overlay static from other modules -->
+					<!-- Need to re-implement overlays here because by default we overlay ourself! -->
 					<overlays>
-						<overlay>
-							<groupId>uk.ac.warwick.tabula</groupId>
-							<artifactId>courses</artifactId>
-							<type>war</type>
-							<includes>
-								<include>static/**/*</include>
-							</includes>
-						</overlay>
-					
-						<!-- TODO try and avoid having to reproduce this from tabula/pom.xml -->	
 						<overlay>
 							<groupId>uk.ac.warwick.tabula</groupId>
 							<artifactId>common</artifactId>
@@ -175,6 +165,24 @@
 						<exclude>**/static/libs/**/*.*</exclude>
 					</excludes>
 					<jswarn>false</jswarn>
+					<aggregations>
+						<aggregation>
+							<!-- insert new line after each concatenation (default: false) -->
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/main.js</output>
+							<includes>
+								<include>scripts.js</include>
+								<include>jquery-copyable.js</include>
+								<include>jquery-biglist.js</include>
+								<include>jquery-tableform.js</include>
+								<include>userpicker.js</include>
+								<include>coursework-admin.js</include>
+								<include>coursework-submission.js</include>
+								<include>ajax-popup.js</include>
+								<include>app-comments.js</include>
+							</includes>
+						</aggregation>
+					</aggregations>
 				</configuration>
 			</plugin>
 
@@ -261,6 +269,25 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			
+			<!-- Build a zip of our static-hashes now it's generated -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<classifier>static-hashes</classifier>
+							<descriptor>src/main/assembly/static-hashes.xml</descriptor>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>
@@ -322,12 +349,6 @@
 			<artifactId>common</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>courses</artifactId>
-			<type>war</type>
-			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
