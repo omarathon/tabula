@@ -20,23 +20,18 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionComm
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/delete"))
 class DeleteSubmission extends BaseController {
-	@ModelAttribute
-	def command(@PathVariable assignment: Assignment) = new DeleteSubmissionCommand(assignment)
 
 	validatesSelf[DeleteSubmissionCommand]
-
-	def formView(assignment: Assignment) = Mav("admin/assignments/submissions/delete",
-		"assignment" -> assignment)
-		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
-
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submission(assignment))
-
+	
+	@ModelAttribute
+	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionCommand(assignment)
+	
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+	def get(form: DeleteSubmissionCommand) = RedirectBack(form.assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-		form: DeleteSubmissionCommand, errors: Errors) = {
+	def showForm(@PathVariable("module") module: Module, form: DeleteSubmissionCommand, errors: Errors) = {
+		val assignment = form.assignment
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Delete(mandatory(form.submissions.headOption)))
 		form.prevalidate(errors)
@@ -44,12 +39,9 @@ class DeleteSubmission extends BaseController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@Valid form: DeleteSubmissionCommand,
-			errors: Errors) = {
+	def submit(@PathVariable("module") module: Module, @Valid form: DeleteSubmissionCommand,errors: Errors) = {
 		transactional() {
+			val assignment = form.assignment
 			mustBeLinked(assignment, module)
 			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors) {
@@ -60,4 +52,15 @@ class DeleteSubmission extends BaseController {
 			}
 		}
 	}
+	
+	
+	def formView(assignment: Assignment) = 
+		Mav("admin/assignments/submissions/delete",
+			"assignment" -> assignment)
+			.crumbs(
+					Breadcrumbs.Department(assignment.module.department), 
+					Breadcrumbs.Module(assignment.module))
+
+	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submission(assignment))
+
 }

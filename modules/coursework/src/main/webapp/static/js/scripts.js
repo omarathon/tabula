@@ -38,6 +38,35 @@ jQuery(function ($) {
 		}
 	});
 	
+	/*
+	 * .double-submit-protection class on a form will detect submission
+	 * and prevent submitting twice. It will also visually disable any
+	 * .btn items in a .submit-buttons container. 
+	 * 
+	 * Obviously this won't make it impossible to submit twice, if JS is
+	 * disabled or altered.
+	 */
+	$('form.double-submit-protection').on('submit', function(event) {
+		var $this = $(event.target),
+		    submitted = $this.data('already-submitted');
+		
+		if (!submitted) {
+			var $buttons = $this.find('.submit-buttons .btn').not('.disabled');
+			$buttons.addClass('disabled');
+			$this.data('already-submitted', true);
+			// For FF and other browsers with BFCache/History Cache,
+			// re-enable the form if you click Back.
+			$(window).on('pageshow', function() {
+				$buttons.removeClass('disabled');
+				$this.removeData('already-submitted');
+			});
+			return true;
+		} else {
+			event.preventDefault();
+			return false;
+		}
+	});
+	
     $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
 
     // add .use-tooltip class and title attribute to enable cool looking tooltips.

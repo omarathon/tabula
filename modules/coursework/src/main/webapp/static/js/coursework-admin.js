@@ -21,7 +21,7 @@ var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
 	        else
 	        	$slidingDiv.stop().slideDown('fast');
 	    });
-	    $slidingDiv.toggle($checkbox.not(':checked'));
+	    $slidingDiv.toggle(! $checkbox.is(':checked'));
 	}
 };
 
