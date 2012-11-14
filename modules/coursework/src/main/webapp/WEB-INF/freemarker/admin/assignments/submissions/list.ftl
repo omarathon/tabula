@@ -66,7 +66,7 @@ Publications: ${r.publicationOverlap}%)
                     <#if submission.late>
                         <span class="label-red">Late</span>
 					<#elseif  submission.authorisedLate>
-						<span class="label-blue">Authorised Late</span>
+						<span class="label-blue">Within Extension</span>
                     </#if>
                     <#if item.downloaded>
                         <span class="label-green">Downloaded</span>

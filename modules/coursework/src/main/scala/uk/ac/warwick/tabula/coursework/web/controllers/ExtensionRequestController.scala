@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.coursework.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.NewExtensionRequestMessage
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
 import uk.ac.warwick.tabula.coursework.actions.View
 
 @Controller
@@ -74,10 +74,17 @@ class ExtensionRequestController extends BaseController{
 	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
 		val assignment = extension.assignment
 		val moduleManagers = assignment.module.participants.includeUsers
+		val departmentManagers = assignment.module.department.owners.includeUsers
+
+		val recipients = {
+			if (moduleManagers.isEmpty) departmentManagers
+			else moduleManagers
+		}
+
 		if (modified){
-			//TODO-RITCHIE separate message for modified requests
+			recipients.foreach(new ModifiedExtensionRequestMessage(extension, _).apply())
 		} else {
-			moduleManagers.foreach(new NewExtensionRequestMessage(extension, _).apply())
+			recipients.foreach(new NewExtensionRequestMessage(extension, _).apply())
 		}
 	}
 }
