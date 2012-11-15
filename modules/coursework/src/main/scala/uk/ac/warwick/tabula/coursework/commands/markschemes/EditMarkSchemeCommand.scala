@@ -1,9 +1,9 @@
-package uk.ac.warwick.courses.commands.markschemes
+package uk.ac.warwick.tabula.coursework.commands.markschemes
 
-import uk.ac.warwick.courses.data.model._
-import uk.ac.warwick.courses.commands._
-import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 
 /** Edit an existing markscheme. */

@@ -1,23 +1,22 @@
-package uk.ac.warwick.courses.web.controllers.admin.markschemes
+package uk.ac.warwick.tabula.coursework.web.controllers.admin.markschemes
 
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.web.bind.annotation._
 import org.springframework.stereotype.Controller
 import org.hibernate.criterion.Restrictions
-import uk.ac.warwick.courses.web.controllers.BaseController
-import uk.ac.warwick.courses.data.model.Department
-import uk.ac.warwick.courses.web.Mav
-import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.data.model.MarkScheme
-import uk.ac.warwick.courses.web.Breadcrumbs
-import uk.ac.warwick.courses.actions.Manage
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.courses.data.MarkSchemeDao
+import uk.ac.warwick.tabula.data.MarkSchemeDao
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes"))
-class ListMarkSchemesController extends BaseController with Daoisms {
+class ListMarkSchemesController extends CourseworkController with Daoisms {
 	import ListMarkSchemesController._
 	
 	var dao = Wire.auto[MarkSchemeDao]

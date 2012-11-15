@@ -7,7 +7,10 @@ trait CourseworkBreadcrumbs {
 	val Breadcrumbs = CourseworkBreadcrumbs
 }
 
-object CourseworkBreadcrumbs extends uk.ac.warwick.tabula.web.Breadcrumbs {
+object CourseworkBreadcrumbs {
+	abstract class Abstract extends BreadCrumb
+	case class Standard(val title: String, val url: String, override val tooltip: String) extends Abstract
+  
 	/**
 	 * Special case breadcrumb for the department admin page.
 	 */

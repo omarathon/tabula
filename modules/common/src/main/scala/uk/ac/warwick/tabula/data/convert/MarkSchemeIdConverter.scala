@@ -1,8 +1,8 @@
-package uk.ac.warwick.courses.data.convert
+package uk.ac.warwick.tabula.data.convert
 
-import uk.ac.warwick.courses.system.TwoWayConverter
-import uk.ac.warwick.courses.data.model.MarkScheme
-import uk.ac.warwick.courses.data.Daoisms
+import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.data.Daoisms
 
 class MarkSchemeIdConverter extends TwoWayConverter[String, MarkScheme] with Daoisms {
 

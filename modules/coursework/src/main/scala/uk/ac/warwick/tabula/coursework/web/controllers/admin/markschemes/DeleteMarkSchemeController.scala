@@ -1,4 +1,4 @@
-package uk.ac.warwick.courses.web.controllers.admin.markschemes
+package uk.ac.warwick.tabula.coursework.web.controllers.admin.markschemes
 
 import javax.validation.Valid
 
@@ -7,16 +7,16 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import uk.ac.warwick.courses.actions.Manage
-import uk.ac.warwick.courses.commands.markschemes.DeleteMarkSchemeCommand
-import uk.ac.warwick.courses.data.model._
-import uk.ac.warwick.courses.web.controllers.BaseController
-import uk.ac.warwick.courses.web.Mav
-import uk.ac.warwick.courses.web.Routes
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.coursework.commands.markschemes.DeleteMarkSchemeCommand
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes/delete/{markscheme}"))
-class DeleteMarkSchemeController extends BaseController {
+class DeleteMarkSchemeController extends CourseworkController {
 
 	// tell @Valid annotation how to validate
 	validatesSelf[DeleteMarkSchemeCommand]

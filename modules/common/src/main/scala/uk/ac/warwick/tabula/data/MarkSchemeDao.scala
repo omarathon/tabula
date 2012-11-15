@@ -1,8 +1,8 @@
-package uk.ac.warwick.courses.data
+package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.data.model._
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.Restrictions
 
 trait MarkSchemeDao {

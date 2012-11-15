@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
 /**
  * Command for adding permissions to a module.

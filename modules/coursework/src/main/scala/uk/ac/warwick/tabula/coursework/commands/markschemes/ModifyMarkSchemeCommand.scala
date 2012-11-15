@@ -1,23 +1,23 @@
-package uk.ac.warwick.courses.commands.markschemes
+package uk.ac.warwick.tabula.coursework.commands.markschemes
 
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.springframework.validation.Errors
 import javax.persistence.Entity
-import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.commands.SelfValidating
-import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.data.Transactions._
-import uk.ac.warwick.courses.data.model.Department
-import uk.ac.warwick.courses.data.model.MarkScheme
-import uk.ac.warwick.courses.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
-import uk.ac.warwick.courses.commands.Command
+import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.courses.services.UserLookupService
-import uk.ac.warwick.courses.validators.UsercodeListValidator
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
 /** Abstract base command for either creating or editing a MarkScheme */
 abstract class ModifyMarkSchemeCommand(

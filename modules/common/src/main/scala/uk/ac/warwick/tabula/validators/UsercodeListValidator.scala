@@ -1,9 +1,9 @@
-package uk.ac.warwick.courses.validators
+package uk.ac.warwick.tabula.validators
 
 import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.courses.services.UserLookupService
-import uk.ac.warwick.courses.JavaImports._
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.core.StringUtils
 
