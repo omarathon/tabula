@@ -23,6 +23,20 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
+<#if features.markSchemes && department.markSchemes?has_content>
+	<@form.labelled_row "markScheme" "Mark scheme">
+		<@f.select path="markScheme">
+			<@f.option value="" label="None"/>
+			<#list department.markSchemes as markScheme>
+				<@f.option value="${markScheme.id}" label="${markScheme.name}"/>
+			</#list>
+		</@f.select>
+		<div class="help-block">
+			Select the way in which this assignment will be marked.
+		</div>
+	</@form.labelled_row>
+</#if>
+
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
 		<label class="checkbox">

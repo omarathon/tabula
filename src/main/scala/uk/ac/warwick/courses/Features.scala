@@ -2,15 +2,10 @@ package uk.ac.warwick.courses
 
 import java.util.Properties
 import scala.collection.JavaConversions._
-import scala.reflect.BeanInfo
 import org.springframework.beans.BeanWrapperImpl
-import org.springframework.core.env.PropertySource
 import scala.reflect.BeanProperty
 import java.lang.Boolean
-import scala.reflect.BeanInfo
-import java.beans.SimpleBeanInfo
-import java.beans.BeanDescriptor
-import java.beans.PropertyDescriptor
+
 
 /**
  * Defines flags to turn features on and off.
@@ -40,7 +35,7 @@ abstract class Features {
 	@BeanProperty var assignmentMembership: Boolean = true
 	@BeanProperty var extensions: Boolean = false
 	@BeanProperty var feedbackTemplates: Boolean = true
-	
+	@BeanProperty var markSchemes: Boolean = true
 }
 
 class FeaturesImpl(properties: Properties) extends Features {
