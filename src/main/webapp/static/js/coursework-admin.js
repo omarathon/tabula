@@ -135,7 +135,7 @@ $(function(){
                     }
                 });                 
             }
-            $('.submission-list').data("all-plagiarised", allPlagiarised);
+            $('.submission-feedback-list,.submission-list').data("all-plagiarised", allPlagiarised);
             if (allPlagiarised) {
                 $('#mark-plagiarised-selected-button').text("Unmark selected plagiarised");
             }

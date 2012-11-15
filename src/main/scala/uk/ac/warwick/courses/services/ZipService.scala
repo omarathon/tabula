@@ -46,6 +46,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def partition(id: String): String = id.replace("-", "").grouped(idSplitSize).mkString("/")
 
 	def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
+    def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)	
 	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
@@ -55,6 +56,9 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def getFeedbackZip(feedback: Feedback): File =
 		getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
 
+    def getSubmissionZip(submission: Submission): File =
+        getZip(resolvePath(submission), getSubmissionZipItems(submission))	
+		
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
 		feedback.attachments.map { (attachment) =>
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)

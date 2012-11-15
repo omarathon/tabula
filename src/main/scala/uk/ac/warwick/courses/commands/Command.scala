@@ -118,6 +118,15 @@ abstract class Description {
 		this
 	}
 
+    /**
+     * Record a Submission item, plus its assignment, module, department
+     */
+    def submission(submission: Submission) = {
+        map += "submission" -> submission.id
+        if (submission.assignment != null) assignment(submission.assignment)
+        this
+    }	
+	
 	/**
 	 * University IDs
 	 */

@@ -31,7 +31,7 @@
 <#assign has_archived_assignments=false />
 <a id="module-${module.code}"></a>
 <div class="module-info<#if !has_assignments> empty</#if>">
-<h2><@fmt.module_name module /></h2>
+<h2><@fmt.module_name module /> </h2>
 	<div class="module-info-contents">
 	
 	<div>
@@ -90,7 +90,7 @@
 				<div class="close-date">
 					<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate /> 
 				</div>
-				<#if features.submissions && assignment.collectSubmissions>
+				<#if features.submissions && assignment.collectSubmissions && !features.combinedForm>
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>
 							<a href="<@routes.assignmentsubmissions assignment=assignment />" title="View all submissions">
@@ -101,21 +101,23 @@
 						</#if>
 					</div>
 				</#if>
-				<div class="feedback-count">
-				<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-				${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
-				<#assign unreleasedFeedback=assignment.unreleasedFeedback />
-				<#if unreleasedFeedback?size gt 0>
-					<span class="has-unreleased-feedback">
-					(${unreleasedFeedback?size} to publish)
-					</span>
-				<#elseif has_feedback>
-					<span class="no-unreleased-feedback">
-					(all published)
-					</span>
+				<#if !features.combinedForm>
+					<div class="feedback-count">
+					<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
+					${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
+					<#assign unreleasedFeedback=assignment.unreleasedFeedback />
+					<#if unreleasedFeedback?size gt 0>
+						<span class="has-unreleased-feedback">
+						(${unreleasedFeedback?size} to publish)
+						</span>
+					<#elseif has_feedback>
+						<span class="no-unreleased-feedback">
+						(all published)
+						</span>
+					</#if>
+					</div>
 				</#if>
-				</div>
-				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>	
+				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
 					<div class="submission-and-feedback-count">							
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
 							${assignment.submissions?size} submissions and ${assignment.feedbacks?size} feedback

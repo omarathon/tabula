@@ -31,8 +31,8 @@
 ${verb?cap_first}ing <strong><@fmt.p students?size "student" /></strong> as suspected of being plagiarised.
 ${message}
 </p>
-<#list students as student>
-<input type="hidden" name="students" value="${student.uniId}" />
+<#list students as uniId>
+	<input type="hidden" name="students" value="${uniId}" />
 </#list>
 </@spring.bind>
 
@@ -43,10 +43,10 @@ ${message}
 <p>
 <@form.errors path="confirm" />
 <@form.label checkbox=true><@f.checkbox path="confirm" />
-<#if (submissionsList?size > 1)>
- I confirm that I want to ${verb} these submissions as suspected of being plagiarised.
+<#if (students?size > 1)>
+ I confirm that I want to ${verb} these students' submissions as suspected of being plagiarised.
 <#else>
- I confirm that I want to ${verb} this submission as suspected of being plagiarised.
+ I confirm that I want to ${verb} this student's submission as suspected of being plagiarised.
 </#if>
  </label>
  </@form.label> 

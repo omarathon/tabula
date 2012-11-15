@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<h1>All submissions and feedback for ${assignment.name}</h1>
+<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
 <#assign module=assignment.module />
 
@@ -13,7 +13,7 @@ Download feedback
 <a class="btn" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions.xml'/>"><i class="icon-download"></i>
 XML
 </a>
-<a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete' />" id="delete-selected-button">Delete</a>
+<a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
 
 <#if features.turnitin>
 <a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
@@ -22,7 +22,12 @@ XML
 <a class="btn btn-warn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark selected plagiarised</a>
 
 </div>
-<#macro originalityReport r>
+
+
+<#macro originalityReport attachment>
+<#local r=attachment.originalityReport />
+<div>
+${attachment.name}
 <img src="<@url resource="/static/images/icons/turnitin-16.png"/>">
 <span class="similarity-${r.similarity}">${r.overlap}% similarity</span>
 <span class="similarity-subcategories">
@@ -30,7 +35,9 @@ XML
 Student papers: ${r.studentOverlap}%,
 Publications: ${r.publicationOverlap}%)
 </span>
+<div>
 </#macro>
+
 
 <#if students?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
@@ -91,14 +98,24 @@ Publications: ${r.publicationOverlap}%)
                     </td>
                 </#if>
 				<td nowrap="nowrap" class="files">
-					Files download link will go here
+					<#assign attachments=submission.allAttachments />
+					<#if attachments?size gt 0>
+					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
+						<i class="icon-download"></i>
+						${attachments?size}
+						<#if attachments?size == 1> file
+						<#else> files
+						</#if>
+					</a>
+					</#if>
 				</td>
 				<td nowrap="nowrap" class="download">
-					<#if feedback.attachments?size gt 0>
+					<#assign attachments=feedback.attachments />
+					<#if attachments?size gt 0>
 					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.zip'/>">
 						<i class="icon-download"></i>
-						${feedback.attachments?size}
-						<#if feedback.attachments?size == 1> file
+						${attachments?size}
+						<#if attachments?size == 1> file
 						<#else> files
 						</#if>
 					</a>
@@ -112,10 +129,14 @@ Publications: ${r.publicationOverlap}%)
 					</#if>
 				</td>
 				<#if hasOriginalityReport>
-					<td class="originality-report">
-						<#if submission.originalityReport??>
-							<@originalityReport item.submission.originalityReport />
-						</#if>
+					<td>
+						<#list submission.allAttachments as attachment>
+                    		<!-- Checking originality report for ${attachment.name} ... -->
+                        	<#if attachment.originalityReport??>
+                            	<@originalityReport attachment />
+                        		<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View report</a>
+                        	</#if>
+						</#list>
 					</td>
 				</#if>
 			</tr>

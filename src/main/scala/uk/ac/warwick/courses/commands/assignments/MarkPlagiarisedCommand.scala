@@ -34,6 +34,14 @@ class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[Unit] w
 	var submissionsUpdated = 0
 
 	def apply() {
+    	    for (uniId <- students;
+             submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
+                    submission.suspectPlagiarised = markPlagiarised
+                    assignmentService.saveSubmission(submission)
+                    submissionsUpdated = submissionsUpdated + 1
+            }
+    	
+/*    	this was tested and works, but can't be good!
     	for (uniId <- students) {
     	    val submissionOption = assignmentService.getSubmissionByUniId(assignment, uniId)
     	    
@@ -45,15 +53,20 @@ class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[Unit] w
     	    	}
     	    	case None => //nothing (no submission exists for this student)
     	    }
-		}
+		}*/
 	}
 
 	def validate(implicit errors: Errors) {
 		if (!confirm) rejectValue("confirm", "submission.mark.plagiarised.confirm")
 	}
 
-	def describe(d: Description) = d
-		.assignment(assignment)
+	override def describe(d: Description) = d
+        .assignment(assignment)
+        .property("students" -> students)
+        
+	
+	override def describeResult(d: Description) = d
+	    .assignment(assignment)
 		//.property("submissionCount" -> submissions.size)
 		.property("submissionCount" -> submissionsUpdated)
 		.property("markPlagiarised" -> markPlagiarised)
