@@ -92,19 +92,28 @@ class AssignmentController extends AbstractAssignmentController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@PathVariable module: Module, user: CurrentUser, @Valid form: SubmitAssignmentCommand, errors: Errors) = {
+		/*
+		 * Note the multiple transactions. The submission transaction should commit before the confirmation email
+		 * command runs, to ensure that it has fully committed successfully. So don't wrap this method in an outer transaction
+		 * or you'll just make it be one transaction! (HFC-385)
+		 */
+		val assignment = form.assignment
+		val module = form.module
 		transactional() {
-			val assignment = form.assignment
-			val module = form.module
 			form.onBind
-			checks(form, None)
-			if (errors.hasErrors || !user.loggedIn) {
-				view(user, form, errors)
-			} else {
-				val submission = form.apply
+		}
+		checks(form, None)
+		if (errors.hasErrors || !user.loggedIn) {
+			view(user, form, errors)
+		} else {
+			val submission = transactional() { form.apply() }
+			// submission creation should be committed to DB at this point, 
+			// so we can safely send out a submission receipt.
+			transactional() {
 				val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
 				sendReceipt.apply()
-				Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 			}
+			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}
 
