@@ -19,8 +19,8 @@ checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
-ant_path: "ant"
-ant_package_target: "package"
+builder: !ruby/object:AntBuilder
+  target: "build"
 jbosses: 
   coursework:
   - !ruby/object:Jboss 
