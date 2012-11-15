@@ -38,6 +38,9 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var extensionGuidelineSummary:String = null
 	@BeanProperty var extensionGuidelineLink:String = null
 
+	@OneToMany(mappedBy = "department")
+	@BeanProperty var markSchemes: JList[MarkScheme] = ArrayList()
+
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
 		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
