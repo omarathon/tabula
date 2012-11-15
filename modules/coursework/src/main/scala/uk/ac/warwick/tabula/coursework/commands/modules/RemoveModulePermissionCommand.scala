@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.modules
 
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.Module
 import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.springframework.validation.Errors

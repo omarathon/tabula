@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.services.turnitin
 
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
 /*
  * Typical <object> response when listing submissions

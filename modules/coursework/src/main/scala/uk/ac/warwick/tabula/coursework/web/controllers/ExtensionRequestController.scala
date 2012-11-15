@@ -3,19 +3,19 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.coursework.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.PermissionDeniedException
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
-import uk.ac.warwick.tabula.coursework.actions.View
+import uk.ac.warwick.tabula.actions.View
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
-class ExtensionRequestController extends BaseController{
+class ExtensionRequestController extends CourseworkController{
 
 	@ModelAttribute
 	def extensionRequestCommand(@PathVariable assignment:Assignment, user:CurrentUser) =

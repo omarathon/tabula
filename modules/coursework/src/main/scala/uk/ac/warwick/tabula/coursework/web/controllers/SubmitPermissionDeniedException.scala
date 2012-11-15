@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.coursework._
+import uk.ac.warwick.tabula._
 import data.model.Assignment
 import actions.Action
-import system.exceptions.UserError
+import uk.ac.warwick.tabula.system.exceptions.UserError
 
 /**
  * Specific exception for when a student/person is not allowed to view

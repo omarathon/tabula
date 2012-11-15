@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import scala.reflect.BeanProperty
+
 
 /** Simply marks an assignment as archived. */
 class ArchiveAssignmentCommand(val assignment: Assignment) extends Command[Unit] {

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.FileServer
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.coursework.commands.feedback.DownloadFeedbackCommand
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.coursework.ItemNotFoundException
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))

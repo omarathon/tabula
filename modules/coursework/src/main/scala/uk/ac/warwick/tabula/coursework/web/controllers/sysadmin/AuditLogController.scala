@@ -5,14 +5,14 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.coursework.services.AuditEventService
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.web.Mav
-import uk.ac.warwick.tabula.coursework.services.AuditEventIndexService
+import uk.ac.warwick.tabula.services.AuditEventService
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.services.AuditEventIndexService
 import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.codehaus.jackson.map.ObjectMapper
-import uk.ac.warwick.tabula.coursework.data.model.AuditEvent
+import uk.ac.warwick.tabula.data.model.AuditEvent
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
@@ -33,7 +33,7 @@ case class UserLookupQuery() {
 }
 
 @Controller
-class AuditLogController extends BaseController {
+class AuditLogController extends CourseworkController {
 
 	var auditEventService = Wire.auto[AuditEventService]
 	var auditEventIndexService = Wire.auto[AuditEventIndexService]

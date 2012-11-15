@@ -4,19 +4,20 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions.asScalaBuffer
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.commands.ReadOnly
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.data.model.Submission
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import uk.ac.warwick.tabula.coursework.services.fileserver.RenderableAttachment
-import uk.ac.warwick.tabula.coursework.services.fileserver.RenderableFile
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.AssignmentService
 import scala.None
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+
 
 class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
   var assignmentService = Wire.auto[AssignmentService]

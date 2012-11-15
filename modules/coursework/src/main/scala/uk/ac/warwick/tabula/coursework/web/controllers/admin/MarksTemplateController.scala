@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ PathVariable, RequestMapping }
-import uk.ac.warwick.tabula.coursework.data.model.{ Module, Assignment }
-import uk.ac.warwick.tabula.coursework.actions.Participate
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.views.ExcelView
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
-class MarksTemplateController extends BaseController {
+class MarksTemplateController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 

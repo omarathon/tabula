@@ -6,13 +6,13 @@ import java.util.Properties
 import java.io.FileInputStream
 import java.io.File
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.coursework.TestHelpers
+import uk.ac.warwick.tabula.TestHelpers
 import java.io.FileWriter
 import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
-import uk.ac.warwick.tabula.coursework.TestFixtures
-import uk.ac.warwick.tabula.coursework.data.model.Submission
-import uk.ac.warwick.tabula.coursework.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.TestFixtures
+import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
 import uk.ac.warwick.util.web.UriBuilder
 

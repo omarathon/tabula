@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.coursework.services.ZipService
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.fileserver.RenderableZip
+import uk.ac.warwick.tabula.services.ZipService
 import org.springframework.beans.factory.annotation.Autowired
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+
 
 class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 

@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.tabula.coursework.commands.departments.RemoveDeptOwnerCommand
-import uk.ac.warwick.tabula.coursework.commands.imports.ImportModulesCommand
-import uk.ac.warwick.tabula.coursework.commands.SelfValidating
-import uk.ac.warwick.tabula.coursework.data.model.Department
-import uk.ac.warwick.tabula.coursework.services.AuditEventIndexService
-import uk.ac.warwick.tabula.coursework.services.MaintenanceModeService
-import uk.ac.warwick.tabula.coursework.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.DateFormats
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.AuditEventIndexService
+import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.services.AssignmentImporter
-import uk.ac.warwick.tabula.coursework.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.services.AssignmentImporter
+import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
 import uk.ac.warwick.spring.Wire
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
  */
 
-abstract class BaseSysadminController extends BaseController {
+abstract class BaseSysadminController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var userLookup = Wire.auto[UserLookupInterface]
 

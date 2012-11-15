@@ -2,10 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.departments
 
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.{Description, ReadOnly, Command}
-import uk.ac.warwick.tabula.coursework.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
+import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.{Department, FeedbackTemplate}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.FeedbackTemplate
+
 
 class DownloadFeedbackTemplateCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 
@@ -28,13 +31,11 @@ class DownloadFeedbackTemplateCommand(user: CurrentUser) extends Command[Option[
 		renderableAttachment
 	}
 
-	override def describe(d: Description) {
-		d.department(department)
-		d.property("template", template.id)
-	}
+	override def describe(d: Description) = d
+		.department(department)
+		.property("template", template.id)
 
-	override def describeResult(d: Description) {
-		d.property("fileFound", fileFound)
-	}
+	override def describeResult(d: Description) = d
+		.property("fileFound", fileFound)
 
 }

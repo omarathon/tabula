@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.modules
 
 import uk.ac.warwick.tabula._
-import coursework.actions.Create
-import coursework.web.controllers.BaseController
+import actions.Create
+import coursework.web.controllers.CourseworkController
 import coursework.web.Routes
 import coursework.commands.modules.AddModuleCommand
 
@@ -10,11 +10,11 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.PermissionDeniedException
+import uk.ac.warwick.tabula.PermissionDeniedException
 
 @Controller
 @RequestMapping(value = Array("/admin/module/new"))
-class AddModuleController extends BaseController {
+class AddModuleController extends CourseworkController {
 
 	// set up self validation for when @Valid is used
 	validatesSelf[AddModuleCommand]

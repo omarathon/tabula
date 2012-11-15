@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
 import scala.reflect.BeanProperty
+
 
 class DeleteAssignmentCommand(val assignment: Assignment = null) extends Command[Unit] {
 

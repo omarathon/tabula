@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod._
-import uk.ac.warwick.tabula.coursework.web.Cookies._
-import uk.ac.warwick.tabula.coursework.web.Cookie
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.web.Cookies._
+import uk.ac.warwick.tabula.web.Cookie
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.coursework.actions.Masquerade
+import uk.ac.warwick.tabula.actions.Masquerade
 import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.UserLookup
@@ -23,7 +23,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
-class MasqueradeController extends BaseController {
+class MasqueradeController extends CourseworkController {
 
 	@Autowired var userLookup: UserLookupInterface = _
 
@@ -55,7 +55,7 @@ class MasqueradeController extends BaseController {
 	}
 
 	private def newCookie(usercode: String) = new Cookie(
-		name = "coursesMasqueradeAs",
+		name = "tabulaMasqueradeAs",
 		value = usercode,
 		path = "/")
 

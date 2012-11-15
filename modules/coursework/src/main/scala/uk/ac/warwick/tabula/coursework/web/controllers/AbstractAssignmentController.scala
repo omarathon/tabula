@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.actions.View
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.data.FeedbackDao
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 
-abstract class AbstractAssignmentController extends BaseController {
+abstract class AbstractAssignmentController extends CourseworkController {
 	@Autowired var feedbackDao: FeedbackDao = _
 	@Autowired var assignmentService: AssignmentService = _
 

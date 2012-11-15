@@ -1,28 +1,29 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.commands.{ SelfValidating, Description, Command }
+import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.coursework.data.model.{ Department, UpstreamAssignment }
-import uk.ac.warwick.tabula.coursework.{ DateFormats, AcademicYear }
+import uk.ac.warwick.tabula.data.model.{ Department, UpstreamAssignment }
+import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import org.springframework.validation.Errors
 import com.google.common.collect.Maps
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.ModuleDao
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.ModuleDao
+import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import scala.collection.mutable.HashMap
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.coursework.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+
 
 /**
  * Sub-object on the form for binding each upstream assignment and some other properties.

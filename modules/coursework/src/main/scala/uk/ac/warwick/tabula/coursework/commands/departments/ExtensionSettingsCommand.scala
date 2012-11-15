@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
-import uk.ac.warwick.tabula.coursework.data.model.Department
-import uk.ac.warwick.tabula.coursework.commands.{Description, Command}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.commands.{Description, Command}
 import org.springframework.beans.factory.annotation.Configurable
 import reflect.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
+
 
 class ExtensionSettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
 

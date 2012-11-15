@@ -178,6 +178,7 @@
 							<includeArtifactIds>common</includeArtifactIds>
 							<includes>WEB-INF/**/*</includes>
 							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<overWriteIfNewer>false</overWriteIfNewer>
 						</configuration>
 					</execution>
 				</executions>
@@ -519,6 +520,15 @@
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>
 		</dependency>
+			
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
@@ -529,6 +539,11 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.scalatest</groupId>
+			<artifactId>scalatest_${scala.version}</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

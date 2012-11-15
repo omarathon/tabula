@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.services.turnitin
 
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 
 
 class TurnitinTests extends TestBase {

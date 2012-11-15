@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.commands.assignments.ArchiveAssignmentCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/archive"))
-class ArchiveAssignmentController extends BaseController {
+class ArchiveAssignmentController extends CourseworkController {
 
 	@ModelAttribute("command") def model(assignment: Assignment) = new ArchiveAssignmentCommand(assignment)
 

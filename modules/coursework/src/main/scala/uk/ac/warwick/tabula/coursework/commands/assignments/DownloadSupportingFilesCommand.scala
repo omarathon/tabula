@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.coursework.commands.{Description, ReadOnly, Command}
-import uk.ac.warwick.tabula.coursework.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
+import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
+
 
 class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 

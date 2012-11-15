@@ -6,10 +6,10 @@ import org.junit.Test
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
 
-import uk.ac.warwick.tabula.coursework.AppContextTestBase
-import uk.ac.warwick.tabula.coursework.Fixtures
-import uk.ac.warwick.tabula.coursework.AcademicYear
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model._
 
 
 

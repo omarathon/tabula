@@ -3,18 +3,18 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.FileServer
 import scala.Array
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadSupportingFilesCommand, DownloadAttachmentCommand}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.ItemNotFoundException
+import uk.ac.warwick.tabula.ItemNotFoundException
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}",
 							"/module/{module}/{assignment}/extension"))
-class DownloadSupportingFilesController extends BaseController{
+class DownloadSupportingFilesController extends CourseworkController{
 
 	@ModelAttribute def command(user:CurrentUser) = new DownloadSupportingFilesCommand(user)
 

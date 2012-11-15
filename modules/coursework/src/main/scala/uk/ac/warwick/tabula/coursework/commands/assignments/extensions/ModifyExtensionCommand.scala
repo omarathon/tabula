@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
-import uk.ac.warwick.tabula.coursework.commands.{Description, Command}
+import uk.ac.warwick.tabula.commands.{Description, Command}
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.DateFormats
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors

@@ -5,8 +5,9 @@ import org.junit.Test
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import collection.JavaConversions._
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 
-class DateBuilderTest extends TestBase {
+class DateBuilderTest extends TestBase with FreemarkerRendering {
 	
 	@Test def format {
 		withFakeTime(new DateTime(2012,4,12, 13,36,0)) {
@@ -27,6 +28,11 @@ class DateBuilderTest extends TestBase {
 			builder.format(today, false, false, false, true, true) should be ("Today 13:36")
 			
 			builder.format(today, false, false, false, true, false) should be ("Thu 12th April 2012 13:36")
+		  
+			// Freemarker exec
+			implicit val fmConfig = newFreemarkerConfiguration
+			val rendered = renderToString("dateBuilder.ftl", Map("b" -> builder, "today" -> today))
+			rendered should be ("Today 13:36")
 		}
 	}
 	

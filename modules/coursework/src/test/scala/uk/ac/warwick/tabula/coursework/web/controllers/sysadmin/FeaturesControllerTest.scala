@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.Features
 
 
 import java.util.Properties

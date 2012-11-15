@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceiptCommand
-import uk.ac.warwick.tabula.coursework.web.{ Mav, Routes }
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 
 @Controller

@@ -7,14 +7,14 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.coursework.data.model.Submission
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
+import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.coursework.services.Zips
-import uk.ac.warwick.tabula.coursework.AppContextTestBase
+import uk.ac.warwick.tabula.services.Zips
+import uk.ac.warwick.tabula.AppContextTestBase
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
 
 class DownloadSubmissionsCommandTest extends AppContextTestBase {

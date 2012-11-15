@@ -12,22 +12,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.test.context.support.AnnotationConfigContextLoader
 import org.springframework.context.annotation.Configuration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ComponentScan
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.test.context.transaction.TransactionConfiguration
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Module
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.data.model.Department
+import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.coursework.web.controllers.sysadmin.SysadminController
+import uk.ac.warwick.tabula._
 
 class ApplicationTest extends AppContextTestBase {
     

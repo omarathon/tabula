@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentsCommand
-import uk.ac.warwick.tabula.coursework
-import uk.ac.warwick.tabula.coursework.actions.Manage
-import uk.ac.warwick.tabula.coursework.web.Mav
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.data.model.Department
+import uk.ac.warwick.tabula
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
 import org.joda.time.DateTime
@@ -16,8 +16,8 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.web.bind.annotation.RequestMethod._
-import uk.ac.warwick.tabula.coursework.AcademicYear
-import uk.ac.warwick.tabula.coursework.PermissionDeniedException
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.PermissionDeniedException
 
 /**
  * Controller that handles the multi-step process of creating many assignments from SITS data.
@@ -33,7 +33,7 @@ import uk.ac.warwick.tabula.coursework.PermissionDeniedException
  */
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/setup-assignments"))
-class AddAssignmentsController extends BaseController {
+class AddAssignmentsController extends CourseworkController {
 
 	validatesSelf[AddAssignmentsCommand]
 

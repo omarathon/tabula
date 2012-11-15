@@ -10,18 +10,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.RequestMethod
 import org.codehaus.jackson.map.ObjectMapper
-import uk.ac.warwick.tabula.coursework.web.views.JSONView
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.actions.Participate
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/picker"))
-class AssignmentPickerController extends BaseController {
+class AssignmentPickerController extends CourseworkController {
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var json: ObjectMapper = _
 

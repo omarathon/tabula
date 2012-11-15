@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
 import uk.ac.warwick.tabula.coursework.commands.assignments.SharedAssignmentPropertiesForm
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.data.model.Department
+import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Valid
 import org.springframework.web.bind.annotation.PathVariable
 
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable
  */
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/shared-options"))
-class AssignmentSharedOptionsController extends BaseController {
+class AssignmentSharedOptionsController extends CourseworkController {
 
 	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {

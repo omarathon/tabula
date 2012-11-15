@@ -17,8 +17,9 @@ import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.util.core.StringUtils._
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands._
 
 class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
 

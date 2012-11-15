@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands
 
-import uk.ac.warwick.tabula.coursework
-import assignments.EditAssignmentCommand
-import coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.coursework.commands.assignments.EditAssignmentCommand
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.TestBase
 
 class EditAssignmentCommandTest extends TestBase {
   @Test def instantiate {

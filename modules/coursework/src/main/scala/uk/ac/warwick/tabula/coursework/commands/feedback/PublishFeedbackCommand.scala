@@ -17,20 +17,21 @@ import freemarker.template.Configuration
 import javax.annotation.Resource
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.commands.SelfValidating
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+
 
 class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
 
@@ -114,7 +115,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		return message
 	}
 
-	def describe(d: Description) = d
+	def describe(d: Description) = d 
 		.assignment(assignment)
 		.studentIds(assignment.feedbacks.map { _.universityId })
 

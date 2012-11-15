@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web
 
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.data.model._
 import java.net.URLEncoder
 
 /**

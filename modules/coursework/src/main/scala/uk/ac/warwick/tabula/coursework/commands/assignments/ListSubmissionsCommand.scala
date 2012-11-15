@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Unaudited
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.coursework.commands.ReadOnly
-import uk.ac.warwick.tabula.coursework.services.AuditEventIndexService
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.services.AuditEventIndexService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire

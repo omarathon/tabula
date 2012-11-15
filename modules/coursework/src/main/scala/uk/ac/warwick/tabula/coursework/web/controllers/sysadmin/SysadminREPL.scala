@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestParam
@@ -15,8 +15,8 @@ import org.springframework.expression.Expression
 import org.springframework.expression.ParserContext
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.data.model._
-import uk.ac.warwick.tabula.coursework.services._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services._
 import collection.JavaConversions._
 import java.util.HashMap
 import org.springframework.expression.spel.SpelEvaluationException
@@ -24,7 +24,7 @@ import org.hibernate.Session
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/repl"))
-class SysadminREPL extends BaseController with BeanFactoryAware {
+class SysadminREPL extends CourseworkController with BeanFactoryAware {
 
 	@BeanProperty var beanFactory: BeanFactory = _
 	@Autowired var assignmentService: AssignmentService = _

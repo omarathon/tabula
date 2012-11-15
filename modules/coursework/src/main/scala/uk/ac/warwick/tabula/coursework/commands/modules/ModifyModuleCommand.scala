@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.modules
 
-import uk.ac.warwick.tabula.coursework
-import uk.ac.warwick.tabula.coursework._
+import uk.ac.warwick.tabula
+import uk.ac.warwick.tabula._
 
 import commands.{ Description, Command }
 import data.model.{ Department, Module }

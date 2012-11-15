@@ -6,14 +6,15 @@ import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.data.model._
-import uk.ac.warwick.tabula.coursework.data._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import uk.ac.warwick.tabula.coursework.services.fileserver._
-import uk.ac.warwick.tabula.coursework.services.ZipService
+import uk.ac.warwick.tabula.services.fileserver._
+import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
+
 
 class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
 	var zip = Wire.auto[ZipService]

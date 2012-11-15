@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import java.io.Writer
-import uk.ac.warwick.tabula.coursework._
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.web.servlet.ModelAndView
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 
 class ViewPlagiarismReportCommand {
 	@BeanProperty var module: Module = _
@@ -24,7 +24,7 @@ class ViewPlagiarismReportCommand {
  * that's been submitted to Turnitin.
  */
 @Controller
-class TurnitinReportController extends BaseController {
+class TurnitinReportController extends CourseworkController {
 
 	@Autowired var turnitinService: Turnitin = _
 

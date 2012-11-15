@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.services.ZipService
+import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import javax.validation.constraints.{ Max, Min }
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
-import uk.ac.warwick.tabula.coursework.data.model.forms.{ CommentField, FileField }
+import uk.ac.warwick.tabula.data.model.forms.{ CommentField, FileField }
 import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.spring.Wire

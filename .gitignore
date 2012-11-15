@@ -11,6 +11,8 @@ CVS
 ajcore*
 /config/scripts/dev/tabula.properties
 /config/scripts/dev/tabula-private.properties
+/config/scripts/dev/courses.properties
+/config/scripts/dev/courses-private.properties
 console.properties
 tabula-private.properties
 !/modules/*/src/test/resources/tabula-private.properties

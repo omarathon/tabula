@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.coursework.data._
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
-import uk.ac.warwick.tabula.coursework.Mockito
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
 
 import org.junit.Ignore
 

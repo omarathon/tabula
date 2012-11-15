@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import java.io.Writer
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.data.Daoisms
 
 @Controller
 @RequestMapping(value=Array("/debug"))

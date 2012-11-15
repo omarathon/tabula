@@ -2,30 +2,30 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions._
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.coursework.data.model.{ Assignment, Module }
+import uk.ac.warwick.tabula.data.model.{ Assignment, Module }
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages._
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.CurrentUser
 import org.codehaus.jackson.map.ObjectMapper
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.web.views.JSONView
+import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/extensions"))
-class ExtensionController extends BaseController{
+class ExtensionController extends CourseworkController{
 
 	@Autowired var assignmentService:AssignmentService =_
 	@Autowired var userLookup: UserLookupService = _

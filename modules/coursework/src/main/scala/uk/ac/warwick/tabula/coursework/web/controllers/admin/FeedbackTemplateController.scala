@@ -2,17 +2,17 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMethod, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.data.model.{FeedbackTemplate, Department}
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import uk.ac.warwick.tabula.coursework.commands.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import scala.Array
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.actions.Manage
+import uk.ac.warwick.tabula.actions.Manage
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates"))
-class FeedbackTemplateController extends BaseController {
+class FeedbackTemplateController extends CourseworkController {
 
 	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable dept:Department)
 		= new BulkFeedbackTemplateCommand(dept)

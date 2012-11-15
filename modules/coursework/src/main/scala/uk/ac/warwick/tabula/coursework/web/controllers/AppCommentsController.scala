@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod._
 
 import uk.ac.warwick.tabula.coursework.commands.AppCommentCommand
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 
 /**
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.CurrentUser
  */
 @Controller
 @RequestMapping(value = Array("/app/tell-us"))
-class AppCommentsController extends BaseController {
+class AppCommentsController extends CourseworkController {
 
 	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
 

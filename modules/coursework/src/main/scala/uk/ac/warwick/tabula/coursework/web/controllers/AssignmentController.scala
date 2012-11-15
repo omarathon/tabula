@@ -7,14 +7,14 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.actions.Submit
+import uk.ac.warwick.tabula.actions.Submit
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.Feedback
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *

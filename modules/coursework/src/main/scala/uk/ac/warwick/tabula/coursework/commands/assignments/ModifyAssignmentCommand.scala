@@ -10,16 +10,17 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
-import uk.ac.warwick.tabula.coursework._
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.data.model.forms.CommentField
-import uk.ac.warwick.tabula.coursework.data.model.forms.FileField
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model.forms.CommentField
+import uk.ac.warwick.tabula.data.model.forms.FileField
 import data.model._
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.{ UniversityId, AcademicYear, DateFormats }
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+
 
 case class UpstreamGroupOption(
 	assignmentId: String,

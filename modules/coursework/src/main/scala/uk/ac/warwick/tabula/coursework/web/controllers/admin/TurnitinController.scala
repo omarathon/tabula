@@ -5,18 +5,18 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.persistence._
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.services.jobs.JobService
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.services.jobs.JobService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/turnitin"))
-class TurnitinController extends BaseController {
+class TurnitinController extends CourseworkController {
 
 	@Autowired var jobService: JobService = _
 	@Autowired var assignmentService: AssignmentService = _

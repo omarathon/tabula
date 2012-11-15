@@ -9,18 +9,19 @@ import org.springframework.stereotype.Component
 import freemarker.template.Configuration
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.Describable
+import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.OriginalityReport
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.services.jobs.JobInstance
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.tabula.jobs._
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"

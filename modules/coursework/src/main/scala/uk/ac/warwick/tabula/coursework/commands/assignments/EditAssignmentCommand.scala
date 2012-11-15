@@ -9,11 +9,12 @@ import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.data.Transactions._
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.data.Daoisms
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+
 
 class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAssignmentCommand {
 

@@ -17,28 +17,29 @@ import org.springframework.web.multipart.MultipartFile
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.UniversityId
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.commands.UploadedFile
-import uk.ac.warwick.tabula.coursework.data.Daoisms
-import uk.ac.warwick.tabula.coursework.data.FileDao
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.coursework.services.ZipEntryInputStream
-import uk.ac.warwick.tabula.coursework.services.ZipService
-import uk.ac.warwick.tabula.coursework.services.Zips
+import uk.ac.warwick.tabula.services.ZipEntryInputStream
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.services.Zips
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import java.nio.charset.Charset
 import uk.ac.warwick.spring.Wire
+
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _

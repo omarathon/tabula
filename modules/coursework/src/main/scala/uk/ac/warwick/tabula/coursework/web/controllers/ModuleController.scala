@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.coursework._
+import uk.ac.warwick.tabula._
 import actions._
 import data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -10,7 +10,7 @@ import collection.JavaConversions._
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
-class ModuleController extends BaseController {
+class ModuleController extends CourseworkController {
 
 	hideDeletedItems
 

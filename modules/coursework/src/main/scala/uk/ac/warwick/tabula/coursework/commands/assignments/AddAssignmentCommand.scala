@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers._
-import uk.ac.warwick.tabula.coursework.commands._
+import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.Transactions._
+
 
 class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
 

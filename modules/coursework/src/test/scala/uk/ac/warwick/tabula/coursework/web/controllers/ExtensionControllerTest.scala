@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.ExtensionController
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.{Mockito, TestBase}
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{ExtensionItem, ModifyExtensionCommand}
 
 

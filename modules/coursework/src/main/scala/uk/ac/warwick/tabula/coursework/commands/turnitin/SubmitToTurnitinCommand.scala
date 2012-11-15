@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.turnitin
 
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.jobs.JobService
+import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinJob
 import scala.reflect.BeanProperty

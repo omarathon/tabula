@@ -19,6 +19,8 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.util.FileCopyUtils
 import collection.JavaConversions._
 import freemarker.cache.ClassTemplateLoader
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
+import uk.ac.warwick.tabula.data.model._
 
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
@@ -45,10 +47,29 @@ abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with Test
 /** Various test objects
   */
 trait TestFixtures {
+	def newFreemarkerConfiguration = new ScalaFreemarkerConfiguration {
+		setTemplateLoader(new MultiTemplateLoader(Array(
+			new ClassTemplateLoader(getClass, "/freemarker/"), // to match test templates
+			new ClassTemplateLoader(getClass, "/") // to match live templates
+			)))
+		setAutoIncludes(Nil) // don't use prelude
+	}
+	
 	def testRequest(uri: String = null) = {
 		val req = new MockHttpServletRequest
 		req.setRequestURI(uri)
 		req
+	}
+	
+	def emptyFeatures = Features.empty
+
+	/** Creates an Assignment with a module and department,
+	  * and a few pre-filled fields. 
+	  */
+	def newDeepAssignment(moduleCode: String="IN101") = {
+		val department = new Department
+		val module = new Module(moduleCode, department)
+		new Assignment(module)
 	}
 
 	def testResponse = new MockHttpServletResponse
@@ -58,6 +79,12 @@ trait TestFixtures {
 }
 
 trait TestHelpers {
+	lazy val json = new JsonObjectMapperFactory().createInstance
+
+	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[java.util.Map[String, Any]]).toMap
+
+	var currentUser: CurrentUser = null
+  
 	var temporaryFiles: Set[File] = Set.empty
 
 	// Location of /tmp - best to create a subdir below it.
@@ -118,6 +145,32 @@ trait TestHelpers {
 		} finally {
 			DateTimeUtils.setCurrentMillisSystem
 		}
+		
+	/** Sets up a pretend requestinfo context with the given pretend user
+	  * around the callback.
+	  *
+	  * withUser("cusebr") { /* ... your code */  }
+	  */
+	def withUser(code: String, universityId: String = null)(fn: => Unit) {
+		val requestInfo = RequestInfo.fromThread match {
+			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
+			case None => {
+				val user = new User(code)
+				user.setIsLoggedIn(true)
+				user.setWarwickId(universityId)
+				currentUser = new CurrentUser(user, user)
+				new RequestInfo(currentUser, null)
+			}
+		}
+
+		try {
+			RequestInfo.open(requestInfo)
+			fn
+		} finally {
+			currentUser = null
+			RequestInfo.close
+		}
+	}
 
 	/** Fetches a resource as a string. Assumes UTF-8 unless specified.
 	  */

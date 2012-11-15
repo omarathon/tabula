@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
@@ -14,9 +14,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.reflect.BeanProperty
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.coursework.data.model.forms.SubmissionValue
+import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.coursework.services.ZipService
+import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 
 class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating {

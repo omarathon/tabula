@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import dispatch._
 import dispatch.Request.toRequestVerbs
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.CurrentUser
 import org.apache.http.cookie.CookieSpec
@@ -20,7 +20,7 @@ import org.apache.commons.httpclient.cookie.IgnoreCookiesSpec
 import org.apache.http.cookie.CookieSpecRegistry
 import org.apache.http.client.params.ClientPNames
 import org.apache.http.client.params.CookiePolicy
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import scala.util.matching.Regex
 import dispatch.thread.ThreadSafeHttpClient
 

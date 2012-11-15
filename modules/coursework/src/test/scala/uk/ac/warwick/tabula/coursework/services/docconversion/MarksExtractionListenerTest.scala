@@ -5,7 +5,7 @@ import org.apache.poi.hssf.eventusermodel.HSSFEventFactory
 import org.apache.poi.hssf.eventusermodel.HSSFRequest
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.junit.Test
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.helpers.Closeables.closeThis
 import uk.ac.warwick.tabula.coursework.services.docconversion.XslSheetHandler
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor

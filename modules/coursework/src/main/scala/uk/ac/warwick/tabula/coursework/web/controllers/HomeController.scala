@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.coursework.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 
-@Controller class HomeController extends BaseController {
+@Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]

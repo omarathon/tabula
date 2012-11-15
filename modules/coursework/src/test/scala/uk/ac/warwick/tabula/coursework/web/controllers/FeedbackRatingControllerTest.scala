@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
-import uk.ac.warwick.tabula.coursework.AppContextTestBase
+import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.servlet.HandlerAdapter
 import javax.annotation.Resource
 import org.springframework.web.servlet.HandlerMapping
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.Mockito
-import uk.ac.warwick.tabula.coursework.data.FeedbackDao
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.data.model.Feedback
 
 
 class FeedbackRatingControllerTest extends TestBase with Mockito {

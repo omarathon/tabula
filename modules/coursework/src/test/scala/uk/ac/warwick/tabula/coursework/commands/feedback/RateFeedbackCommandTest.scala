@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.JavaImports._
 import org.junit.Test
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.coursework.Mockito
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.model._
 
 
 import org.springframework.web.bind.WebDataBinder

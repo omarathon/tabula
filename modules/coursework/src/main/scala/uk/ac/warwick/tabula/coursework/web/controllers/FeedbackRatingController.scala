@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.coursework.commands.feedback.RateFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.coursework.actions.View
+import uk.ac.warwick.tabula.actions.View
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.Features
 import org.springframework.beans.factory.annotation.Autowired
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
 

@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.feedback.DownloadFeedbackCommand
-import uk.ac.warwick.tabula.coursework.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.ItemNotFoundException
+import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestMethod
 
 @Controller

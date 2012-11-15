@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.commands._
-import uk.ac.warwick.tabula.coursework.data.Daoisms
-import uk.ac.warwick.tabula.coursework.data.model.Department
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.Department
 import org.hibernate.validator.constraints.NotEmpty
 import uk.ac.warwick.tabula.data.Transactions._
+
 
 class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with Daoisms {
 

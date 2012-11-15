@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import org.springframework.expression.spel.standard.SpelExpressionParser
 

@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands
-import uk.ac.warwick.tabula.coursework.AppContextTestBase
+import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentCommand
-import uk.ac.warwick.tabula.coursework.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.data.ModuleDao
+import uk.ac.warwick.tabula.data.ModuleDao
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.coursework.data.model.forms._
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.data.model.forms._
+import uk.ac.warwick.tabula.data.model._
 
 class AddAssignmentCommandContextTest extends AppContextTestBase {
 	

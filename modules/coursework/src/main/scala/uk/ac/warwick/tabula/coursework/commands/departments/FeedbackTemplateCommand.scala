@@ -2,13 +2,14 @@ package uk.ac.warwick.tabula.coursework.commands.departments
 
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import uk.ac.warwick.tabula.coursework.commands.{UploadedFile, Description, Command}
-import uk.ac.warwick.tabula.coursework.data.Daoisms
-import uk.ac.warwick.tabula.coursework.data.model.{FeedbackTemplate, Department}
+import uk.ac.warwick.tabula.commands.{Description, Command}
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.{Logging, ArrayList}
-import uk.ac.warwick.tabula.coursework.services.ZipService
+import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 

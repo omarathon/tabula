@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
 
 import org.springframework.beans.factory.annotation.{Value, Autowired, Configurable}
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.commands.{Description, ReadOnly, Command}
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
-import uk.ac.warwick.tabula.coursework.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import freemarker.template.Configuration
 import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender

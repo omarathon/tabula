@@ -5,15 +5,15 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
-import uk.ac.warwick.tabula.coursework.services.fileserver.FileServer
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.services.fileserver.FileServer
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.spring.Wire
 
 @Controller
-class DownloadSubmissionsController extends BaseController {
+class DownloadSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 

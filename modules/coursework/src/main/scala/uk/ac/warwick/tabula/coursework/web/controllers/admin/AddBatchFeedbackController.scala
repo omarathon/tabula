@@ -1,25 +1,25 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
-class AddBatchFeedbackController extends BaseController {
+class AddBatchFeedbackController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(assignment, user)
 

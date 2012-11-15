@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model._
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.Features
 
 class SubmissionReportCommand {
 	@BeanProperty var assignment: Assignment = _
@@ -19,7 +19,7 @@ class SubmissionReportCommand {
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/submissions-report"))
-class SubmissionReportController extends BaseController {
+class SubmissionReportController extends CourseworkController {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupInterface = _

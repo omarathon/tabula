@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.TestBase
+import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.data.model.Submission
-import uk.ac.warwick.tabula.coursework.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.coursework.data.model.Submission
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
-import uk.ac.warwick.tabula.coursework.Mockito
-import uk.ac.warwick.tabula.coursework.services.SecurityService
+import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
+import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.services.SecurityService
 
 
 class SubmissionsInfoControllerTest extends TestBase with Mockito {

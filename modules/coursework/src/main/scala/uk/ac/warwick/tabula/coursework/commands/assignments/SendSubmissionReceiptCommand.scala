@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.data.model.Submission
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.springframework.mail.SimpleMailMessage
-import uk.ac.warwick.tabula.coursework.commands.Description
+import uk.ac.warwick.tabula.commands.Description
 import javax.annotation.Resource
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Autowired
 import freemarker.template.Configuration
@@ -20,8 +20,8 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.ReadOnly
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 
 /**

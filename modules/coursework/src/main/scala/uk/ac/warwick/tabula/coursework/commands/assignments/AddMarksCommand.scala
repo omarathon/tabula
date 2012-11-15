@@ -8,26 +8,27 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.util.core.StringUtils.hasText
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
-import uk.ac.warwick.tabula.coursework.commands.UploadedFile
+import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.coursework.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.NoUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.FoundUser
-import uk.ac.warwick.tabula.coursework.UniversityId
+import uk.ac.warwick.tabula.UniversityId
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
+
 
 class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
 

@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.RequestMethod._
 
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.coursework.actions.Manage
+import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.coursework.commands.modules.AddModulePermissionCommand
 import uk.ac.warwick.tabula.coursework.commands.modules.RemoveModulePermissionCommand
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-trait ModulePermissionControllerMethods extends BaseController {
+trait ModulePermissionControllerMethods extends CourseworkController {
 
 	@ModelAttribute("addCommand") def addCommandModel = new AddModulePermissionCommand()
 	@ModelAttribute("removeCommand") def removeCommandModel = new RemoveModulePermissionCommand()
@@ -37,14 +37,14 @@ trait ModulePermissionControllerMethods extends BaseController {
 }
 
 @Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModulePermissionController extends BaseController with ModulePermissionControllerMethods {
+class ModulePermissionController extends CourseworkController with ModulePermissionControllerMethods {
 	@RequestMapping
 	def permissionsForm(@PathVariable("module") module: Module): Mav =
 		form(module)
 }
 
 @Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModuleAddPermissionController extends BaseController with ModulePermissionControllerMethods {
+class ModuleAddPermissionController extends CourseworkController with ModulePermissionControllerMethods {
 
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@ModelAttribute("addCommand") command: AddModulePermissionCommand, errors: Errors): Mav = {
@@ -62,7 +62,7 @@ class ModuleAddPermissionController extends BaseController with ModulePermission
 }
 
 @Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModuleRemovePermissionController extends BaseController with ModulePermissionControllerMethods {
+class ModuleRemovePermissionController extends CourseworkController with ModulePermissionControllerMethods {
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
 	def addPermission(@ModelAttribute("removeCommand") command: RemoveModulePermissionCommand, errors: Errors): Mav = {
 		val module = command.module

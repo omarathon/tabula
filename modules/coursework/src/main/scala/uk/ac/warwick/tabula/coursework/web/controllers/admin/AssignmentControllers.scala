@@ -19,24 +19,24 @@ import org.springframework.web.bind.annotation._
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.actions.Manage
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.commands.feedback._
-import uk.ac.warwick.tabula.coursework.data.model._
-import uk.ac.warwick.tabula.coursework.data.FeedbackDao
-import uk.ac.warwick.tabula.coursework.services.fileserver.FileServer
-import uk.ac.warwick.tabula.coursework.services._
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.AcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.ItemNotFoundException
-import uk.ac.warwick.tabula.coursework.services.AuditEventIndexService
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.services.AuditEventIndexService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
-class AddAssignment extends BaseController {
+class AddAssignment extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
@@ -97,7 +97,7 @@ class AddAssignment extends BaseController {
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
-class EditAssignment extends BaseController {
+class EditAssignment extends CourseworkController {
 
 	validatesWith { (form: EditAssignmentCommand, errors: Errors) =>
 		form.validate(errors)
@@ -158,7 +158,7 @@ class EditAssignment extends BaseController {
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/delete"))
-class DeleteAssignment extends BaseController {
+class DeleteAssignment extends CourseworkController {
 
 	validatesWith { (form: DeleteAssignmentCommand, errors: Errors) =>
 		form.validate(errors)

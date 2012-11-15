@@ -1,19 +1,21 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.commands.{UploadedFile, Description, Command}
-import uk.ac.warwick.tabula.coursework.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.commands.{Description, Command}
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.DateFormats
+import uk.ac.warwick.tabula.DateFormats
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.beans.factory.annotation.Configurable
+
 
 class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
 	extends Command[Extension] with Daoisms {

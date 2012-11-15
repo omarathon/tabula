@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.coursework.web.controllers.sysadmin
 import uk.ac.warwick.tabula.coursework.web.controllers._
 import org.springframework.stereotype._
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.jobs.JobService
+import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.coursework.jobs.TestingJob
+import uk.ac.warwick.tabula.jobs.TestingJob
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/jobs"))
-class JobController extends BaseController {
+class JobController extends CourseworkController {
 
 	@Autowired var jobService: JobService = _
 

@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.data.model.{ UserGroup, Module, Assignment }
-import uk.ac.warwick.tabula.coursework.commands.{ Description, Command }
+import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
+import uk.ac.warwick.tabula.commands.{ Description, Command }
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.beans.factory.annotation.{ Value, Autowired, Configurable }
 import uk.ac.warwick.userlookup.{ User, UserLookup }
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import freemarker.template.Configuration
 import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender

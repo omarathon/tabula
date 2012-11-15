@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.coursework.commands.Command
-import uk.ac.warwick.tabula.coursework.commands.Description
-import uk.ac.warwick.tabula.coursework.data.model.Feedback
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.Feedback
 import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.Features
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
+
 
 /**
  * A holder for a boolean value plus an extra flag to say that

@@ -296,6 +296,10 @@
 			<artifactId>org.apache.commons.io</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.apache.commons.codec</artifactId>
+		</dependency>	
+		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 		</dependency>
@@ -375,7 +379,6 @@
 			<groupId>org.scalatest</groupId>
 			<artifactId>scalatest_${scala.version}</artifactId>
 			<scope>test</scope>
-			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

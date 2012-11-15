@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
-import uk.ac.warwick.tabula.coursework.commands.{ Description, Command }
-import uk.ac.warwick.tabula.coursework.data.Daoisms
+import uk.ac.warwick.tabula.commands.{ Description, Command }
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{ LazyLists, Logging }
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+
 
 class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {

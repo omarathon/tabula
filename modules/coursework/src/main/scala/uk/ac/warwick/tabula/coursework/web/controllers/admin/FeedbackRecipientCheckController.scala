@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackRecipientCheckCommand
-import uk.ac.warwick.tabula.coursework.web.Mav
+import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.coursework.actions.Participate
+import uk.ac.warwick.tabula.actions.Participate
 
 /**
  * For calling by AJAX. Returns a report of the email addresses that would be
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.actions.Participate
  */
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
-class FeedbackRecipientCheckController extends BaseController {
+class FeedbackRecipientCheckController extends CourseworkController {
 
 	@RequestMapping()
 	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {

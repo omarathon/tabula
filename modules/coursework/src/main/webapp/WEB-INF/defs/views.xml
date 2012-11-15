@@ -10,12 +10,6 @@
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
-  
-  <!-- Bare layout - used for AJAX responses -->
-  <definition name="none" template="/WEB-INF/freemarker/layouts/none.ftl">
-    <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
-    <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
-  </definition>
 
 	<!-- Layout without navigation but including scripts and styles - used for iframes -->
 	<definition name="nonav" template="/WEB-INF/freemarker/layouts/nonav.ftl">

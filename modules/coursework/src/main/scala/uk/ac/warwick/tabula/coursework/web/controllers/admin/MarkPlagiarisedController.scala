@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.web.controllers.BaseController
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.actions.Participate
-import uk.ac.warwick.tabula.coursework.data.model.Module
-import uk.ac.warwick.tabula.coursework.actions.Delete
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Delete
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand
@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/mark-plagiarised"))
-class MarkPlagiarisedController extends BaseController {
+class MarkPlagiarisedController extends CourseworkController {
 	@ModelAttribute
 	def command(@PathVariable assignment: Assignment) = new MarkPlagiarisedCommand(assignment)
 

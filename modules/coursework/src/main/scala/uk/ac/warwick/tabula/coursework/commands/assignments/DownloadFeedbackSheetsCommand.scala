@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.coursework.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.services.{AssignmentService, ZipService}
-import uk.ac.warwick.tabula.coursework.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.coursework.commands.{ApplyWithCallback, ReadOnly, Command, Description}
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.services.{AssignmentService, ZipService}
+import uk.ac.warwick.tabula.services.fileserver.RenderableZip
+import uk.ac.warwick.tabula.commands.{ApplyWithCallback, ReadOnly, Command, Description}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+
 
 /**
  * Downloads a feedback sheet per student in the assignment member list
@@ -31,6 +32,6 @@ class DownloadFeedbackSheetsCommand extends Command[RenderableZip]
 	override def describe(d: Description) = {
 		val members = assignmentService.determineMembershipUsers(assignment)
 		d.assignment(assignment)
-		.studentIds(members.map(_.getWarwickId))
+		d.studentIds(members.map(_.getWarwickId))
 	}
 }

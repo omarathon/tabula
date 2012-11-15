@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.modules
 
-import uk.ac.warwick.tabula.coursework
-import uk.ac.warwick.tabula.coursework._
+import uk.ac.warwick.tabula
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.Transactions._
 
 import commands.{ Description, SelfValidating }
@@ -12,6 +12,7 @@ import collection.JavaConversions._
 import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
 import org.springframework.beans.factory.annotation.Configurable
+
 
 class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidating {
 
@@ -51,9 +52,9 @@ class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidat
 
 	}
 
-	def describe(d: Description) {
-		d.department(department)
-		d.property("moduleCode", sanitisedCode)
-		d.property("moduleName", name)
-	}
+	def describe(d: Description) = d
+		.department(department)
+		.property("moduleCode", sanitisedCode)
+		.property("moduleName", name)
+
 }
