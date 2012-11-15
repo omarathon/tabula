@@ -94,6 +94,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission: Submission) = {
 		session.saveOrUpdate(submission)
+		session.flush()
 	}
 
 	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
