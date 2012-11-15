@@ -9,10 +9,6 @@ Adding or editing a new markscheme
 	<#assign submit_text="Save" />
 </#if>
 
-
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-
 <#assign department=command.department />
 
 <#escape x as x?html>

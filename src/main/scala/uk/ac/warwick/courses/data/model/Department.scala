@@ -29,7 +29,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 	
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var markSchemes:JList[MarkScheme] = ArrayList()
 
 	// settings for extension requests

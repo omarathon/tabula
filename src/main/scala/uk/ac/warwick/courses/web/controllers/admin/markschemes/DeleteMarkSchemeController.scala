@@ -8,34 +8,31 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
 import uk.ac.warwick.courses.actions.Manage
-import uk.ac.warwick.courses.commands.markschemes.EditMarkSchemeCommand
+import uk.ac.warwick.courses.commands.markschemes.DeleteMarkSchemeCommand
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.web.controllers.BaseController
 import uk.ac.warwick.courses.web.Mav
 import uk.ac.warwick.courses.web.Routes
 
 @Controller
-@RequestMapping(value=Array("/admin/department/{department}/markschemes/edit/{markscheme}"))
-class EditMarkSchemeController extends BaseController {
+@RequestMapping(value=Array("/admin/department/{department}/markschemes/delete/{markscheme}"))
+class DeleteMarkSchemeController extends BaseController {
 
 	// tell @Valid annotation how to validate
-	validatesSelf[EditMarkSchemeCommand]
+	validatesSelf[DeleteMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable department: Department, @PathVariable markscheme: MarkScheme) = 
-		new EditMarkSchemeCommand(department, markscheme)
-	 
+	def cmd(@PathVariable("markscheme") markScheme: MarkScheme) = new DeleteMarkSchemeCommand(markScheme)
+	
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: EditMarkSchemeCommand): Mav = {
+	def form(@ModelAttribute("command") cmd: DeleteMarkSchemeCommand): Mav = {
 		doPermissions(cmd)
-		doBind(cmd)
-		Mav("admin/markschemes/edit")
+		Mav("admin/markschemes/delete").noLayoutIf(ajax)
 	}
 	
 	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: EditMarkSchemeCommand, errors: Errors): Mav = {
+	def submit(@Valid @ModelAttribute("command") cmd: DeleteMarkSchemeCommand, errors: Errors): Mav = {
 		doPermissions(cmd)
-		doBind(cmd)
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -44,12 +41,9 @@ class EditMarkSchemeController extends BaseController {
 		}
 	}
 	
-	def doPermissions(cmd: EditMarkSchemeCommand) {
+	def doPermissions(cmd: DeleteMarkSchemeCommand) {
 		mustBeAbleTo(Manage(cmd.department))
 		mustBeLinked(cmd.markScheme, cmd.department)
 	}
-	
-	// do extra property processing on the form.
-	def doBind(cmd: EditMarkSchemeCommand) = cmd.doBind()
 	
 }

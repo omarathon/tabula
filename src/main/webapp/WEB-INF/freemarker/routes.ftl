@@ -39,6 +39,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markschemelist department><@url page="/admin/department/${department.code}/markschemes" /></#macro>
 <#macro markschemeadd department><@markschemelist department />/add</#macro>
 <#macro markschemeedit scheme><@markschemelist scheme.department />/edit/${scheme.id}</#macro>
+<#macro markschemedelete scheme><@markschemelist scheme.department />/delete/${scheme.id}</#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
