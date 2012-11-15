@@ -6,6 +6,8 @@ import java.net.URLEncoder
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
  * are hardcoded and repeated.
+ * 
+ * For methods called "apply", you can leave out the "apply" and treat the object like a function.
  */
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
@@ -19,6 +21,13 @@ object Routes {
 	object admin {
 		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+
+		object markscheme {
+			def list(department: Department) = admin.department(department) + "/markschemes"
+			def add(department: Department) = list(department) + "/add"
+			def edit(scheme: MarkScheme) = list(scheme.department) + "/edit/" + scheme.id
+		}
+		
 		object module {
 			def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
 

@@ -55,7 +55,9 @@ object ModuleImporter {
         """select xcode code, name from (
           select substr(module_code,0,5) as xcode, max(modified_date) maxmod from module x
                       where module_code like '_____-%'
-                      and department_code = ?
+                      and case when delivered_dept_code is null then department_code
+                        else delivered_dept_code
+                        end = ?
                       and in_use = 'Y'
                       group by substr(module_code,0,5)
         ) x inner join module m on substr(m.module_code,0,5) = xcode and m.modified_date = maxmod"""

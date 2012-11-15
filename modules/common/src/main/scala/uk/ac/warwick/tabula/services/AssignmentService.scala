@@ -95,6 +95,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
 	def saveSubmission(submission: Submission) = {
 		session.saveOrUpdate(submission)
+		session.flush()
 	}
 
 	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
@@ -154,6 +155,9 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	def delete(submission: Submission) = {
 		submission.assignment.submissions.remove(submission)
 		session.delete(submission)
+		// force delete now, just for the cases where we re-insert in the same session
+		// (i.e. when a student is resubmitting work). [HFC-385#comments]
+		session.flush()
 	}
 
 	/**

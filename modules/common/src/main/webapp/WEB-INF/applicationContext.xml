@@ -106,10 +106,20 @@
 	        <list>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MarkSchemeIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
 	    	<list>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 	        </list>
 	    </property>
 	</bean>

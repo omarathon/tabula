@@ -56,8 +56,9 @@ class Mav() {
 	/**
 	 * Add a list of breadcrumbs to display in the navigation.
 	 */
-	def crumbs(pages: BreadCrumb*) = addObjects("breadcrumbs" -> pages.toSeq)
-
+	def crumbs(pages: BreadCrumb*): Mav = crumbsList(pages.toSeq)
+	def crumbsList(pages: Seq[BreadCrumb]): Mav = addObjects("breadcrumbs" -> pages) 
+		
 	/**
 	 * Sets the layout parameter to "none" to
 	 * render the template without any surrounding stuff.
