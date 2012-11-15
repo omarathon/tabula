@@ -158,6 +158,24 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+          <execution>
+            <id>copy-resource-dependencies</id>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <target>
+                <!-- We need to touch first otherwise Ant will overwrite any files that are older -->
+                <touch>
+                  <fileset dir="${project.build.testOutputDirectory}"/>
+                </touch>
+                <copy todir="${project.build.testOutputDirectory}" overwrite="false">
+                  <fileset dir="${project.build.directory}/dependency"/>
+                </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
 				</executions>
 			</plugin>
 
@@ -169,15 +187,16 @@
 				<executions>
 					<execution>
 						<id>resource-dependencies</id>
-						<phase>process-test-resources</phase>
+						<phase>generate-test-resources</phase>
 						<goals>
 							<goal>unpack-dependencies</goal>
 						</goals>
 						<configuration>
 							<includeGroupIds>uk.ac.warwick.tabula</includeGroupIds>
 							<includeArtifactIds>common</includeArtifactIds>
+              <excludeTransitive>true</excludeTransitive>
 							<includes>WEB-INF/**/*</includes>
-							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<!--<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>-->
 							<overWriteIfNewer>false</overWriteIfNewer>
 						</configuration>
 					</execution>
