@@ -17,7 +17,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	
 	@BeanProperty var name:String = null
 	
-	@OneToMany(mappedBy="department")
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
 	@BeanProperty var modules:JList[Module] = List()
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
@@ -26,8 +26,11 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	
 	@BeanProperty var collectFeedbackRatings:Boolean = true
 
-	@OneToMany(mappedBy = "department")
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
+	
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BeanProperty var markSchemes:JList[MarkScheme] = ArrayList()
 
 	// settings for extension requests
 	@BeanProperty var allowExtensionRequests:JBoolean = false

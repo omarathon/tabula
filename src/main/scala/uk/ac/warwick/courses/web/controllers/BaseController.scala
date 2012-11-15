@@ -1,34 +1,31 @@
 package uk.ac.warwick.courses.web.controllers
 
-import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
+
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Required
+import org.springframework.context.MessageSource
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
-import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.WebDataBinder
-import uk.ac.warwick.courses.actions.Action
-import uk.ac.warwick.courses.helpers._
-import uk.ac.warwick.courses.services.SecurityService
+import org.springframework.web.bind.annotation.InitBinder
+import org.springframework.web.bind.annotation.RequestMethod
+
+import javax.annotation.Resource
+import uk.ac.warwick.courses.CurrentUser
 import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.RequestInfo
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.Module
-import uk.ac.warwick.courses.data.model.Feedback
-import javax.annotation.Resource
-import org.springframework.beans.factory.annotation.Required
-import uk.ac.warwick.courses.events.EventHandling
-import org.springframework.stereotype.Controller
-import uk.ac.warwick.courses.JavaImports._
-import uk.ac.warwick.courses.CurrentUser
-import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.courses.data.model.CanBeDeleted
+import uk.ac.warwick.courses.actions.Action
 import uk.ac.warwick.courses.data.Daoisms
-import uk.ac.warwick.courses.web.Mav
-import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
-import uk.ac.warwick.sso.client.SSOConfiguration
-import org.springframework.context.MessageSource
-import org.springframework.web.servlet.LocaleResolver
+import uk.ac.warwick.courses.data.model._
+import uk.ac.warwick.courses.events.EventHandling
+import uk.ac.warwick.courses.helpers.Logging
+import uk.ac.warwick.courses.helpers.StringUtils
+import uk.ac.warwick.courses.services.SecurityService
 import uk.ac.warwick.courses.validators.CompositeValidator
+import uk.ac.warwick.courses.web.Mav
+import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment: Assignment, module: Module) =
@@ -41,6 +38,12 @@ abstract trait ControllerMethods extends Logging {
 		if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 			throw new ItemNotFoundException(feedback)
+		}
+	
+	def mustBeLinked(markScheme: MarkScheme, department: Department) =
+		if (mandatory(markScheme).department.id != mandatory(department.id)) {
+			logger.info("Not displaying mark scheme as it doesn't belong to specified department")
+			throw new ItemNotFoundException(markScheme)
 		}
 
 	/**

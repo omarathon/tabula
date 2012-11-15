@@ -1,3 +1,13 @@
+<#-- 
+
+Macros for customised form elements, containers and more complex pickers.
+
+Include by default as "form", e.g.
+
+<@form.userpicker path="users" /> 
+
+-->
+
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#compress>
@@ -96,30 +106,40 @@ To not bind:
 	<#-- This handles whether we're binding to a list or not but I think
 		it might still be more verbose than it needs to be. -->
 	<#assign ids=[] />
-	<#if list>
-		<#assign ids=status.value />
-	<#elseif status.value??>
-		<#assign ids=[status.value] />
+	<#if status.actualValue??>
+		<#if list && status.actualValue?is_sequence>
+			<#assign ids=status.actualValue />
+		<#elseif status.actualValue?is_string>
+			<#assign ids=[status.actualValue] />
+		</#if>
 	</#if>
-	<@render_userpicker expression=status.expression value=ids />
+	<@render_userpicker expression=status.expression value=ids multiple=multiple/>
 	</@spring.bind>
 <#else>
-	<@render_userpicker expression=name value=[] />
+	<@render_userpicker expression=name value=[] multiple=multiple/>
 </#if>
 </#macro>
 
-<#macro render_userpicker expression value>
+<#macro render_userpicker expression value multiple>
+	<#if multiple><div class="user-picker-collection"></#if>
+	
+	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 	<#list value as id>
-		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+		<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
 		--><input type="text" class="user-code-picker span2" name="${expression}" value="${id}">
 		</div>
 	</#list>
-	<#else>
-		<div class="input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-		--><input type="text" class="user-code-picker span2" name="${expression}">
-		</div>
 	</#if>
+	
+	<#if !value?has_content || multiple>
+	<#-- an empty field for entering new values in any case -->
+	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+	--><input type="text" class="user-code-picker span2" name="${expression}">
+	</div>
+	</#if>
+	
+	<#if multiple></div></#if>
 </#macro>
 
 <#--

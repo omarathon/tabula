@@ -35,6 +35,10 @@ class UserLookupTag extends TemplateDirectiveModel {
 		val user = unwrap(params.get("id")).asInstanceOf[String]
 		val users = unwrap(params.get("ids")).asInstanceOf[JList[String]]
 
+		if (body == null) {
+			throw new TemplateException("UserLookupTag: must have a body", env);
+		}
+		
 		if (user != null) {
 			env.getCurrentNamespace().put("returned_user", wrapper.wrap(userLookup.getUserByUserId(user)))
 		} else if (users != null) {
@@ -43,7 +47,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 			env.getCurrentNamespace().put("returned_users", wrapper.wrap(map))
 			env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))
 		} else {
-			throw new TemplateException("Either user or users must be specified", env)
+			throw new TemplateException("UserLookupTag: Either user or users must be specified", env)
 		}
 
 		body.render(env.getOut())
