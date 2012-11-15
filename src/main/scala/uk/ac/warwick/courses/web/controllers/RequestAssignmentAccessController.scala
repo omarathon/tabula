@@ -25,12 +25,15 @@ class RequestAssignmentAccessController extends AbstractAssignmentController {
 	@RequestMapping(method = Array(POST))
 	def sendEmail(user: CurrentUser, form: RequestAssignmentAccessCommand): Mav = {
 		mustBeLinked(form.assignment, form.module)
-
-		if (!alreadyEmailed(user, form)) {
-			form.apply()
+		if (!user.loggedIn) {
+			nope(form)
+		} else {
+			if (!alreadyEmailed(user, form)) {
+				form.apply()
+			}
+	
+			Redirect(Routes.assignment(form.assignment)).addObjects("requestedAccess" -> true)
 		}
-
-		Redirect(Routes.assignment(form.assignment)).addObjects("requestedAccess" -> true)
 	}
 
 	// if user+assignment is in the queue, they already sent an email recently so don't resend.
