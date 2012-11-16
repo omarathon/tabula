@@ -1,0 +1,670 @@
+// iframes have no green background
+html.iframe {
+    background: none;
+}
+
+@import "css3.less";
+.tabula-page, #container {
+  @import "bootstrap/bootstrap.less";
+  @import "bootstrap/responsive.less";
+}
+@import "bootstrap_fixes.inc.less";
+@import "bootstrap/variables.less";
+
+@grid-size:16px;
+@warning-color: #933;
+@subtle-text-color: #444;
+@very-subtle-text-color: #777;
+@very-subtle-font-size: 0.8em;
+
+.box-style() {
+	border: 1px solid #999;
+	border-bottom: 1px solid #666;
+	.border-radius(8px);
+}
+
+.warning-box-style() {
+	.border-radius(8px);
+	padding: 0.5em;
+	.vertical-gradient(#ffffcc, #ffee99);
+	border: 1px solid #ffcc66;
+}
+
+.error-box-style() {
+	.border-radius(8px);
+	padding: 0.5em;
+	.vertical-gradient(#ffeeee, #ffcccc);
+	border: 1px solid #ff6666;
+}
+
+.fade-transition() {
+  @properties: opacity, -webkit-transform;
+  .transition-property(@properties);
+  .transition-duration(0.3s);
+}
+
+.cursor-pointer() {
+  cursor: pointer;
+  cursor: hand;
+}
+
+.tabula-page {
+
+.error { 
+	color: crimson;
+	display: block; 
+	}
+	
+.module-info {
+	.box-style;
+	
+	padding: 0.5em;
+	margin: 0.7em 0;
+	background-color: #eee;
+	
+	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
+}
+
+ul {
+    margin: 0.5em;
+    padding: 0;
+}
+
+.submission-receipt-container {
+	width: 30em;
+	padding: 2em;
+}
+.submission-receipt {
+	border: 1px solid #CCC;
+	padding: 1em;
+	.box-shadow(0px, 6px, 14px, rgba(0,0,0,0.3));
+	background: #F8F8F8 url(../images/icons/glyphicons_193_circle_ok.png) 95% 1em no-repeat;
+}
+
+.feedback-list, .submission-list {
+	div.checkbox.check-all {
+	  padding: 0.5em 0 0.3em 1.9em;
+	  input { vertical-align: middle; }
+	}
+}
+
+#feedback-table, #submission-table {
+    tbody {
+    	tr.selected td {
+        	background-color: #F2DEDE;
+        	&:hover{
+	            background-color: #F2DEDE;
+    	    }
+    	}
+    }
+    .status span{
+        display: inline-block;
+    }
+}
+
+.feedback-info, .submission-info {
+	clear:both;
+	.box-style;
+	
+	padding: 0.5em;
+	margin: 0.5em 0;
+	background-color: #eee;
+	
+	.uni-id {
+	
+	}
+}
+
+.assignment-info {
+	.box-style;
+	padding: 0.5em;
+	margin-bottom: 0.5em;
+	background-color: #fff;
+	
+	.column1 {
+		width: 18em;
+		float:left;
+	}
+	.stats {
+		font-size: 0.85em;
+		width: 30em;
+		float:left;
+	}
+	.assignment-buttons {
+		float: right;
+		text-align: right;
+		width: 11em;
+		a {
+			display: block;
+			margin: 1px 0;
+			text-align: right;
+		}
+		
+		.btn-toolbar {
+		  margin: 0;
+		}
+		
+	}
+	.feedback-published {
+		line-height: 1.4em;
+	}
+	span.label-like {
+		color: @subtle-text-color;
+	}
+	.submission-count, .feedback-count {
+	  padding-left: 20px;
+	  background: url(../images/filetypes/text-x-generic.png) 0 2px no-repeat;
+	}
+	.has-unreleased-feedback {
+	  color: @warning-color;
+	}
+	.no-unreleased-feedback {
+	  color: @subtle-text-color;
+	}
+	
+	&.archived {
+	  display: none;
+	  background-color: #ddd;
+	}
+	
+	// Assignment deadlines shown on the home page.
+	div.alert {
+	  margin-bottom: 0 !important;
+	}
+}
+
+// assignment deadlines
+.deadline {
+	overflow: hidden;
+	a.btn {
+		float: right;
+	}
+}
+
+.end-assignment-info { clear: both; }
+.end-floats { clear: both; }
+
+.dev {
+	color: #ccc;
+}
+
+.admin-flash {
+	padding: 0.5em;
+	background: #eef;
+}
+
+.submit-buttons {
+	padding: 1em 0;
+	margin: 1em 0;
+	border-top: 1px solid #EEE;
+}
+
+#batch-feedback-form {
+	#multifile-column {
+		padding-right: 1em;
+		border-right: 1px solid #eee;
+	}
+	#zip-column { 
+		padding-left: 1em; 
+	}
+}
+
+// Don't actually use this, it's too amazing
+.sweet-button() {
+	background: #C63929;
+	background: -moz-linear-gradient(0% 100% 90deg, #891100 0%, #B51700 50%, #C63929 50%, #EE432E 100%);
+	background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #EE432E), color-stop(0.5, #C63929), color-stop(0.5, #B51700), color-stop(1, #891100));
+	border: 1px solid #951100;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	-moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
+	-webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
+	box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
+	color: white;
+	font-weight: bold;
+	line-height: 1;
+	padding: 4px 6px 6px 6px;
+	text-align: center;
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.actions {
+	a {
+		text-decoration: none;
+		white-space: nowrap;
+		.vertical-gradient(#EEEEEE,#CCCCCC);
+		color: #222;
+		text-shadow: 0 1px 0 #fff;
+		border-radius: 3px;
+		padding: 2px 7px;
+		border: 1px solid #999;
+		line-height: 2em;
+		.transition(none);
+		&:hover, &.hover {
+			.vertical-gradient(darken(#2c5893,20%),#2c5893);
+			color: white;
+			text-shadow: none;
+		}
+		&.disabled {
+		    .opacity-one(0.5);
+		    cursor: default;
+		}
+	}
+}
+#page-header .actions a  {
+	.vertical-gradient(#666,#333);
+	text-shadow: 0 1px 0 #000;
+}
+
+table {
+  th,td {
+    vertical-align: top;
+  }
+  th {
+    padding-right: 1em;
+  }
+}
+
+#main-content {
+
+	ul.file-list {
+	  padding: 0;
+	  margin: 0;
+	  list-style: none;
+	  li {
+	    padding-left: 10px;
+	    margin: 3px 0;
+	    a {
+	      max-width: 28em;
+	      overflow: hidden;
+	      white-space: nowrap;
+	      text-overflow: ellipsis;
+	    }
+	  }
+	}
+	
+	ul.user-list {
+	  list-style: none;
+	  li {
+	    margin: 0;
+	  }
+	}
+
+	textarea.big-textarea {
+		display: block;
+		width: 80%;
+		height: 6em;
+	}
+
+	input.big-input {
+		width: 80%;
+	}
+}
+
+#masquerade-notice {
+	font-size: 140%;
+	padding: 0.3em;
+	text-align: center;
+	.vertical-gradient(#ffff99, #ffcc66);
+}
+
+.permission-group {
+   .box-style;
+   padding: 0.5em;
+   h3 { line-height: 1em; }
+   .description {
+     color: #666;
+   }
+   
+   table.permission-list {
+   	  margin: 1em 0 0.3em 1em;
+   	  tr.anon-user {
+   	    color: #666;
+   	  }
+   }
+}
+
+.unrecognised-files {
+    .warning-box-style;
+}
+
+.invalid-files {
+    .error-box-style;
+}
+
+.potential-problem {
+    .warning-box-style;
+}
+
+.bad-recipients {
+  ul { margin: 0.2em; }
+  li { list-style: none; }
+  margin-bottom: 1em;
+}
+
+#footer-utility {
+   .subtle {
+     color: #666;
+   }
+}
+
+@media screen and (max-width:720px) {
+
+	/* Unwrap presentation tables into a 1-column stack */
+	table[role=presentation] {
+		display: block;
+		tr, td { display: block; }
+	}
+	
+}
+
+.mod-name { font-size: 85%; }
+
+.disabled-zone {
+  .opacity-one(0.6);
+}
+
+.userpicker-form {
+  input { width: 8em; }
+}
+
+.userpicker-button {
+  margin-left: 0.5em;
+}
+
+.userpicker-results {
+  overflow: auto;
+  height: 330px; 
+  
+  table { width: 100%; }
+  td.user-id {
+    white-space: nowrap; 
+  	width: 5%; 
+  	cursor: hand;
+  	cursor: pointer;
+  	font-weight: bold;
+  	color: darkblue;
+  }
+  tr:hover {
+    background-color: #ddd;
+    background-color: fadeout(lighten(#ff0,30%), 40%);
+  }
+}
+
+.user-picker-collection .user-picker-container {
+  display: block !important; 
+}
+
+.clickable-cursor {
+	cursor:hand;
+	cursor:pointer;
+}
+
+#app-comment-message {
+  padding: 0.5em;
+  height: 5em;
+  width: 97%;
+}
+
+@media screen and (min-width:1000px) {
+  #app-feedback-link {
+    position:fixed;
+    left:0;
+    top:30%;
+    width: 36px;
+    height: 155px;
+    background: url(../images/app-feedback.png) no-repeat;
+    cursor: hand;
+    cursor: pointer;
+    a { display: none; }
+  }
+}
+
+#feedback-rating-container {
+  float:right;
+  width: 23em;
+  #feedback-rating {
+  	margin: @grid-size;
+  }
+  .box-style();
+}
+
+.mark-and-grade{
+	margin: 10px;
+}
+
+.nav.nav-tabs{
+	padding-left: 0;
+	a {
+		text-decoration:none;
+	}
+}
+
+.rating-question { margin: 1em; }
+
+input.copyable-url { 
+  text-overflow: ellipsis; 
+  border: none; 
+  background: transparent; 
+  color: #333; 
+  font-size: 100%; 
+  height: 1.3em; 
+  width: 100%;
+  &, &[readonly] { cursor: pointer !important; }
+  }
+span.copyable-url-container { position: relative; }
+span.press-ctrl-c {
+  position:absolute;   
+  top: 1.7em;
+  left: 0;
+  background: #eef;
+  border-radius: 4px;
+  padding: 3px 5px;
+  border: 1px solid #aaf;
+  .box-shadow(0, 2px, 2px, rgba(0,0,0,0.3));
+}
+
+ul.links {
+  list-style: none;
+  li {  }
+}
+
+#submission-options {
+  padding-left: 2em;
+}
+
+#submitAssignmentCommand {
+  margin-top: 1em;
+}
+
+.subtle { color: @subtle-text-color; }
+.very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
+
+.comment-field {
+  color: #000;
+  margin: 1em;
+}
+
+.label-ANY() {
+	padding: 1px 4px;
+	text-transform: uppercase;
+	font-size: 80%;
+	font-weight: bold;
+	border-radius: 4px;
+}
+
+.label-green {
+	background: #393;
+	color: white;
+	.label-ANY();
+}
+
+.label-orange {
+	background: #fc0;
+	color: #333;
+	.label-ANY();
+}
+
+.label-red {
+	background: #c00;
+	color: white;
+	.label-ANY();
+}
+
+.label-blue {
+	background: #3A87AD;
+	color: white;
+	.label-ANY();
+}
+
+.extra-data {
+  .very-subtle;
+}
+
+.audit-events {
+  .date { white-space: nowrap; }
+  td,th { padding: 4px; }
+}
+
+.uneditable-value {
+	display: inline-block;
+	margin-top: 5px;
+}
+
+// Bootstrap additions
+
+// For single button wrappers that shouldn't have extra margin
+form.form-tiny {
+  margin: 0;
+}
+
+// Bootstrap fixes
+
+// button-style links don't also need underlining
+a.btn { text-decoration: none; }
+
+// Icons + ID6 require some adjustment
+[class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
+
+// Some fields not quite aligning with adjacent things like .add-on 
+input[type=text] {
+  position: relative;
+  top: 1px;
+}
+
+.originality-report {
+  text-align: right;
+  img { vertical-align: middle }
+}
+
+// fix for the date plugin and models
+.AnyTime-win {
+	z-index: @zindexModal+1;
+}
+
+
+// Colour keys for Turnitin results. Turnitin proper has a little coloured
+// box which academics are used to and will often use as the main decider
+// for whether to hold a document back (e.g. if it's orange or red). So we
+// need to adopt the same colour scheme.
+
+.similarity-box(@color, @text-color) {
+  background-color: @color;
+  color: @text-color;
+  .border-radius(3px);
+  padding: 3px;
+}
+.similarity-box(@color) when (lightness(@color) >= 60%) { .similarity-box(@color, black) }
+.similarity-box(@color) when (lightness(@color) < 60%) { .similarity-box(@color, white) }
+
+.similarity-0 { .similarity-box(#4499ee); }
+.similarity-1 { .similarity-box(#66bb11); }
+.similarity-2 { .similarity-box(#ffcc00); }
+.similarity-3 { .similarity-box(#ff6600); }
+.similarity-4 { .similarity-box(#ee3333); }
+
+.similarity-subcategories {
+  margin-left: 0.5em;
+  font-size: @very-subtle-font-size;
+  color: @very-subtle-text-color;
+}
+
+.sits-picker, .membership-picker {
+  border: 1px solid #ccc;
+  .border-radius(3px);
+  padding: 0.5em;
+  margin-top: 0.5em;
+  
+  table { width: 100%; }
+
+  .scroller {
+    overflow-y: auto;
+    height: 18em;
+  }
+
+  textarea { width: 97%; height: 5em; }
+}
+
+.membership-picker {
+	.item-type-include { color: #393 }
+	.item-type-exclude { color: #999 }
+	.item-type-sits { color: #33f }
+
+	// checkbox column
+	table tr > td:nth-of-type(1) { width: 16px; }
+}
+
+// setup assignments - hidden options groups
+.options-button .options-group {
+	display: none;
+}
+
+#main-content {
+// distinct coloured labels for assigning options groups.
+.label-A { background-color: #FFB300; }
+.label-B { background-color: #803E75; }
+.label-C { background-color: #FF6800; }
+.label-D { background-color: #A6BDD7; }
+.label-E { background-color: #C10020; }
+.label-F { background-color: #CEA262; }
+.label-G { background-color: #817066; }
+.label-H { background-color: #007D34; }
+.label-I { background-color: #F6768E; }
+.label-J { background-color: #00538A; }
+.label-K { background-color: #FF7A5C; }
+.label-L { background-color: #53377A; }
+.label-M { background-color: #FF8E00; }
+.label-N { background-color: #B32851; }
+.label-O { background-color: #F4C800; }
+.label-P { background-color: #7F180D; }
+.label-Q { background-color: #93AA00; }
+.label-R { background-color: #593315; }
+.label-S { background-color: #F13A13; }
+.label-T { background-color: #232C16; }
+// if you've gone past T then you have too many options. Grey for you!
+}
+
+// highlightable table rows
+tr.selected td, tr.highlight td {
+	background-color: #F2DEDE !important;
+}
+
+#feedback-template-model iframe {
+	width:90%;
+	height:400px;
+	overflow:hidden;
+}
+
+h1.with-settings {
+	display: inline-block;
+	margin-right: 0px;
+}
+
+.dept-settings {
+	display: inline-block;
+	top: -8px;
+	margin: 0px 0px 16px 10px;
+}
+
+} // .tabula-page

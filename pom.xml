@@ -1,0 +1,919 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick</groupId>
+		<artifactId>warwick</artifactId>
+		<version>4</version>
+	</parent>
+
+	<groupId>uk.ac.warwick.tabula</groupId>
+	<artifactId>tabula-project</artifactId>
+	<version>1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Tabula</name>
+	<description>
+  		Tabula is a tool to support the administration of teaching and learning in academic departments. 
+  		It's also referred to as My Department.
+  	</description>
+	<url>http://warwick.ac.uk/tabula</url>
+
+	<!-- I N C E P T I O N -->
+	<inceptionYear>2012</inceptionYear>
+
+	<properties>
+		<scala.version>2.9.1</scala.version>
+		<org.springframework.version>3.1.0.RELEASE</org.springframework.version>
+		<org.apache.lucene.version>3.5.0</org.apache.lucene.version>
+		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
+		<org.apache.poi.version>3.8</org.apache.poi.version>
+		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
+
+		<tabula.basedir>${project.basedir}</tabula.basedir>
+	</properties>
+
+	<!-- ====================================================================== -->
+	<!-- S C M -->
+	<!-- ====================================================================== -->
+	<scm>
+		<developerConnection>scm:git:ssh://git@repo.elab.warwick.ac.uk/TAB/tabula.git</developerConnection>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse</url>
+	</scm>
+
+	<!-- ====================================================================== -->
+	<!-- I S S U E M A N A G E M E N T -->
+	<!-- ====================================================================== -->
+	<issueManagement>
+		<system>jira</system>
+		<url>https://bugs.elab.warwick.ac.uk/browse/TAB</url>
+	</issueManagement>
+
+	<!-- ====================================================================== -->
+	<!-- C I M A N A G E M E N T -->
+	<!-- ====================================================================== -->
+	<ciManagement>
+		<system>Bamboo</system>
+		<url>http://build.elab.warwick.ac.uk/browse/TAB</url>
+	</ciManagement>
+
+	<modules>
+		<module>modules/common</module>
+		<module>modules/home</module>
+		<module>modules/coursework</module>
+	</modules>
+
+	<profiles>
+		<profile>
+			<id>all</id>
+		</profile>
+
+		<profile>
+			<id>deploy</id>
+
+			<build>
+				<defaultGoal>install</defaultGoal>
+
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${tabula.basedir}/local.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>dev-deploy-views</id>
+
+			<build>
+				<defaultGoal>process-resources</defaultGoal>
+
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${tabula.basedir}/local.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- sync static -->
+		<profile>
+			<id>dev-deploy-static</id>
+
+			<build>
+				<defaultGoal>package</defaultGoal>
+
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${tabula.basedir}/local.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<!-- Need to add the local repository in order to get the parent pom -->
+	<repositories>
+		<repository>
+			<id>nexus</id>
+			<name>Internal Nexus Repository</name>
+			<url>http://mvn.elab.warwick.ac.uk/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<!-- ====================================================================== -->
+	<!-- B U I L D -->
+	<!-- ====================================================================== -->
+	<build>
+		<defaultGoal>install</defaultGoal>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>properties-maven-plugin</artifactId>
+					<version>1.0-alpha-2</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.1.1</version>
+					<configuration>
+						<outputDirectory>${tabula.basedir}/dist</outputDirectory>
+						<warName>${project.artifactId}</warName>
+	
+						<!-- Overlay WEB-INF from common onto other WEB-INFs -->
+						<overlays>
+							<overlay>
+								<groupId>uk.ac.warwick.tabula</groupId>
+								<artifactId>common</artifactId>
+								<type>jar</type>
+								<includes>
+									<include>WEB-INF/**/*</include>
+								</includes>
+							</overlay>
+							<overlay>
+								<groupId>uk.ac.warwick.tabula</groupId>
+								<artifactId>home</artifactId>
+								<type>zip</type>
+								<classifier>static-hashes</classifier>
+								<includes>
+									<include>WEB-INF/**/*</include>
+								</includes>
+							</overlay>
+						</overlays>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>scala-maven-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+
+				<!-- To compress and minify JS files -->
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>yuicompressor-maven-plugin</artifactId>
+					<version>1.1</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.lesscss</groupId>
+					<artifactId>lesscss-maven-plugin</artifactId>
+					<version>1.3.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<configuration>
+						<forkMode>always</forkMode>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.2</version>
+				</plugin>
+
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											properties-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0-alpha-2,)
+										</versionRange>
+										<goals>
+											<goal>
+												read-project-properties
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											net.alchim31.maven
+										</groupId>
+										<artifactId>
+											scala-maven-plugin
+										</artifactId>
+										<versionRange>
+											[3.1.0,)
+										</versionRange>
+										<goals>
+											<goal>compile</goal>
+											<goal>testCompile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.4,)
+										</versionRange>
+										<goals>
+											<goal>
+												unpack-dependencies
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-assembly-plugin
+										</artifactId>
+										<versionRange>
+											[2.2-beta-5,)
+										</versionRange>
+										<goals>
+											<goal>single</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.6,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- ====================================================================== -->
+	<!-- D E P E N D E N C I E S -->
+	<!-- ====================================================================== -->
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.2.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.2</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock-junit4</artifactId>
+			<version>2.5.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jmock</groupId>
+			<artifactId>jmock-cglib</artifactId>
+			<version>1.2.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Project dependencies -->
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>home</artifactId>
+				<version>${project.version}</version>
+				<type>zip</type>
+				<classifier>static-hashes</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>common</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-tools.testing</groupId>
+				<artifactId>specs_${scala.version}</artifactId>
+				<version>1.6.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.9.5</version>
+			</dependency>
+
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.9.1</version>
+			</dependency>
+			<dependency>
+				<groupId>xml-apis</groupId>
+				<artifactId>xml-apis</artifactId>
+				<version>1.3.04</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>2.2.9</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-asm</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aspects</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-instrument</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-instrument-tomcat</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jms</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-oxm</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-core_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-futures_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-http_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-jsoup_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-mime_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.databinder</groupId>
+				<artifactId>dispatch-tagsoup_${scala.version}</artifactId>
+				<version>${net.databinder.dispatch.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-core</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${org.apache.poi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${org.apache.poi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml-schemas</artifactId>
+				<version>${org.apache.poi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>ooxml-schemas</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-scratchpad</artifactId>
+				<version>${org.apache.poi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>3.6.10.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-annotations</artifactId>
+				<version>3.5.6-Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.javax.persistence</groupId>
+				<artifactId>hibernate-jpa-2.0-api</artifactId>
+				<version>1.0.1.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>4.2.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator-annotation-processor</artifactId>
+				<version>4.2.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.0.0.GA</version>
+			</dependency>
+
+			<!-- Needed to stop version clashing with Jboss5 common/lib http://stackoverflow.com/questions/4097567/jboss-and-different-versions-of-hibernate -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator-legacy</artifactId>
+				<version>4.0.2.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time-hibernate</artifactId>
+				<version>1.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.joda</groupId>
+				<artifactId>joda-convert</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>2.3.18</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.oauth.core</groupId>
+				<artifactId>oauth</artifactId>
+				<version>20090825</version>
+			</dependency>
+			<dependency>
+				<groupId>net.oauth.core</groupId>
+				<artifactId>oauth-provider</artifactId>
+				<version>20090531</version>
+			</dependency>
+			<dependency>
+				<groupId>net.oauth.core</groupId>
+				<artifactId>oauth-httpclient3</artifactId>
+				<version>20090617</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml</groupId>
+				<artifactId>jackson-module-scala</artifactId>
+				<version>1.9.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.5</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.directory.studio</groupId>
+				<artifactId>org.apache.commons.io</artifactId>
+				<version>2.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>1.2.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-api</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-compat</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-core</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-el</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-extras</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-freemarker</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-jsp</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-servlet</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-servlet-wildcard</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tiles</groupId>
+				<artifactId>tiles-template</artifactId>
+				<version>${org.apache.tiles.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjtools</artifactId>
+				<version>1.6.11</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jsuereth</groupId>
+				<artifactId>scala-arm_${scala.version}</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>uk.ac.warwick.util</groupId>
+				<artifactId>warwickutils-all</artifactId>
+				<version>20121112</version>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.sso</groupId>
+				<artifactId>sso-client</artifactId>
+				<version>1.90</version>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick</groupId>
+				<artifactId>spring-scala-glue_2.9.2</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>github.com.ingoem</groupId>
+				<artifactId>scala-react_2.9.1</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-core</artifactId>
+				<version>${org.apache.lucene.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-test-framework</artifactId>
+				<version>${org.apache.lucene.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache-core</artifactId>
+				<version>1.7.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.6.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>1.6.2</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>13.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.directory.studio</groupId>
+				<artifactId>org.apache.commons.codec</artifactId>
+				<version>1.6</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.scalatest</groupId>
+				<artifactId>scalatest_${scala.version}</artifactId>
+				<version>1.6.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

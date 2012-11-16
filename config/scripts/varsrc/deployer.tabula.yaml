@@ -1,0 +1,50 @@
+--- !ruby/object:Deployment 
+apaches: 
+- !ruby/object:Apache 
+  name: tabula
+  port_balancer: !ruby/object:LoadBalancedPortTracker 
+    balanced_ports: 
+    - "8080"
+    - "8180"
+    balancer_port: "10001"
+    current_port: "10001"
+    rewrite_map: "/usr/local/apache/conf/vhosts/proxy_port.map"
+  remotehost: 
+  apache_dir: "/usr/local/apache"
+  restart_command: "echo 'not restarting apache' "
+  state: balanced
+build_status: starting
+app: "tabula"
+war_names:
+- courses
+- home
+checkout_base: "/var/src/checkout"
+archive_dir: "/var/src/archive"
+branch: "master"
+build_user: "build"
+builder: !ruby/object:MavenBuilder
+  path: "/usr/local/apache-maven/bin/mvn"
+jbosses: 
+  tabula:
+  - !ruby/object:Jboss 
+    deployment_state: old
+    name: tabula-primary
+    port: "8080"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    test_path: /courses/test/up
+    requests: 
+       /courses/test/up: 200
+  - !ruby/object:Jboss 
+    deployment_state: old
+    name: tabula-secondary
+    port: "8080"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    test_path: /courses/test/up
+    requests: 
+       /courses/test/up: 200
+lockfile: /tmp/tabula_deploy.running
+notification_emails: n.howes@warwick.ac.uk
