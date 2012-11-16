@@ -4,7 +4,7 @@
 	<head>
 		<#include "_head.ftl" />
 	</head>
-	<body class="horizontal-nav layout-100 coursework-page ${bodyClasses?default('')}">
+	<body class="horizontal-nav layout-100 tabula-page ${component.bodyClass?default('component-page')} ${bodyClasses?default('')}">
 		<div id="container">
 			<#if (user.masquerading)!false >
 			<div id="masquerade-notice">
@@ -83,9 +83,11 @@
 					<div class="content">
 						<div id="site-header-container">
 							<h1 id="site-header">
+							<#if component.subsite>
 								<span id="parent-site-header"><a href="/" title="Tabula home page">Tabula</a></span>
 								<span id="subsite-character">&raquo;</span>
-								<span id="current-site-header"><a href="<@url page="/" />">Coursework management</a></span>
+							</#if>
+								<span id="current-site-header"><a href="<@url page="/" />">${component.siteHeader?default('Tabula')}</a></span>
 							</h1>
 							
 							<h2 id="strapline">

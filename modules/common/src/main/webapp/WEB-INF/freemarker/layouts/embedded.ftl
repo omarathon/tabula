@@ -3,7 +3,7 @@
 <!doctype html>
 <html lang="en-GB">
 	<head>		  
-		  <title>Coursework</title>
+		  <title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}</title>
 		
 		  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 		  <meta charset="utf-8">
@@ -31,7 +31,7 @@
 
 	</head>
 	<body>
-		<div class="coursework-page">
+		<div class="tabula-page ${component.bodyClass?default('component-page')">
 		<@tiles.insertAttribute name="body" />
 		</div>
 	</body>

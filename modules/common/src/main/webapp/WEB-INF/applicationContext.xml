@@ -234,7 +234,7 @@
 	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
 		p:detectAnonymousOnCampusUsers="true"
 		p:userLookup-ref="userLookup"
-		p:configLocation="/tabula-sso-config.xml" />
+		p:configLocation="/tabula-${module.name}-sso-config.xml" />
 		
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
 	
@@ -358,7 +358,7 @@
 		    <property name="server" ref="jmxServerLocator" />
 		    <property name="beans">
 		      <map>
-		        <entry key="tabula:name=features" value-ref="features" />
+		        <entry key="tabula-${module.name}:name=features" value-ref="features" />
 		      </map>
 		    </property>
 		  </bean>

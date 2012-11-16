@@ -1,4 +1,4 @@
-<title>Coursework</title>
+<title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}</title>
 
 <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 <meta charset="utf-8">
@@ -39,4 +39,4 @@
 <@script "/static/libs/bootstrap-editable/js/bootstrap-editable.js" />
 <@script "/static/js/modernizr.js" />
 <@script "/static/js/browser-info.js" />
-<@script "/static/js/main.js" />
+<@script "/static/js/${component.js?default('common.js')}" />

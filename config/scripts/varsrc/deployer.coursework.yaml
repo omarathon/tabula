@@ -1,7 +1,7 @@
 --- !ruby/object:Deployment 
 apaches: 
 - !ruby/object:Apache 
-  name: tabula-test
+  name: coursework
   port_balancer: !ruby/object:LoadBalancedPortTracker 
     balanced_ports: 
     - "8080"
@@ -17,18 +17,18 @@ build_status: starting
 app: "tabula"
 war_names:
 - courses
-- home
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
-  path: "/usr/local/apache-maven/bin/mvn"
+  profiles:
+  - standalone
 jbosses: 
-  tabula-test:
+  coursework:
   - !ruby/object:Jboss 
     deployment_state: old
-    name: tabula-primary
+    name: coursework-primary
     port: "8080"
     state: running
     mode: smf
@@ -38,7 +38,7 @@ jbosses:
        /courses/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
-    name: tabula-secondary
+    name: coursework-secondary
     port: "8080"
     state: running
     mode: smf

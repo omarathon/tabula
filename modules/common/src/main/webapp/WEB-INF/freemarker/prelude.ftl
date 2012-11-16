@@ -8,6 +8,7 @@
 	<#import "forms.ftl" as form />
 	<#import "routes.ftl" as routes />
 	<#import "can_do.ftl" as can />
+	<#import "component.ftl" as component />
 </#if>
 
 <#macro stylesheet path><link rel="stylesheet" href="<@url resource=path/>" type="text/css"></#macro>

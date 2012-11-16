@@ -17,6 +17,7 @@ build_status: starting
 app: "tabula"
 war_names:
 - courses
+- home
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"

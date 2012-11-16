@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands
+package uk.ac.warwick.tabula.home.commands
 
 import java.lang.Boolean
 import java.util.concurrent.Future
@@ -21,9 +21,6 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 
-/**
- * @deprecated Use version in home module instead
- */
 class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
@@ -47,7 +44,7 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 		val mail = new SimpleMailMessage
 		mail setTo adminMailAddress
 		mail setFrom adminMailAddress
-		mail setSubject "Coursework application feedback"
+		mail setSubject "Tabula feedback"
 		mail setText generateText
 
 		mailSender send mail

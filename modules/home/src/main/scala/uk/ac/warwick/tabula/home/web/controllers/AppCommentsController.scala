@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.web.controllers
+package uk.ac.warwick.tabula.home.web.controllers
 
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
@@ -7,18 +7,17 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod._
 
-import uk.ac.warwick.tabula.coursework.commands.AppCommentCommand
+import uk.ac.warwick.tabula.home.commands.AppCommentCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 /**
  * App to receive comments/feedback about the app.
- *
- * @deprecated Use version in home module instead
  */
 @Controller
 @RequestMapping(value = Array("/app/tell-us"))
-class AppCommentsController extends CourseworkController {
+class AppCommentsController extends BaseController {
 
 	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
 
