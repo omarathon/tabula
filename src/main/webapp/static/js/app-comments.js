@@ -23,12 +23,14 @@ var fillInAppComments = function($form) {
         $currentPage.val(window.location.href);
     BrowserDetect.findIP(function(ip){
         $form.find('#app-comment-ipAddress').val(ip);
-    })
+    });
 };
 
 var decorateAppCommentsForm = function($form) {
     $form.addClass('narrowed-form');
-}
+};
+
+$(function(){
 
 // Fills in non-AJAX app comment form
 $('#app-comment-form').each(function() {
@@ -66,6 +68,8 @@ $('#app-feedback-link').click(function(event){
             onComplete: formFirstLoaded
         });
     }
+
+});
 
 });
 
