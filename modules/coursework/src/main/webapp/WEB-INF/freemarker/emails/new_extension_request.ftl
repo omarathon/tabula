@@ -2,7 +2,7 @@ Dear ${user.firstName}
 
 ${student.fullName} has requested an extension for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
 
-They have requested until ${requestedExpirtyDate} to complete the assignment. The following reasons were given for the request
+They have requested until ${requestedExpiryDate} to complete the assignment. The following reasons were given for the request:
 
 ${reasonForRequest}
 

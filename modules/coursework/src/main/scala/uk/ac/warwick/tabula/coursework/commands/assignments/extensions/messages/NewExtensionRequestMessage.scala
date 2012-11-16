@@ -10,9 +10,9 @@ class NewExtensionRequestMessage(extension: Extension, userId: String)
 
 	// applied to a base message to set a context specific subject and body
 	def setMessageContent(baseMessage: SimpleMailMessage) = {
-		baseMessage.setSubject(module.code + ": New extension request made")
+		baseMessage.setSubject(getSubjectPrefix() + "New extension request made")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/new_extension_request.ftl", Map(
-			"requestedExpirtyDate" -> dateFormatter.print(extension.requestedExpiryDate),
+			"requestedExpiryDate" -> dateFormatter.print(extension.requestedExpiryDate),
 			"reasonForRequest" -> extension.reason,
 			"attachments" -> extension.attachments,
 			"assignment" -> assignment,

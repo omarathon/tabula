@@ -7,11 +7,15 @@
 <div>
     <h1>Authorise late submissions for ${assignment.name}</h1>
     <p>
-		This assignment closes on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>.
-		To authorise an extension for a student click the "Grant" button next to the students university ID. If you
+		This assignment <@fmt.tense assignment.closeDate "closes" "closed" /> 
+		on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>.
+		To authorise an extension for a student click the "Grant" button next to the student's niversity ID. If you
 		wish to grant an extension to a user that is not listed below, please ensure that they appear in the students
 		list on the <a href="/admin/module/${module.code}/assignments/${assignment.id}/edit">assignment edit page</a>.
-    </p><br/>
+    </p>
+    <div class="alert alert-info">
+    	<i class="icon-envelope"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
+    </div>
     <div id="extension-list">
         <table class="extensionListTable table table-striped table-bordered">
             <tr class="extension-header">
