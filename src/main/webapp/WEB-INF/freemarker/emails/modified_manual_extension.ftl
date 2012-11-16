@@ -3,7 +3,7 @@ Dear ${user.firstName}
 Your extension for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been changed.
 The modified submission date for this assignment is now ${newExpiryDate}. Please disregard any previous emails regarding this extension.
 
-<#if extension.approvalComments??>
+<#if extension.approvalComments?has_content>
 The administrator left the following comments:
 
 ${extension.approvalComments}

@@ -34,9 +34,9 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
 
 	// email constants
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
+	var replyAddress: String = Wire.property("${mail.noreply.to}")
+	var fromAddress: String = Wire.property("${mail.exceptions.to}")
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
@@ -59,6 +59,9 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 		d.assignment(assignment)
 		d.module(module)
 	}
+	
+	// text to put at the start of all email subjects.
+	protected def getSubjectPrefix() = module.code.toUpperCase() + ": "
 
 	// generates a message with common attributes pre-defined
 	def generateBaseMessage():SimpleMailMessage = {

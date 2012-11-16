@@ -4,7 +4,7 @@ Your extension request has been rejected for the assignment '${assignment.name}'
 The deadline for the assignment is ${originalAssignmentDate}. Any submissions made after the deadline will be
 subject to the usual late penalties.
 
-<#if extension.approvalComments??>
+<#if extension.approvalComments?has_content>
 The administrator left the following comments:
 
 ${extension.approvalComments}
