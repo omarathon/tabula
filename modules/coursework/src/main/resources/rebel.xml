@@ -9,6 +9,7 @@
 	<web>
 		<link target="/">
 			<dir name="${rebel.workspace.path}/courses/src/main/webapp/" />
+			<dir name="${rebel.workspace.path}/courses/src/main/resources/" />
 		</link>
 	</web>
 		
