@@ -177,7 +177,7 @@ class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidatin
 
 	@BeanProperty var message: String = service.message orNull
 
-	def validate(implicit errors: Errors) {
+	def validate(errors: Errors) {
 
 	}
 }

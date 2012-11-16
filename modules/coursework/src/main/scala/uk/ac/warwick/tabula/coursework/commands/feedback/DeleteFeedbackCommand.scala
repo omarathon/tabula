@@ -27,9 +27,9 @@ class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] wi
 		for (feedback <- feedbacks) feedbackDao.delete(feedback)
 	}
 
-	def prevalidate(implicit errors: Errors) {
+	def prevalidate(errors: Errors) {
 		if (feedbacks.find(_.assignment != assignment).isDefined) {
-			reject("feedback.delete.wrongassignment")
+			errors.reject("feedback.delete.wrongassignment")
 		}
 		// HFC-88 allow deleting released feedback.
 		//		if (feedbacks.find(_.released).isDefined) {
@@ -37,9 +37,9 @@ class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] wi
 		//		}
 	}
 
-	def validate(implicit errors: Errors) {
-		prevalidate
-		if (!confirm) rejectValue("confirm", "feedback.delete.confirm")
+	def validate(errors: Errors) {
+		prevalidate(errors)
+		if (!confirm) errors.rejectValue("confirm", "feedback.delete.confirm")
 	}
 
 	def describe(d: Description) = 

@@ -93,10 +93,7 @@ trait ApplyWithCallback[R] extends Command[R] {
  * validation methods to simplify validation code.
  */
 trait SelfValidating {
-	def validate(implicit errors: Errors)
-
-	def reject(code: String)(implicit errors: Errors) = errors.reject(code)
-	def rejectValue(prop: String, code: String)(implicit errors: Errors) = errors.rejectValue(prop, code)
+	def validate(errors: Errors)
 }
 
 /**

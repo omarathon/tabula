@@ -22,7 +22,7 @@ class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) 
 	
 	def currentMarkScheme = Some(markScheme)
 
-	override def validate(implicit errors: Errors) {
+	override def validate(errors: Errors) {
 		super.validate(errors)
 	}
 

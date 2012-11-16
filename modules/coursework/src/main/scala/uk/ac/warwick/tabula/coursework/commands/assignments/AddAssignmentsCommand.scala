@@ -117,7 +117,7 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		moduleDao.getByCode(moduleCode)
 	}
 
-	override def validate(implicit errors: Errors) {
+	override def validate(errors: Errors) {
 		ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
 
 		// just get the items we're actually going to import

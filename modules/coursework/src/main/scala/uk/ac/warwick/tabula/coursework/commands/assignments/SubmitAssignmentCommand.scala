@@ -49,35 +49,35 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 		Map(pairs: _*)
 	}
 
-	def validate(implicit errors: Errors) {
+	def validate(errors: Errors) {
 		if (!assignment.active) {
-			reject("assignment.submit.inactive")
+			errors.reject("assignment.submit.inactive")
 		}
 		if (!assignment.isOpened()) {
-			reject("assignment.submit.notopen")
+			errors.reject("assignment.submit.notopen")
 		}
 		if (!assignment.collectSubmissions) {
-			reject("assignment.submit.disabled")
+			errors.reject("assignment.submit.disabled")
 		}
 
 		val hasExtension = assignment.isWithinExtension(user.apparentUser.getUserId)
 
 		if (!assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
-			reject("assignment.submit.closed")
+			errors.reject("assignment.submit.closed")
 		}
 		// HFC-164
 		if (assignment.submissions.exists(_.universityId == user.universityId)) {
 			if (assignment.allowResubmission) {
 				if (assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
-					reject("assignment.resubmit.closed")
+					errors.reject("assignment.resubmit.closed")
 				}
 			} else {
-				reject("assignment.submit.already")
+				errors.reject("assignment.submit.already")
 			}
 		}
 
 		if (assignment.displayPlagiarismNotice && !plagiarismDeclaration) {
-			rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
+			errors.rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
 		}
 
 		// TODO for multiple attachments, check filenames are unique 	

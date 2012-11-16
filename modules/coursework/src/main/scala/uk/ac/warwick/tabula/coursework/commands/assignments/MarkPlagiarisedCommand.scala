@@ -38,15 +38,15 @@ class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[JList[S
 		submissions
 	}
 
-	def prevalidate(implicit errors: Errors) {
+	def prevalidate(errors: Errors) {
 		if (submissions.find(_.assignment != assignment).isDefined) {
-			reject("submission.bulk.wrongassignment")
+			errors.reject("submission.bulk.wrongassignment")
 		}
 	}
 
-	def validate(implicit errors: Errors) {
-		prevalidate
-		if (!confirm) rejectValue("confirm", "submission.mark.plagiarised.confirm")
+	def validate(errors: Errors) {
+		prevalidate(errors)
+		if (!confirm) errors.rejectValue("confirm", "submission.mark.plagiarised.confirm")
 	}
 
 	def describe(d: Description) = 

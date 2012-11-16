@@ -32,15 +32,15 @@ class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] 
 		zipService.invalidateSubmissionZip(assignment)
 	}
 
-	def prevalidate(implicit errors: Errors) {
+	def prevalidate(errors: Errors) {
 		if (submissions.find(_.assignment != assignment).isDefined) {
-			reject("submission.bulk.wrongassignment")
+			errors.reject("submission.bulk.wrongassignment")
 		}
 	}
 
-	def validate(implicit errors: Errors) {
-		prevalidate
-		if (!confirm) rejectValue("confirm", "submission.delete.confirm")
+	def validate(errors: Errors) {
+		prevalidate(errors)
+		if (!confirm) errors.rejectValue("confirm", "submission.delete.confirm")
 	}
 
 	def describe(d: Description) = 

@@ -63,10 +63,10 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		}
 	}
 
-	def validate(implicit errors: Errors) {
+	def validate(errors: Errors) {
 		prevalidate(errors)
 		if (!confirm) {
-			rejectValue("confirm", "feedback.publish.confirm")
+			errors.rejectValue("confirm", "feedback.publish.confirm")
 		}
 	}
 

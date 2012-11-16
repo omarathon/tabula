@@ -32,7 +32,7 @@ class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidat
 		module
 	}
 
-	def validate(implicit errors: Errors) {
+	def validate(errors: Errors) {
 		//TODO proper department checks before we open this up to non-sysadmins
 
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "code", "NotEmpty")

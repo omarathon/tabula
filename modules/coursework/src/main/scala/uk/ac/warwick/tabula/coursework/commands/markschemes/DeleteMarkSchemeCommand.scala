@@ -21,7 +21,7 @@ class DeleteMarkSchemeCommand(var markScheme: MarkScheme) extends Command[Unit] 
 		}
 	}
 	
-	def validate(implicit errors: Errors) {
+	def validate(errors: Errors) {
 		if (!dao.getAssignmentsUsingMarkScheme(markScheme).isEmpty()) {
 			errors.reject("inuse") // FIXME use a real message code
 		}
