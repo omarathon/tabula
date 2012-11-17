@@ -20,7 +20,7 @@ war_names:
 - home
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
-branch: "master"
+branch: "develop"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   path: "/usr/local/apache-maven/bin/mvn"

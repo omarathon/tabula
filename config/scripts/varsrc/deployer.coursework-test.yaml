@@ -19,7 +19,7 @@ war_names:
 - courses
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
-branch: "master"
+branch: "develop"
 build_user: "build"
   profiles:
   - standalone
