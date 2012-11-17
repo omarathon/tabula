@@ -29,7 +29,7 @@ jbosses:
   coursework-test:
   - !ruby/object:Jboss 
     deployment_state: old
-    name: coursework-primary
+    name: tabula-primary
     port: "8080"
     state: running
     mode: smf
@@ -39,8 +39,8 @@ jbosses:
        /courses/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
-    name: coursework-secondary
-    port: "8080"
+    name: tabula-secondary
+    port: "8180"
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s jboss:"  
