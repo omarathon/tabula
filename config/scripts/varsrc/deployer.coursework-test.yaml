@@ -23,6 +23,7 @@ branch: "develop"
 build_user: "build"
   profiles:
   - standalone
+  skipTests: true
 jbosses: 
   coursework-test:
   - !ruby/object:Jboss 

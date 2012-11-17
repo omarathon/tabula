@@ -23,7 +23,7 @@ archive_dir: "/var/src/archive"
 branch: "develop"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
-  path: "/usr/local/apache-maven/bin/mvn"
+  skipTests: true
 jbosses: 
   tabula-test:
   - !ruby/object:Jboss 
