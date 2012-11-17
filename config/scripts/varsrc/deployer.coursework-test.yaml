@@ -21,6 +21,7 @@ checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "develop"
 build_user: "build"
+builder: !ruby/object:MavenBuilder
   profiles:
   - standalone
   skipTests: true
