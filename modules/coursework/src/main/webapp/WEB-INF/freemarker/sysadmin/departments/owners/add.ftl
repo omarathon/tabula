@@ -2,7 +2,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 
-<@f.form method="post" action="/sysadmin/departments/${department.code}/owners/add" commandName="addOwner">
+<@f.form method="post" action="${url('/sysadmin/departments/${department.code}/owners/add')}" commandName="addOwner">
 <@f.label path="usercode">
 <@f.errors path="usercode" cssClass="error" />
 Add usercode

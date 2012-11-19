@@ -12,7 +12,7 @@
 
 <#assign command = sharedAssignmentPropertiesForm />
 
-<@f.form method="post" action="/admin/department/${department.code}/shared-options" commandName="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
+<@f.form method="post" action="${url('/admin/department/${department.code}/shared-options')}" commandName="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
 
 <#if submitted?? && submitted && !hasErrors>
 	<span class="ajax-response" data-status="success"></span>

@@ -6,7 +6,7 @@
 		<button type="button" class="close" data-dismiss="modal">×</button>
 		<h3>Modify extension for ${universityId}</h3>
 	</div>
-	<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/extensions/edit" commandName="modifyExtensionCommand">
+	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/edit')}" commandName="modifyExtensionCommand">
 		<#include "_extension_fields.ftl" />
 	</@f.form>
 </#escape>

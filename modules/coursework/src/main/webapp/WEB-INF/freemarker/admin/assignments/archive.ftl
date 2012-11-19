@@ -1,4 +1,4 @@
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/archive" commandName="command" cssClass="form-vertical">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/archive')}" commandName="command" cssClass="form-vertical">
 <#assign assignment=command.assignment />
 
 <#if assignment.archived>

@@ -11,7 +11,7 @@
 		on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>.
 		To authorise an extension for a student click the "Grant" button next to the student's niversity ID. If you
 		wish to grant an extension to a user that is not listed below, please ensure that they appear in the students
-		list on the <a href="/admin/module/${module.code}/assignments/${assignment.id}/edit">assignment edit page</a>.
+		list on the <a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">assignment edit page</a>.
     </p>
     <div class="alert alert-info">
     	<i class="icon-envelope"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.

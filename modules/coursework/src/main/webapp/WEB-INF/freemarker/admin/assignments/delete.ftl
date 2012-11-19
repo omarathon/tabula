@@ -4,7 +4,7 @@
 
 <h1>Delete assignment</h1>
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/delete" commandName="deleteAssignmentCommand">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/delete')}" commandName="deleteAssignmentCommand">
 
 <h2>${assignment.name} (${assignment.academicYear.label})</h2>
 

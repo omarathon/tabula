@@ -4,7 +4,7 @@
 
 
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissions/mark-plagiarised" commandName="markPlagiarisedCommand">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/submissions/mark-plagiarised')}" commandName="markPlagiarisedCommand">
 
 
 <#if markPlagiarisedCommand.markPlagiarised> 

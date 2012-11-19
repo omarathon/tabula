@@ -14,7 +14,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <#assign step=action!'select'/>
 
-<@f.form method="post" id="batch-add-form" action="/admin/department/${command.department.code}/setup-assignments" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" id="batch-add-form" action="${url('/admin/department/${command.department.code}/setup-assignments')}" commandName=commandName cssClass="form-horizontal">
 
 <#if step='select'>
 

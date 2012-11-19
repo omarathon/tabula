@@ -4,7 +4,7 @@
 
 <div class="span9">
 
-<@f.form method="post" action="/sysadmin/repl">
+<@f.form method="post" action="${url('/sysadmin/repl')}">
 <input name="query" style="width:100%" value="${query!""}" />
 <br>
 <input type="submit" class="btn" value="Evaluate">

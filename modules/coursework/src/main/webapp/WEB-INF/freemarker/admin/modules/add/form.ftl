@@ -6,7 +6,7 @@
 <h1>Create module</h1>
 <#assign commandName="addModuleCommand" />
 <#assign command=addModuleCommand />
-<@f.form method="post" action="/admin/module/new" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action="${url('/admin/module/new')}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
 	<@form.labelled_row "department" "Department code">

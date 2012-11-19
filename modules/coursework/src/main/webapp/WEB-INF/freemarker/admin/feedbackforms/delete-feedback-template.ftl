@@ -4,7 +4,7 @@
 	<@f.form
 		method="post"
 		class="form-horizontal"
-		action="/admin/department/${department.code}/settings/feedback-templates/delete"
+		action="${url('/admin/department/${department.code}/settings/feedback-templates/delete')}"
 		commandName="deleteFeedbackTemplateCommand">
 		<@f.hidden path="id"/>
 		<p>Are you sure that you want to delete this feedback template?</p>

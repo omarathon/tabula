@@ -29,7 +29,7 @@
 		</div>
 	</#if>
 
-	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="/module/${module.code}/${assignment.id}#submittop" modelAttribute="submitAssignmentCommand">
+	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${url('/module/${module.code}/${assignment.id}#submittop')}" modelAttribute="submitAssignmentCommand">
 	<@f.errors cssClass="error form-errors">
 	</@f.errors>
 	

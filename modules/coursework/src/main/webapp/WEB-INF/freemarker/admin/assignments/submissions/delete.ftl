@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete" commandName="deleteSubmissionCommand">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete')}" commandName="deleteSubmissionCommand">
 
 <h1>Delete submissions for ${assignment.name}</h1>
 

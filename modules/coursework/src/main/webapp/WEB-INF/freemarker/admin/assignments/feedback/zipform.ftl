@@ -2,7 +2,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <div id="batch-feedback-form">
-<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" commandName="addFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch')}" commandName="addFeedbackCommand">
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>

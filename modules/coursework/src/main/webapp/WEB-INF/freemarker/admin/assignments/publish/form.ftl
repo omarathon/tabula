@@ -25,7 +25,7 @@ jQuery(function($){ "use strict";
 });
 </script>
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/publish" commandName="publishFeedbackCommand">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/publish')}" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
 

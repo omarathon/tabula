@@ -15,7 +15,7 @@
 				The spreadsheet should have two columns in the following order: student ID then mark.
 				You can use this <a href="<@routes.markstemplate assignment=assignment  />" >generated spreadsheet</a> as a template.
 			</p>
-			<@f.form method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
+			<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="addMarksCommand">
 				<input name="isfile" value="true" type="hidden"/>
 				<table role="presentation" class="narrowed-form">
 					<tr>
@@ -72,7 +72,7 @@
                 </tbody>
             </table>
 
-			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="/admin/module/${module.code}/assignments/${assignment.id}/marks" commandName="addMarksCommand">
+			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="addMarksCommand">
 				<input name="isfile" value="false" type="hidden"/>
                 <table class="marksUploadTable">
 					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
