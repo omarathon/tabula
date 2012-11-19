@@ -9,17 +9,30 @@ import freemarker.core.Environment
 import org.springframework.beans.factory.annotation.Value
 import java.util.Properties
 import javax.annotation.Resource
+import freemarker.template.SimpleScalar
 
 /**
  *
  */
-class UrlMethodModel extends TemplateDirectiveModel {
+class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
   
 	@Value("${module.context}") var context: String = _
 
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@Resource(name = "staticHashes") var staticHashes: Properties = _
+	
+	override def exec(args: java.util.List[_]): TemplateModel = {
+		if (args.size == 1) {
+			val contextNoRoot = context match {
+			  	case "/" => ""
+			  	case context => context
+			}
+			new SimpleScalar(contextNoRoot + args.iterator().next().toString())
+	  	} else {
+	  		throw new IllegalArgumentException("")
+	  	}
+	}
 
 	override def execute(env: Environment,
 		params: java.util.Map[_, _],

@@ -9,7 +9,7 @@ the comments textarea needs to maintain newlines.
 <h1>Create assignment for <@fmt.module_name module /></h1>
 <#assign commandName="addAssignmentCommand" />
 <#assign command=addAssignmentCommand />
-<@f.form method="post" action="/admin/module/${module.code}/assignments/new" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action="${url(/admin/module/${module.code}/assignments/new)}" commandName=commandName cssClass="form-horizontal">
 
 <#if command.prefilled>
 <div class="alert alert-success">

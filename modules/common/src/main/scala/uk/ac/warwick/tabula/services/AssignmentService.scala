@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User

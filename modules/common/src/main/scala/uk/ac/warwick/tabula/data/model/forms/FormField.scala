@@ -22,11 +22,11 @@ import scala.xml.NodeSeq
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{MarkScheme, FileAttachment}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.courses.services.UserLookupService
+import uk.ac.warwick.tabula.services.UserLookupService
 
 /**
  * A FormField defines a field to be displayed on an Assignment
