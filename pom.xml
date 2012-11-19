@@ -388,8 +388,16 @@
 								<type>jar</type>
 								<includes>
 									<include>WEB-INF/**/*</include>
-									<include>messages.properties</include>
 								</includes>
+							</overlay>
+							<overlay>
+								<groupId>uk.ac.warwick.tabula</groupId>
+								<artifactId>common</artifactId>
+								<type>jar</type>
+								<includes>
+									<include>*.properties</include>
+								</includes>
+								<targetPath>WEB-INF/classes</targetPath>
 							</overlay>
 							<overlay>
 								<groupId>uk.ac.warwick.tabula</groupId>
