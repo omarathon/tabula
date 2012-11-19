@@ -37,6 +37,7 @@ import uk.ac.warwick.spring.Wire
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
+	val defaultMarkerSelectorName = "marker"
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 
@@ -245,9 +246,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		fields.add(field)
 	}
 
+	def removeField(field: FormField) {
+		assignmentService.deleteFormField(field)
+	}
+
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
 
 	def commentField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+
+	def markerSelectField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultMarkerSelectorName)
 
 	/**
 	 * Find a FormField on the Assignment with the given name.

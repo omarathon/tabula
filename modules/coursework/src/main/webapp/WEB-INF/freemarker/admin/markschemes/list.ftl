@@ -26,7 +26,7 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 		<a class="btn btn-mini btn-danger use-tooltip <#if !canDelete>disabled</#if>" 
 			href="<@routes.markschemedelete markScheme />" 
 			data-toggle="modal" data-target="#markscheme-modal" 
-			<#if !canDelete>title="You can't delete this mark scheme as it is in use by <@fmt.p info.assignmentCount singular="assignment" one="one" />."</#if>>
+			<#if !canDelete>title="You can't delete this mark scheme as it is in use by <@fmt.p info.assignmentCount "assignment" "one" />."</#if>
 			<i class="icon-remove icon-white"></i> Delete 
 		</a>
 	</td>

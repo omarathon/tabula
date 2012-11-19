@@ -8,9 +8,8 @@ import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
-import uk.ac.warwick.tabula.data.model.forms.{ CommentField, FileField }
+import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField }
 import org.springframework.validation.Errors
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.spring.Wire
 
 /**
@@ -34,8 +33,8 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
 trait SharedAssignmentProperties {
 
 
-  @BeanProperty var openEnded: JBoolean = false
-  @BeanProperty var collectMarks: JBoolean = false
+	@BeanProperty var openEnded: JBoolean = false
+	@BeanProperty var collectMarks: JBoolean = false
 	@BeanProperty var collectSubmissions: JBoolean = false
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -47,6 +46,7 @@ trait SharedAssignmentProperties {
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
+	@BeanProperty var markScheme: MarkScheme = _
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -54,7 +54,7 @@ trait SharedAssignmentProperties {
 
 	@BeanProperty val maxFileAttachments: Int = 10
 
-	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*""";
+	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
 
 	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
 
@@ -85,6 +85,8 @@ trait SharedAssignmentProperties {
 		assignment.feedbackTemplate = feedbackTemplate
 		if (assignment.id != null) // this is an edit
 			zipService.invalidateSubmissionZip(assignment)
+		assignment.markScheme = markScheme
+		manageMarkerField(assignment)
 
 		for (field <- findCommentField(assignment)) field.value = comment
 		for (file <- findFileField(assignment)) {
@@ -104,7 +106,7 @@ trait SharedAssignmentProperties {
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
 		feedbackTemplate = assignment.feedbackTemplate
-
+		markScheme = assignment.markScheme
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
@@ -112,8 +114,32 @@ trait SharedAssignmentProperties {
 		}
 	}
 
+	/**
+	 * add/remove marker field as appropriate
+ 	 */
+	def manageMarkerField(assignment:Assignment) {
+		val markerField = findMarkerSelectField(assignment)
+		if (markScheme != null && markScheme.studentsChooseMarker){
+			// we now need a marker field for this assignment. create one
+			if (!markerField.isDefined) {
+				val markerSelect = new MarkerSelectField()
+				markerSelect.name = Assignment.defaultMarkerSelectorName
+				markerSelect.markScheme = markScheme
+				assignment.addFields(markerSelect)
+			}
+		} else {
+			// if a mark scheme has been removed or changed we need to remove redundant marker fields
+			if (markerField.isDefined) {
+				assignment.removeField(markerField.get)
+			}
+		}
+	}
+
 	protected def findFileField(assignment: Assignment) =
 		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
+
+	protected def findMarkerSelectField(assignment: Assignment) =
+		assignment.findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
 
 	/**Find the standard free-text field if it exists */
 	protected def findCommentField(assignment: Assignment) =

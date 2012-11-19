@@ -31,7 +31,9 @@ trait AssignmentService {
 	def getSubmission(id: String): Option[Submission]
 
 	def delete(submission: Submission): Unit
-	
+
+	def deleteFormField(field: FormField) : Unit
+
 	def deleteOriginalityReport(attachment: FileAttachment): Unit
 	def saveOriginalityReport(attachment: FileAttachment): Unit
 	
@@ -152,12 +154,17 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 	def getSubmission(id: String) = getById[Submission](id)
 
-	def delete(submission: Submission) = {
+	def delete(submission: Submission) {
 		submission.assignment.submissions.remove(submission)
 		session.delete(submission)
 		// force delete now, just for the cases where we re-insert in the same session
 		// (i.e. when a student is resubmitting work). [HFC-385#comments]
 		session.flush()
+	}
+
+	def deleteFormField(field: FormField) {
+		var removed = field.assignment.fields.remove(field)
+		session.delete(field)
 	}
 
 	/**

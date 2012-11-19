@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.courses.services.UserLookupService
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -51,13 +53,18 @@ abstract class FormField extends GeneratedId {
 	}
 
 	@transient var json = Wire.auto[ObjectMapper]
-
+	@transient var userLookup = Wire.auto[UserLookupService]
 	//	var fieldType:String =_
 
 	@BeanProperty
 	@ManyToOne
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
+
+	@BeanProperty
+	@ManyToOne
+	@(JoinColumn @field)(name = "mark_scheme_id")
+	var markScheme: MarkScheme = _
 
 	@BeanProperty var name: String = _
 	@BeanProperty var label: String = _
@@ -157,6 +164,20 @@ class TextareaField extends FormField with SimpleValue[String] {
 class CheckboxField extends FormField {
 	def blankSubmissionValue = new BooleanSubmissionValue(this)
 	override def validate(value: SubmissionValue, errors: Errors) {}
+}
+
+@Entity
+@DiscriminatorValue("marker")
+class MarkerSelectField() extends FormField with SimpleValue[String] {
+
+	def markers:Seq[User] = {
+		if (markScheme == null) Seq()
+		else markScheme.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
+	}
+
+	override def validate(value: SubmissionValue, errors: Errors) {
+		// TODO- check is not null???
+	}
 }
 
 @Entity

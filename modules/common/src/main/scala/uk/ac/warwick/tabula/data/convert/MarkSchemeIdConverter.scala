@@ -6,8 +6,11 @@ import uk.ac.warwick.tabula.data.Daoisms
 
 class MarkSchemeIdConverter extends TwoWayConverter[String, MarkScheme] with Daoisms {
 
-	override def convertLeft(scheme: MarkScheme) = scheme.id
+	override def convertLeft(scheme: MarkScheme) = Option(scheme) match {
+		case Some(s) => s.id
+		case None => null
+	}
 	
-	override def convertRight(id: String) = getById[MarkScheme](id) getOrElse { throw new IllegalArgumentException }
+	override def convertRight(id: String) = getById[MarkScheme](id).orNull
 
 }
