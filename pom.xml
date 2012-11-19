@@ -392,15 +392,6 @@
 							</overlay>
 							<overlay>
 								<groupId>uk.ac.warwick.tabula</groupId>
-								<artifactId>common</artifactId>
-								<type>jar</type>
-								<includes>
-									<include>*.properties</include>
-								</includes>
-								<targetPath>WEB-INF/classes</targetPath>
-							</overlay>
-							<overlay>
-								<groupId>uk.ac.warwick.tabula</groupId>
 								<artifactId>home</artifactId>
 								<type>zip</type>
 								<classifier>static-hashes</classifier>
