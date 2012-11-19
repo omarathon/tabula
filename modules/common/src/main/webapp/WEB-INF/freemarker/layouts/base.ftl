@@ -49,7 +49,7 @@
 								<li>
 								<#if user?? && user.loggedIn>
 									Signed in as ${user.fullName}.
-									<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}/" />">Sign out</a>
+									<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 								<#else>
 								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 								</#if>
@@ -199,7 +199,7 @@
 							<ul>
 								<li id="sign-inout-link">
 				          			<#if user?? && user.loggedIn>
-										<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}/" />">Sign out</a>
+										<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 									<#else>
 									    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 									</#if>

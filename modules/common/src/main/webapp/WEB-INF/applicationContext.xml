@@ -234,7 +234,7 @@
 	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
 		p:detectAnonymousOnCampusUsers="true"
 		p:userLookup-ref="userLookup"
-		p:configLocation="/tabula-${module.name}-sso-config.xml" />
+		p:configLocation="/tabula-sso-config.xml" />
 		
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
 	
@@ -265,7 +265,7 @@
 		<property name="sharedVariables">
 			<map>
 				<entry key="url"><bean class="uk.ac.warwick.tabula.web.views.UrlMethodModel" /></entry>
-				<entry key="rootUrl" value="${toplevel.url}" />
+				<entry key="rootUrl" value="${toplevel.url}${module.context}" />				
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.tabula.web.views.TheYear" /></entry>
