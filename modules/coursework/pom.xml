@@ -155,6 +155,15 @@
 	</profiles>
 
 	<dependencies>
+		<!-- Project dependencies -->
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>home</artifactId>
+			<classifier>static-hashes</classifier>
+			<type>zip</type>
+			<scope>runtime</scope>
+		</dependency>
+	
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>

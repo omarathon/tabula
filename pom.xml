@@ -292,29 +292,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
-		
-		<profile>
-			<id>war-static-hashes</id>
-			
-			<!-- This is a separate profile to avoid a circula dependency on /home, which is also a war -->
-			<activation>
-				<file>
-					<exists>src/main/webapp/WEB-INF/web.xml</exists>
-					<missing>src/main/assembly/static-hashes.xml</missing>
-				</file>
-			</activation>
-			
-			<dependencies>
-				<!-- Project dependencies -->
-				<dependency>
-					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>home</artifactId>
-					<classifier>static-hashes</classifier>
-					<type>zip</type>
-					<scope>runtime</scope>
-				</dependency>
-			</dependencies>
-		</profile>
 	</profiles>
 
 	<!-- Need to add the local repository in order to get the parent pom -->
