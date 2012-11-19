@@ -13,17 +13,17 @@ import org.springframework.web.util.HtmlUtils._
 import javax.persistence._
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.courses.commands.UploadedFile
-import uk.ac.warwick.courses.data.model.Assignment
-import uk.ac.warwick.courses.data.model.GeneratedId
-import uk.ac.warwick.courses.data.model.SavedSubmissionValue
+import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
 import uk.ac.warwick.courses.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.courses.data.model.FileAttachment
 import uk.ac.warwick.spring.Wire
+import scala.Some
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.courses.services.UserLookupService
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -50,13 +50,18 @@ abstract class FormField extends GeneratedId {
 	}
 
 	@transient var json = Wire.auto[ObjectMapper]
-
+	@transient var userLookup = Wire.auto[UserLookupService]
 	//	var fieldType:String =_
 
 	@BeanProperty
 	@ManyToOne
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
+
+	@BeanProperty
+	@ManyToOne
+	@(JoinColumn @field)(name = "mark_scheme_id")
+	var markScheme: MarkScheme = _
 
 	@BeanProperty var name: String = _
 	@BeanProperty var label: String = _
@@ -156,6 +161,20 @@ class TextareaField extends FormField with SimpleValue[String] {
 class CheckboxField extends FormField {
 	def blankSubmissionValue = new BooleanSubmissionValue(this)
 	override def validate(value: SubmissionValue, errors: Errors) {}
+}
+
+@Entity
+@DiscriminatorValue("marker")
+class MarkerSelectField() extends FormField with SimpleValue[String] {
+
+	def markers:Seq[User] = {
+		if (markScheme == null) Seq()
+		else markScheme.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
+	}
+
+	override def validate(value: SubmissionValue, errors: Errors) {
+		// TODO- check is not null???
+	}
 }
 
 @Entity

@@ -15,10 +15,7 @@ import Assignment.defaultUploadName
 import javax.persistence._
 import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.actions.Viewable
-import uk.ac.warwick.courses.data.model.forms.CommentField
-import uk.ac.warwick.courses.data.model.forms.Extension
-import uk.ac.warwick.courses.data.model.forms.FileField
-import uk.ac.warwick.courses.data.model.forms.FormField
+import forms._
 import uk.ac.warwick.courses.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.{ CurrentUser, AcademicYear, ToString, Features }
@@ -30,10 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
 import uk.ac.warwick.courses.JavaImports._
 import uk.ac.warwick.spring.Wire
+import scala.Some
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
+	val defaultMarkerSelectorName = "marker"
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 
@@ -242,9 +241,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		fields.add(field)
 	}
 
+	def removeField(field: FormField) {
+		assignmentService.deleteFormField(field)
+	}
+
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
 
 	def commentField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+
+	def markerSelectField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultMarkerSelectorName)
 
 	/**
 	 * Find a FormField on the Assignment with the given name.

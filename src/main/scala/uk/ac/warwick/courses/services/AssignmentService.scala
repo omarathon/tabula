@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import javax.persistence.Entity
 import uk.ac.warwick.courses.JavaImports.JList
 import uk.ac.warwick.courses.data.model._
+import forms.FormField
 import uk.ac.warwick.courses.data.Daoisms
 import uk.ac.warwick.courses.AcademicYear
 import uk.ac.warwick.userlookup.User
@@ -30,7 +31,9 @@ trait AssignmentService {
 	def getSubmission(id: String): Option[Submission]
 
 	def delete(submission: Submission): Unit
-	
+
+	def deleteFormField(field: FormField) : Unit
+
 	def deleteOriginalityReport(attachment: FileAttachment): Unit
 	def saveOriginalityReport(attachment: FileAttachment): Unit
 	
@@ -150,9 +153,14 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 	def getSubmission(id: String) = getById[Submission](id)
 
-	def delete(submission: Submission) = {
+	def delete(submission: Submission) {
 		submission.assignment.submissions.remove(submission)
 		session.delete(submission)
+	}
+
+	def deleteFormField(field: FormField) {
+		var removed = field.assignment.fields.remove(field)
+		session.delete(field)
 	}
 
 	/**
