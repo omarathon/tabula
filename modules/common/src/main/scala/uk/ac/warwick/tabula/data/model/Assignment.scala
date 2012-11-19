@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
+import scala.Some
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
