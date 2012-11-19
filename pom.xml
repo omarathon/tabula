@@ -388,6 +388,7 @@
 								<type>jar</type>
 								<includes>
 									<include>WEB-INF/**/*</include>
+									<include>messages.properties</include>
 								</includes>
 							</overlay>
 							<overlay>
