@@ -28,7 +28,7 @@ jbosses:
   coursework:
   - !ruby/object:Jboss 
     deployment_state: old
-    name: coursework-primary
+    name: courses-primary
     port: "8080"
     state: running
     mode: smf
@@ -38,7 +38,7 @@ jbosses:
        /courses/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
-    name: coursework-secondary
+    name: courses-secondary
     port: "8180"
     state: running
     mode: smf
