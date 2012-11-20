@@ -3,12 +3,10 @@ package uk.ac.warwick.tabula.system.exceptions
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
-
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.ServletException
@@ -19,6 +17,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.core.ExceptionUtils
 import uk.ac.warwick.tabula.system.exceptions._
+import org.springframework.beans.TypeMismatchException
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -58,6 +58,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None): Mav = {
 		e match {
+			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
+			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request)
 			case exception: Throwable => handle(exception, request)
 			case _ => handleNull
 		}
