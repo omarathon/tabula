@@ -409,6 +409,13 @@
 			<artifactId>ehcache-core</artifactId>
 			<version>1.7.0</version>
 		</dependency>
+		
+		<!-- Bump the JRuby version to one that doesn't bundle joda-time -->
+		<dependency>
+			<groupId>org.jruby</groupId>
+			<artifactId>jruby</artifactId>
+			<version>1.6.8</version>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
