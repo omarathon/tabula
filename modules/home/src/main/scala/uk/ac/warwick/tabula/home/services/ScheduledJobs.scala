@@ -1,5 +1,6 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.home.services
 
+import uk.ac.warwick.tabula.services._
 import java.util.Collections.newSetFromMap
 import java.util.concurrent.ConcurrentHashMap
 import scala.reflect.BeanProperty

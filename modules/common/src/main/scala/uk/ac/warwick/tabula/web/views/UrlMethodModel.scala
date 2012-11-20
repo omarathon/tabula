@@ -40,10 +40,15 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 		body: TemplateDirectiveBody) {
 
 		val path: String = if (params.containsKey("page")) {
-			val contextNoRoot = context match {
-			  	case "/" => ""
-			  	case context => context
+			val contextOverridden: String = 
+			  if (params.containsKey("context")) params.get("context").toString()
+			  else context
+			
+			val contextNoRoot = contextOverridden match {
+		  		case "/" => ""
+		  		case context => context
 			}
+			
 			contextNoRoot + params.get("page").toString()
 		} else if (params.containsKey("resource")) {
 			addSuffix(params.get("resource").toString())

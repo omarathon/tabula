@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.home.services
 
 import uk.ac.warwick.tabula.TestBase
 import SchedulingConcurrency._

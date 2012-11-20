@@ -64,6 +64,7 @@
 		<module>modules/common</module>
 		<module>modules/home</module>
 		<module>modules/coursework</module>
+		<module>modules/profiles</module>
 	</modules>
 
 	<profiles>
