@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.courses.data.model.Submission
 import uk.ac.warwick.courses.helpers.ArrayList
 import uk.ac.warwick.courses.ItemNotFoundException
+import uk.ac.warwick.courses.services.AssignmentService
 
 /**
  * Download one or more submissions from an assignment, as a Zip.
@@ -25,11 +26,21 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	@BeanProperty var filename: String = _
 
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
-
+    @BeanProperty var students: JList[String] = ArrayList()
+    
 	@Autowired var zipService: ZipService = _
+    @Autowired var assignmentService: AssignmentService = _
 
 	override def apply: RenderableZip = {
-		if (submissions.isEmpty) throw new ItemNotFoundException
+        if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
+        else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
+        else if (!students.isEmpty && submissions.isEmpty) {
+			submissions = for (
+				uniId <- students;
+				submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
+			) yield submission
+		}
+		
 		if (submissions.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")
 		}

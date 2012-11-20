@@ -4,10 +4,10 @@
 <#assign module=assignment.module />
 
 <div>
-<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/download-zip/submissions.zip'/>"><i class="icon-download"></i>
+<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download submissions
 </a>
-<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download-zip/feedback.zip'/>"><i class="icon-download"></i>
+<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download feedback
 </a>
 <a class="btn" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions.xml'/>"><i class="icon-download"></i>

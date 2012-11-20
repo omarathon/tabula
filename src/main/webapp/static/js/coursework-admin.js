@@ -117,6 +117,7 @@ $(function(){
                 }
                 return false;
             });
+            
         },
     
         // rather than just toggling the class check the state of the checkbox to avoid silly errors

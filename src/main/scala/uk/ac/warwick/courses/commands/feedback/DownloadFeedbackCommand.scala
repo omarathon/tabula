@@ -2,10 +2,8 @@ package uk.ac.warwick.courses.commands.feedback
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-
 import uk.ac.warwick.courses.commands._
 import uk.ac.warwick.courses.data.model._
 import uk.ac.warwick.courses.data._
@@ -13,6 +11,7 @@ import uk.ac.warwick.courses.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.courses.services.fileserver._
 import uk.ac.warwick.courses.services.ZipService
 import uk.ac.warwick.courses.CurrentUser
+import uk.ac.warwick.courses.helpers.ArrayList
 
 @Configurable
 class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
@@ -22,7 +21,8 @@ class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[Renderab
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var filename: String = _
-
+    @BeanProperty var students: JList[String] = ArrayList()
+    
 	private var fileFound: Boolean = _
 
 	var callback: (RenderableFile) => Unit = _
