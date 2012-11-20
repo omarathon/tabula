@@ -34,25 +34,32 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	var feedbacksDeleted = 0
 
 	def apply() = {
-    	println("submissionOrFeedback is: " + submissionOrFeedback)
-    	println("students are: " + students)
-    	
-    	// delete the submissions
-/*        for (uniId <- students;
-        	 submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-                    assignmentService.delete(submission)
-                    submissionsDeleted = submissionsDeleted + 1
-            }
-            
-        // delete the feedbacks
-        for (uniId <- students;
-             feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-                    feedbackDao.delete(feedback)
-                    feedbacksDeleted = feedbacksDeleted + 1
-            }
+		println("submissionOrFeedback is: " + submissionOrFeedback)
+		println("students are: " + students)
 
-		zipService.invalidateSubmissionZip(assignment)
-		zipService.invalidateFeedbackZip(assignment) */
+		if (submissionOrFeedback.equals("submissionOnly") || submissionOrFeedback.equals("submissionAndFeedback")) {
+			// delete the submissions
+			for (
+				uniId <- students;
+				submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
+			) {
+				assignmentService.delete(submission)
+				submissionsDeleted = submissionsDeleted + 1
+			}
+			zipService.invalidateSubmissionZip(assignment)
+		}
+
+		if (submissionOrFeedback.equals("feedbackOnly") || submissionOrFeedback.equals("submissionAndFeedback")) {
+			// delete the feedbacks
+			for (
+				uniId <- students;
+				feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)
+			) {
+				feedbackDao.delete(feedback)
+				feedbacksDeleted = feedbacksDeleted + 1
+			}
+			zipService.invalidateFeedbackZip(assignment)
+		}
 	}
 
 	def prevalidate(implicit errors: Errors) {
@@ -61,7 +68,6 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
                 if (submission.assignment != assignment) reject("submission.bulk.wrongassignment")
             }
             
-        // delete the feedbacks
         for (uniId <- students;
              feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
                 if (feedback.assignment != assignment) reject("feedback.bulk.wrongassignment")
