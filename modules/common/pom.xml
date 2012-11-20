@@ -198,6 +198,13 @@
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-all</artifactId>
 			<version>20121112</version>
+      <exclusions>
+        <!-- We don't want to use Textile, so don't bother with JRuby -->
+        <exclusion>
+          <groupId>org.jruby</groupId>
+          <artifactId>jruby</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
@@ -408,13 +415,6 @@
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>
 			<version>1.7.0</version>
-		</dependency>
-		
-		<!-- Bump the JRuby version to one that doesn't bundle joda-time -->
-		<dependency>
-			<groupId>org.jruby</groupId>
-			<artifactId>jruby</artifactId>
-			<version>1.6.8</version>
 		</dependency>
 
 		<!-- Test dependencies -->
