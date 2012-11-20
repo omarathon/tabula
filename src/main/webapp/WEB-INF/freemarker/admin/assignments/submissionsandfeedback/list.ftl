@@ -4,13 +4,13 @@
 <#assign module=assignment.module />
 
 <div>
-<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
+<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download submissions
 </a>
-<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback.zip'/>" id="download-selected-button"><i class="icon-download"></i>
+<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download feedback
 </a>
-<a class="btn" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions.xml'/>"><i class="icon-download"></i>
+<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>"><i class="icon-download"></i>
 XML
 </a>
 <a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>

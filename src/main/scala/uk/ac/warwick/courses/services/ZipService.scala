@@ -91,6 +91,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def getSomeSubmissionsZip(submissions: Seq[Submission]): File =
 		createUnnamedZip(submissions flatMap getSubmissionZipItems)
 
+    /**
+     * Get a zip containing these feedbacks.
+     */
+    def getSomeFeedbacksZip(feedbacks: Seq[Feedback]): File =
+        createUnnamedZip(feedbacks flatMap getFeedbackZipItems)		
+		
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */

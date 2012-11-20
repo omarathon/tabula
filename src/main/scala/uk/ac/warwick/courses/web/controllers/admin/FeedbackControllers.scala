@@ -35,12 +35,11 @@ import uk.ac.warwick.courses.ItemNotFoundException
 import uk.ac.warwick.courses.services.AuditEventIndexService
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadFeedback extends BaseController {
 	@Autowired var feedbackDao: FeedbackDao = _
 	@Autowired var fileServer: FileServer = _
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
@@ -54,6 +53,16 @@ class DownloadFeedback extends BaseController {
 			case None => throw new ItemNotFoundException
 		}
 	}
+	
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
+    def getSelected(command: DownloadSelectedFeedbackCommand, response: HttpServletResponse) {
+        val (assignment, module, filename) = (command.assignment, command.module, command.filename)
+        mustBeLinked(assignment, module)
+        mustBeAbleTo(Participate(module))
+        command.apply { renderable =>
+            fileServer.serve(renderable, response)
+        }
+    }   
 }
 
 @Controller
