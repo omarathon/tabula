@@ -148,6 +148,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	@BeanProperty var markScheme: MarkScheme = _
+	
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
 	}

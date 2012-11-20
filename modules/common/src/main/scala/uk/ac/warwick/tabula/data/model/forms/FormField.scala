@@ -61,11 +61,6 @@ abstract class FormField extends GeneratedId {
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
 
-	@BeanProperty
-	@ManyToOne
-	@(JoinColumn @field)(name = "mark_scheme_id")
-	var markScheme: MarkScheme = _
-
 	@BeanProperty var name: String = _
 	@BeanProperty var label: String = _
 	@BeanProperty var instructions: String = _
@@ -171,8 +166,8 @@ class CheckboxField extends FormField {
 class MarkerSelectField() extends FormField with SimpleValue[String] {
 
 	def markers:Seq[User] = {
-		if (markScheme == null) Seq()
-		else markScheme.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
+		if (assignment.markScheme == null) Seq()
+		else assignment.markScheme.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
 	}
 
 	override def validate(value: SubmissionValue, errors: Errors) {

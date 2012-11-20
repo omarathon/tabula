@@ -124,7 +124,6 @@ trait SharedAssignmentProperties {
 			if (!markerField.isDefined) {
 				val markerSelect = new MarkerSelectField()
 				markerSelect.name = Assignment.defaultMarkerSelectorName
-				markerSelect.markScheme = markScheme
 				assignment.addFields(markerSelect)
 			}
 		} else {
