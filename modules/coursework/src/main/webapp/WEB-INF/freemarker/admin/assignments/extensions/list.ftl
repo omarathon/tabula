@@ -9,7 +9,7 @@
     <p>
 		This assignment <@fmt.tense assignment.closeDate "closes" "closed" /> 
 		on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>.
-		To authorise an extension for a student click the "Grant" button next to the student's niversity ID. If you
+		To authorise an extension for a student click the "Grant" button next to the student's University ID. If you
 		wish to grant an extension to a user that is not listed below, please ensure that they appear in the students
 		list on the <a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">assignment edit page</a>.
     </p>
