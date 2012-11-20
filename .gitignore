@@ -20,8 +20,8 @@ tabula-private.properties
 /.classpath
 junit*.properties
 .*.swp
-/.idea/ant.xml
-/.idea/workspace.xml
+/.idea
+*.iml
 /project/target
 /project/project
 .externalToolBuilders
