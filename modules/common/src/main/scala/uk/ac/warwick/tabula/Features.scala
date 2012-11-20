@@ -35,7 +35,7 @@ abstract class Features {
 	@BeanProperty var assignmentMembership: Boolean = true
 	@BeanProperty var extensions: Boolean = false
 	@BeanProperty var feedbackTemplates: Boolean = true
-	@BeanProperty var markSchemes: Boolean = true
+	@BeanProperty var markSchemes: Boolean = false
 }
 
 class FeaturesImpl(properties: Properties) extends Features {
