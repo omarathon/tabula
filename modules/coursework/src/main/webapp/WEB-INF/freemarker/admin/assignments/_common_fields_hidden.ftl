@@ -25,6 +25,9 @@ lost between requests.
 <@hiddenorfalse path="allowResubmission" />
 <@hiddenorfalse path="allowExtensions" />
 <@hiddenorfalse path="allowExtensionRequests" />
+<@f.hidden path="wordCountMin" />
+<@f.hidden path="wordCountMax" />
+<@f.hidden path="wordCountConventions" />
 <@f.hidden path="fileAttachmentLimit" />
 <@f.hidden path="fileAttachmentTypes" />
 <@f.hidden path="comment" />

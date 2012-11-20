@@ -32,6 +32,12 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJBoolean(b: Option[Boolean]) = b map (b => b: JBoolean) orNull
+
+	/**
+	 * Converts an Option[Integer] to a Java Integer, by interpreting
+	 * None as null.
+	 */
+	protected implicit def ToJInteger(b: Option[Int]) = b map (b => b: JInteger) orNull
 }
 
 object JavaImports extends JavaImports

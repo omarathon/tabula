@@ -172,9 +172,8 @@ so that they can be passed around between requests.
 			</@form.field>
 		</@form.row>
 
-		<div>
 		<@form.row path="comment">
-		  <@form.label for="assignmentComment">Text to show on submission form:</@form.label>
+		  <@form.label for="assignmentComment">Text to show on submission form</@form.label>
 		  	<@form.field>
 				<@f.errors path="comment" cssClass="error" />
 				<@f.textarea path="comment" id="assignmentComment" rows="6" cssClass="span6" />
@@ -183,6 +182,34 @@ so that they can be passed around between requests.
 				</div>
 			</@form.field>
 		</@form.row>
+
+		<@form.row>
+			<@form.label path="wordCountMin">Minimum word count</@form.label>
+			<@form.field>
+				<@f.errors path="wordCountMin" cssClass="error" />
+				<@f.input path="wordCountMin" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
+			</@form.field>
+		</@form.row>
+
+		<@form.row>
+			<@form.label path="wordCountMax">Maximum word count</@form.label>
+			<@form.field>
+				<@f.errors path="wordCountMax" cssClass="error" />
+				<@f.input path="wordCountMax" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
+			</@form.field>
+		</@form.row>
+		
+		<@form.row>
+		  <@form.label for="wordCountConventions">Word count conventions</@form.label>
+		  	<@form.field>
+				<@f.errors path="wordCountConventions" cssClass="error" />
+				<@f.textarea path="wordCountConventions" id="wordCountConventions" rows="3" cssClass="span6" />
+				<div class="help-block">
+					Tell students if there are specific things which should be included or excluded from the word count.
+				</div>
+			</@form.field>
+		</@form.row>
+
 	</fieldset>
 
 

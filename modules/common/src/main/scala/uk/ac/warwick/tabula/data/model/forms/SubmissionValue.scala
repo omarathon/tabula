@@ -32,6 +32,7 @@ class StringSubmissionValue(val field: FormField) extends SubmissionValue {
 	@BeanProperty var value: String = _
 	def persist(ssv: SavedSubmissionValue) { ssv.value = value }
 }
+
 class BooleanSubmissionValue(val field: FormField) extends SubmissionValue {
 	@BeanProperty var value: JBoolean = null
 	def persist(ssv: SavedSubmissionValue) { ssv.value = Option(value).map { _.toString }.getOrElse("") }

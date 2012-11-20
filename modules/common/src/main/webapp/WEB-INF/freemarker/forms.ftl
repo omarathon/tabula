@@ -77,7 +77,7 @@ Include by default as "form", e.g.
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label cssClass="">
+<#macro labelled_row path label cssClass="" help="">
 <@row path=path cssClass=cssClass>
 	<@_label path=path>
 	${label}
@@ -85,6 +85,7 @@ Include by default as "form", e.g.
 	<@field>
 	<#nested />
 	<@errors path=path />
+	<#if help?has_content><div class="help-block">${help}</div></#if>
 	</@field>
 </@row>
 </#macro>

@@ -26,4 +26,19 @@ class FormFieldTest extends TestBase {
 		file.attachmentLimit should be (5)
 		file.attachmentTypes should be (Seq("pdf","doc"))
 	}
+	
+	@Test def wordCountFieldRange {
+		val wc = new WordCountField
+		wc.min should be (null)
+		wc.max should be (null)
+		wc.conventions should be (null)
+		
+		wc.conventions = "Don't include words in Judaeo-Piedmontese."
+		wc.min = 500
+		wc.max = 5000
+		
+		wc.conventions should be ("Don't include words in Judaeo-Piedmontese.")
+		wc.min should be (500)
+		wc.max should be (5000)
+	}
 }

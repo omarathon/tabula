@@ -8,6 +8,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Valid
 import org.springframework.web.bind.annotation.PathVariable
+import uk.ac.warwick.tabula.data.model.Assignment
 
 /**
  * When setting up a batch of assignments using AddAssignmentsController, we need
@@ -33,7 +34,8 @@ class AssignmentSharedOptionsController extends CourseworkController {
 
 	def mav(form: SharedAssignmentPropertiesForm, @PathVariable("department") department: Department) = {
 		Mav("admin/assignments/shared_options",
-			"department" -> department).noLayout()
+			"department" -> department,
+			"maxWordCount" -> Assignment.MaximumWordCount).noLayout()
 	}
 
 	@ModelAttribute

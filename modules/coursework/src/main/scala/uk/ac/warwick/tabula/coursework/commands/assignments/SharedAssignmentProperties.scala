@@ -8,7 +8,7 @@ import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
-import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField }
+import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField, WordCountField }
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 
@@ -42,6 +42,14 @@ trait SharedAssignmentProperties {
 	@BeanProperty var displayPlagiarismNotice: JBoolean = false
 	@BeanProperty var allowExtensions: JBoolean = false
 	@BeanProperty var allowExtensionRequests: JBoolean = false
+	
+	@Min(0)
+	@BeanProperty var wordCountMin: JInteger = _
+	@Max(Assignment.MaximumWordCount)
+	@BeanProperty var wordCountMax: JInteger = _
+	@Length(max = 500)
+	@BeanProperty var wordCountConventions: String = "Exclude any bibliography or appendices."
+	
 	// linked feedback template (optional)
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
@@ -67,9 +75,16 @@ trait SharedAssignmentProperties {
 	@BeanProperty var comment: String = _
 	
 	def validateShared(errors: Errors) {
-        if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
-            errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
-        }
+		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
+			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
+		}
+		
+		Pair(Option(wordCountMin), Option(wordCountMax)) match {
+			case (Some(min), Some(max)) if (max <= min) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
+			case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
+			case (None, Some(max)) => wordCountMin = 0
+			case _ => // It's All Good
+		}
 	}
 
 	def copySharedTo(assignment: Assignment) {
@@ -93,6 +108,16 @@ trait SharedAssignmentProperties {
 			file.attachmentLimit = fileAttachmentLimit
 			file.attachmentTypes = fileAttachmentTypes
 		}
+		
+		val wordCount = findWordCountField(assignment)
+		if (wordCountMax != null) {
+			wordCount.min = wordCountMin
+			wordCount.max = wordCountMax
+			wordCount.conventions = wordCountConventions
+		} else {
+			// none set, so remove field
+			assignment.removeField(wordCount)
+		}
 	}
 
 	def copySharedFrom(assignment: Assignment) {
@@ -107,13 +132,19 @@ trait SharedAssignmentProperties {
 		allowExtensionRequests = assignment.allowExtensionRequests
 		feedbackTemplate = assignment.feedbackTemplate
 		markScheme = assignment.markScheme
+		
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
 			fileAttachmentTypes = file.attachmentTypes
 		}
+		
+		val wordCount = findWordCountField(assignment)
+		wordCountMin = wordCount.min
+		wordCountMax = wordCount.max
+		wordCountConventions = wordCount.conventions
 	}
-
+	
 	/**
 	 * add/remove marker field as appropriate
  	 */
@@ -143,4 +174,13 @@ trait SharedAssignmentProperties {
 	/**Find the standard free-text field if it exists */
 	protected def findCommentField(assignment: Assignment) =
 		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+
+	protected def findWordCountField(assignment: Assignment) = {
+		assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName) getOrElse({
+			val newField = new WordCountField()
+			newField.name = Assignment.defaultWordCountName
+			assignment.addField(newField)
+			newField
+		})
+	}
 }

@@ -149,6 +149,25 @@ class TextField extends FormField with SimpleValue[String] {
 }
 
 @Entity
+@DiscriminatorValue("wordcount")
+class WordCountField extends FormField with SimpleValue[Int] {
+	def min: JInteger = getProperty[JInteger]("min", null)
+	def min_=(limit: JInteger) = setProperty("min", limit)
+	def max: JInteger = getProperty[JInteger]("max", null)
+	def max_=(limit: JInteger) = setProperty("max", limit)
+	def conventions: String = getProperty[String]("conventions", null)
+	def conventions_=(conventions: String) = setProperty("conventions", conventions)
+
+	override def validate(value: SubmissionValue, errors: Errors) {
+		value match {
+			case i:StringSubmissionValue if !i.value.matches("\\d+") => errors.rejectValue("value", "assignment.submit.wordCount.missing")
+			case i:StringSubmissionValue if (i.value.toInt < min || i.value.toInt > max) => errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
+			case _ => // valid
+		}
+	}
+}
+
+@Entity
 @DiscriminatorValue("textarea")
 class TextareaField extends FormField with SimpleValue[String] {
 	override def validate(value: SubmissionValue, errors: Errors) {}
@@ -194,7 +213,7 @@ class FileField extends FormField {
 	// List of extensions.
 	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: JList[String])
-
+	
 	// This is before onBind is called, so multipart files have not been persisted
 	// as attachments yet.
 	override def validate(value: SubmissionValue, errors: Errors) {

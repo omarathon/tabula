@@ -34,14 +34,16 @@ import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import scala.Some
+import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
 	val defaultMarkerSelectorName = "marker"
+	val defaultWordCountName = "wordcount"
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
-
+	final val MaximumWordCount = 1000000
 }
 
 /**
@@ -257,6 +259,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def commentField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
 
 	def markerSelectField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultMarkerSelectorName)
+	
+	def wordCountField: Option[WordCountField] = findFieldOfType[WordCountField](Assignment.defaultWordCountName)
 
 	/**
 	 * Find a FormField on the Assignment with the given name.

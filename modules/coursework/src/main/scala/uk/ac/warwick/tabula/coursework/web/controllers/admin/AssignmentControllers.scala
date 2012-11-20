@@ -89,7 +89,8 @@ class AddAssignment extends CourseworkController {
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module,
-			"assessmentGroup" -> form.assessmentGroup)
+			"assessmentGroup" -> form.assessmentGroup,
+			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
@@ -122,7 +123,8 @@ class EditAssignment extends CourseworkController {
 			"module" -> module,
 			"assignment" -> assignment,
 			"canDelete" -> couldDelete,
-			"assessmentGroup" -> form.assessmentGroup)
+			"assessmentGroup" -> form.assessmentGroup,
+			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
@@ -176,7 +178,8 @@ class DeleteAssignment extends CourseworkController {
 		Mav("admin/assignments/delete",
 			"department" -> module.department,
 			"module" -> module,
-			"assignment" -> assignment)
+			"assignment" -> assignment,
+			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 

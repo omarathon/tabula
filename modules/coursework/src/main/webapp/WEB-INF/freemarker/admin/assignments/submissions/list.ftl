@@ -48,6 +48,9 @@ Publications: ${r.publicationOverlap}%)
             <th>University ID</th>
             <th>Submitted</th>
             <th>Status</th>
+			<#if assignment.wordCountField??>
+				<th title="Declared word count">Words</th>
+			</#if>
             <#if hasOriginalityReport><th>Originality Report</th></#if>
         </tr>
         <#list submissions as item>
@@ -75,6 +78,13 @@ Publications: ${r.publicationOverlap}%)
                     	<span class="label-orange">Suspect Plagiarised</span>
                     </#if>
                 </td>
+				<#if assignment.wordCountField??>
+					<td>
+						<#if submission.valuesByFieldName[assignment.defaultWordCountName]??>
+							${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
+						</#if>
+					</td>
+				</#if>
                 <#if hasOriginalityReport>
                     <td class="originality-report">
                     	<#list item.submission.allAttachments as attachment>

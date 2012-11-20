@@ -62,6 +62,9 @@ Publications: ${r.publicationOverlap}%)
 			<th>Student</th>
 			<th>Submitted</th>
 			<th>Submission status</th>
+			<#if assignment.wordCountField??>
+				<th title="Declared word count">Words</th>
+			</#if>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
 				<th>Grade</th>
@@ -101,6 +104,13 @@ Publications: ${r.publicationOverlap}%)
 						<span class="label-orange">Suspect Plagiarised</span>
 					</#if>
 				</td>
+				<#if assignment.wordCountField??>
+					<td>
+						<#if submission.valuesByFieldName[assignment.defaultWordCountName]??>
+							${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
+						</#if>
+					</td>
+				</#if>
 				 <#if assignment.collectMarks>
                     <td class="mark">
                         ${(student.feedback.actualMark)!''}

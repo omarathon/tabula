@@ -63,6 +63,8 @@ class Submission extends GeneratedId with Deleteable {
 	def getValue(field: FormField): Option[SavedSubmissionValue] = {
 		values.find( _.name == field.name )
 	}
+	
+	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
 
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 
