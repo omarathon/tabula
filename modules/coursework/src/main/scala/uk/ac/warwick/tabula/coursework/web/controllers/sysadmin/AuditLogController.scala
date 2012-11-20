@@ -17,11 +17,17 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 class AuditLogQuery {
 	@BeanProperty var page: Int = 0
 	@BeanProperty var query: String = ""
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 case class UserLookupQuery() {
 	var userLookup = Wire.auto[UserLookupInterface]
 	@BeanProperty var userId: String = _
@@ -32,6 +38,9 @@ case class UserLookupQuery() {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 class AuditLogController extends CourseworkController {
 

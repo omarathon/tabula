@@ -21,6 +21,9 @@ import collection.JavaConversions._
 import java.util.HashMap
 import uk.ac.warwick.userlookup.UserLookupInterface
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends CourseworkController {

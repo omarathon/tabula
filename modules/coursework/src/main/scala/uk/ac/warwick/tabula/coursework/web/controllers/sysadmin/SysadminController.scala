@@ -33,8 +33,9 @@ import uk.ac.warwick.spring.Wire
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
+ *
+ * @deprecated We're keeping this around just for standalone
  */
-
 abstract class BaseSysadminController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var userLookup = Wire.auto[UserLookupInterface]
@@ -52,6 +53,9 @@ abstract class BaseSysadminController extends CourseworkController {
 
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
@@ -82,6 +86,9 @@ class SysadminController extends BaseSysadminController {
 
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
 class RemoveDeptOwnerController extends BaseSysadminController {
@@ -101,6 +108,9 @@ class RemoveDeptOwnerController extends BaseSysadminController {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
 class AddDeptOwnerController extends BaseSysadminController {
@@ -135,6 +145,9 @@ class AddDeptOwnerController extends BaseSysadminController {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 class ReindexForm {
 	var indexer = Wire.auto[AuditEventIndexService]
 
@@ -146,6 +159,9 @@ class ReindexForm {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin/index/run"))
 class SysadminIndexController extends BaseSysadminController {
@@ -156,6 +172,9 @@ class SysadminIndexController extends BaseSysadminController {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
@@ -169,6 +188,9 @@ class ImportSitsController extends BaseSysadminController {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {
 	@BeanProperty var enable: Boolean = service.enabled
 
@@ -182,6 +204,9 @@ class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidatin
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {

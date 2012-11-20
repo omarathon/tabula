@@ -22,6 +22,9 @@ import java.util.HashMap
 import org.springframework.expression.spel.SpelEvaluationException
 import org.hibernate.Session
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(value = Array("/sysadmin/repl"))
 class SysadminREPL extends CourseworkController with BeanFactoryAware {
@@ -64,6 +67,8 @@ class SysadminREPL extends CourseworkController with BeanFactoryAware {
 /**
  * Implements a Java Map that only has a working get() method, to allow
  * you to expose some collection of objects as a String-keyed map.
+ *
+ * @deprecated We're keeping this around just for standalone
  */
 abstract class MapAccessor[T] extends JMap[String, T] {
 	def fetch(key: String): T
@@ -83,6 +88,9 @@ abstract class MapAccessor[T] extends JMap[String, T] {
 	def strop = new UnsupportedOperationException
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 object MapAccessor {
 	/**
 	 * Creates a MapAccessor that uses the given function to resolve
@@ -93,6 +101,9 @@ object MapAccessor {
 	}
 }
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 case class Return(val value: Any, val exception: Exception = null) {
 	lazy val stringValue = value.toString
 	lazy val isNone = value match {

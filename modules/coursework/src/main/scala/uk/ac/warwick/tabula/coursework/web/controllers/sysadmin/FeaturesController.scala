@@ -18,10 +18,13 @@ import org.springframework.beans.BeanWrapper
 
 case class FeatureItem(val name: String, val value: Boolean)
 
+
 /**
  * Read and write feature flags. Alternative to using JMX.
  *
  * TODO unfinished
+ *
+ * @deprecated We're keeping this around just for standalone
  */
 @Controller
 @RequestMapping(value = Array("/sysadmin/features"))

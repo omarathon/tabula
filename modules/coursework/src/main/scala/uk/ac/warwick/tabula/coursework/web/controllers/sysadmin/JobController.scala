@@ -8,6 +8,9 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.jobs.TestingJob
 
+/**
+ * @deprecated We're keeping this around just for standalone
+ */
 @Controller
 @RequestMapping(value = Array("/sysadmin/jobs"))
 class JobController extends CourseworkController {
