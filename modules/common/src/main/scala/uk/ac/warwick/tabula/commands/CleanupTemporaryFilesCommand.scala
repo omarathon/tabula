@@ -10,7 +10,7 @@ class CleanupTemporaryFilesCommand extends Command[Unit] {
 
 	var dao = Wire.auto[FileDao]
 
-	override def work = transactional() {
+	override def applyInternal() = transactional() {
 		dao.deleteOldTemporaryFiles
 	}
 

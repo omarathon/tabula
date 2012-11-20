@@ -99,7 +99,7 @@ class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUs
 		}
 	}
 
-	override def work():List[Extension] = transactional() {
+	override def applyInternal():List[Extension] = transactional() {
 		extensions = copyExtensionItems()
 		persistExtensions()
 		extensions.toList

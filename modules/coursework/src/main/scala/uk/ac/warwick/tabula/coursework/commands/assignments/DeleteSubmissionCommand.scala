@@ -27,7 +27,7 @@ class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] 
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
 	@BeanProperty var confirm: Boolean = false
 
-	def work() = {
+	def applyInternal() = {
 		for (submission <- submissions) assignmentService.delete(submission)
 		zipService.invalidateSubmissionZip(assignment)
 	}

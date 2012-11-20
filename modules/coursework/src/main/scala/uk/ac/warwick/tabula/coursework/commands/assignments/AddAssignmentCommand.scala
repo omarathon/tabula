@@ -24,7 +24,7 @@ class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCo
 
 	def assignment: Assignment = null
 
-	override def work: Assignment = transactional() {
+	override def applyInternal(): Assignment = transactional() {
 		val assignment = new Assignment(module)
 		assignment.addDefaultFields()
 		copyTo(assignment)

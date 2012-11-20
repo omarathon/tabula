@@ -38,7 +38,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null) extends Command
 		commonChecks(errors)
 	}
 
-	override def work = transactional() {
+	override def applyInternal() = transactional() {
 		assignment.markDeleted
 	}
 

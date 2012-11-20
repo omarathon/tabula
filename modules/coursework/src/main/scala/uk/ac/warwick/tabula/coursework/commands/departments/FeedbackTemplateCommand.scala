@@ -33,7 +33,7 @@ abstract class FeedbackTemplateCommand(val department:Department)
 
 class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department){
 
-	override def work() {
+	override def applyInternal() {
 		transactional() {
 			if (!file.attached.isEmpty) {
 				for (attachment <- file.attached) {
@@ -60,7 +60,7 @@ class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	@BeanProperty var description:String = _
 	@BeanProperty var template:FeedbackTemplate = _  // retained in case errors are found
 
-	override def work() {
+	override def applyInternal() {
 		transactional() {
 			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
 			feedbackTemplate.name = name
@@ -82,7 +82,7 @@ class DeleteFeedbackTemplateCommand(department:Department) extends FeedbackTempl
 
 	@BeanProperty var id:String = _
 
-	override def work() {
+	override def applyInternal() {
 		transactional() {
 			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
 			if (feedbackTemplate.hasAssignments)

@@ -43,7 +43,7 @@ class FeedbackRecipientCheckCommand extends Command[RecipientCheckReport] with U
 	@BeanProperty var module: Module = _ // optional, mainly for binding from URL
 	@BeanProperty var assignment: Assignment = _
 
-	override def work = {
+	override def applyInternal() = {
 		val items: Seq[RecipientReportItem] =
 			for ((id, user) <- assignmentService.getUsersForFeedback(assignment))
 				yield resolve(id, user)

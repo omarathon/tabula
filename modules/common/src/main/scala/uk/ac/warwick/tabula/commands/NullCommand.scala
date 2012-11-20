@@ -7,7 +7,7 @@ package uk.ac.warwick.tabula.commands
 class NullCommand extends Command[Unit] {
 
 	private var fn = () => {}
-	def work() = {
+	def applyInternal() = {
 		fn()
 	}
 	def will(f: () => Unit) = {

@@ -89,7 +89,7 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
 
-	override def work() {
+	override def applyInternal() {
 		transactional() {
 			for (item <- assignmentItems if item.include) {
 				val assignment = new Assignment()

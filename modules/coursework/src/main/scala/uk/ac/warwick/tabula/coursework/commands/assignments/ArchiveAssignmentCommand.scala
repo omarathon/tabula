@@ -13,7 +13,7 @@ class ArchiveAssignmentCommand(val assignment: Assignment) extends Command[Unit]
 
 	@BeanProperty var unarchive: Boolean = false
 
-	def work {
+	def applyInternal() {
 		transactional() {
 			assignment.archived = !unarchive
 		}

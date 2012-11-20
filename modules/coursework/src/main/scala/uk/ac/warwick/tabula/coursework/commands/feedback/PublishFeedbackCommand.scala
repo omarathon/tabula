@@ -70,7 +70,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		}
 	}
 
-	def work {
+	def applyInternal() {
 		transactional() {
 			val users = assignmentService.getUsersForFeedback(assignment)
 			for ((studentId, user) <- users) {

@@ -15,7 +15,7 @@ class DeleteMarkSchemeCommand(var markScheme: MarkScheme) extends Command[Unit] 
 	
 	var dao = Wire.auto[MarkSchemeDao]
 	
-	override def work() {
+	override def applyInternal() {
 		transactional() {
 			department.markSchemes.remove(markScheme)
 		}

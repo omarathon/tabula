@@ -15,7 +15,7 @@ class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with
 	@NotEmpty
 	@BeanProperty var usercode: String = _
 
-	override def work = transactional() {
+	override def applyInternal() = transactional() {
 		department.addOwner(usercode)
 	}
 
@@ -31,7 +31,7 @@ class RemoveDeptOwnerCommand(val department: Department) extends Command[Unit] w
 	@NotEmpty
 	@BeanProperty var usercode: String = _
 
-	override def work = transactional() {
+	override def applyInternal() = transactional() {
 		department.removeOwner(usercode)
 	}
 

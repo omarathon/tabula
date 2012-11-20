@@ -22,7 +22,7 @@ class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAss
 
 	def module = assignment.module
 
-	override def work: Assignment = transactional() {
+	override def applyInternal(): Assignment = transactional() {
 		copyTo(assignment)
 		service.save(assignment)
 		assignment

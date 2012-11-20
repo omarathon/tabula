@@ -23,7 +23,7 @@ class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidat
 
 	def sanitisedCode = Option(code).map(_.toLowerCase).orNull
 
-	def work() = transactional() {
+	def applyInternal() = transactional() {
 		val module = new Module()
 		module.department = department
 		module.name = name

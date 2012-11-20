@@ -15,7 +15,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 
-	def work() {
+	def applyInternal() {
 		transactional() {
 			importDepartments
 			importModules

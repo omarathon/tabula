@@ -33,7 +33,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
-	override def work() {
+	override def applyInternal() {
 		val admins =
 			if (!module.participants.isEmpty) module.participants
 			else module.department.owners

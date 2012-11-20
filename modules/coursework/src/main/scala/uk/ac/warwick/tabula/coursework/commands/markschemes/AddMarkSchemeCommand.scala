@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Configurable
 class AddMarkSchemeCommand(department: Department) extends ModifyMarkSchemeCommand(department) {
 	
 	// Copy properties to a new markscheme, save it transactionally, return it.
-	def work() = {
+	def applyInternal() = {
 		transactional() { 
 			val markScheme = new MarkScheme(department)
 			this.copyTo(markScheme)

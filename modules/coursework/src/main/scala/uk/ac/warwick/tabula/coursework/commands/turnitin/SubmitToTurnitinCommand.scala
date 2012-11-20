@@ -28,7 +28,7 @@ class SubmitToTurnitinCommand(@BeanProperty var user: CurrentUser) extends Comma
 
 	var jobService = Wire.auto[JobService]
 
-	def work() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
+	def applyInternal() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 
 	def describe(d: Description) = d.assignment(assignment)
 

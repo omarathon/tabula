@@ -21,7 +21,7 @@ class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaud
 
 	var checkIndex = true
 
-	def work = {
+	def applyInternal() = {
 		val submissions = assignment.submissions.sortBy(_.submittedDate).reverse
 		val downloads =
 			if (checkIndex) auditIndex.adminDownloadedSubmissions(assignment)

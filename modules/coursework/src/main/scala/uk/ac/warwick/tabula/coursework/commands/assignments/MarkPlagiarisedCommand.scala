@@ -28,7 +28,7 @@ class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[JList[S
 	@BeanProperty var confirm: Boolean = false
 	@BeanProperty var markPlagiarised: Boolean = true
 
-	def work() = {
+	def applyInternal() = {
 		for (submission <- submissions) {
 			submission.suspectPlagiarised = markPlagiarised
 			//zipService.invalidateSubmissionZip(assignment)

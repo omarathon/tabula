@@ -21,7 +21,7 @@ class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly
 
 	var zipService = Wire.auto[ZipService]
 
-	override def work = {
+	override def applyInternal() = {
 		val zip = zipService.getAllSubmissionsZip(assignment)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)

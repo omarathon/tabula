@@ -12,7 +12,7 @@ class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) 
 	// fill in the properties on construction
 	copyFrom(markScheme)
 
-	def work() = {
+	def applyInternal() = {
 		transactional() {
 			this.copyTo(markScheme)
 			session.update(markScheme)

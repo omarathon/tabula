@@ -43,7 +43,7 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 	@BeanProperty var resolution: String = _
 	@BeanProperty var ipAddress: String = _
 
-	def work = {
+	def applyInternal() = {
 		val mail = new SimpleMailMessage
 		mail setTo adminMailAddress
 		mail setFrom adminMailAddress

@@ -12,7 +12,7 @@ import uk.ac.warwick.spring.Wire
 class AdminGetAllFeedbackCommand(assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
 	var zipService = Wire.auto[ZipService]
 
-	override def work = {
+	override def applyInternal() = {
 		val zip = zipService.getAllFeedbackZips(assignment)
 		new RenderableZip(zip)
 	}

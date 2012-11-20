@@ -21,7 +21,7 @@ class RemoveModulePermissionCommand extends Command[Unit] {
 
 	var userLookup = Wire.auto[UserLookupService]
 
-	def work() {
+	def applyInternal() {
 		transactional() {
 			for (user <- usercodes) module.participants.removeUser(user)
 		}

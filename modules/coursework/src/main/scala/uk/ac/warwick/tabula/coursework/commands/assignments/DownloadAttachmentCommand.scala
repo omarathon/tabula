@@ -29,7 +29,7 @@ class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[Render
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def work() = {
+	def applyInternal() = {
 		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId);
 		val allAttachments = submission map { _.allAttachments } getOrElse Nil
 		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))

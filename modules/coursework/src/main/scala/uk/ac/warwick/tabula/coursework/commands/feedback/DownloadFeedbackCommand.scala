@@ -33,7 +33,7 @@ class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[Renderab
 	 * If filename is set, it will return a renderable attachment if found.
 	 * In either case if it's not found, None is returned.
 	 */
-	def work() = {
+	def applyInternal() = {
 		val result: Option[RenderableFile] = feedbackDao.getFeedbackByUniId(assignment, user.universityId) flatMap { (feedback) =>
 			filename match {
 				case filename: String if filename.hasText => {

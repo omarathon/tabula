@@ -29,7 +29,7 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
 
 
-	override def work: RenderableZip = {
+	override def applyInternal(): RenderableZip = {
 		if (submissions.isEmpty) throw new ItemNotFoundException
 		if (submissions.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")

@@ -47,10 +47,10 @@ abstract class Command[R] extends Describable[R] with JavaImports with EventHand
 
 	final def apply(): R = {
 		if (EventHandling.enabled) {
-			if (maintenanceCheck(this)) recordEvent(this) { work() }
+			if (maintenanceCheck(this)) recordEvent(this) { applyInternal() }
 			else throw maintenanceMode.exception()
 		} else {
-			work()
+			applyInternal()
 		}
 	} 
 
@@ -62,7 +62,7 @@ abstract class Command[R] extends Describable[R] with JavaImports with EventHand
 		to be publicly visible, so there's little to stop you from calling it.
 		TODO somehow stop this being callable
 	*/
-	protected def work(): R
+	protected def applyInternal(): R
 
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
 

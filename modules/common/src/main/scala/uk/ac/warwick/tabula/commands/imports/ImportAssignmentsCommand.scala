@@ -17,7 +17,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	var assignmentImporter = Wire.auto[AssignmentImporter]
 	var assignmentService = Wire.auto[AssignmentService]
 
-	def work() {
+	def applyInternal() {
 		benchmark("ImportAssignments") {
 			doAssignments
 			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
