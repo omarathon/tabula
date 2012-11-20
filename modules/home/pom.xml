@@ -147,7 +147,6 @@
 					<jswarn>false</jswarn>
 					<aggregations>
 						<aggregation>
-							<!-- insert new line after each concatenation (default: false) -->
 							<insertNewLine>true</insertNewLine>
 							<output>${project.build.directory}/${project.build.finalName}/static/js/common.js</output>
 							<includes>
@@ -161,7 +160,6 @@
 							</includes>
 						</aggregation>
 						<aggregation>
-							<!-- insert new line after each concatenation (default: false) -->
 							<insertNewLine>true</insertNewLine>
 							<output>${project.build.directory}/${project.build.finalName}/static/js/courses.js</output>
 							<includes>
@@ -171,9 +169,15 @@
 							</includes>
 						</aggregation>
 						<aggregation>
-							<!-- insert new line after each concatenation (default: false) -->
 							<insertNewLine>true</insertNewLine>
 							<output>${project.build.directory}/${project.build.finalName}/static/js/home.js</output>
+							<includes>
+								<include>common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/profiles.js</output>
 							<includes>
 								<include>common.js</include>
 							</includes>
