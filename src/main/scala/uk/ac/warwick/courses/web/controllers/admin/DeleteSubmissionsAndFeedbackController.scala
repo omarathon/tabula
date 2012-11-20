@@ -52,12 +52,12 @@ class DeleteSubmissionsAndFeedback extends BaseController {
 		) {
 		    mustBeAbleTo(Delete(mandatory(submission)))
 		}
-
+		
         for (
             uniId <- form.students;
             feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)
         ) {
-            mustBeAbleTo(Delete(mandatory(feedback)))
+        	mustBeAbleTo(Delete(mandatory(feedback)))
         }
 		
 		form.prevalidate(errors)

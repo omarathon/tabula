@@ -22,6 +22,7 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 
 	//@BeanProperty var submissions: JList[Submission] = ArrayList()
     @BeanProperty var students: JList[String] = ArrayList()
+    @BeanProperty var submissionOrFeedback: String = ""
 	
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var zipService: ZipService = _
@@ -33,8 +34,11 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	var feedbacksDeleted = 0
 
 	def apply() = {
+    	println("submissionOrFeedback is: " + submissionOrFeedback)
+    	println("students are: " + students)
+    	
     	// delete the submissions
-        for (uniId <- students;
+/*        for (uniId <- students;
         	 submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
                     assignmentService.delete(submission)
                     submissionsDeleted = submissionsDeleted + 1
@@ -48,7 +52,7 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
             }
 
 		zipService.invalidateSubmissionZip(assignment)
-		zipService.invalidateFeedbackZip(assignment)
+		zipService.invalidateFeedbackZip(assignment) */
 	}
 
 	def prevalidate(implicit errors: Errors) {
