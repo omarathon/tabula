@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 import uk.ac.warwick.userlookup.GroupService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired,Value}
 import uk.ac.warwick.util.core.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
@@ -17,6 +17,9 @@ import uk.ac.warwick.tabula.services._
 @Service
 class SecurityService extends Logging {
 	@Autowired var userLookup: UserLookupService = _
+	
+	@Value("${permissions.admin.group}") var adminGroup: String = _
+	@Value("${permissions.masquerade.group}") var masqueradeGroup: String = _
 
 	def groupService = userLookup.getGroupService
 
@@ -31,9 +34,9 @@ class SecurityService extends Logging {
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	def isSysadmin(usercode: String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-tabula-sysadmins")
+	def isSysadmin(usercode: String) = hasText(usercode) && groupService.isUserInGroup(usercode, adminGroup)
 	// excludes sysadmins, though they can also masquerade
-	def isMasquerader(usercode: String) = hasText(usercode) && groupService.isUserInGroup(usercode, "in-tabula-hasmasque")
+	def isMasquerader(usercode: String) = hasText(usercode) && groupService.isUserInGroup(usercode, masqueradeGroup)
 
 	val checks: Seq[PermissionChecker] = List(checkSysadmin _, checkEnrolled _, checkGroup _)
 
