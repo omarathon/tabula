@@ -291,6 +291,32 @@
 					<type>test-jar</type>
 					<scope>test</scope>
 				</dependency>
+				
+				<!-- 
+					http://jira.codehaus.org/browse/MNG-1378  
+				
+					"By design, test dependencies are not transitive"
+					
+					So need to include any test dependencies in common here	
+				-->
+				<dependency>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-test</artifactId>
+					<version>${org.springframework.version}</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.hsqldb</groupId>
+					<artifactId>hsqldb</artifactId>
+					<version>2.2.9</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-test-framework</artifactId>
+					<version>${org.apache.lucene.version}</version>
+					<scope>test</scope>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>
@@ -654,12 +680,6 @@
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.joda</groupId>
-			<artifactId>joda-convert</artifactId>
-			<version>1.1</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>github.com.ingoem</groupId>
