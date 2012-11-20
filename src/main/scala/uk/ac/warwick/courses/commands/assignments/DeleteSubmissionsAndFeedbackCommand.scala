@@ -20,7 +20,6 @@ import uk.ac.warwick.courses.services.ZipService
 @Configurable
 class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
 
-	//@BeanProperty var submissions: JList[Submission] = ArrayList()
     @BeanProperty var students: JList[String] = ArrayList()
     @BeanProperty var submissionOrFeedback: String = ""
 	
@@ -76,7 +75,7 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 
 	def validate(implicit errors: Errors) {
 		prevalidate
-		if (!confirm) rejectValue("confirm", "submission.delete.confirm")
+		if (!confirm) rejectValue("confirm", "submissionOrFeedback.delete.confirm")
 	}
 
 	override def describe(d: Description) = d

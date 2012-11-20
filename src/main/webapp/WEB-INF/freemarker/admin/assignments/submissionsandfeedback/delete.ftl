@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/feedback/delete" commandName="deleteSubmissionsAndFeedbackCommand">
+<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete" commandName="deleteSubmissionsAndFeedbackCommand">
 
 <h1>Delete submissions and/or feedback for ${assignment.name}</h1>
 
@@ -20,6 +20,7 @@
 <ul>
 <#list studentIds as studentId>
 <li>${studentId}</li>
+<input type="hidden" name="students" value="${studentId}" />
 </#list>
 </ul>
 <br />
@@ -31,9 +32,6 @@ Please specify what you would like to delete:
 <br /><input type="radio" name="submissionOrFeedback" value="submissionAndFeedback"> Both submission and feedback</input>
 </p>
 
-<#list studentIds as studentId>
-<input type="hidden" name="student" value="${studentId}" />
-</#list>
 </@spring.bind>
 <br />
 </p>
@@ -43,7 +41,7 @@ If you are trying to re-use this assignment, you should go back and create a sep
 <br />
 <p>
 <@form.errors path="confirm" />
-<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submissions and feedback items.</@form.label> 
+<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submissions/feedback items.</@form.label> 
 </p>
 
 <div class="submit-buttons">
