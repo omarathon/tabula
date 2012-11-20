@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-  <httpbasic><allow>true</allow></httpbasic>   
+  <httpbasic>
+    <allow>true</allow>
+  </httpbasic>   
+
+  <cluster>
+    <enabled>true</enabled>
+    <datasource>java:/TabulaDS</datasource>
+  </cluster>
+
   <mode>new</mode>
 
   <shire>
@@ -8,7 +16,7 @@
     <uri-header>x-requested-uri</uri-header>
     <location>https://leftabit.warwick.ac.uk/sso/acs</location>
     <sscookie>
-      <name>SSO-SSC-Courses</name>
+      <name>SSO-SSC-Tabula</name>
       <path>/</path>
       <domain>leftabit.warwick.ac.uk</domain>
     </sscookie>
@@ -20,5 +28,4 @@
     <key>file:/private/etc/apache2/ssl/11047986.key</key>
     <chain>file:/private/etc/apache2/ssl/11047986.ca-bundle</chain>
   </credentials>
-
 </config>
