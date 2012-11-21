@@ -40,7 +40,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
         
         val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
             var enhancedSubmissionForUniId = new SubmissionListItem(new Submission(), false)
-            var feedbackForUniId = new Feedback()
+            var feedbackForUniId: Feedback = null
         	
         	// lists
             val enhancedSubmissionsForUniId = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)

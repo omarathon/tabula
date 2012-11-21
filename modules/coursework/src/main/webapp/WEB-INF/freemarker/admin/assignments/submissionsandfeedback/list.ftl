@@ -49,7 +49,7 @@ Publications: ${r.publicationOverlap}%)
 			<th></th>
 			<th>Student</th>
 			<th>Submitted</th>
-			<th>Submission Status</th>
+			<th>Submission status</th>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
 				<th>Grade</th>
@@ -57,13 +57,13 @@ Publications: ${r.publicationOverlap}%)
 			<th>Files</th>
 			<th>Feedback</th>
 			<th>Uploaded</th>
-			<th>Feedback Status</th>
-			<#if hasOriginalityReport><th>Originality Report</th></#if>
+			<th>Feedback status</th>
+			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
 		<#list students as student>
 			<#assign enhancedSubmission=student.enhancedSubmission>
 			<#assign submission=enhancedSubmission.submission>
-			<#assign feedback=student.feedback>
+			
 			
 			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 				<td><@form.selector_check_row "students" student.uniId /></td>
@@ -91,10 +91,10 @@ Publications: ${r.publicationOverlap}%)
 				</td>
 				 <#if assignment.collectMarks>
                     <td class="mark">
-                        <#if feedback.actualMark??>${feedback.actualMark}</#if>
+                        ${(student.feedback.actualMark)!''}
                     </td>
                     <td class="grade">
-                        <#if feedback.actualGrade??>${feedback.actualGrade}</#if>
+                        ${(student.feedback.actualGrade)!''}
                     </td>
                 </#if>
 				<td nowrap="nowrap" class="files">
@@ -110,22 +110,26 @@ Publications: ${r.publicationOverlap}%)
 					</#if>
 				</td>
 				<td nowrap="nowrap" class="download">
-					<#assign attachments=feedback.attachments />
-					<#if attachments?size gt 0>
-					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.zip'/>">
-						<i class="icon-download"></i>
-						${attachments?size}
-						<#if attachments?size == 1> file
-						<#else> files
+					<#if student.feedback??>
+						<#assign attachments=student.feedback.attachments />
+						<#if attachments?size gt 0>
+						<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.feedback.id}/feedback-${student.feedback.universityId}.zip'/>">
+							<i class="icon-download"></i>
+							${attachments?size}
+							<#if attachments?size == 1> file
+							<#else> files
+							</#if>
+						</a>
 						</#if>
-					</a>
 					</#if>
 				</td>
 				
-				<td class="uploaded"><@fmt.date date=feedback.uploadedDate seconds=true capitalise=true /></td>
+				<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 				<td class="feedbackReleased">
-					<#if feedback.released>Published
-					<#else>Not Yet Published
+					<#if student.feedback??>
+						<#if student.feedback.released>Published
+						<#else>Not yet published
+						</#if>
 					</#if>
 				</td>
 				<#if hasOriginalityReport>
