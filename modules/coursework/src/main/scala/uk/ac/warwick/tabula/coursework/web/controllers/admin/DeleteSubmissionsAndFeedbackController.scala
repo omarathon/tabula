@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionsAnd
 import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import java.lang.ProcessBuilder.Redirect
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
