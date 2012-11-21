@@ -30,7 +30,7 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 	@Autowired var feedbackDao: FeedbackDao = _
 
 	@ModelAttribute
-	def command(@PathVariable assignment: Assignment) = new DeleteSubmissionsAndFeedbackCommand(assignment)
+	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionsAndFeedbackCommand(assignment)
 
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 
@@ -47,8 +47,8 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
-		form: DeleteSubmissionsAndFeedbackCommand, errors: Errors) = {
+	def showForm(@PathVariable("module") module: Module, form: DeleteSubmissionsAndFeedbackCommand, errors: Errors) = {
+		val assignment = form.assignment
 		mustBeLinked(assignment, module)
 
 		for (uniId <- form.students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
@@ -65,7 +65,7 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-			@PathVariable module: Module,
+			@PathVariable("module") module: Module,
 			@Valid form: DeleteSubmissionsAndFeedbackCommand,
 			errors: Errors) = {
 		transactional() {
