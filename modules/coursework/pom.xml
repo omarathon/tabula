@@ -18,6 +18,9 @@
 
 	<properties>
 		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+		
+		<!-- TAB-46 We want this on /coursework, not /courses -->
+		<tabula.module.context>/coursework</tabula.module.context>
 	</properties>
 
 	<scm>

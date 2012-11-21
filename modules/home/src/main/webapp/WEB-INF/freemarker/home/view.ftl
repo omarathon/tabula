@@ -17,7 +17,7 @@ You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Si
 to see a personalised view.
 </p>
 <#else>
-<h1><a href="<@url page="/courses/"/>">Coursework Management</a></h1>
+<h1><a href="<@url page="/coursework/"/>">Coursework Management</a></h1>
 <h1><a href="<@url page="/profiles/"/>">Student Profiles</a></h1>
 </#if>
 
