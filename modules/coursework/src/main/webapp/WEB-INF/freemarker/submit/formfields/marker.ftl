@@ -6,6 +6,7 @@
 			<@f.option value="${marker.userId}" label="${marker.fullName}"/>
 		</#list>
 	</@f.select>
+   <@f.errors path="fields[${field.id}].value" cssClass="error"/>
 	<div class="help-block">
 		Select the tutor that will mark your submission. If your are unsure which tutor should mark your work then contact
 		the module convenor.

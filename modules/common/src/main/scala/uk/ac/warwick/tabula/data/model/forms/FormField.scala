@@ -171,7 +171,15 @@ class MarkerSelectField() extends FormField with SimpleValue[String] {
 	}
 
 	override def validate(value: SubmissionValue, errors: Errors) {
-		// TODO- check is not null???
+		value match {
+			case v: StringSubmissionValue => {
+				Option(v.value) match {
+					case None => errors.rejectValue("value", "marker.missing")
+					case Some(v) if (v == "") => errors.rejectValue("value", "marker.missing")
+					case _ =>
+				}
+			}
+		}
 	}
 }
 
