@@ -40,20 +40,6 @@ class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[Unit] w
                     assignmentService.saveSubmission(submission)
                     submissionsUpdated = submissionsUpdated + 1
             }
-    	
-/*    	this was tested and works, but can't be good!
-    	for (uniId <- students) {
-    	    val submissionOption = assignmentService.getSubmissionByUniId(assignment, uniId)
-    	    
-    	    submissionOption match {
-    	    	case Some(submission) => {
-    	    		submission.suspectPlagiarised = markPlagiarised
-    	    		assignmentService.saveSubmission(submission)
-    	    		submissionsUpdated = submissionsUpdated + 1
-    	    	}
-    	    	case None => //nothing (no submission exists for this student)
-    	    }
-		}*/
 	}
 
 	def validate(implicit errors: Errors) {
