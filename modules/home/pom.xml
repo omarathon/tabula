@@ -234,9 +234,9 @@
 				</executions>
 				<dependencies>
 					<dependency>
-						<groupId>uk.ac.warwick</groupId>
+						<groupId>uk.ac.warwick.util</groupId>
 						<artifactId>warwickutils-all</artifactId>
-						<version>20111018</version>
+						<version>20121112</version>
 					</dependency>
 					<dependency>
 						<groupId>com.asual.lesscss</groupId>
