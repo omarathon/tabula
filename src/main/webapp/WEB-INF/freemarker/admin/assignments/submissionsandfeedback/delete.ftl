@@ -27,9 +27,10 @@
 <p>
 Please specify what you would like to delete:
 </p>
-<p><input type="radio" name="submissionOrFeedback" value="submissionOnly"> Submission only</input>
-<br /><input type="radio" name="submissionOrFeedback" value="feedbackOnly"> Feedback only</input>
-<br /><input type="radio" name="submissionOrFeedback" value="submissionAndFeedback"> Both submission and feedback</input>
+<p>
+<@f.radiobutton path="submissionOrFeedback" value="submissionOnly"/> Submission only
+<br /><@f.radiobutton path="submissionOrFeedback" value="feedbackOnly"/> Feedback only
+<br /><@f.radiobutton path="submissionOrFeedback" value="submissionAndFeedback"/> Both submission and feedback
 </p>
 
 </@spring.bind>
