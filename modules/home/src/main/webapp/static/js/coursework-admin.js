@@ -161,11 +161,11 @@ $(function(){
         },
     
         onSomeChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button').removeClass('disabled');
+            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').removeClass('disabled');
         },
     
         onNoneChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button').addClass('disabled');
+            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').addClass('disabled');
         }
     
     });

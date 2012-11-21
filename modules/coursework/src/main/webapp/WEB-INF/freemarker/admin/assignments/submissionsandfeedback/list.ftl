@@ -3,25 +3,37 @@
 
 <#assign module=assignment.module />
 
+<!-- Extra junk that most people probably won't care about -->
+<div class="btn-group" id="assignment-extra-dropdown" style="float:right">
+<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+	<i class="icon-wrench"></i>
+	Extra
+	<span class="caret"></span>
+</a>
+<ul class="dropdown-menu pull-right">
+	<li>
+	<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>">
+	  <i class="icon-download"></i>XML
+	</a>
+	</li>
+</ul>
+</div>
+
 <div>
-<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
+<a class="btn long-running use-tooltip" title="Download the submission files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download submissions
 </a>
-<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
+<a class="btn long-running use-tooltip" title="Download the feedback files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 Download feedback
 </a>
-<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>"><i class="icon-download"></i>
-XML
-</a>
-<a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
+<a class="btn use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
+
+<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
 
 <#if features.turnitin>
 <a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
 </#if>
 
-<a class="btn btn-warn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark selected plagiarised</a>
-
-</div>
 
 
 <#macro originalityReport attachment>
