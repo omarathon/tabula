@@ -20,11 +20,13 @@ import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.data.Transactions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/delete"))
 class DeleteSubmissionsAndFeedback extends CourseworkController {
-    @Autowired var assignmentService: AssignmentService = _
+	
+	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var feedbackDao: FeedbackDao = _
 
 	@ModelAttribute
@@ -32,9 +34,12 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 
-	def formView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/delete",
-		"assignment" -> assignment)
-		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
+	def formView(assignment: Assignment) =
+		Mav("admin/assignments/submissionsandfeedback/delete",
+			"assignment" -> assignment)
+			.crumbs(
+					Breadcrumbs.Department(assignment.module.department), 
+					Breadcrumbs.Module(assignment.module))
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
@@ -46,38 +51,33 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 		form: DeleteSubmissionsAndFeedbackCommand, errors: Errors) = {
 		mustBeLinked(assignment, module)
 
-		for (
-			uniId <- form.students;
-			submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
-		) {
-		    mustBeAbleTo(Delete(mandatory(submission)))
+		for (uniId <- form.students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
+			mustBeAbleTo(Delete(mandatory(submission)))
 		}
-		
-        for (
-            uniId <- form.students;
-            feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)
-        ) {
-        	mustBeAbleTo(Delete(mandatory(feedback)))
-        }
+
+		for (uniId <- form.students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
+			mustBeAbleTo(Delete(mandatory(feedback)))
+		}
 		
 		form.prevalidate(errors)
 		formView(assignment)
 	}
 
-	@Transactional
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: DeleteSubmissionsAndFeedbackCommand,
-		errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		if (errors.hasErrors) {
-			formView(assignment)
-		} else {
-			form.apply()
-			RedirectBack(assignment)
+			@PathVariable module: Module,
+			@Valid form: DeleteSubmissionsAndFeedbackCommand,
+			errors: Errors) = {
+		transactional() {
+			val assignment = form.assignment
+			mustBeLinked(assignment, module)
+			mustBeAbleTo(Participate(module))
+			if (errors.hasErrors) {
+				formView(assignment)
+			} else {
+				form.apply()
+				RedirectBack(assignment)
+			}
 		}
 	}
 }

@@ -139,8 +139,19 @@
 				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
 					<div class="submission-and-feedback-count">							
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
-							${assignment.submissions?size} submissions and ${assignment.feedbacks?size} feedback
+							${assignment.submissions?size} submissions
+							<#if has_feedback> and ${assignment.feedbacks?size} feedback</#if>
 						</a>
+						<#assign unreleasedFeedback=assignment.unreleasedFeedback />
+						<#if unreleasedFeedback?size gt 0>
+							<span class="has-unreleased-feedback">
+							(${unreleasedFeedback?size} feedback to publish)
+							</span>
+						<#elseif has_feedback>
+							<span class="no-unreleased-feedback">
+							(all feedback published)
+							</span>
+						</#if>
 					</div>	
 				</#if>			
 				

@@ -18,6 +18,10 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 
+/**
+ * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
+ * depending on the value of submissionOrFeedback
+ */
 class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
 
 	var assignmentService = Wire.auto[AssignmentService]
@@ -26,34 +30,29 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	
     @BeanProperty var students: JList[String] = ArrayList()
     @BeanProperty var submissionOrFeedback: String = ""
-	
 	@BeanProperty var confirm: Boolean = false
 
 	var submissionsDeleted = 0
 	var feedbacksDeleted = 0
+	
+	val SubmissionOnly = "submissionOnly"
+	val FeedbackOnly = "feedbackOnly"
+	val SubmissionAndFeedback = "submissionAndFeedback"
+	
+	def shouldDeleteSubmissions = ( submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly )
+	def shouldDeleteFeedback = ( submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly )
 
-	def applyInternal() = {
-		println("submissionOrFeedback is: " + submissionOrFeedback)
-		println("students are: " + students)
-
-		if (submissionOrFeedback.equals("submissionOnly") || submissionOrFeedback.equals("submissionAndFeedback")) {
-			// delete the submissions
-			for (
-				uniId <- students;
-				submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
-			) {
+	def applyInternal() = {			
+		if (shouldDeleteSubmissions) {
+			for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
 				assignmentService.delete(submission)
 				submissionsDeleted = submissionsDeleted + 1
 			}
 			zipService.invalidateSubmissionZip(assignment)
 		}
 
-		if (submissionOrFeedback.equals("feedbackOnly") || submissionOrFeedback.equals("submissionAndFeedback")) {
-			// delete the feedbacks
-			for (
-				uniId <- students;
-				feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)
-			) {
+		if (shouldDeleteFeedback) {
+			for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
 				feedbackDao.delete(feedback)
 				feedbacksDeleted = feedbacksDeleted + 1
 			}
@@ -62,15 +61,17 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	}
 
 	def prevalidate(errors: Errors) {
-        for (uniId <- students;
-             submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-                if (submission.assignment != assignment) errors.reject("submission.bulk.wrongassignment")
-            }
-            
-        for (uniId <- students;
-             feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-                if (feedback.assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
-            }		
+		for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
+			if (submission.assignment != assignment) errors.reject("submission.bulk.wrongassignment")
+		}
+
+		for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
+			if (feedback.assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
+		}
+		
+		if (!Seq(SubmissionOnly, FeedbackOnly, SubmissionAndFeedback).contains(submissionOrFeedback)) {
+			errors.rejectValue("submissionOrFeedback", "invalid")
+		}
 	}
 
 	def validate(errors: Errors) {
@@ -81,9 +82,9 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	override def describe(d: Description) = d
 		.assignment(assignment)
 		.property("students" -> students)
-        
-    override def describeResult(d: Description) = d
-        .assignment(assignment)
-        .property("submissionsDeleted" -> submissionsDeleted)
-        .property("feedbacksDeleted" -> feedbacksDeleted)
+
+	override def describeResult(d: Description) = d
+		.assignment(assignment)
+		.property("submissionsDeleted" -> submissionsDeleted)
+		.property("feedbacksDeleted" -> feedbacksDeleted)
 }
