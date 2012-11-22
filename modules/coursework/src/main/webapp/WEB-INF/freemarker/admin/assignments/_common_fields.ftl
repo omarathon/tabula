@@ -196,6 +196,11 @@ so that they can be passed around between requests.
 			<@form.field>
 				<@f.errors path="wordCountMax" cssClass="error" />
 				<@f.input path="wordCountMax" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
+				<div class="help-block">
+					If you enter a minimum and/or maximum word count, students will be required to declare the word count for
+					their submissions. They will not be allowed to submit unless their declaration is within your specified range.
+					Students won't be asked if both boxes are left blank. There's a system-wide maximum of <@fmt.p maxWordCount "word" />.
+				</div>
 			</@form.field>
 		</@form.row>
 		

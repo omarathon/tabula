@@ -79,6 +79,7 @@ trait SharedAssignmentProperties {
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 		
+		// implicitly fix missing bounds
 		Pair(Option(wordCountMin), Option(wordCountMax)) match {
 			case (Some(min), Some(max)) if (max <= min) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
 			case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
