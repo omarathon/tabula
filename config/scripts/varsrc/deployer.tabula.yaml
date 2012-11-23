@@ -26,7 +26,7 @@ archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
-  path: "/usr/local/apache-maven/bin/mvn"
+  skipTests: true
 jbosses: 
   tabula:
   - !ruby/object:Jboss 

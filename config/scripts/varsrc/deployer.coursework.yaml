@@ -24,6 +24,7 @@ build_user: "build"
 builder: !ruby/object:MavenBuilder
   profiles:
   - standalone
+  skipTests: true
 jbosses: 
   coursework:
   - !ruby/object:Jboss 

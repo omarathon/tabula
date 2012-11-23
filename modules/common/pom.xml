@@ -33,7 +33,7 @@
 				<directory>${basedir}/src/main/webapp</directory>
 			</resource>
 		</resources>
-	
+
 		<testResources>
 			<testResource>
 				<targetPath>WEB-INF</targetPath>
@@ -71,7 +71,7 @@
 		</plugins>
 	</reporting>
 
-	<dependencies>	
+	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
@@ -193,19 +193,23 @@
 			<artifactId>dispatch-tagsoup_${scala.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
-			<artifactId>warwickutils-all</artifactId>
-			<version>20121112</version>
-      <exclusions>
-        <!-- We don't want to use Textile, so don't bother with JRuby -->
-        <exclusion>
-          <groupId>org.jruby</groupId>
-          <artifactId>jruby</artifactId>
-        </exclusion>
-      </exclusions>
+			<artifactId>warwickutils-core</artifactId>
+			<version>${warwickutils.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-mail</artifactId>
+			<version>${warwickutils.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-web</artifactId>
+			<version>${warwickutils.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
@@ -216,7 +220,7 @@
 			<artifactId>spring-scala-glue_2.9.2</artifactId>
 			<version>1.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.oauth.core</groupId>
 			<artifactId>oauth</artifactId>
@@ -238,7 +242,7 @@
 			<artifactId>freemarker</artifactId>
 			<version>2.3.18</version>
 		</dependency>
-			
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -293,7 +297,7 @@
 			<artifactId>joda-convert</artifactId>
 			<version>1.1</version>
 		</dependency>
-			
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -322,7 +326,7 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.5</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
