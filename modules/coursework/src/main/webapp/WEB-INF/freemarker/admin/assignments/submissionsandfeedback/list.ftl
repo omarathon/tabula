@@ -12,9 +12,10 @@
 </a>
 <ul class="dropdown-menu pull-right">
 	<li>
-	<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>">
-	  <i class="icon-download"></i>XML
-	</a>
+		<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>">XML</a>
+	</li>
+	<li>
+		<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.csv'/>">CSV</a>
 	</li>
 </ul>
 </div>
