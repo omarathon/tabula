@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick.tabula</groupId>
+		<artifactId>tabula-project</artifactId>
+		<version>19</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>home</artifactId>
+	<packaging>war</packaging>
+
+	<name>Tabula Homepage</name>
+	<description>Serves all static content (though it may come from other modules) and the homepage</description>
+
+	<properties>
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+		
+		<!-- Override module context -->
+		<tabula.module.context>/</tabula.module.context>
+	</properties>
+
+	<scm>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/home</url>
+	</scm>
+
+	<profiles>
+		<!-- deploy to jboss -->
+		<profile>
+			<id>deploy</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-unpacked</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war">
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}" />
+										</sync>
+										<touch
+											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- sync static -->
+		<profile>
+			<id>dev-deploy-static</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-static</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war/static">
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}/static" />
+										</sync>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+			<!-- Build the war -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-war</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>exploded</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<warName>${project.build.finalName}</warName>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- Need to re-implement overlays here because by default we overlay 
+						ourself! -->
+					<overlays>
+						<overlay>
+							<groupId>uk.ac.warwick.tabula</groupId>
+							<artifactId>common</artifactId>
+							<type>jar</type>
+							<includes>
+								<include>WEB-INF/**/*</include>
+							</includes>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>compress</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nosuffix>true</nosuffix>
+					<excludes>
+						<exclude>**/static/libs/**/*.*</exclude>
+					</excludes>
+					<jswarn>false</jswarn>
+					<aggregations>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/common.js</output>
+							<includes>
+								<include>scripts.js</include>
+								<include>jquery-copyable.js</include>
+								<include>jquery-biglist.js</include>
+								<include>jquery-tableform.js</include>
+								<include>userpicker.js</include>
+								<include>ajax-popup.js</include>
+								<include>app-comments.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/courses.js</output>
+							<includes>
+								<include>common.js</include>
+								<include>coursework-admin.js</include>
+								<include>coursework-submission.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/home.js</output>
+							<includes>
+								<include>common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/profiles.js</output>
+							<includes>
+								<include>common.js</include>
+							</includes>
+						</aggregation>
+					</aggregations>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>lesscss</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
+									classpathref="maven.plugin.classpath" />
+
+								<lesscss
+									todir="${project.build.directory}/${project.build.finalName}/static/css">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}/static/css"
+										includes="*.less" excludes="*.inc.less" />
+								</lesscss>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>batchhash</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
+									classpathref="maven.plugin.classpath" />
+
+								<batchhash
+									propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
+									maxhashlength="12" salt="a">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}"
+										includes="static/**" excludes="**/*.less" />
+								</batchhash>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>uk.ac.warwick.util</groupId>
+						<artifactId>warwickutils-ant</artifactId>
+						<version>${warwickutils.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+						<version>1.2.17</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Build a zip of our static-hashes now it's generated -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<classifier>static-hashes</classifier>
+							<descriptor>src/main/assembly/static-hashes.xml</descriptor>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+	</dependencies>
+</project>
