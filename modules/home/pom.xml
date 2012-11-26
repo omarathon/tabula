@@ -141,6 +141,7 @@
 				</executions>
 				<configuration>
 					<nosuffix>true</nosuffix>
+					<nomunge>true</nomunge>
 					<excludes>
 						<exclude>**/static/libs/**/*.*</exclude>
 					</excludes>
