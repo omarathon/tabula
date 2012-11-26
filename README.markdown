@@ -49,6 +49,8 @@ Some other useful Maven commands:
 
 - `mvn -Pdeploy,standalone` - dev deploy of the standalone courses.war
 - `mvn -DskipTests` - skip tests during deploy (Maven will run tests by default)
+- `mvn -DskipTests -Dmaven.test.skip=true` - also skip test compilation
+- `mvn --project modules/coursework --also-make` - work on a single module, but make module dependencies like common
 - `mvn test -Dsurefire.useFile=false` - run tests, showing stack trace of failures in the console
 - `mvn test -Dtest=uk.ac.warwick.tabula.coursework.ApplicationTest` - run a specific test
 - `mvn -Pdev-deploy-views` - syncs the latest Freemarker templates into the deployed app - no need to redeploy
