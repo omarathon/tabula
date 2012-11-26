@@ -5,12 +5,13 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -25,8 +26,18 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 		if (user.loggedIn) {
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
+			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
+			// add the number of submissions to each assignment for marking
+			val assignmentsForMarkingInfo = for (assignment <- assignmentsForMarking) yield {
+				val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(Seq())
+				Map(
+					"assignment" -> assignment,
+					"numSubmissions" -> submissions.size
+				)
+			}
 
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
+
 			val enrolledAssignments = 
 				if (features.assignmentMembership) assignmentService.getEnrolledAssignments(user.apparentUser)
 				else Seq.empty
@@ -54,6 +65,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 				"assignmentsWithFeedback" -> assignmentsWithFeedback,
 				"enrolledAssignments" -> enrolledAssignmentsInfo,
 				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
+				"assignmentsForMarking" -> assignmentsForMarkingInfo,
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
 				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)

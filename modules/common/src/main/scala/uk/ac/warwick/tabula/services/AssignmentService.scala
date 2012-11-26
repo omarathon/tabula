@@ -46,6 +46,8 @@ trait AssignmentService {
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
 
+	def getAssignmentWhereMarker(user: User): Seq[Assignment]
+
 	/**
 	 * Find a recent assignment within this module or possible department.
 	 */
@@ -244,6 +246,16 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 				where f.universityId = :universityId""")
 			.setString("universityId", universityId)
 			.list.asInstanceOf[JList[Assignment]]
+
+	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
+		session.createSQLQuery("""select distinct a.* from Assignment a
+			join MarkScheme m on a.markscheme_id = m.id
+			join UserGroupInclude u on m.firstmarkers_id = u.group_id or m.secondmarkers_id = u.group_id
+			where u.usercode = :userId
+			and a.deleted = 0 and a.archived = 0""")
+		.addEntity(classOf[Assignment])
+		.setString("userId", user.getUserId())
+		.list.asInstanceOf[JList[Assignment]]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) = {
 		session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")

@@ -182,7 +182,7 @@ class CheckboxField extends FormField {
 
 @Entity
 @DiscriminatorValue("marker")
-class MarkerSelectField() extends FormField with SimpleValue[String] {
+class MarkerSelectField extends FormField with SimpleValue[String] {
 
 	def markers:Seq[User] = {
 		if (assignment.markScheme == null) Seq()
