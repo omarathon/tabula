@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
@@ -18,6 +18,7 @@ import java.util.HashSet
 import javax.persistence.FetchType
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormField
+import uk.ac.warwick.tabula.data.model.SubmissionState._
 
 
 @Entity @AccessType("field")
@@ -56,6 +57,9 @@ class Submission extends GeneratedId with Deleteable {
 	 */
 	@NotNull
 	@BeanProperty var universityId: String = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.SubmissionStateUserType")
+	@BeanProperty var state : SubmissionState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BeanProperty var values: JSet[SavedSubmissionValue] = new HashSet
