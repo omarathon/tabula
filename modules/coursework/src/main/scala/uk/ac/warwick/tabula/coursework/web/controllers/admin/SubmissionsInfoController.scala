@@ -37,9 +37,11 @@ import scala.collection.mutable.LinkedHashSet
 @Controller
 class SubmissionsInfoController extends CourseworkController {
 
-	val formatter = DateFormats.IsoDateTime
+	val isoFormatter = DateFormats.IsoDateTime
+	val csvFormatter = DateFormats.CSVDateTime
 
-	def format(i: ReadableInstant) = formatter print i
+	def isoFormat(i: ReadableInstant) = isoFormatter print i
+	def csvFormat(i: ReadableInstant) = csvFormatter print i
 
 	var checkIndex = true
 
@@ -59,10 +61,10 @@ class SubmissionsInfoController extends CourseworkController {
 	}
 
 	def assignmentElement(assignment: Assignment) =
-		<assignment id={ assignment.id } open-date={ format(assignment.openDate) } close-date={ format(assignment.closeDate) }/>
+		<assignment id={ assignment.id } open-date={ isoFormat(assignment.openDate) } close-date={ isoFormat(assignment.closeDate) }/>
 
 	def submissionElement(item: SubmissionListItem) =
-		<submission id={ item.submission.id } submission-time={ format(item.submission.submittedDate) } university-id={ item.submission.universityId } downloaded={ item.downloaded.toString }>
+		<submission id={ item.submission.id } submission-time={ isoFormat(item.submission.submittedDate) } university-id={ item.submission.universityId } downloaded={ item.downloaded.toString }>
 			{ item.submission.values map fieldElement(item) }
 		</submission>
 
@@ -123,10 +125,10 @@ class SubmissionsInfoController extends CourseworkController {
 
 	def coreData(item: SubmissionListItem) = ListMap(
 		"submission-id" -> item.submission.id,
-		"submission-time" -> format(item.submission.submittedDate),
+		"submission-time" -> csvFormat(item.submission.submittedDate),
 		"university-id" -> item.submission.universityId,
 		"assignment-id" -> item.submission.assignment.id,
-		"downloaded" -> item.downloaded.toString
+		"downloaded" -> item.downloaded.toString.toLowerCase
 	)
 
 	def fieldData(item: SubmissionListItem) = {
