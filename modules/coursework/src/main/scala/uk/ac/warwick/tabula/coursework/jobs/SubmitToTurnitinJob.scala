@@ -133,7 +133,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				debug("Submission ID: " + submission.id)
 				debug("submission.allAttachments: (" + submission.allAttachments.size + ")")
 
-				submission.allAttachments foreach { attachment =>
+				for (attachment <- submission.allAttachments if Turnitin.validFileType(attachment)) {
 					val alreadyUploaded = existingSubmissions.exists(_.matches(attachment))
 					if (alreadyUploaded) {
 						// we don't need to upload it again, probably
