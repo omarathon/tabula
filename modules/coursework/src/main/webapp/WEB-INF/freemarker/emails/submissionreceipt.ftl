@@ -1,4 +1,4 @@
-Hello ${user.universityId}
+Hello
 	          
 This email confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
 
