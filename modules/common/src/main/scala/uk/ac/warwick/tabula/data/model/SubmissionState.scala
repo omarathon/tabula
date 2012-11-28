@@ -5,26 +5,19 @@ import scala.Array
 import java.sql.Types
 
 
-sealed abstract class SubmissionState(val name: String){
-	def canTransitionTo: Set[SubmissionState]
+sealed abstract class SubmissionState(val name: String, val ts: Set[SubmissionState]){
+	lazy val transitionStates = ts
+	def canTransitionTo(state: SubmissionState): Boolean = transitionStates.contains(state)
 	override def toString = name
 }
 // initial state - received but has not yet been released for marking
-case object Received extends SubmissionState("Received"){
-	def canTransitionTo = Set(ReleasedForMarking)
-}
+case object Received extends SubmissionState("Received", Set(ReleasedForMarking))
 // ready to be distributed to markers
-case object ReleasedForMarking extends SubmissionState("ReleasedForMarking"){
-	def canTransitionTo = Set(DownloadedByMarker)
-}
+case object ReleasedForMarking extends SubmissionState("ReleasedForMarking", Set(DownloadedByMarker))
 // has been downloaded by the marker and is being marked
-case object DownloadedByMarker extends SubmissionState("DownloadedByMarker"){
-	def canTransitionTo = Set(MarkingCompleted)
-}
+case object DownloadedByMarker extends SubmissionState("DownloadedByMarker", Set(MarkingCompleted))
 // submission has been marked and feedback has been uploaded
-case object MarkingCompleted extends SubmissionState("MarkingCompleted"){
-	def canTransitionTo = Set()
-}
+case object MarkingCompleted extends SubmissionState("MarkingCompleted", Set())
 
 object SubmissionState {
 	def fromCode(code: String) = code match {
