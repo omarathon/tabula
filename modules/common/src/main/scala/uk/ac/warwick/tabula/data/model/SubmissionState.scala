@@ -20,14 +20,14 @@ case object DownloadedByMarker extends SubmissionState("DownloadedByMarker", Set
 case object MarkingCompleted extends SubmissionState("MarkingCompleted", Set())
 
 object SubmissionState {
-	def fromCode(code: String) = code match {
-		case "Received" => Received
-		case "ReleasedForMarking" => ReleasedForMarking
-		case "DownloadedByMarker" => DownloadedByMarker
-		case "MarkingCompleted" => MarkingCompleted
-		case null => null
-		case _ => throw new IllegalArgumentException()
-	}
+	val values: Set[SubmissionState] = Set(Received, ReleasedForMarking, DownloadedByMarker, MarkingCompleted)
+
+	def fromCode(code: String): SubmissionState =
+		if (code == null) null
+		else values.find{_.name == code} match {
+			case Some(gender) => gender
+			case None => throw new IllegalArgumentException()
+		}
 }
 
 class SubmissionStateUserType extends AbstractBasicUserType[SubmissionState, String]{
