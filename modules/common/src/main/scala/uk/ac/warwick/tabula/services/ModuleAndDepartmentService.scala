@@ -45,6 +45,13 @@ class ModuleAndDepartmentService extends Logging {
 
 	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
 	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
+	
+	def modulesAdministratedBy(usercode: String) = {
+		departmentsOwnedBy(usercode).toSeq flatMap (dept => dept.modules.asScala)
+	}
+	def modulesAdministratedBy(usercode: String, dept: Department) = {
+		if (departmentsOwnedBy(usercode) contains dept) dept.modules.asScala else Nil
+	}
 
 	def addOwner(dept: Department, owner: String) = transactional() {
 		dept.owners.addUser(owner)

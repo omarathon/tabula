@@ -56,6 +56,17 @@ trait QueryMethods { self: AuditEventIndexService =>
 	def student(user: User) = search(termQuery("students", user.getWarwickId))
 
 	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
+	
+	def recentSubmissionsForModules(modules: Seq[Module]): Seq[AuditEvent] = {
+		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
+		
+		parsedAuditEvents(search(
+			query = all(termQuery("eventType", "SubmitAssignment"), 
+						some(moduleTerms:_*)
+					),
+			max = 10,
+			sort = reverseDateSort))
+	}
 
 	/**
 	 * Work out which submissions have been downloaded from the admin interface

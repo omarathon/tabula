@@ -11,10 +11,14 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.services.AuditEventIndexService
+import uk.ac.warwick.tabula.data.model.AuditEvent
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
+	var auditIndexService = Wire.auto[AuditEventIndexService]
+
 	var userLookup = Wire.auto[UserLookupService]
 	var features = Wire.auto[Features]
 	def groupService = userLookup.getGroupService
@@ -25,6 +29,8 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 		if (user.loggedIn) {
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
+			
+			val activities = getActivities(user)
 
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 			val enrolledAssignments = 
@@ -56,8 +62,8 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
-				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct)
-
+				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct,
+				"activities" -> activities)
 		} else {
 			Mav("home/view")
 		}
@@ -67,4 +73,16 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 		.map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
 		.sortBy { _._1 }
 
+	/** At the moment, this is only going to gather new submission events.
+	 *  In the future it'll likely make sense to refactor it into a common
+	 *  ActivityService which watches for events of interest at whichever
+	 *  depth of Tabula we're looking from.
+	 * */
+	def getActivities(user: CurrentUser): Seq[AuditEvent] = {
+		val ownedModules = moduleService.modulesManagedBy(user.idForPermissions).toSet
+		val adminModules = moduleService.modulesAdministratedBy(user.idForPermissions).toSet
+		val collatedModules = (ownedModules ++ adminModules).toSeq
+		
+		auditIndexService.recentSubmissionsForModules(collatedModules)
+	}
 }
