@@ -78,6 +78,8 @@ class Submission extends GeneratedId with Deleteable {
 
 	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
 	def zipFileName(attachment: FileAttachment) = assignment.module.code + " - " + universityId + " - " + attachment.name
+
+	def isReleasedForMarking: Boolean = state == ReleasedForMarking
 }
 
 /**

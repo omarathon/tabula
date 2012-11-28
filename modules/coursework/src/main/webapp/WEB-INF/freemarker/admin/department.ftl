@@ -31,6 +31,9 @@
 			<#if features.feedbackTemplates>
 				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
 			</#if>
+			<#if features.markSchemes>
+				<li><a href="markschemes"><i class="icon-inbox"></i> Mark schemes</a></li>
+			</#if>
 		</ul>
 	</div>
 <#else>

@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.AccessType
 import javax.persistence._
-import scala.annotation.target._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-
+import uk.ac.warwick.tabula.data.model.SubmissionState._
 
 /** A MarkScheme defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submssions
@@ -19,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 class MarkScheme extends GeneratedId {
 
 	def this(dept: Department) = {
-		this();
+		this()
 		this.department = dept
 	}
 
@@ -51,7 +50,8 @@ class MarkScheme extends GeneratedId {
 		if(studentsChooseMarker) {
 			// if studentsChooseMarker exists then a field will exist too so fetch it
 			val markerField = assignment.markerSelectField.get
-			assignment.submissions.filter(submission => {
+			val releasedSubmission = assignment.submissions.filter(_.state == ReleasedForMarking)
+			releasedSubmission.filter(submission => {
 				submission.getValue(markerField) match {
 					case Some(subValue) => user.getUserId == subValue.value
 					case None => false
