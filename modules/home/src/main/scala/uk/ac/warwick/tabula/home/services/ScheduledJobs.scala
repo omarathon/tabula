@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -37,6 +38,11 @@ class ScheduledJobs {
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = exceptionResolver.reportExceptions {
 		new ImportModulesCommand().apply()
+	}
+
+	@Scheduled(cron = "0 30 7 * * *")
+	def importMembers: Unit = exceptionResolver.reportExceptions {
+		new ImportProfilesCommand().apply()
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")

@@ -75,22 +75,6 @@ class AssignmentImporter extends InitializingBean {
 		})
 	}
 
-	def allMemberDetails(callback: UpstreamMember => Unit) {
-		jdbc.getJdbcOperations.query(AssignmentImporter.GetAllMembers, new RowCallbackHandler {
-			override def processRow(rs: ResultSet) = {
-				callback({
-					val member = new UpstreamMember
-					member.universityId = rs.getString("university_id")
-					member.userId = rs.getString("primary_user_code")
-					member.firstName = rs.getString("preferred_forename")
-					member.lastName = rs.getString("family_name")
-					member.email = rs.getString("preferred_email_address")
-					member
-				})
-			}
-		})
-	}
-
 	private def yearsToImport = AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
@@ -154,19 +138,6 @@ object AssignmentImporter {
 		where academic_year_code in (:academic_year_code)
 		order by academic_year_code, module_code, mav_occurrence, assessment_group
 		"""
-
-	val GetAllMembers = """
-        select 
-            university_id,
-		    primary_user_code,
-		    preferred_forename,
-		    family_name,
-		    preferred_email_address
-        from member
-		where in_use_flag = 'Active'
-		and primary_user_code is not null
-		and preferred_email_address is not null
-        """
 
 	class UpstreamAssignmentQuery(ds: DataSource) extends MappingSqlQuery[UpstreamAssignment](ds, GetAssignmentsQuery) {
 		compile()
