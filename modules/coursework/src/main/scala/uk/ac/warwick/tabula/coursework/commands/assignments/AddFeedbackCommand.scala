@@ -23,9 +23,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback, FileAttachment}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
@@ -38,7 +36,6 @@ import java.nio.charset.Charset
 import uk.ac.warwick.spring.Wire
 import scala.Some
 import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
-import uk.ac.warwick.tabula.data.model.SubmissionState._
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _

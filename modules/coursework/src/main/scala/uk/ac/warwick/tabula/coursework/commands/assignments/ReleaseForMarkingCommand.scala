@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
+import uk.ac.warwick.tabula.data.model.{Received, ReleasedForMarking, Submission, Assignment}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Command}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentService}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.SubmissionState._
 import org.springframework.validation.Errors
 
 class ReleaseForMarkingCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	@BeanProperty var students: JList[String] = ArrayList()
 	@BeanProperty var confirm: Boolean = false
@@ -26,10 +27,8 @@ class ReleaseForMarkingCommand(val assignment: Assignment) extends Command[Unit]
 		) yield submission
 
 		val submissionsToUpdate = submissions -- invalidSubmissions
-		submissionsToUpdate foreach { submission =>
-			submission.state = ReleasedForMarking
-			assignmentService.saveSubmission(submission)
-		}
+		submissionsToUpdate foreach (submissionService.updateState(_, ReleasedForMarking))
+
 		submissionsUpdated = submissionsToUpdate.size
 	}
 
