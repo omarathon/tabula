@@ -68,11 +68,10 @@ Publications: ${r.publicationOverlap}%)
 			</#if>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
-				<th>Grade</th>
 			</#if>
 			<th>Files</th>
 			<th>Feedback</th>
-			<th>Uploaded</th>
+			<th>Feedback Uploaded</th>
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
@@ -115,9 +114,6 @@ Publications: ${r.publicationOverlap}%)
 				 <#if assignment.collectMarks>
                     <td class="mark">
                         ${(student.feedback.actualMark)!''}
-                    </td>
-                    <td class="grade">
-                        ${(student.feedback.actualGrade)!''}
                     </td>
                 </#if>
 				<td nowrap="nowrap" class="files">
