@@ -66,7 +66,8 @@ Common form fields.
 		<input type="checkbox" checked="checked" disabled="disabled"/>
 		<div class="help-block">
 			When checked, students will choose their marker out of the list of first markers
-			using a drop-down select box on the submission form.
+			using a drop-down select box on the submission form. You will be able to un-check this option when
+			more mark schemes are released in upcoming versions of the app.
 		</div>
 	</div>
 </div>
