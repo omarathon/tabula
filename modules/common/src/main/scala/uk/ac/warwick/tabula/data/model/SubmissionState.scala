@@ -25,7 +25,7 @@ object SubmissionState {
 	def fromCode(code: String): SubmissionState =
 		if (code == null) null
 		else values.find{_.name == code} match {
-			case Some(gender) => gender
+			case Some(state) => state
 			case None => throw new IllegalArgumentException()
 		}
 }
