@@ -250,6 +250,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	def removeField(field: FormField) {
 		assignmentService.deleteFormField(field)
+		// manually update all fields to reflect their new positions
+		fields.zipWithIndex foreach {case (field, index) => field.position = index}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
