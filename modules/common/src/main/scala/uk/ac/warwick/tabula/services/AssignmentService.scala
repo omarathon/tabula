@@ -166,7 +166,6 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	}
 
 	def deleteFormField(field: FormField) {
-		var removed = field.assignment.fields.remove(field)
 		session.delete(field)
 	}
 
