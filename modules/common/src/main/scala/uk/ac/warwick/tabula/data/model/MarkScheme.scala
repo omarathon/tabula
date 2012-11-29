@@ -49,14 +49,18 @@ class MarkScheme extends GeneratedId {
 
 		if(studentsChooseMarker) {
 			// if studentsChooseMarker exists then a field will exist too so fetch it
-			val markerField = assignment.markerSelectField.get
-			val releasedSubmission = assignment.submissions.filter(_.state == ReleasedForMarking)
-			releasedSubmission.filter(submission => {
-				submission.getValue(markerField) match {
-					case Some(subValue) => user.getUserId == subValue.value
-					case None => false
+			assignment.markerSelectField match {
+				case Some(markerField) => {
+					val releasedSubmission = assignment.submissions.filter(_.state == ReleasedForMarking)
+					releasedSubmission.filter(submission => {
+						submission.getValue(markerField) match {
+							case Some(subValue) => user.getUserId == subValue.value
+							case None => false
+						}
+					})
 				}
-			})
+				case None => Seq()
+			}
 		}
 		else Seq() //TODO - no defined behaviour for default mark schemes yet
 	}
