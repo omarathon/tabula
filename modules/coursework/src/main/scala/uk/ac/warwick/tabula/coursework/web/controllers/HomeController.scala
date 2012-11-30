@@ -11,13 +11,13 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.data.model.AuditEvent
+import uk.ac.warwick.tabula.data.model.Activity
+import uk.ac.warwick.tabula.services.ActivityService
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
-	var auditIndexService = Wire.auto[AuditEventIndexService]
+	var activityService = Wire.auto[ActivityService]
 
 	var userLookup = Wire.auto[UserLookupService]
 	var features = Wire.auto[Features]
@@ -30,7 +30,7 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
 			
-			val activities = getActivities(user)
+			val activities = activityService.getActivities(user)
 
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 			val enrolledAssignments = 
@@ -72,17 +72,4 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 	def webgroupsToMap(groups: Seq[Group]) = groups
 		.map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
 		.sortBy { _._1 }
-
-	/** At the moment, this is only going to gather new submission events.
-	 *  In the future it'll likely make sense to refactor it into a common
-	 *  ActivityService which watches for events of interest at whichever
-	 *  depth of Tabula we're looking from.
-	 * */
-	def getActivities(user: CurrentUser): Seq[AuditEvent] = {
-		val ownedModules = moduleService.modulesManagedBy(user.idForPermissions).toSet
-		val adminModules = moduleService.modulesAdministratedBy(user.idForPermissions).toSet
-		val collatedModules = (ownedModules ++ adminModules).toSeq
-		
-		auditIndexService.recentSubmissionsForModules(collatedModules)
-	}
 }
