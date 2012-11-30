@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>20-SNAPSHOT</version>
+		<version>20</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -108,11 +107,9 @@
 								<configuration>
 									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war">
-											<fileset
-												dir="${project.build.directory}/${project.build.finalName}" />
+											<fileset dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
-										<touch
-											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -140,8 +137,7 @@
 								<phase>process-resources</phase>
 								<configuration>
 									<target>
-										<sync
-											todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
+										<sync todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
 											<fileset dir="${basedir}/src/main/webapp/WEB-INF/freemarker" />
 										</sync>
 									</target>
