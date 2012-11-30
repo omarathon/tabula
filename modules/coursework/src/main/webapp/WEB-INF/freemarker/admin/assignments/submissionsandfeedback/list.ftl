@@ -27,6 +27,9 @@
 	<a class="btn long-running use-tooltip" title="Download the feedback files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 	Download feedback
 	</a>
+	<#if features.turnitin>
+		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+	</#if>
 	<div class="btn-group">
 		<a id="modify-selected" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 			Update selected
@@ -44,11 +47,6 @@
 		    <li>
 				<a class="" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
 			</li>
-			<#if features.turnitin>
-				<li>
-					<a class="" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
-				</li>
-			</#if>
 		</ul>
 	</div>
 </div>
