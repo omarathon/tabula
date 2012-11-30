@@ -209,7 +209,7 @@
 		<div>
 		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
 		<#if has_archived_assignments>
-			<a class="btn show-archived-assignments" href="#">Show archived assignents</a>
+			<a class="btn show-archived-assignments" href="#">Show archived assignments</a>
 		</#if>
 		</div>
 	</#if>
