@@ -10,8 +10,9 @@
 </#macro>
 
 <#macro assignment_link assignment>
+	<@module_name assignment.module />
 	<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-		<@assignment_name assignment />	
+		<span class="ass-name">${assignment.name}</span>
 	</a>
 </#macro>
 

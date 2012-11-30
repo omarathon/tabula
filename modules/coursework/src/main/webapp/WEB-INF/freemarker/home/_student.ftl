@@ -1,26 +1,28 @@
-<#assign has_feedback=assignmentsWithFeedback?has_content />
-<#assign has_submissions=assignmentsWithSubmission?has_content />
-<#assign has_assignments=enrolledAssignments?has_content />
+<#assign has_feedback = assignmentsWithFeedback?has_content />
+<#assign has_submissions = assignmentsWithSubmission?has_content />
+<#assign has_assignments = enrolledAssignments?has_content />
+<#assign has_archived = archivedAssignments?has_content />
 
-<#assign has_any_items = (has_feedback || has_submissions || has_assignments) />
+<#assign has_pending_items = (has_feedback || has_assignments) />
+<#assign has_historical_items = (has_submissions || has_archived) />
 
 <#assign missing_assignments_markup>
 	<p>Talk to your module convenor if this seems like a mistake.</p>
-	<ul class="muted">
+	<ul>
 		<li>They may not have set up the assignment yet</li>
 		<li>They may not be using Tabula for assessment</li>
 		<li>You may not be correctly enrolled.</li>
 	</ul>
 </#assign>
 
-<#if has_any_items || user.student>
+<#if has_pending_items || has_historical_items || user.student>
 	<h2>Your assignments</h2>
 	
-	<div class="row">
+	<div class="row-fluid">
 		<div class="span6">
-			<h3>Pending</h3>
+			<h6 class="muted">Pending</h6>
 			
-			<#if has_any_items>
+			<#if has_pending_items>
 				<ul class="links">		
 					<#if has_assignments>
 						<#macro enrolled_assignment info>
@@ -33,9 +35,14 @@
 								<#include "../submit/assignment_deadline.ftl" />
 							</#if>
 						</#macro>
+						
 						<#list enrolledAssignments as info>
 							<li class="assignment-info">
-								<span class="label label-info">Enrolled</span>
+								<#if !info.isExtended!false && info.closed>
+									<span class="pull-right label label-important">Late</span>
+								<#elseif info.isExtended!false>
+									<span class="pull-right label label-info">Extended</span>
+								</#if>
 								<@enrolled_assignment info />
 							</li>
 						</#list>
@@ -44,50 +51,53 @@
 					<#if has_feedback>
 						<#list assignmentsWithFeedback as assignment>
 							<li class="assignment-info">
-								<span class="label-green">Marked</span>
+								<span class="pull-right label label-success">Marked</span>
 								<@fmt.assignment_link assignment />
 							</li>
 						</#list>
 					</#if>
 
-					<#if has_submissions>
-						<#list assignmentsWithSubmission as assignment>
-							<li class="assignment-info">
-								<span class="label-orange">Submitted</span>
-								<@fmt.assignment_link assignment />
-							</li>
-						</#list>
-					</#if>
 				</ul>	
-			<#else><#-- !has_any_items -->
-				<div class="alert alert-block alert-warning">
-					<h4>We don't have anything for you here.</h4>
-					${missing_assignments_markup}
-				</div>		
-			</#if>
 			
-			<#-- just as a footnote, really. Might need to recede more -->
-			<small class="alert">
-				<h4>Is an assignment missing here?</h4>
-				${missing_assignments_markup}
-			</small>
+				<div class="alert alert-block">
+					<h6>Is an assignment missing here?</h6>
+					${missing_assignments_markup}
+				</div>
+			<#else>
+				<div class="alert alert-block">
+					<h6>We don't have anything for you here.</h6>
+					${missing_assignments_markup}
+				</div>
+			</#if>
 		</div>
 		
 		<div class="span6">
-			<h3>Archive</h3>
+			<h6 class="muted">Past</h6>
 
-			<#if archivedAssignments?has_content>
-				<div id="archived-assignments-container">
-					<ul class="links" id="archived-assignments-list">
-						<#list archivedAssignments as assignment>
+			<#if has_historical_items>
+				<#if has_submissions>
+					<ul class="links" id="submitted-assignments-list">
+						<#list assignmentsWithSubmission as assignment>
 							<li class="assignment-info">
-								<@assignment_link assignment>
-									<@format_name assignment />	
-								</@assignment_link>
+								<span class="pull-right label">Submitted</span>
+								<@fmt.assignment_link assignment />
 							</li>
 						</#list>
 					</ul>
-				</div>
+				</#if>
+	
+				<#if has_archived>
+					<div id="archived-assignments-container">
+						<ul class="links" id="archived-assignments-list">
+							<#list archivedAssignments as assignment>
+								<li class="assignment-info">
+									<span class="pull-right label">Archived</span>
+									<@fmt.assignment_link assignment />
+								</li>
+							</#list>
+						</ul>
+					</div>
+				</#if>
 			<#else>
 				<p class="alert">There are no archived assignments to show you right now.</p>
 			</#if>

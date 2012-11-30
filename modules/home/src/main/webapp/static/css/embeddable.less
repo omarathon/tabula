@@ -23,6 +23,12 @@ html.iframe {
 	.border-radius(8px);
 }
 
+.subtle-box-style() {
+	border: 1px solid #bbb;
+	border-bottom: 1px solid #aaa;
+	.border-radius(8px);
+}
+
 .warning-box-style() {
 	.border-radius(8px);
 	padding: 0.5em;
@@ -175,7 +181,6 @@ ul {
 
 // assignment deadlines
 .deadline {
-	overflow: hidden;
 	a.btn {
 		float: right;
 	}
@@ -291,6 +296,12 @@ table {
 	  }
 	}
 
+	ul.links {
+		list-style: none;
+		padding-left:0;
+		margin: 7px 0;
+	}
+
 	textarea.big-textarea {
 		display: block;
 		width: 80%;
@@ -359,7 +370,20 @@ table {
 	
 }
 
-.mod-name { font-size: 85%; }
+.mod-code {
+	font-size: 115%;
+	color: #444;
+}
+
+.mod-name {
+	color: #999;
+	font-size: 85%;
+	&:before { '// ' }
+}
+
+.ass-name {
+	display: block;
+}
 
 .disabled-zone {
   .opacity-one(0.6);
@@ -463,11 +487,6 @@ span.press-ctrl-c {
   padding: 3px 5px;
   border: 1px solid #aaf;
   .box-shadow(0, 2px, 2px, rgba(0,0,0,0.3));
-}
-
-ul.links {
-  list-style: none;
-  li {  }
 }
 
 #submission-options {
