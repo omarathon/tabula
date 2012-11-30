@@ -17,7 +17,6 @@ The conf directory should contain:
 
 - tabula-sso-config.xml modified to your details.
 - tabula.properties modified to your details
-- tabula-private.properties (may be empty but must exist)
 
 You can get versions of these from the servers directory
 
