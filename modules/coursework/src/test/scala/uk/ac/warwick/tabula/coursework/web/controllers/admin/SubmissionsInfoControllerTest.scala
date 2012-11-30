@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.SecurityService
+import org.joda.time.DateTimeConstants
 
 
 class SubmissionsInfoControllerTest extends TestBase with Mockito {
@@ -22,7 +23,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	 * testing much about the controller itself here, just that it uses
 	 * the correct thing.
 	 */
-	@Test def timeFormat = {
+	@Test def isoTimeFormat = {
 		val controller = new SubmissionsInfoController()
 		
 		/**
@@ -36,8 +37,19 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		 */
 		val summerDate = DateTime.parse("2012-08-15T11:20")
 		val winterDate = DateTime.parse("2012-11-15T11:20")
-		controller.format(summerDate) should be ("2012-08-15T11:20:00+01:00")
-		controller.format(winterDate) should be ("2012-11-15T11:20:00Z")
+		controller.isoFormat(summerDate) should be ("2012-08-15T11:20:00+01:00")
+		controller.isoFormat(winterDate) should be ("2012-11-15T11:20:00Z")
+	}
+	
+	@Test def csvTimeFormat = {
+		val controller = new SubmissionsInfoController()
+		
+		/**
+		 * For CSV, we don't specify timezone. Instead the format mirrors that
+		 * used in Formsbuilder, which has default set in FormSubmission.java
+		 */
+		val validDate = DateTime.parse("2012-08-15T16:20")
+		controller.csvFormat(validDate) should be ("15/08/2012 16:20")
 	}
 	
 	@Test def getXml {
@@ -46,10 +58,11 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		controller.checkIndex = false
 		val command = new ListSubmissionsCommand
 		val assignment = newDeepAssignment()
+		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 10, 44)
 		command.assignment = assignment
 		command.module = assignment.module
 		command.assignment.submissions.addAll(Seq(
-			submission(assignment, "0123456", Seq("Interesting helicopter.jpg"))
+			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
 		))
 		
 		withUser("cusebr") {
@@ -58,10 +71,36 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		}
 	}
 	
-	def submission(assignment:Assignment, uniId:String, attachmentNames:Seq[String]) = {
+	@Test def getCsv {
+		val controller = new SubmissionsInfoController()
+		controller.securityService = mock[SecurityService]
+		controller.checkIndex = false
+		val command = new ListSubmissionsCommand
+		val assignment = newDeepAssignment()
+		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 15, 44)
+		assignment.id = "fakeassid"
+		command.assignment = assignment
+		command.module = assignment.module
+		command.assignment.submissions.addAll(Seq(
+			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
+		))
+		
+		withUser("cusxad") {
+			val actual = controller.csv(command) getAsString
+			val expected = """	|"submission-id","submission-time","university-id","assignment-id","downloaded","upload-name","upload-zip-path"
+								|"fakesubid","27/11/2012 15:44","0123456","fakeassid","false","Interesting helicopter.jpg","IN101 - 0123456 - Interesting helicopter.jpg"
+								|""" stripMargin
+			
+			actual should be (expected)
+		}
+	}
+	
+	def submission(submittedDate: DateTime, assignment:Assignment, uniId:String, attachmentNames:Seq[String]) = {
 		val s = new Submission
 		s.assignment = assignment
 		s.universityId = uniId
+		s.submittedDate = submittedDate
+		s.id = "fakesubid"
 		if (!attachmentNames.isEmpty) {
 			val attachments = (attachmentNames map toAttachment).toSet
 			s.values.add(SavedSubmissionValue.withAttachments(s, Assignment.defaultUploadName, attachments ))

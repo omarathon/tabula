@@ -23,16 +23,25 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.DateFormats
+import java.io.StringWriter
+import uk.ac.warwick.util.csv.GoodCsvDocument
+import uk.ac.warwick.util.csv.CSVLineWriter
+import uk.ac.warwick.tabula.web.views.CSVView
+import scala.collection.immutable.ListMap
+import scala.collection.immutable.SortedSet
+import scala.collection.mutable.LinkedHashSet
 
 /**
- * Download submissions as XML.
+ * Download submissions metadata.
  */
 @Controller
 class SubmissionsInfoController extends CourseworkController {
 
-	val formatter = DateFormats.IsoDateTime
+	val isoFormatter = DateFormats.IsoDateTime
+	val csvFormatter = DateFormats.CSVDateTime
 
-	def format(i: ReadableInstant) = formatter print i
+	def isoFormat(i: ReadableInstant) = isoFormatter print i
+	def csvFormat(i: ReadableInstant) = csvFormatter print i
 
 	var checkIndex = true
 
@@ -52,10 +61,10 @@ class SubmissionsInfoController extends CourseworkController {
 	}
 
 	def assignmentElement(assignment: Assignment) =
-		<assignment id={ assignment.id } open-date={ format(assignment.openDate) } close-date={ format(assignment.closeDate) }/>
+		<assignment id={ assignment.id } open-date={ isoFormat(assignment.openDate) } close-date={ isoFormat(assignment.closeDate) }/>
 
 	def submissionElement(item: SubmissionListItem) =
-		<submission id={ item.submission.id } submission-time={ format(item.submission.submittedDate) } university-id={ item.submission.universityId } downloaded={ item.downloaded.toString }>
+		<submission id={ item.submission.id } submission-time={ isoFormat(item.submission.submittedDate) } university-id={ item.submission.universityId } downloaded={ item.downloaded.toString }>
 			{ item.submission.values map fieldElement(item) }
 		</submission>
 
@@ -73,4 +82,68 @@ class SubmissionsInfoController extends CourseworkController {
 		else
 			Nil //empty Node seq, no element
 
+			
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
+	def csv(command: ListSubmissionsCommand) = {
+		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
+		mustBeAbleTo(Participate(command.module))
+		command.checkIndex = checkIndex
+
+		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
+		val assignment = command.assignment
+		val writer = new StringWriter
+		val csvBuilder = new SubmissionsCSVBuilder(items)
+		val doc = new GoodCsvDocument(csvBuilder, null)
+
+		doc.setHeaderLine(true)
+		csvBuilder.headers foreach (header => doc.addHeaderField(header))
+		items foreach (item => doc.addLine(item))
+		doc.write(writer)
+
+		new CSVView("submissions.csv", writer.toString)
+	}
+
+	class SubmissionsCSVBuilder(items:Seq[SubmissionListItem]) extends CSVLineWriter[SubmissionListItem] {
+		val headers = {
+			var keys = Set[String]()
+			
+			// have to iterate all items to ensure complete field coverage. bleh :(
+			items foreach ( item => keys = keys ++ fieldData(item).keySet )
+			
+			// return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
+			(coreData(items.head).keys.toList ++ keys.toList.sorted)
+		}
+		
+		def getNoOfColumns(item:SubmissionListItem) = headers.size
+		
+		def getColumn(item:SubmissionListItem, i:Int) = {
+			itemData(item).get(headers.get(i)) getOrElse ""
+		}
+	}
+	
+	def itemData(item: SubmissionListItem) = coreData(item) ++ fieldData(item)
+
+	def coreData(item: SubmissionListItem) = ListMap(
+		"submission-id" -> item.submission.id,
+		"submission-time" -> csvFormat(item.submission.submittedDate),
+		"university-id" -> item.submission.universityId,
+		"assignment-id" -> item.submission.assignment.id,
+		"downloaded" -> item.downloaded.toString.toLowerCase
+	)
+
+	def fieldData(item: SubmissionListItem) = {
+		var fieldDataMap = ListMap[String, String]()
+		
+		item.submission.values foreach ( value =>
+			if (value.hasAttachments)
+				value.attachments foreach {file => {
+					fieldDataMap += (value.name + "-name") -> file.name
+					fieldDataMap += (value.name + "-zip-path") -> item.submission.zipFileName(file)
+				}}
+			else if (value.value != null)
+				fieldDataMap += value.name -> value.value
+		)
+		
+		fieldDataMap
+	}
 }

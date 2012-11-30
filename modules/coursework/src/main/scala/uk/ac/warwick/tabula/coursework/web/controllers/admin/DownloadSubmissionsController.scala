@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.actions.{DownloadSubmissions, Participate}
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -29,6 +30,22 @@ class DownloadSubmissionsController extends CourseworkController {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
+		command.apply { renderable =>
+			fileServer.serve(renderable, response)
+		}
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+	def downloadMarkersSubmissions(command: DownloadSubmissionsCommand, response: HttpServletResponse) {
+		val (assignment, module) = (command.assignment, command.module)
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(DownloadSubmissions(assignment))
+
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
+			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
+		)
+		command.submissions = submissions.toList
+
 		command.apply { renderable =>
 			fileServer.serve(renderable, response)
 		}

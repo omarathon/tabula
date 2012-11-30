@@ -60,16 +60,28 @@ Common form fields.
 	</script>
 </@form.labelled_row>
 
-<@form.labelled_row "studentsChooseMarker" "">
+<div class="control-group">
+	<label class="control-label">Students must select their marker</label>
+	<div class="controls">
+		<input type="checkbox" checked="checked" disabled="disabled"/>
+		<div class="help-block">
+			When checked, students will choose their marker out of the list of first markers
+			using a drop-down select box on the submission form. You will be able to un-check this option when
+			more mark schemes are released in upcoming versions of the app.
+		</div>
+	</div>
+</div>
+<#-- TODO - replace with above block when more options become available-->
+<#--@form.labelled_row "studentsChooseMarker" "">
 	<label class="checkbox">
 		<@f.checkbox path="studentsChooseMarker" />
 		Students must select their marker
 	</label>
 	<div class="help-block">
-		When checked, students will choose their marker out of the list of first markers 
+		When checked, students will choose their marker out of the list of first markers
 		using a drop-down select box on the submission form.
 	</div>
-</@form.labelled_row>
+</@form.labelled_row-->
 
 
 <div class="submit-buttons">

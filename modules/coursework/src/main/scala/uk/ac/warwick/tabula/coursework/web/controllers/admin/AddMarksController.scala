@@ -44,21 +44,31 @@ class AddMarksController extends CourseworkController {
 
 		members.foreach(member => {
 			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId())
-			feedback.foreach(marksToDisplay ::= noteMarkItem(member, _))
-		});
+			//feedback.foreach(marksToDisplay ::= noteMarkItem(member, _))
+			marksToDisplay ::= noteMarkItem(member, feedback)
+		})
 
 		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
 
 	}
 
-	def noteMarkItem(member: User, feedback: Feedback) = {
+	def noteMarkItem(member: User, feedback: Option[Feedback]) = {
 
-		logger.debug("in noteMarkItem (logger.debug)");
+		logger.debug("in noteMarkItem (logger.debug)")
 
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId()
-		markItem.actualMark = feedback.actualMark.map { _.toString() }.getOrElse("")
-		markItem.actualGrade = feedback.actualGrade
+
+		feedback match {
+			case Some(f) => {
+				markItem.actualMark = f.actualMark.map { _.toString() }.getOrElse("")
+				markItem.actualGrade = f.actualGrade
+			}
+			case None => {
+				markItem.actualMark = ""
+				markItem.actualGrade = ""
+			}
+		}
 
 		markItem
 	}

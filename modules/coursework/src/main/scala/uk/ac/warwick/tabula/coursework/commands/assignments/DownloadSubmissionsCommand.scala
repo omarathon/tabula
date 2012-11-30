@@ -21,20 +21,20 @@ import uk.ac.warwick.tabula.services.AssignmentService
  * Download one or more submissions from an assignment, as a Zip.
  */
 class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
-    var zipService = Wire.auto[ZipService]
-    var assignmentService = Wire.auto[AssignmentService]
+	var zipService = Wire.auto[ZipService]
+	var assignmentService = Wire.auto[AssignmentService]
 
 	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var module: Module = _
 	@BeanProperty var filename: String = _
 
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
-    @BeanProperty var students: JList[String] = ArrayList()
+	@BeanProperty var students: JList[String] = ArrayList()
 
 	override def applyInternal(): RenderableZip = {
-        if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
-        else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
-        else if (!students.isEmpty && submissions.isEmpty) {
+		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
+		else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
+		else if (!students.isEmpty && submissions.isEmpty) {
 			submissions = for (
 				uniId <- students;
 				submission <- assignmentService.getSubmissionByUniId(assignment, uniId)

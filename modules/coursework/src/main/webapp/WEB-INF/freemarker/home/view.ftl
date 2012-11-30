@@ -26,6 +26,8 @@ to see a personalised view.
 
 <#include "_admin.ftl" />
 
+<#include "_markers.ftl" />
+
 <#include "_student.ftl" />
 
 </#escape>

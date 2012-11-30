@@ -31,6 +31,9 @@
 			<#if features.feedbackTemplates>
 				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
 			</#if>
+			<#if features.markSchemes>
+				<li><a href="markschemes"><i class="icon-inbox"></i> Mark schemes</a></li>
+			</#if>
 		</ul>
 	</div>
 <#else>
@@ -113,10 +116,10 @@
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>
 							<a href="<@routes.assignmentsubmissions assignment=assignment />" title="View all submissions">
-								${assignment.submissions?size} submissions
+								<@fmt.p assignment.submissions?size "submission" />
 							</a>
 						<#else>
-							${assignment.submissions?size} submissions
+							<@fmt.p assignment.submissions?size "submission" />
 						</#if>
 					</div>
 				</#if>
@@ -139,7 +142,7 @@
 				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
 					<div class="submission-and-feedback-count">							
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
-							${assignment.submissions?size} submissions
+							<@fmt.p assignment.submissions?size "submission" />
 							<#if has_feedback> and ${assignment.feedbacks?size} feedback</#if>
 						</a>
 						<#assign unreleasedFeedback=assignment.unreleasedFeedback />
@@ -187,7 +190,9 @@
 					<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a>
 				</#if>
 				<#if has_feedback>
+					<#-- contained in the combined submissions and feedback list now 
 					<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
+					-->
 					<#if assignment.canPublishFeedback>
 						<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
 					</#if>

@@ -2,21 +2,15 @@ package uk.ac.warwick.tabula.coursework.commands.markschemes
 
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
 import org.springframework.validation.Errors
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.MarkScheme
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.util.core.StringUtils
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
 /** Abstract base command for either creating or editing a MarkScheme */
@@ -25,7 +19,9 @@ abstract class ModifyMarkSchemeCommand(
 
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
-	@BeanProperty var studentsChooseMarker: Boolean = _
+
+	//TODO - reinstate when other options become available
+	//@BeanProperty var studentsChooseMarker: Boolean = _
 	
 	// Subclasses can provide the "current" markscheme if one applies, for validation.
 	def currentMarkScheme: Option[MarkScheme]
@@ -60,14 +56,17 @@ abstract class ModifyMarkSchemeCommand(
 	def copyTo(scheme: MarkScheme) {
 		scheme.name = name
 		scheme.firstMarkers.setIncludeUsers(firstMarkers)
-		scheme.studentsChooseMarker = studentsChooseMarker
+		//TODO - reinstate when other options become available
+		//scheme.studentsChooseMarker = studentsChooseMarker
+		scheme.studentsChooseMarker = true // default until more options are available
 	}
 
 	def copyFrom(scheme: MarkScheme) {
 		name = scheme.name
 		firstMarkers.clear()
 		firstMarkers.addAll(scheme.firstMarkers.includeUsers)
-		studentsChooseMarker = scheme.studentsChooseMarker
+		//TODO - reinstate when other options become available
+		//studentsChooseMarker = scheme.studentsChooseMarker
 	}
 
 }

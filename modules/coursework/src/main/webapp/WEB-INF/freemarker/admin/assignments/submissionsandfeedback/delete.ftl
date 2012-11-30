@@ -11,14 +11,14 @@
 
 <input type="hidden" name="confirmScreen" value="true" />
 
-<@spring.bind path="students">
+<@spring.bind path="studentsAsUsers">
 <@form.errors path="students" />
-<#assign studentIds=status.actualValue />
-<p>Deleting submissions and feedbacks for <strong><@fmt.p studentIds?size "student" /></strong>:</p>
+<#assign students=status.actualValue />
+<p>Deleting submissions and feedbacks for <strong><@fmt.p students?size "student" /></strong>:</p>
 <ul>
-<#list studentIds as studentId>
-<li>${studentId}</li>
-<input type="hidden" name="students" value="${studentId}" />
+<#list students as student>
+<li>${student.fullName} (${student.warwickId})</li>
+<input type="hidden" name="students" value="${student.warwickId}" />
 </#list>
 </ul>
 <p>
