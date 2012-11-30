@@ -11,24 +11,26 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.UpstreamMember
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.AcademicYear
 import java.sql.Blob
 import java.sql.Date
 import org.apache.commons.lang3.text.WordUtils
+import org.springframework.jdbc.core.SqlParameter
+import java.sql.Types
 
 @Service
 class ProfileImporter extends InitializingBean {
 	import ProfileImporter._
 	
 	var ads = Wire[DataSource]("academicDataStore")
-	var userLookup = Wire.auto[UserLookupService]
 	var fileDao = Wire.auto[FileDao]
 	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 	
@@ -37,118 +39,21 @@ class ProfileImporter extends InitializingBean {
 	override def afterPropertiesSet {
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
+	
+	lazy val allMembersQuery = new AllMembersQuery(ads, fileDao, moduleAndDepartmentService)
 
-	def allMemberDetails(callback: UpstreamMember => Unit) {	  
-		jdbc.getJdbcOperations.query(GetAllMembers, new RowCallbackHandler {
-			override def processRow(rs: ResultSet) = {
-				callback(createMember(rs, allUsers))
-			}
-		})
-	}
+	def getMemberDetails(usercodes: JList[String]): Seq[Member] = allMembersQuery.executeByNamedParam(Map(
+	    "usercodes" -> usercodes))
 	
 	lazy val allUserIdsQuery = new AllUserIdsQuery(ads)
 	lazy val allUserCodes: Seq[String] = allUserIdsQuery.execute
-	lazy val allUsers: Map[String, User] = allUserCodes.grouped(1000).flatMap(userLookup.getUsersByUserIds(_)).toMap.withDefaultValue(new AnonymousUser)
 	
-	private def toPhoto(photoBlob: Blob, universityId: String) = {
-		if (photoBlob == null || photoBlob.length == 0) { 
-			null
-		} else {
-			val photo = new FileAttachment
-			photo.name = universityId + ".jpg"
-			photo.uploadedData = photoBlob.getBinaryStream
-			photo.uploadedDataLength = photoBlob.length
-			fileDao.saveTemporary(photo)
-			
-			photo
-		}
-	}
-	
-	private def toDepartment(departmentCode: String) = {
-		if (departmentCode == null || departmentCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode).getOrElse(null)
-		}
-	}
-	
-	private def toLocalDate(date: Date) = {
-		if (date == null) {
-			null
-		} else {
-			new LocalDate(date)
-		}
-	}
-	
-	private def toAcademicYear(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			AcademicYear.parse(code)
-		}
-	}
-	
-	def createMember(rs: ResultSet, users: Map[String, User]) = {
-		val member = new UpstreamMember
-					
-		member.universityId = rs.getString("university_id")
-		member.userId = rs.getString("user_code")					
-		member.firstName = rs.getString("preferred_forename")
-		member.lastName = rs.getString("family_name")
-		member.email = rs.getString("email_address")
-		member.title = rs.getString("title")
-		member.fullFirstName = rs.getString("forenames")
-		member.gender = Gender.fromCode(rs.getString("gender"))
-		member.nationality = rs.getString("nationality")
-		member.homeEmail = rs.getString("alternative_email_address")
-		member.mobileNumber = rs.getString("mobile_number")
-		member.photo = toPhoto(rs.getBlob("photo"), member.universityId)
-				
-		member.inUseFlag = rs.getString("in_use_flag")
-		member.inactivationDate = toLocalDate(rs.getDate("date_of_inactivation"))
-		member.groupName = rs.getString("group_name")
-			
-		member.homeDepartment = toDepartment(rs.getString("home_department_code"))
-		member.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
-		member.teachingStaff = rs.getString("teaching_staff") == "Y"
-		member.sprCode = rs.getString("spr_code")
-		member.sitsCourseCode = rs.getString("sits_course_code")
-		
-		// member.route
-		
-		member.yearOfStudy = rs.getInt("year_of_study")
-		member.attendanceMode = rs.getString("mode_of_attendance")
-		member.enrolmentStatus = rs.getString("enrolment_status")
-		member.courseStatus = rs.getString("course_status")
-		member.studentStatus = rs.getString("student_status")
-		member.fundingSource = rs.getString("source_of_funding")
-		member.programmeOfStudy = rs.getString("programme_of_study")
-		member.intendedAward = rs.getString("intended_award")
-		
-		member.academicYear = toAcademicYear(rs.getString("academic_year_code"))
-		member.studyDepartment = toDepartment(rs.getString("study_department"))
-		member.courseStartYear = toAcademicYear(rs.getString("course_start_year"))
-		member.yearCommencedDegree = toAcademicYear(rs.getString("year_commenced_degree"))
-		member.courseBaseYear = toAcademicYear(rs.getString("course_base_start_year"))
-		member.courseEndDate = toLocalDate(rs.getDate("course_end_date"))
-		member.transferReason = rs.getString("transfer_reason")
-		member.beginDate = toLocalDate(rs.getDate("begin_date"))
-		member.endDate = toLocalDate(rs.getDate("end_date"))
-		member.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
-		member.feeStatus = rs.getString("fee_status")
-		member.domicile = rs.getString("domicile")
-		member.highestQualificationOnEntry = rs.getString("highest_qualification_on_entry")
-		member.lastInstitute = rs.getString("last_institute")
-		member.lastSchool = rs.getString("last_school")
-		
-		processNames(member, users)
-	}
-	
-	def processNames(member: UpstreamMember, users: Map[String, User]) = {
+	def processNames(member: Member, users: Map[String, User]) = {
 		val ssoUser = users(member.userId)
 		
 		member.title = WordUtils.capitalizeFully(Option(member.title).getOrElse("")).trim()
 		member.firstName = formatForename(Option(member.firstName).getOrElse(""), Option(ssoUser.getFirstName()).getOrElse(""))
+		member.fullFirstName = formatForename(Option(member.fullFirstName).getOrElse(""), Option(ssoUser.getFirstName()).getOrElse(""))
 		member.lastName = formatSurname(Option(member.lastName).getOrElse(""), Option(ssoUser.getLastName()).getOrElse(""))
 	  
 		member
@@ -195,8 +100,6 @@ object ProfileImporter {
 			levl.name as study_level,
 			study.year_of_study as year_of_study,
 			moa.name as mode_of_attendance,
-			enrolment_status.name as enrolment_status,
-			course_status.name as course_status,
 			funding.name as source_of_funding,
 			student_status.name as student_status,
 			pos.name as programme_of_study,
@@ -253,13 +156,7 @@ object ProfileImporter {
     
     		left outer join status student_status 
 	  			on study.student_status = student_status.status_code
-	  
-    		left outer join status enrolment_status 
-	  			on study.student_status = enrolment_status.status_code
-	  
-    		left outer join status course_status 
-	  			on study.student_status = course_status.status_code
-    
+	     
     		left outer join mode_of_attendance moa 
 	  			on study.mode_of_attendance = moa.moa_code
     
@@ -282,10 +179,117 @@ object ProfileImporter {
 	  			on details.last_school = last_school.school_code
 
 		where m.primary_user_code is not null
+		and m.primary_user_code in (:usercodes)
 		and m.preferred_email_address is not null
 		and m.preferred_email_address != 'No Email'
 		and m.in_use_flag = 'Active'
 	  	"""
+	  
+	private def toPhoto(photoBlob: Blob, universityId: String, fileDao: FileDao) = {
+		if (photoBlob == null || photoBlob.length == 0) { 
+			null
+		} else {
+			val photo = new FileAttachment
+			photo.name = universityId + ".jpg"
+			photo.uploadedData = photoBlob.getBinaryStream
+			photo.uploadedDataLength = photoBlob.length
+			fileDao.saveTemporary(photo)
+			
+			photo
+		}
+	}
+	
+	private def toRoute(routeCode: String, moduleAndDepartmentService: ModuleAndDepartmentService) = {
+		if (routeCode == null || routeCode == "") {
+			null
+		} else {
+			moduleAndDepartmentService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
+		}
+	}
+	
+	private def toDepartment(departmentCode: String, moduleAndDepartmentService: ModuleAndDepartmentService) = {
+		if (departmentCode == null || departmentCode == "") {
+			null
+		} else {
+			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
+		}
+	}
+	
+	private def toLocalDate(date: Date) = {
+		if (date == null) {
+			null
+		} else {
+			new LocalDate(date)
+		}
+	}
+	
+	private def toAcademicYear(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			AcademicYear.parse(code)
+		}
+	}
+	
+	def createMember(rs: ResultSet, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) = {
+		val member = new Member
+					
+		member.universityId = rs.getString("university_id")
+		member.userId = rs.getString("user_code")					
+		member.firstName = rs.getString("preferred_forename")
+		member.lastName = rs.getString("family_name")
+		member.email = rs.getString("email_address")
+		member.title = rs.getString("title")
+		member.fullFirstName = rs.getString("forenames")
+		member.gender = Gender.fromCode(rs.getString("gender"))
+		member.nationality = rs.getString("nationality")
+		member.homeEmail = rs.getString("alternative_email_address")
+		member.mobileNumber = rs.getString("mobile_number")
+		member.photo = toPhoto(rs.getBlob("photo"), member.universityId, fileDao)
+				
+		member.inUseFlag = rs.getString("in_use_flag")
+		member.inactivationDate = toLocalDate(rs.getDate("date_of_inactivation"))
+		member.groupName = rs.getString("group_name")
+			
+		member.homeDepartment = toDepartment(rs.getString("home_department_code"), moduleAndDepartmentService)
+		member.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
+		member.teachingStaff = rs.getString("teaching_staff") == "Y"
+		member.sprCode = rs.getString("spr_code")
+		member.sitsCourseCode = rs.getString("sits_course_code")
+		
+		member.route = toRoute(rs.getString("route_code"), moduleAndDepartmentService)
+		
+		member.yearOfStudy = rs.getInt("year_of_study")
+		member.attendanceMode = rs.getString("mode_of_attendance")
+		member.studentStatus = rs.getString("student_status")
+		member.fundingSource = rs.getString("source_of_funding")
+		member.programmeOfStudy = rs.getString("programme_of_study")
+		member.intendedAward = rs.getString("intended_award")
+		
+		member.academicYear = toAcademicYear(rs.getString("academic_year_code"))
+		member.studyDepartment = toDepartment(rs.getString("study_department"), moduleAndDepartmentService)
+		member.courseStartYear = toAcademicYear(rs.getString("course_start_year"))
+		member.yearCommencedDegree = toAcademicYear(rs.getString("year_commenced_degree"))
+		member.courseBaseYear = toAcademicYear(rs.getString("course_base_start_year"))
+		member.courseEndDate = toLocalDate(rs.getDate("course_end_date"))
+		member.transferReason = rs.getString("transfer_reason")
+		member.beginDate = toLocalDate(rs.getDate("begin_date"))
+		member.endDate = toLocalDate(rs.getDate("end_date"))
+		member.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
+		member.feeStatus = rs.getString("fee_status")
+		member.domicile = rs.getString("domicile")
+		member.highestQualificationOnEntry = rs.getString("highest_qualification_on_entry")
+		member.lastInstitute = rs.getString("last_institute")
+		member.lastSchool = rs.getString("last_school")
+		
+		member
+	}
+	  
+	class AllMembersQuery(ds: DataSource, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) extends MappingSqlQuery[Member](ds, GetAllMembers) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()		
+		override def mapRow(rs: ResultSet, rowNumber: Int) = createMember(rs, fileDao, moduleAndDepartmentService)
+	}
 	  
 	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
 	  

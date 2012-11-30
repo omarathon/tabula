@@ -72,7 +72,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.academicYear = new AcademicYear(2011)
 			otherGroup.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
 			
-			val member = new UpstreamMember
+			val member = new Member
 			member.universityId = "0672089"
 			member.userId = "cuscav"					
 			member.firstName = "Mathew"
@@ -99,8 +99,8 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			
 			dao.getAssessmentGroup(law2012).isDefined should be (false)
 			
-			session.load(classOf[UpstreamMember], "0672089") match {
-				case loadedMember:UpstreamMember => loadedMember.firstName should be ("Mathew")
+			session.load(classOf[Member], "0672089") match {
+				case loadedMember:Member => loadedMember.firstName should be ("Mathew")
 				case _ => fail("Department not found")
 			}
 		}

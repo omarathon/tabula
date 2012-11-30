@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import java.sql.Connection
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import uk.ac.warwick.tabula.data.model.UpstreamMember
+import uk.ac.warwick.tabula.data.model.Member
 
 @Service
 class AssignmentImporter extends InitializingBean {

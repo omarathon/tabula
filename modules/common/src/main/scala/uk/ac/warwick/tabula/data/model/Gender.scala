@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.reflect.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class Gender(val dbValue: String)
-case object Male extends Gender("M")
-case object Female extends Gender("F")
-case object Unspecified extends Gender("N")
+sealed abstract class Gender(val dbValue: String, @BeanProperty val description: String)
+case object Male extends Gender("M", "Male")
+case object Female extends Gender("F", "Female")
+case object Unspecified extends Gender("N", "Not specified")
 
 object Gender {
 	def fromCode(code: String) = code match {
-	  	case "M" => Male
-	  	case "F" => Female
-	  	case "N" => Unspecified
+	  	case Male.dbValue => Male
+	  	case Female.dbValue => Female
+	  	case Unspecified.dbValue => Unspecified
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}

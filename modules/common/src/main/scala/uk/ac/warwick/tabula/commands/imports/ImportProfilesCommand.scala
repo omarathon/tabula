@@ -8,51 +8,64 @@ import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.Transactions._
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.User
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	def applyInternal() {
 		benchmark("ImportMembers") {
 			doMemberDetails
-			logger.debug("Imported UpstreamMembers")
+			logger.debug("Imported Members")
+			doAddressDetails
 		}
 	}
 
-	/** Import basic info about all members in ADS, batched 1000 at a time */
+	/** Import basic info about all members in ADS, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 	def doMemberDetails {
-		transactional() {
-			benchmark("Import all member details") {
-				var list = List[UpstreamMember]()
-				profileImporter.allMemberDetails { member =>
-					list = list :+ member
-					if (list.size >= 1000) {
-						logger.info("Saving details of " + list.size + " members")
-						saveMemberDetails(list)
-						list = Nil
-					}
-				}
-				if (!list.isEmpty) {
-					logger.info("Saving details of " + list.size + " members")
-					saveMemberDetails(list)
+		benchmark("Import all member details") {
+			for (usercodes <- logSize(profileImporter.allUserCodes).grouped(250)) {
+				logger.info("Fetching details for " + usercodes.size + " usercodes from websignon")
+				val users: Map[String, User] = userLookup.getUsersByUserIds(usercodes).toMap
+				
+				logger.info("Fetching member details for " + usercodes.size + " members from ADS")
+
+				transactional() {
+					saveMemberDetails(profileImporter.getMemberDetails(usercodes).map(profileImporter.processNames(_, users)))
 				}
 			}
 		}
 	}
-
-	def saveMemberDetails(seq: Seq[UpstreamMember]) {
+	
+	def doAddressDetails {
+		
+	}
+	
+	def refresh(member: Member) {
+		// The importer creates a new object and does saveOrUpdate; so evict the current object
+		session.evict(member)
+		val usercode = member.userId
+		val user = userLookup.getUserByUserId(usercode)
+	  
+		transactional() {
+			saveMemberDetails(profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user))))
+		}
+	}
+	
+	def saveMemberDetails(seq: Seq[Member]) {
 		seq foreach { member =>
 			session.saveOrUpdate(member)
 		}
 		session.flush
 		seq foreach session.evict
 	}
-
+	
 	def equal(s1: Seq[String], s2: Seq[String]) =
 		s1.length == s2.length && s1.sorted == s2.sorted
 

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
-class UpstreamMember extends Viewable with ToString {
+class Member extends Viewable with ToString {
 	@Id @BeanProperty var universityId: String = _
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
@@ -51,15 +51,13 @@ class UpstreamMember extends Viewable with ToString {
 	@BeanProperty var sprCode: String = _
 	@BeanProperty var sitsCourseCode: String = _
 	
-	/*@ManyToOne
-	@JoinColumn(name = "route_code")
-	@BeanProperty var route: UpstreamRoute = _*/
+	@ManyToOne
+	@JoinColumn(name = "route_id")
+	@BeanProperty var route: Route = _
 	
 	@BeanProperty var yearOfStudy: JInteger = _
 	@BeanProperty var attendanceMode: String = _
 	
-	@BeanProperty var enrolmentStatus: String = _
-	@BeanProperty var courseStatus: String = _
 	@BeanProperty var studentStatus: String = _
 	
 	@BeanProperty var fundingSource: String = _
@@ -107,6 +105,9 @@ class UpstreamMember extends Viewable with ToString {
 	
 	@BeanProperty var lastInstitute: String = _
 	@BeanProperty var lastSchool: String = _
+	
+	@BeanProperty def fullName = firstName + " " + lastName
+	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 
 	def asSsoUser = {
 		val u = new User
@@ -114,7 +115,7 @@ class UpstreamMember extends Viewable with ToString {
 		u.setWarwickId(universityId)
 		u.setFirstName(firstName)
 		u.setLastName(lastName)
-		u.setFullName(u.getFirstName + " " + u.getLastName)
+		u.setFullName(fullName)
 		u.setEmail(email)
 		u.setDepartment(homeDepartment.name)
 		u.setDepartmentCode(homeDepartment.code)

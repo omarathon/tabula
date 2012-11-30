@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 import org.junit.Test
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.UpstreamMember
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Department
@@ -24,10 +24,10 @@ class ProfileImporterTest extends TestBase with Mockito {
 		val importer = new ProfileImporter
 		
 		for (name <- names) {
-			val member = new UpstreamMember
+			val member = new Member
 			member.firstName = name.toUpperCase()
 			
-			importer.processNames(member, Map() withDefaultValue(new AnonymousUser))
+			importer.processNames(member, Map().withDefaultValue(new AnonymousUser))
 			
 			member.firstName should be (name)
 		}
@@ -41,10 +41,10 @@ class ProfileImporterTest extends TestBase with Mockito {
 		val importer = new ProfileImporter
 		
 		for (name <- names) {
-			val member = new UpstreamMember
+			val member = new Member
 			member.lastName = name.toUpperCase()
 			
-			importer.processNames(member, Map() withDefaultValue(new AnonymousUser))
+			importer.processNames(member, Map().withDefaultValue(new AnonymousUser))
 			
 			member.lastName should be (name)
 		}
@@ -64,12 +64,12 @@ class ProfileImporterTest extends TestBase with Mockito {
 		
 		val users = Map("user1" -> user1, "user2" -> user2)
 		
-		val member1 = new UpstreamMember
+		val member1 = new Member
 		member1.userId = "user1"
 		member1.firstName = "MATHEW JAMES"
 		member1.lastName = "MACINTOSH"
 		  
-		val member2 = new UpstreamMember
+		val member2 = new Member
 		member2.userId = "user2"
 		member2.firstName = "MATHEW JAMES"
 		member2.lastName = "MACINTOSH"
@@ -81,17 +81,7 @@ class ProfileImporterTest extends TestBase with Mockito {
 		importer.processNames(member2, users).lastName should be ("MacIntosh")
 	}
 	
-	@Test def importStaff {
-		val importer = new ProfileImporter
-		
-		val userLookup = mock[UserLookupService]
-		userLookup.getUsersByUserIds(any[List[String]]) returns (Map[String, User]())
-		
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
-		
-		importer.userLookup = userLookup
-		importer.moduleAndDepartmentService = moduleAndDepartmentService
-		
+	@Test def importStaff {	
 		val rs = mock[ResultSet]
 		rs.getString("university_id") returns("0672089")
 		rs.getString("title") returns("MR")
@@ -105,7 +95,7 @@ class ProfileImporterTest extends TestBase with Mockito {
 		rs.getInt("year_of_study") returns(3)
 		rs.getDate("date_of_birth") returns(new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDate().getTime()))
 		
-		val member = importer.createMember(rs, Map().withDefaultValue(new AnonymousUser))
+		val member = new ProfileImporter().processNames(ProfileImporter.createMember(rs, null, null), Map().withDefaultValue(new AnonymousUser))
 		member.title should be ("Mr")
 		member.universityId should be ("0672089")
 		member.userId should be ("cuscav")

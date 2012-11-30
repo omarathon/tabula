@@ -77,14 +77,6 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	def saveMemberDetails(seq: Seq[UpstreamMember]) {
-		seq foreach { member =>
-			session.saveOrUpdate(member)
-		}
-		session.flush
-		seq foreach session.evict
-	}
-
 	/**
 	 * This sequence of ModuleRegistrations represents the members of an assessment
 	 * group, so save them (and reconcile it with any existing members we have in the

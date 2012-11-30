@@ -1,7 +1,11 @@
 --- TAB-187
 
-ALTER TABLE UPSTREAMMEMBER
-ADD (
+CREATE TABLE MEMBER (
+	UNIVERSITYID NVARCHAR2(100) NOT NULL,
+	USERID NVARCHAR2(100) NOT NULL,
+	FIRSTNAME NVARCHAR2(255),
+	LASTNAME NVARCHAR2(255),
+	EMAIL NVARCHAR2(4000),
 	TITLE nvarchar2(100),
 	FULLFIRSTNAME nvarchar2(255),
 	GENDER nvarchar2(1),
@@ -18,11 +22,9 @@ ADD (
 	TEACHINGSTAFF number(1,0),
 	SPRCODE nvarchar2(100),
 	SITSCOURSECODE nvarchar2(100),
-	ROUTE_CODE nvarchar2(100),
+	ROUTE_ID nvarchar2(255),
 	YEAROFSTUDY number(2,0),
 	ATTENDANCEMODE nvarchar2(255),
-	ENROLMENTSTATUS nvarchar2(255),
-	COURSESTATUS nvarchar2(255),
 	STUDENTSTATUS nvarchar2(255),
 	FUNDINGSOURCE nvarchar2(255),
 	PROGRAMMEOFSTUDY nvarchar2(255),
@@ -40,5 +42,19 @@ ADD (
 	DOMICILE nvarchar2(255),
 	HIGHESTQUALIFICATIONONENTRY nvarchar2(255),
 	LASTINSTITUTE nvarchar2(255),
-	LASTSCHOOL nvarchar2(255)
+	LASTSCHOOL nvarchar2(255),
+	CONSTRAINT "MEMBER_PK" PRIMARY KEY ("UNIVERSITYID")
 );
+
+create table ROUTE (
+    id nvarchar2(255) not null,
+    active number(1,0) not null,
+    code nvarchar2(255),
+    name nvarchar2(255),
+    participantsgroup_id nvarchar2(255),
+    degreetype nvarchar2(100),
+    department_id nvarchar2(255),
+    CONSTRAINT "ROUTE_PK" PRIMARY KEY ("ID"),
+	CONSTRAINT "ROUTE_CODE" UNIQUE ("CODE")
+);
+CREATE INDEX IDX_ROUTE_DEPT ON ROUTE(DEPARTMENT_ID);
