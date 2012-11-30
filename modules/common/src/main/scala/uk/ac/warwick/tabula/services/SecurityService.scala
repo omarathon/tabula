@@ -74,6 +74,9 @@ class SecurityService extends Logging {
 
 		case Delete(submission: Submission) => can(user, Participate(submission.assignment.module))
 
+		case DownloadSubmissions(assignment: Assignment) => assignment.isMarker(user.apparentUser) ||
+			can(user, Participate(assignment.module))
+
 		case Masquerade() => user.sysadmin || user.masquerader
 		
 		case View(member: Member) => 

@@ -37,7 +37,10 @@ class SubmissionsAndFeedbackController extends CourseworkController {
         val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
         val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
         val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
-        
+	      // later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
+	      // for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
+	      val mustReleaseForMarking = assignment.markScheme != null
+
         val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
             var enhancedSubmissionForUniId = new SubmissionListItem(new Submission(), false)
             var feedbackForUniId: Feedback = null
@@ -70,7 +73,8 @@ class SubmissionsAndFeedbackController extends CourseworkController {
             "assignment" -> assignment,
             //"submissions" -> submissions,
             "students" -> students,
-            "hasOriginalityReport" -> hasOriginalityReport)
+            "hasOriginalityReport" -> hasOriginalityReport,
+            "mustReleaseForMarking" -> mustReleaseForMarking)
             .crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
     }
 

@@ -23,23 +23,19 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback, FileAttachment}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.NoUser
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.ZipEntryInputStream
-import uk.ac.warwick.tabula.services.ZipService
-import uk.ac.warwick.tabula.services.Zips
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import java.nio.charset.Charset
 import uk.ac.warwick.spring.Wire
-
+import scala.Some
+import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
@@ -81,6 +77,8 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
 	var fileDao = Wire.auto[FileDao]
+	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	/* for single upload */
 	@BeanProperty var uniNumber: String = _
@@ -234,14 +232,21 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 			for (attachment <- file.attached)
 				feedback addAttachment attachment
 			session.saveOrUpdate(feedback)
+			updateSubmissionState(uniNumber)
 
 			feedback
+		}
+
+		def updateSubmissionState(uniNumber: String) {
+			val submission = assignmentService.getSubmissionByUniId(assignment, uniNumber)
+			submission.foreach(submissionService.updateState(_, MarkingCompleted))
 		}
 
 		if (items != null && !items.isEmpty()) {
 
 			val feedbacks = items.map { (item) =>
 				saveFeedback(item.uniNumber, item.file)
+
 			}
 			zipService.invalidateFeedbackZip(assignment)
 			feedbacks.toList

@@ -132,6 +132,18 @@ $(function(){
                 }
                 return false;
             });
+
+            $('#release-submissions-button').click(function(event){
+                event.preventDefault();
+                var $checkedBoxes = $(".collection-checkbox:checked", $container);
+                if ($container.data('checked') != 'none') {
+                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                    $form.append($checkedBoxes.clone());
+                    $(document.body).append($form);
+                    $form.submit();
+                }
+                return false;
+            });
             
         },
     
@@ -161,11 +173,11 @@ $(function(){
         },
     
         onSomeChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').removeClass('disabled');
+            $('#modify-selected').removeClass('disabled');
         },
     
         onNoneChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').addClass('disabled');
+            $('#modify-selected').addClass('disabled');
         }
     
     });

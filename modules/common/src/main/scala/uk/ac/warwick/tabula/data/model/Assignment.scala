@@ -15,10 +15,7 @@ import Assignment.defaultUploadName
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.actions.Viewable
-import uk.ac.warwick.tabula.data.model.forms.CommentField
-import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.forms.FileField
-import uk.ac.warwick.tabula.data.model.forms.FormField
+import forms._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.CurrentUser
@@ -35,6 +32,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import scala.Some
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import uk.ac.warwick.tabula.data.model.SubmissionsReport
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -251,15 +249,19 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	}
 
 	def removeField(field: FormField) {
+		fields.remove(field)
 		assignmentService.deleteFormField(field)
+		// manually update all fields to reflect their new positions
+		fields.zipWithIndex foreach {case (field, index) => field.position = index}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
 
 	def commentField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
 
-	def markerSelectField: Option[CommentField] = findFieldOfType[CommentField](Assignment.defaultMarkerSelectorName)
-	
+	def markerSelectField: Option[MarkerSelectField] =
+		findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
+
 	def wordCountField: Option[WordCountField] = findFieldOfType[WordCountField](Assignment.defaultWordCountName)
 
 	/**
@@ -315,6 +317,23 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		} else {
 			true
 		}
+	}
+
+	def isMarker(user: User): Boolean = {
+		if (markScheme != null)
+			markScheme.firstMarkers.includes(user.getUserId)
+		else false
+	}
+
+	/**
+	 * Optionally returns the submissions that are to be marked by the given user
+	 * Returns none if this assignment doesn't have a valid mark scheme attached
+	 */
+	def getMarkersSubmissions(marker: User): Option[Seq[Submission]] = {
+		if (markScheme != null){
+			Some(markScheme.getSubmissions(this, marker))
+		}
+		else None
 	}
 
 	/**

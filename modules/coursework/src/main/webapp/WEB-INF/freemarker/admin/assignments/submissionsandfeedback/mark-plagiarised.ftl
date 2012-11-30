@@ -2,10 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-
-
-<@f.form method="post" action="/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised" commandName="markPlagiarisedCommand">
-
+<#assign formAction><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#assign>
+<@f.form method="post" action="${formAction}" commandName="markPlagiarisedCommand">
 
 <#if markPlagiarisedCommand.markPlagiarised> 
 	<#assign verb = "mark">

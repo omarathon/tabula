@@ -25,7 +25,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@JoinColumn(name="ownersgroup_id")
 	@BeanProperty var owners:UserGroup = new UserGroup
 	
-	@BeanProperty var collectFeedbackRatings:Boolean = true
+	@BeanProperty var collectFeedbackRatings:Boolean = false
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()

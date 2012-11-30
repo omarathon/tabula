@@ -1,11 +1,9 @@
-package uk.ac.warwick.tabula.home.services
+package uk.ac.warwick.tabula.coursework.services
 
 import uk.ac.warwick.tabula.TestBase
 import SchedulingConcurrency._
-
-import org.junit.Test
-import scala.actors.Actor
 import scala.actors.Actor._
+import org.junit.Test
 
 class ScheduledJobsTest extends TestBase {
 

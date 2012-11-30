@@ -27,14 +27,23 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 
-	val idSplitSize = 4
+	val idSplitSize = 2
+	val idSplitSizeCompat = 4 // for existing paths split by 4 chars
 
 	val TemporaryFileBatch = 1000 // query for this many each time
 	val TemporaryFileSubBatch = 50 // run a separate transaction for each one
 
-	private def partition(id: String): String = id.replace("-", "").grouped(idSplitSize).mkString("/")
+	private def partition(id: String, splitSize: Int): String = id.replace("-", "").grouped(splitSize).mkString("/")
+	private def partition(id: String): String = partition(id, idSplitSize)
+	private def partitionCompat(id: String): String = partition(id, idSplitSizeCompat)
 
-	def targetFile(id: String): File = new File(attachmentDir, partition(id))
+	/**
+	 * Retrieves a File object where you can store data under this ID. It doesn't check
+	 * whether the File already exists. If you want to retrieve an existing file you must
+	 * use #getData which checks whether it exists and also knows to check the old-style path if needed.
+	 */
+	private def targetFile(id: String): File = new File(attachmentDir, partition(id))
+	private def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
 	def saveTemporary(file: FileAttachment): Unit = {
 		session.saveOrUpdate(file)
@@ -55,10 +64,12 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	/** Only for use by FileAttachment to find its own backing file. */
 	def getData(id: String): Option[File] = targetFile(id) match {
-		case file: File if file.exists => {
-			Some(file)
+		case file: File if file.exists => Some(file)
+		// If no file found, check if it's stored under old 4-character path style
+		case _ => targetFileCompat(id) match {
+			case file: File if file.exists => Some(file)
+			case _ => None
 		}
-		case _ => None
 	}
 
 	/**
@@ -88,9 +99,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		transactional(propagation = REQUIRES_NEW) {
 			// To be safe, split off temporary files which are attached to non-temporary things
 			// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
-			val grouped = files groupBy (_.isAttached)
-			val okayToDelete = grouped.getOrElse(false, Nil)
-			val dontDelete = grouped.getOrElse(true, Nil)
+			val (dontDelete, okayToDelete) = files partition (_.isAttached)
 
 			if (dontDelete.size > 0) {
 				// Somewhere else in the app is failing to set temporary=false
@@ -100,7 +109,9 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			session.createQuery("delete FileAttachment f where f.id in :ids")
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.executeUpdate()
-			for (file <- files) targetFile(file.id).delete()
+			for (attachment <- files; file <- getData(attachment.id)) {
+				file.delete()
+			}
 		}
 	}
 

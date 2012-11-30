@@ -4,6 +4,7 @@ import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.DateTimeFieldType._
 import collection.JavaConversions._
+import org.joda.time.format.DateTimeFormat
 
 /**
  * Date format strings and formatter objects that can be used
@@ -20,5 +21,8 @@ object DateFormats {
 	 * make a formatter with no seconds but still having a timezone.
 	 */
 	final val IsoDateTime = ISODateTimeFormat.dateTimeNoMillis
+	
+	/** Date-time format used in Formsbuilder-style CSV export */
+	final val CSVDateTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
 }
 
