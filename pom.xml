@@ -10,7 +10,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>20</version>
+	<version>21-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
