@@ -30,7 +30,7 @@ abstract class Features {
 	@BeanProperty var collectRatings: Boolean = true
 	@BeanProperty var submissions: Boolean = true
 	@BeanProperty var privacyStatement: Boolean = true
-	@BeanProperty var collectMarks: Boolean = false
+	@BeanProperty var collectMarks: Boolean = true
 	@BeanProperty var turnitin: Boolean = true
 	@BeanProperty var assignmentMembership: Boolean = true
 	@BeanProperty var extensions: Boolean = true
