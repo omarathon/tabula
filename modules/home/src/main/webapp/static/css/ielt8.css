@@ -1,5 +1,7 @@
 /* spacer pipes are collapsed in IElt8 */
-#warwick-site-links li.spacer, #utility-bar li.spacer, #footer-utility li.spacer {
+#warwick-site-links li.spacer,
+#utility-bar li.spacer,
+#footer-utility li.spacer {
   padding: 0 0.3em;
 }
 #search-container #search-box {
@@ -26,4 +28,9 @@
   z-index: auto;
   bottom: auto;
   top: auto;
+}
+/* cancels out position:relative added for fixed navigation */
+#navigation-and-content,
+#navigation-wrapper.vwrap {
+  position: static;
 }

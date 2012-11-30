@@ -4,6 +4,6 @@
 <#assign siteHeader="Component" />
 <#assign subsite=true />
 <#assign title="Component" />
-<#assign js="common.js" />
+<#assign name="common" />
 
 </#compress>

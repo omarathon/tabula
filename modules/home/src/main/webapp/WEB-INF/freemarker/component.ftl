@@ -4,6 +4,6 @@
 <#assign siteHeader="Tabula" />
 <#assign subsite=false />
 <#assign title="Tabula" />
-<#assign js="home.js" />
+<#assign name="home" />
 
 </#compress>
