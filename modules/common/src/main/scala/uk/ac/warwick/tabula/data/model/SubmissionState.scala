@@ -11,7 +11,7 @@ sealed abstract class SubmissionState(val name: String, val ts: Set[SubmissionSt
 	override def toString = name
 }
 // initial state - received but has not yet been released for marking
-case object Received extends SubmissionState("Received", Set(ReleasedForMarking))
+case object Received extends SubmissionState("Received", Set(ReleasedForMarking, MarkingCompleted))
 // ready to be distributed to markers
 case object ReleasedForMarking extends SubmissionState("ReleasedForMarking", Set(DownloadedByMarker))
 // has been downloaded by the marker and is being marked
