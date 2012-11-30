@@ -26,10 +26,10 @@
 <![endif]-->
 
 <@stylesheet "/static/libs/popup/popup.css" />
-<@stylesheet "/static/css/fonts/standard.css" />
 <@stylesheet "/static/libs/jquery-rating/jquery.rating.css" />
 
-<@script "/static/js/id6scripts.js" />
+<#include "_scripts.ftl" />
+
 <@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 <@script "/static/libs/jquery.delayedObserver.js" />
 <@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
@@ -39,4 +39,4 @@
 <@script "/static/libs/bootstrap-editable/js/bootstrap-editable.js" />
 <@script "/static/js/modernizr.js" />
 <@script "/static/js/browser-info.js" />
-<@script "/static/js/${component.js?default('common.js')}" />
+<@script "/static/js/${component.name?default('common')}.js" />

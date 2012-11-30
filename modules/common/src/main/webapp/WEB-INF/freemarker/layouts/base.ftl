@@ -12,7 +12,7 @@
 			</div>
 			</#if>
 			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
-			<div id="header" class="header-small" data-type="image">
+			<div id="header" class="<#if jumbotron?? && jumbotron>header-medium<#else>header-small</#if>" data-type="image">
 			
 				<div id="masthead" class="transparent"> <!-- optional: class="transparent" -->
 					<div class="access-info">
@@ -91,7 +91,9 @@
 							</h1>
 							
 							<h2 id="strapline">
-								
+								<#if jumbotron?? && jumbotron>
+									Student management and administration system
+								</#if>
 							</h2>
 						</div>
 						
