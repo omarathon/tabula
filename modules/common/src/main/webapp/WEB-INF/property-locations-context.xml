@@ -9,7 +9,6 @@
 		<value>classpath:/default.properties</value>
 		<value>classpath:/messages.properties</value>
 		<value>classpath:/tabula.properties</value>
-		<value>classpath:/tabula-private.properties</value>
 		<value>/WEB-INF/build.properties</value>
 		<value>classpath:/messages.properties</value>
 	</util:list>
