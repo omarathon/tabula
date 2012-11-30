@@ -27,6 +27,7 @@ import uk.ac.warwick.spring.Wire
 class SubmissionsAndFeedbackController extends CourseworkController {
 
     var auditIndexService = Wire.auto[AuditEventIndexService]
+		var assignmentService = Wire.auto[AssignmentService]
 
     @RequestMapping(method = Array(GET, HEAD))
     def list(command: ListSubmissionsCommand) = {
@@ -36,10 +37,15 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
         val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
         val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
+
+				val moduleMembers = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
         val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
-	      // later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
-	      // for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
-	      val mustReleaseForMarking = assignment.markScheme != null
+
+				val awaitingSubmission = (moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+
+				// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
+				// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
+				val mustReleaseForMarking = assignment.markScheme != null
 
         val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
             var enhancedSubmissionForUniId = new SubmissionListItem(new Submission(), false)
@@ -73,6 +79,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
             "assignment" -> assignment,
             //"submissions" -> submissions,
             "students" -> students,
+						"awaitingSubmission" -> awaitingSubmission,
             "hasOriginalityReport" -> hasOriginalityReport,
             "mustReleaseForMarking" -> mustReleaseForMarking)
             .crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))

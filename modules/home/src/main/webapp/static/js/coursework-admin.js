@@ -94,6 +94,10 @@ $(function(){
         e.preventDefault();
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
     });
+
+	$('.hide-awaiting-submission').on('click', function(){
+        $('.awaiting-submission, .hide-label, .show-label').toggle();
+    });
     
     $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     

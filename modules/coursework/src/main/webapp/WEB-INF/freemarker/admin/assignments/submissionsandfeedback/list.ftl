@@ -73,6 +73,10 @@ Publications: ${r.publicationOverlap}%)
 <#else>
 <div class="submission-feedback-list">
 	<@form.selector_check_all />
+	<a class="btn btn-mini hide-awaiting-submission" href="#">
+		<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
+		<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
+	</a>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<tr>
 			<th></th>
@@ -91,6 +95,18 @@ Publications: ${r.publicationOverlap}%)
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
+		<#list awaitingSubmission as student>
+			<tr class="itemContainer awaiting-submission">
+				<td></td>
+				<td>${student}</td>
+				<td></td>
+				<td><span class="label-blue">Awaiting submission</span></td>
+				<#if assignment.wordCountField??><td></td></#if>
+				<#if assignment.collectMarks><td></td></#if>
+				<td></td><td></td><td></td><td></td>
+				<#if hasOriginalityReport><td></td></#if>
+			</tr>
+		</#list>
 		<#list students as student>
 			<#assign enhancedSubmission=student.enhancedSubmission>
 			<#assign submission=enhancedSubmission.submission>
