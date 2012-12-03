@@ -68,16 +68,14 @@ html {
 	// the window
 	overflow-y: scroll;
 	
-	background: @background-colour url(../images/bg.png) no-repeat center -100px;
+	background: @background-colour url(../images/bg.png) no-repeat fixed center -100px;
 	color: @body-colour;
 }
 body { background: none; }
 
 #container {
 	// Hello Mister Coggy wog!
-	background-image: url(../images/inner-bg.png);
-	background-repeat: no-repeat;
-	background-position: center -100px;
+	background: white url(../images/inner-bg.png) no-repeat fixed center -100px; 
 }
 
 #page-header #site-header-container {
