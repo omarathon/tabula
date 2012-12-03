@@ -123,35 +123,40 @@
 			
 			<div id="navigation-and-content">
 			
-	
-	<div id="navigation" class="horizontal">
-	<div id="primary-navigation-wrapper">
-		<div id="before-primary-navigation"></div>
-		
-		<div id="primary-navigation-container" >
-			<ul id="primary-navigation" >
-				<li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="<@url page="/" />">Home</a>										
+				<#if !component.nonav>	
+					<div id="navigation" class="horizontal">
+						<div id="primary-navigation-wrapper">
+							<div id="before-primary-navigation"></div>
+				
+							<div id="primary-navigation-container" >
+								<ul id="primary-navigation" >
+									<li class="section rendered-link">
+										<div class="link-content">
+											<div class="title rendered-link-content">
+												<#assign homeUrl><@url page="/" /></#assign>
+												<#if info.requestedUri != homeUrl>
+													<a href="${homeUrl}">${component.title}</a>
+												<#else>
+													<span>${component.title}</span>	
+												</#if>
+											</div>
+										</div>
+									</li>
+									<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
+										<div class="link-content">
+											<div class="title rendered-link-content">
+												<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
+											</div>
+										</div>
+									</li></#list></#if>
+								</ul>
+							</div>
+				
+				
+							<div id="after-primary-navigation"></div>
 						</div>
 					</div>
-				</li>
-				<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
-					<div class="link-content">
-						<div class="title rendered-link-content">
-							<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
-						</div>
-					</div>
-				</li></#list></#if>
-			</ul>
-		</div>
-		
-		
-		<div id="after-primary-navigation"></div>
-	</div>
-	
-</div>
+				</#if>
 		
 				<div id="content-wrapper">					     
 					<div id="main-content">
