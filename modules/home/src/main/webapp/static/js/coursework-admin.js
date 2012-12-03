@@ -98,6 +98,10 @@ $(function(){
 	$('.hide-awaiting-submission').on('click', function(){
         $('.awaiting-submission, .hide-label, .show-label').toggle();
     });
+	// hide this button if it would do nothing
+	if ($('.awaiting-submission').length == 0) {
+		$('.hide-awaiting-submission').hide();
+	}
     
     $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     
