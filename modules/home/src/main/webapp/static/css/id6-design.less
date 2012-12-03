@@ -86,13 +86,8 @@ body { background: none; }
 
 // Link colours
 a:link, a:visited {color: @link-colour;}
-#main-content a:visited {color: @link-visited-colour;}
-a:hover, #main-content a:hover {color: @link-hover;}
-
-// TAB-184 Override for bootstrap
-#main-content a.btn {
-	&:visited, &:hover { color: #333333; }
-}
+#main-content a:not(.btn):visited {color: @link-visited-colour;}
+a:hover, #main-content a:not(.btn):hover {color: @link-hover;}
 
 // Search tab
 #search-container ul.index-section li.active {
