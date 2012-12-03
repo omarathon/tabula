@@ -35,7 +35,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import java.nio.charset.Charset
 import uk.ac.warwick.spring.Wire
 import scala.Some
-import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
