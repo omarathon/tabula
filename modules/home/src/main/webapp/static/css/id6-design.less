@@ -75,7 +75,13 @@ body { background: none; }
 
 #container {
 	// Hello Mister Coggy wog!
-	background: white url(../images/inner-bg.png) no-repeat fixed center -100px; 
+	background: white url(../images/inner-bg.png) no-repeat fixed center -100px;
+	.box-shadow(0, 0, 48px, rgba(0,0,0,0.4));
+}
+
+.is-tablet #container, .is-smallscreen #container {
+	background: white;
+	.box-shadow-none();
 }
 
 #page-header #site-header-container {
