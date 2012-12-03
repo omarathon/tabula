@@ -37,11 +37,14 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 		val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
-
-		val moduleMembers = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
-
-		val awaitingSubmission = (moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+		val awaitingSubmission = 
+			if (assignment.members == null) {
+				Nil
+			} else {
+				val moduleMembers = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
+				(moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+			}
 
 		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
 		// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
