@@ -10,10 +10,10 @@ trait SubmissionService {
 }
 
 @Service(value = "submissionService")
-class SubmissionServiceServiceImpl extends SubmissionService with Daoisms with Logging {
+class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging {
 
 	def updateState(submission: Submission, state: SubmissionState){
-		if (!submission.state.canTransitionTo(state))
+		if (submission.state != null && !submission.state.canTransitionTo(state))
 			throw new IllegalStateException("Cannot transition from " + submission.state + " to " + state)
 		submission.state = state
 		session.saveOrUpdate(submission)
