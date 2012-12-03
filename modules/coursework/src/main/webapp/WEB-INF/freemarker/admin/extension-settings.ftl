@@ -36,6 +36,20 @@
 				Copy the URL of a page or file containing your full extension guidelines and paste it here.
 			</div>
 		</@form.labelled_row>
+		<@form.labelled_row "extensionManagers" "Extension managers">
+			<div id="extension-manager-list">
+				<@form.userpicker path="extensionManagers" list=true multiple=true />
+			</div>
+			<script>
+				jQuery('#extension-manager-list').on('click', function(e){
+					e.preventDefault();
+					var name = jQuery(this).data('expression');
+					var newButton = jQuery('<div><input type="text" class="text" name="'+name+'" /></div>');
+					jQuery('#extension-manager-list button').before(newButton);
+					return false;
+				});
+			</script>
+		</@form.labelled_row>
 	</div>
 </#if>
 	<div class="submit-buttons">
