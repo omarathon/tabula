@@ -27,6 +27,9 @@
 	<a class="btn long-running use-tooltip" title="Download the feedback files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 	Download feedback
 	</a>
+	<#if features.turnitin>
+		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+	</#if>
 	<div class="btn-group">
 		<a id="modify-selected" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 			Update selected
@@ -44,11 +47,6 @@
 		    <li>
 				<a class="" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
 			</li>
-			<#if features.turnitin>
-				<li>
-					<a class="" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
-				</li>
-			</#if>
 		</ul>
 	</div>
 </div>
@@ -73,6 +71,10 @@ Publications: ${r.publicationOverlap}%)
 <#else>
 <div class="submission-feedback-list">
 	<@form.selector_check_all />
+	<a class="btn btn-mini hide-awaiting-submission" href="#">
+		<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
+		<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
+	</a>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<tr>
 			<th></th>
@@ -91,6 +93,18 @@ Publications: ${r.publicationOverlap}%)
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
+		<#list awaitingSubmission as student>
+			<tr class="itemContainer awaiting-submission">
+				<td></td>
+				<td>${student}</td>
+				<td></td>
+				<td><span class="label-blue">Awaiting submission</span></td>
+				<#if assignment.wordCountField??><td></td></#if>
+				<#if assignment.collectMarks><td></td></#if>
+				<td></td><td></td><td></td><td></td>
+				<#if hasOriginalityReport><td></td></#if>
+			</tr>
+		</#list>
 		<#list students as student>
 			<#assign enhancedSubmission=student.enhancedSubmission>
 			<#assign submission=enhancedSubmission.submission>

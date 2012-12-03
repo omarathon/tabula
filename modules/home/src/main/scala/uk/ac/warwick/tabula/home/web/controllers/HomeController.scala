@@ -18,5 +18,8 @@ import uk.ac.warwick.tabula.web.controllers._
 
 	hideDeletedItems
 
-	@RequestMapping(Array("/")) def home(user: CurrentUser) = Mav("home/view")
+	@RequestMapping(Array("/")) def home(user: CurrentUser) = 
+	  	Mav("home/view",
+  			"jumbotron" -> true // All hail our new Jumbotron overlords
+	  	)
 }

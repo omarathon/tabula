@@ -25,7 +25,6 @@ import java.lang.Boolean
  * }}}
  */
 abstract class Features {
-
 	@BeanProperty var emailStudents: Boolean = false
 	@BeanProperty var collectRatings: Boolean = true
 	@BeanProperty var submissions: Boolean = true

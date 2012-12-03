@@ -24,9 +24,7 @@
 		 		}
 		  	</style>
 		  <![endif]-->
-		  
-		  <link rel="stylesheet" href="/static/css/fonts/standard.css" type="text/css">
-		
+		  	
 		  <#include "_scripts.ftl" />
 
 	</head>

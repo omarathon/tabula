@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Value
 import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import scala.react.EventSource
@@ -36,7 +37,7 @@ trait MaintenanceModeService {
 
 @Service
 class MaintenanceModeServiceImpl extends MaintenanceModeService with MaintenanceStatus {
-	private var _enabled: Boolean = false;
+	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	@BeanProperty def enabled: Boolean = _enabled
 	@BeanProperty var until: Option[DateTime] = None

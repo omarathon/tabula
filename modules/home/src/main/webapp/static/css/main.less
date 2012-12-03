@@ -1,25 +1,7 @@
 @import "css3.less";
 @import "embeddable.less";
 
-#container {
-  .box-shadow(0,0,48px, rgba(0,0,0,0.4));
-}
-
-#page-header {
-	.vertical-gradient(#696, #363);
-}
-
-#custom-header {
-    text-align:right;
-}
-
-html {
-	background: #cce5cc;
-	// Always show scrollbars to avoid horizontal jerkothon
-	// when moving between pages that are taller and shorter than
-	// the window
-	overflow-y: scroll;
-}
+@import "id6-design.less";
 
 // Badass CSS transitions for the popup library
 .WPopupBox {
@@ -69,28 +51,6 @@ h1 {
 
 tr.even-row {
     background-color: #eee;
-}
-
-#primary-navigation-wrapper {
-  .vertical-gradient(#606060, #404040);
-  border-top: 1px solid #404040;
-}
-#primary-navigation li.rendered-link {
-  padding-right: 20px;
-  background: transparent url(../images/crumb-divider.png) right center no-repeat;
-  
-  .rendered-link:hover {
-    .box-shadow-none();
-  }
-  .rendered-link-content {
-    a:link, a:visited {
-      color: #aaa;
-    }
-    a:hover {
-      color: #fff;
-      text-decoration: underline;
-    }
-  }
 }
 
 // Undo the damage done by Bootstrap
@@ -155,7 +115,6 @@ tr.even-row {
 }
 
 .marksUploadTable {
-	@import "bootstrap/bootstrap.less";
 	tbody {
 	
     	tr:nth-child(odd) td, tr:nth-child(odd) th {
