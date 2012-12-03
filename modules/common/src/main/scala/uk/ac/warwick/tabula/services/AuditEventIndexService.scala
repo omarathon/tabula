@@ -64,7 +64,7 @@ trait QueryMethods { self: AuditEventIndexService =>
 			query = all(termQuery("eventType", "SubmitAssignment"), 
 						some(moduleTerms:_*)
 					),
-			max = 10,
+			max = 20,
 			sort = reverseDateSort))
 	}
 

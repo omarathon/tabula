@@ -17,12 +17,12 @@ class ActivityService {
 	 *  In the future it'll likely make sense service events of interest at whichever
 	 *  depth of Tabula we're looking from.
 	 * */
-	def getActivities(user: CurrentUser): Seq[Activity] = {
+	def getActivities(user: CurrentUser): Seq[Activity[Any]] = {
 		val ownedModules = moduleService.modulesManagedBy(user.idForPermissions).toSet
 		val adminModules = moduleService.modulesAdministratedBy(user.idForPermissions).toSet
 		val collatedModules = (ownedModules ++ adminModules).toSeq
 		
-		auditIndexService.recentSubmissionsForModules(collatedModules) map (event => Activity(event))
+		auditIndexService.recentSubmissionsForModules(collatedModules) flatMap (event => Activity(event))
 	}
 
 }

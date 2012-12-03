@@ -12,12 +12,12 @@
 	<h1>Hello</h1>
 </#if>	
 
-<p class="muted">
+<p class="lead muted">
 	This is your service for managing coursework assignments and feedback
 </p>
 
 <#if !user.loggedIn>
-	<p>
+	<p class="alert">
 		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 		to see a personalised view.
 	</p>

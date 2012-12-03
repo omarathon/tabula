@@ -20,7 +20,7 @@
 	
 	<div class="row-fluid">
 		<div class="span6">
-			<h6 class="muted">Pending</h6>
+			<h6>Pending</h6>
 			
 			<#if has_pending_items>
 				<ul class="links">		
@@ -72,7 +72,7 @@
 		</div>
 		
 		<div class="span6">
-			<h6 class="muted">Past</h6>
+			<h6>Past</h6>
 
 			<#if has_historical_items>
 				<#if has_submissions>
