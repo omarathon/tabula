@@ -11,6 +11,8 @@ html.iframe {
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
 
+@import "fonts/tabula.less";
+
 @grid-size:16px;
 @warning-color: #933;
 @subtle-text-color: #444;
@@ -107,6 +109,15 @@ ul {
 	  input { vertical-align: middle; }
 	}
 }
+
+.submission-feedback-list {
+	div.check-all {
+		display:block-inline;
+		float: left;
+		margin: 1px 10px 5px 0;
+	}
+}
+
 
 #feedback-table, #submission-table {
     tbody {
@@ -381,7 +392,7 @@ table {
 
 #footer-utility {
    .subtle {
-     color: #666;
+     color: #ccc;
    }
 }
 

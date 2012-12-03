@@ -36,6 +36,7 @@ class AppCommentsController extends CourseworkController {
 		if (errors hasErrors) {
 			formView
 		} else {
+			command.afterPropertiesSet()
 			command.apply()
 			chooseLayout(Mav("app/comments/success"))
 		}

@@ -94,6 +94,14 @@ $(function(){
         e.preventDefault();
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
     });
+
+	$('.hide-awaiting-submission').on('click', function(){
+        $('.awaiting-submission, .hide-label, .show-label').toggle();
+    });
+	// hide this button if it would do nothing
+	if ($('.awaiting-submission').length == 0) {
+		$('.hide-awaiting-submission').hide();
+	}
     
     $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     
@@ -132,6 +140,18 @@ $(function(){
                 }
                 return false;
             });
+
+            $('#release-submissions-button').click(function(event){
+                event.preventDefault();
+                var $checkedBoxes = $(".collection-checkbox:checked", $container);
+                if ($container.data('checked') != 'none') {
+                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                    $form.append($checkedBoxes.clone());
+                    $(document.body).append($form);
+                    $form.submit();
+                }
+                return false;
+            });
             
         },
     
@@ -161,11 +181,11 @@ $(function(){
         },
     
         onSomeChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').removeClass('disabled');
+            $('#modify-selected').removeClass('disabled');
         },
     
         onNoneChecked : function() {
-            $('#delete-feedback-button, #delete-selected-button, #download-selected-button, #mark-plagiarised-selected-button').addClass('disabled');
+            $('#modify-selected').addClass('disabled');
         }
     
     });

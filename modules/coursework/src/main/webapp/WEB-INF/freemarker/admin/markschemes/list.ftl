@@ -11,7 +11,7 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 <p><a class="btn" href="<@routes.markschemeadd department=command.department />"><i class="icon-plus"></i> Create</a></p>
 
 <#if markSchemeInfo?has_content>
-<table class="table table-bordered table-striped">
+<table class="mark-schemes table table-bordered table-striped">
 <tr>
 	<th>Mark scheme name</th>
 	<th></th>
@@ -47,6 +47,8 @@ $('a[data-toggle=modal]').click(function(event){
 	var $modal = $($this.data('target'));
 	$modal.load($this.attr('href'));
 });
+
+$("a.disabled").on('click', function(e){e.preventDefault(e);})
 
 });
 </script>

@@ -24,7 +24,7 @@
 </#if>
 
 <#include "_student.ftl" />
-
+<#include "_markers.ftl" />
 <#include "_admin.ftl" />
 
 </#escape>

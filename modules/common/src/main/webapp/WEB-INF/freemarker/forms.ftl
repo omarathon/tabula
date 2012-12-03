@@ -63,8 +63,9 @@ Include by default as "form", e.g.
 
 <#macro selector_check_all>
 <div class="check-all checkbox">
-	<label><span class="very-subtle">select all</span>
+	<label>
 		<input type="checkbox" class="collection-check-all">
+		<span class="very-subtle">select all</span>
 	</label>
 </div>
 </#macro>

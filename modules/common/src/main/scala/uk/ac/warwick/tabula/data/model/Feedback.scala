@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
+import org.joda.time.DateTime
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
-import org.joda.time.DateTime
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
+import javax.persistence.ManyToOne
+import javax.persistence.FetchType
 import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.actions.Deleteable
 import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
-import javax.persistence.ManyToOne
-import javax.persistence.FetchType
 
 
 @Entity @AccessType("field")
