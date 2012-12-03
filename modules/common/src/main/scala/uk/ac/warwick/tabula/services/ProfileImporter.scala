@@ -25,6 +25,11 @@ import java.sql.Date
 import org.apache.commons.lang3.text.WordUtils
 import org.springframework.jdbc.core.SqlParameter
 import java.sql.Types
+import uk.ac.warwick.tabula.data.model.NextOfKin
+import uk.ac.warwick.tabula.data.model.NextOfKin
+import uk.ac.warwick.tabula.data.model.Address
+import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.data.model.AddressType
 
 @Service
 class ProfileImporter extends InitializingBean {
@@ -48,6 +53,15 @@ class ProfileImporter extends InitializingBean {
 	lazy val allUserIdsQuery = new AllUserIdsQuery(ads)
 	lazy val allUserCodes: Seq[String] = allUserIdsQuery.execute
 	
+	lazy val nextOfKinQuery = new NextOfKinsQuery(ads)
+	lazy val addressQuery = new AddressesQuery(ads)
+	
+	def getNextOfKins(member: Member): Seq[NextOfKin] = nextOfKinQuery.executeByNamedParam(Map(
+	    "universityId" -> member.universityId))
+	    
+	def getAddresses(member: Member): Seq[Address] = addressQuery.executeByNamedParam(Map(
+	    "universityId" -> member.universityId))
+	
 	def processNames(member: Member, users: Map[String, User]) = {
 		val ssoUser = users(member.userId)
 		
@@ -69,11 +83,6 @@ object ProfileImporter {
 		and preferred_email_address != 'No Email'
 		and in_use_flag = 'Active'
 		"""
-	  
-	class AllUserIdsQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetAllUserIds) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("primary_user_code")
-	}
   
 	val GetAllMembers = """
 	  	select
@@ -185,6 +194,43 @@ object ProfileImporter {
 		and m.in_use_flag = 'Active'
 	  	"""
 	  
+	val GetNextOfKins = """
+		select 
+	  		forenames, 
+	  		family_name, 
+	  		relationship, 
+	  		address1, 
+	  		address2, 
+	  		address3, 
+	  		address4, 
+	  		address5, 
+	  		postcode, 
+	  		day_telephone,
+	  		evening_telephone,
+	  		email_address
+	  	from next_of_kin
+			where university_id = :universityId
+		"""
+	  
+	val GetAddresses = """
+		select 
+	  		address1,
+	  		address2,
+	  		address3,
+	  		address4,
+	  		address5,
+	  		postcode,
+	  		telephone,
+	  		type
+	  	from address
+			where university_id = :universityId
+		"""
+	  
+	class AllUserIdsQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetAllUserIds) {
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("primary_user_code")
+	}
+	  
 	private def toPhoto(photoBlob: Blob, universityId: String, fileDao: FileDao) = {
 		if (photoBlob == null || photoBlob.length == 0) { 
 			null
@@ -290,10 +336,58 @@ object ProfileImporter {
 		compile()		
 		override def mapRow(rs: ResultSet, rowNumber: Int) = createMember(rs, fileDao, moduleAndDepartmentService)
 	}
+	
+	class NextOfKinsQuery(ds: DataSource) extends MappingSqlQuery[NextOfKin](ds, GetNextOfKins) {
+		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+			val kin = new NextOfKin
+			
+			kin.firstName = formatForename(rs.getString("forenames"))
+			kin.lastName = formatSurname(rs.getString("family_name"))
+			kin.relationship = WordUtils.capitalizeFully(Option(rs.getString("relationship")).getOrElse("")).trim()
+			
+			val address = new Address
+			address.line1 = WordUtils.capitalizeFully(Option(rs.getString("address1")).getOrElse("")).trim()
+			address.line2 = WordUtils.capitalizeFully(Option(rs.getString("address2")).getOrElse("")).trim()
+			address.line3 = WordUtils.capitalizeFully(Option(rs.getString("address3")).getOrElse("")).trim()
+			address.line4 = WordUtils.capitalizeFully(Option(rs.getString("address4")).getOrElse("")).trim()
+			address.line5 = WordUtils.capitalizeFully(Option(rs.getString("address5")).getOrElse("")).trim()
+			address.postcode = rs.getString("postcode")
+			address.telephone = rs.getString("day_telephone")
+			
+			if (!address.isEmpty)
+				kin.address = address
+				
+			kin.eveningPhone = rs.getString("evening_telephone")
+			kin.email = rs.getString("email_address")
+			
+			kin
+		}
+	}
+	
+	class AddressesQuery(ds: DataSource) extends MappingSqlQuery[Address](ds, GetAddresses) {
+		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+			val address = new Address
+			address.line1 = WordUtils.capitalizeFully(Option(rs.getString("address1")).getOrElse("")).trim()
+			address.line2 = WordUtils.capitalizeFully(Option(rs.getString("address2")).getOrElse("")).trim()
+			address.line3 = WordUtils.capitalizeFully(Option(rs.getString("address3")).getOrElse("")).trim()
+			address.line4 = WordUtils.capitalizeFully(Option(rs.getString("address4")).getOrElse("")).trim()
+			address.line5 = WordUtils.capitalizeFully(Option(rs.getString("address5")).getOrElse("")).trim()
+			address.postcode = rs.getString("postcode")
+			address.telephone = rs.getString("telephone")
+			
+			address.addressType = AddressType.fromCode(rs.getString("type"))
+			
+			address
+		}
+	}
 	  
 	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
 	  
-	private def formatForename(name: String, suggested: String): String = {
+	private def formatForename(name: String, suggested: String = null): String = {
 		if (name.equalsIgnoreCase(suggested)) {
 			// Our suggested capitalisation from SSO was correct
 			suggested
@@ -306,7 +400,7 @@ object ProfileImporter {
 	
 	private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
 	
-	private def formatSurname(name: String, suggested: String): String = {
+	private def formatSurname(name: String, suggested: String = null): String = {
 		if (name.equalsIgnoreCase(suggested)) {
 			// Our suggested capitalisation from SSO was correct
 			suggested

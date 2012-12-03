@@ -1,15 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
 import scala.reflect.BeanProperty
-import javax.persistence._
-import uk.ac.warwick.tabula.actions.Viewable
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
+
+import org.hibernate.annotations.Cascade
+import org.hibernate.annotations.CascadeType._
+import org.hibernate.annotations.Type
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.JavaImports._
+
+import javax.persistence._
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.actions.Viewable
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.userlookup.User
 
 @Entity
 class Member extends Viewable with ToString {
@@ -105,6 +109,20 @@ class Member extends Viewable with ToString {
 	
 	@BeanProperty var lastInstitute: String = _
 	@BeanProperty var lastSchool: String = _
+	
+	@OneToOne
+	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@JoinColumn(name="HOME_ADDRESS_ID")
+	@BeanProperty var homeAddress: Address = null
+	
+	@OneToOne
+	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@JoinColumn(name="TERMTIME_ADDRESS_ID")
+	@BeanProperty var termtimeAddress: Address = null
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, orphanRemoval=true)
+	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@BeanProperty var nextOfKins:JList[NextOfKin] = ArrayList()
 	
 	@BeanProperty def fullName = firstName + " " + lastName
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName

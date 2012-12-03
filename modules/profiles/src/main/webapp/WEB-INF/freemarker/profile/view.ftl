@@ -59,16 +59,16 @@
 			</#if>
 			
 			<dt>2 + 2?</dt>
-			<dd>??????</dd>
+			<dd><strong>NOT IN ADS/UNKNOWN HOW TO GET</strong></dd>
 			
 			<dt>Personal tutor</dt>
-			<dd>??????</dd>
+			<dd><strong>NOT RELIABLE IN ADS</strong></dd>
 			
 			<dt>Registered disability</dt>
-			<dd>??????</dd>
+			<dd><strong>NOT IN ADS</strong></dd>
 			
 			<dt>Notes on disability</dt>
-			<dd>??????</dd>
+			<dd><strong>NOT IN ADS</strong></dd>
 			
 			<dt>IT code</dt>
 			<dd>${profile.userId}</dd>
@@ -87,45 +87,52 @@
 			</#if>
 			
 			<dt>Comments</dt>
-			<dd>??????</dd>
+			<dd><strong>NOT IN ADS (OBVIOUSLY)</strong></dd>
 		</dl>
 	</section>
 	
-	<section class="course-details">
-		<h2>Course details</h2>
-		
-		<dl>
-			<dt>Course title</td>
-			<dd>??????</dd>
+	<#if profile.route??>
+		<#assign route = profile.route />
+	
+		<section class="course-details">
+			<h2>Course details</h2>
 			
-			<dt>Length of course</td>
-			<dd>??????</dd>
-			
-			<dt>Course code</td>
-			<dd>??????</dd>
-			
-			<dt>PGT dissertation title / PGR thesis title</td>
-			<dd>??????</dd>
-			
-			<dt>3rd year project supervisor(s)</td>
-			<dd>??????</dd>
-			
-			<dt>PGT dissertation supervisor(s) / PGR thesis supervisor(s)</td>
-			<dd>??????</dd>
-			
-			<dt>Source of funding</td>
-			<dd>??????</dd>
-			
-			<dt>Date of dissertation / thesis submission</td>
-			<dd>??????</dd>
-			
-			<dt>VIVA date</td>
-			<dd>??????</dd>
-			
-			<dt>Post-Warwick destination</td>
-			<dd>??????</dd>
-		</dl>
-	</section>
+			<dl>
+				<dt>Course title</td>
+				<dd>${route.name}</dd>
+				
+				<dt>Course type</dt>
+				<dd>${route.degreeType.description}</dd>
+				
+				<dt>Length of course</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>Course code</td>
+				<dd>${route.code?upper_case}</dd>
+				
+				<dt>PGT dissertation title / PGR thesis title</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>3rd year project supervisor(s)</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>PGT dissertation supervisor(s) / PGR thesis supervisor(s)</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>Source of funding</td>
+				<dd>${profile.fundingSource}</dd>
+				
+				<dt>Date of dissertation / thesis submission</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>VIVA date</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+				
+				<dt>Post-Warwick destination</td>
+				<dd><strong>NOT IN ADS</strong></dd>
+			</dl>
+		</section>
+	</#if>
 	
 	<section class="contact-details">
 		<h2>Contact details</h2>

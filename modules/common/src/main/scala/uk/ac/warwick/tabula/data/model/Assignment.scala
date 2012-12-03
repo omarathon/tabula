@@ -32,7 +32,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import scala.Some
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
-import uk.ac.warwick.tabula.data.model.SubmissionsReport
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"

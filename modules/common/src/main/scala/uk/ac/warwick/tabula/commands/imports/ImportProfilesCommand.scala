@@ -24,6 +24,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			doMemberDetails
 			logger.debug("Imported Members")
 			doAddressDetails
+			doNextOfKinDetails
 		}
 	}
 
@@ -47,6 +48,24 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		
 	}
 	
+	def doAddressDetails(member: Member) {
+		for (address <- profileImporter.getAddresses(member)) {
+			address.addressType match {
+			  	case Home => member.homeAddress = address
+			  	case TermTime => member.termtimeAddress = address
+			}
+		}
+	}
+	
+	def doNextOfKinDetails {
+		
+	}
+	
+	def doNextOfKinDetails(member: Member) {
+		member.nextOfKins.clear
+		member.nextOfKins.addAll(profileImporter.getNextOfKins(member))
+	}
+	
 	def refresh(member: Member) {
 		// The importer creates a new object and does saveOrUpdate; so evict the current object
 		session.evict(member)
@@ -54,7 +73,15 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		val user = userLookup.getUserByUserId(usercode)
 	  
 		transactional() {
-			saveMemberDetails(profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user))))
+			val members = profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user)))
+			saveMemberDetails(members)
+			
+			val newMember = members.head
+			doAddressDetails(newMember)
+			doNextOfKinDetails(newMember)
+			
+			session.update(newMember)
+			session.flush
 		}
 	}
 	

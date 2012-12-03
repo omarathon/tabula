@@ -43,6 +43,8 @@ CREATE TABLE MEMBER (
 	HIGHESTQUALIFICATIONONENTRY nvarchar2(255),
 	LASTINSTITUTE nvarchar2(255),
 	LASTSCHOOL nvarchar2(255),
+	HOME_ADDRESS_ID nvarchar2(255),
+	TERMTIME_ADDRESS_ID nvarchar2(255),
 	CONSTRAINT "MEMBER_PK" PRIMARY KEY ("UNIVERSITYID")
 );
 
@@ -58,3 +60,28 @@ create table ROUTE (
 	CONSTRAINT "ROUTE_CODE" UNIQUE ("CODE")
 );
 CREATE INDEX IDX_ROUTE_DEPT ON ROUTE(DEPARTMENT_ID);
+
+create table ADDRESS (
+	id nvarchar2(255) not null,
+	line1 nvarchar2(255),
+	line2 nvarchar2(255),
+	line3 nvarchar2(255),
+	line4 nvarchar2(255),
+	line5 nvarchar2(255),
+	postcode nvarchar2(100),
+	telephone nvarchar2(255),
+	CONSTRAINT "ADDRESS_PK" PRIMARY KEY ("ID")
+);
+
+create table NEXTOFKIN (
+	id nvarchar2(255) not null,
+	member_id nvarchar2(255),
+	address_id nvarchar2(255),
+	FIRSTNAME NVARCHAR2(255),
+	LASTNAME NVARCHAR2(255),
+	RELATIONSHIP NVARCHAR2(255),
+	EVENINGPHONE NVARCHAR2(255),
+	EMAIL NVARCHAR2(255),
+	CONSTRAINT "NEXTOFKIN_PK" PRIMARY KEY ("ID")
+);
+CREATE INDEX IDX_NEXTOFKIN_MEMBER ON NEXTOFKIN(MEMBER_ID);
