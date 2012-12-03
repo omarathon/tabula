@@ -98,7 +98,7 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td>${student}</td>
 				<td></td>
-				<td><span class="label-blue">Awaiting submission</span></td>
+				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
 				<#if assignment.collectMarks><td></td></#if>
 				<td></td><td></td><td></td><td></td>
