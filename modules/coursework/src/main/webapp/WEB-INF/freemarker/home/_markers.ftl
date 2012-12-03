@@ -12,8 +12,7 @@
 		<#assign class="disabled use-tooltip" />
 		<#assign href="" />
 		<#assign title>
-			No submissions have been released to you yet. When the administrator releases submissions for marking you
-			will be able to download them here.
+			You'll be able to download submissions for marking when an administrator releases them.
 		</#assign>
 	<#else>
 		<#assign class="" />
