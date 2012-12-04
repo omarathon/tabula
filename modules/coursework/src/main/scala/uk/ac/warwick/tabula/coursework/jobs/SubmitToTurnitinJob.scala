@@ -53,7 +53,6 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	@Value("${mail.noreply.to}") var replyAddress: String = _
 	@Value("${mail.exceptions.to}") var fromAddress: String = _
-	@Value("${toplevel.url}") var topLevelUrl: String = _
 
 	val WaitingRetries = 50
 	val WaitingSleep = 20000
@@ -261,7 +260,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
 			"user" -> user,
-			"url" -> (topLevelUrl + Routes.admin.assignment.submission(assignment))))
+			"path" -> Routes.admin.assignment.submission(assignment)
+		))
 	}
 
 	def loginFailure = new IllegalStateException("Failed to login user to Turnitin")

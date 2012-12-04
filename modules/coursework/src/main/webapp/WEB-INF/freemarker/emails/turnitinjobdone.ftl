@@ -4,6 +4,7 @@ You recently asked to have the submissions for the assignment ${assignmentTitle}
 
 You may see the results on the list of submissions page, which you can find here:
 
-${url}
+<@url page=path />
+
 
 This email was sent from an automated system, and replies to it will not reach a real person.

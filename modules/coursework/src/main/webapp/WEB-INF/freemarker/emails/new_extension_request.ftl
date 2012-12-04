@@ -8,6 +8,7 @@ ${reasonForRequest}
 
 To review this extension request and any supporting documentation, please click the link below.
 
-${url}
+<@url page=path />
+
 
 This email was sent from an automated system, and replies to it will not reach a real person.

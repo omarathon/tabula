@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
 
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -17,7 +16,8 @@ class ExtensionChangedMessage(extension: Extension, userId: String)
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.assignment.apply(assignment)))))
+			"path" -> Routes.assignment.apply(assignment)
+		)))
 		baseMessage
 	}
 

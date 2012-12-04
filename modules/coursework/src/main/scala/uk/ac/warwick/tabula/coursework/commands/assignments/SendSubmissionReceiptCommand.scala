@@ -7,17 +7,10 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.commands.Description
-import javax.annotation.Resource
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.beans.factory.annotation.Autowired
 import freemarker.template.Configuration
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -41,7 +34,6 @@ class SendSubmissionReceiptCommand(
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
-	var topLevelUrl = Wire.property("${toplevel.url}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
@@ -67,7 +59,8 @@ class SendSubmissionReceiptCommand(
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> user,
-			"url" -> (topLevelUrl + Routes.assignment.receipt(assignment)))))
+			"path" -> Routes.assignment.receipt(assignment)
+		)))
 		message
 	}
 

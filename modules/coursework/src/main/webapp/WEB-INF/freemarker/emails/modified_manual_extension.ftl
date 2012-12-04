@@ -11,6 +11,7 @@ ${extension.approvalComments}
 </#if>
 The modified extension deadline is now displayed at the top of the submission page:
 
-${url}
+<@url page=url />
+
 
 This email was sent from an automated system, and replies to it will not reach a real person.

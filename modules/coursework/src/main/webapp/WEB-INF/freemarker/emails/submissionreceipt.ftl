@@ -14,6 +14,7 @@ Uploaded attachments:
 
 To review your submission, please visit:
 
-${url}
+<@url page=path />
+
 
 This email was sent from an automated system, and replies to it will not reach a real person.

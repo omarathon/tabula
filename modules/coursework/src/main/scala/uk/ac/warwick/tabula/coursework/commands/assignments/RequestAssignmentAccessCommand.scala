@@ -29,7 +29,6 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	var userLookup = Wire.auto[UserLookupService]
 	implicit var freemarker = Wire.auto[Configuration]
 	var mailSender = Wire[WarwickMailSender]("mailSender")
-	var topLevelUrl = Wire.property("${toplevel.url}")
 	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
@@ -39,14 +38,14 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 			else module.department.owners
 
 		val adminUsers = userLookup.getUsersByUserIds(seqAsJavaList(admins.members))
-		val manageAssignmentUrl = topLevelUrl + Routes.admin.assignment.edit(assignment)
+		val manageAssignmentUrl = Routes.admin.assignment.edit(assignment)
 
 		for ((usercode, admin) <- adminUsers if admin.isFoundUser) {
 			val messageText = renderToString("/WEB-INF/freemarker/emails/requestassignmentaccess.ftl", Map(
 				"assignment" -> assignment,
 				"student" -> user,
 				"admin" -> admin,
-				"url" -> manageAssignmentUrl))
+				"path" -> manageAssignmentUrl))
 			val message = new SimpleMailMessage
 			val moduleCode = module.code.toUpperCase
 			message.setFrom(fromAddress)

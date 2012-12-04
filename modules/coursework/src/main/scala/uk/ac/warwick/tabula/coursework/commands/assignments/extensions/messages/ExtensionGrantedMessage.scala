@@ -17,7 +17,8 @@ class ExtensionGrantedMessage(extension: Extension, userId: String)
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.assignment.apply(assignment)))))
+			"path" -> Routes.assignment.apply(assignment)
+		)))
 		baseMessage
 	}
 
