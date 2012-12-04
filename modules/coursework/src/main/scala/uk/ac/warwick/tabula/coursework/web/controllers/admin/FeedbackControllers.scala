@@ -11,7 +11,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.commands.feedback.DownloadSelectedFeedbackCommand
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao

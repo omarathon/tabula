@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.feedback
+package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip

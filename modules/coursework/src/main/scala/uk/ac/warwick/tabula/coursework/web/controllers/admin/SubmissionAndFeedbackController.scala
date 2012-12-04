@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.admin
+package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.seqAsJavaList
@@ -10,15 +10,13 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.commands.assignments._
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
+import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 
