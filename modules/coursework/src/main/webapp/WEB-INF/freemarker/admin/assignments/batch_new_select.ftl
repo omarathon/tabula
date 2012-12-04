@@ -76,6 +76,27 @@ first page of the form to setup a bunch of assignments from SITS.
   </#if>
 </@form.labelled_row>
 
+<#macro hidden_properties>
+	<@f.hidden path="upstreamAssignment" />
+	<@f.hidden path="optionsId" cssClass="options-id-input" />
+	<@f.hidden path="openDate" cssClass="open-date-field" />
+	<@f.hidden path="closeDate" cssClass="close-date-field" />
+	<@f.hidden path="occurrence" />
+	<@f.hidden path="name" cssClass="name-field" />
+</#macro>
+
+<#--
+	Always output these hidden properties for all assignments. We want to show them
+	on step 1 because we might have gone back from step 2.
+-->
+<#list command.assignmentItems as item>
+	<#if step != 'select' && !item.include>
+		<@spring.nestedPath path="assignmentItems[${item_index}]">
+			<@hidden_properties />
+		</@spring.nestedPath>
+	</#if>
+</#list>
+
 <table class="table table-bordered table-striped" id="batch-add-table">
 <tr>
 	<th>
@@ -102,12 +123,14 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <tr class="itemContainer">
 	<td>
-		<@f.hidden path="upstreamAssignment" />
+	
+		<#-- saved options for the assignment stored here -->
+		<@hidden_properties />
+		
 		<#if step="select">
 			<@f.checkbox path="include" cssClass="collection-checkbox" />
 		<#else>
 			<@f.hidden path="include" />
-
 			<input type="checkbox" checked="checked" class="collection-checkbox" />
 		</#if>
 	</td>
@@ -119,12 +142,10 @@ first page of the form to setup a bunch of assignments from SITS.
 	</td>
 	<td class="selectable">
 		${item.occurrence}
-		<@f.hidden path="occurrence" />
 	</td>
 	<td class="selectable">	
 		<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
 		<#-- TODO expose as click-to-edit -->
-		<@f.hidden path="name" />
 		
 		<#-- render all field errors for assignmentItems[x] -->
 		<@f.errors path="" cssClass="error" />
@@ -133,8 +154,6 @@ first page of the form to setup a bunch of assignments from SITS.
 	</td>
 	<#if step="options">
  	<td class="selectable assignment-editable-fields-cell">
- 		<@f.hidden path="openDate" cssClass="open-date-field" />
- 		<@f.hidden path="closeDate" cssClass="close-date-field" />
  		<span class="dates-label">
  			<#if form.hasvalue('openDate') && form.hasvalue('closeDate')>
  				${form.getvalue("openDate")} - ${form.getvalue("closeDate")}
@@ -142,7 +161,6 @@ first page of the form to setup a bunch of assignments from SITS.
  		</span>
  	</td>
  	<td>
- 		<@f.hidden path="optionsId" cssClass="options-id-input" />
  		<span class="options-id-label">
  			<#if form.hasvalue('optionsId')>
  				<#assign optionsIdValue=form.getvalue('optionsId') />
@@ -166,7 +184,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#list command.assignmentItems as item>
 <@spring.nestedPath path="assignmentItems[${item_index}]">
 <#if step!="select" && !item.include>
-	<@f.hidden path="upstreamAssignment" />
+	<#-- <@f.hidden path="upstreamAssignment" /> -->
 	<@f.hidden path="include" />
 </#if>
 </@spring.nestedPath>
@@ -177,10 +195,22 @@ first page of the form to setup a bunch of assignments from SITS.
 <div class="span2">
 
 <#if step='select'>
-<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
+
+	<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
+	
+	<#-- This is for if you go Back from step 2, to remember previous options -->
+	<#list command.optionsMap?keys as optionsId>
+		<div class="options-group">
+			<@spring.nestedPath path="optionsMap[${optionsId}]">
+				<#include "_common_fields_hidden.ftl" />
+			</@spring.nestedPath>
+		</div>
+	</#list>
+
 <#elseif step='options'>
 <div id="options-buttons">
 
+<button class="btn btn-large btn-block use-tooltip" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
 <button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
 
 <div id="selected-count">0 selected</div>
@@ -269,6 +299,19 @@ first page of the form to setup a bunch of assignments from SITS.
       <button class="btn btn-primary">Set dates</button>
 		</div>
 	</div>
+	
+	<script type="text/javascript">
+		// Give a heads up if you're about to navigate away from your progress
+		jQuery(window).on('beforeunload.backattack', function() { 
+			return "If you leave this page without clicking either the Submit button or the Back button above it, you will lose your progress."; 
+		});
+		
+		// Disable the heads up when we submit the form through the proper means 
+		jQuery('form').on('submit', function() {
+			jQuery(window).off('beforeunload.backattack');
+		});
+	</script>
+	
 </#if>
 
 <script type="text/javascript">

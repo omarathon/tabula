@@ -20,7 +20,7 @@ jQuery(function($){
 	}).on('update', function(){
 		// set the hidden field to the new value.
 		var newVal = $(this).data('editable').value;
-		$(this).siblings('input[type=hidden]').val( newVal );
+		$(this).closest('.itemContainer').find('input.name-field').val( newVal );
 	});
 	
 	

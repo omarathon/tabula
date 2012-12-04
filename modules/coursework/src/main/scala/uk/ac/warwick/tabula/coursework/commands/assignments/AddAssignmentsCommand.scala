@@ -55,6 +55,9 @@ class AssignmentItem(
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate: DateTime = _
 
+	def sameAssignment(other: AssignmentItem) =
+		upstreamAssignment == other.upstreamAssignment &&
+		occurrence == other.occurrence
 }
 
 /**
