@@ -53,6 +53,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
 
 	def canRequestExtension = allowExtensionRequests != null && allowExtensionRequests
+	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 

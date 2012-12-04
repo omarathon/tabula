@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import org.hibernate.annotations.{Type, AccessType}
 
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
-import uk.ac.warwick.tabula.actions.Deleteable
+import uk.ac.warwick.tabula.actions.{Manageable, Deleteable}
 import scala.Array
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.GeneratedId
 
 @Entity @AccessType("field")
-class Extension extends GeneratedId with Deleteable {
+class Extension extends GeneratedId with Deleteable with Manageable {
 
 	def this(universityId:String=null) {
 		this()
