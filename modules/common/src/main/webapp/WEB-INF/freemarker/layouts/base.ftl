@@ -48,10 +48,19 @@
 						<div id="site-header-container">
 							<h1 id="site-header">
 							<#if component.subsite>
-								<span id="parent-site-header"><a href="/" title="Tabula home page">Tabula</a></span>
+								<span id="parent-site-header">
+									<a href="/" title="Tabula home page">Tabula</a>
+								</span>
 								<span id="subsite-character">&raquo;</span>
 							</#if>
-								<span id="current-site-header"><a href="<@url page="/" />">${component.siteHeader?default('Tabula')}</a></span>
+								<span id="current-site-header"><#compress>
+									<#assign homeUrl><@url page="/" /></#assign>
+									<#if info.requestedUri?? && info.requestedUri != homeUrl>
+										<a href="${homeUrl}">${component.siteHeader?default('Tabula')}</a>
+									<#else>
+										<span>${component.siteHeader?default('Tabula')}</span>	
+									</#if>
+								</#compress></span>
 							</h1>
 							
 							<h2 id="strapline">
@@ -98,10 +107,10 @@
 										<div class="link-content">
 											<div class="title rendered-link-content">
 												<#assign homeUrl><@url page="/" /></#assign>
-												<#if info.requestedUri != homeUrl>
-													<a href="${homeUrl}">${component.title}</a>
+												<#if info.requestedUri?? && info.requestedUri != homeUrl>
+													<a href="${homeUrl}">${component.title?default('Tabula')}</a>
 												<#else>
-													<span>${component.title}</span>	
+													<span>${component.title?default('Tabula')}</span>	
 												</#if>
 											</div>
 										</div>
