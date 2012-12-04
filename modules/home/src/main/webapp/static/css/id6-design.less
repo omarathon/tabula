@@ -7,7 +7,7 @@
 // Link colours
 @link-colour: #3C5E7F;
 @link-hover: #209990;
-@link-visited-colour: #93225E;
+@link-visited-colour: @link-colour;
 
 // Search tab background and colour
 @search-tab-background: #80716a;
@@ -89,8 +89,7 @@ body { background: none; }
 }
 
 // Link colours
-a:link, a:visited {color: @link-colour;}
-#main-content a:not(.btn):visited {color: @link-visited-colour;}
+a:link, a:visited, #main-content a:not(.btn):visited {color: @link-colour;}
 a:hover, #main-content a:not(.btn):hover {color: @link-hover;}
 
 // Search tab
@@ -177,3 +176,6 @@ a:hover, #main-content a:not(.btn):hover {color: @link-hover;}
     }
   }
 }
+
+// Remove the 1px bottom padding
+#container { padding-bottom: 0; }

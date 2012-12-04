@@ -37,6 +37,10 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var allowExtensionRequests:JBoolean = false
 	@BeanProperty var extensionGuidelineSummary:String = null
 	@BeanProperty var extensionGuidelineLink:String = null
+	/** The group of extension managers */
+	@OneToOne(cascade = Array(CascadeType.ALL))
+	@JoinColumn(name = "extension_managers_id")
+	@BeanProperty var extensionManagers = new UserGroup()
 
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace

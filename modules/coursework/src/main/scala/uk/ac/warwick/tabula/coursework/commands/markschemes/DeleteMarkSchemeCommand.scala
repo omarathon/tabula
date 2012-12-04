@@ -22,8 +22,9 @@ class DeleteMarkSchemeCommand(var markScheme: MarkScheme) extends Command[Unit] 
 	}
 	
 	def validate(errors: Errors) {
+		// can't delete a mark scheme that's being referenced by assignments.
 		if (!dao.getAssignmentsUsingMarkScheme(markScheme).isEmpty()) {
-			errors.reject("inuse") // FIXME use a real message code
+			errors.reject("markScheme.inuse")
 		}
 	}
 	

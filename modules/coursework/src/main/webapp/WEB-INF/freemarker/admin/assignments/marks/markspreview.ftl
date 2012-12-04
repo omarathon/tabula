@@ -55,14 +55,14 @@
 				<tr>
 					<th>University ID</th>
 					<th>Marks</th>
-					<th>Grade</th>
+					<#--th>Grade</th-->
 				</tr>
 				<#list itemList as item>
 					<@spring.nestedPath path="marks[${item_index}]">
 						<#if !item.isValid>
 							<#assign errorClass="alert-error" />
 						<#elseif item.warningMessage??>
-							<#assign errorClass="alert" />						
+							<#assign errorClass="alert" />
 						<#else>
 							<#assign errorClass="alert-success" />
 						</#if>
@@ -90,12 +90,12 @@
 								</@spring.bind>
 								<@f.errors path="actualMark" cssClass="error" />
 							</td>
-							<td>
+							<#--td>
 								<@spring.bind path="actualGrade">
 									${status.value}
 								</@spring.bind>
 								<@f.errors path="actualGrade" cssClass="error" />
-							</td>
+							</td-->
 						</tr>
 					</@spring.nestedPath>
 				</#list>

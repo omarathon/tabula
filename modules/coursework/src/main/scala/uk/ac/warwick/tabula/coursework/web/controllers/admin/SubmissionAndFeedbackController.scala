@@ -26,65 +26,60 @@ import uk.ac.warwick.spring.Wire
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/list"))
 class SubmissionsAndFeedbackController extends CourseworkController {
 
-    var auditIndexService = Wire.auto[AuditEventIndexService]
-		var assignmentService = Wire.auto[AssignmentService]
+	var auditIndexService = Wire.auto[AuditEventIndexService]
+	var assignmentService = Wire.auto[AssignmentService]
 
-    @RequestMapping(method = Array(GET, HEAD))
-    def list(command: ListSubmissionsCommand) = {
-        val (assignment, module) = (command.assignment, command.module)
-        mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-        mustBeAbleTo(Participate(command.module))
+	@RequestMapping(method = Array(GET, HEAD))
+	def list(command: ListSubmissionsCommand) = {
+		val (assignment, module) = (command.assignment, command.module)
+		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
+		mustBeAbleTo(Participate(command.module))
 
-        val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
-        val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
-
+		val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
+		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
+		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
+		val awaitingSubmission = 
+			if (assignment.members == null) {
+				Nil
+			} else {
 				val moduleMembers = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
-        val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
+				(moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+			}
 
-				val awaitingSubmission = (moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
+		// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
+		val mustReleaseForMarking = assignment.markScheme != null
 
-				// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
-				// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
-				val mustReleaseForMarking = assignment.markScheme != null
+		val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
+			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
+			val usersFeedback = assignment.feedbacks.filter(feedback => feedback.universityId == uniId)
+			
+			val enhancedSubmissionForUniId = usersSubmissions.toList match {
+				case head :: Nil => head
+				case head :: others => throw new IllegalStateException("More than one SubmissionListItem (" + usersSubmissions.size() + ") for " + uniId)
+				case Nil => new SubmissionListItem(new Submission(), false)
+			}
+			
+			if (usersFeedback.size() > 1) {
+				throw new IllegalStateException("More than one Feedback for " + uniId);
+			}
+			
+			val feedbackForUniId: Feedback = usersFeedback.headOption.orNull
 
-        val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
-            var enhancedSubmissionForUniId = new SubmissionListItem(new Submission(), false)
-            var feedbackForUniId: Feedback = null
-        	
-        	// lists
-            val enhancedSubmissionsForUniId = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
-            val feedbacksForUniId = assignment.feedbacks.filter(feedback => feedback.universityId == uniId)
+			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId)
+		}
 
-            if (enhancedSubmissionsForUniId.size() > 1) {
-                throw new IllegalStateException("More than one SubmissionListItem (" + enhancedSubmissionsForUniId.size() + ") for " + uniId);
-            }
-            else if (enhancedSubmissionsForUniId.size() > 0) {
-                enhancedSubmissionForUniId = enhancedSubmissionsForUniId.head
-            }
-            else {
-            	enhancedSubmissionForUniId = new SubmissionListItem(new Submission(), false)
-            }
-            
-            if (feedbacksForUniId.size() > 1) {
-                throw new IllegalStateException("More than one Feedback for " + uniId);
-            }
-            else if (feedbacksForUniId.size() > 0) {
-                feedbackForUniId = feedbacksForUniId.head
-            }
-
-            new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId)
-        }
-
-        Mav("admin/assignments/submissionsandfeedback/list",
-            "assignment" -> assignment,
-            //"submissions" -> submissions,
-            "students" -> students,
+		Mav("admin/assignments/submissionsandfeedback/list",
+			"assignment" -> assignment,
+			//"submissions" -> submissions,
+			"students" -> students,
 						"awaitingSubmission" -> awaitingSubmission,
-            "hasOriginalityReport" -> hasOriginalityReport,
-            "mustReleaseForMarking" -> mustReleaseForMarking)
-            .crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-    }
+			"hasOriginalityReport" -> hasOriginalityReport,
+			"mustReleaseForMarking" -> mustReleaseForMarking)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	}
 
-    class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val feedback: Feedback) {
-    }
+	// Simple object holder
+	class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val feedback: Feedback) 
+	
 }
