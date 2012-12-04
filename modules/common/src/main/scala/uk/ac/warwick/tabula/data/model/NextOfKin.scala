@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Cascade
-import org.hibernate.annotations.CascadeType._
 import org.hibernate.annotations.Type
 import scala.reflect.BeanProperty
 import javax.persistence._
+import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.userlookup.User
@@ -24,9 +23,7 @@ class NextOfKin extends GeneratedId with Viewable with ToString {
 	
 	@BeanProperty var relationship: String = _
 	
-	
-	@OneToOne
-	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="ADDRESS_ID")
 	@BeanProperty var address: Address = _
 	
@@ -35,6 +32,8 @@ class NextOfKin extends GeneratedId with Viewable with ToString {
 	
 	@BeanProperty var eveningPhone: String = _
 	@BeanProperty var email: String = _
+	
+	@BeanProperty def fullName = firstName + " " + lastName
 		
 	def toStringProps = Seq(
 		"member" -> member,

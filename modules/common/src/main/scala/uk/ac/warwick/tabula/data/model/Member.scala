@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
 
-import org.hibernate.annotations.Cascade
-import org.hibernate.annotations.CascadeType._
+import javax.persistence.CascadeType._
 import org.hibernate.annotations.Type
 import org.joda.time.LocalDate
 
@@ -110,18 +109,15 @@ class Member extends Viewable with ToString {
 	@BeanProperty var lastInstitute: String = _
 	@BeanProperty var lastSchool: String = _
 	
-	@OneToOne
-	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@BeanProperty var homeAddress: Address = null
 	
-	@OneToOne
-	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
 	@BeanProperty var termtimeAddress: Address = null
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, orphanRemoval=true)
-	@Cascade(Array(SAVE_UPDATE, DETACH))
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
 	@BeanProperty var nextOfKins:JList[NextOfKin] = ArrayList()
 	
 	@BeanProperty def fullName = firstName + " " + lastName

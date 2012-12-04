@@ -49,6 +49,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	}
 	
 	def doAddressDetails(member: Member) {
+		if (member.homeAddress != null) session.delete(member.homeAddress)
+		if (member.termtimeAddress != null) session.delete(member.termtimeAddress)
+	  
 		for (address <- profileImporter.getAddresses(member)) {
 			address.addressType match {
 			  	case Home => member.homeAddress = address
@@ -62,35 +65,46 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	}
 	
 	def doNextOfKinDetails(member: Member) {
-		member.nextOfKins.clear
-		member.nextOfKins.addAll(profileImporter.getNextOfKins(member))
+		for (kin <- member.nextOfKins) session.delete(kin)
+		
+		val kins = profileImporter.getNextOfKins(member)
+		member.nextOfKins.addAll(kins)
+		for (kin <- kins) kin.member = member
 	}
 	
-	def refresh(member: Member) {
-		// The importer creates a new object and does saveOrUpdate; so evict the current object
-		session.evict(member)
-		val usercode = member.userId
-		val user = userLookup.getUserByUserId(usercode)
-	  
+	def refresh(member: Member) {	  
+//		transactional() {
+//			// Delete old cruft
+//			if (member.homeAddress != null) session.delete(member.homeAddress)
+//			if (member.termtimeAddress != null) session.delete(member.termtimeAddress)		
+//			for (kin <- member.nextOfKins) session.delete(kin)
+//		}
+//				
 		transactional() {
+			// The importer creates a new object and does saveOrUpdate; so evict the current object
+			session.evict(member)
+			
+			val usercode = member.userId
+			val user = userLookup.getUserByUserId(usercode)
+		
 			val members = profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user)))
 			saveMemberDetails(members)
 			
 			val newMember = members.head
+			
 			doAddressDetails(newMember)
 			doNextOfKinDetails(newMember)
 			
-			session.update(newMember)
-			session.flush
+			saveMemberDetails(Seq(newMember))
 		}
 	}
 	
 	def saveMemberDetails(seq: Seq[Member]) {
-		seq foreach { member =>
-			session.saveOrUpdate(member)
-		}
+		for (member <- seq) session.saveOrUpdate(member)
+		
 		session.flush
-		seq foreach session.evict
+		
+		for (member <- seq) session.evict(member)
 	}
 	
 	def equal(s1: Seq[String], s2: Seq[String]) =

@@ -153,23 +153,66 @@
 				<dd>${profile.mobileNumber}</dd>
 			</#if>
 			
-			<dt>Emergency contact</dt>
-			<dd><dl>
-				<dt>Name</dt>
-				<dd>??????</dd>
-				
-				<dt>Telephone</dt>
-				<dd>??????</dd>
-				
-				<dt>Relationship</dt>
-				<dd>??????</dd>
-			</dl></dd>
+			<#macro address address>
+				<div class="vcard">
+					<#if address.line1??>
+						<p class="address">
+							<span class="line1">${address.line1}</span>
+							<#if address.line2??><br><span class="line2">${address.line2}</span></#if>
+							<#if address.line3??><br><span class="line3">${address.line3}</span></#if>
+							<#if address.line4??><br><span class="line4">${address.line4}</span></#if>
+							<#if address.line5??><br><span class="line5">${address.line5}</span></#if>
+							<#if address.postcode??><br><span class="postcode">${address.postcode}</span></#if>
+						</p>
+					</#if>
+					<#if address.telephone??>
+						<p class="tel">${address.telephone}</p>
+					</#if>
+				</div>
+			</#macro>
 			
-			<dt>Term-time address</dt>
-			<dd>??????</dd>
+			<#if profile.nextOfKins?size gt 0>
+				<dt>Emergency contacts</dt>
+				
+				<#list profile.nextOfKins as kin>
+					<dd><dl>
+						<#if kin.firstName?? && kin.lastName??>
+							<dt>Name</dt>
+							<dd>${kin.fullName}</dd>
+						</#if>
+						
+						<#if kin.relationship??>
+							<dt>Relationship</dt>
+							<dd>${kin.relationship}</dd>
+						</#if>
+						
+						<#if kin.address??>
+							<dt>Address</dt>
+							<dd><@address kin.address /></dd>
+						</#if>
+						
+						<#if kin.eveningPhone??>
+							<dt>Evening phone number</dt>
+							<dd>${kin.eveningPhone}</dd>
+						</#if>
+						
+						<#if kin.email??>
+							<dt>Email address</dt>
+							<dd>${kin.email}</dd>
+						</#if>
+					</dl></dd>
+				</#list>
+			</#if>
 			
-			<dt>Home address</dt>
-			<dd>??????</dd>
+			<#if profile.termtimeAddress??>
+				<dt>Term-time address</dt>
+				<dd><@address profile.termtimeAddress /></dd>
+			</#if>
+			
+			<#if profile.homeAddress??>
+				<dt>Home address</dt>
+				<dd><@address profile.homeAddress /></dd>
+			</#if>
 			
 			<dt>Details last updated</dt>
 			<dd>??????</dd>
