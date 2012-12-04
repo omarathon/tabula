@@ -55,7 +55,7 @@
 							</#if>
 								<span id="current-site-header"><#compress>
 									<#assign homeUrl><@url page="/" /></#assign>
-									<#if info.requestedUri?? && info.requestedUri != homeUrl>
+									<#if (info.requestedUri != homeUrl)!false>
 										<a href="${homeUrl}">${component.siteHeader?default('Tabula')}</a>
 									<#else>
 										<span>${component.siteHeader?default('Tabula')}</span>	
@@ -107,7 +107,7 @@
 										<div class="link-content">
 											<div class="title rendered-link-content">
 												<#assign homeUrl><@url page="/" /></#assign>
-												<#if info.requestedUri?? && info.requestedUri != homeUrl>
+												<#if (info.requestedUri != homeUrl)!false>
 													<a href="${homeUrl}">${component.title?default('Tabula')}</a>
 												<#else>
 													<span>${component.title?default('Tabula')}</span>	

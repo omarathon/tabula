@@ -19,6 +19,7 @@ import uk.ac.warwick.util.core.ExceptionUtils
 import uk.ac.warwick.tabula.system.exceptions._
 import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -32,6 +33,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var defaultView: String = _
 
 	@Autowired var exceptionHandler: ExceptionHandler = _
+	
+	@Autowired var userInterceptor: CurrentUserInterceptor = _
+	@Autowired var infoInterceptor: RequestInfoInterceptor = _
 
 	/**
 	 * If the interesting exception matches one of these exceptions then
@@ -40,9 +44,16 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
 	@Required @BeanProperty var viewMappings: JMap[String, String] = Map[String, String]()
-
+	
 	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
-		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
+		val interceptors = List(userInterceptor, infoInterceptor)
+		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
+		
+		val mav = doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView 
+		
+		for (interceptor <- interceptors.reverse) interceptor.postHandle(request, response, obj, mav)
+		
+		mav
 	}
 
 	private def ajax = RequestInfo.fromThread.map { _.ajax }.getOrElse(false)
