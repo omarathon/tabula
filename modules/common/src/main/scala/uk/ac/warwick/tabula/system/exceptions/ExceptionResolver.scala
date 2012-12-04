@@ -49,11 +49,10 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		val interceptors = List(userInterceptor, infoInterceptor)
 		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
 		
-		val mav = doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView 
-		
-		for (interceptor <- interceptors.reverse) interceptor.postHandle(request, response, obj, mav)
-		
-		mav
+		try doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView 
+		finally {
+			for (interceptor <- interceptors.reverse) interceptor.afterCompletion(request, response, obj, null)
+		}
 	}
 
 	private def ajax = RequestInfo.fromThread.map { _.ajax }.getOrElse(false)
