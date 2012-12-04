@@ -54,7 +54,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
 			val usersFeedback = assignment.feedbacks.filter(feedback => feedback.universityId == uniId)
 			
-			val enhancedSubmissionForUniId = usersSubmissions match {
+			val enhancedSubmissionForUniId = usersSubmissions.toList match {
 				case head :: Nil => head
 				case head :: others => throw new IllegalStateException("More than one SubmissionListItem (" + usersSubmissions.size() + ") for " + uniId)
 				case Nil => new SubmissionListItem(new Submission(), false)
