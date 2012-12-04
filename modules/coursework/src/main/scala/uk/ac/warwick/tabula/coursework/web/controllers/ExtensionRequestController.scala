@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.Extension
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
 import uk.ac.warwick.tabula.actions.View
-import uk.ac.warwick.tabula.helpers.ArrayList
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -74,11 +73,7 @@ class ExtensionRequestController extends CourseworkController{
 
 	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
 		val assignment = extension.assignment
-		val extensionManagers = assignment.module.department.extensionManagers
-		val recipients = {
-			if (extensionManagers != null) extensionManagers.includeUsers
-			else ArrayList()
-		}
+		val recipients = assignment.module.department.extensionManagers.includeUsers
 
 		if (modified){
 			recipients.foreach(new ModifiedExtensionRequestMessage(extension, _).apply())
