@@ -15,7 +15,7 @@
 			Uploaded attachments:
 			<ul>
 				<#list submission.allAttachments as attachment>
-					<li><a href="/module/${module.code}/${assignment.id}/attachment/${attachment.name}">${attachment.name}</a></li>
+					<li><a href="${url('/module/${module.code}/${assignment.id}/attachment/${attachment.name}')}">${attachment.name}</a></li>
 				</#list>  
 			</ul>
 		</p>
