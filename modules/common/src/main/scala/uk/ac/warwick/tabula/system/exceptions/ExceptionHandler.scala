@@ -24,6 +24,15 @@ case class ExceptionContext(val token: String, val exception: Throwable, val req
 	def getHasRequest = request.isDefined
 }
 
+object ExceptionHandler {
+	def renderStackTrace(exception: Throwable) = {
+		val stringWriter = new StringWriter
+		val writer = new PrintWriter(stringWriter)
+		exception.printStackTrace(writer)
+		stringWriter.toString
+	}
+}
+
 trait ExceptionHandler {
 	def exception(context: ExceptionContext)
 }
@@ -73,7 +82,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 		message.setText(renderToString(template, Map(
 			"token" -> context.token,
 			"exception" -> context.exception,
-			"exceptionStack" -> renderStackTrace(context.exception),
+			"exceptionStack" -> ExceptionHandler.renderStackTrace(context.exception),
 			"requestInfo" -> info,
 			"time" -> new DateTime,
 			"request" -> context.request)))
@@ -81,13 +90,6 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	}
 
 	private def userId(info: Option[RequestInfo]) = info.map { _.user }.map { _.realId }.getOrElse("ANON")
-
-	private def renderStackTrace(exception: Throwable) = {
-		val stringWriter = new StringWriter
-		val writer = new PrintWriter(stringWriter)
-		exception.printStackTrace(writer)
-		stringWriter.toString
-	}
 
 	override def afterPropertiesSet {
 		template = freemarker.getTemplate("/WEB-INF/freemarker/emails/exception.ftl")
