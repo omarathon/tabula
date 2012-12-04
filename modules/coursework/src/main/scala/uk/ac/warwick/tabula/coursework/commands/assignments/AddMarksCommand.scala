@@ -40,7 +40,6 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 	@BeanProperty var file: UploadedFile = new UploadedFile
 	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()
 
-
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
 	def postExtractValidation(errors: Errors) = {
@@ -101,6 +100,9 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 					noErrors = false
 				}
 			}
+		} else {
+			// If a row has no mark, we will quietly ignore it 
+			noErrors = false
 		}
 		noErrors
 	}

@@ -79,7 +79,8 @@ object Transactions extends TransactionAspectSupport {
 	  } catch {
 	  	case t => {
 	  		val info = TransactionSupport.currentTransactionInfo
-	  		if (!info.getTransactionStatus().isCompleted()) {
+	  		val status = info.getTransactionStatus()
+	  		if (status != null && !status.isCompleted()) {
 	  			completeTransactionAfterThrowing(info, t)
 	  		}
 	  		throw t

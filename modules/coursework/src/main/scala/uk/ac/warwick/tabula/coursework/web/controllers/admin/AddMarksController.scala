@@ -27,7 +27,7 @@ class AddMarksController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
+	@ModelAttribute def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
@@ -38,15 +38,10 @@ class AddMarksController extends CourseworkController {
 		mustBeAbleTo(Participate(module))
 		val members = assignmentService.determineMembershipUsers(assignment)
 
-		var marksToDisplay = List[MarkItem]()
-
-		logger.debug("sizeof marksToDisplay is " + marksToDisplay.size)
-
-		members.foreach(member => {
+		var marksToDisplay = members.map { member => 
 			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId())
-			//feedback.foreach(marksToDisplay ::= noteMarkItem(member, _))
-			marksToDisplay ::= noteMarkItem(member, feedback)
-		})
+			noteMarkItem(member, feedback)
+		}
 
 		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
 
@@ -74,21 +69,22 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		cmd.onBind
-		cmd.postExtractValidation(errors)
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
+	def confirmBatchUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(module, cmd, errors)
 		crumbed(Mav("admin/assignments/marks/markspreview"), module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		mustBeLinked(assignment, module)
+	def doUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(module, cmd, errors)
+		Redirect(Routes.admin.module(module))
+	}
+
+	private def bindAndValidate(module: uk.ac.warwick.tabula.data.model.Module, cmd: uk.ac.warwick.tabula.coursework.commands.assignments.AddMarksCommand, errors: org.springframework.validation.Errors): Unit = {
+		mustBeLinked(cmd.assignment, module)
 		mustBeAbleTo(Participate(module))
 		cmd.onBind
-		cmd.apply()
-		Redirect(Routes.admin.module(module))
+		cmd.postExtractValidation(errors)
 	}
 
 }
