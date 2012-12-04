@@ -9,7 +9,7 @@ import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index.FieldInfo.IndexOptions
 import org.apache.lucene.index._
-import org.apache.lucene.queryParser.QueryParser
+import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.FSDirectory
@@ -31,6 +31,8 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
+import org.apache.lucene.analysis.core._
+import org.apache.lucene.analysis.miscellaneous._
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -120,11 +122,11 @@ trait QueryMethods { self: AuditEventIndexService =>
 	def getAssignmentCreatedDate(assignment: Assignment): Option[DateTime] = {
 		search(all(term("eventType" -> "AddAssignment"), term("assignment" -> assignment.id)))
 			.flatMap { doc: Document =>
-				doc.getFieldable("eventDate") match {
-					case field: NumericField => {
-						Some(new DateTime(field.getNumericValue()))
+				doc.getField("eventDate") match {
+					case field: StoredField if field.numericValue() != null => {
+						Some(new DateTime(field.numericValue()))
 					}
-					case a => {
+					case _ => {
 						None
 					}
 				}
@@ -256,7 +258,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	private def initialiseSearching = {
 		if (searcherManager == null) {
 			try {
-				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null, null)
+				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null)
 			} catch {
 				case e: IndexNotFoundException => logger.warn("No index found.")
 			}
@@ -264,12 +266,12 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	}
 
 	/**
-	 * Sets up a new IndexSearcher with a reopened IndexReader so that
+	 * Sets up a new IndexSearcher with a refreshed IndexReader so that
 	 * subsequent searches see the results of recent index changes.
 	 */
 	private def reopen = {
 		initialiseSearching
-		if (searcherManager != null) searcherManager.maybeReopen
+		if (searcherManager != null) searcherManager.maybeRefresh
 	}
 
 	/**
@@ -387,7 +389,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 			val min: Option[JLong] = Option(since).map { _.getMillis }
 			val docs = search(
 				query = NumericRangeQuery.newLongRange("eventDate", min.orNull, null, true, true),
-				sort = new Sort(new SortField("eventDate", SortField.LONG, true)),
+				sort = new Sort(new SortField("eventDate", SortField.Type.LONG, true)),
 				max = 1)
 			docs.headOption // Some(firstResult) or None if empty
 		}
@@ -404,10 +406,10 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 		initialiseSearching
 		if (searcherManager == null) return Seq.empty
 		acquireSearcher { searcher =>
-			val maxResults = max.getOrElse(searcher.maxDoc)
+			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
-				if (sort == null) searcher.search(query, null, searcher.maxDoc)
-				else searcher.search(query, null, searcher.maxDoc, sort)
+				if (sort == null) searcher.search(query, null, searcher.getIndexReader.maxDoc)
+				else searcher.search(query, null, searcher.getIndexReader.maxDoc, sort)
 			transformResults(searcher, results, offset, maxResults)
 		}
 	}
@@ -464,7 +466,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	def openQuery(queryString: String, start: Int, count: Int) = {
 		val query = parser.parse(queryString)
 		val docs = search(query,
-			sort = new Sort(new SortField("eventDate", SortField.LONG, true)),
+			sort = new Sort(new SortField("eventDate", SortField.Type.LONG, true)),
 			offset = start,
 			max = count)
 		docs flatMap toId flatMap service.getById
@@ -475,7 +477,7 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId")) {
 			data.get(key) match {
 				case Some(value: String) => {
-					doc add plainStringField(key, value, stored = false)
+					doc add plainStringField(key, value, isStored = false)
 				}
 				case _ => // missing or not a string
 			}
@@ -493,23 +495,15 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	}
 
 	private def seqField(key: String, ids: Seq[_]) = {
-		val field = new Field(key, ids.mkString(" "), Store.NO, Index.ANALYZED_NO_NORMS)
-		field.setIndexOptions(IndexOptions.DOCS_ONLY)
-		field
+		new TextField(key, ids.mkString(" "), Store.NO)
 	}
 
-	private def plainStringField(name: String, value: String, stored: Boolean = true) = {
-		val storeMode = if (stored) Store.YES else Store.NO
-		val field = new Field(name, value, storeMode, Index.NOT_ANALYZED_NO_NORMS)
-		field.setIndexOptions(IndexOptions.DOCS_ONLY)
-		field
+	private def plainStringField(name: String, value: String, isStored: Boolean = true) = {
+		val storage = if (isStored) Store.YES else Store.NO
+		new StringField(name, value, storage)
 	}
 
-	private def dateField(name: String, value: DateTime) = {
-		val field = new NumericField(name, Store.YES, true)
-		field.setLongValue(value.getMillis)
-		field
-	}
+	private def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
 }
 
 trait QueryHelpers {
@@ -525,6 +519,6 @@ trait QueryHelpers {
 	def termQuery(name: String, value: String) = new TermQuery(new Term(name, value))
 	def term(pair: Pair[String, String]) = new TermQuery(new Term(pair._1, pair._2))
 
-	def dateSort = new Sort(new SortField("eventDate", SortField.LONG, false))
-	def reverseDateSort = new Sort(new SortField("eventDate", SortField.LONG, true))
+	def dateSort = new Sort(new SortField("eventDate", SortField.Type.LONG, false))
+	def reverseDateSort = new Sort(new SortField("eventDate", SortField.Type.LONG, true))
 }
