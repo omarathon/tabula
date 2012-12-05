@@ -250,11 +250,7 @@
 	</bean>
 	
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
-		<constructor-arg>
-			<bean id="u" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
-				p:ssosUrl="${ssoclient.ssos.url}"
-				p:groupServiceLocation="${ssoclient.webgroups.url}" />
-		</constructor-arg>
+		<constructor-arg ref="userLookupDelegate" />
 	</bean>
 	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
@@ -302,6 +298,15 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
+	<beans profile="test">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
+	</beans>
+	
+	<beans profile="dev,production">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
+				p:ssosUrl="${ssoclient.ssos.url}"
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+	</beans>
 	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
