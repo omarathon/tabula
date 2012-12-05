@@ -585,6 +585,7 @@ input[type=text] {
   color: @text-color;
   .border-radius(3px);
   padding: 3px;
+  white-space: nowrap;
 }
 .similarity-box(@color) when (lightness(@color) >= 60%) { .similarity-box(@color, black) }
 .similarity-box(@color) when (lightness(@color) < 60%) { .similarity-box(@color, white) }
