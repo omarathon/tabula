@@ -45,14 +45,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	@Required @BeanProperty var viewMappings: JMap[String, String] = Map[String, String]()
 	
-	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
+	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {	
 		val interceptors = List(userInterceptor, infoInterceptor)
 		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
 		
-		try doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView 
-		finally {
-			for (interceptor <- interceptors.reverse) interceptor.afterCompletion(request, response, obj, null)
-		}
+		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
 	}
 
 	private def ajax = RequestInfo.fromThread.map { _.ajax }.getOrElse(false)
