@@ -9,7 +9,7 @@
 
 	<#if submissionOnly?size gt 0>
 	<div class="alert alert-error">
-		<p>These users have submitted to the assignment, but no feedback has been uploaded for them.</p>
+		<p><i class="icon-remove"></i> These users have submitted to the assignment, but no feedback has been uploaded for them.</p>
 		
 		<ul class="user-list">
 		<#list submissionOnly as u>
@@ -21,7 +21,7 @@
 	
 	<#if feedbackOnly?size gt 0>
 	<div class="alert alert-error">
-		<p><i class="icon-remove"></i> There is feedback for these users but they did not submit an assignment to this system.</p>
+		<p><i class="icon-remove"></i> There is feedback or marks for these users but they did not submit an assignment to this system.</p>
 		
 		<ul class="user-list">
 		<#list feedbackOnly as u>
@@ -68,8 +68,8 @@
 	<#else>
 		<div class="alert alert-warn">
 			<p><i class="icon-remove"></i> 
-			<#if plagiarised?size == 1>			
-				It is suspected that the submission received from the following student is plagiarised.  Feedback for this student will not be published.	
+			<#if plagiarised?size == 1>
+				It is suspected that the submission received from the following student is plagiarised.  Feedback for this student will not be published.
 			<#else>
 				It is suspected that submissions received from the following students are plagiarised.  Feedback for these students will not be published.
 			</#if>
@@ -83,7 +83,7 @@
 	</#if>
 
 	<p>
-		The above discrepencies are provided for information.
+		The above discrepancies are provided for information.
 		It is up to you to decide whether to continue publishing. 
 	</p>
 	
