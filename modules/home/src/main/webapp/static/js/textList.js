@@ -25,10 +25,15 @@ TextListController.prototype = {
 		var self = this;
 		
 		jQuery("input", this.inputContainer).on('keyup', function(event){
-			if(event.keyCode == "32"){ //' '
+			if(event.keyCode == "32" || event.keyCode == "13"){ //' ' or Enter
 		        var newItem = jQuery(this).val();
 		        newItem = self.sanitiseInput(newItem);
-		        newItem = newItem.substring(0, newItem.length-1);
+		        
+		        // If it was a space, remove the last item
+		        if(event.keyCode == "32")
+		        	newItem = newItem.substring(0, newItem.length-1);
+		        	
+		        	
 				if(self.preventDuplicates && self.isDuplicate(newItem)){
 					jQuery(this).val(newItem);
 				} else {
@@ -52,6 +57,13 @@ TextListController.prototype = {
 		    		}
 		    	}
 		    }
+		}).on("keyup keydown keypress", function(event){
+			if (event.keyCode == "13") {
+				// Prevent default behaviour for Enter
+				event.stopPropagation();
+	    		event.preventDefault();
+	    		return false;
+			}
 		});
 		
 		// if there is any text remaining in the input box when it loses focus convert it into a new item
