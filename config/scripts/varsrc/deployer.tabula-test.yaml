@@ -27,6 +27,7 @@ branch: "develop"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
+  goal: "clean package"
 jbosses: 
   tabula-test:
   - !ruby/object:Jboss 

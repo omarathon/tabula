@@ -25,6 +25,7 @@ builder: !ruby/object:MavenBuilder
   profiles:
   - standalone
   skipTests: true
+  goal: "clean package"
 jbosses: 
   coursework-test:
   - !ruby/object:Jboss 
