@@ -7,7 +7,9 @@ import java.sql.Types
 
 sealed abstract class SubmissionState(val name: String, val ts: Set[SubmissionState]){
 	lazy val transitionStates = ts
-	def canTransitionTo(state: SubmissionState): Boolean = transitionStates.contains(state)
+	
+	def canTransitionTo(state: SubmissionState): Boolean = state == this || transitionStates.contains(state)
+	
 	override def toString = name
 }
 // initial state - received but has not yet been released for marking
