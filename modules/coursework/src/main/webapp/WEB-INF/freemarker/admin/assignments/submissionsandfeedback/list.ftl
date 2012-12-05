@@ -76,11 +76,13 @@ Publications: ${r.publicationOverlap}%)
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 <#else>
 <div class="submission-feedback-list">
-	<@form.selector_check_all />
-	<a class="btn btn-mini hide-awaiting-submission" href="#">
-		<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
-		<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
-	</a>
+	<div class="clearfix">
+		<@form.selector_check_all />
+		<a class="btn btn-mini hide-awaiting-submission" href="#">
+			<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
+			<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
+		</a>
+	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<tr>
 			<th></th>
