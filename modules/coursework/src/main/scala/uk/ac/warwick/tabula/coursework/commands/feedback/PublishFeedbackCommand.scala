@@ -61,7 +61,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 
 	def applyInternal() {
 		transactional() {
-			val users = assignmentService.getUsersForFeedback(assignment)
+			val users = getUsersForFeedback
 			for ((studentId, user) <- users) {
 				val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
 				for (feedback <- feedbacks)
@@ -89,6 +89,8 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 			missingUsers add MissingUser(id)
 		}
 	}
+	
+	def getUsersForFeedback = assignmentService.getUsersForFeedback(assignment)
 
 	private def messageFor(user: User): SimpleMailMessage = {
 		val message = new SimpleMailMessage
@@ -106,7 +108,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 
 	def describe(d: Description) = d 
 		.assignment(assignment)
-		.studentIds(assignment.feedbacks.map { _.universityId })
+		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
 
 	def messageTextFor(user: User) =
 		renderToString("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
