@@ -33,8 +33,24 @@ TextListController.prototype = {
 					jQuery(this).val(newItem);
 				} else {
 					self.addItem(newItem);
-					jQuery(this).val('');	
+					jQuery(this).val('');
 				}
+		    } else if (event.keyCode == "8"){ //backspace
+		    	var caret = jQuery(this).caret().start;
+		    	if (caret == 0) {
+		    		// Remove the last item in the list
+		    		var items = jQuery(".item", self.container);
+		    		if (items.length) {
+		    			items.last().remove();
+						self.syncFormField();
+						self.resizeInputContainer();
+		    		
+			    		// Prevent annoying "bip" from being at start of list
+			    		event.stopPropagation();
+			    		event.preventDefault();
+			    		return false;
+		    		}
+		    	}
 		    }
 		});
 		
