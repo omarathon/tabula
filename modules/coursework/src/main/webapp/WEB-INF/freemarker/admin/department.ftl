@@ -19,7 +19,7 @@
 		${department.name}
 	</h1>
 	<div class="btn-group dept-settings">
-		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+		<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
 			<i class="icon-white icon-wrench"></i>
 			Department settings
 			<span class="caret"></span>
