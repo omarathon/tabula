@@ -3,6 +3,12 @@
 
 <#assign module=assignment.module />
 
+<#if hasPublishedFeedback>
+	<p>
+		<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date. <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
+	</p>
+</#if>
+
 <!-- Extra junk that most people probably won't care about -->
 <div class="btn-group" id="assignment-extra-dropdown" style="float:right">
 <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">

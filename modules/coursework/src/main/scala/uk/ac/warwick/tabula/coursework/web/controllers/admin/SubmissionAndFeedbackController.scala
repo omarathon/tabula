@@ -66,12 +66,18 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId)
 		}
+		
+		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
+		val hasPublishedFeedback = students.exists { student => 
+			student.feedback != null && student.feedback.checkedReleased
+		}
 
 		Mav("admin/assignments/submissionsandfeedback/list",
 			"assignment" -> assignment,
-			//"submissions" -> submissions,
 			"students" -> students,
-						"awaitingSubmission" -> awaitingSubmission,
+			"awaitingSubmission" -> awaitingSubmission,
+			"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment),
+			"hasPublishedFeedback" -> hasPublishedFeedback,
 			"hasOriginalityReport" -> hasOriginalityReport,
 			"mustReleaseForMarking" -> mustReleaseForMarking)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
