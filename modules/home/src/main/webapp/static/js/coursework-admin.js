@@ -37,6 +37,7 @@ $(function(){
     
     // hide stuff that makes no sense when open-ended
     slideMoreOptions($('input#openEnded'), $('.has-close-date'), false);
+    slideMoreOptions($('input#modal-open-ended'), $('.has-close-date'), false);
 
     // check that the extension UI elements are present
     if($('input#allowExtensionRequests').length > 0){

@@ -54,6 +54,8 @@ class AssignmentItem(
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate: DateTime = _
+	
+	@BeanProperty var openEnded: JBoolean = false
 
 	def sameAssignment(other: AssignmentItem) =
 		upstreamAssignment == other.upstreamAssignment &&
@@ -91,6 +93,9 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
+	
+	@BeanProperty
+	val defaultOpenEnded = false
 
 	override def applyInternal() {
 		transactional() {
@@ -109,6 +114,9 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 				// validation should have verified that there is an options set for us to use
 				val options = optionsMap.get(item.optionsId)
 				options.copySharedTo(assignment)
+				
+				// Do open-ended afterwards; it's a date item that we're copying, not from shared options
+				assignment.openEnded = item.openEnded
 
 				assignmentService.save(assignment)
 			}
@@ -132,7 +140,7 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		}
 
 		def missingDates(item: AssignmentItem) = {
-			item.openDate == null || item.closeDate == null
+			item.openDate == null || (!item.openEnded && item.closeDate == null)
 		}
 
 		// reject if any items have a missing or garbage optionId value

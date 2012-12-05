@@ -80,6 +80,7 @@ first page of the form to setup a bunch of assignments from SITS.
 	<@f.hidden path="upstreamAssignment" />
 	<@f.hidden path="optionsId" cssClass="options-id-input" />
 	<@f.hidden path="openDate" cssClass="open-date-field" />
+	<@f.hidden path="openEnded" cssClass="open-ended-field" />
 	<@f.hidden path="closeDate" cssClass="close-date-field" />
 	<@f.hidden path="occurrence" />
 	<@f.hidden path="name" cssClass="name-field" />
@@ -156,7 +157,7 @@ first page of the form to setup a bunch of assignments from SITS.
  	<td class="selectable assignment-editable-fields-cell">
  		<span class="dates-label">
  			<#if form.hasvalue('openDate') && form.hasvalue('closeDate')>
- 				${form.getvalue("openDate")} - ${form.getvalue("closeDate")}
+ 				${form.getvalue("openDate")}<#if form.hasvalue("openEnded") && form.getvalue("openEnded") == "true"> (open ended)<#else> - ${form.getvalue("closeDate")}</#if>
  			</#if>
  		</span>
  	</td>
@@ -281,11 +282,31 @@ first page of the form to setup a bunch of assignments from SITS.
 					</@spring.bind>
 				</@form.field>
 			</@form.row>
+			
+			<@form.labelled_row "defaultOpenEnded" "Open-ended">
+				<label class="checkbox">
+					<@f.checkbox path="defaultOpenEnded" id="modal-open-ended" />
+					<a href="#" class="use-popover" 
+					   data-title="Open-ended assignments"
+					   data-html="true"
+					   data-trigger="hover"
+					   data-content="&lt;p&gt;
+					   Check this box to mark the assignments as open-ended.
+					   &lt;/p&gt;&lt;ul&gt;
+					   &lt;li&gt;Any close dates previously entered will have no effect.&lt;/li&gt;
+					   &lt;li&gt;Allowing extensions and submission after the close date will have no effect.&lt;/li&gt;
+					   &lt;li&gt;No close date will be shown to students.&lt;/li&gt;
+					   &lt;li&gt;There will be no warnings for lateness, and no automatic deductions to marks.&lt;/li&gt;
+					   &lt;li&gt;You will be able to publish feedback individually at any time.&lt;/li&gt;
+					   &lt;/ul&gt;"
+					   >What's this?</a>
+				</label>
+			</@form.labelled_row>
 
-			<@form.row>
+			<@form.row cssClass="has-close-date">
 				<@form.label>Close date</@form.label>
 				<@form.field>
-					<@spring.bind path="defaultOpenDate">
+					<@spring.bind path="defaultCloseDate">
 						<input type="text" id="modal-close-date" name="closeDate" class="date-time-picker" value="${status.value}">
 					</@spring.bind>
 				</@form.field>

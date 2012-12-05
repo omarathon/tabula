@@ -202,11 +202,13 @@ jQuery(function($){
 	// set dates
 	$datesModal.find('.modal-footer .btn-primary').click(function(e){
 		var openDate = $('#modal-open-date').val();
+		var openEnded = $('#modal-open-ended').is(':checked');
 		var closeDate = $('#modal-close-date').val();
 		var $selectedRows = $('#batch-add-table tr.selected');
 		$selectedRows.find('.open-date-field').val(openDate);
+		$selectedRows.find('.open-ended-field').val("" + openEnded);
 		$selectedRows.find('.close-date-field').val(closeDate);
-		$selectedRows.find('.dates-label').html(openDate +' - ' + closeDate);
+		$selectedRows.find('.dates-label').html(openDate + (openEnded ? ' (open ended)' : ' - ' + closeDate));
 		$datesModal.modal('hide');
 	});
 	
