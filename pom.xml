@@ -170,7 +170,7 @@
 
 			<activation>
 				<file>
-					<exists>src/main/webapp/WEB-INF/web.xml</exists>
+					<exists>src/main/webapp/WEB-INF</exists>
 				</file>
 			</activation>
 
