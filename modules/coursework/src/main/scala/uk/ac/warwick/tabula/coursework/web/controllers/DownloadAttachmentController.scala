@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.coursework.commands.feedback.DownloadFeedbackCommand
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.ItemNotFoundException
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
@@ -21,11 +22,11 @@ class DownloadAttachmentController extends AbstractAssignmentController {
 	@Autowired var fileServer: FileServer = _
 
 	@RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command: DownloadAttachmentCommand, user: CurrentUser, response: HttpServletResponse): Unit = {
+	def getAttachment(command: DownloadAttachmentCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 
 		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable, response) }
+		command.callback = { (renderable) => fileServer.serve(renderable) }
 		command.apply().orElse { throw new ItemNotFoundException() }
 	}
 

@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class DownloadSubmissionsController extends CourseworkController {
@@ -26,17 +27,17 @@ class DownloadSubmissionsController extends CourseworkController {
 	var assignmentService = Wire.auto[AssignmentService]
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
-	def download(command: DownloadSubmissionsCommand, response: HttpServletResponse) {
+	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		command.apply { renderable =>
-			fileServer.serve(renderable, response)
+			fileServer.serve(renderable)
 		}
 	}
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
-	def downloadMarkersSubmissions(command: DownloadSubmissionsCommand, response: HttpServletResponse) {
+	def downloadMarkersSubmissions(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val (assignment, module) = (command.assignment, command.module)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(DownloadSubmissions(assignment))
@@ -47,22 +48,22 @@ class DownloadSubmissionsController extends CourseworkController {
 		command.submissions = submissions.toList
 
 		command.apply { renderable =>
-			fileServer.serve(renderable, response)
+			fileServer.serve(renderable)
 		}
 	}
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
-	def downloadAll(command: DownloadAllSubmissionsCommand, response: HttpServletResponse) {
+	def downloadAll(command: DownloadAllSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		command.apply { renderable =>
-			fileServer.serve(renderable, response)
+			fileServer.serve(renderable)
 		}
 	}
 	
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
-    def downloadSingle(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submissionId: String, @PathVariable filename: String, response: HttpServletResponse) {
+    def downloadSingle(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submissionId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 	    mustBeAbleTo(Participate(module))
 
@@ -70,19 +71,19 @@ class DownloadSubmissionsController extends CourseworkController {
 	        case Some(submission) => {
 	            mustBeLinked(submission, assignment)
                 val renderable = new AdminGetSingleSubmissionCommand(submission).apply()
-                fileServer.serve(renderable, response)
+                fileServer.serve(renderable)
 	        }
 	        case None => throw new ItemNotFoundException
         }
     }
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback-templates.zip"))
-	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand, response: HttpServletResponse) {
+	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val assignment = command.assignment
 		mustBeLinked(assignment, assignment.module)
 		mustBeAbleTo(Participate(assignment.module))
 		command.apply { renderable =>
-			fileServer.serve(renderable, response)
+			fileServer.serve(renderable)
 		}
 	}
 

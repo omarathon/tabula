@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestMethod
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
@@ -21,20 +22,20 @@ class DownloadFeedbackController extends AbstractAssignmentController {
 	@Autowired var fileServer: FileServer = _
 
 	@RequestMapping(value = Array("/all/feedback.zip"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAll(command: DownloadFeedbackCommand, user: CurrentUser, response: HttpServletResponse): Unit = {
+	def getAll(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.filename = null
-		getOne(command, user, response)
+		getOne(command, user)
 	}
 
 	@RequestMapping(value = Array("/get/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getOne(command: DownloadFeedbackCommand, user: CurrentUser, response: HttpServletResponse): Unit = {
+	def getOne(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		mustBeLinked(command.assignment, command.module)
 
 		// Does permission checks.
 		checkCanGetFeedback(command.assignment, user)
 
 		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable, response) }
+		command.callback = { (renderable) => fileServer.serve(renderable) }
 		command.apply().orElse { throw new ItemNotFoundException() }
 	}
 

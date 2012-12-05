@@ -2,10 +2,8 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.seqAsJavaList
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -18,6 +16,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.fileserver.FileServer
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class DownloadFeedback extends CourseworkController {
@@ -25,7 +24,7 @@ class DownloadFeedback extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 
 	@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, response: HttpServletResponse) {
+	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 
@@ -33,19 +32,19 @@ class DownloadFeedback extends CourseworkController {
 			case Some(feedback) => {
 				mustBeLinked(feedback, assignment)
 				val renderable = new AdminGetSingleFeedbackCommand(feedback).apply()
-				fileServer.serve(renderable, response)
+				fileServer.serve(renderable)
 			}
 			case None => throw new ItemNotFoundException
 		}
 	}
 	
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
-    def getSelected(command: DownloadSelectedFeedbackCommand, response: HttpServletResponse) {
+    def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
         val (assignment, module, filename) = (command.assignment, command.module, command.filename)
         mustBeLinked(assignment, module)
         mustBeAbleTo(Participate(module))
         command.apply { renderable =>
-            fileServer.serve(renderable, response)
+            fileServer.serve(renderable)
         }
     }   
 }
@@ -56,11 +55,11 @@ class DownloadAllFeedback extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 	
 	@RequestMapping
-	def download(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String, response: HttpServletResponse) {
+	def download(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(Participate(module))
 		val renderable = new AdminGetAllFeedbackCommand(assignment).apply()
-		fileServer.serve(renderable, response)
+		fileServer.serve(renderable)
 	}
 }
 
