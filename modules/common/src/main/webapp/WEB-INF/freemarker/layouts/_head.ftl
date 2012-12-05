@@ -6,7 +6,7 @@
 
 <meta name="HandheldFriendly" content="True">
 <meta id="meta-mobile-optimized" name="MobileOptimized" content="320">
-<meta id="meta-viewport" name="viewport" content="width=device-width, initial-scale=1.0">
+<meta id="meta-viewport" name="viewport" content="width=device-width">
 <meta http-equiv="cleartype" content="on">
 
 <@stylesheet "/static/css/concat6.css" />
