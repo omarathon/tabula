@@ -20,7 +20,7 @@
 	</h1>
 	<div class="btn-group dept-settings">
 		<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-			<i class="icon-white icon-wrench"></i>
+			<i class="icon-wrench"></i>
 			Department settings
 			<span class="caret"></span>
 		</a>
