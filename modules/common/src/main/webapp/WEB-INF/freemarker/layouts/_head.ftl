@@ -1,4 +1,4 @@
-<title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}</title>
+<title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}<#if breadcrumbs??><#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}</#if></title>
 
 <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 <meta charset="utf-8">
