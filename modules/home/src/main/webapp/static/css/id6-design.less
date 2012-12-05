@@ -179,3 +179,11 @@ a:hover {color: @link-hover;}
 
 // Remove the 1px bottom padding
 #container { padding-bottom: 0; }
+
+// Turn off some smallscreen ID6 stuff that isn't really needed here
+.is-smallscreen {
+	// Our breadcrumbs are better than the automatic ones, and we don't need the dropdown nav
+	#navigation.horizontal { display: block; }
+	.alternate-breadcrumbs, #alternate-navigation, .smallscreen-anchor-links { display: none; }
+	
+}
