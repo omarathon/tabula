@@ -29,9 +29,6 @@ class JobContextTests extends AppContextTestBase {
 	}
 	
 	@Test def load {
-		jobService.jobs.size should (be > 1)
-		jobService.jobs map (_.identifier) should contain ("turnitin-submit")
-		
 		val id = jobService.add(None, TestingJob("anything really"))
 		jobService.getInstance(id) map { instance =>
 			jobService.run

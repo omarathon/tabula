@@ -17,6 +17,7 @@ build_status: starting
 app: "tabula"
 war_names:
 - courses
+- scheduling
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
@@ -25,7 +26,7 @@ builder: !ruby/object:MavenBuilder
   profiles:
   - standalone
   skipTests: true
-  goal: "clean package"
+  goal: "clean install"
 jbosses: 
   coursework:
   - !ruby/object:Jboss 

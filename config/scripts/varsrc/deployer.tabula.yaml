@@ -27,7 +27,7 @@ branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
-  goal: "clean package"
+  goal: "clean install"
 jbosses: 
   tabula:
   - !ruby/object:Jboss 
