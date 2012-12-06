@@ -66,6 +66,7 @@
 		<module>modules/home</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
+		<module>modules/scheduling</module>
 	</modules>
 
 	<profiles>
@@ -259,6 +260,50 @@
 							</execution>
 						</executions>
 					</plugin>
+					
+					<!-- Also make a JAR file for use in other components -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>make-a-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<archive>
+										<manifest>
+											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+										</manifest>
+									</archive>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-install-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>install</phase>
+								<goals>
+									<goal>install-file</goal>
+								</goals>
+								<configuration>
+									<packaging>jar</packaging>
+									<artifactId>${project.artifactId}</artifactId>
+									<groupId>${project.groupId}</groupId>
+									<version>${project.version}</version>
+									<file>
+										${project.build.directory}/${project.build.finalName}.jar
+									</file>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin> 
 				</plugins>
 			</build>
 
@@ -703,6 +748,25 @@
 				<version>${project.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>courses</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>profiles</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>home</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

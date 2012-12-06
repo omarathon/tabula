@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import uk.ac.warwick.tabula.services._
 import java.util.Collections.newSetFromMap
@@ -25,8 +25,6 @@ import scala.reflect.BeanProperty
  */
 @Service
 class ScheduledJobs {
-	import SchedulingConcurrency._
-
 	@Autowired @BeanProperty
 	var exceptionResolver: ExceptionResolver = _
 
@@ -51,29 +49,10 @@ class ScheduledJobs {
 		new CleanupTemporaryFilesCommand().apply()
 	}
 
-	@Scheduled(cron = "0 */1 * * * *") // every minute
+	@Scheduled(fixedRate = 60000) // every minute
 	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { indexingService.index }
 
-	@Scheduled(cron = "*/10 * * * * *") // every 10 seconds
-	def jobs: Unit = nonconcurrent("scheduled-jobs") {
-		exceptionResolver.reportExceptions {
-			jobService.run
-		}
-	}
-}
+	@Scheduled(fixedDelay = 10000) // every 10 seconds, non-concurrent
+	def jobs: Unit = exceptionResolver.reportExceptions { jobService.run }
 
-/**
- * Provides `nonconcurrent` which will only run the given
- * code if it's not currently running (as determined by the
- * ID string also passed). Used to avoid running a task if it's
- * still running already.
- */
-object SchedulingConcurrency {
-
-	var running = newSetFromMap(new ConcurrentHashMap[String, JBoolean])
-	def nonconcurrent[T](id: String)(f: => T) =
-		if (running.add(id)) {
-			try f
-			finally running.remove(id)
-		}
 }
