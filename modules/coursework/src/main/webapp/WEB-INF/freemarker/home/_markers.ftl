@@ -37,14 +37,14 @@
 
 <h2>Assignments for marking</h2>
 <p>You're a marker for one or more assignments.</p>
-<ul class="links">
+<div class="simple-assignment-list">
 	<#list assignmentsForMarking as info>
-		<li class="assignment-info">
+		<div class="simple-assignment-info">
 			<@format_name info.assignment />
 			<@download_link info />
-		</li>
+		</div>
 	</#list>
-</ul>
+</div>
 <script>
 	jQuery("a.disabled").on('click', function(e){e.preventDefault(e)})
 </script>
