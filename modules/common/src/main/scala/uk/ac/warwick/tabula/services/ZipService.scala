@@ -44,20 +44,21 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def partition(id: String): String = id.replace("-", "").grouped(idSplitSize).mkString("/")
 
 	def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
-    def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)	
+	def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
 	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
 
 	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
+	def invalidateIndividualFeedbackZip(feedback: Feedback) = invalidate(resolvePath(feedback))
 
 	def getFeedbackZip(feedback: Feedback): File =
 		getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
 
-    def getSubmissionZip(submission: Submission): File =
-        getZip(resolvePath(submission), getSubmissionZipItems(submission))	
-		
+	def getSubmissionZip(submission: Submission): File =
+		getZip(resolvePath(submission), getSubmissionZipItems(submission))
+
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
 		feedback.attachments.map { (attachment) =>
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
@@ -96,12 +97,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def getSomeSubmissionsZip(submissions: Seq[Submission]): File =
 		createUnnamedZip(submissions flatMap getSubmissionZipItems)
 
-    /**
-     * Get a zip containing these feedbacks.
-     */
-    def getSomeFeedbacksZip(feedbacks: Seq[Feedback]): File =
-        createUnnamedZip(feedbacks flatMap getFeedbackZipItems)		
-		
+	/**
+		* Get a zip containing these feedbacks.
+	*/
+	def getSomeFeedbacksZip(feedbacks: Seq[Feedback]): File =
+		createUnnamedZip(feedbacks flatMap getFeedbackZipItems)
+
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */

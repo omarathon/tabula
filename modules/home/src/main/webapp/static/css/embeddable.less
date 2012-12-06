@@ -55,7 +55,12 @@ html.iframe {
 .error { 
 	color: crimson;
 	display: block; 
-	}
+}
+
+.warning {
+	color: @warning-color;
+	display: block;
+}
 	
 .module-info {
 	.box-style;
@@ -284,7 +289,7 @@ table {
 	  margin: 0;
 	  list-style: none;
 	  li {
-	    padding-left: 10px;
+	    padding: 5px 0 5px 10px;
 	    margin: 3px 0;
 	    a {
 	      max-width: 28em;
@@ -292,8 +297,13 @@ table {
 	      white-space: nowrap;
 	      text-overflow: ellipsis;
 	    }
+	    &:not(:last-child){
+			border-bottom: solid 1px #aaa;
+	    }
 	  }
 	}
+
+
 	
 	ul.user-list {
 	  list-style: none;

@@ -1,20 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import java.util.ArrayList
-import java.util.zip.ZipInputStream
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.util.matching.Regex
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.stereotype.Repository
-import org.springframework.stereotype.Service
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.UniversityId
@@ -32,7 +23,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.util.core.StringUtils.hasText
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
-import java.nio.charset.Charset
 import uk.ac.warwick.spring.Wire
 import scala.Some
 
@@ -40,16 +30,23 @@ class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
 	@BeanProperty var file: UploadedFile = new UploadedFile
 
+	@BeanProperty var submissionExists: Boolean = false
+	@BeanProperty var duplicateFileNames: Set[String] = Set()
+
+	def listAttachments() = file.attached.map(f => new AttachmentItem(f.name, duplicateFileNames.contains(f.name)))
+
 	def this(uniNumber: String) = {
-		this();
-		this.uniNumber = uniNumber;
+		this()
+		this.uniNumber = uniNumber
 	}
+
+	class AttachmentItem(val name: String, val duplicate: Boolean){}
 }
 
 // Purely for storing in command to display on the model.
 case class ProblemFile(
-	@BeanProperty val path: String,
-	@BeanProperty val file: FileAttachment) {
+	@BeanProperty path: String,
+	@BeanProperty file: FileAttachment) {
 	def this() = this(null, null)
 }
 
@@ -57,7 +54,7 @@ case class ProblemFile(
 class ExtractFeedbackZip(cmd: AddFeedbackCommand) extends Command[Unit] {
 	def applyInternal() {}
 	def describe(d: Description) = d.assignment(cmd.assignment).properties(
-		"archive" -> cmd.archive.getOriginalFilename())
+		"archive" -> cmd.archive.getOriginalFilename)
 }
 
 /**
@@ -97,7 +94,7 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
-	def preExtractValidation(errors: Errors) = {
+	def preExtractValidation(errors: Errors) {
 		if (batch) {
 			if (archive != null && !archive.isEmpty()) {
 				logger.info("file name is " + archive.getOriginalFilename())
@@ -110,22 +107,27 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 		}
 	}
 
-	def postExtractValidation(errors: Errors) = {
-		if (!invalidFiles.isEmpty()) errors.rejectValue("invalidFiles", "invalidFiles")
-		if (items != null && !items.isEmpty()) {
+	def postExtractValidation(errors: Errors) {
+		if (!invalidFiles.isEmpty) errors.rejectValue("invalidFiles", "invalidFiles")
+		if (items != null && !items.isEmpty) {
 			for (i <- 0 until items.length) {
 				val item = items.get(i)
 				errors.pushNestedPath("items[" + i + "]")
-				validateUploadedFile(item.file, item.uniNumber, errors)
+				validateUploadedFile(item, errors)
 				errors.popNestedPath()
 			}
 		} else {
-			validateUploadedFile(file, uniNumber, errors)
+			val tempItem = new FeedbackItem(uniNumber)
+			tempItem.file = file
+			validateUploadedFile(tempItem, errors)
 		}
 	}
 
-	private def validateUploadedFile(file: UploadedFile, uniNumber: String, errors: Errors) {
-		if (file isMissing) errors.rejectValue("file", "file.missing")
+	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
+		val file = item.file
+		val uniNumber = item.uniNumber
+
+		if (file.isMissing) errors.rejectValue("file", "file.missing")
 		if (hasText(uniNumber)) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
@@ -135,15 +137,26 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 					case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
 				}
 
-				// Reject if feedback for this student is already uploaded
+				// warn if feedback for this student is already uploaded
 				assignment.feedbacks.find { feedback => feedback.universityId == uniNumber && feedback.hasAttachments } match {
-					case Some(feedback) => errors.rejectValue("uniNumber", "uniNumber.duplicate.feedback")
+					case Some(feedback) => {
+						// set warning flag for existing feedback and check if any existing files will be overwritten
+						item.submissionExists = true
+						checkForDuplicateFiles(item, feedback)
+					}
 					case None => {}
 				}
+
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
 		}
+	}
+
+	private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback){
+		val attachedFiles = item.file.attachedFileNames.toSet
+		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
+		item.duplicateFileNames = attachedFiles & feedbackFiles
 	}
 
 	def onBind = transactional() {
@@ -228,8 +241,12 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 			feedback.uploaderId = submitter.apparentId
 			feedback.universityId = uniNumber
 			feedback.released = false
-			for (attachment <- file.attached)
+			for (attachment <- file.attached){
+				// if an attachment with the same name as this one exists then delete it
+				val duplicateAttachment = feedback.attachments.find(_.name == attachment.name)
+				duplicateAttachment.foreach(session.delete(_))
 				feedback addAttachment attachment
+			}
 			session.saveOrUpdate(feedback)
 			updateSubmissionState(uniNumber)
 
@@ -244,9 +261,11 @@ class AddFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
 		if (items != null && !items.isEmpty()) {
 
 			val feedbacks = items.map { (item) =>
-				saveFeedback(item.uniNumber, item.file)
-
+				val feedback = saveFeedback(item.uniNumber, item.file)
+				zipService.invalidateIndividualFeedbackZip(feedback)
+				feedback
 			}
+
 			zipService.invalidateFeedbackZip(assignment)
 			feedbacks.toList
 
