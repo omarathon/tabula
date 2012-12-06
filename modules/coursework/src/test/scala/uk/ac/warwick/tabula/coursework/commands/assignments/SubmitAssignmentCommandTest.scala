@@ -20,9 +20,10 @@ import java.util.HashSet
 import uk.ac.warwick.tabula.data.model.forms.FileField
 import uk.ac.warwick.tabula.data.model.forms.FileSubmissionValue
 import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.AppContextTestBase
 
 
-class SubmitAssignmentCommandTest extends TestBase {
+class SubmitAssignmentCommandTest extends AppContextTestBase {
 
 	@Autowired var dao: FileDao = _
 
