@@ -10,7 +10,6 @@ import javax.persistence.Entity
 import javax.persistence.Lob
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.helpers.Logging
@@ -20,6 +19,7 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.ToString
 
 object JobInstanceImpl {
 	def fromPrototype(prototype: JobPrototype) = {
@@ -37,7 +37,7 @@ object JobInstanceImpl {
  * does not need subclassing.
  */
 @Entity(name = "Job")
-class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging {
+class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
 	private type JsonMap = Map[String, Any]
 
@@ -102,5 +102,10 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
 		user = currentUserFinder.resolveCurrentUser(realUser, { (u, s) => apparentUser }, false)
 	}
+	
+	def toStringProps = Seq(
+		"id" -> id,
+		"status" -> status,
+		"jobType" -> jobType)
 
 }
