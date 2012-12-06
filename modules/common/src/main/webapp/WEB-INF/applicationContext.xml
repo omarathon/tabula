@@ -259,10 +259,11 @@
 	
 	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
 	
+	<bean id="urlMethodModel" class="uk.ac.warwick.tabula.web.views.UrlMethodModel" />
 	<bean id="defaultFreemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration" abstract="true">
 		<property name="sharedVariables">
 			<map>
-				<entry key="url"><bean class="uk.ac.warwick.tabula.web.views.UrlMethodModel" /></entry>
+				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />				
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>

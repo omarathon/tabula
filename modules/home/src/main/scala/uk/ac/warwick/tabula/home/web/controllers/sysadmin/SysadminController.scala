@@ -75,12 +75,6 @@ class SysadminController extends BaseSysadminController {
 			"department" -> dept)
 	}
 
-	@RequestMapping(value = Array("/import"), method = Array(POST))
-	def importModules = {
-		new ImportModulesCommand().apply()
-		"sysadmin/importdone"
-	}
-
 }
 
 @Controller
@@ -136,38 +130,10 @@ class AddDeptOwnerController extends BaseSysadminController {
 	}
 }
 
+/* Just a pojo to bind to; actually used in scheduling */
 class ReindexForm {
-	var indexer = Wire.auto[AuditEventIndexService]
-
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
-
-	def reindex = {
-		indexer.indexFrom(from)
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/index/run"))
-class SysadminIndexController extends BaseSysadminController {
-	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexForm) = {
-		form.reindex
-		redirectToHome
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/import-sits"))
-class ImportSitsController extends BaseSysadminController {
-	var importer = Wire.auto[AssignmentImporter]
-
-	@RequestMapping(method = Array(POST))
-	def reindex() = {
-		val command = new ImportAssignmentsCommand
-		command.apply()
-		redirectToHome
-	}
 }
 
 class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {

@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.home.web.controllers.sysadmin
+package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 
 import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.stereotype._
