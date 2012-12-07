@@ -3,13 +3,11 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
-import org.springframework.beans.factory.annotation.Autowired
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -50,11 +48,18 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 		renderable
 	}
 
-	override def describe(d: Description) = d
-		.assignment(assignment)
-		.submissions(submissions)
-		.studentIds(submissions.map(_.universityId))
+	override def describe(d: Description) {
+
+		val downloads: Seq[Submission] = {
+			if (!students.isEmpty) students.map(assignmentService.getSubmissionByUniId(assignment, _).get)
+			else submissions
+		}
+
+		d.assignment(assignment)
+		.submissions(downloads)
+		.studentIds(downloads.map(_.universityId))
 		.properties(
-			"submissionCount" -> Option(submissions).map(_.size).getOrElse(0))
+		"submissionCount" -> Option(downloads).map(_.size).getOrElse(0))
+	}
 
 }
