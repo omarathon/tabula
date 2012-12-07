@@ -45,7 +45,16 @@ class JobService extends HasJobDao with Logging {
 		 * TODO no handle on thread to actually kill it if it's running
 		 * right now.
 		 */
-		fail(instance)
+		
+		// Don't fail if the job is finished
+		if (!instance.finished) {
+			transactional() {
+				instance.succeeded = false
+				instance.finished = true
+				instance.status = "Killed"
+				jobDao.update(instance)
+			}
+		}
 	}
 
 	def unfinishedInstances = jobDao.unfinishedInstances
