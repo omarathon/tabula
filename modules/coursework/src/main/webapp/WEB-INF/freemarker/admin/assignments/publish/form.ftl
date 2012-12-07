@@ -14,14 +14,14 @@ jQuery(function($){ "use strict";
 	}
 	checkbox.change(updateCheckbox);
 	updateCheckbox();
-	
+
 	$('#feedback-check-recipient-results')
 		.html('<div class="alert"><p>Checking for potential problems with students\' email addresses&hellip;</p></div>')
-		.load('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients');
+		.load('${url('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')}');
 		
 	$('#submissions-report-results')
 		.html('<div class="alert"><p>Comparing feedback list against submission list&hellip;</p></div>')
-		.load('/admin/module/${module.code}/assignments/${assignment.id}/submissions-report');
+		.load('${url('/admin/module/${module.code}/assignments/${assignment.id}/submissions-report')}');
 });
 </script>
 

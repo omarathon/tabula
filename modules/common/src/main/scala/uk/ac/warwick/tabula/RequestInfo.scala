@@ -29,7 +29,7 @@ object RequestInfo {
 	def fromThread = threadLocal.get
 	def open(info: RequestInfo) = threadLocal.set(Some(info))
 
-	def use(info: RequestInfo)(fn: => Unit) =
+	def use[T](info: RequestInfo)(fn: => T): T =
 		try { open(info); fn }
 		finally close
 

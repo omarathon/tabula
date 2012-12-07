@@ -4,6 +4,7 @@
 <#assign siteHeader="Student Profiles" />
 <#assign subsite=true />
 <#assign title="Student Profiles" />
-<#assign js="profiles.js" />
+<#assign name="profiles" />
+<#assign nonav=false />
 
 </#compress>

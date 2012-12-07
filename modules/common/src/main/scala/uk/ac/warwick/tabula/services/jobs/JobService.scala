@@ -27,9 +27,12 @@ class JobService extends HasJobDao with Logging {
 	def getInstance(id: String) = jobDao.getById(id)
 
 	def processInstance(instance: JobInstance) {
-		findJob(instance.jobType)
-			.map { processInstance(instance, _) }
-			.getOrElse { fail(instance) }
+		findJob(instance.jobType).getOrElse({logger.warn("Couldn't find a job matching for this instance: " + instance)}) match {
+			case job: Job => {
+				processInstance(instance, job)
+			}
+			case _ => 
+		}
 	}
 
 	def processInstance(instance: JobInstance, job: Job) {

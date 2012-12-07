@@ -11,6 +11,8 @@ html.iframe {
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
 
+@import "fonts/tabula.less";
+
 @grid-size:16px;
 @warning-color: #933;
 @subtle-text-color: #444;
@@ -53,7 +55,12 @@ html.iframe {
 .error { 
 	color: crimson;
 	display: block; 
-	}
+}
+
+.warning {
+	color: @warning-color;
+	display: block;
+}
 	
 .module-info {
 	.box-style;
@@ -87,6 +94,15 @@ ul {
 	  input { vertical-align: middle; }
 	}
 }
+
+.submission-feedback-list {
+	div.check-all {
+		display:block-inline;
+		float: left;
+		margin: 1px 10px 5px 0;
+	}
+}
+
 
 #feedback-table, #submission-table {
     tbody {
@@ -273,7 +289,7 @@ table {
 	  margin: 0;
 	  list-style: none;
 	  li {
-	    padding-left: 10px;
+	    padding: 5px 0 5px 10px;
 	    margin: 3px 0;
 	    a {
 	      max-width: 28em;
@@ -281,8 +297,13 @@ table {
 	      white-space: nowrap;
 	      text-overflow: ellipsis;
 	    }
+	    &:not(:last-child){
+			border-bottom: solid 1px #aaa;
+	    }
 	  }
 	}
+
+
 	
 	ul.user-list {
 	  list-style: none;
@@ -345,7 +366,7 @@ table {
 
 #footer-utility {
    .subtle {
-     color: #666;
+     color: #ccc;
    }
 }
 
@@ -574,6 +595,7 @@ input[type=text] {
   color: @text-color;
   .border-radius(3px);
   padding: 3px;
+  white-space: nowrap;
 }
 .similarity-box(@color) when (lightness(@color) >= 60%) { .similarity-box(@color, black) }
 .similarity-box(@color) when (lightness(@color) < 60%) { .similarity-box(@color, white) }
@@ -665,6 +687,18 @@ h1.with-settings {
 	display: inline-block;
 	top: -8px;
 	margin: 0px 0px 16px 10px;
+}
+
+// Fix modals to be wider (e.g. for SITS import options)
+.modal {
+	@modal-width: 840px;
+	width: @modal-width;
+	margin-left: -(@modal-width/2);
+}
+
+// Fix popovers to be on top of modals
+.popover {
+	z-index: @zindexPopover  + @zindexModal;
 }
 
 } // .tabula-page

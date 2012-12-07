@@ -13,10 +13,13 @@ import uk.ac.warwick.tabula.web.controllers._
 
 @Controller class HomeController extends BaseController {
 
-  var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems
 
-	@RequestMapping(Array("/")) def home(user: CurrentUser) = Mav("home/view")
+	@RequestMapping(Array("/")) def home(user: CurrentUser) = 
+	  	Mav("home/view",
+  			"jumbotron" -> true // All hail our new Jumbotron overlords
+	  	)
 }

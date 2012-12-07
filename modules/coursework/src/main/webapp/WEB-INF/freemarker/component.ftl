@@ -4,6 +4,7 @@
 <#assign siteHeader="Coursework Management" />
 <#assign subsite=true />
 <#assign title="Coursework Management" />
-<#assign js="courses.js" />
+<#assign name="courses" />
+<#assign nonav=false />
 
 </#compress>

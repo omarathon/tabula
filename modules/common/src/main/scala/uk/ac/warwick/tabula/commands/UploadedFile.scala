@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.{Autowired,Value}
+
 
 /**
  * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -27,6 +29,9 @@ import uk.ac.warwick.spring.Wire
 class UploadedFile {
 	var fileDao = Wire.auto[FileDao]
 
+	def disallowedFilenames: String = Wire.property("${uploads.disallowedFilenames}")
+	def disallowedPrefixes: String = Wire.property("${uploads.disallowedPrefixes}")
+		
 	// files bound from an upload request, prior to being persisted
 	@BeanProperty var upload: JList[MultipartFile] = ArrayList()
 
@@ -42,15 +47,19 @@ class UploadedFile {
 
 	def size: Int = 
 		if (hasAttachments) attached.size
-		else if (hasUploads) nonEmptyUploads.size
+		else if (hasUploads) permittedUploads.size
 		else 0
 
 	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse ArrayList()
-	def uploadOrEmpty: JList[MultipartFile] = nonEmptyUploads
+	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
 	def hasAttachments = attached != null && !attached.isEmpty()
-	def hasUploads = !nonEmptyUploads.isEmpty
-	def nonEmptyUploads: JList[MultipartFile] = Option(upload).getOrElse(ArrayList()).filterNot { _.isEmpty }
+	def hasUploads = !permittedUploads.isEmpty
+	
+	def permittedUploads: JList[MultipartFile] = {
+		Option(upload).getOrElse(ArrayList()).filterNot { s => s.isEmpty || (disallowedFilenames.split(",").toList contains s.getOriginalFilename()) || disallowedPrefixes.split(",").toList.exists(s.getOriginalFilename().startsWith)}
+	}
+		
 	def isUploaded = hasUploads
 
 	/**
@@ -60,6 +69,7 @@ class UploadedFile {
 	 * command needs them. This method will throw an exception
 	 */
 	def onBind {
+		
 		for (item <- attached) {
 			if (item != null && !item.temporary) {
 				throw new IllegalStateException("Non temporary file used")
@@ -67,7 +77,7 @@ class UploadedFile {
 		}
 		if (hasUploads) {
 			// convert MultipartFiles into FileAttachments
-			val newAttachments = for (item <- nonEmptyUploads) yield {
+			val newAttachments = for (item <- permittedUploads) yield {
 				val a = new FileAttachment
 				a.name = new File(item.getOriginalFilename()).getName
 				a.uploadedData = item.getInputStream

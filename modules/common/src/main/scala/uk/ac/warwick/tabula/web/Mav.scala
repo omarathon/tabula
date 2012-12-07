@@ -58,6 +58,11 @@ class Mav() {
 	 */
 	def crumbs(pages: BreadCrumb*): Mav = crumbsList(pages.toSeq)
 	def crumbsList(pages: Seq[BreadCrumb]): Mav = addObjects("breadcrumbs" -> pages) 
+	
+	/**
+	 * Set a custom title
+	 */
+	def withTitle(title: String): Mav = addObjects("pageTitle" -> title)
 		
 	/**
 	 * Sets the layout parameter to "none" to

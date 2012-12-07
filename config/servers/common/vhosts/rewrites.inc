@@ -29,6 +29,7 @@ RewriteRule ^/coursework/(.*)$ http://127.0.0.1:${proxy:port}/courses/$1 [QSA,P,
 RewriteCond %{REQUEST_URI} !^/coursework/(.*)
 RewriteCond %{REQUEST_URI} !^/home/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)
+RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 
 # Else, go straight to Jboss

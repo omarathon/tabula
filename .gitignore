@@ -25,3 +25,6 @@ junit*.properties
 /project/target
 /project/project
 .externalToolBuilders
+*.sublime-project
+*.sublime-workspace
+

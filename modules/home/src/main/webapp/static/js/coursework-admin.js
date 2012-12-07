@@ -37,6 +37,7 @@ $(function(){
     
     // hide stuff that makes no sense when open-ended
     slideMoreOptions($('input#openEnded'), $('.has-close-date'), false);
+    slideMoreOptions($('input#modal-open-ended'), $('.has-close-date'), false);
 
     // check that the extension UI elements are present
     if($('input#allowExtensionRequests').length > 0){
@@ -94,6 +95,14 @@ $(function(){
         e.preventDefault();
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
     });
+
+	$('.hide-awaiting-submission').on('click', function(){
+        $('.awaiting-submission, .hide-label, .show-label').toggle();
+    });
+	// hide this button if it would do nothing
+	if ($('.awaiting-submission').length == 0) {
+		$('.hide-awaiting-submission').hide();
+	}
     
     $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     

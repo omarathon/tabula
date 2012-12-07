@@ -10,13 +10,14 @@ class ExtensionDeletedMessage(assignment:Assignment, userId: String)
 
 	// applied to a base message to set a context specific subject and body
 	def setMessageContent(baseMessage: SimpleMailMessage) = {
-		baseMessage.setSubject(getSubjectPrefix() + "Extension revoked")
+		baseMessage.setSubject(getSubjectPrefix + "Extension revoked")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/revoke_manual_extension.ftl", Map(
 			"originalAssignmentDate" -> dateFormatter.print(assignment.closeDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.assignment.apply(assignment)))))
+			"path" -> Routes.assignment.apply(assignment)
+		)))
 		baseMessage
 	}
 

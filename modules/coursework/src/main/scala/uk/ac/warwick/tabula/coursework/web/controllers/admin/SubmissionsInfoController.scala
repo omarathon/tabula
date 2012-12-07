@@ -1,35 +1,23 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import collection.JavaConversions._
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.services.fileserver.FileServer
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAllSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadSubmissionsCommand
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.ReadableInstant
-import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.DateFormats
 import java.io.StringWriter
-import uk.ac.warwick.util.csv.GoodCsvDocument
-import uk.ac.warwick.util.csv.CSVLineWriter
+import scala.collection.JavaConversions.asScalaSet
+import scala.collection.JavaConversions.seqAsJavaList
+import org.joda.time.ReadableInstant
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.RequestMapping
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.web.views.CSVView
+import uk.ac.warwick.util.csv.CSVLineWriter
+import uk.ac.warwick.util.csv.GoodCsvDocument
 import scala.collection.immutable.ListMap
-import scala.collection.immutable.SortedSet
-import scala.collection.mutable.LinkedHashSet
 
 /**
  * Download submissions metadata.
@@ -105,13 +93,13 @@ class SubmissionsInfoController extends CourseworkController {
 
 	class SubmissionsCSVBuilder(items:Seq[SubmissionListItem]) extends CSVLineWriter[SubmissionListItem] {
 		val headers = {
-			var keys = Set[String]()
+			var extraFields = Set[String]()
 			
 			// have to iterate all items to ensure complete field coverage. bleh :(
-			items foreach ( item => keys = keys ++ fieldData(item).keySet )
+			items foreach ( item => extraFields = extraFields ++ extraFieldData(item).keySet )
 			
 			// return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
-			(coreData(items.head).keys.toList ++ keys.toList.sorted)
+			(coreFields ++ extraFields.toList.sorted)
 		}
 		
 		def getNoOfColumns(item:SubmissionListItem) = headers.size
@@ -121,9 +109,12 @@ class SubmissionsInfoController extends CourseworkController {
 		}
 	}
 	
-	def itemData(item: SubmissionListItem) = coreData(item) ++ fieldData(item)
-
-	def coreData(item: SubmissionListItem) = ListMap(
+	private def itemData(item: SubmissionListItem) = coreData(item) ++ extraFieldData(item)
+	
+	// This Seq specifies the core field order
+	private def coreFields = Seq("submission-id", "submission-time", "university-id", "assignment-id", "downloaded")
+	
+	private def coreData(item: SubmissionListItem) = Map(
 		"submission-id" -> item.submission.id,
 		"submission-time" -> csvFormat(item.submission.submittedDate),
 		"university-id" -> item.submission.universityId,
@@ -131,7 +122,7 @@ class SubmissionsInfoController extends CourseworkController {
 		"downloaded" -> item.downloaded.toString.toLowerCase
 	)
 
-	def fieldData(item: SubmissionListItem) = {
+	private def extraFieldData(item: SubmissionListItem) = {
 		var fieldDataMap = ListMap[String, String]()
 		
 		item.submission.values foreach ( value =>

@@ -157,6 +157,7 @@ trait TestHelpers {
 			case None => {
 				val user = new User(code)
 				user.setIsLoggedIn(true)
+				user.setFoundUser(true)
 				user.setWarwickId(universityId)
 				currentUser = new CurrentUser(user, user)
 				new RequestInfo(currentUser, null)

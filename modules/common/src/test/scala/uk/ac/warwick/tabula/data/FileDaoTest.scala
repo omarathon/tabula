@@ -62,9 +62,9 @@ class FileDaoTest extends AppContextTestBase {
 				file.getAbsolutePath().replace(prefix, "")
 			}
 
-			getRelativePath( dao.getData("aaaabbbbccccdddd").orNull ) should be ("/aaaa/bbbb/cccc/dddd")
-			getRelativePath( dao.getData("aaaabbbbddddeeee").orNull ) should be ("/aaaa/bbbb/dddd/eeee")
-			getRelativePath( dao.getData("aaaabbbbccccefef").orNull ) should be ("/aa/aa/bb/bb/cc/cc/ef/ef")
+			getRelativePath( dao.getData("aaaabbbbccccdddd").orNull ) should be (File.separator + "aaaa" + File.separator + "bbbb" + File.separator  + "cccc" + File.separator + "dddd")
+			getRelativePath( dao.getData("aaaabbbbddddeeee").orNull ) should be (File.separator + "aaaa" + File.separator + "bbbb" + File.separator + "dddd" + File.separator + "eeee")
+			getRelativePath( dao.getData("aaaabbbbccccefef").orNull ) should be (File.separator + "aa" + File.separator + "aa" + File.separator + "bb" + File.separator + "bb" + File.separator + "cc" + File.separator + "cc" + File.separator + "ef" + File.separator + "ef")
 
 		}
 	}

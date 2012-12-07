@@ -16,20 +16,13 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
-
-	val AjaxHeader = "X-Requested-With"
-	val XRequestedUriHeader = "X-Requested-Uri"
-	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
-
+	import RequestInfoInterceptor._
+  
 	@Autowired var maintenance: MaintenanceModeService = _
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 		implicit val req = request
-		RequestInfo.open(fromAttributeElse(new RequestInfo(
-			user = getUser(request),
-			requestedUri = getRequestedUri(request),
-			ajax = isAjax(request),
-			maintenance = maintenance.enabled)))
+		RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled)))
 		true
 	}
 
@@ -45,6 +38,25 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 			request.setAttribute(RequestInfoAttribute, info)
 			info
 		}
+	}
+
+	override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
+		RequestInfo.close
+	}
+
+}
+
+object RequestInfoInterceptor {
+	val AjaxHeader = "X-Requested-With"
+	val XRequestedUriHeader = "X-Requested-Uri"
+	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
+	  
+	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false) = {
+		new RequestInfo(
+			user = getUser(request),
+			requestedUri = getRequestedUri(request),
+			ajax = isAjax(request),
+			maintenance = isMaintenance)
 	}
 
 	private def getUser(implicit request: HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {
@@ -68,9 +80,4 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 		case string: String => string
 		case _ => request.getRequestURL.toString
 	})
-
-	override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
-		RequestInfo.close
-	}
-
 }

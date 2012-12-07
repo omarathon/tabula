@@ -10,14 +10,15 @@ class ExtensionGrantedMessage(extension: Extension, userId: String)
 
 	// applied to a base message to set a context specific subject and body
 	def setMessageContent(baseMessage: SimpleMailMessage) = {
-		baseMessage.setSubject(getSubjectPrefix() + "Extension granted")
+		baseMessage.setSubject(getSubjectPrefix + "Extension granted")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/new_manual_extension.ftl", Map(
 			"extension" -> extension,
 			"newExpiryDate" -> dateFormatter.print(extension.getExpiryDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.assignment.apply(assignment)))))
+			"path" -> Routes.assignment.apply(assignment)
+		)))
 		baseMessage
 	}
 

@@ -19,8 +19,8 @@
 		${department.name}
 	</h1>
 	<div class="btn-group dept-settings">
-		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-			<i class="icon-white icon-wrench"></i>
+		<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-wrench"></i>
 			Department settings
 			<span class="caret"></span>
 		</a>
@@ -209,7 +209,7 @@
 		<div>
 		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
 		<#if has_archived_assignments>
-			<a class="btn show-archived-assignments" href="#">Show archived assignents</a>
+			<a class="btn show-archived-assignments" href="#">Show archived assignments</a>
 		</#if>
 		</div>
 	</#if>
