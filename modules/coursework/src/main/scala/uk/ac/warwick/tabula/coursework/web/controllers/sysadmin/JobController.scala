@@ -19,7 +19,7 @@ class JobController extends CourseworkController {
 
 	@RequestMapping(value = Array("/list"))
 	def list = {
-		val jobs = jobService.unfinishedInstances.sortBy(_.createdDate).reverse
+		val jobs = jobService.unfinishedInstances
 		Mav("sysadmin/jobs/list", "jobs" -> jobs)
 	}
 

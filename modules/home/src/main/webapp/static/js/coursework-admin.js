@@ -12,16 +12,14 @@ var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
 	        	$slidingDiv.stop().slideDown('fast');
 	        else
 	        	$slidingDiv.stop().slideUp('fast');
-	    });
-	    $slidingDiv.toggle($checkbox.is(':checked'));
+	    }).trigger('change');
 	} else {
 	    $checkbox.change(function(){
 	        if ($checkbox.is(':checked'))
 	        	$slidingDiv.stop().slideUp('fast');
 	        else
 	        	$slidingDiv.stop().slideDown('fast');
-	    });
-	    $slidingDiv.toggle(! $checkbox.is(':checked'));
+	    }).trigger('change');
 	}
 };
 
