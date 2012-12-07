@@ -18,7 +18,9 @@ class MockJobDao extends JobDao {
 		instance.id
 	}
 	
-	def unfinishedInstances = instances.iterator.filterNot( _.finished ).toSeq
+	def unfinishedInstances = instances.toSeq.filterNot( _.finished )
+	
+	def listRecent(start: Int, count: Int) = instances.toSeq.filter( _.finished ).slice(start, start+count)
 	
 	def getById(id:String) = instances.find( id == _.id )
 	

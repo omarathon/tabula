@@ -13,6 +13,7 @@ trait JobDao {
 	def saveJob(instance: JobInstance): String
 	def getById(id: String): Option[JobInstance]
 	def unfinishedInstances: Seq[JobInstance]
+	def listRecent(start: Int, count: Int): Seq[JobInstance]
 	def update(instance: JobInstance): Unit
 }
 
@@ -22,6 +23,7 @@ trait HasJobDao {
 
 @Service
 class JobDaoImpl extends JobDao with Daoisms {
+	import org.hibernate.criterion.Order._
 
 	def findOutstandingInstances(max: Int): Seq[JobInstance] =
 		transactional(readOnly = true) {
@@ -55,6 +57,15 @@ class JobDaoImpl extends JobDao with Daoisms {
 	def unfinishedInstances: Seq[JobInstance] =
 		session.newCriteria[JobInstanceImpl]
 			.add(is("finished", false))
+			.addOrder(desc("createdDate"))
+			.seq
+			
+	def listRecent(start: Int, count: Int): Seq[JobInstance] =
+		session.newCriteria[JobInstanceImpl]
+			.add(is("finished", true))
+			.addOrder(desc("createdDate"))
+			.setFirstResult(start)
+			.setMaxResults(count)
 			.seq
 
 }

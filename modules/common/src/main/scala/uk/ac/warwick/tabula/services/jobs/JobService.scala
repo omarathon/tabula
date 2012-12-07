@@ -49,6 +49,7 @@ class JobService extends HasJobDao with Logging {
 	}
 
 	def unfinishedInstances = jobDao.unfinishedInstances
+	def listRecent(start: Int, count: Int) = jobDao.listRecent(start, count)
 
 	def update(instance: JobInstance) = jobDao.update(instance)
 
