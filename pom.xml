@@ -273,6 +273,7 @@
 									<goal>jar</goal>
 								</goals>
 								<configuration>
+									<classifier>jar</classifier>
 									<archive>
 										<manifest>
 											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
@@ -297,8 +298,9 @@
 									<artifactId>${project.artifactId}</artifactId>
 									<groupId>${project.groupId}</groupId>
 									<version>${project.version}</version>
+									<classifier>jar</classifier>
 									<file>
-										${project.build.directory}/${project.build.finalName}.jar
+										${project.build.directory}/${project.build.finalName}-jar.jar
 									</file>
 								</configuration>
 							</execution>
@@ -755,18 +757,21 @@
 				<artifactId>courses</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
+				<classifier>jar</classifier>
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>profiles</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
+				<classifier>jar</classifier>
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>home</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
+				<classifier>jar</classifier>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
