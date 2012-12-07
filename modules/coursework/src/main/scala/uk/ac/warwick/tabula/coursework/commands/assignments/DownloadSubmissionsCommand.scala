@@ -51,7 +51,7 @@ class DownloadSubmissionsCommand extends Command[RenderableZip] with ReadOnly wi
 	override def describe(d: Description) {
 
 		val downloads: Seq[Submission] = {
-			if (!students.isEmpty) students.map(assignmentService.getSubmissionByUniId(assignment, _).get)
+			if (!students.isEmpty) students.flatMap(assignmentService.getSubmissionByUniId(assignment, _))
 			else submissions
 		}
 
