@@ -55,5 +55,12 @@ class JobController extends BaseController {
 			"jobId" -> id,
 			"jobStatus" -> (instance map (_.status) getOrElse (""))).noLayoutIf(ajax)
 	}
+	
+	@RequestMapping(value = Array("/kill"))
+	def kill(@RequestParam("id") id: String) = {
+		val instance = jobService.getInstance(id)
+		jobService.kill(instance.get)
+		Redirect("/sysadmin/jobs/list")
+	}
 
 }
