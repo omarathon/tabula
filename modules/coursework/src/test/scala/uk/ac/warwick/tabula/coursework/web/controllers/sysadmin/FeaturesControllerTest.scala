@@ -9,7 +9,7 @@ import java.util.Properties
 
 class FeaturesControllerTest extends TestBase {
 	@Test def access {
-		val features = Features.fromProperties(new Properties)
+		val features = Features.empty
 		val controller = new FeaturesController
 		controller.features = features
 		controller.afterPropertiesSet
