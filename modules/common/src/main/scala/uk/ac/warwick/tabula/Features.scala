@@ -5,6 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.beans.BeanWrapperImpl
 import scala.reflect.BeanProperty
 import java.lang.Boolean
+import org.springframework.beans.factory.annotation.Value
 
 
 /**
@@ -25,38 +26,21 @@ import java.lang.Boolean
  * }}}
  */
 abstract class Features {
-	@BeanProperty var emailStudents: Boolean = false
-	@BeanProperty var collectRatings: Boolean = true
-	@BeanProperty var submissions: Boolean = true
-	@BeanProperty var privacyStatement: Boolean = true
-	@BeanProperty var collectMarks: Boolean = true
-	@BeanProperty var turnitin: Boolean = true
-	@BeanProperty var assignmentMembership: Boolean = true
-	@BeanProperty var extensions: Boolean = true
-	@BeanProperty var combinedForm: Boolean = true	
-	@BeanProperty var feedbackTemplates: Boolean = true
-	@BeanProperty var markSchemes: Boolean = false
+	@Value("${features.emailStudents:false}") @BeanProperty var emailStudents: Boolean = _
+	@Value("${features.collectRatings:true}") @BeanProperty var collectRatings: Boolean = _
+	@Value("${features.submissions:true}") @BeanProperty var submissions: Boolean = _
+	@Value("${features.privacyStatement:true}") @BeanProperty var privacyStatement: Boolean = _
+	@Value("${features.collectMarks:true}") @BeanProperty var collectMarks: Boolean = _
+	@Value("${features.turnitin:true}") @BeanProperty var turnitin: Boolean = _
+	@Value("${features.assignmentMembership:true}") @BeanProperty var assignmentMembership: Boolean = _
+	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = _
+	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = _
+	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = _
+	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = _
 }
 
-class FeaturesImpl(properties: Properties) extends Features {
-	// begin black magic that converts features.* properties into values
-	// to inject into this instance.
-
-	private val featuresPrefix = "features."
-
-	private val bean = new BeanWrapperImpl(this)
-	private def featureKeys = properties.keysIterator.filter(_ startsWith featuresPrefix)
-	def capitalise(string: String) = string.head.toUpper + string.tail
-	def removePrefix(string: String) = string.substring(featuresPrefix.length)
-	def camelise(string: String) = removePrefix(string).split("\\.").toList match {
-		case Nil => ""
-		case head :: tail => head + tail.map(capitalise).mkString("")
-	}
-
-	for (key <- featureKeys) bean.setPropertyValue(camelise(key), properties.getProperty(key))
-}
+class FeaturesImpl extends Features
 
 object Features {
-	def empty = new FeaturesImpl(new Properties)
-	def fromProperties(p: Properties) = new FeaturesImpl(p)
+	def empty = new FeaturesImpl
 }
