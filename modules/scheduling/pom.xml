@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>21-SNAPSHOT</version>
+		<version>22-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -69,14 +69,17 @@
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>courses</artifactId>
+			<classifier>jar</classifier>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>profiles</artifactId>
+			<classifier>jar</classifier>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>home</artifactId>
+			<classifier>jar</classifier>
 		</dependency>
 	</dependencies>
 </project>
