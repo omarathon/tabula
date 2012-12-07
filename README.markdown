@@ -30,9 +30,10 @@ on the Coursework instance alone.
 
 You need an HTTPS vhost for SSO so if you're only going to set up one vhost,
 it should be the HTTPS one. The include files reference a map to get the port to use,
-so you may need to define yours with a line such as
+so you may need to define yours with two lines such as
 
     RewriteMap proxy txt:/etc/apache2/tabulaport.txt
+    RewriteMap scheduler txt:/etc/apache2/tabulaport.txt
 
 The above line should point to a file containing this line (assuming default JBoss port 8080):
 
