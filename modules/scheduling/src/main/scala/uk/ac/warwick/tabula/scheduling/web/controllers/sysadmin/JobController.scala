@@ -7,17 +7,38 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.jobs.TestingJob
+import scala.reflect.BeanProperty
+
+class JobQuery {
+	@BeanProperty var page: Int = 0
+}
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/jobs"))
 class JobController extends BaseController {
 
 	@Autowired var jobService: JobService = _
+	
+	val pageSize = 100
 
 	@RequestMapping(value = Array("/list"))
-	def list = {
-		val jobs = jobService.unfinishedInstances.sortBy(_.createdDate).reverse
-		Mav("sysadmin/jobs/list", "jobs" -> jobs)
+	def list(query: JobQuery) = {
+		val unfinished = jobService.unfinishedInstances
+		
+		val page = query.page
+		val start = (page * pageSize) + 1
+		val max = pageSize
+		val end = start + max - 1
+		
+		val recent = jobService.listRecent(page * pageSize, pageSize)
+		
+		Mav("sysadmin/jobs/list",
+			"unfinished" -> unfinished,
+			"finished" -> recent,
+			"fromIndex" -> false,
+			"page" -> page,
+			"startIndex" -> start,
+			"endIndex" -> end)
 	}
 
 	@RequestMapping(value = Array("/create-test"), method = Array(POST))

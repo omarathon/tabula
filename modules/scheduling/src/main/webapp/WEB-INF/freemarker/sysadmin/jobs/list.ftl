@@ -1,8 +1,6 @@
 <#escape x as x?html>
 
-<h1>Background jobs</h1>
-
-<#if jobs?size gt 0>
+<#macro jobs jobs>
 <table class="jobs-list">
 <tr>
 	<td>Created</td>
@@ -34,10 +32,24 @@
 </tr>
 </#list>
 </table>
+</#macro>
+
+<h1>Background jobs</h1>
+
+<h2>Incomplete jobs</h2>
+
+<#if unfinished?size gt 0>
+<@jobs unfinished />
 <#else>
+<p>There are no incomplete jobs.</p>
+</#if>
 
-<p>Il n'y a pas de jobs.</p>
+<h2>Completed jobs</h2>
 
+<#if finished?size gt 0>
+<@jobs finished />
+<#else>
+<p>There are no completed jobs.</p>
 </#if>
 
 </#escape>
