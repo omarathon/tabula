@@ -14,7 +14,7 @@ Uploaded attachments:
 
 To review your submission, please visit:
 
-<@url page=path />
+<@url page=path context="/coursework" />
 
 
 This email was sent from an automated system, and replies to it will not reach a real person.
