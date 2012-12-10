@@ -275,6 +275,7 @@
 					</bean>
 				</entry>
 				<entry key="dateBuilder"><bean class="uk.ac.warwick.tabula.helpers.DateBuilder" /></entry>
+				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
 			</map>
 		</property>

@@ -40,8 +40,6 @@ class ExtensionController extends CourseworkController{
 	def crumbed(mav:Mav, module:Module)
 	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
-	val dateBuilder = new DateBuilder
-
 	validatesWith{ (form:ModifyExtensionCommand, errors:Errors) =>
 		form.validate(errors)
 	}
@@ -204,7 +202,7 @@ class ExtensionController extends CourseworkController{
 			}
 
 			val expiryDate =  extension.expiryDate match {
-				case d:DateTime => dateBuilder.format(extension.expiryDate)
+				case d:DateTime => DateBuilder.format(extension.expiryDate)
 				case _ => ""
 			}
 

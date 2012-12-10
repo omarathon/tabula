@@ -42,12 +42,9 @@ $(function(){
         slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'), true);
     }
     
-    
-    $('.assignment-info .assignment-buttons').css('opacity',0);
-    $('.assignment-info').hover(function() {
-        $(this).find('.assignment-buttons').stop().fadeTo('fast', 1);
-    }, function() {
-        $(this).find('.assignment-buttons').stop().fadeTo('fast', 0);
+    // Zebra striping on lists of modules/assignments
+    $('.module-info').each(function(i, module) { 
+        $(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
     });
     
     $('.module-info.empty').css('opacity',0.66)

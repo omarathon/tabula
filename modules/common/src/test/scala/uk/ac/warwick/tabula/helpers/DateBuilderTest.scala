@@ -9,10 +9,10 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 
 class DateBuilderTest extends TestBase with FreemarkerRendering {
 	
-	@Test def format {
+	import DateBuilder._
+
+	@Test def formatting {
 		withFakeTime(new DateTime(2012,4,12, 13,36,0)) {
-		 
-			val builder = new DateBuilder
 			
 			val anotherDay = new DateTime(2012,3,10, 12,13,14)
 			
@@ -20,24 +20,23 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 			val tomorrow = new DateTime().plusDays(1)
 			val today = new DateTime()
 			
-			builder.format(anotherDay, false, false, false, true, true) should be ("Sat 10th March 2012 12:13")
-			builder.format(anotherDay, true, true, true, true, true) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
+			format(anotherDay, false, false, false, true, true) should be ("Sat 10th March 2012 12:13")
+			format(anotherDay, true, true, true, true, true) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
 			
-			builder.format(yesterday, false, true, false, true, true) should be ("Yesterday at 13:36")
-			builder.format(tomorrow, true, true, false, false, true) should be ("tomorrow at 13:36:00")
-			builder.format(today, false, false, false, true, true) should be ("Today 13:36")
+			format(yesterday, false, true, false, true, true) should be ("Yesterday at 13:36")
+			format(tomorrow, true, true, false, false, true) should be ("tomorrow at 13:36:00")
+			format(today, false, false, false, true, true) should be ("Today 13:36")
 			
-			builder.format(today, false, false, false, true, false) should be ("Thu 12th April 2012 13:36")
+			format(today, false, false, false, true, false) should be ("Thu 12th April 2012 13:36")
 		  
 			// Freemarker exec
 			implicit val fmConfig = newFreemarkerConfiguration
-			val rendered = renderToString("dateBuilder.ftl", Map("b" -> builder, "today" -> today))
+			val rendered = renderToString("dateBuilder.ftl", Map("b" -> new DateBuilder, "today" -> today))
 			rendered should be ("Today 13:36")
 		}
 	}
 	
 	@Test def ordinals {
-		val builder = new DateBuilder
 		for ((i, o) <- Seq(
 				0->"th",
 				1->"st",
@@ -52,6 +51,6 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 				20->"th",
 				21->"st",
 				101->"st"
-		)) withClue("Ordinal of "+i) { builder.ordinal(i) should be (o) } 
+		)) withClue("Ordinal of "+i) { ordinal(i) should be (o) } 
 	}
 }

@@ -19,21 +19,23 @@ html.iframe {
 @very-subtle-text-color: #777;
 @very-subtle-font-size: 0.8em;
 
+@box-style-border-radius: 8px;
+
 .box-style() {
 	border: 1px solid #999;
 	border-bottom: 1px solid #666;
-	.border-radius(8px);
+	.border-radius(@box-style-border-radius);
 }
 
 .warning-box-style() {
-	.border-radius(8px);
+	.border-radius(@box-style-border-radius);
 	padding: 0.5em;
 	.vertical-gradient(#ffffcc, #ffee99);
 	border: 1px solid #ffcc66;
 }
 
 .error-box-style() {
-	.border-radius(8px);
+	.border-radius(@box-style-border-radius);
 	padding: 0.5em;
 	.vertical-gradient(#ffeeee, #ffcccc);
 	border: 1px solid #ff6666;
@@ -65,11 +67,22 @@ html.iframe {
 .module-info {
 	.box-style;
 	
-	padding: 0.5em;
+	padding: 0.5em 0.5em 0 0.5em;
 	margin: 0.7em 0;
-	background-color: #eee;
+	background-color: #ebebeb;
 	
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
+	
+	// Position module title and its Manage dropdown on the same line.
+	.module-title { display: inline-block; }
+	.module-manage-button { 
+		display: inline-block;
+		margin-left: 8px;
+		top: -8px;
+	}
+
+	// fade out glypicons a bit, too dark
+	i, .caret { .opacity-one(0.6); }
 }
 
 ul {
@@ -132,18 +145,31 @@ ul {
 }
 
 .assignment-info {
-	.box-style;
+
+	border-top: 2px groove white;
+
+	//fix appearance against bottom of rounded module box
+	&:last-child { 
+		border-radius: 0 0 @box-style-border-radius @box-style-border-radius;
+	}
+
 	padding: 0.5em;
-	margin-bottom: 0.5em;
-	background-color: #fff;
+	margin-left: -0.5em;
+	margin-right: -0.5em;
+	
+	// zebra-striping (but exclude archived items)
+	// doesn't work very well
+	// TODO jQuery this
+	//&:not(.archived):nth-of-type(odd) { background-color: #f5f5f5; }
+	&.alt-row { background-color: #f5f5f5; }
 	
 	.column1 {
-		width: 18em;
+		width: 24em;
 		float:left;
 	}
 	.stats {
 		font-size: 0.85em;
-		width: 30em;
+		width: 32em;
 		float:left;
 	}
 	.assignment-buttons {
@@ -180,9 +206,17 @@ ul {
 	
 	&.archived {
 	  display: none;
-	  background-color: #ddd;
 	}
 	
+}
+
+// small assignment items as used on home page. Used to be same
+// as assignment-info on department page, but no more.
+.simple-assignment-info {
+	.box-style();
+	padding: 4px;
+	margin: 4px 0;
+
 	// Assignment deadlines shown on the home page.
 	div.alert {
 	  margin-bottom: 0 !important;

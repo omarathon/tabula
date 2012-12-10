@@ -25,7 +25,7 @@
 			</a>
 		</#macro>
 		
-		<ul class="links">
+		<div class="simple-assignment-list">
 		
 		<#if has_assignments>
 		<#macro enrolled_assignment info>
@@ -41,36 +41,36 @@
 			</#if>
 		</#macro>
 		<#list enrolledAssignments as info>
-			<li class="assignment-info">
+			<div class="simple-assignment-info">
 				<span class="label label-info">Enrolled</span>
 				<@enrolled_assignment info />
-			</li>
+			</div>
 		</#list>
 		</#if>
 		
 		<#if has_feedback>
 		<#list assignmentsWithFeedback as assignment>
-			<li class="assignment-info">
+			<div class="simple-assignment-info">
 				<span class="label-green">Marked</span>
 				<@assignment_link assignment>
 					<@format_name assignment />	
 				</@assignment_link>
-			</li>
+			</div>
 		</#list>
 		</#if>
 		
 		<#if has_submissions>
 		<#list assignmentsWithSubmission as assignment>
-			<li class="assignment-info">
+			<div class="simple-assignment-info">
 				<span class="label-orange">Submitted</span>
 				<@assignment_link assignment>
 					<@format_name assignment />	
 				</@assignment_link>
-			</li>
+			</div>
 		</#list>
 		</#if>
 		
-		</ul>
+		</div>
 	
 	<#else><#-- !has_any_items -->
 
@@ -82,15 +82,15 @@
 	
 	<#if archivedAssignments?has_content>
 	<div id="archived-assignments-container">
-	<ul class="links" id="archived-assignments-list">
+	<div class="simple-assignment-list" id="archived-assignments-list">
 	<#list archivedAssignments as assignment>
-		<li class="assignment-info">
+		<div class="simple-assignment-info">
 			<@assignment_link assignment>
 				<@format_name assignment />	
 			</@assignment_link>
-		</li>
+		</div>
 	</#list>
-	</ul>
+	</div>
 	</div>
 	</#if>
 
