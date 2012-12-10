@@ -54,7 +54,7 @@
 	<div class="clearfix">
 		<h2 class="module-title"><@fmt.module_name module /></h2>
 		<div class="btn-group module-manage-button">
-		  <a class="btn dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+		  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
 		  <ul class="dropdown-menu">
 		  	<#if can_manage >	
 					<#assign  module_managers_count = ((module.participants.includeUsers)![])?size />
@@ -176,7 +176,7 @@
 			<div class="assignment-buttons">
 				<div class="btn-toolbar">
 				<div class="btn-group">
-				  <a class="btn dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+				  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
 				  <ul class="dropdown-menu pull-right">
 					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
 					<li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">

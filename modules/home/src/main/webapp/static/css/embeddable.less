@@ -414,7 +414,7 @@ table {
 	
 }
 
-.mod-name { font-size: 85%; }
+.mod-name { font-size: 85%; padding-left: 8px; }
 
 .disabled-zone {
   .opacity-one(0.6);
@@ -503,7 +503,7 @@ input.copyable-url {
   border: none; 
   background: transparent; 
   color: #333; 
-  font-size: 100%; 
+  font-size: 100% !important; // override Bootstrap
   height: 1.3em; 
   width: 100%;
   &, &[readonly] { cursor: pointer !important; }
