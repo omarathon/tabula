@@ -14,11 +14,13 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Ordered
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.core.ExceptionUtils
 import uk.ac.warwick.tabula.system.exceptions._
 import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
 
 /**
@@ -28,7 +30,7 @@ import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoIntercept
  * ErrorController which delegates to ExceptionResolver.doResolve(e), so all errors
  * should come here eventually.
  */
-class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered {
+class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered with ControllerViews {
 
 	@Required @BeanProperty var defaultView: String = _
 
@@ -52,7 +54,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
 	}
 
-	private def ajax = RequestInfo.fromThread.map { _.ajax }.getOrElse(false)
+	override def requestInfo = RequestInfo.fromThread
+
+	private def ajax = requestInfo.map { _.ajax }.getOrElse(false)
 
 	/**
 	 * Resolve an exception outside of a request. Doesn't return a model/view.
@@ -64,9 +68,12 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * happens beyond Spring's grasp.
 	 */
 	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None): Mav = {
+		def loggedIn = requestInfo.map { _.user.loggedIn }.getOrElse(false)
+
 		e match {
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request)
+			case permDenied: PermissionDeniedException if !loggedIn => RedirectToSignin()
 			case exception: Throwable => handle(exception, request)
 			case _ => handleNull
 		}
