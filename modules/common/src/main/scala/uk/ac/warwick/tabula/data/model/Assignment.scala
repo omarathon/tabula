@@ -30,9 +30,12 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-
-
-
+import org.springframework.beans.factory.annotation.Autowired
+import javax.annotation.Resource
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.spring.Wire
+import scala.Some
+import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"

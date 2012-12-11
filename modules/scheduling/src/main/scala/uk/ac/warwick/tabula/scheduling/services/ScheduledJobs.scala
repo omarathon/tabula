@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -37,6 +38,11 @@ class ScheduledJobs {
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = exceptionResolver.reportExceptions {
 		new ImportModulesCommand().apply()
+	}
+
+	@Scheduled(cron = "0 30 7 * * *")
+	def importMembers: Unit = exceptionResolver.reportExceptions {
+		new ImportProfilesCommand().apply()
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")

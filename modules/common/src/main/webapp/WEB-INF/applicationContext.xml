@@ -113,6 +113,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkSchemeIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">

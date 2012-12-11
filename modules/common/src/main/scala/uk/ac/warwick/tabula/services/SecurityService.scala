@@ -83,6 +83,11 @@ class SecurityService extends Logging {
 			can(user, Participate(assignment.module))
 
 		case Masquerade() => user.sysadmin || user.masquerader
+		
+		case View(member: Member) => 
+		  user.sysadmin || 
+		  (member.homeDepartment != null && can(user, View(member.homeDepartment))) || 
+		  (member.studyDepartment != null && can(user, View(member.studyDepartment)))
 
 		case action: Action[_] => throw new IllegalArgumentException(action.toString)
 		case _ => throw new IllegalArgumentException()

@@ -32,6 +32,7 @@ abstract class AbstractBasicUserType[T <: Object: ClassManifest, V: ClassManifes
 
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
 		basicType.nullSafeGet(resultSet, names(0)) match {
+			case s: Any if s == nullValue => nullObject
 			case s: Any if vm.erasure.isInstance(s) => convertToObject(s.asInstanceOf[V])
 			case null => nullObject
 		}

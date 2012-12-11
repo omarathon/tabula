@@ -18,6 +18,8 @@ RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 
 # Add trailing slash because otherwise ensadness occurs
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
+RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
+RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
 
 # Remove /home context
 RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]

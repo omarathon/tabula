@@ -28,7 +28,9 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.services.AssignmentImporter
 import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileImporter
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -134,6 +136,19 @@ class AddDeptOwnerController extends BaseSysadminController {
 class ReindexForm {
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-profiles"))
+class ImportProfilesController extends BaseSysadminController {
+	var importer = Wire.auto[ProfileImporter]
+	
+	@RequestMapping(method = Array(POST))
+	def reindex() = {
+		val command = new ImportProfilesCommand
+		command.apply()
+		redirectToHome
+	}
 }
 
 class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {
