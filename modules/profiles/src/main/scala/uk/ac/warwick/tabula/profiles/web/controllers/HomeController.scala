@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 
 @Controller class HomeController extends BaseController {
 
