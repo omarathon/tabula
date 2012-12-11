@@ -2,11 +2,16 @@
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
 
 <#macro module_name module>
-<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">(${module.name})</span>
+<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true><#--
 -->${dateBuilder(date, seconds, at, timezone, capitalise, relative)}<#--
+--></#macro>
+
+<#macro interval start end=""><#--
+--><#if end?has_content>${intervalFormatter(start, end)}<#--
+--><#else>${intervalFormatter(start)}</#if><#--
 --></#macro>
 
 <#macro p number singular plural="${singular}s" one="1" zero="0"><#--

@@ -2097,13 +2097,7 @@ a:link {
 a:visited {
   color: #123e5a;
 }
-#main-content a:visited {
-  color: #5a123d;
-}
 a:hover,
-#main-content a:hover {
-  color: #3588bc;
-}
 a img {
   border: none;
 }

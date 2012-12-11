@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.assignments
+package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description

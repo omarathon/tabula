@@ -7,7 +7,7 @@
 // Link colours
 @link-colour: #3C5E7F;
 @link-hover: #209990;
-@link-visited-colour: #93225E;
+@link-visited-colour: @link-colour;
 
 // Search tab background and colour
 @search-tab-background: #80716a;
@@ -58,7 +58,8 @@
 @footer-hover-colour: #fff;
 
 #custom-header {
-    text-align:right;
+    position: absolute;
+    right: 0px;
 }
 
 html {
@@ -67,10 +68,21 @@ html {
 	// the window
 	overflow-y: scroll;
 	
-	background: @background-colour;
+	background: @background-colour url(../images/bg.png) no-repeat fixed center -100px;
 	color: @body-colour;
 }
 body { background: none; }
+
+#container {
+	// Hello Mister Coggy wog!
+	background: white url(../images/inner-bg.png) no-repeat fixed center -100px;
+	.box-shadow(0, 0, 48px, rgba(0,0,0,0.4));
+}
+
+.is-tablet #container, .is-smallscreen #container {
+	background: white;
+	.box-shadow-none();
+}
 
 #page-header #site-header-container {
 	text-shadow: none;
@@ -78,8 +90,7 @@ body { background: none; }
 
 // Link colours
 a:link, a:visited {color: @link-colour;}
-#main-content a:visited {color: @link-visited-colour;}
-a:hover, #main-content a:hover {color: @link-hover;}
+a:hover {color: @link-hover;}
 
 // Search tab
 #search-container ul.index-section li.active {
@@ -164,4 +175,15 @@ a:hover, #main-content a:hover {color: @link-hover;}
       	text-decoration: underline;
     }
   }
+}
+
+// Remove the 1px bottom padding
+#container { padding-bottom: 0; }
+
+// Turn off some smallscreen ID6 stuff that isn't really needed here
+.is-smallscreen {
+	// Our breadcrumbs are better than the automatic ones, and we don't need the dropdown nav
+	#navigation.horizontal { display: block; }
+	.alternate-breadcrumbs, #alternate-navigation, .smallscreen-anchor-links { display: none; }
+	
 }

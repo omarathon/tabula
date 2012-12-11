@@ -11,11 +11,20 @@ import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.MockUserLookup
+import org.junit.Before
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AssignmentServiceImpl =_
     @Autowired var modAndDeptService:ModuleAndDepartmentService =_
+    var userLookup:MockUserLookup = _
+    
+    @Before def getUserLookup {
+		// We can't just Autowire this because it has autowire-candidate="false"
+		userLookup = beans.getBean("userLookupDelegate").asInstanceOf[MockUserLookup]
+		userLookup.defaultFoundUser = true
+	}
 	
 	@Transactional @Test def recentAssignment {
 		val assignment = newDeepAssignment()

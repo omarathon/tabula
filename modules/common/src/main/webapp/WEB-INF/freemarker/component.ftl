@@ -5,5 +5,6 @@
 <#assign subsite=true />
 <#assign title="Component" />
 <#assign name="common" />
+<#assign nonav=false />
 
 </#compress>

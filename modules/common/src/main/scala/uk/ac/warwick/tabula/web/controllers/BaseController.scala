@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
 import scala.reflect.BeanProperty
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.context.MessageSource
@@ -10,7 +9,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.RequestMethod
-
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -26,6 +24,7 @@ import uk.ac.warwick.tabula.validators.CompositeValidator
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
+import org.springframework.web.servlet.view.RedirectView
 
 abstract trait ControllerMethods extends Logging {
 	def mustBeLinked(assignment: Assignment, module: Module) =

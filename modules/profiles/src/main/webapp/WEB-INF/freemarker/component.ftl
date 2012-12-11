@@ -5,5 +5,6 @@
 <#assign subsite=true />
 <#assign title="Student Profiles" />
 <#assign name="profiles" />
+<#assign nonav=false />
 
 </#compress>

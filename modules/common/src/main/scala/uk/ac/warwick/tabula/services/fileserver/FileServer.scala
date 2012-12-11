@@ -3,13 +3,14 @@ import org.springframework.stereotype.Service
 import java.io.InputStream
 import javax.servlet.http.HttpServletResponse
 import org.springframework.util.FileCopyUtils
+import javax.servlet.http.HttpServletRequest
 
 @Service
 class FileServer {
 	/**
 	 * Serves a RenderableFile out to an HTTP response.
 	 */
-	def serve(file: RenderableFile, out: HttpServletResponse) {
+	def serve(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
 		/*
 		 * There's no consistent standard for encoding in the optional
 		 * "filename" attribute of Content-Disposition, so you should stick
@@ -21,6 +22,8 @@ class FileServer {
 		file.contentLength.map { length =>
 			out.addHeader("Content-Length", length.toString)
 		}
-		FileCopyUtils.copy(inStream, out.getOutputStream)
+		
+		if (request.getMethod.toUpperCase != "HEAD")
+			FileCopyUtils.copy(inStream, out.getOutputStream)
 	}
 }

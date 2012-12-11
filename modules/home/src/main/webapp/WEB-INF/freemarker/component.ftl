@@ -5,5 +5,6 @@
 <#assign subsite=false />
 <#assign title="Tabula" />
 <#assign name="home" />
+<#assign nonav=true />
 
 </#compress>

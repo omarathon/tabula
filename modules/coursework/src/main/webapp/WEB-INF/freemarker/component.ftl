@@ -5,5 +5,6 @@
 <#assign subsite=true />
 <#assign title="Coursework Management" />
 <#assign name="courses" />
+<#assign nonav=false />
 
 </#compress>

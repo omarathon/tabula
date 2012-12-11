@@ -1,30 +1,34 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.reflect.Manifest
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.IndexColumn
 import org.hibernate.annotations.Type
-import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Configurable
-import Assignment.defaultCommentFieldName
-import Assignment.defaultUploadName
-import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.actions.Viewable
-import forms._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
-import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.{ AcademicYear, ToString }
-import uk.ac.warwick.tabula.Features
+import org.hibernate.annotations.IndexColumn
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.OneToMany
+import javax.persistence.ManyToOne
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.services.UserLookupService
+import javax.persistence.Basic
+import javax.persistence.JoinColumn
+import javax.persistence.OrderBy
+import javax.persistence.OneToOne
+import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.actions.Viewable
+import uk.ac.warwick.tabula.data.model.forms._
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.Resource
@@ -140,7 +144,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@IndexColumn(name = "position")
 	@BeanProperty var fields: JList[FormField] = ArrayList()
 
-	@OneToOne(cascade = Array(CascadeType.ALL))
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	@BeanProperty var members: UserGroup = new UserGroup
 	

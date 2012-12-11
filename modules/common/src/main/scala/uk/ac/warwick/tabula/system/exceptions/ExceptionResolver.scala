@@ -19,6 +19,7 @@ import uk.ac.warwick.util.core.ExceptionUtils
 import uk.ac.warwick.tabula.system.exceptions._
 import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -32,6 +33,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required @BeanProperty var defaultView: String = _
 
 	@Autowired var exceptionHandler: ExceptionHandler = _
+	
+	@Autowired var userInterceptor: CurrentUserInterceptor = _
+	@Autowired var infoInterceptor: RequestInfoInterceptor = _
 
 	/**
 	 * If the interesting exception matches one of these exceptions then
@@ -40,8 +44,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
 	@Required @BeanProperty var viewMappings: JMap[String, String] = Map[String, String]()
-
-	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
+	
+	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {	
+		val interceptors = List(userInterceptor, infoInterceptor)
+		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
+		
 		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
 	}
 
@@ -75,13 +82,15 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		catch { case throwable => handle(throwable, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
+		val token = ExceptionTokens.newToken
+		
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
 		val mav = Mav(defaultView,
 			"originalException" -> exception,
-			"exception" -> interestingException)
-
-		val token = ExceptionTokens.newToken
+			"exception" -> interestingException,
+			"token" -> token,
+			"stackTrace" -> ExceptionHandler.renderStackTrace(interestingException))
 
 		// handler will do logging, emailing
 		try {

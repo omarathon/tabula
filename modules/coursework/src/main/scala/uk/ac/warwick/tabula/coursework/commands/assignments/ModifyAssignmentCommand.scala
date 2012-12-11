@@ -112,7 +112,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 			errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
 		}
 
-		if (openDate.isAfter(closeDate)) {
+		if (!openEnded && openDate.isAfter(closeDate)) {
 			errors.reject("closeDate.early")
 		}
 

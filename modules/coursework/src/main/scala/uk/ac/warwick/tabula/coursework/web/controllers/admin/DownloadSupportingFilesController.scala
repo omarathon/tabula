@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}",
@@ -21,12 +22,11 @@ class DownloadSupportingFilesController extends CourseworkController{
 	@Autowired var fileServer:FileServer =_
 
 	@RequestMapping(value=Array("/supporting-file/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser, response:HttpServletResponse) = {
-
+	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
 		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
 
 		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable, response)	}
+		command.callback = { (renderable) => fileServer.serve(renderable)	}
 		command.apply().orElse{ throw new ItemNotFoundException() }
 	}
 

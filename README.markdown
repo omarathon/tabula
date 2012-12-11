@@ -25,14 +25,14 @@ Obtain the datasource files for the app and ADS, and place in the deploy directo
 You will need to get this configuration added to Web Sign-on for SSO to work.
 
 Set up an Apache vhost referencing the include files in `config/servers/common/vhosts` - 
-use `rewrites.inc` for full Tabula development, but swap in `standalone.inc` if you're working 
-on the Coursework instance alone.
+use `rewrites.inc` for full Tabula development.
 
 You need an HTTPS vhost for SSO so if you're only going to set up one vhost,
 it should be the HTTPS one. The include files reference a map to get the port to use,
-so you may need to define yours with a line such as
+so you may need to define yours with two lines such as
 
     RewriteMap proxy txt:/etc/apache2/tabulaport.txt
+    RewriteMap scheduler txt:/etc/apache2/tabulaport.txt
 
 The above line should point to a file containing this line (assuming default JBoss port 8080):
 
@@ -46,7 +46,6 @@ location you specified in your properties file.
 
 Some other useful Maven commands:
 
-- `mvn -Pdeploy,standalone` - dev deploy of the standalone courses.war
 - `mvn -DskipTests` - skip tests during deploy (Maven will run tests by default)
 - `mvn -DskipTests -Dmaven.test.skip=true` - also skip test compilation
 - `mvn --project modules/coursework --also-make` - work on a single module, but make module dependencies like common
@@ -88,8 +87,6 @@ that would be defined in the overlay.
 
 - `common/.../WEB-INF` -> `WEB-INF` - default `applicationContext.xml` and some includes that can be overridden
 - `home/.../WEB-INF/static-hashes.properties` -> `WEB-INF/static-hashes.properties` - the hashes of static content, for URL construction
-
-For standalone courses, `home/.../static` is also overlayed. 
 
 Database schema changes
 ---------

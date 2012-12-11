@@ -3,6 +3,12 @@
 
 <#assign module=assignment.module />
 
+<#if hasPublishedFeedback>
+	<p>
+		<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date. <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
+	</p>
+</#if>
+
 <!-- Extra junk that most people probably won't care about -->
 <div class="btn-group" id="assignment-extra-dropdown" style="float:right">
 <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
@@ -70,11 +76,13 @@ Publications: ${r.publicationOverlap}%)
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 <#else>
 <div class="submission-feedback-list">
-	<@form.selector_check_all />
-	<a class="btn btn-mini hide-awaiting-submission" href="#">
-		<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
-		<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
-	</a>
+	<div class="clearfix">
+		<@form.selector_check_all />
+		<a class="btn btn-mini hide-awaiting-submission" href="#">
+			<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
+			<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
+		</a>
+	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<tr>
 			<th></th>
@@ -98,7 +106,7 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td>${student}</td>
 				<td></td>
-				<td><span class="label-blue">Awaiting submission</span></td>
+				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
 				<#if assignment.collectMarks><td></td></#if>
 				<td></td><td></td><td></td><td></td>
@@ -109,23 +117,26 @@ Publications: ${r.publicationOverlap}%)
 			<#assign enhancedSubmission=student.enhancedSubmission>
 			<#assign submission=enhancedSubmission.submission>
 			
+			<#if submission.submittedDate?? && (submission.late || submission.authorisedLate)>
+				<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+			</#if>
 			
 			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 				<td><@form.selector_check_row "students" student.uniId /></td>
 				<td class="id">${student.uniId}</td>
 				<#-- TODO show student name if allowed by department --> 
 				<td class="submitted">
-					<span class="date">
-						<#if submission.submittedDate??>
+					<#if submission.submittedDate??>
+						<span class="date use-tooltip" title="${lateness!''}">
 							<@fmt.date date=submission.submittedDate seconds=true capitalise=true />
-						</#if>
-					</span>
+						</span>
+					</#if>
 				</td>
 				<td class="submission-status">
 					<#if submission.late>
-						<span class="label-red">Late</span>
+						<span class="label-red use-tooltip" title="${lateness!''}">Late</span>
 					<#elseif  submission.authorisedLate>
-						<span class="label-blue">Authorised Late</span>
+						<span class="label-blue use-tooltip" title="${lateness!''}">Authorised Late</span>
 					</#if>
 					<#if enhancedSubmission.downloaded>
 						<span class="label-green">Downloaded</span>

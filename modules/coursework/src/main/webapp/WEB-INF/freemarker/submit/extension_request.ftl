@@ -66,6 +66,10 @@
 
 		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="extensionRequestCommand">
 
+			<#if isModification>
+				<@f.hidden path="modified" value="true" />
+			</#if>
+
 			<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
 				<@f.textarea path="reason" cssClass="text big-textarea" />
 			</@form.labelled_row>

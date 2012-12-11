@@ -7,13 +7,15 @@ import java.sql.Types
 
 sealed abstract class SubmissionState(val name: String, val ts: Set[SubmissionState]){
 	lazy val transitionStates = ts
-	def canTransitionTo(state: SubmissionState): Boolean = transitionStates.contains(state)
+	
+	def canTransitionTo(state: SubmissionState): Boolean = state == this || transitionStates.contains(state)
+	
 	override def toString = name
 }
 // initial state - received but has not yet been released for marking
 case object Received extends SubmissionState("Received", Set(ReleasedForMarking, MarkingCompleted))
 // ready to be distributed to markers
-case object ReleasedForMarking extends SubmissionState("ReleasedForMarking", Set(DownloadedByMarker))
+case object ReleasedForMarking extends SubmissionState("ReleasedForMarking", Set(DownloadedByMarker, MarkingCompleted))
 // has been downloaded by the marker and is being marked
 case object DownloadedByMarker extends SubmissionState("DownloadedByMarker", Set(MarkingCompleted))
 // submission has been marked and feedback has been uploaded

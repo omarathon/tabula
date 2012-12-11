@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.actions.{Manage, Participate}
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
@@ -40,8 +40,6 @@ class ExtensionController extends CourseworkController{
 	def crumbed(mav:Mav, module:Module)
 	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
-	val dateBuilder = new DateBuilder
-
 	validatesWith{ (form:ModifyExtensionCommand, errors:Errors) =>
 		form.validate(errors)
 	}
@@ -53,17 +51,21 @@ class ExtensionController extends CourseworkController{
 
 		val assignmentMembership = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
 		val manualExtensions = assignment.extensions.filter(_.requestedOn == null)
+		val isExtensionManager = module.department.isExtensionManager(user.apparentId)
 		val extensionRequests = assignment.extensions.filterNot(manualExtensions contains(_))
+
 
 		// users that are members of the assignment but have not yet requested or been granted an extension
 		val potentialExtensions =
-			assignmentMembership -- (manualExtensions.map(_.universityId).toSet) -- (extensionRequests.map(_.universityId).toSet)
+			assignmentMembership -- (manualExtensions.map(_.universityId).toSet) --
+				(extensionRequests.map(_.universityId).toSet)
 
 		val model = Mav("admin/assignments/extensions/list",
 			"module" -> module,
 			"assignment" -> assignment,
 			"existingExtensions" -> manualExtensions,
 			"extensionRequests" -> extensionRequests,
+			"isExtensionManager" -> isExtensionManager,
 			"potentialExtensions" -> potentialExtensions
 		)
 
@@ -112,6 +114,8 @@ class ExtensionController extends CourseworkController{
 		mustBeAbleTo(Participate(module))
 
 		val extension = assignment.findExtension(universityId).get
+		mustBeAbleTo(Manage(extension))
+
 		cmd.copyExtensions(List(extension))
 
 		val model = Mav("admin/assignments/extensions/review_request",
@@ -198,7 +202,7 @@ class ExtensionController extends CourseworkController{
 			}
 
 			val expiryDate =  extension.expiryDate match {
-				case d:DateTime => dateBuilder.format(extension.expiryDate)
+				case d:DateTime => DateBuilder.format(extension.expiryDate)
 				case _ => ""
 			}
 

@@ -1,4 +1,4 @@
-<#assign fmt=JspTaglibs["/WEB-INF/tld/fmt.tld"]>
+<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
 <#escape x as x?html>
 
@@ -11,7 +11,7 @@
 	<div class="assignment ${assignment.active?string("active", "inactive")}">
 		<h2>
 		<#if assignment.active>
-			<a href="/module/${module.code}/${assignment.id}">${assignment.name}</a>
+			<a href="${url('/module/${module.code}/${assignment.id}')}">${assignment.name}</a>
 		<#else>
 			${assignment.name}
 		</#if>
@@ -20,7 +20,7 @@
 			<#if assignment.openEnded>
 				Open-ended submission
 			<#else>
-				Submission ${assignment.active?string("closes", "closed")} 
+				Submission ${assignment.active?string("closes", "closed")}
 				<@fmt.date date=assignment.closeDate seconds=true timezone=true />
 			</#if>
 		</div>

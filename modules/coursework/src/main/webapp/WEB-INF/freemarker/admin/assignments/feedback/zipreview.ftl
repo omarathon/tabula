@@ -72,7 +72,7 @@
 <@spring.bind path="items">
 <#assign itemList=status.actualValue />
 <#if itemList?size gt 0>
-<table class="batch-feedback-summary">
+<table class="table table-bordered table-striped">
 	<tr>
 		<th>University ID</th>
 		<th>Files</th>
@@ -82,19 +82,29 @@
 	<@spring.nestedPath path="items[${item_index}]">
 		<@f.hidden path="uniNumber" />
 		<td>
-			<@f.errors path="uniNumber" cssClass="error" />
 			<@spring.bind path="uniNumber">
-			${status.value}
+				${status.value}
 			</@spring.bind>
+			<@f.errors path="uniNumber" cssClass="error" />
+			<#if item.submissionExists>
+				<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+			</#if>
 		</td>
 		<#noescape>
 		<@spring.bind path="file.attached" htmlEscape="false">
 		<td>
 			<#-- FIXME should be able to spring:bind to a list, not have to manually specify it like this -->
 			<ul class="file-list">
-			<#list addFeedbackCommand.items[item_index].file.attached as attached>
-				<@f.hidden path="file.attached[${attached_index}]" />
-				<li>${attached.name}</li>
+			<#list addFeedbackCommand.items[item_index].listAttachments as attached>
+				<li>
+					<@f.hidden path="file.attached[${attached_index}]" />
+					${attached.name}
+					<#if attached.duplicate>
+						<span class="warning">
+							A feedback file with this name already exists for this student. It will be overwritten.
+						</span>
+					</#if>
+				</li>
 			</#list>
 			</ul>
 		</td>

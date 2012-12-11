@@ -14,7 +14,7 @@ class CSVView(var filename: String = "tabula-data.csv", var csv: Any) extends Vi
 		response.setContentType(getContentType)
 		response.setCharacterEncoding("UTF-8")
 		response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-		val out = response.getOutputStream
+		val out = response.getWriter
 		out.println(csv.toString)
 	}
 	

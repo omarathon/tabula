@@ -9,10 +9,14 @@
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	<#if numSubmissions==0>
-		<#assign class="disabled" />
+		<#assign class="disabled use-tooltip" />
 		<#assign href="" />
+		<#assign title>
+			You'll be able to download submissions for marking when an administrator releases them.
+		</#assign>
 	<#else>
 		<#assign class="" />
+		<#assign title="" />
 		<#assign href>
 			<@routes.downloadmarkersubmissions assignment=assignment />
 		</#assign>
@@ -20,7 +24,7 @@
 	<#if assignment.closed>
 		<div class="alert alert-success deadline">
 			Assignment closed: <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
-			<a href="${href}" class="btn btn-mini ${class}">
+			<a href="${href}" class="btn btn-mini ${class}" data-title="${title}">
 				<i class="icon-download"></i> Download submissions (${numSubmissions})
 			</a>
 		</div>
@@ -33,16 +37,15 @@
 
 <h2>Assignments for marking</h2>
 <p>You're a marker for one or more assignments.</p>
-<ul class="links">
+<div class="simple-assignment-list">
 	<#list assignmentsForMarking as info>
-		<li class="assignment-info">
+		<div class="simple-assignment-info">
 			<@format_name info.assignment />
 			<@download_link info />
-		</li>
+		</div>
 	</#list>
-</ul>
+</div>
 <script>
 	jQuery("a.disabled").on('click', function(e){e.preventDefault(e)})
 </script>
-
 </#if>

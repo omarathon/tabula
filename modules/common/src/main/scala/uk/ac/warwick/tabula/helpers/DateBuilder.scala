@@ -10,7 +10,7 @@ import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.JavaImports._
 
-class DateBuilder extends TemplateMethodModelEx {
+object DateBuilder {
 
 	private val dayAndDateFormat = DateTimeFormat.forPattern("EEE d")
 	private val monthAndYearFormat = DateTimeFormat.forPattern(" MMMM yyyy")
@@ -44,7 +44,7 @@ class DateBuilder extends TemplateMethodModelEx {
 		case _ => "th"
 	}
 
-	private def datePart(date: DateTime, capitalise: Boolean, relative: Boolean) = {
+	def datePart(date: DateTime, capitalise: Boolean, relative: Boolean) = {
 		val today = new DateTime().toDateMidnight
 		val thatDay = date.toDateMidnight
 
@@ -59,6 +59,15 @@ class DateBuilder extends TemplateMethodModelEx {
 		else absoluteDate
 	}
 
+
+	class DateTimeFormatterCache extends mutable.HashMap[String, DateTimeFormatter] {
+		override def default(pattern: String) = DateTimeFormat.forPattern(pattern)
+	}
+}
+
+class DateBuilder extends TemplateMethodModelEx {
+	import DateBuilder.format
+
 	/** For Freemarker */
 	override def exec(list: java.util.List[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
@@ -67,9 +76,5 @@ class DateBuilder extends TemplateMethodModelEx {
 				format(date, secs, at, tz, caps, relative)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
-	}
-
-	class DateTimeFormatterCache extends mutable.HashMap[String, DateTimeFormatter] {
-		override def default(pattern: String) = DateTimeFormat.forPattern(pattern)
 	}
 }

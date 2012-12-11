@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddMarksCommand
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -27,7 +25,7 @@ class AddMarksController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
+	@ModelAttribute def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
@@ -38,15 +36,10 @@ class AddMarksController extends CourseworkController {
 		mustBeAbleTo(Participate(module))
 		val members = assignmentService.determineMembershipUsers(assignment)
 
-		var marksToDisplay = List[MarkItem]()
-
-		logger.debug("sizeof marksToDisplay is " + marksToDisplay.size)
-
-		members.foreach(member => {
-			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId())
-			//feedback.foreach(marksToDisplay ::= noteMarkItem(member, _))
-			marksToDisplay ::= noteMarkItem(member, feedback)
-		})
+		var marksToDisplay = members.map { member => 
+			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
+			noteMarkItem(member, feedback)
+		}
 
 		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
 
@@ -57,11 +50,11 @@ class AddMarksController extends CourseworkController {
 		logger.debug("in noteMarkItem (logger.debug)")
 
 		val markItem = new MarkItem()
-		markItem.universityId = member.getWarwickId()
+		markItem.universityId = member.getWarwickId
 
 		feedback match {
 			case Some(f) => {
-				markItem.actualMark = f.actualMark.map { _.toString() }.getOrElse("")
+				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
 				markItem.actualGrade = f.actualGrade
 			}
 			case None => {
@@ -74,21 +67,23 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		cmd.onBind
-		cmd.postExtractValidation(errors)
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
+	def confirmBatchUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(module, cmd, errors)
 		crumbed(Mav("admin/assignments/marks/markspreview"), module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @PathVariable assignment: Assignment, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		cmd.onBind
+	def doUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(module, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.module(module))
+	}
+
+	private def bindAndValidate(module: Module, cmd: AddMarksCommand, errors: Errors) {
+		mustBeLinked(cmd.assignment, module)
+		mustBeAbleTo(Participate(module))
+		cmd.onBind
+		cmd.postExtractValidation(errors)
 	}
 
 }
