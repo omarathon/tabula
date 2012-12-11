@@ -24,15 +24,26 @@ so that they can be passed around between requests.
 </#if>
 
 <#if features.markSchemes && department.markSchemes?has_content>
+
+	<@spring.bind path="canUpdateMarkScheme">
+		<#assign disabled = (status.value != 'true')>
+	</@spring.bind>
+
+	<@f.hidden path="canUpdateMarkScheme" />
+
 	<@form.labelled_row "markScheme" "Mark scheme">
-		<@f.select path="markScheme">
+		<@f.select path="markScheme" disabled="${disabled?string}">
 			<@f.option value="" label="None"/>
 			<#list department.markSchemes as markScheme>
 				<@f.option value="${markScheme.id}" label="${markScheme.name}"/>
 			</#list>
 		</@f.select>
 		<div class="help-block">
-			Select the way in which this assignment will be marked.
+			<#if disabled>
+				<span class="warning">You cannot change the mark scheme for this assignment as it already has submissions.</span>
+			<#else>
+				Select the way in which this assignment will be marked.
+			</#if>
 		</div>
 	</@form.labelled_row>
 </#if>

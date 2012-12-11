@@ -5,15 +5,10 @@ import scala.collection.JavaConversions._
 import org.hibernate.validator.constraints.Length
 import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
-import javax.validation.constraints.Max
-import javax.validation.constraints.Min
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.forms.CommentField
-import uk.ac.warwick.tabula.data.model.forms.FileField
 import data.model._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.AssignmentService
@@ -65,7 +60,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
 
 	/**
-	 * If copying from existing Assigment, this must be a DEEP COPY
+	 * If copying from existing Assignment, this must be a DEEP COPY
 	 * with changes copied back to the original UserGroup, don't pass
 	 * the same UserGroup around because it'll just cause Hibernate
 	 * problems. This copy should be transient.
@@ -104,8 +99,13 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 	private var _prefilled: Boolean = _
 	def prefilled = _prefilled
 
+	// can be overridden in concrete implementations to provide additional validation
+	def contextSpecificValidation(errors: Errors)
+
 	def validate(errors: Errors) {
-		
+
+		contextSpecificValidation(errors)
+
 		val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module)
 		                    .filterNot { _ eq assignment }
 		for (duplicate <- duplicates.headOption) {
@@ -130,7 +130,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 
 		def addUserId(item: String) {
 			val user = userLookup.getUserByUserId(item)
-			if (user.isFoundUser()) {
+			if (user.isFoundUser) {
 				includeUsers.add(user.getUserId)
 			}
 		}
@@ -139,7 +139,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 		for (item <- massAddUsersEntries) {
 			if (UniversityId.isValid(item)) {
 				val user = userLookup.getUserByWarwickUniId(item)
-				if (user.isFoundUser()) {
+				if (user.isFoundUser) {
 					includeUsers.add(user.getUserId)
 				} else {
 					addUserId(item)

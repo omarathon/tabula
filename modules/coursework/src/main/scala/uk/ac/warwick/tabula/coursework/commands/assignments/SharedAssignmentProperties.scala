@@ -54,7 +54,10 @@ trait SharedAssignmentProperties {
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
+
 	@BeanProperty var markScheme: MarkScheme = _
+	// set to false by the edit assignment command if changing the value of mark scheme should be disabled
+	@BeanProperty var canUpdateMarkScheme: Boolean = true
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
