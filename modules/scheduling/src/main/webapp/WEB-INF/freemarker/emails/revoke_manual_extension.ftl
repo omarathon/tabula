@@ -6,7 +6,7 @@ subject to the usual late penalties.
 
 The assignment deadline is displayed at the top of the submission page:
 
-<@url page=path />
+<@url page=path context="/coursework" />
 
 
 This email was sent from an automated system, and replies to it will not reach a real person.
