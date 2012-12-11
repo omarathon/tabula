@@ -22,6 +22,6 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
 
-	@RequestMapping(Array("/")) def home(user: CurrentUser) = Mav("home/view")
+	@RequestMapping(Array("/")) def home() = Mav("home/view")
 	
 }

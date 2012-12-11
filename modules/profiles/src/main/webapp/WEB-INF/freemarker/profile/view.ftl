@@ -1,13 +1,60 @@
 <#escape x as x?html>
+
+<#macro address address>
+	<div class="vcard">
+		<#if address.line1??>
+			<p class="address">
+				<span class="line1">${address.line1}</span>
+				<#if address.line2??><br><span class="line2">${address.line2}</span></#if>
+				<#if address.line3??><br><span class="line3">${address.line3}</span></#if>
+				<#if address.line4??><br><span class="line4">${address.line4}</span></#if>
+				<#if address.line5??><br><span class="line5">${address.line5}</span></#if>
+				<#if address.postcode??><br><span class="postcode">${address.postcode}</span></#if>
+			</p>
+		</#if>
+		<#if address.telephone??>
+			<p class="tel">${address.telephone}</p>
+		</#if>
+	</div>
+</#macro>
+
+<style type="text/css">
+/* Definition list reset */
+#main-content dl { margin: 0; padding: 0; }
+#main-content dt, #main-content dd { margin: 0; padding: 0; font-weight: normal; display: inline; }
+
+.profile dt { float: left; clear: left; }
+.profile dt:after { content: ':'; margin-right: 5px; }
+.profile dd { float: left; clear: right; }
+
+.personal-details div.photo { float: left; width: 198px; margin-right: 16px; }
+.personal-details dl.col1   { float: left; width: 348px; margin-right: 16px; }
+.personal-details dl.col2   { float: left; width: 348px; margin-right: 0; }
+
+.personal-details header h1 { display: inline; }
+</style>
+
+<section class="search hero-unit">
+	<h2>Search for a profile</h2>
+	
+	<@f.form method="post" action="${url('/search')}" commandName="searchProfilesCommand" cssClass="form-search">
+		<@f.input path="query" cssClass="input-large search-query" />
+		<button type="submit" class="btn">Search</btn>
+	</@f.form>
+</section>
+
 <section class="profile">
-	<h1>${profile.fullName} (${profile.universityId})</h1>
-	
-	<section class="personal-details">
-		<h2>Personal details</h2>
-	
-		<img class="photo" src="<@url page="/view/photo/${profile.universityId}.jpg" />" width="120" />
+	<section class="personal-details clearfix">
+		<div class="photo">
+			<img src="<@url page="/view/photo/${profile.universityId}.jpg" />" />
+		</div>
 		
-		<dl>
+		<header>
+			<h1>${profile.fullName}</h1>
+			<span class="description">${profile.groupName}<#if profile.route??>, ${route.name}</#if><#if profile.homeDepartment??>, ${profile.homeDepartment.name}</#if></span>
+		</header>
+		
+		<dl class="col1 clearfix">
 			<dt>Official name</dt>
 			<dd>${profile.officialName}</dd>
 			
@@ -19,223 +66,56 @@
 				<dd>${profile.gender.description}</dd>
 			</#if>
 			
-			<dt>University number</dt>
-			<dd>${profile.universityId}</dd>
-			
-			<dt>Description</dt>
-			<dd>${profile.groupName}</dd>
-			
-			<#if profile.studentStatus??>
-				<dt>Status</dt>
-				<dd>${profile.studentStatus}</dd>
-			</#if>
-			
-			<#if profile.transferReason??>
-				<dt>Transfer reason</dt>
-				<dd>${profile.transferReason}</dd>
-			</#if>
-			
-			<#if profile.feeStatus??>
-				<dt>Fee status</dt>
-				<dd>${profile.feeStatus}</dd>
-			</#if>
-			
 			<dt>Nationality</dt>
 			<dd>${profile.nationality?default('Unknown')}</dd>
 			
 			<#if profile.dateOfBirth??>
 				<dt>Date of birth</dt>
-				<dd><@warwick.formatDate value=profile.dateOfBirth.toDateTimeAtStartOfDay() pattern="d MMMM yyyy" /></dd>
+				<dd><@warwick.formatDate value=profile.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /></dd>
 			</#if>
 			
-			<#if profile.homeDepartment??>
-				<dt>Home department</dt>
-				<dd>${profile.homeDepartment.name}</dd>
+			<#if profile.termtimeAddress??>
+				<dt class="address">Term-time address</dt>
+				<dd class="address"><@address profile.termtimeAddress /></dd>
 			</#if>
-			
-			<#if profile.yearOfStudy??>
-				<dt>Year of study</dt>
-				<dd>${profile.yearOfStudy}</dd>
-			</#if>
-			
-			<dt>2 + 2?</dt>
-			<dd><strong>NOT IN ADS/UNKNOWN HOW TO GET</strong></dd>
-			
-			<dt>Personal tutor</dt>
-			<dd><strong>NOT RELIABLE IN ADS</strong></dd>
-			
-			<dt>Registered disability</dt>
-			<dd><strong>NOT IN ADS</strong></dd>
-			
-			<dt>Notes on disability</dt>
-			<dd><strong>NOT IN ADS</strong></dd>
-			
-			<dt>IT code</dt>
-			<dd>${profile.userId}</dd>
-			
-			<dt>IT account status</dt>
-			<dd>${profile.inUseFlag}</dd>
-			
-			<#if profile.inactivationDate??>
-				<dt>IT account inactivation date</dt>
-				<dd><@warwick.formatDate value=profile.inactivationDate.toDateTimeAtStartOfDay() pattern="d MMMM yyyy" /></dd>
-			</#if>
-			
-			<#if profile.attendanceMode??>
-				<dt>Mode of attendance</dt>
-				<dd>${profile.attendanceMode}</dd>
-			</#if>
-			
-			<dt>Comments</dt>
-			<dd><strong>NOT IN ADS (OBVIOUSLY)</strong></dd>
-		</dl>
-	</section>
-	
-	<#if profile.route??>
-		<#assign route = profile.route />
-	
-		<section class="course-details">
-			<h2>Course details</h2>
-			
-			<dl>
-				<dt>Course title</td>
-				<dd>${route.name}</dd>
-				
-				<dt>Course type</dt>
-				<dd>${route.degreeType.description}</dd>
-				
-				<dt>Length of course</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>Course code</td>
-				<dd>${route.code?upper_case}</dd>
-				
-				<dt>PGT dissertation title / PGR thesis title</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>3rd year project supervisor(s)</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>PGT dissertation supervisor(s) / PGR thesis supervisor(s)</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>Source of funding</td>
-				<dd>${profile.fundingSource}</dd>
-				
-				<dt>Date of dissertation / thesis submission</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>VIVA date</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-				
-				<dt>Post-Warwick destination</td>
-				<dd><strong>NOT IN ADS</strong></dd>
-			</dl>
-		</section>
-	</#if>
-	
-	<section class="contact-details">
-		<h2>Contact details</h2>
-		
-		<dl>
-			<#if profile.email??>
-				<dt>Warwick email address</dt>
-				<dd>${profile.email}</dd>
-			</#if>
-			
-			<#if profile.homeEmail??>
-				<dt>Alternative email address</dt>
-				<dd>${profile.homeEmail}</dd>
-			</#if>
-			
-			<#if profile.mobileNumber??>
-				<dt>Mobile phone number</dt>
-				<dd>${profile.mobileNumber}</dd>
-			</#if>
-			
-			<#macro address address>
-				<div class="vcard">
-					<#if address.line1??>
-						<p class="address">
-							<span class="line1">${address.line1}</span>
-							<#if address.line2??><br><span class="line2">${address.line2}</span></#if>
-							<#if address.line3??><br><span class="line3">${address.line3}</span></#if>
-							<#if address.line4??><br><span class="line4">${address.line4}</span></#if>
-							<#if address.line5??><br><span class="line5">${address.line5}</span></#if>
-							<#if address.postcode??><br><span class="postcode">${address.postcode}</span></#if>
-						</p>
-					</#if>
-					<#if address.telephone??>
-						<p class="tel">${address.telephone}</p>
-					</#if>
-				</div>
-			</#macro>
 			
 			<#if profile.nextOfKins?size gt 0>
 				<dt>Emergency contacts</dt>
 				
 				<#list profile.nextOfKins as kin>
-					<dd><dl>
-						<#if kin.firstName?? && kin.lastName??>
-							<dt>Name</dt>
-							<dd>${kin.fullName}</dd>
-						</#if>
-						
-						<#if kin.relationship??>
-							<dt>Relationship</dt>
-							<dd>${kin.relationship}</dd>
-						</#if>
-						
-						<#if kin.address??>
-							<dt>Address</dt>
-							<dd><@address kin.address /></dd>
-						</#if>
-						
-						<#if kin.eveningPhone??>
-							<dt>Evening phone number</dt>
-							<dd>${kin.eveningPhone}</dd>
-						</#if>
-						
-						<#if kin.email??>
-							<dt>Email address</dt>
-							<dd>${kin.email}</dd>
-						</#if>
-					</dl></dd>
+					<dd>
+						<#if kin.firstName?? && kin.lastName??>${kin.fullName}</#if>
+						<#if kin.relationship??>(${kin.relationship})</#if>
+					</dd>
 				</#list>
 			</#if>
-			
-			<#if profile.termtimeAddress??>
-				<dt>Term-time address</dt>
-				<dd><@address profile.termtimeAddress /></dd>
+		</dl>
+		
+		<dl class="col2 clearfix">			
+			<#if profile.email??>
+				<dt>Warwick email</dt>
+				<dd>${profile.email}</dd>
 			</#if>
+			
+			<#if profile.homeEmail??>
+				<dt>Alternative email</dt>
+				<dd>${profile.homeEmail}</dd>
+			</#if>
+			
+			<#if profile.mobileNumber??>
+				<dt>Mobile phone</dt>
+				<dd>${profile.mobileNumber}</dd>
+			</#if>
+			
+			<dt>University number</dt>
+			<dd>${profile.universityId}</dd>
+			
+			<dt>IT code</dt>
+			<dd>${profile.userId}</dd>
 			
 			<#if profile.homeAddress??>
-				<dt>Home address</dt>
-				<dd><@address profile.homeAddress /></dd>
-			</#if>
-			
-			<dt>Details last updated</dt>
-			<dd>??????</dd>
-		</dl>
-	</section>
-	
-	<section class="previous-qualifications">
-		<h2>Previous qualifications</h2>
-		
-		<dl>
-			<#if profile.highestQualificationOnEntry??>
-				<dt>Highest qualification on entry</dt>
-				<dd>${profile.highestQualificationOnEntry}</dd>
-			</#if>
-			
-			<#if profile.lastInstitute??>
-				<dt>Previous institute</dt>
-				<dd>${profile.lastInstitute}</dd>
-			</#if>
-			
-			<#if profile.lastSchool??>
-				<dt>Previous school</dt>
-				<dd>${profile.lastSchool}</dd>
+				<dt class="address">Home address</dt>
+				<dd class="address"><@address profile.homeAddress /></dd>
 			</#if>
 		</dl>
 	</section>

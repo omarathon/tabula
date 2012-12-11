@@ -12,19 +12,23 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.Features
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
+	var features = Wire.auto[Features]
 
 	def applyInternal() {
-		benchmark("ImportMembers") {
-			doMemberDetails
-			logger.debug("Imported Members")
-			doAddressDetails
-			doNextOfKinDetails
+		if (features.profiles) {
+			benchmark("ImportMembers") {
+				doMemberDetails
+				logger.debug("Imported Members")
+				doAddressDetails
+				doNextOfKinDetails
+			}
 		}
 	}
 
@@ -39,6 +43,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 				transactional() {
 					saveMemberDetails(profileImporter.getMemberDetails(usercodes).map(profileImporter.processNames(_, users)))
+					session.flush
+					session.clear
 				}
 			}
 		}

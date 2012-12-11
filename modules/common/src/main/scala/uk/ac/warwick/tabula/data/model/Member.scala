@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
 
 @Entity
-class Member extends Viewable with ToString {
+class Member extends Viewable with Student with Staff with Alumni with ToString {
 	@Id @BeanProperty var universityId: String = _
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
@@ -50,7 +50,32 @@ class Member extends Viewable with ToString {
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
 	
-	@BeanProperty var teachingStaff: JBoolean = _
+	@BeanProperty def fullName = firstName + " " + lastName
+	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
+
+	def asSsoUser = {
+		val u = new User
+		u.setUserId(userId)
+		u.setWarwickId(universityId)
+		u.setFirstName(firstName)
+		u.setLastName(lastName)
+		u.setFullName(fullName)
+		u.setEmail(email)
+		u.setDepartment(homeDepartment.name)
+		u.setDepartmentCode(homeDepartment.code)
+		u.setFoundUser(true)
+		u
+	}
+	
+	def toStringProps = Seq(
+		"universityId" -> universityId,
+		"userId" -> userId,
+		"name" -> (firstName + " " + lastName),
+		"email" -> email)
+
+}
+
+trait Student {
 	@BeanProperty var sprCode: String = _
 	@BeanProperty var sitsCourseCode: String = _
 	
@@ -107,7 +132,7 @@ class Member extends Viewable with ToString {
 	@BeanProperty var highestQualificationOnEntry: String = _
 	
 	@BeanProperty var lastInstitute: String = _
-	@BeanProperty var lastSchool: String = _
+	@BeanProperty var lastSchool: String = _	
 	
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="HOME_ADDRESS_ID")
@@ -119,28 +144,12 @@ class Member extends Viewable with ToString {
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
 	@BeanProperty var nextOfKins:JList[NextOfKin] = ArrayList()
-	
-	@BeanProperty def fullName = firstName + " " + lastName
-	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
+}
 
-	def asSsoUser = {
-		val u = new User
-		u.setUserId(userId)
-		u.setWarwickId(universityId)
-		u.setFirstName(firstName)
-		u.setLastName(lastName)
-		u.setFullName(fullName)
-		u.setEmail(email)
-		u.setDepartment(homeDepartment.name)
-		u.setDepartmentCode(homeDepartment.code)
-		u.setFoundUser(true)
-		u
-	}
-	
-	def toStringProps = Seq(
-		"universityId" -> universityId,
-		"userId" -> userId,
-		"name" -> (firstName + " " + lastName),
-		"email" -> email)
+trait Staff {
+	@BeanProperty var teachingStaff: JBoolean = _
+}
 
+trait Alumni {
+	
 }

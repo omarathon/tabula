@@ -45,9 +45,9 @@ class ProfileImporter extends InitializingBean {
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 	
-	lazy val allMembersQuery = new AllMembersQuery(ads, fileDao, moduleAndDepartmentService)
+	lazy val basicInformationQuery = new BasicInformationQuery(ads, fileDao, moduleAndDepartmentService)
 
-	def getMemberDetails(usercodes: JList[String]): Seq[Member] = allMembersQuery.executeByNamedParam(Map(
+	def getMemberDetails(usercodes: JList[String]): Seq[Member] = basicInformationQuery.executeByNamedParam(Map(
 	    "usercodes" -> usercodes))
 	
 	lazy val allUserIdsQuery = new AllUserIdsQuery(ads)
@@ -84,7 +84,7 @@ object ProfileImporter {
 		and in_use_flag = 'Active'
 		"""
   
-	val GetAllMembers = """
+	val GetBasicInformation = """
 	  	select
 			m.university_id as university_id,
 			m.title as title,
@@ -102,8 +102,19 @@ object ProfileImporter {
 			m.home_email_address as alternative_email_address,
 			m.mobile_phone_number as mobile_number,
 			m.primary_user_code as user_code,
-			m.teaching_staff as teaching_staff,
-			m.date_of_birth as date_of_birth,
+			m.date_of_birth as date_of_birth
+		from member m
+    		left outer join member_photo_details photo 
+      			on m.university_id = photo.university_id
+        
+    		left outer join nationality nat 
+	  			on m.nationality = nat.nationality_code
+		where m.primary_user_code in (:usercodes)
+	  	"""
+		
+	val GetStudentInformation = """
+		select
+			m.university_id as university_id,
 			study.spr_code as spr_code,
 			study.sits_course_code as sits_course_code,
 			levl.name as study_level,
@@ -133,17 +144,8 @@ object ProfileImporter {
 			details.year_commenced_degree as year_commenced_degree
 
 		from member m
-    		left outer join member_photo_details photo 
-      			on m.university_id = photo.university_id
-  
     		left outer join student_current_study_details study 
       			on m.university_id = study.university_id
-      
-    		left outer join nationality nat 
-	  			on m.nationality = nat.nationality_code
-    
-    		left outer join department dept 
-	  			on m.department_code = dept.department_code
     
 			left outer join transfer_reasons transfer 
 	  			on study.transfer_code_reason = transfer.code
@@ -187,12 +189,16 @@ object ProfileImporter {
     		left outer join school last_school 
 	  			on details.last_school = last_school.school_code
 
-		where m.primary_user_code is not null
-		and m.primary_user_code in (:usercodes)
-		and m.preferred_email_address is not null
-		and m.preferred_email_address != 'No Email'
-		and m.in_use_flag = 'Active'
-	  	"""
+		where m.primary_user_code in (:usercodes)
+		"""
+		
+	val GetStaffInformation = """
+		select
+			m.university_id as university_id,
+			m.teaching_staff as teaching_staff
+		from member m
+		where m.primary_user_code in (:usercodes)
+		"""
 	  
 	val GetNextOfKins = """
 		select 
@@ -299,7 +305,12 @@ object ProfileImporter {
 			
 		member.homeDepartment = toDepartment(rs.getString("home_department_code"), moduleAndDepartmentService)
 		member.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
+		
+		/*
+		// Staff-specific properties
 		member.teachingStaff = rs.getString("teaching_staff") == "Y"
+			
+		// Student-specific properties
 		member.sprCode = rs.getString("spr_code")
 		member.sitsCourseCode = rs.getString("sits_course_code")
 		
@@ -327,11 +338,12 @@ object ProfileImporter {
 		member.highestQualificationOnEntry = rs.getString("highest_qualification_on_entry")
 		member.lastInstitute = rs.getString("last_institute")
 		member.lastSchool = rs.getString("last_school")
+		*/
 		
 		member
 	}
 	  
-	class AllMembersQuery(ds: DataSource, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) extends MappingSqlQuery[Member](ds, GetAllMembers) {
+	class BasicInformationQuery(ds: DataSource, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) extends MappingSqlQuery[Member](ds, GetBasicInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()		
 		override def mapRow(rs: ResultSet, rowNumber: Int) = createMember(rs, fileDao, moduleAndDepartmentService)

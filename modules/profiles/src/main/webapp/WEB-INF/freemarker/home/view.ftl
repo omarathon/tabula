@@ -8,13 +8,7 @@
 <h1>Hello.</h1>
 </#if>	
 
-<#if !user.loggedIn>
-<p>
-You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
-to see a personalised view.
-</p>
-<#else>
-
+<#if features.profiles>
 <div class="hero-unit">
 	<h2>Search for a profile</h2>
 	
@@ -23,7 +17,8 @@ to see a personalised view.
 		<button type="submit" class="btn">Search</btn>
 	</@f.form>
 </div>
-
+<#else>
+<p>Here is where you'd see student profiles.</p>
 </#if>
 
 </#escape>

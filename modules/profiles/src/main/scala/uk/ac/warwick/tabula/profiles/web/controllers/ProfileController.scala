@@ -11,12 +11,16 @@ import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.actions.Create
+import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ProfileController extends BaseController with ProfileBreadcrumbs {
   
 	hideDeletedItems
+	
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
 	
 	@RequestMapping
 	def viewProfile(@PathVariable member: Member) = {
