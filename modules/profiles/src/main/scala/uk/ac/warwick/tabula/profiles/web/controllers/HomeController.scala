@@ -10,13 +10,18 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.profiles.commands.SearchProfilesCommand
 
 @Controller class HomeController extends BaseController {
 
-  var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems
+	
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = Mav("home/view")
+	
 }
