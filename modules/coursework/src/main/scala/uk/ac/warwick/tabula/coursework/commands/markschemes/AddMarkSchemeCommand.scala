@@ -22,6 +22,8 @@ class AddMarkSchemeCommand(department: Department) extends ModifyMarkSchemeComma
 	// For validation. Not editing an existing markscheme so return None
 	def currentMarkScheme = None
 
+	def contextSpecificValidation(errors:Errors){}
+
 	override def validate(errors: Errors) {
 		super.validate(errors)
 	}

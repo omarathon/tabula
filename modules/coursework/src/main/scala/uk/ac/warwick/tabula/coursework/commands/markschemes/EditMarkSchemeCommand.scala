@@ -1,16 +1,36 @@
 package uk.ac.warwick.tabula.coursework.commands.markschemes
 
+import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
+import reflect.BeanProperty
 
 /** Edit an existing markscheme. */
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
 
+	@BeanProperty var hasExistingSubmissions: Boolean = false
+
 	// fill in the properties on construction
 	copyFrom(markScheme)
+
+	def contextSpecificValidation(errors:Errors){
+		if (hasExistingSubmissions){
+			/* TODO - reinstate when other options become available
+			if (markScheme.studentsChooseMarker != studentsChooseMarker)
+				errors.rejectValue("studentsChooseMarker", "markScheme.studentsChooseMarker.submissionsExist")
+		  */
+			if (markScheme.studentsChooseMarker){
+				val existingMarkers = markScheme.firstMarkers.includeUsers.toSet
+				val newMarkers = firstMarkers.toSet
+				// if newMarkers is not a super set of existingMarker, markers have been removed.
+				if (!(existingMarkers -- newMarkers).isEmpty){
+					errors.rejectValue("firstMarkers", "markScheme.firstMarkers.cannotRemoveMarkers")
+				}
+			}
+		}
+	}
 
 	def applyInternal() = {
 		transactional() {

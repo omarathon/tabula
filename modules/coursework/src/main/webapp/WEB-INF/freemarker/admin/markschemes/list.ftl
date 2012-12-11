@@ -48,7 +48,7 @@ $('a[data-toggle=modal]').click(function(event){
 	$modal.load($this.attr('href'));
 });
 
-$("a.disabled").on('click', function(e){e.preventDefault(e);})
+$("a.disabled").on('click', function(e){e.preventDefault(e); return false;})
 
 });
 </script>
