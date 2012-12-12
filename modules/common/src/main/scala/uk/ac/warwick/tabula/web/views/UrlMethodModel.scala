@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value
 import java.util.Properties
 import javax.annotation.Resource
 import freemarker.template.SimpleScalar
+import java.net.URLEncoder
+import uk.ac.warwick.util.web.EscapingUriParser
 
 /**
  *
@@ -21,6 +23,8 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@Resource(name = "staticHashes") var staticHashes: Properties = _
+	
+	val parser = new EscapingUriParser
 	
 	private def rewrite(path: String, contextOverridden: Option[String]) = {
 		val contextNoRoot = contextOverridden.getOrElse(context) match {
@@ -48,7 +52,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 				if (prependTopLevelUrl) toplevelUrl
 				else ""
 				
-			new SimpleScalar(prefix + rewrite(args.get(0).toString(), contextOverridden))
+			new SimpleScalar(prefix + encode(rewrite(args.get(0).toString(), contextOverridden)))
 	  	} else {
 	  		throw new IllegalArgumentException("")
 	  	}
@@ -73,9 +77,11 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 
 		val writer = env.getOut()
 		writer.write(toplevelUrl)
-		writer.write(path)
+		writer.write(encode(path))
 
 	}
+	
+	def encode(url: String) = parser.parse(url).toString
 
 	def addSuffix(path: String) = {
 		staticHashes.getProperty(path.substring(1)) match {
