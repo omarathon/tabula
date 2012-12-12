@@ -100,7 +100,6 @@ class EditAssignment extends CourseworkController {
 		mustBeLinked(assignment, module)
 		checkPerms(module)
 		form.afterBind()
-		form.checkMarkScheme()
 
 		val couldDelete = canDelete(assignment)
 		Mav("admin/assignments/edit",

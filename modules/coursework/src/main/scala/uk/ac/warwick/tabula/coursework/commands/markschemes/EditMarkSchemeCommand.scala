@@ -6,11 +6,15 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import reflect.BeanProperty
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.MarkSchemeDao
 
 /** Edit an existing markscheme. */
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
 
-	@BeanProperty var hasExistingSubmissions: Boolean = false
+	var dao = Wire.auto[MarkSchemeDao]
+
+	def hasExistingSubmissions: Boolean = dao.getAssignmentsUsingMarkScheme(markScheme).exists(!_.submissions.isEmpty)
 
 	// fill in the properties on construction
 	copyFrom(markScheme)

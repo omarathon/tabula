@@ -25,11 +25,7 @@ so that they can be passed around between requests.
 
 <#if features.markSchemes && department.markSchemes?has_content>
 
-	<@spring.bind path="canUpdateMarkScheme">
-		<#assign disabled = (status.value != 'true')>
-	</@spring.bind>
-
-	<@f.hidden path="canUpdateMarkScheme" />
+	<#assign disabled = !(canUpdateMarkScheme!true)>
 
 	<@form.labelled_row "markScheme" "Mark scheme">
 		<@f.select path="markScheme" disabled="${disabled?string}">

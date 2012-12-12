@@ -13,12 +13,12 @@ class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAss
 
 	def module = assignment.module
 
-	def checkMarkScheme() {
+	def canUpdateMarkScheme = {
 		Option(assignment.markScheme) match {
 			// if students can choose the marker and submissions exist then the markScheme cannot be updated
-			case Some(scheme) if scheme.studentsChooseMarker => canUpdateMarkScheme = (assignment.submissions.size() == 0)
-			case Some(scheme) =>
-			case None =>
+			case Some(scheme) if scheme.studentsChooseMarker => (assignment.submissions.size() == 0)
+			case Some(scheme) => true
+			case None => true
 		}
 	}
 

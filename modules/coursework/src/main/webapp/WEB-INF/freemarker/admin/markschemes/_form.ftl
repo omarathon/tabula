@@ -20,10 +20,6 @@ Adding or editing a new markscheme
 <@f.form method="post" action="${form_url}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
-<#if view_type="edit">
-<@f.hidden path="hasExistingSubmissions" />
-</#if>
-
 <#--
 
 Common form fields.
