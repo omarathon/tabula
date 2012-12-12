@@ -20,7 +20,6 @@ Adding or editing a new markscheme
 <@f.form method="post" action="${form_url}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
-
 <#--
 
 Common form fields.
@@ -71,7 +70,7 @@ Common form fields.
 		</div>
 	</div>
 </div>
-<#-- TODO - replace with above block when more options become available-->
+<#-- TODO - replace with block below when more options become available - but disable it if existingSubmissions is true -->
 <#--@form.labelled_row "studentsChooseMarker" "">
 	<label class="checkbox">
 		<@f.checkbox path="studentsChooseMarker" />
