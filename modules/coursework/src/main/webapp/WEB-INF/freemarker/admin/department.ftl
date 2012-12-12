@@ -73,15 +73,8 @@
 	</div>
 	
 	
+	<#if has_assignments>
 	<div class="module-info-contents">
-	
-	<#if !has_assignments >
-		<p>This module has no assignments. 
-		<span class="btn-group">
-		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
-		</span>
-		</p>
-	<#else>
 		<#list module.assignments as assignment>
 		<#if !assignment.deleted>
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
@@ -215,10 +208,8 @@
 		</#if>
 		</#list>
 		
-		
-	</#if>
-	
 	</div>
+	</#if>
 	
 </div>
 </#list>
