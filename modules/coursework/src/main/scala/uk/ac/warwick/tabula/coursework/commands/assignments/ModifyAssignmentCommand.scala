@@ -106,10 +106,12 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 
 		contextSpecificValidation(errors)
 
-		val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module)
-		                    .filterNot { _ eq assignment }
-		for (duplicate <- duplicates.headOption) {
-			errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
+		if (name != null && name.length < 3000) {
+			val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module).filterNot { _ eq assignment }
+			for (duplicate <- duplicates.headOption) {
+				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+			}
 		}
 
 		if (!openEnded && openDate.isAfter(closeDate)) {
