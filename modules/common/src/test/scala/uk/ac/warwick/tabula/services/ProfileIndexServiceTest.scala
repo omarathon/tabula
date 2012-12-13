@@ -50,6 +50,13 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.afterPropertiesSet
 	}
 	
+	@Test def stripTitles {
+		indexer.stripTitles("Mathew Mannion") should be ("Mathew Mannion")
+		indexer.stripTitles("Mr Mathew Mannion") should be ("Mathew Mannion")
+		indexer.stripTitles("Mr. Mathew Mannion") should be ("Mathew Mannion")
+		indexer.stripTitles("Prof.Mathew Mannion") should be ("Mathew Mannion")
+	}
+	
 	@Transactional
 	@Test def find = withFakeTime(dateTime(2000, 6)) {
 		val m = new Member
