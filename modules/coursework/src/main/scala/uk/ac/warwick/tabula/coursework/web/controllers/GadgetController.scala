@@ -1,10 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
+import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
+import javax.servlet.http.HttpServletRequest
+import java.util.Collections
 
 @Controller
 class GadgetController extends CourseworkController {
@@ -18,10 +21,7 @@ class GadgetController extends CourseworkController {
 
 	@RequestMapping(value = Array("/api/gadget.html"))
 	def render(user: CurrentUser) = {
-		val home = homeController.home(user)
-		//home.viewName = "gadgets/coursework/render"
-		home.embedded
-		home
+		homeController.home(user).embedded
 	}
 		
 }

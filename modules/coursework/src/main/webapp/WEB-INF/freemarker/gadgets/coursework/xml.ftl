@@ -11,7 +11,10 @@
     </OAuth>
   </ModulePrefs>
 <Content type="html" view="home,profile,default"><![CDATA[  
-<div id="main-content">
+
+<div id="main-content" class="tabula-page">
+
+<@stylesheet "/static/css/gadget.css" />
 	 
 <div id="approval"></div>
 <div id="waiting"></div>
