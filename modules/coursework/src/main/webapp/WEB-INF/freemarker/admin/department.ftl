@@ -10,6 +10,10 @@
 	<@fmt.date end /> (${closeTZ})
 </#macro>
 
+<#function module_anchor module>
+	<#return "module-${module.code}" />
+</#function>
+
 
 <#if department??>
 
@@ -40,6 +44,17 @@
 	<h1>${department.name}</h1>
 </#if>
 
+<#if notices.unpublishedAssignments?has_content>
+<div class="alert alert-error">
+	Some assigments have feedback that hasn't been published to students yet.
+	<#list notices.unpublishedAssignments as a>
+		<div>
+			<a href="#${module_anchor(a.module)}">${a.name}</a>
+		</div>
+	</#list>
+</div>
+</#if>
+
 <#list modules as module>
 <#assign can_manage=can.manage(module) />
 <#assign has_assignments=(module.assignments!?size gt 0) />
@@ -49,7 +64,7 @@
 			<#assign has_archived_assignments=true />
 		</#if>
 </#list>
-<a id="module-${module.code}"></a>
+<a id="${module_anchor(module)}"></a>
 <div class="module-info<#if !has_assignments> empty</#if>">
 	<div class="clearfix">
 		<h2 class="module-title"><@fmt.module_name module /></h2>

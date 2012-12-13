@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/list"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/list"))
 class SubmissionsAndFeedbackController extends CourseworkController {
 
 	var auditIndexService = Wire.auto[AuditEventIndexService]

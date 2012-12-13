@@ -9,14 +9,7 @@
 </#if>	
 
 <#if features.profiles>
-<div class="hero-unit">
-	<h2>Search for a profile</h2>
-	
-	<@f.form method="post" action="${url('/search')}" commandName="searchProfilesCommand" cssClass="form-search">
-		<@f.input path="query" cssClass="input-large search-query" />
-		<button type="submit" class="btn">Search</btn>
-	</@f.form>
-</div>
+<#include "../profile/search/form.ftl" />
 <#else>
 <p>Here is where you'd see student profiles.</p>
 </#if>

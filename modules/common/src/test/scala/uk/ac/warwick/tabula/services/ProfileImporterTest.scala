@@ -91,7 +91,6 @@ class ProfileImporterTest extends TestBase with Mockito {
 		rs.getString("user_code") returns("cuscav")
 		rs.getString("email_address") returns("M.Mannion@warwick.ac.uk")
 		rs.getBlob("photo") returns(null)
-		rs.getString("academic_year_code") returns("11/12")
 		rs.getInt("year_of_study") returns(3)
 		rs.getDate("date_of_birth") returns(new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDate().getTime()))
 		
@@ -104,7 +103,6 @@ class ProfileImporterTest extends TestBase with Mockito {
 		member.firstName should be ("Mathew")
 		member.lastName should be ("Mannion")
 		member.photo should be (null)
-		member.academicYear should be (new AcademicYear(2011))
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 	}
 
