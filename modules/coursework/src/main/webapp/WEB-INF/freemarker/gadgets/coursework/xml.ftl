@@ -12,19 +12,6 @@
   </ModulePrefs>
 <Content type="html" view="home,profile,default"><![CDATA[  
 <div id="main-content">
-
-<#-- FIXME this is not the correct way to include the styles on a gadget. 
-     This was just a test to see what CSS is needed to make it look decent.
-     We might not even want it to look like Tabula - may want it to blend in
-     better with Start. --> 
-
-<link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
-<link rel="stylesheet" href="/static/css/embeddable.css" type="text/css">
-<link rel="stylesheet" href="/static/css/id6-design.css" type="text/css">
-<style>
-/* hax */
-html, body { background: none !important; }
-</style>
 	 
 <div id="approval"></div>
 <div id="waiting"></div>

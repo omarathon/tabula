@@ -4,9 +4,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.spring.Wire
 
 @Controller
 class GadgetController extends CourseworkController {
+	
+	// Jump on the back of the home page controller.
+	var homeController = Wire.auto[HomeController]
 
 	@RequestMapping(value = Array("/api/gadget.xml"))
 	def xml = Mav("gadgets/coursework/xml",
@@ -14,7 +18,10 @@ class GadgetController extends CourseworkController {
 
 	@RequestMapping(value = Array("/api/gadget.html"))
 	def render(user: CurrentUser) = {
-		Mav("gadgets/coursework/render").embedded
+		val home = homeController.home(user)
+		//home.viewName = "gadgets/coursework/render"
+		home.embedded
+		home
 	}
 		
 }
