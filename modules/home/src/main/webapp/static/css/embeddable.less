@@ -11,7 +11,6 @@ html.iframe {
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
 
-@import "fonts/tabula.less";
 
 @grid-size:16px;
 @warning-color: #933;
@@ -450,6 +449,9 @@ table {
 .user-picker-collection .user-picker-container {
   display: block !important; 
 }
+
+// 1px out of alignment on all browsers for some reason.
+.user-code-picker { margin-top: -1px; }
 
 .clickable-cursor {
 	cursor:hand;

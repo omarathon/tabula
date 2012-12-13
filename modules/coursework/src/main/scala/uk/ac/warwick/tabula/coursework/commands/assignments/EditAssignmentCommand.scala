@@ -1,19 +1,10 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments;
+package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.reflect.BeanProperty
-import org.hibernate.annotations.AccessType
-import org.hibernate.validator.constraints.NotEmpty
-import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.format.annotation.DateTimeFormat
+
 import uk.ac.warwick.tabula.data.Transactions._
-import javax.persistence.Entity
-import javax.persistence.NamedQueries
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
+import org.springframework.validation.Errors
 
 
 class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAssignmentCommand {
@@ -22,15 +13,30 @@ class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAss
 
 	def module = assignment.module
 
+	def canUpdateMarkScheme = {
+		Option(assignment.markScheme) match {
+			// if students can choose the marker and submissions exist then the markScheme cannot be updated
+			case Some(scheme) if scheme.studentsChooseMarker => (assignment.submissions.size() == 0)
+			case Some(scheme) => true
+			case None => true
+		}
+	}
+
+	override def contextSpecificValidation(errors:Errors){
+		if (!canUpdateMarkScheme && (markScheme == null || assignment.markScheme != markScheme))
+			errors.rejectValue("markScheme", "markScheme.cannotChange")
+	}
+
 	override def applyInternal(): Assignment = transactional() {
 		copyTo(assignment)
 		service.save(assignment)
 		assignment
 	}
 
-	override def describe(d: Description) = d.assignment(assignment).properties(
+	override def describe(d: Description) { d.assignment(assignment).properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate)
+	}
 
 }

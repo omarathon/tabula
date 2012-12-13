@@ -26,7 +26,11 @@ abstract class ModifyMarkSchemeCommand(
 	// Subclasses can provide the "current" markscheme if one applies, for validation.
 	def currentMarkScheme: Option[MarkScheme]
 
+	def contextSpecificValidation(errors: Errors)
+
 	def validate(errors: Errors) {
+		contextSpecificValidation(errors)
+
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
 		
 		if (department.markSchemes.exists(sameName)) {

@@ -22,5 +22,11 @@ class UrlMethodModelTest extends TestBase {
 		model.exec(ArrayList("/module/yes")).toString should be ("/courses/module/yes")
 		model.exec(ArrayList("/module/yes", "/profiles")).toString should be ("/profiles/module/yes")
 	}
+	
+	@Test def encoding() {
+		val input = "/download/greek \u03a7\u03a8\u03a9.doc"
+		val expected = "/courses/download/greek%20%CE%A7%CE%A8%CE%A9.doc"
+		model.exec(ArrayList(input)).toString should be (expected)
+	}
 
 }

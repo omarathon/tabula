@@ -7,6 +7,8 @@ the comments textarea needs to maintain newlines.
 -->
 <#assign commandName="editAssignmentCommand"/>
 <#assign command=editAssignmentCommand />
+<#assign canUpdateMarkScheme=command.canUpdateMarkScheme/>
+
 <@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/edit')}" commandName=commandName cssClass="form-horizontal">
 
 <#--

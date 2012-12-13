@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value
  * }}}
  */
 abstract class Features {
+	// FIXME currently requires default to be set twice: in annotation for Spring, and at the end for non-Spring tests
 	@Value("${features.emailStudents:false}") @BeanProperty var emailStudents: Boolean = false
 	@Value("${features.collectRatings:true}") @BeanProperty var collectRatings: Boolean = true
 	@Value("${features.submissions:true}") @BeanProperty var submissions: Boolean = true
@@ -36,7 +37,7 @@ abstract class Features {
 	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = true
 	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = true
 	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = true
-	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = false
+	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = true
 	@Value("${features.profiles:false}") @BeanProperty var profiles: Boolean = false
 }
 

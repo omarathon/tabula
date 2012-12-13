@@ -54,6 +54,7 @@ trait SharedAssignmentProperties {
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
+
 	@BeanProperty var markScheme: MarkScheme = _
 
 	@Min(1)
