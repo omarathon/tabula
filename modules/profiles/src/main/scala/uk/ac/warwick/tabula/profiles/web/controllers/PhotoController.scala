@@ -24,18 +24,21 @@ class PhotoController extends BaseController {
 		mustBeAbleTo(View(mandatory(member)))
 
 		Option(member.photo) match {
-		  	case Some(photo) => {
-		  		// TODO We don't use fileserver here at the moment because it's for serving 
-		  		// files for download. We could probably extend RenderableFile to provide options 
-		  		// to not specify content-disposition, but for the moment let's just serve directly.
-		  	  
-		  		val inStream = photo.dataStream
-  				response.addHeader("Content-Type", "image/jpeg")
-  				photo.length.map { length =>
-  					response.addHeader("Content-Length", length.toString)
-	  			}
-		  		FileCopyUtils.copy(inStream, response.getOutputStream)
-		  	} 
+		  	case Some(photo) => 
+		  		photo.dataStream match {
+		  			case null => throw new ItemNotFoundException
+		  			case inStream => {
+		  				// TODO We don't use fileserver here at the moment because it's for serving 
+	  					// files for download. We could probably extend RenderableFile to provide options 
+		  				// to not specify content-disposition, but for the moment let's just serve directly.
+		  				
+		  				response.addHeader("Content-Type", "image/jpeg")
+		  				photo.length.map { length =>
+		  					response.addHeader("Content-Length", length.toString)
+			  			}
+				  		FileCopyUtils.copy(inStream, response.getOutputStream)
+		  			}
+		  		}
 		  	case None => throw new ItemNotFoundException
 		}
 	}

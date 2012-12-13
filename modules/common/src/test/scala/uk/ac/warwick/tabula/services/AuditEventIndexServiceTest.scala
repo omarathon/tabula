@@ -178,7 +178,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 			events.foreach { service.save(_) }
 			service.getByEventId("x9000")
 		}
-		indexer.indexEvents(moreEvents)
+		indexer.indexItems(moreEvents)
 		
 		indexer.student(user).size should be (21)
 		

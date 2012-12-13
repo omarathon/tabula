@@ -32,7 +32,6 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.AuditEventIndexService
 
 /**
  * Screens for department and module admins.

@@ -44,8 +44,17 @@
 <hr>
 
 <p>
-<@f.form method="post" action="${url('/sysadmin/index/run', '/scheduling')}" commandName="reindexForm">
-Rebuild index from
+<@f.form method="post" action="${url('/sysadmin/index/run-audit', '/scheduling')}" commandName="reindexForm">
+Rebuild audit event index from
+<div class="input-append"> 
+<@f.input path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+</div>
+</@f.form>
+</p>
+
+<p>
+<@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="reindexForm">
+Rebuild profiles index from
 <div class="input-append"> 
 <@f.input path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
