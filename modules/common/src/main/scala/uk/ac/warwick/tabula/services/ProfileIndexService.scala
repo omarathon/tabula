@@ -42,21 +42,19 @@ import uk.ac.warwick.tabula.data.MemberDao
  */
 trait ProfileQueryMethods { self: ProfileIndexService =>
 	
-	private val Title = """^(?:Mr|Ms|Mrs|Miss|Dr|Sir|Doctor|Prof(?:essor)?)\b""".r
+	private val Title = """^(?:Mr|Ms|Mrs|Miss|Dr|Sir|Doctor|Prof(?:essor)?)(\.?|\b)\s*""".r
 	private val FullStops = """\.(\S)""".r
 	
 	override lazy val parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
 	def find(query: String) =
 		if (!StringUtils.hasText(query)) Seq()
-		else search(parse(query)) flatMap { toItem(_) }
+		else search(parser.parse(stripTitles(query))) flatMap { toItem(_) }
 	
-	private def parse(rawQuery: String) = {
-		var query = Title.replaceAllIn(rawQuery, "")
-		query = FullStops.replaceAllIn(query, ". $1")
-		
-		parser.parse(query)
-	}
+	def stripTitles(query: String) = 
+		FullStops.replaceAllIn(
+			Title.replaceAllIn(query, ""), 
+		". $1")
 	
 }
 

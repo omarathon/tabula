@@ -9,7 +9,7 @@ class SynonymAwareWildcardMultiFieldQueryParserTest extends TestBase {
 	@Test def itWorks() {
 		val parser = new SynonymAwareWildcardMultiFieldQueryParser(List("forenames", "surname"), analyzer)
 		
-		parser.parse("mathew").toString should be ("forenames:mathew* surname:mathew*")
+		parser.parse("mathew").toString should be ("(forenames:mathew* forenames:matthew) (surname:mathew* surname:matthew)")
 	}
 
 }

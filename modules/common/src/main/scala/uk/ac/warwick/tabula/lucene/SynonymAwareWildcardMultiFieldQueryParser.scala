@@ -23,22 +23,39 @@ class SynonymAwareWildcardMultiFieldQueryParser(fields: Traversable[String], ana
 		query match {
 			case null => null
 			case q: BooleanQuery => {
-				val bq = new BooleanQuery
+				val bq = new BooleanQuery(false)
 				for (clause <- q.getClauses())
-					clause.getQuery() match {
+					bq.add(clause.getQuery() match {
 						case query: TermQuery =>
-							// TODO synonyms
+							// Synonyms
+							val term = query.getTerm
+							val text = term.text
 							
-							bq.add(new WildcardQuery(new Term(query.getTerm.field, query.getTerm.text + "*")), clause.getOccur)
-						
-						case query => 
-							bq.add(clause)
-					}
+							Synonyms.names.get(text.toLowerCase) match {
+								case Some(synonyms) => {
+									val synonymBq = new BooleanQuery 
+									
+									// all of these SHOULD occur, not MUST
+									
+									// firstly, add the main term as a wildcard
+									synonymBq.add(new WildcardQuery(new Term(term.field, text + "*")), Occur.SHOULD)
+									
+									// add all synonyms as an exact termquery
+									for (synonym <- synonyms)
+										synonymBq.add(new TermQuery(new Term(term.field, synonym)), Occur.SHOULD)
+									
+									synonymBq
+								}
+								
+								case None => new WildcardQuery(new Term(term.field, text + "*")) 
+							}
+						case query => query
+					}, clause.getOccur)
 				
 				bq
 			}
 			case q: PhraseQuery => {
-				val bq = new BooleanQuery
+				val bq = new BooleanQuery(false)
 				
 				val terms = q.getTerms
 				for (term <- terms.slice(0, terms.length - 1))
