@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
-
 import javax.persistence.CascadeType._
 import org.hibernate.annotations.Type
 import org.joda.time.LocalDate
-
 import javax.persistence._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -13,6 +11,7 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
+import org.joda.time.DateTime
 
 @Entity
 class Member extends Viewable with Student with Staff with Alumni with ToString {
@@ -52,6 +51,9 @@ class Member extends Viewable with Student with Staff with Alumni with ToString 
 	
 	@BeanProperty def fullName = firstName + " " + lastName
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var lastUpdatedDate = DateTime.now
 
 	def asSsoUser = {
 		val u = new User

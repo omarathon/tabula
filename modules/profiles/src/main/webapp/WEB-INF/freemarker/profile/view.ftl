@@ -34,24 +34,17 @@
 .personal-details header h1 { display: inline; }
 </style>
 
-<section class="search hero-unit">
-	<h2>Search for a profile</h2>
-	
-	<@f.form method="post" action="${url('/search')}" commandName="searchProfilesCommand" cssClass="form-search">
-		<@f.input path="query" cssClass="input-large search-query" />
-		<button type="submit" class="btn">Search</btn>
-	</@f.form>
-</section>
+<#include "search/form.ftl" />
 
 <section class="profile">
 	<section class="personal-details clearfix">
 		<div class="photo">
-			<img src="<@url page="/view/photo/${profile.universityId}.jpg" />" />
+			<img src="<@routes.photo profile />" />
 		</div>
 		
 		<header>
-			<h1>${profile.fullName}</h1>
-			<span class="description">${profile.groupName}<#if profile.route??>, ${route.name}</#if><#if profile.homeDepartment??>, ${profile.homeDepartment.name}</#if></span>
+			<h1><@fmt.profile_name profile /></h1>
+			<@fmt.profile_description profile />
 		</header>
 		
 		<dl class="col1 clearfix">
