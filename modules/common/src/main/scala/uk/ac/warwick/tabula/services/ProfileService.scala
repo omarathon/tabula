@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.helpers.{ FoundUser, Logging }
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.spring.Wire
+import org.joda.time.DateTime
 
 /**
  * Service providing access to members and profiles.
@@ -27,15 +28,31 @@ import uk.ac.warwick.spring.Wire
 trait ProfileService {
 	def save(member: Member)
 	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getMemberByUserId(userId: String): Option[Member]
+	def findMembersByQuery(query: String): Seq[Member]
+	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 }
 
 @Service(value = "profileService")
 class ProfileServiceImpl extends ProfileService with Logging {
 	
 	var memberDao = Wire.auto[MemberDao]
+	var profileIndexService = Wire.auto[ProfileIndexService]
 	
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
+	}
+	
+	def getMemberByUserId(userId: String) = transactional(readOnly = true) {
+		memberDao.getByUserId(userId)
+	}
+	
+	def findMembersByQuery(query: String) = transactional(readOnly = true) {
+		profileIndexService.find(query)
+	} 
+	
+	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {
+		memberDao.listUpdatedSince(startDate, max)
 	}
 	
 	def save(member: Member) = memberDao.saveOrUpdate(member)

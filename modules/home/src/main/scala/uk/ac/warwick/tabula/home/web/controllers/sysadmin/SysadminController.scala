@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.home.commands.departments.RemoveDeptOwnerCommand
 import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.web.controllers.BaseController

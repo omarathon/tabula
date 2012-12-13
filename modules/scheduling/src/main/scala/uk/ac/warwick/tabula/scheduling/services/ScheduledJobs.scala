@@ -30,7 +30,10 @@ class ScheduledJobs {
 	var exceptionResolver: ExceptionResolver = _
 
 	@Autowired @BeanProperty
-	var indexingService: AuditEventIndexService = _
+	var auditIndexingService: AuditEventIndexService = _
+	
+	@Autowired @BeanProperty
+	var profileIndexingService: ProfileIndexService = _
 
 	@Autowired @BeanProperty
 	var jobService: JobService = _
@@ -56,7 +59,10 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(fixedRate = 60000) // every minute
-	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { indexingService.index }
+	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.index }
+	
+	@Scheduled(fixedRate = 60000) // every 5 minutes
+	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.index }
 
 	@Scheduled(fixedDelay = 10000) // every 10 seconds, non-concurrent
 	def jobs: Unit = exceptionResolver.reportExceptions { jobService.run }

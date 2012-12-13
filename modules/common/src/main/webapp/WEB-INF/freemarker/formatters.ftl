@@ -52,3 +52,6 @@
 	</@userlookup>
 </#macro>
 </#compress>
+
+<#macro profile_name profile>${profile.fullName}</#macro>
+<#macro profile_description profile><span class="profile-description">${profile.groupName}<#if profile.route??>, ${profile.route.name}</#if><#if profile.homeDepartment??>, ${profile.homeDepartment.name}</#if></span></#macro>
