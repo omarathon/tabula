@@ -132,7 +132,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 
 		def addUserId(item: String) {
 			val user = userLookup.getUserByUserId(item)
-			if (user.isFoundUser) {
+			if (user.isFoundUser && null != user.getWarwickId) {
 				includeUsers.add(user.getUserId)
 			}
 		}
