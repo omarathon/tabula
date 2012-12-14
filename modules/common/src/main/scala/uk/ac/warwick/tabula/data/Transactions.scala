@@ -69,25 +69,28 @@ object Transactions extends TransactionAspectSupport {
 		}
 
 	}
-  
-  private def handle[T](f: => T, attribute: TransactionAttribute): T = {
-	  try {
-	  	createTransactionIfNecessary(getTransactionManager(), attribute, "Transactions.transactional()" )
-	  	val result = f
-	  	commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
-	  	result
-	  } catch {
-	  	case t => {
-	  		val info = TransactionSupport.currentTransactionInfo
-	  		val status = info.getTransactionStatus()
-	  		if (status != null && !status.isCompleted()) {
-	  			completeTransactionAfterThrowing(info, t)
-	  		}
-	  		throw t
-	  	}
-	  } finally {
-	  	cleanupTransactionInfo(TransactionSupport.currentTransactionInfo);
-	  }
+
+	private def handle[T](f: => T, attribute: TransactionAttribute): T = {
+		try {
+			createTransactionIfNecessary(getTransactionManager(), attribute, "Transactions.transactional()")
+			val result = f
+			commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
+			result
+		} catch {
+			case t => {
+				
+				for {
+					info <- Option(TransactionSupport.currentTransactionInfo)
+					status <- Option(info.getTransactionStatus())
+					if !status.isCompleted
+				} completeTransactionAfterThrowing(info, t)
+				
+				throw t
+			}
+		} finally {
+			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo);
+		}
 	}
+
   
 }

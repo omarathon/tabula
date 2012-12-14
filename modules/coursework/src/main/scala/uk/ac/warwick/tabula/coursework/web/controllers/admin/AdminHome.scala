@@ -61,10 +61,27 @@ class AdminHome extends CourseworkController {
 		if (modules.isEmpty()) {
 			mustBeAbleTo(Manage(dept))
 		}
+		
+		val sortedModules = modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
+		val notices = gatherNotices(modules)
+		
 		Mav("admin/department",
 			"department" -> dept,
-			"modules" -> modules.sortBy { (module) => (module.assignments.isEmpty, module.code) })
+			"modules" -> sortedModules,
+			"notices" -> notices)
 
+	}
+	
+	def gatherNotices(modules: Seq[Module])= {
+		val unpublished = for ( 
+				module <- modules;
+				assignment <- module.assignments
+				if assignment.isAlive && assignment.anyUnreleasedFeedback
+			) yield assignment
+			
+		Map(
+			"unpublishedAssignments" -> unpublished
+		)
 	}
 
 }
