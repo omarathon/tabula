@@ -1,8 +1,7 @@
-<section class="search">
-	<h2>Search for a profile</h2>
-	
-	<@f.form method="get" action="${url('/search')}" commandName="searchProfilesCommand" cssClass="form-search">
-		<@f.input path="query" cssClass="input-large search-query" />
-		<button type="submit" class="btn">Search</btn>
+<section class="profile-search">	
+	<@f.form method="get" action="${url('/search')}" commandName="searchProfilesCommand">
+		<div class="input-append">
+			<@f.input path="query" cssClass="span4" placeholder="Search for a student..." /><input class="btn" type="submit" value="Search">
+		</div>
 	</@f.form>
 </section>

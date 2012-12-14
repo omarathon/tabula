@@ -49,11 +49,18 @@ class Member extends Viewable with Student with Staff with Alumni with ToString 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
 	
-	@BeanProperty def fullName = firstName + " " + lastName
-	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
-	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var lastUpdatedDate = DateTime.now
+	
+	@BeanProperty def fullName = firstName + " " + lastName
+	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
+	@BeanProperty def description = {
+		def userType = Option(groupName) orElse(Option(""))
+		def courseName = Option(route) map (", " + _.name) orElse(Option(""))
+		def deptName = Option(homeDepartment) map (", " + _.name) orElse(Option(""))
+		 
+		userType.get + courseName.get + deptName.get
+	}
 
 	def asSsoUser = {
 		val u = new User

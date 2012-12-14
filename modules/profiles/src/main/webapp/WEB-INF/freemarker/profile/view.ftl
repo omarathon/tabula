@@ -18,22 +18,6 @@
 	</div>
 </#macro>
 
-<style type="text/css">
-/* Definition list reset */
-#main-content dl { margin: 0; padding: 0; }
-#main-content dt, #main-content dd { margin: 0; padding: 0; font-weight: normal; display: inline; }
-
-.profile dt { float: left; clear: left; }
-.profile dt:after { content: ':'; margin-right: 5px; }
-.profile dd { float: left; clear: right; }
-
-.personal-details div.photo { float: left; width: 198px; margin-right: 16px; }
-.personal-details dl.col1   { float: left; width: 348px; margin-right: 16px; }
-.personal-details dl.col2   { float: left; width: 348px; margin-right: 0; }
-
-.personal-details header h1 { display: inline; }
-</style>
-
 <#include "search/form.ftl" />
 
 <section class="profile">

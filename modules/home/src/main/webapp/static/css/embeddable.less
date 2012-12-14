@@ -737,3 +737,93 @@ h1.with-settings {
 }
 
 } // .tabula-page
+
+.profiles-page {
+	/* Definition list reset */
+	#main-content {
+	 	dl, dt, dd { margin: 0; padding: 0; }
+	 	dt, dd { font-weight: normal; display: inline; }
+ 	}
+	
+	.profile {
+		dt { 
+			float: left; 
+			clear: left;
+			
+			&:after { content: ':'; margin-right: 5px; }
+		}
+	
+		dd { 
+			float: left; 
+			clear: right; 
+		}
+	
+		.personal-details {
+			div.photo { 
+				float: left; 
+				width: 198px; 
+				margin-right: 16px; 
+			}
+			dl.col1 { 
+				float: left; 
+				width: 348px; 
+				margin-right: 16px; 
+			}
+			dl.col2 {
+				float: left; 
+				width: 348px; 
+				margin-right: 0; 
+			}
+	
+			header h1 { display: inline; }
+		}
+	}
+	
+	.profile-search-results {
+		.result {
+			border: 1px solid #888;
+			min-height: 50px;
+			padding: 1em;
+			
+			h3 {
+				margin-bottom: 0;
+			}
+			
+			.photo {
+				float: right;
+				
+				img {
+					max-height: 50px;
+				}	
+			}
+		}
+	}
+	
+	#container .profile-search {
+		// TODO Why
+		.input-append .btn { margin-top: 1px; }
+		
+		@searchFontSize: @baseFontSize * 1.5;
+		@searchLineHeight: @baseLineHeight * 1.5;
+		
+		input[type="text"] {
+			height: @searchLineHeight;
+			margin-bottom: @searchLineHeight / 2;
+			font-size: @searchFontSize;
+			line-height: @searchLineHeight;
+		}
+		
+		input.btn {
+			font-size: @searchFontSize;
+			line-height: @searchLineHeight;
+		}
+		
+		.dropdown-menu {
+			width: 468px;
+			
+			h2 { margin-bottom: 0; }
+			.photo { max-height: 50px; }
+			span.description { white-space: normal; }
+		}
+	}
+}
