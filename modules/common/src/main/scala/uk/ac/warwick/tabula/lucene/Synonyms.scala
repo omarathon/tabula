@@ -84,7 +84,7 @@ object Synonyms {
 		"liz" -> Set("elizabeth"),
 		"llewellyn" -> Set("lewellyn", "llewelyn", "lewelyn"),
 		"llewelyn" -> Set("lewellyn", "lewelyn", "llewellyn"),
-		"many" -> Set("amanda"),
+		"mandy" -> Set("amanda"),
 		"mathew" -> Set("matthew"),
 		"mathews" -> Set("matthews"),
 		"matt" -> Set("mathew", "mat"),

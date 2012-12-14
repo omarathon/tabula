@@ -177,6 +177,7 @@
 							<output>${project.build.directory}/${project.build.finalName}/static/js/profiles.js</output>
 							<includes>
 								<include>common.js</include>
+								<include>profiles.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>
