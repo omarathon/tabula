@@ -3,19 +3,14 @@ package uk.ac.warwick.tabula.data.model
 import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.OneToMany
-import javax.persistence.ManyToOne
-import javax.persistence.FetchType
+import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.actions.Deleteable
 import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
+import scala.Some
 
 
 @Entity @AccessType("field")
@@ -50,6 +45,24 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	var agreedMark: Option[Int] = None
 	var actualGrade: String = _
 	var agreedGrade: String = _
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "first_marker_feedback")
+	@BeanProperty var firstMarkerFeedback: MarkerFeedback = _
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "second_marker_feedback")
+	@BeanProperty var secondMarkerFeedback: MarkerFeedback = _
+
+	def addFirstMarkerFeedback(markerFeedback: MarkerFeedback) {
+		markerFeedback.feedback = this
+		firstMarkerFeedback = markerFeedback
+	}
+
+	def addSecondMarkerFeedback(markerFeedback: MarkerFeedback) {
+		markerFeedback.feedback = this
+		secondMarkerFeedback = markerFeedback
+	}
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
