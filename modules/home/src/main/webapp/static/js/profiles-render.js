@@ -9,9 +9,6 @@ $(function() {
 	$('.profile-search').each(function() {
 		var container = $(this);
 		
-		container.find('input.span4').removeClass('span4').addClass('span5');
-		container.find('.input-append').removeClass('input-append').find('input.btn').hide();
-		
 		var target = container.find('form').attr('action') + '.json';
 		
 		var profilePickerMappings;
