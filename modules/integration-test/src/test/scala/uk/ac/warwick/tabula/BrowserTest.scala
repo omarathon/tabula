@@ -53,7 +53,7 @@ abstract class BrowserTest
  * Defaults are in integrationtest-default.proerties.
  */
 object FunctionalTestProperties {
-	private val properties = loadOptionalProps("/integrationtest.properties", "integrationtest-default.properties")
+	private val properties = loadOptionalProps("/integrationtest.properties", "/integrationtest-default.properties")
 
 	val SiteRoot = prop("toplevel.url")
 	val Browser = prop("browser")
