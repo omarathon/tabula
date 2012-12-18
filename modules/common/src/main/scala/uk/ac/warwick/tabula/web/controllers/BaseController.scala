@@ -84,7 +84,6 @@ trait ControllerViews {
 	
 	def Redirect(path: String) = Mav("redirect:" + path)
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
-	def Reload() = Redirect(currentPath)
 
 	private def currentUri = requestInfo.get.requestedUri
 	private def currentPath: String = currentUri.getPath
