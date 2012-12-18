@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.services
 
+import java.io.ByteArrayInputStream
+import java.sql.Blob
+import java.sql.Date
 import java.sql.ResultSet
-import scala.collection.JavaConversions._
+import org.joda.time.DateTimeConstants
+import org.joda.time.LocalDate
 import org.junit.Test
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.Member
+import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.Department
-import java.sql.Date
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.data.model.Male
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTimeConstants
 
-class ProfileImporterTest extends TestBase with Mockito {
+
+class ProfileImporterTest extends PersistenceTestBase with Mockito {
   
 	// SITS names come uppercased - check that we reformat various names correctly.
 	@Test def forenameFormatting {
@@ -82,6 +83,11 @@ class ProfileImporterTest extends TestBase with Mockito {
 	}
 	
 	@Test def importStaff {	
+		val blobBytes = Array[Byte](1,2,3,4,5)
+		val blob = mock[Blob]
+		blob.getBinaryStream() returns(new ByteArrayInputStream(blobBytes))
+		blob.length() returns (blobBytes.length)
+		
 		val rs = mock[ResultSet]
 		rs.getString("university_id") returns("0672089")
 		rs.getString("title") returns("MR")
@@ -90,11 +96,14 @@ class ProfileImporterTest extends TestBase with Mockito {
 		rs.getString("gender") returns("M")
 		rs.getString("user_code") returns("cuscav")
 		rs.getString("email_address") returns("M.Mannion@warwick.ac.uk")
-		rs.getBlob("photo") returns(null)
+		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
 		rs.getDate("date_of_birth") returns(new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDate().getTime()))
 		
-		val member = new ProfileImporter().processNames(ProfileImporter.createMember(rs, null, null), Map().withDefaultValue(new AnonymousUser))
+		val importer = new ProfileImporter()
+		val fileDao = mock[FileDao]
+		
+		val member = importer.processNames(ProfileImporter.createMember(rs, fileDao, null), Map().withDefaultValue(new AnonymousUser))
 		member.title should be ("Mr")
 		member.universityId should be ("0672089")
 		member.userId should be ("cuscav")
@@ -102,8 +111,11 @@ class ProfileImporterTest extends TestBase with Mockito {
 		member.gender should be (Male)
 		member.firstName should be ("Mathew")
 		member.lastName should be ("Mannion")
-		member.photo should be (null)
+		member.photo should not be (null)
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+		
+		there was one(fileDao).savePermanent(any[FileAttachment])
+		there was no(fileDao).saveTemporary(any[FileAttachment])
 	}
 
 }

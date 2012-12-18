@@ -94,5 +94,8 @@ Database schema changes
 Any SQL for changing the database schema should go in `config/scripts/schema/migrations`. Migrations are done
 manually so you need to run it on dev, test and production separately. The recommended route is to
 migrate dev first to get it working, and then update test and production _at the same time_. If you
-don't do these at the same time then you run the risk of having everything working on test so you do
-a deploy and it's broken on live because of the old schema.
+don't do these at the same time then you run the risk of everything apparently working fine on test
+until you deploy to live, which then explodes.
+
+It is also best to do these before or soon after you've pushed the new code onto the central develop branch, 
+so that a deploy to tabula-test won't cause explosions.
