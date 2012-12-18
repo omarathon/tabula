@@ -15,9 +15,9 @@ object ProfileBreadcrumbs {
 	 * Special case breadcrumb for a profile.
 	 */
 	case class Profile(val profile: model.Member) extends Abstract {
-		val title = profile.universityId
+		val title = profile.fullName
 		val url = Routes.profile.view(profile)
-		override val tooltip = profile.fullName
+		override val tooltip = profile.fullName + " (" + profile.universityId + ")"
 	}
 
 	/**
