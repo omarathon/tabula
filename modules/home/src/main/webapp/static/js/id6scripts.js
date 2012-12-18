@@ -24134,7 +24134,9 @@ jQuery(function($) {
 			// if we find it, add an anchor in and shift that up by the height of the horizontal
 			// navigation. plus cheesy scrollTo() for Firefox and IE on first load
 			var hashtext = window.location.hash.substr(1);
-			$(window.location.hash).append('<a id="'+hashtext+'">&nbsp;</a>');
+			if (!$('a[id="'+hashtext+'"]')){				
+				$(window.location.hash).append('<a id="'+hashtext+'">&nbsp;</a>');
+			}
 			$('a[id="'+hashtext+'"]').css({'position':'relative', 'top': -(navHeight+30) +'px', 'display':'block'});
 			window.scrollTo(0, $(window.location.hash).offset().top-(navHeight+(navHeight/3)));
 			$(window.location.hash).attr("id",hashtext+"_");
