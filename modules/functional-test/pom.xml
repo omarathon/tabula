@@ -9,10 +9,10 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>integration-test</artifactId>
+	<artifactId>functional-test</artifactId>
 
-	<name>Integration tests</name>
-	<description>Runs integration tests against a running server</description>
+	<name>Functional tests</name>
+	<description>Runs functional tests against a running server</description>
 
 	<properties>
 		<tabula.basedir>${project.basedir}/../..</tabula.basedir>		
@@ -21,7 +21,7 @@
 	</properties>
 
 	<scm>
-		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/integration-test</url>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/functional-test</url>
 	</scm>
 
 	<profiles>

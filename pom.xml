@@ -75,9 +75,9 @@
 		</profile>
 		
 		<profile>
-			<id>integration-test</id>
+			<id>functional-test</id>
 			<modules>
-				<module>modules/integration-test</module>
+				<module>modules/functional-test</module>
 			</modules>
 		</profile>
 

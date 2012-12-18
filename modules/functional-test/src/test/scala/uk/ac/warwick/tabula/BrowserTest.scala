@@ -48,12 +48,12 @@ abstract class BrowserTest
 }
 
 /**
- * Properties that can be overriden by a integrationtest.properties file in the classpath.
+ * Properties that can be overriden by a functionaltest.properties file in the classpath.
  * 
- * Defaults are in integrationtest-default.proerties.
+ * Defaults are in functionaltest-default.proerties.
  */
 object FunctionalTestProperties {
-	private val properties = loadOptionalProps("/integrationtest.properties", "/integrationtest-default.properties")
+	private val properties = loadOptionalProps("/functionaltest.properties", "/functionaltest-default.properties")
 
 	val SiteRoot = prop("toplevel.url")
 	val Browser = prop("browser")
