@@ -245,8 +245,7 @@ object ProfileImporter {
 			photo.name = universityId + ".jpg"
 			photo.uploadedData = photoBlob.getBinaryStream
 			photo.uploadedDataLength = photoBlob.length
-			fileDao.saveTemporary(photo)
-			
+			fileDao.savePermanent(photo)
 			photo
 		}
 	}

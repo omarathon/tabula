@@ -45,11 +45,21 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	private def targetFile(id: String): File = new File(attachmentDir, partition(id))
 	private def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
-	def saveTemporary(file: FileAttachment): Unit = {
+	private def saveAttachment(file: FileAttachment) {
 		session.saveOrUpdate(file)
 		if (!file.hasData && file.uploadedData != null) {
 			persistFileData(file, file.uploadedData)
 		}
+	}
+	
+	def saveTemporary(file: FileAttachment) {
+		file.temporary = true
+		saveAttachment(file)
+	}
+	
+	def savePermanent(file: FileAttachment) {
+		file.temporary = false
+		saveAttachment(file)
 	}
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
@@ -99,6 +109,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		transactional(propagation = REQUIRES_NEW) {
 			// To be safe, split off temporary files which are attached to non-temporary things
 			// (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)
+			// WARNING isAttached isn't exhaustive so this won't protect you all the time.
 			val (dontDelete, okayToDelete) = files partition (_.isAttached)
 
 			if (dontDelete.size > 0) {

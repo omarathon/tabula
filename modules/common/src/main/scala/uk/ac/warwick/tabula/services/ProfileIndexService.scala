@@ -148,7 +148,9 @@ class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 		result = 
 			if (indexing) new SurnamePunctuationFilter(result)
 			else new DelimitByCharacterFilter(result, '\'')
-				
+		
+		def standard(delegate: TokenFilter) = new StandardFilter(LuceneVersion, delegate)
+		
 		result = new StandardFilter(LuceneVersion, result)
 		result = new LowerCaseFilter(LuceneVersion, result)
 		result = new StopFilter(LuceneVersion, result, StopWords)

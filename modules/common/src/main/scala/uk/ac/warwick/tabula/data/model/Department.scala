@@ -69,4 +69,6 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 
 	override def toString = "Department(" + code + ")"
 
+	@BeanProperty var showStudentName:JBoolean = false
+	
 }
