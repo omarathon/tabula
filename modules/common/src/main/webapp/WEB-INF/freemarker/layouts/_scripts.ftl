@@ -9,8 +9,13 @@
 	<@script "/static/libs/popup/popup.js" />
 	<@script "/static/libs/bootstrap/js/bootstrap.js" />
 	<@script "/static/libs/bootstrap-editable/js/bootstrap-editable.js" />
+	<@script "/static/libs/spin-js/spin.min.js" />
+	<@script "/static/libs/spin-js/jquery.spin.js" />
 	<@script "/static/js/modernizr.js" />
 	<@script "/static/js/browser-info.js" />
 <#else>
 	<@script "/static/js/render.js" />
+	
+	<#-- TODO work out why this won't go in concat -->
+	<@script "/static/libs/jquery-caret/jquery.caret.1.02.min.js" />
 </#if>
