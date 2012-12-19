@@ -23,7 +23,6 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
 			doGroups
 			doGroupMembers
-			doMemberDetails
 		}
 	}
 
@@ -76,33 +75,6 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 				logger.info("Processed all " + count + " group members")
 			}
 		}
-	}
-
-	/** Import basic info about all members in ADS, batched 1000 at a time */
-	def doMemberDetails {
-		transactional() {
-			benchmark("Import all member details") {
-				var list = List[UpstreamMember]()
-				assignmentImporter.allMemberDetails { member =>
-					list = list :+ member
-					if (list.size >= 1000) {
-						saveMemberDetails(list)
-						list = Nil
-					}
-				}
-				if (!list.isEmpty) {
-					saveMemberDetails(list)
-				}
-			}
-		}
-	}
-
-	def saveMemberDetails(seq: Seq[UpstreamMember]) {
-		seq foreach { member =>
-			session.saveOrUpdate(member)
-		}
-		session.flush
-		seq foreach session.evict
 	}
 
 	/**

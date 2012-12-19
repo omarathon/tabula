@@ -57,7 +57,7 @@ class Submission extends GeneratedId with Deleteable {
 	 */
 	@NotNull
 	@BeanProperty var universityId: String = _
-
+	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.SubmissionStateUserType")
 	@BeanProperty var state : SubmissionState = _
 
@@ -78,8 +78,14 @@ class Submission extends GeneratedId with Deleteable {
 
 	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 
-/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
-	def zipFileName(attachment: FileAttachment) = assignment.module.code + " - " + universityId + " - " + attachment.name
+	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
+	def zipFileName(attachment: FileAttachment) = {
+		assignment.module.code + " - " + universityId + " - " + attachment.name
+	}
+	
+	def zipFilename(attachment: FileAttachment, name: String) = { 
+		assignment.module.code + " - " + name + " - " + attachment.name
+	}
 
 	def isReleasedForMarking: Boolean = state == ReleasedForMarking
 }

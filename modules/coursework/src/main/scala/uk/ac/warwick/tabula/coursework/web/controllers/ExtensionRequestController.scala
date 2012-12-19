@@ -73,13 +73,7 @@ class ExtensionRequestController extends CourseworkController{
 
 	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
 		val assignment = extension.assignment
-		val moduleManagers = assignment.module.participants.includeUsers
-		val departmentManagers = assignment.module.department.owners.includeUsers
-
-		val recipients = {
-			if (moduleManagers.isEmpty) departmentManagers
-			else moduleManagers
-		}
+		val recipients = assignment.module.department.extensionManagers.includeUsers
 
 		if (modified){
 			recipients.foreach(new ModifiedExtensionRequestMessage(extension, _).apply())

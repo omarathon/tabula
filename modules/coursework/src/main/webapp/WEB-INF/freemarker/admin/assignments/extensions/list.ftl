@@ -52,11 +52,11 @@
 							</#if>
 						</td>
 						<td class="expiryDate"></td>
-						<td>
+						<td><#if isExtensionManager>
 							<a class="new-extension btn btn-mini btn-primary" href="<@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Review request
 							</a>
-						</td>
+						</#if></td>
 					</tr>
 				</#list>
 			</#if>

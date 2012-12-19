@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
 
-import org.springframework.beans.factory.annotation.{Value, Autowired, Configurable}
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import freemarker.template.Configuration
-import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.joda.time.format.DateTimeFormat
 import org.springframework.mail.SimpleMailMessage
@@ -36,7 +34,6 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	// email constants
 	var replyAddress: String = Wire.property("${mail.noreply.to}")
 	var fromAddress: String = Wire.property("${mail.exceptions.to}")
-	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
@@ -61,7 +58,7 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	}
 	
 	// text to put at the start of all email subjects.
-	protected def getSubjectPrefix() = module.code.toUpperCase() + ": "
+	protected def getSubjectPrefix = module.code.toUpperCase + ": "
 
 	// generates a message with common attributes pre-defined
 	def generateBaseMessage():SimpleMailMessage = {

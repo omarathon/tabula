@@ -21,7 +21,6 @@ import collection.JavaConversions._
 import freemarker.cache.ClassTemplateLoader
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.tabula.data.model._
-
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 import freemarker.cache.MultiTemplateLoader
@@ -32,6 +31,8 @@ import java.io.StringWriter
 import java.io.StringReader
 import org.aspectj.lang.{NoAspectBoundException, Aspects}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.util.web.Uri
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -147,7 +148,9 @@ trait TestHelpers {
 		}
 		
 	/** Sets up a pretend requestinfo context with the given pretend user
-	  * around the callback.
+	  * around the callback. 
+	  * 
+	  * Can pass null as the usercode to make an anonymous user.
 	  *
 	  * withUser("cusebr") { /* ... your code */  }
 	  */
@@ -155,12 +158,18 @@ trait TestHelpers {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
-				val user = new User(code)
-				user.setIsLoggedIn(true)
-				user.setFoundUser(true)
-				user.setWarwickId(universityId)
+				val user = if (code == null) {
+					new AnonymousUser()
+				} else {
+					val u = new User(code)
+					u.setIsLoggedIn(true)
+					u.setFoundUser(true)
+					u.setWarwickId(universityId)
+					u
+				}
+				
 				currentUser = new CurrentUser(user, user)
-				new RequestInfo(currentUser, null)
+				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"))
 			}
 		}
 

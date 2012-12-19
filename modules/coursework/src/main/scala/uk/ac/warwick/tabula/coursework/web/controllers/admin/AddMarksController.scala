@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddMarksCommand
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -39,7 +37,7 @@ class AddMarksController extends CourseworkController {
 		val members = assignmentService.determineMembershipUsers(assignment)
 
 		var marksToDisplay = members.map { member => 
-			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId())
+			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
 			noteMarkItem(member, feedback)
 		}
 
@@ -52,11 +50,11 @@ class AddMarksController extends CourseworkController {
 		logger.debug("in noteMarkItem (logger.debug)")
 
 		val markItem = new MarkItem()
-		markItem.universityId = member.getWarwickId()
+		markItem.universityId = member.getWarwickId
 
 		feedback match {
 			case Some(f) => {
-				markItem.actualMark = f.actualMark.map { _.toString() }.getOrElse("")
+				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
 				markItem.actualGrade = f.actualGrade
 			}
 			case None => {
@@ -77,10 +75,11 @@ class AddMarksController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def doUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
 		bindAndValidate(module, cmd, errors)
+		cmd.apply()
 		Redirect(Routes.admin.module(module))
 	}
 
-	private def bindAndValidate(module: uk.ac.warwick.tabula.data.model.Module, cmd: uk.ac.warwick.tabula.coursework.commands.assignments.AddMarksCommand, errors: org.springframework.validation.Errors): Unit = {
+	private def bindAndValidate(module: Module, cmd: AddMarksCommand, errors: Errors) {
 		mustBeLinked(cmd.assignment, module)
 		mustBeAbleTo(Participate(module))
 		cmd.onBind

@@ -1,5 +1,5 @@
 <#macro admin_href submission>
-	<@url page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/submissionsandfeedback/list' />
+	<@url page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/list' />
 </#macro>
 
 <#if expired??>

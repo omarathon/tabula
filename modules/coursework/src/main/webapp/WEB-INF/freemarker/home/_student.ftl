@@ -37,7 +37,7 @@
 						</#macro>
 						
 						<#list enrolledAssignments as info>
-							<li class="assignment-info">
+							<li class="simple-assignment-info">
 								<#if !info.isExtended!false && info.closed>
 									<span class="pull-right label label-important">Late</span>
 								<#elseif info.isExtended!false>
@@ -50,13 +50,12 @@
 
 					<#if has_feedback>
 						<#list assignmentsWithFeedback as assignment>
-							<li class="assignment-info">
+							<li class="simple-assignment-info">
 								<span class="pull-right label label-success">Marked</span>
 								<@fmt.assignment_link assignment />
 							</li>
 						</#list>
 					</#if>
-
 				</ul>	
 			
 				<div class="alert alert-block">
@@ -78,7 +77,7 @@
 				<#if has_submissions>
 					<ul class="links" id="submitted-assignments-list">
 						<#list assignmentsWithSubmission as assignment>
-							<li class="assignment-info">
+							<li class="simple-assignment-info">
 								<span class="pull-right label">Submitted</span>
 								<@fmt.assignment_link assignment />
 							</li>
@@ -90,7 +89,7 @@
 					<div id="archived-assignments-container">
 						<ul class="links" id="archived-assignments-list">
 							<#list archivedAssignments as assignment>
-								<li class="assignment-info">
+								<li class="simple-assignment-info">
 									<span class="pull-right label">Archived</span>
 									<@fmt.assignment_link assignment />
 								</li>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" version="2.4">
+
+  <!-- Listener to load up Spring -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener> 
+  <context-param>
+	<param-name>contextInitializerClasses</param-name>
+	<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer</param-value>
+  </context-param>
+   
+  <!-- Servlet will latch on to the context loaded above, and serve requests -->
+  <servlet>
+    <servlet-name>spring</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<init-param>
+	  <param-name>contextConfigLocation</param-name>
+	  <param-value>/WEB-INF/*-context.xml</param-value>
+	</init-param> 
+	<init-param>
+	  <param-name>contextInitializerClasses</param-name>
+	  <param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer</param-value>
+	</init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+  
+  
+  <filter>
+  	<filter-name>filters</filter-name>
+  	<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  	<init-param>
+        <param-name>targetFilterLifecycle</param-name>
+        <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+  	<filter-name>filters</filter-name>
+  	<servlet-name>spring</servlet-name>
+  	<dispatcher>REQUEST</dispatcher>
+    <dispatcher>ERROR</dispatcher>
+  </filter-mapping>
+   
+  
+  <!-- To make Freemarker templates available to Tiles -->  
+  <servlet>
+    <servlet-name>freemarkerServlet</servlet-name>
+    <servlet-class>uk.ac.warwick.tabula.web.views.CustomFreemarkerServlet</servlet-class>
+    <init-param><param-name>TemplatePath</param-name><param-value>/</param-value></init-param>
+    <init-param><param-name>ContentType</param-name><param-value>text/html</param-value></init-param>
+    <init-param><param-name>default_encoding</param-name><param-value>UTF-8</param-value></init-param>
+    <init-param><param-name>output_encoding</param-name><param-value>UTF-8</param-value></init-param>
+    <load-on-startup>5</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>freemarkerServlet</servlet-name>
+  	<url-pattern>*.ftl</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Help JSP taglibs to work properly within Freemarker http://freemarker.sourceforge.net/docs/pgui_misc_servlet.html -->
+  <listener>
+    <listener-class>freemarker.ext.jsp.EventForwarding</listener-class>
+  </listener>  
+  
+  <!-- SSO -->
+  <servlet>
+    <servlet-name>ShireServlet</servlet-name>
+    <servlet-class>uk.ac.warwick.sso.client.ShireServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>uk.ac.warwick.sso.client.LogoutServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>ShireServlet</servlet-name>
+  	<url-pattern>/sso/acs</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LogoutServlet</servlet-name>
+  	<url-pattern>/sso/logout</url-pattern>
+  </servlet-mapping>
+  
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error/404</location>
+  </error-page>
+  
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error</location>
+  </error-page>
+  
+  <error-page> 
+    <exception-type>java.lang.Throwable</exception-type> 
+    <location>/error</location> 
+  </error-page>
+
+</web-app>

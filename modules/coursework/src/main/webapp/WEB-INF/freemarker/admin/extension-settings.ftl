@@ -13,7 +13,7 @@
 			<@f.errors path="allowExtensionRequests" cssClass="error" />
 			<div class="help-block">
 				Students will be able to request extensions for this assignment via the submission page. If you select
-				this option you will need to provide a link to your departments extension guidelines and/or provide a
+				this option you will need to provide a link to your department's extension guidelines and/or provide a
 				summary of those guidelines.
 			</div>
 		</@form.field>
@@ -24,7 +24,7 @@
 			<@form.field>
 				<@f.textarea path="extensionGuidelineSummary" class="big-textarea" />
 				<div class="help-block">
-					This should be a short outline of the departments extension guidelines. Use the field below to provide
+					This should be a short outline of the department's extension guidelines. Use the field below to provide
 					a link to the full guidelines. You can leave this blank if you wish. You can make a new paragraph by
 					leaving a blank line (i.e. press Enter twice).
 				</div>

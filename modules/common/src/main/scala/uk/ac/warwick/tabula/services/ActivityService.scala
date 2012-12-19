@@ -21,6 +21,8 @@ import org.apache.lucene.search.FieldDoc
 @Service
 class ActivityService {
 	
+	private val StreamSize = 8
+	
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditIndexService = Wire.auto[AuditEventIndexService]
@@ -32,16 +34,18 @@ class ActivityService {
 		def getTokens: String = doc.doc + "/" + doc.fields(0) + "/" + token
 	}
 
-	def getNoteworthySubmissions(user: CurrentUser, doc: Int, field: Long, token: Long): PagedActivities = {
-		// slightly ugly implicit cast required, as we need a FieldDoc whose constructor expects a java Object[]
-		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:java.lang.Long))
-		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), 4)
+	// first page
+	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
+		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, StreamSize)
 		
 		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last.get, events.token, events.total)
 	}
 	
-	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
-		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, 4)
+	// following pages
+	def getNoteworthySubmissions(user: CurrentUser, doc: Int, field: Long, token: Long): PagedActivities = {
+		// slightly ugly implicit cast required, as we need a FieldDoc whose constructor expects a java Object[]
+		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:java.lang.Long))
+		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
 		
 		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last.get, events.token, events.total)
 	}

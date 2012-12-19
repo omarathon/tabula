@@ -7,10 +7,6 @@
  * Code licensed under the BSD License:
  * http://developer.yahoo.com/yui/license.html
  */
-html {
-  color: #000;
-  background: #FFF;
-}
 body,
 div,
 dl,
@@ -2097,13 +2093,7 @@ a:link {
 a:visited {
   color: #123e5a;
 }
-#main-content a:visited {
-  color: #5a123d;
-}
 a:hover,
-#main-content a:hover {
-  color: #3588bc;
-}
 a img {
   border: none;
 }

@@ -10,6 +10,10 @@
 	<@fmt.date end /> (${closeTZ})
 </#macro>
 
+<#function module_anchor module>
+	<#return "module-${module.code}" />
+</#function>
+
 
 <#if department??>
 
@@ -19,8 +23,8 @@
 		${department.name}
 	</h1>
 	<div class="btn-group dept-settings">
-		<a class="btn btn-primary btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-			<i class="icon-white icon-wrench"></i>
+		<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-wrench"></i>
 			Department settings
 			<span class="caret"></span>
 		</a>
@@ -40,76 +44,85 @@
 	<h1>${department.name}</h1>
 </#if>
 
+<#if notices.unpublishedAssignments?has_content>
+<div class="alert alert-error">
+	Some assigments have feedback that hasn't been published to students yet.
+	<#list notices.unpublishedAssignments as a>
+		<div>
+			<a href="#${module_anchor(a.module)}">${a.name}</a>
+		</div>
+	</#list>
+</div>
+</#if>
+
 <#list modules as module>
 <#assign can_manage=can.manage(module) />
 <#assign has_assignments=(module.assignments!?size gt 0) />
 <#assign has_archived_assignments=false />
-<a id="module-${module.code}"></a>
-<div class="module-info<#if !has_assignments> empty</#if>">
-<h2><@fmt.module_name module /> </h2>
-	<div class="module-info-contents">
-	
-	<div>
-		
-		<#assign  module_managers = ((module.participants.includeUsers)![]) />
-		<@fmt.p module_managers?size "module manager"/><#if module_managers?size gt 0>:
-			<@fmt.user_list_csv ids=module_managers />
-		</#if>
-		<#if can_manage >	
-		
-		<a class="btn btn-mini" title="Edit module permissions" href="<@url page="/admin/module/${module.code}/permissions" />">
-		Edit
-		</a>
-		
-		</#if>
-	</div>
-	
-	<#if !has_assignments >
-		<p>This module has no assignments. 
-		<span class="btn-group">
-		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
-		</span>
-		</p>
-	<#else>
-		<#list module.assignments as assignment>
+<#list module.assignments as assignment>
 		<#if assignment.archived>
 			<#assign has_archived_assignments=true />
 		</#if>
+</#list>
+<a id="${module_anchor(module)}"></a>
+<div class="module-info<#if !has_assignments> empty</#if>">
+	<div class="clearfix">
+		<h2 class="module-title"><@fmt.module_name module /></h2>
+		<div class="btn-group module-manage-button">
+		  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+		  <ul class="dropdown-menu">
+		  	<#if can_manage >	
+					<#assign  module_managers_count = ((module.participants.includeUsers)![])?size />
+					<li><a href="<@url page="/admin/module/${module.code}/permissions" />">
+						Edit module managers <span class="badge">${module_managers_count}</span>
+					</a></li>
+				</#if>
+				
+				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> Add assignment</a></li>
+				
+				<#if has_archived_assignments>
+					<li><a class="show-archived-assignments" href="#">Show archived assignments</a></li>
+				</#if>
+		  </ul>
+		</div>
+	</div>
+	
+	
+	<#if has_assignments>
+	<div class="module-info-contents">
+		<#list module.assignments as assignment>
 		<#if !assignment.deleted>
 		<#assign has_feedback = assignment.feedbacks?size gt 0 >
 		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
 			<h3 class="name">
-				${assignment.name}
-				<#if assignment.archived>
-		            (Archived)
-		        </#if>
+				<small>
+					${assignment.name}
+					<#if assignment.archived>
+						(Archived)
+					</#if>
+				</small>
 			</h3>
-			<h4>${assignment.academicYear.label}</h4>
-
-			<div>
-			<#if assignment.closed>
-				<span class="label label-warning">Closed</span>
-			</#if>
-			<#if assignment.upstreamAssignment??>
-			  <#assign _upstream=assignment.upstreamAssignment />
-			  <span class="label label-info">SITS : ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
-			</#if>
-			</div>
 
 			</div>
 			<div class="stats">
 				<#if assignment.openEnded>
-					<div class="open-date">
-						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />, never closes
-						<span class="label-like">(open-ended)<span class="label-like">
+					<div class="dates">
+						<@fmt.interval assignment.openDate />, never closes
+						(open-ended)
+						<#if !assignment.opened>
+							<span class="label label-warning">Not yet open</span>
+						</#if>
 					</div>
 				<#else>
-					<div class="open-date">
-						<span class="label-like"><@fmt.tense assignment.openDate "Opens" "Opened" /></span> <@fmt.date assignment.openDate />
-					</div>
-					<div class="close-date">
-						<span class="label-like"><@fmt.tense assignment.closeDate "Closes" "Closed" /></span> <@fmt.date assignment.closeDate />
+					<div class="dates">
+						<@fmt.interval assignment.openDate assignment.closeDate />
+						<#if assignment.closed>
+							<span class="label label-warning">Closed</span>
+						</#if>
+						<#if !assignment.opened>
+							<span class="label label-warning">Not yet open</span>
+						</#if>
 					</div>
 				</#if>
 				<#if features.submissions && assignment.collectSubmissions && !features.combinedForm>
@@ -171,50 +184,47 @@
 			<div class="assignment-buttons">
 				<div class="btn-toolbar">
 				<div class="btn-group">
-		          <a class="btn dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
-		          <ul class="dropdown-menu pull-right">
-		            <li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
-		            <li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">
-		            	<#if assignment.archived>
-		            		Unarchive
-		            	<#else>
-		            		Archive
-		            	</#if>
-		            </a></li>
-		          </ul>
-		        </div>
-		        </div>
-			
-				<a class="btn btn-block feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
-				<#if assignment.collectMarks >
-					<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a>
-				</#if>
-				<#if has_feedback>
-					<#-- contained in the combined submissions and feedback list now 
-					<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
-					-->
-					<#if assignment.canPublishFeedback>
-						<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a>
+				  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+				  <ul class="dropdown-menu pull-right">
+					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
+					<li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">
+						<#if assignment.archived>
+							Unarchive
+						<#else>
+							Archive
+						</#if>
+					</a></li>
+					
+					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
+					
+					<#if assignment.collectMarks >
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a></li>
 					</#if>
-				</#if>
-				<#if assignment.allowExtensions >
-					<a class="btn btn-block" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">List extensions <i class="icon-calendar"></i></a>
-				</#if>
+					
+					<#if has_feedback>
+						<#-- contained in the combined submissions and feedback list now 
+						<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
+						-->
+						<#if assignment.canPublishFeedback>
+							<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a></li>
+						</#if>
+					</#if>
+					<#if assignment.allowExtensions >
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">List extensions <i class="icon-calendar"></i></a></li>
+					</#if>
+					
+				  </ul>
+				</div>
+				</div>
+		
 			</div>
 			<div class="end-assignment-info"></div>
 		</div>
 		</#if>
 		</#list>
 		
-		<div>
-		<a class="btn" href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> New assignment</a>
-		<#if has_archived_assignments>
-			<a class="btn show-archived-assignments" href="#">Show archived assignments</a>
-		</#if>
-		</div>
-	</#if>
-	
 	</div>
+	</#if>
 	
 </div>
 </#list>

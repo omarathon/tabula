@@ -24,6 +24,11 @@
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
 
+<#macro interval start end=""><#--
+--><#if end?has_content>${intervalFormatter(start, end)}<#--
+--><#else>${intervalFormatter(start)}</#if><#--
+--></#macro>
+
 <#macro tense date future past><#if date.afterNow>${future}<#else>${past}</#if></#macro>
 
 <#macro usergroup_summary ug>
@@ -57,4 +62,16 @@
 	</#list>
 	</@userlookup>
 </#macro>
+
+<#macro profile_name profile>${profile.fullName}</#macro>
+<#macro profile_description profile><span class="profile-description">${profile.description!""}</span></#macro>
+
+<#macro nationality nationality><#--
+--><#if nationality = 'British (ex. Channel Islands & Isle of Man)' || nationality = 'British [NO LONGER IN USE: change to 2826]' || nationality = 'NAT code 000 should be used for British'><#--
+	--><span rel="tooltip" data-placement="right" title="${nationality}">British</span><#--
+--><#elseif nationality?starts_with('(Obsolete) Formerly ')><#--
+	--><span rel="tooltip" data-placement="right" title="${nationality}">${nationality?substring(20)}</span><#--
+--><#else><#--
+	-->${nationality}<#--
+--></#if></#macro>
 </#compress>

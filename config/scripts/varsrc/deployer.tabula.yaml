@@ -21,12 +21,26 @@ war_names:
 - courses
 - home
 - profiles
+- scheduling
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
+  goal: "clean install"
+scheduler_jboss: !ruby/object:Jboss 
+  deployment_state: old
+  name: tabula-scheduler
+  port: "8280"
+  state: running
+  mode: smf
+  stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+  war_names:
+  - scheduling
+  test_path: /scheduling/test/up
+  requests: 
+     /scheduling/test/up: 200
 jbosses: 
   tabula:
   - !ruby/object:Jboss 
@@ -37,6 +51,8 @@ jbosses:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    excluded_war_names:
+    - scheduling
     test_path: /home/test/up
     requests: 
        /home/test/up: 200
@@ -50,6 +66,8 @@ jbosses:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    excluded_war_names:
+    - scheduling
     test_path: /home/test/up
     requests: 
        /home/test/up: 200

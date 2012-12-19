@@ -14,11 +14,14 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Ordered
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.core.ExceptionUtils
 import uk.ac.warwick.tabula.system.exceptions._
 import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -27,11 +30,14 @@ import uk.ac.warwick.tabula.ItemNotFoundException
  * ErrorController which delegates to ExceptionResolver.doResolve(e), so all errors
  * should come here eventually.
  */
-class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered {
+class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered with ControllerViews {
 
 	@Required @BeanProperty var defaultView: String = _
 
 	@Autowired var exceptionHandler: ExceptionHandler = _
+	
+	@Autowired var userInterceptor: CurrentUserInterceptor = _
+	@Autowired var infoInterceptor: RequestInfoInterceptor = _
 
 	/**
 	 * If the interesting exception matches one of these exceptions then
@@ -40,12 +46,17 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
 	@Required @BeanProperty var viewMappings: JMap[String, String] = Map[String, String]()
-
-	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
+	
+	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {	
+		val interceptors = List(userInterceptor, infoInterceptor)
+		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
+		
 		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
 	}
 
-	private def ajax = RequestInfo.fromThread.map { _.ajax }.getOrElse(false)
+	override def requestInfo = RequestInfo.fromThread
+
+	private def ajax = requestInfo.map { _.ajax }.getOrElse(false)
 
 	/**
 	 * Resolve an exception outside of a request. Doesn't return a model/view.
@@ -57,9 +68,12 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * happens beyond Spring's grasp.
 	 */
 	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None): Mav = {
+		def loggedIn = requestInfo.map { _.user.loggedIn }.getOrElse(false)
+
 		e match {
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request)
+			case permDenied: PermissionDeniedException if !loggedIn => RedirectToSignin()
 			case exception: Throwable => handle(exception, request)
 			case _ => handleNull
 		}
@@ -75,13 +89,15 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		catch { case throwable => handle(throwable, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
+		val token = ExceptionTokens.newToken
+		
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
 		val mav = Mav(defaultView,
 			"originalException" -> exception,
-			"exception" -> interestingException)
-
-		val token = ExceptionTokens.newToken
+			"exception" -> interestingException,
+			"token" -> token,
+			"stackTrace" -> ExceptionHandler.renderStackTrace(interestingException))
 
 		// handler will do logging, emailing
 		try {

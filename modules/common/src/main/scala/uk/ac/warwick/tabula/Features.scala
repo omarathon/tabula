@@ -5,6 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.beans.BeanWrapperImpl
 import scala.reflect.BeanProperty
 import java.lang.Boolean
+import org.springframework.beans.factory.annotation.Value
 
 
 /**
@@ -25,38 +26,23 @@ import java.lang.Boolean
  * }}}
  */
 abstract class Features {
-	@BeanProperty var emailStudents: Boolean = false
-	@BeanProperty var collectRatings: Boolean = true
-	@BeanProperty var submissions: Boolean = true
-	@BeanProperty var privacyStatement: Boolean = true
-	@BeanProperty var collectMarks: Boolean = true
-	@BeanProperty var turnitin: Boolean = true
-	@BeanProperty var assignmentMembership: Boolean = true
-	@BeanProperty var extensions: Boolean = true
-	@BeanProperty var combinedForm: Boolean = true	
-	@BeanProperty var feedbackTemplates: Boolean = true
-	@BeanProperty var markSchemes: Boolean = false
+	// FIXME currently requires default to be set twice: in annotation for Spring, and at the end for non-Spring tests
+	@Value("${features.emailStudents:false}") @BeanProperty var emailStudents: Boolean = false
+	@Value("${features.collectRatings:true}") @BeanProperty var collectRatings: Boolean = true
+	@Value("${features.submissions:true}") @BeanProperty var submissions: Boolean = true
+	@Value("${features.privacyStatement:true}") @BeanProperty var privacyStatement: Boolean = true
+	@Value("${features.collectMarks:true}") @BeanProperty var collectMarks: Boolean = true
+	@Value("${features.turnitin:true}") @BeanProperty var turnitin: Boolean = true
+	@Value("${features.assignmentMembership:true}") @BeanProperty var assignmentMembership: Boolean = true
+	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = true
+	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = true
+	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = true
+	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = true
+	@Value("${features.profiles:false}") @BeanProperty var profiles: Boolean = false
 }
 
-class FeaturesImpl(properties: Properties) extends Features {
-	// begin black magic that converts features.* properties into values
-	// to inject into this instance.
-
-	private val featuresPrefix = "features."
-
-	private val bean = new BeanWrapperImpl(this)
-	private def featureKeys = properties.keysIterator.filter(_ startsWith featuresPrefix)
-	def capitalise(string: String) = string.head.toUpper + string.tail
-	def removePrefix(string: String) = string.substring(featuresPrefix.length)
-	def camelise(string: String) = removePrefix(string).split("\\.").toList match {
-		case Nil => ""
-		case head :: tail => head + tail.map(capitalise).mkString("")
-	}
-
-	for (key <- featureKeys) bean.setPropertyValue(camelise(key), properties.getProperty(key))
-}
+class FeaturesImpl extends Features
 
 object Features {
-	def empty = new FeaturesImpl(new Properties)
-	def fromProperties(p: Properties) = new FeaturesImpl(p)
+	def empty = new FeaturesImpl
 }

@@ -89,8 +89,8 @@ body { background: none; }
 }
 
 // Link colours
-a:link, a:visited, #main-content a:not(.btn):visited {color: @link-colour;}
-a:hover, #main-content a:not(.btn):hover {color: @link-hover;}
+a:link, a:visited {color: @link-colour;}
+a:hover {color: @link-hover;}
 
 // Search tab
 #search-container ul.index-section li.active {
@@ -179,3 +179,11 @@ a:hover, #main-content a:not(.btn):hover {color: @link-hover;}
 
 // Remove the 1px bottom padding
 #container { padding-bottom: 0; }
+
+// Turn off some smallscreen ID6 stuff that isn't really needed here
+.is-smallscreen {
+	// Our breadcrumbs are better than the automatic ones, and we don't need the dropdown nav
+	#navigation.horizontal { display: block; }
+	.alternate-breadcrumbs, #alternate-navigation, .smallscreen-anchor-links { display: none; }
+	
+}

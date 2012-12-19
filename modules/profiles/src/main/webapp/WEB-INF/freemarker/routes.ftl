@@ -7,4 +7,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 --><#compress>
 <#macro home><@url page="/" /></#macro>
+<#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
+<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg"/></#macro>
 </#compress>

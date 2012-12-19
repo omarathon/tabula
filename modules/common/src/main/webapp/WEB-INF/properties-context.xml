@@ -20,12 +20,14 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 		
-	<import resource="property-locations-context.xml" />
+	<context:property-placeholder location="
+		classpath:/default.properties,
+		classpath:/messages.properties,
+		classpath:/tabula.properties,
+		/WEB-INF/build.properties,
+		classpath:/messages.properties
+	" />
 
-	<bean id="properties" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-		<property name="locations" ref="propertyLocations" />
-	</bean>
-	
-	<import resource="features-context.xml" />
+	<bean id="features" class="uk.ac.warwick.tabula.FeaturesImpl" />
 
 </beans>

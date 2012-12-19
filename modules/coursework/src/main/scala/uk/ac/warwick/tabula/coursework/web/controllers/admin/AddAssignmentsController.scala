@@ -51,6 +51,7 @@ class AddAssignmentsController extends CourseworkController {
 	def refreshSelectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		cmd.afterBind()
 		checkPermissions(cmd)
+//		cmd.populateWithMissingItems()
 		getMav(cmd).addObjects("action" -> "select")
 	}
 

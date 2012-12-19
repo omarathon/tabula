@@ -30,9 +30,12 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-
-
-
+import org.springframework.beans.factory.annotation.Autowired
+import javax.annotation.Resource
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.spring.Wire
+import scala.Some
+import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -202,7 +205,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 */
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
-
+		
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
@@ -225,11 +228,16 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			assignmentService.getAssessmentGroup(template)
 		}
 	}
+	
+	/**
+	 * Whether the assignment is not archived or deleted.
+	 */
+	def isAlive = active && !deleted && !archived
 
 	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
-	def submittable(uniId: String) = active && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(uniId))
+	def submittable(uniId: String) = isAlive && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(uniId))
 
 	/**
 	 * Calculates whether we could re-submit to this assignment (assuming that the current
@@ -288,8 +296,10 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 */
 	def unreleasedFeedback = feedbacks.filterNot(_.released == true) // ==true because can be null
 
-	def anyReleasedFeedback = feedbacks.find(_.released == true).isDefined
+	def anyReleasedFeedback = feedbacks.exists(_.released == true)
 
+	def anyUnreleasedFeedback = feedbacks.exists(_.released != true) // should catch false and null
+	
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: Feedback) {

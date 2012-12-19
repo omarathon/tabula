@@ -113,6 +113,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkSchemeIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -129,6 +130,8 @@
 	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
 	<bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor" />
 	
+	<bean id="requestInfoInterceptor" class="uk.ac.warwick.tabula.system.RequestInfoInterceptor" />
+	
 	<mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
@@ -136,7 +139,7 @@
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
-			<bean class="uk.ac.warwick.tabula.system.RequestInfoInterceptor" />
+			<ref bean="requestInfoInterceptor" />
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
@@ -206,15 +209,15 @@
 		</constructor-arg>
 	</bean>
 	
-	<filter-stack id="commonFilters" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
-		<mapping>
+	<filter-stack id="commonFilters" abstract="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
+		<mapping name="all">
 			<filter ref="characterEncodingFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
-		<mapping>
+		<mapping name="sso">
 			<filter ref="ssoClientFilter" />
 			<filter ref="oAuthFilter" />
 			<url-pattern>/*</url-pattern>
@@ -223,13 +226,15 @@
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/up</excluded-url-pattern>
 		</mapping>
-		<mapping>
+		<mapping name="forceSysadmin">
 			<filter ref="forceLoginFilter" />
 			<filter ref="sysadminGroupFilter" />
 			<url-pattern>/sysadmin/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
+	
+	<import resource="filters-context.xml" />
 	
 	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
 		p:detectAnonymousOnCampusUsers="true"
@@ -248,11 +253,7 @@
 	</bean>
 	
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
-		<constructor-arg>
-			<bean id="u" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
-				p:ssosUrl="${ssoclient.ssos.url}"
-				p:groupServiceLocation="${ssoclient.webgroups.url}" />
-		</constructor-arg>
+		<constructor-arg ref="userLookupDelegate" />
 	</bean>
 	
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
@@ -261,10 +262,11 @@
 	
 	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
 	
+	<bean id="urlMethodModel" class="uk.ac.warwick.tabula.web.views.UrlMethodModel" />
 	<bean id="defaultFreemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration" abstract="true">
 		<property name="sharedVariables">
 			<map>
-				<entry key="url"><bean class="uk.ac.warwick.tabula.web.views.UrlMethodModel" /></entry>
+				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />				
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
@@ -276,6 +278,7 @@
 					</bean>
 				</entry>
 				<entry key="dateBuilder"><bean class="uk.ac.warwick.tabula.helpers.DateBuilder" /></entry>
+				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
 			</map>
 		</property>
@@ -300,6 +303,15 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
+	<beans profile="test">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
+	</beans>
+	
+	<beans profile="dev,production">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
+				p:ssosUrl="${ssoclient.ssos.url}"
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+	</beans>
 	
 	<beans profile="scheduling">
 		<!-- @Scheduled -->

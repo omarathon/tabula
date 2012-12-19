@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.{Autowired,Value}
 import uk.ac.warwick.util.core.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
+import forms.Extension
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.actions._
@@ -60,6 +61,10 @@ class SecurityService extends Logging {
 		// Manage module = can modify its permissions.
 		case Manage(module: Module) => can(user, Manage(module.department))
 
+		// should only be called on extension requests i.e. extension.isManual == false
+		case Manage(extensionRequest: Extension) =>
+			extensionRequest.assignment.module.department.isExtensionManager(user.apparentId)
+
 		// View module = see what assignments are in a module
 		case View(module: Module) => can(user, View(module.department))
 
@@ -78,6 +83,11 @@ class SecurityService extends Logging {
 			can(user, Participate(assignment.module))
 
 		case Masquerade() => user.sysadmin || user.masquerader
+		
+		case View(member: Member) => 
+		  user.sysadmin || 
+		  (member.homeDepartment != null && can(user, View(member.homeDepartment))) || 
+		  (member.studyDepartment != null && can(user, View(member.studyDepartment)))
 
 		case action: Action[_] => throw new IllegalArgumentException(action.toString)
 		case _ => throw new IllegalArgumentException()

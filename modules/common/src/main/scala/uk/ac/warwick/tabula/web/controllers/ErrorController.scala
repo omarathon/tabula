@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers
-import org.apache.log4j.Logger
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.servlet.ModelAndView
+
 import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 class ErrorController extends BaseController {

@@ -12,16 +12,14 @@ var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
 	        	$slidingDiv.stop().slideDown('fast');
 	        else
 	        	$slidingDiv.stop().slideUp('fast');
-	    });
-	    $slidingDiv.toggle($checkbox.is(':checked'));
+	    }).trigger('change');
 	} else {
 	    $checkbox.change(function(){
 	        if ($checkbox.is(':checked'))
 	        	$slidingDiv.stop().slideUp('fast');
 	        else
 	        	$slidingDiv.stop().slideDown('fast');
-	    });
-	    $slidingDiv.toggle(! $checkbox.is(':checked'));
+	    }).trigger('change');
 	}
 };
 
@@ -37,26 +35,22 @@ $(function(){
     
     // hide stuff that makes no sense when open-ended
     slideMoreOptions($('input#openEnded'), $('.has-close-date'), false);
+    slideMoreOptions($('input#modal-open-ended'), $('.has-close-date'), false);
 
     // check that the extension UI elements are present
     if($('input#allowExtensionRequests').length > 0){
         slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'), true);
     }
     
-    
-    $('.assignment-info .assignment-buttons').css('opacity',0);
-    $('.assignment-info').hover(function() {
-        $(this).find('.assignment-buttons').stop().fadeTo('fast', 1);
-    }, function() {
-        $(this).find('.assignment-buttons').stop().fadeTo('fast', 0);
+    // Zebra striping on lists of modules/assignments
+    $('.module-info').each(function(i, module) { 
+        $(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
     });
     
     $('.module-info.empty').css('opacity',0.66)
         .find('.module-info-contents').hide().end()
-        .find('h2').prepend($('<small>Click to expand</small>')).end()
         .click(function(){
             $(this).css('opacity',1)
-                .find('h2 small').remove().end()
                 .find('.module-info-contents').show().end();
         })
         .hide()

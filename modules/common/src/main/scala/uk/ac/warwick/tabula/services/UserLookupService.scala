@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.OnCampusService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.UpstreamMember
+import uk.ac.warwick.tabula.data.model.Member
 import scala.reflect.BeanProperty
 import scala.annotation.target.field
 import uk.ac.warwick.userlookup.UserLookupAdapter
@@ -28,7 +28,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	 * When looking up a user by University ID, check our internal database first.
 	 */
 	override def getUserByWarwickUniId(id: String, ignored: Boolean) = {
-		getById[UpstreamMember](id) map { member =>
+		getById[Member](id) map { member =>
 			member.asSsoUser
 		} getOrElse {
 			super.getUserByWarwickUniId(id, ignored)

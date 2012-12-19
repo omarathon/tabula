@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.admin
+package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller

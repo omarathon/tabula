@@ -7,7 +7,7 @@
 		<#if has_requested_access>
 			<div class="alert alert-success">
 				<a class="close" data-dismiss="alert">&times;</a>
-				Thanks, we've sent a message to whoever is in charge of the module with all the necessary
+				Thanks, we've sent a message to a department administrator with all the necessary
 				details.
 			</div>
 		</#if>
@@ -17,14 +17,16 @@
 		<p>
 			This assignment is set up only to allow students who are enrolled on the relevant module.
 			If you are reading this and you believe you should have access to this assignment,
-			click the button below to send an automated message to the module convenor.
+			click the button below to send an automated message to an administrator for the department.
 		</p>
 
+		<#assign button_text>Request access for <strong>${user.fullName}</strong> (you)</#assign>
+
 		<#if has_requested_access>
-			<a href="#" class="btn disabled">Request access</a>
+			<a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
 		<#else>
 			<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
-				<button class=btn>Request access</button>
+				<button class=btn><#noescape>${button_text}</#noescape></button>
 			</form>
 		</#if>
 

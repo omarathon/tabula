@@ -32,7 +32,6 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.AuditEventIndexService
 
 /**
  * Screens for department and module admins.
@@ -62,10 +61,27 @@ class AdminHome extends CourseworkController {
 		if (modules.isEmpty()) {
 			mustBeAbleTo(Manage(dept))
 		}
+		
+		val sortedModules = modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
+		val notices = gatherNotices(modules)
+		
 		Mav("admin/department",
 			"department" -> dept,
-			"modules" -> modules.sortBy { (module) => (module.assignments.isEmpty, module.code) })
+			"modules" -> sortedModules,
+			"notices" -> notices)
 
+	}
+	
+	def gatherNotices(modules: Seq[Module])= {
+		val unpublished = for ( 
+				module <- modules;
+				assignment <- module.assignments
+				if assignment.isAlive && assignment.anyUnreleasedFeedback
+			) yield assignment
+			
+		Map(
+			"unpublishedAssignments" -> unpublished
+		)
 	}
 
 }

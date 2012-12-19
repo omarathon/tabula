@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.actions.Delete
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))

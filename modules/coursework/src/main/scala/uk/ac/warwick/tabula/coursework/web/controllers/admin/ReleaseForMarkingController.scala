@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import javax.validation.Valid
-import uk.ac.warwick.tabula.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
 
 
 @Controller

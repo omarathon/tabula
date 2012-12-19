@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.admin
+package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.seqAsJavaList
@@ -10,20 +10,18 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.commands.assignments._
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
+import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/list"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/list"))
 class SubmissionsAndFeedbackController extends CourseworkController {
 
 	var auditIndexService = Wire.auto[AuditEventIndexService]
@@ -68,12 +66,18 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId)
 		}
+		
+		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
+		val hasPublishedFeedback = students.exists { student => 
+			student.feedback != null && student.feedback.checkedReleased
+		}
 
 		Mav("admin/assignments/submissionsandfeedback/list",
 			"assignment" -> assignment,
-			//"submissions" -> submissions,
 			"students" -> students,
-						"awaitingSubmission" -> awaitingSubmission,
+			"awaitingSubmission" -> awaitingSubmission,
+			"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment),
+			"hasPublishedFeedback" -> hasPublishedFeedback,
 			"hasOriginalityReport" -> hasOriginalityReport,
 			"mustReleaseForMarking" -> mustReleaseForMarking)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))

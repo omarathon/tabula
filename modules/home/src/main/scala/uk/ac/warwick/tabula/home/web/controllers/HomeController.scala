@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.controllers._
 
 @Controller class HomeController extends BaseController {
 
-  var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems

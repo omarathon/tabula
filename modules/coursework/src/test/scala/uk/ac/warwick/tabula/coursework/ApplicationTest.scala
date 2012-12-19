@@ -27,13 +27,11 @@ import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Value
-import uk.ac.warwick.tabula.coursework.web.controllers.sysadmin.SysadminController
 import uk.ac.warwick.tabula._
 
 class ApplicationTest extends AppContextTestBase {
     
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_
-    @Autowired var sysadminController:SysadminController = _
     
     @Value("${filesystem.index.audit.dir}") var auditIndexDir:String =_
     
@@ -42,12 +40,6 @@ class ApplicationTest extends AppContextTestBase {
     	for ((info,method) <- annotationMapper.getHandlerMethods()) {
     		
     	}
-    }
-    
-    // Can resolve message codes from any controller
-    @Test def messageResolving = {
-    	sysadminController.getMessage("NotEmpty") should be ("You need to put something here.")
-    	sysadminController.getMessage("userId.notingroup", "alvin") should be ("The usercode alvin isn't in this group.")
     }
     
     /** 

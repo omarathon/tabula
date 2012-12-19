@@ -10,6 +10,7 @@ import scala.Array
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.departments.DownloadFeedbackTemplateCommand
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/feedback-templates/download"))
@@ -19,9 +20,9 @@ class DownloadFeedbackTemplateController extends CourseworkController {
 	@Autowired var fileServer:FileServer =_
 
 	@RequestMapping(value=Array("{template}/{filename}") ,method = Array(GET, HEAD))
-	def getAttachment(command:DownloadFeedbackTemplateCommand, user:CurrentUser, response:HttpServletResponse) = {
+	def getAttachment(command:DownloadFeedbackTemplateCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
 		// specify callback so that audit logging happens around file serving
-		command.callback = {(renderable) => fileServer.serve(renderable, response)}
+		command.callback = {(renderable) => fileServer.serve(renderable)}
 		command.apply().orElse{ throw new ItemNotFoundException() }
 	}
 

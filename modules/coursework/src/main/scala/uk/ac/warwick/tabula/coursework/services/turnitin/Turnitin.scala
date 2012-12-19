@@ -116,13 +116,15 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
-		session.userEmail = email
+		val userEmail = if (email == null || email.isEmpty()) firstName + lastName + "@turnitin.warwick.ac.uk" else email
+			
+		session.userEmail = userEmail
 		session.userFirstName = firstName
 		session.userLastName = lastName
 		session.login() match {
 			case Created(sessionId) if sessionId != "" => {
 				val session = new Session(this, sessionId)
-				session.userEmail = email
+				session.userEmail = userEmail
 				session.userFirstName = firstName
 				session.userLastName = lastName
 				session.acquireUserId()

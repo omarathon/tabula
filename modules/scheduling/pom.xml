@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick.tabula</groupId>
+		<artifactId>tabula-project</artifactId>
+		<version>22-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>scheduling</artifactId>
+	<packaging>war</packaging>
+
+	<name>Tabula Scheduling</name>
+	<description>Runs all scheduled jobs; expected to run in a separate container to other components</description>
+
+	<properties>
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+	</properties>
+
+	<scm>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/scheduling</url>
+	</scm>
+
+	<profiles>
+		<!-- deploy to jboss -->
+		<profile>
+			<id>deploy</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-unpacked</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war">
+											<fileset dir="${project.build.directory}/${project.build.finalName}" />
+										</sync>
+										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<!-- Project dependencies - need a dependency on any module that runs a job -->
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>home</artifactId>
+			<classifier>static-hashes</classifier>
+			<type>zip</type>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>courses</artifactId>
+			<classifier>jar</classifier>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>profiles</artifactId>
+			<classifier>jar</classifier>
+		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>home</artifactId>
+			<classifier>jar</classifier>
+		</dependency>
+	</dependencies>
+</project>

@@ -24,7 +24,8 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		cmd.academicYear = new AcademicYear(2012)
 		cmd.assignmentItems = Seq(
 			item(f.upstream1, true, "A"),
-			item(f.upstream2, false, null)
+			item(f.upstream2, false, null),
+			item(f.upstream3, true, "A", true)
 		)
 		cmd.optionsMap = Map(
 			"A" -> new SharedAssignmentPropertiesForm
@@ -37,14 +38,25 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		
 		cmd.apply
 		
-		val query = session.createQuery("from Assignment where module=:module")
-		query.setEntity("module", f.module)
-		val result = query.uniqueResult().asInstanceOf[Assignment]
-		result.name should be ("Assignment 1")
+		val query1 = session.createQuery("from Assignment where module=:module")
+		query1.setEntity("module", f.module1)
+		val result1 = query1.uniqueResult().asInstanceOf[Assignment]
+		result1.name should be ("Assignment 1")
 		
 		//check the default fields were added.
-		withClue("Expecting attachment field.") { result.attachmentField should be ('defined) }
-		withClue("Expecting comment field.") { result.commentField should be ('defined) }
+		withClue("Expecting attachment field.") { result1.attachmentField should be ('defined) }
+		withClue("Expecting comment field.") { result1.commentField should be ('defined) }
+		withClue("Expected not open ended") { assert(result1.openEnded === false) }
+		
+		val query2 = session.createQuery("from Assignment where module=:module")
+		query2.setEntity("module", f.module3)
+		val result2 = query2.uniqueResult().asInstanceOf[Assignment]
+		result2.name should be ("Assignment 3")
+		
+		//check the default fields were added.
+		withClue("Expecting attachment field.") { result2.attachmentField should be ('defined) }
+		withClue("Expecting comment field.") { result2.commentField should be ('defined) }
+		withClue("Expected open ended") { assert(result2.openEnded === true) }
 	} 
 	
 	
@@ -52,21 +64,28 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
         val upstream1 = Fixtures.upstreamAssignment(departmentCode="ls", number=1)
         val upstream2 = Fixtures.upstreamAssignment(departmentCode="ls", number=2)
+        val upstream3 = Fixtures.upstreamAssignment(departmentCode="ls", number=3)
         val assessmentGroup1 = Fixtures.assessmentGroup(upstream1)
-        val module = Fixtures.module(code="ls101")
+        val assessmentGroup3 = Fixtures.assessmentGroup(upstream3)
+        val module1 = Fixtures.module(code="ls101")
+        val module3 = Fixtures.module(code="ls103")
         
         session.save(department)
         session.save(upstream1)
         session.save(upstream2)
+        session.save(upstream3)
         session.save(assessmentGroup1)
-        session.save(module)
+        session.save(assessmentGroup3)
+        session.save(module1)
+        session.save(module3)
 	}
 	
-	def item(assignment: UpstreamAssignment, include: Boolean, optionsId: String) = {
+	def item(assignment: UpstreamAssignment, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
 		val item = new AssignmentItem(include, "A", assignment)
 		item.optionsId = optionsId
 		item.openDate  = dateTime(2012, 9)
 		item.closeDate = dateTime(2012, 11)
+		item.openEnded = openEnded
 		item
 	}
 	

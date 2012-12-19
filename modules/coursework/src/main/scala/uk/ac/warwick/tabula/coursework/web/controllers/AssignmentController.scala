@@ -86,6 +86,7 @@ class AssignmentController extends AbstractAssignmentController {
 				"extension" -> extension,
 				"isExtended" -> isExtended,
 				"extensionRequested" -> extensionRequested)
+				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
 
 		}
 	}

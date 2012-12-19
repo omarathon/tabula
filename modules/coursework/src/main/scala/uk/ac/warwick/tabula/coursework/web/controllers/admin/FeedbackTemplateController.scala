@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.web.Mav
 import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates"))
@@ -43,7 +44,7 @@ class FeedbackTemplateController extends CourseworkController {
 		}
 		else{
 			cmd.apply()
-			Reload()
+			Redirect(Routes.admin.feedbackTemplates(cmd.department))
 		}
 	}
 

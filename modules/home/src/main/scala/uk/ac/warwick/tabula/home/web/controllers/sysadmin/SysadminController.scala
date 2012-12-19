@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.home.commands.departments.RemoveDeptOwnerCommand
 import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -28,7 +27,9 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.services.AssignmentImporter
 import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileImporter
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -73,12 +74,6 @@ class SysadminController extends BaseSysadminController {
 	def department(@PathVariable dept: Department) = {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
-	}
-
-	@RequestMapping(value = Array("/import"), method = Array(POST))
-	def importModules = {
-		new ImportModulesCommand().apply()
-		"sysadmin/importdone"
 	}
 
 }
@@ -136,35 +131,20 @@ class AddDeptOwnerController extends BaseSysadminController {
 	}
 }
 
+/* Just a pojo to bind to; actually used in scheduling */
 class ReindexForm {
-	var indexer = Wire.auto[AuditEventIndexService]
-
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
-
-	def reindex = {
-		indexer.indexFrom(from)
-	}
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/index/run"))
-class SysadminIndexController extends BaseSysadminController {
-	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexForm) = {
-		form.reindex
-		redirectToHome
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/import-sits"))
-class ImportSitsController extends BaseSysadminController {
-	var importer = Wire.auto[AssignmentImporter]
-
+@RequestMapping(Array("/sysadmin/import-profiles"))
+class ImportProfilesController extends BaseSysadminController {
+	var importer = Wire.auto[ProfileImporter]
+	
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
-		val command = new ImportAssignmentsCommand
+		val command = new ImportProfilesCommand
 		command.apply()
 		redirectToHome
 	}

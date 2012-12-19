@@ -49,6 +49,11 @@ class FileAttachment extends GeneratedId {
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
 	@BeanProperty var feedbackForm: FeedbackTemplate = _
 
+	/**
+	 * WARNING this method isn't exhaustive. It only checks fields that are directly on this
+	 * attachment table. It won't check mappings where the foreign key is on the other side,
+	 * which is the case for things like member photos.
+	 */
 	def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
 
 	@BeanProperty var temporary: JBoolean = true

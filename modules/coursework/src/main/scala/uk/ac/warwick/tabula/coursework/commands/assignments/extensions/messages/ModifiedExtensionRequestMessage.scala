@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
 
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -10,14 +9,17 @@ class ModifiedExtensionRequestMessage(extension: Extension, userId: String)
 
 	// applied to a base message to set a context specific subject and body
 	def setMessageContent(baseMessage: SimpleMailMessage) = {
-		baseMessage.setSubject(getSubjectPrefix() + "Extension request modified")
+		baseMessage.setSubject(getSubjectPrefix + "Extension request modified")
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/modified_extension_request.ftl", Map(
-			"extension" -> extension,
-			"newExpiryDate" -> dateFormatter.print(extension.getExpiryDate),
+			"requestedExpiryDate" -> dateFormatter.print(extension.requestedExpiryDate),
+			"reasonForRequest" -> extension.reason,
+			"attachments" -> extension.attachments,
 			"assignment" -> assignment,
+			"student" -> userLookup.getUserByUserId(extension.getUserId),
 			"module" -> module,
 			"user" -> recipient,
-			"url" -> (topLevelUrl + Routes.admin.assignment.extension.review(assignment, extension.universityId)))))
+			"path" -> Routes.admin.assignment.extension.review(assignment, extension.universityId)
+		)))
 		baseMessage
 	}
 
