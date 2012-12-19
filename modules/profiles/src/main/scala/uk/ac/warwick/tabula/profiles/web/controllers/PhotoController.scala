@@ -17,7 +17,7 @@ import org.springframework.util.FileCopyUtils
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
-class PhotoController extends BaseController {
+class PhotoController extends ProfilesController {
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@PathVariable member: Member, response: HttpServletResponse): Unit = {

@@ -744,38 +744,83 @@ h1.with-settings {
 	 	dl, dt, dd { margin: 0; padding: 0; }
 	 	dt, dd { font-weight: normal; display: inline; }
  	}
+ 	
+ 	hr.full-width {
+ 		width: auto;
+ 		background: #bfb8d4;
+ 	}
+ 	
+	.profile-search {
+		margin-bottom: 1em;
+	}
 	
 	.profile {
-		dt { 
-			float: left; 
-			clear: left;
-			
-			&:after { content: ':'; margin-right: 5px; }
-		}
+		margin-top: 1em;
+	}
 	
-		dd { 
-			float: left; 
-			clear: right; 
-		}
-	
+	#container .profile {
 		.personal-details {
+			@photoTargetWidth: 186px;
+			@polaroidPadding: 8px;
+		
 			div.photo { 
 				float: left; 
-				width: 198px; 
+				width: @photoTargetWidth;
+				margin-right: 16px; 
+				
+				img { 
+					padding: @polaroidPadding;
+  					background-color: #fff;
+  					border: 1px solid #ccc;
+  					border: 1px solid rgba(0,0,0,.2);
+					.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
+				
+					max-width: @photoTargetWidth - (@polaroidPadding * 2); 
+				}
+			}
+			div.col1 { 
+				float: left; 
+				width: 354px; 
 				margin-right: 16px; 
 			}
-			dl.col1 { 
+			div.col2 {
 				float: left; 
-				width: 348px; 
-				margin-right: 16px; 
-			}
-			dl.col2 {
-				float: left; 
-				width: 348px; 
+				width: 354px;
 				margin-right: 0; 
 			}
 	
-			header h1 { display: inline; }
+			header {
+				h1, h5 {
+					display: inline;
+					line-height: 26px;
+				}
+				
+				h1 {
+					margin-right: 10px;
+				}
+				
+				margin-bottom: 16px;
+			}
+			
+			table.profile-info {
+				// Reset
+				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+				
+				width: 100%;
+				
+				th { 
+					text-align: right;
+					color: #818285;
+					white-space: nowrap;
+					
+					&:after { content: ':'; margin-right: 3px; } 
+				}
+				
+				td {
+					color: #0c0c0c;
+					width: 99%;
+				}
+			}
 		}
 	}
 	
@@ -808,7 +853,7 @@ h1.with-settings {
 		
 		input[type="text"] {
 			height: @searchLineHeight;
-			margin-bottom: @searchLineHeight / 2;
+			margin-bottom: 0;
 			font-size: @searchFontSize;
 			line-height: @searchLineHeight;
 		}
@@ -819,11 +864,19 @@ h1.with-settings {
 		}
 		
 		.dropdown-menu {
-			width: 468px;
+			@import "bootstrap/mixins.less";
+		
+			width: 462px;
 			
 			h2 { margin-bottom: 0; }
 			.photo { max-height: 50px; }
 			span.description { white-space: normal; }
+			
+			.active > a, .active > a:hover {
+				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
+			}
 		}
+		
+		form { margin: 0; }
 	}
 }

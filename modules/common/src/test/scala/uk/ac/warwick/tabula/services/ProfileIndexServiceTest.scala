@@ -32,6 +32,8 @@ import java.lang.Boolean
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.data.model.Staff
 
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
@@ -66,6 +68,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		m.fullFirstName = "Mathew James"
 		m.lastName = "Mannion"
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
+		m.userType = Student
 		
 		session.save(m)
 		session.flush
@@ -73,13 +76,15 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		indexer.listRecent(0, 1000).size should be (1)
 		
-		indexer.find("bob thornton") should be ('empty)
-		indexer.find("Mathew").head should be (m)
-		indexer.find("mat").head should be (m)
-		indexer.find("m mannion").head should be (m)
-		indexer.find("mathew james mannion").head should be (m)
-		indexer.find("mat mannion").head should be (m)
-		indexer.find("m m").head should be (m)
+		indexer.find("bob thornton", Set()) should be ('empty)
+		indexer.find("Mathew", Set()).head should be (m)
+		indexer.find("mat", Set()).head should be (m)
+		indexer.find("m mannion", Set()).head should be (m)
+		indexer.find("mathew james mannion", Set()).head should be (m)
+		indexer.find("mat mannion", Set()).head should be (m)
+		indexer.find("m m", Set()).head should be (m)
+		indexer.find("m m", Set(Student, Staff)).head should be (m)
+		indexer.find("m m", Set(Staff)) should be ('empty)
 	}
 	
 	@Transactional
@@ -93,6 +98,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 				m.universityId = i.toString
 				m.userId = i.toString
 				m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0).plusSeconds(i)
+				m.userType = Student
 				
 				m
 			}

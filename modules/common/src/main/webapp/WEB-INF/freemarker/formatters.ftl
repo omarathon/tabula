@@ -51,7 +51,16 @@
 	</#list>
 	</@userlookup>
 </#macro>
-</#compress>
 
 <#macro profile_name profile>${profile.fullName}</#macro>
 <#macro profile_description profile><span class="profile-description">${profile.description!""}</span></#macro>
+
+<#macro nationality nationality><#--
+--><#if nationality = 'British (ex. Channel Islands & Isle of Man)' || nationality = 'British [NO LONGER IN USE: change to 2826]' || nationality = 'NAT code 000 should be used for British'><#--
+	--><abbr title="${nationality}">British</abbr><#--
+--><#elseif nationality?starts_with('(Obsolete) Formerly ')><#--
+	--><abbr title="${nationality}">${nationality?substring(20)}</abbr><#--
+--><#else><#--
+	-->${nationality}<#--
+--></#if></#macro>
+</#compress>

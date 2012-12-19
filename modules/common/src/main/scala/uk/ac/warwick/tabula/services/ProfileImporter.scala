@@ -30,6 +30,7 @@ import uk.ac.warwick.tabula.data.model.NextOfKin
 import uk.ac.warwick.tabula.data.model.Address
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.data.model.AddressType
+import uk.ac.warwick.tabula.data.model.MemberUserType
 
 @Service
 class ProfileImporter extends InitializingBean {
@@ -102,7 +103,8 @@ object ProfileImporter {
 			m.home_email_address as alternative_email_address,
 			m.mobile_phone_number as mobile_number,
 			m.primary_user_code as user_code,
-			m.date_of_birth as date_of_birth
+			m.date_of_birth as date_of_birth,
+			m.group_ctg as group_ctg
 		from member m
     		left outer join member_photo_details photo 
       			on m.university_id = photo.university_id
@@ -286,7 +288,9 @@ object ProfileImporter {
 		val member = new Member
 					
 		member.universityId = rs.getString("university_id")
-		member.userId = rs.getString("user_code")					
+		member.userId = rs.getString("user_code")
+		member.userType = MemberUserType.fromCode(rs.getString("group_ctg"))
+		
 		member.firstName = rs.getString("preferred_forename")
 		member.lastName = rs.getString("family_name")
 		member.email = rs.getString("email_address")

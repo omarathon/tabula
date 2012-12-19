@@ -15,9 +15,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
-class SearchController extends BaseController with ProfileBreadcrumbs {
+class SearchController extends ProfilesController {
 	
 	hideDeletedItems
+	studentProfilesOnly
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchProfilesCommand) = {
