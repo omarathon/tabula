@@ -222,7 +222,7 @@
 				<executions>
 					<execution>
 						<id>lesscss</id>
-						<phase>prepare-package</phase>
+						<phase>compile</phase>
 						<configuration>
 							<target>
 								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="maven.plugin.classpath" />
