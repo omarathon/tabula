@@ -6,6 +6,8 @@
 var exports = {};
 
 $(function() {
+	$('span[rel="tooltip"]').tooltip();
+
 	$('.profile-search').each(function() {
 		var container = $(this);
 		
@@ -19,6 +21,15 @@ $(function() {
 					if (xhr != null) {
 						xhr.abort();
 						xhr = null;
+					}
+					
+					query = $.trim(query);
+					if (query.length < 3) { process([]); return; }
+					
+					// At least one of the search terms must have more than 1 character
+					var terms = query.split(/\s+/g);
+					if ($.grep(terms, function(term) { return term.length > 1; }).length == 0) {
+						process([]); return;
 					}
 				
 					xhr = $.get(target, { query : query }, function(data) {				
