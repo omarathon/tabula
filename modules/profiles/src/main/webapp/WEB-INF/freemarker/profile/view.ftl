@@ -13,7 +13,7 @@
 			</p>
 		</#if>
 		<#if address.telephone??>
-			<p class="tel">${address.telephone}</p>
+			<p class="tel">${phoneNumberFormatter(address.telephone)}</p>
 		</#if>
 	</div>
 </#macro>
@@ -109,7 +109,7 @@
 					<#if profile.mobileNumber??>
 						<tr>
 							<th>Mobile phone</th>
-							<td>${profile.mobileNumber}</td>
+							<td>${phoneNumberFormatter(profile.mobileNumber)}</td>
 						</tr>
 					</#if>
 					
