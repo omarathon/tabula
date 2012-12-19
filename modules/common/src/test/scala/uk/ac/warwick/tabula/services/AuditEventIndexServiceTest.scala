@@ -28,6 +28,8 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Department
 
 
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
@@ -200,4 +202,103 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		
 	}
+	
+	@Transactional
+	@Test def pagingSearch = withFakeTime(dateTime(2010, 6)) {
+		val stopwatch = new StopWatch
+		
+		val dept = new Department
+		dept.code = "zx"
+		
+		val assignment = new Assignment
+		assignment.id = "4a0ce216-adda-b0b0-c0c0-000000000000"
+		// Merry Christmas
+		assignment.closeDate = new DateTime(2009,12,25,0,0,0)
+		
+		val module = new Module
+		module.id = "367a9abd-adda-c0c0-b0b0-000000000000"
+		module.assignments = List(assignment)
+		module.department = dept
+
+		val beforeJsonData = json.writeValueAsString(Map(
+					"assignment" -> assignment.id,
+					"module" -> module.id,
+					"department" -> dept.code
+				))
+
+		val afterJsonData = json.writeValueAsString(Map(
+					"assignment" -> assignment.id,
+					"module" -> module.id,
+					"department" -> dept.code,
+					"submission" -> "94624c3b-adda-0dd0-b0b0-REPLACE-THIS"
+				))
+
+		val afterLateJsonData = json.writeValueAsString(Map(
+					"assignment" -> assignment.id,
+					"module" -> module.id,
+					"department" -> dept.code,
+					"submission" -> "94624c3b-adda-0dd0-b0b0-REPLACE-THIS",
+					"submissionIsNoteworthy" -> true
+				))
+
+		stopwatch.start("creating items")
+		
+		val submitBefore = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="ontime"+i, eventType="SubmitAssignment", eventStage="before", userId="bob",
+				eventDate=new DateTime(2009,12,1,0,0,0).plusSeconds(i),
+				data=beforeJsonData
+			)
+		
+		val submitAfter = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="ontime"+i, eventType="SubmitAssignment", eventStage="after", userId="bob",
+				eventDate=new DateTime(2009,12,1,0,0,0).plusSeconds(i),
+				data=afterLateJsonData.replace("REPLACE-THIS", "%012d".format(i))
+			)
+		
+		val submitBeforeLate = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="late"+i, eventType="SubmitAssignment", eventStage="before", userId="bob",
+				eventDate=new DateTime(2010,1,1,0,0,0).plusSeconds(i),
+				data=beforeJsonData
+			)
+		
+		val submitAfterLate = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="late"+i, eventType="SubmitAssignment", eventStage="after", userId="bob",
+				eventDate=new DateTime(2010,1,1,0,0,0).plusSeconds(i),
+				data=afterJsonData.replace("REPLACE-THIS", "%012d".format(i))
+			)
+		
+		stopwatch.stop()
+		
+		val events = submitBefore ++ submitAfter ++ submitBeforeLate ++ submitAfterLate
+		events.foreach { event =>
+			service.save(addParsedData(event))
+		}
+		
+		// 140 total distinct events
+		service.listNewerThan(new DateTime(2009,12,1,0,0,0), 500).size should be (140)
+		
+		// 70 new ones, since Christmas
+		service.listNewerThan(new DateTime(2009,12,25,0,0,0), 500).size should be (70)
+		
+		stopwatch.start("indexing")
+		indexer.index
+		stopwatch.stop()
+		
+		// check pager
+		val paged0 = indexer.submissionsForModules(Seq(module), None, None, 100)
+		paged0.docs.length should be (100)
+		
+		val paged1 = indexer.submissionsForModules(Seq(module), paged0.last, Some(paged0.token), 100)
+		// asked to batch in 100s, but only 40 left
+		paged1.docs.length should be (40)
+		
+		// check pager for noteworthy submissions
+		val paged2 = indexer.noteworthySubmissionsForModules(Seq(module), None, None, 100)
+		paged2.docs.length should be (70)
+	}
+
 }

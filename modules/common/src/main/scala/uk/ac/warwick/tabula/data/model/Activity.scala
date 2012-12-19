@@ -6,19 +6,22 @@ import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentService
 
-// class to expose bean properties via constructor
+/** Class to expose bean properties via constructor.
+ * 
+ *  It currently takes a single entity, as we're currently only interested in
+ *  simple relations between agents (users) and entities (objects),
+ *  eg. Student does Submission
+ *  In future, perhaps we'd extend this to take a collection of entities
+ *  for more complex interactions.
+ */
 class Activity[T](val title: String, val date: DateTime, val agent: User, val message: String, val entity: T) {
 
 	// Expose entity type for Freemarker
 	def getEntityType = entity.getClass.getSimpleName
 }
 
-/** companion object offers apply method to construct new Activities,
- *  drawing its data from other types
- * 
- *  currently, it's ignoring away everything except for
- *  noteworthy submissions (late, auth late, suspected plagiarised)
-						
+/** Companion object offers apply method to construct new Activities,
+ *  drawing its data from other types.
  */
 object Activity {
 	var userLookup = Wire.auto[UserLookupService]
@@ -30,13 +33,19 @@ object Activity {
 			case "SubmitAssignment" if (event.hasProperty("submission")) => {
 				val submission = assignmentService.getSubmission(event.submissionId getOrElse "")
 				
-				if (submission.isDefined && submission.get.isNoteworthy) {
+				if (submission.isDefined) {
 					val title = "New submission"
 					val date = event.eventDate
 					val agent = userLookup.getUserByUserId(event.userId)
 					val activity = new Activity[Any](title, date, agent, "", submission.get)
 					Option(activity)
-				} else None
+				} else {
+					val title = "New submission (since deleted)"
+					val date = event.eventDate
+					val agent = userLookup.getUserByUserId(event.userId)
+					val activity = new Activity[Any](title, date, agent, "", Nil)
+					Option(activity)
+				}
 			}
 			case _ => {
 				None

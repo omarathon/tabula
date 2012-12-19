@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.services.ActivityService
 import uk.ac.warwick.tabula.JavaImports._
+import org.springframework.web.bind.annotation._
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -26,12 +27,33 @@ import uk.ac.warwick.tabula.JavaImports._
 
 	hideDeletedItems
 
+	@RequestMapping(Array("/api/activity/pagelet/{doc}/{field}/{token}"))
+	def pagelet(user: CurrentUser, @PathVariable("doc") doc: Int, @PathVariable("field") field: Long, @PathVariable("token") token: Long) = {
+		if (user.loggedIn) {
+			try {
+				val pagedActivities = activityService.getNoteworthySubmissions(user, doc, field, token)
+				
+				Mav("home/activities",
+					"activities" -> pagedActivities,
+					"async" -> true).noLayout
+			}
+			catch {
+				case e:IllegalStateException => {
+					Mav("home/activities",
+					"expired" -> true).noLayout
+				}
+			}
+		} else {
+			Mav("home/empty").noLayout
+		}
+	}
+
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
 		if (user.loggedIn) {
 			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
 			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
 			
-			val activities = activityService.getActivities(user)
+			val pagedActivities = activityService.getNoteworthySubmissions(user)
 
 			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
 			// add the number of submissions to each assignment for marking
@@ -76,7 +98,7 @@ import uk.ac.warwick.tabula.JavaImports._
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
 				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct,
-				"activities" -> activities)
+				"activities" -> pagedActivities)
 		} else {
 			Mav("home/view")
 		}

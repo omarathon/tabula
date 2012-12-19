@@ -6,50 +6,15 @@
 			<h6>Late &amp; suspicious activity</h6>
 			
 			<#if activities?has_content>
-				<#macro admin_href submission>
-					<@url page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/submissionsandfeedback/list' />
-				</#macro>
-				
-				<table class="table table-condensed table-hover stream">
-					<tbody>
-						<#list activities as activity>
-							<tr>
-								<td>
-									<div class="pull-right"><@fmt.date date=activity.date at=true /></div>
-									
-									<div>
-										<#if activity.entityType == "Submission">
-											<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId}</a>
-
-											<#if activity.entity.late>
-												<span class="label-red">Late</span>
-											<#elseif activity.entity.authorisedLate>
-												<span class="label-blue">Authorised Late</span>
-											</#if>
-											<#if activity.entity.suspectPlagiarised>
-												<span class="label-orange">Suspect Plagiarised</span>
-											</#if>
-										<#else>
-											<#-- default -->
-											<b>${activity.title}</b> by ${activity.agent.warwickId}
-										</#if>
-									</div>
-									
-									<div class="activity-message">
-										<#if activity.entityType == "Submission">
-											<@fmt.assignment_name activity.entity.assignment />
-										<#elseif activity.entityType == "Assignment">
-											<@fmt.assignment_name activity.entity />
-										<#else>
-											${activity.message}
-										</#if>
-									</div>
-								</td>
-							<tr>
-						</#list>
-					</tbody>
+				<table class="table table-condensed table-hover" id="activities">
+					<#include "activities.ftl" />
+					
+					<tfoot aria-hidden="true" id="activity-fetcher" style="display:none;">
+						<tr><td>
+							<a href="#">See more</a>
+						</td></tr>
+					</tfoot>
 				</table>
-				</ol>
 			<#else>
 				<p class="alert">There is no notable activity to show you right now.</p>
 			</#if>
@@ -81,4 +46,25 @@
 			</#if>
 		</div>
 	</div>
+	
+	<script type="text/javascript">
+		(function ($) {
+			$("#activity-fetcher").show().click(function(e) {
+				e.preventDefault();
+				
+				$.get($("#activities").data("url"), function(pagelet) {
+					$("#activities tbody:last").after(pagelet);
+					
+					if ($("#activities tbody tr").length >= ${activities.total}) {
+						$("#activity-fetcher").remove();
+					}
+					
+					$(".streaming").fadeIn("normal", function() {
+						var $streaming = $(this);
+						$streaming.replaceWith($streaming.contents());
+					});
+				});
+			});
+		})(jQuery);
+	</script>
 </#if>

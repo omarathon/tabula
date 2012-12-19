@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
+import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
+import uk.ac.warwick.spring.Wire
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -59,15 +61,46 @@ trait QueryMethods { self: AuditEventIndexService =>
 
 	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
 	
-	def recentSubmissionsForModules(modules: Seq[Module]): Seq[AuditEvent] = {
+	class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
+		// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
+		// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
+		// pass a specific subclass of FieldDoc.
+		def last: Option[FieldDoc] = lastscore match {
+			case None => None
+			case Some(f:FieldDoc) => Some(f)
+			case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
+		}
+	}
+	
+	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
-		parsedAuditEvents(search(
+		val searchResults = search(
 			query = all(termQuery("eventType", "SubmitAssignment"), 
 						some(moduleTerms:_*)
 					),
-			max = 20,
-			sort = reverseDateSort))
+			max = max,
+			sort = reverseDateSort,
+			last = last,
+			token = token)
+			
+		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
+	}
+
+	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
+		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
+		
+		val searchResults = search(
+			query = all(termQuery("eventType", "SubmitAssignment"), 
+						termQuery("submissionIsNoteworthy", "true"),
+						some(moduleTerms:_*)
+					),
+			max = max,
+			sort = reverseDateSort,
+			last = last,
+			token = token)
+		
+		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
 
 	/**
@@ -159,7 +192,7 @@ class RichSearchResults(seq: Seq[Document]) {
 @Component
 class AuditEventIndexService extends InitializingBean with QueryHelpers with QueryMethods with Logging with DisposableBean {
 
-	final val LuceneVersion = Version.LUCENE_35
+	final val LuceneVersion = Version.LUCENE_40
 
 	// largest batch of event items we'll load in at once.
 	final val MaxBatchSize = 100000
@@ -228,6 +261,15 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	 * the index has changed (i.e. after an index)
 	 */
 	var searcherManager: SearcherManager = _
+	
+	/**
+	 * SearcherLifetimeManager allows a specific IndexSearcher state to be
+	 * retrieved later by passing a token. This allows stateful search context
+	 * per-user. If you don't have a token, use the regular SearcherManager
+	 * to do the initial creation.
+	 */
+	var searcherLifetimeManager: SearcherLifetimeManager = _
+	
 	val analyzer = {
 		//val standard = new StandardAnalyzer(LuceneVersion)
 		val token = new KeywordAnalyzer()
@@ -255,13 +297,14 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 		if (!indexPath.isDirectory) throw new IllegalStateException("Audit event index path not a directory: " + indexPath.getAbsolutePath)
 
 		initialiseSearching
-
+		
 		// Reopen the index reader periodically, else it won't notice changes.
 		executor.scheduleAtFixedRate(Runnable {
 			try reopen catch { case e => logger.error("Index service reopen failed", e) }
+			try prune catch { case e => logger.error("Pruning old searchers failed", e) }
 		}, 20, 20, TimeUnit.SECONDS)
 	}
-
+	
 	override def destroy {
 		executor.shutdown()
 	}
@@ -274,6 +317,13 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 				case e: IndexNotFoundException => logger.warn("No index found.")
 			}
 		}
+		if (searcherLifetimeManager == null) {
+			try {
+				searcherLifetimeManager = new SearcherLifetimeManager
+			} catch {
+				case e: IllegalStateException => logger.warn("Could not create SearcherLifetimeManager.")
+			}
+		}
 	}
 
 	/**
@@ -283,6 +333,15 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 	private def reopen = {
 		initialiseSearching
 		if (searcherManager != null) searcherManager.maybeRefresh
+	}
+	
+	/**
+	 * Remove saved searchers over 20 minutes old
+	 */
+	private def prune = {
+		val ageInSeconds = 20*60
+		initialiseSearching
+		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
 	/**
@@ -408,14 +467,15 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 
 	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query: Query): Seq[Document] = doSearch(query, None, null, 0)
-	def search(query: Query, sort: Sort): Seq[Document] = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = doPagingSearch(query, Option(max), Option(sort), last, token)
 
 	protected def auditEvents(docs: Seq[Document]) = docs.flatMap(toAuditEvent(_))
 	protected def parsedAuditEvents(docs: Seq[Document]) = docs.flatMap(toParsedAuditEvent(_))
 
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): Seq[Document] = {
 		initialiseSearching
-		if (searcherManager == null) return Seq.empty
+		if (searcherManager == null) return Seq.empty //failsafe
+		
 		acquireSearcher { searcher =>
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
@@ -435,6 +495,57 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 		val hits = results.scoreDocs
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
+
+	class pagingSearchResult(val results: Seq[Document], val last: Option[ScoreDoc], val token: Long, val total: Int) {}
+	
+	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = {
+		// guard
+		initialiseSearching
+		
+		val (newToken, searcher) = acquireSearcher(token)
+		if (searcher == null) 
+			throw new IllegalStateException("Original IndexSearcher has expired.")
+		
+		try {
+			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
+			val results = (lastDoc, sort) match {
+				case (None, None) => searcher.search(query, maxResults)
+				case (after:Some[ScoreDoc], None) => searcher.searchAfter(after.get, query, maxResults)
+				case (after:Some[ScoreDoc], sort: Some[Sort]) => searcher.searchAfter(lastDoc.get, query, maxResults, sort.get)
+				case (None, sort: Some[Sort]) => searcher.search(query, maxResults, sort.get)
+			}
+			
+			val hits = results.scoreDocs
+			val totalHits = results.totalHits
+			hits match {
+				case Array() => new pagingSearchResult(Nil, None, newToken, 0)
+				case _ => {
+					val hitsOnThisPage = hits.length
+					new pagingSearchResult(hits.toStream.map (hit => searcher.doc(hit.doc)).toList, Option(hits(hitsOnThisPage-1)), newToken, totalHits)
+				}
+			}
+		}
+		finally searcherLifetimeManager.release(searcher)
+	}
+	
+	private def acquireSearcher(token: Option[Long]): (Long, IndexSearcher) = {
+		var searcher: IndexSearcher = null
+		var newToken: Long = 0
+		
+		token match {
+			case None => {
+				searcher = searcherManager.acquire
+				newToken = searcherLifetimeManager.record(searcher)
+			}
+			case Some(t) => {
+				searcher = searcherLifetimeManager.acquire(token.get)
+				newToken = t
+			}
+		}
+		
+		(newToken, searcher)
+	}
+
 
 	/**
 	 * If an existing Document is in the index with this term, it
@@ -485,10 +596,13 @@ class AuditEventIndexService extends InitializingBean with QueryHelpers with Que
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {
-		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId")) {
+		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")) {
 			data.get(key) match {
 				case Some(value: String) => {
 					doc add plainStringField(key, value, isStored = false)
+				}
+				case Some(value: Boolean) => {
+					doc add plainStringField(key, value.toString, isStored = false)
 				}
 				case _ => // missing or not a string
 			}

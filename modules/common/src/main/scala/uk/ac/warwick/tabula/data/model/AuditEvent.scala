@@ -59,6 +59,7 @@ case class AuditEvent(
 
 	def assignmentId = stringProperty("assignment")
 	def submissionId = stringProperty("submission")
+	def submissionIsNoteworthy = stringProperty("submissionIsNoteworthy")
 	def submissionIds = stringListProperty("submissions")
 	def feedbackIds = stringListProperty("feedbacks")
 
