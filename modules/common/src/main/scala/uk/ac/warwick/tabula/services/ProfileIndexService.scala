@@ -33,7 +33,7 @@ import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
 import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.MemberDao
-import org.apache.lucene.queryparser.flexible.standard.parser.ParseException
+import org.apache.lucene.queryparser.classic.ParseException
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.MemberUserType

@@ -16,6 +16,9 @@ $(function() {
 		var profilePickerMappings;
 		var xhr = null;
 		container.find('input[name="query"]').attr('autocomplete','off').each(function() {
+			var $spinner = $('<div class="spinner-container" />');
+			$(this).before($spinner);
+		
 			$(this).typeahead({
 				source: function(query, process) {
 					if (xhr != null) {
@@ -32,7 +35,10 @@ $(function() {
 						process([]); return;
 					}
 				
-					xhr = $.get(target, { query : query }, function(data) {				
+					$spinner.spin('small');
+					xhr = $.get(target, { query : query }, function(data) {
+						$spinner.spin(false);
+									
 						var labels = []; // labels is the list of Strings representing assignments displayed on the screen
 						profilePickerMappings = {};
 						
@@ -41,9 +47,9 @@ $(function() {
 							profilePickerMappings[mapKey] = member;
 							labels.push(mapKey);
 						})
-	
+
 						process(labels);
-					});
+					}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
 				},
 				
 				// Disable some typeahead behaviour that we already do in searching
