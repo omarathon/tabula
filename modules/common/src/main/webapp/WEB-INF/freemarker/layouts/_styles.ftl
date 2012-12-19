@@ -1,6 +1,18 @@
 <#-- Styles that should be included both in the app and embedded in to Sitebuilder -->
-<@stylesheet "/static/css/main.css" />
-<@stylesheet "/static/css/${component.name?default('common')}.css" />
-<@stylesheet "/static/libs/anytime/anytimec.css" />
-<@stylesheet "/static/libs/bootstrap-editable/css/bootstrap-editable.css" />
+<@stylesheet "/static/css/render.css" />
+
 <link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" title="No Accessibility" href="<@url resource="/static/css/noaccessibility.css"/>" type="text/css">
+<link rel="alternate stylesheet" title="Show Accessibility" href="<@url resource="/static/css/showaccessibility.css"/>" type="text/css">
+
+<!--[if lt IE 8]>
+<@stylesheet "/static/css/ielt8.css" />
+<![endif]-->
+<!--[if lt IE 9]>
+<style type="text/css">
+	#container {
+	behavior: url(/static/css/pie.htc);
+	}
+</style>
+<![endif]-->
