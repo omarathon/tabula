@@ -12,6 +12,13 @@
 
 <link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
 
+<#--
+	Uncomment these lines to use our Typekit font set for Tabula, which has museo-slab:700
+
+	<script type="text/javascript" src="//use.typekit.net/yym6hpx.js"></script>
+	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+-->
+
 <link rel="stylesheet" title="No Accessibility" href="<@url resource="/static/css/noaccessibility.css"/>" type="text/css">
 <link rel="alternate stylesheet" title="Show Accessibility" href="<@url resource="/static/css/showaccessibility.css"/>" type="text/css">
 
