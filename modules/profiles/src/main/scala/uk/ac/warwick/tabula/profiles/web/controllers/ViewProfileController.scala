@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
-class ProfileController extends BaseController with ProfileBreadcrumbs {
+class ViewProfileController extends ProfilesController {
   
 	hideDeletedItems
+	studentProfilesOnly
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
 	

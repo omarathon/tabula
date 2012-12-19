@@ -8,6 +8,7 @@
 	<bean id="freemarkerConfiguration" parent="defaultFreemarkerConfiguration">
 		<property name="sharedVariables">
 			<map merge="true">
+				<entry key="nationalityFormatter"><bean class="uk.ac.warwick.tabula.profiles.helpers.NationalityFormatter" /></entry>
 			</map>
 		</property>
 	</bean>

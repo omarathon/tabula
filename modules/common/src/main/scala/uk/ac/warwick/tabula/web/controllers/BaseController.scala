@@ -157,7 +157,12 @@ abstract class BaseController extends ControllerMethods
 		if (_hideDeletedItems) {
 			session.enableFilter("notDeleted")
 		}
+		
+		onPreRequest
 	}
+	
+	// Stub implementation that can be overridden for logic that goes before a request
+	def onPreRequest {}
 
 	/**
 	 * Sets up @Valid validation.

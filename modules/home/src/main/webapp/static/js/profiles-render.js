@@ -12,10 +12,16 @@ $(function() {
 		var target = container.find('form').attr('action') + '.json';
 		
 		var profilePickerMappings;
-		container.find('input[name="query"]').each(function() {
+		var xhr = null;
+		container.find('input[name="query"]').attr('autocomplete','off').each(function() {
 			$(this).typeahead({
 				source: function(query, process) {
-					$.get(target, { query : query }, function(data) {				
+					if (xhr != null) {
+						xhr.abort();
+						xhr = null;
+					}
+				
+					xhr = $.get(target, { query : query }, function(data) {				
 						var labels = []; // labels is the list of Strings representing assignments displayed on the screen
 						profilePickerMappings = {};
 						

@@ -25,7 +25,7 @@
 <section class="profile">
 	<section class="personal-details clearfix">
 		<div class="photo">
-			<img src="<@routes.photo profile />" class="img-polaroid" />
+			<img src="<@routes.photo profile />" />
 		</div>
 		
 		<header>
@@ -55,7 +55,7 @@
 					
 					<tr>
 						<th>Nationality</th>
-						<td>${profile.nationality?default('Unknown')}</td>
+						<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
 					</tr>
 					
 					<#if profile.dateOfBirth??>

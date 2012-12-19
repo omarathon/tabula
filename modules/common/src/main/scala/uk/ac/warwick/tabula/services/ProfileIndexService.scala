@@ -33,6 +33,14 @@ import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
 import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.MemberDao
+import org.apache.lucene.queryparser.flexible.standard.parser.ParseException
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.MemberUserType
+import org.apache.lucene.search.BooleanQuery
+import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search.TermQuery
+import org.apache.lucene.index.Term
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -47,9 +55,30 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	
 	override lazy val parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	def find(query: String) =
+	def find(query: String, userTypes: Set[MemberUserType]) =
 		if (!StringUtils.hasText(query)) Seq()
-		else search(parser.parse(stripTitles(query))) flatMap { toItem(_) }
+		else try {
+			val q = parser.parse(stripTitles(query))
+			
+			val bq = 
+				if (userTypes.isEmpty) q
+				else {
+					val bq = new BooleanQuery
+					bq.add(q, Occur.MUST)
+					
+					// Restrict user type
+					val typeQuery = new BooleanQuery
+					for (userType <- userTypes)
+						typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
+						
+					bq.add(typeQuery, Occur.MUST)
+					bq
+				}
+			
+			search(bq) flatMap { toItem(_) }
+		} catch {
+			case e: ParseException => Seq() // Invalid query string
+		}
 	
 	def stripTitles(query: String) = 
 		FullStops.replaceAllIn(
@@ -79,13 +108,21 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		"fullName"
 	)
 	
+	// Fields that will be split on whitespace
+	val whitespaceDelimitedFields = Set(
+		"departments"
+	)
+	
 	override val analyzer = {
 		val defaultAnalyzer = new KeywordAnalyzer()
 		
 		val nameAnalyzer = new ProfileAnalyzer(false)
 		val nameMappings = nameFields.map(field => (field -> nameAnalyzer))
 		
-		val mappings = (nameMappings).toMap[String, Analyzer].asJava
+		val whitespaceAnalyzer = new WhitespaceAnalyzer(LuceneVersion)
+		val whitespaceMappings = whitespaceDelimitedFields.map(field => (field -> whitespaceAnalyzer))
+		
+		val mappings = (nameMappings ++ whitespaceMappings).toMap[String, Analyzer].asJava
 		
 		new PerFieldAnalyzerWrapper(defaultAnalyzer, mappings)
 	}
@@ -120,15 +157,34 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		doc add plainStringField(IdField, item.universityId)
 		doc add plainStringField("userId", item.userId)
 		
-		if (item.firstName != null) doc add tokenisedStringField("firstName", item.firstName)
-		if (item.lastName != null) doc add tokenisedStringField("lastName", item.lastName)
-		if (item.fullFirstName != null) doc add tokenisedStringField("fullFirstName", item.fullFirstName)
-		if (item.firstName != null && item.lastName != null) doc add tokenisedStringField("fullName", item.fullName)
+		indexTokenised(doc, "firstName", Option(item.firstName))
+		indexTokenised(doc, "lastName", Option(item.lastName))
+		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
+		indexTokenised(doc, "fullName", Option(item.fullName))
+		
+		val departments: Seq[Option[Department]] = Seq(Option(item.homeDepartment), Option(item.studyDepartment))
+		indexSeq(doc, "departments", departments map { dept => if (dept.isDefined) Option(dept.get.code) else None })
+		
+		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
 		doc
 	}
-
+	
+	private def indexTokenised(doc: Document, fieldName: String, value: Option[String]) = {
+		if (value.isDefined)
+			doc add tokenisedStringField(fieldName, value.get)
+	}
+	
+	private def indexPlain(doc: Document, fieldName: String, value: Option[String]) = {
+		if (value.isDefined)
+			doc add plainStringField(fieldName, value.get)
+	}
+	
+	private def indexSeq(doc: Document, fieldName: String, values: Seq[Option[_]]) = {
+		doc add seqField(fieldName, values filter(_.isDefined) map {_.get})
+	}
+	
 }
 
 class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {

@@ -7,30 +7,6 @@ html.iframe {
 .tabula-page, #container {
   @import "bootstrap/bootstrap.less";
   @import "bootstrap/responsive.less";
-  
-  // We don't include boostrap/scaffolding, so re-apply img styles
-
-  // Images
-  // -------------------------
-
-  // Rounded corners
-  .img-rounded {
-    .border-radius(6px);
-  }
-
-  // Add polaroid-esque trim
-  .img-polaroid {
-    padding: 4px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border: 1px solid rgba(0,0,0,.2);
-    .box-shadow(0 1px 3px rgba(0,0,0,.1));
-  }
-
-  // Perfect circle
-  .img-circle {
-    .border-radius(500px); // crank the border-radius so it works with most reasonably sized images
-  }
 }
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
@@ -784,10 +760,23 @@ h1.with-settings {
 	
 	#container .profile {
 		.personal-details {
+			@photoTargetWidth: 186px;
+			@polaroidPadding: 8px;
+		
 			div.photo { 
 				float: left; 
-				width: 178px; 
-				margin-right: 24px; 
+				width: @photoTargetWidth;
+				margin-right: 16px; 
+				
+				img { 
+					padding: @polaroidPadding;
+  					background-color: #fff;
+  					border: 1px solid #ccc;
+  					border: 1px solid rgba(0,0,0,.2);
+					.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
+				
+					max-width: @photoTargetWidth - (@polaroidPadding * 2); 
+				}
 			}
 			div.col1 { 
 				float: left; 
@@ -875,11 +864,17 @@ h1.with-settings {
 		}
 		
 		.dropdown-menu {
+			@import "bootstrap/mixins.less";
+		
 			width: 462px;
 			
 			h2 { margin-bottom: 0; }
 			.photo { max-height: 50px; }
 			span.description { white-space: normal; }
+			
+			.active > a, .active > a:hover {
+				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
+			}
 		}
 		
 		form { margin: 0; }

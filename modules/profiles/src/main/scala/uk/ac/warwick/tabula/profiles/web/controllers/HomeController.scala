@@ -13,12 +13,13 @@ import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 
-@Controller class HomeController extends BaseController {
+@Controller class HomeController extends ProfilesController {
 
 	var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems
+	studentProfilesOnly
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
 

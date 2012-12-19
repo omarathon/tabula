@@ -29,7 +29,7 @@ trait ProfileService {
 	def save(member: Member)
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getMemberByUserId(userId: String): Option[Member]
-	def findMembersByQuery(query: String): Seq[Member]
+	def findMembersByQuery(query: String, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 }
 
@@ -47,8 +47,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getByUserId(userId)
 	}
 	
-	def findMembersByQuery(query: String) = transactional(readOnly = true) {
-		profileIndexService.find(query)
+	def findMembersByQuery(query: String, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
+		profileIndexService.find(query, userTypes)
 	} 
 	
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

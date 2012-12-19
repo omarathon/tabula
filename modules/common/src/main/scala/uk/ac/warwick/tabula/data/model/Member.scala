@@ -12,9 +12,28 @@ import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.AccessType
 
+object Member {
+	final val StudentsOnlyFilter = "studentsOnly"
+}
+
+/**
+ * Represents an assignment within a module, occurring at a certain time.
+ *
+ * Notes about the notDeleted filter:
+ * filters don't run on session.get() but getById will check for you.
+ * queries will only include it if it's the entity after "from" and not
+ * some other secondary entity joined on. It's usually possible to flip the
+ * query around to make this work.
+ */
+@FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'")
+@Filter(name = Member.StudentsOnlyFilter)
 @Entity
-class Member extends Viewable with Student with Staff with Alumni with ToString {
+@AccessType("field")
+class Member extends Viewable with StudentProperties with StaffProperties with AlumniProperties with ToString {
 	@Id @BeanProperty var universityId: String = _
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
@@ -23,6 +42,9 @@ class Member extends Viewable with Student with Staff with Alumni with ToString 
 	
 	@BeanProperty var title: String = _
 	@BeanProperty var fullFirstName: String = _
+	
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.MemberUserTypeUserType")
+	@BeanProperty var userType: MemberUserType = _
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
@@ -84,7 +106,7 @@ class Member extends Viewable with Student with Staff with Alumni with ToString 
 
 }
 
-trait Student {
+trait StudentProperties {
 	@BeanProperty var sprCode: String = _
 	@BeanProperty var sitsCourseCode: String = _
 	
@@ -155,10 +177,10 @@ trait Student {
 	@BeanProperty var nextOfKins:JList[NextOfKin] = ArrayList()
 }
 
-trait Staff {
+trait StaffProperties {
 	@BeanProperty var teachingStaff: JBoolean = _
 }
 
-trait Alumni {
+trait AlumniProperties {
 	
 }
