@@ -12,7 +12,7 @@
 	
 	<#if assignment?? >
 		<p>When the job is finished you'll be able to see the results on the 
-		<a href="<@routes.assignmentsubmissions assignment />">submissions page</a>.</p>
+		<a href="<@routes.assignmentsubmissionsandfeedback assignment />">submissions page</a>.</p>
 	</#if>
 	
 	<!-- <p>Job ID ${jobId}</p> -->
