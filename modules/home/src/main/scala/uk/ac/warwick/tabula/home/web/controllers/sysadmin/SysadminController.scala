@@ -137,19 +137,6 @@ class ReindexForm {
 	@BeanProperty var from: DateTime = _
 }
 
-@Controller
-@RequestMapping(Array("/sysadmin/import-profiles"))
-class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[ProfileImporter]
-	
-	@RequestMapping(method = Array(POST))
-	def reindex() = {
-		val command = new ImportProfilesCommand
-		command.apply()
-		redirectToHome
-	}
-}
-
 class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {
 	@BeanProperty var enable: Boolean = service.enabled
 
