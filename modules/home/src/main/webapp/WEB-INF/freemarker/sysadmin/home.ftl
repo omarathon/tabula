@@ -32,7 +32,7 @@
 </p>
 
 <p>
-<@f.form method="post" action="${url('/sysadmin/import-profiles')}">
+<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}">
   <input class="btn btn-danger" type="submit" value="Run profiles data import" onclick="return confirm('Really? Could take a minute.')">
 </@f.form>
 </p>
