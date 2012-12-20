@@ -1,4 +1,6 @@
 <#-- Styles that should be included both in the app and embedded in to Sitebuilder -->
+<@stylesheet "/static/css/bootstrap.css" />
+
 <#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
 	<@stylesheet "/static/css/concat6.css" />
 	<@stylesheet "/static/css/main.css" />
@@ -9,7 +11,6 @@
 <#else>
 	<@stylesheet "/static/css/render.css" />
 </#if>
-<@stylesheet "/static/css/bootstrap.css" />
 
 <link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
 
