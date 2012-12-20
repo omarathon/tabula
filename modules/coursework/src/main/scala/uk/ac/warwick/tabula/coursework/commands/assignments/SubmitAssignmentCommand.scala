@@ -126,4 +126,9 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 
 	override def describe(d: Description) = d.assignment(assignment).properties()
 
+	override def describeResult(d: Description, s: Submission) = {
+		d.assignment(assignment).properties().property("submission" -> s.id)
+		if (s.isNoteworthy)
+			d.assignment(assignment).properties().property("submissionIsNoteworthy" -> true)
+	}
 }

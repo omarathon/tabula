@@ -95,7 +95,7 @@ so that they can be passed around between requests.
 			<@form.field>
 				<label class="checkbox">
 					<@f.checkbox path="allowLateSubmissions" />
-					Allow submissions after the close date
+					Allow new submissions after the close date
 				</label>
 			</@form.field>
 		</@form.row>
@@ -108,7 +108,7 @@ so that they can be passed around between requests.
 				</label>
 				<div class="help-block">
 					Students will be able to submit new work, replacing any previous submission.
-					Re-submission is only allowed before the close date.
+					Re-submission is <em>never</em> allowed after the close date.
 				</div>
 			</@form.field>
 		</@form.row>

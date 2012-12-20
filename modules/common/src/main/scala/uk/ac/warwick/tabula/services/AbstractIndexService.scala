@@ -34,6 +34,7 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
+import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 
 trait CommonQueryMethods[T] { self: AbstractIndexService[T] =>
 
@@ -106,6 +107,14 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	 * the index has changed (i.e. after an index)
 	 */
 	var searcherManager: SearcherManager = _
+	
+	/**
+	 * SearcherLifetimeManager allows a specific IndexSearcher state to be
+	 * retrieved later by passing a token. This allows stateful search context
+	 * per-user. If you don't have a token, use the regular SearcherManager
+	 * to do the initial creation.
+	 */
+	var searcherLifetimeManager: SearcherLifetimeManager = _
 
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
@@ -140,6 +149,9 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 			else throw new IllegalStateException("Index path missing", new FileNotFoundException(indexPath.getAbsolutePath))
 		}
 		if (!indexPath.isDirectory) throw new IllegalStateException("Index path not a directory: " + indexPath.getAbsolutePath)
+		
+		// don't want this. http://www.lifeinthefastlane.ca/wp-content/uploads/2008/12/santa_claus_13sfw.jpg
+		BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE)
 
 		initialiseSearching
 
@@ -147,6 +159,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		executor.scheduleAtFixedRate(Runnable {
 			logger.debug("Trying to reopen index")
 			try reopen catch { case e => logger.error("Index service reopen failed", e) }
+			try prune catch { case e => logger.error("Pruning old searchers failed", e) }
 		}, 20, 20, TimeUnit.SECONDS)
 	}
 
@@ -163,6 +176,14 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 				case e: IndexNotFoundException => logger.warn("No index found.")
 			}
 		}
+		if (searcherLifetimeManager == null) {
+			try {
+				logger.debug("Opening a new searcher lifetime manager at " + indexPath)
+				searcherLifetimeManager = new SearcherLifetimeManager
+			} catch {
+				case e: IllegalStateException => logger.warn("Could not create SearcherLifetimeManager.")
+			}
+		}
 	}
 
 	/**
@@ -174,6 +195,15 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		
 		initialiseSearching
 		if (searcherManager != null) searcherManager.maybeRefresh
+	}
+
+	/**
+	 * Remove saved searchers over 20 minutes old
+	 */
+	private def prune = {
+		val ageInSeconds = 20*60
+		initialiseSearching
+		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
 	/**
@@ -293,6 +323,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): Seq[Document] = doSearch(query, Some(max), sort, offset)
 	def search(query: Query): Seq[Document] = doSearch(query, None, null, 0)
 	def search(query: Query, sort: Sort): Seq[Document] = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = doPagingSearch(query, Option(max), Option(sort), last, token)
 
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): Seq[Document] = {
 		initialiseSearching
@@ -323,6 +354,58 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
 	
+	class pagingSearchResult(val results: Seq[Document], val last: Option[ScoreDoc], val token: Long, val total: Int) {}
+	
+	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = {
+		// guard
+		initialiseSearching
+		
+		val (newToken, searcher) = acquireSearcher(token)
+		if (searcher == null) 
+			throw new IllegalStateException("Original IndexSearcher has expired.")
+		
+		logger.debug("Running paging search for query: " + query)
+			
+		try {
+			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
+			val results = (lastDoc, sort) match {
+				case (None, None) => searcher.search(query, maxResults)
+				case (after:Some[ScoreDoc], None) => searcher.searchAfter(after.get, query, maxResults)
+				case (after:Some[ScoreDoc], sort: Some[Sort]) => searcher.searchAfter(lastDoc.get, query, maxResults, sort.get)
+				case (None, sort: Some[Sort]) => searcher.search(query, maxResults, sort.get)
+			}
+			
+			val hits = results.scoreDocs
+			val totalHits = results.totalHits
+			hits match {
+				case Array() => new pagingSearchResult(Nil, None, newToken, 0)
+				case _ => {
+					val hitsOnThisPage = hits.length
+					new pagingSearchResult(hits.toStream.map (hit => searcher.doc(hit.doc)).toList, Option(hits(hitsOnThisPage-1)), newToken, totalHits)
+				}
+			}
+		}
+		finally searcherLifetimeManager.release(searcher)
+	}
+	
+	private def acquireSearcher(token: Option[Long]): (Long, IndexSearcher) = {
+		var searcher: IndexSearcher = null
+		var newToken: Long = 0
+		
+		token match {
+			case None => {
+				searcher = searcherManager.acquire
+				newToken = searcherLifetimeManager.record(searcher)
+			}
+			case Some(t) => {
+				searcher = searcherLifetimeManager.acquire(token.get)
+				newToken = t
+			}
+		}
+		
+		(newToken, searcher)
+	}
+
 	val IdField: String
 
 	/**

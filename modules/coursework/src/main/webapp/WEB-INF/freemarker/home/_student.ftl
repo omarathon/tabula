@@ -1,98 +1,105 @@
-<#assign has_feedback=assignmentsWithFeedback?has_content />
-<#assign has_submissions=assignmentsWithSubmission?has_content />
-<#assign has_assignments=enrolledAssignments?has_content />
+<#assign has_feedback = assignmentsWithFeedback?has_content />
+<#assign has_submissions = assignmentsWithSubmission?has_content />
+<#assign has_assignments = enrolledAssignments?has_content />
+<#assign has_archived = archivedAssignments?has_content />
 
-<#assign has_any_items = (has_feedback || has_submissions || has_assignments) />
+<#assign has_pending_items = (has_feedback || has_assignments) />
+<#assign has_historical_items = (has_submissions || has_archived) />
 
-<#if has_any_items || user.student>
+<#assign missing_assignments_markup>
+	<p>Talk to your module convenor if this seems like a mistake.</p>
+	<ul>
+		<li>They may not have set up the assignment yet</li>
+		<li>They may not be using Tabula for assessment</li>
+		<li>You may not be correctly enrolled.</li>
+	</ul>
+</#assign>
 
-<h2>Your assignments</h2>
+<#if has_pending_items || has_historical_items || user.student>
+	<h2 class="section">Your assignments</h2>
+	
+	<div class="row-fluid">
+		<div class="span6">
+			<h6>Pending</h6>
+			
+			<#if has_pending_items>
+				<ul class="links">		
+					<#if has_assignments>
+						<#macro enrolled_assignment info>
+							<#local assignment = info.assignment />
+							<#local extension = info.extension!false />
+							<#local isExtended = info.isExtended!false />
+							<#local extensionRequested = info.extensionRequested!false />
+							<@fmt.assignment_link assignment />
+							<#if info.submittable>
+								<#include "../submit/assignment_deadline.ftl" />
+							</#if>
+						</#macro>
+						
+						<#list enrolledAssignments as info>
+							<li class="simple-assignment-info">
+								<#if !info.isExtended!false && info.closed>
+									<span class="pull-right label label-important">Late</span>
+								<#elseif info.isExtended!false>
+									<span class="pull-right label label-info">Extended</span>
+								</#if>
+								<@enrolled_assignment info />
+							</li>
+						</#list>
+					</#if>
 
-	<p>
-	<strong>Is an assignment missing here?</strong> You will need to get in touch with your module convenor in the first instance.
-	They may not have set up the assignment, or may not be using this system for assessment, or you may not be correctly
-	enrolled.
-	</p>
-
-	<#if has_any_items>
-		
-		<#macro format_name assignment>
-			${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
-		</#macro>
-		<#macro assignment_link assignment>
-			<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-				<#nested />	
-			</a>
-		</#macro>
-		
-		<div class="simple-assignment-list">
-		
-		<#if has_assignments>
-		<#macro enrolled_assignment info>
-			<#local assignment = info.assignment />
-			<#local extension = info.extension!false />
-			<#local isExtended = info.isExtended!false />
-			<#local extensionRequested = info.extensionRequested!false />
-			<@assignment_link assignment>
-				<@format_name assignment />	
-			</@assignment_link>
-			<#if info.submittable>
-				<#include "../submit/assignment_deadline.ftl" />
+					<#if has_feedback>
+						<#list assignmentsWithFeedback as assignment>
+							<li class="simple-assignment-info">
+								<span class="pull-right label label-success">Marked</span>
+								<@fmt.assignment_link assignment />
+							</li>
+						</#list>
+					</#if>
+				</ul>	
+			
+				<div class="alert alert-block">
+					<h6>Is an assignment missing here?</h6>
+					${missing_assignments_markup}
+				</div>
+			<#else>
+				<div class="alert alert-block">
+					<h6>We don't have anything for you here.</h6>
+					${missing_assignments_markup}
+				</div>
 			</#if>
-		</#macro>
-		<#list enrolledAssignments as info>
-			<div class="simple-assignment-info">
-				<span class="label label-info">Enrolled</span>
-				<@enrolled_assignment info />
-			</div>
-		</#list>
-		</#if>
-		
-		<#if has_feedback>
-		<#list assignmentsWithFeedback as assignment>
-			<div class="simple-assignment-info">
-				<span class="label-green">Marked</span>
-				<@assignment_link assignment>
-					<@format_name assignment />	
-				</@assignment_link>
-			</div>
-		</#list>
-		</#if>
-		
-		<#if has_submissions>
-		<#list assignmentsWithSubmission as assignment>
-			<div class="simple-assignment-info">
-				<span class="label-orange">Submitted</span>
-				<@assignment_link assignment>
-					<@format_name assignment />	
-				</@assignment_link>
-			</div>
-		</#list>
-		</#if>
-		
 		</div>
-	
-	<#else><#-- !has_any_items -->
-
-		<p>
-		We don't have anything for you here. Talk to your module convenor if this seems like a mistake.
-		</p>
 		
-	</#if>
+		<div class="span6">
+			<h6>Past</h6>
+
+			<#if has_historical_items>
+				<#if has_submissions>
+					<ul class="links" id="submitted-assignments-list">
+						<#list assignmentsWithSubmission as assignment>
+							<li class="simple-assignment-info">
+								<span class="pull-right label">Submitted</span>
+								<@fmt.assignment_link assignment />
+							</li>
+						</#list>
+					</ul>
+				</#if>
 	
-	<#if archivedAssignments?has_content>
-	<div id="archived-assignments-container">
-	<div class="simple-assignment-list" id="archived-assignments-list">
-	<#list archivedAssignments as assignment>
-		<div class="simple-assignment-info">
-			<@assignment_link assignment>
-				<@format_name assignment />	
-			</@assignment_link>
+				<#if has_archived>
+					<div id="archived-assignments-container">
+						<ul class="links" id="archived-assignments-list">
+							<#list archivedAssignments as assignment>
+								<li class="simple-assignment-info">
+									<span class="pull-right label">Archived</span>
+									<@fmt.assignment_link assignment />
+								</li>
+							</#list>
+						</ul>
+					</div>
+				</#if>
+			<#else>
+				<p class="alert">There are no archived assignments to show you right now.</p>
+			</#if>
 		</div>
-	</#list>
 	</div>
-	</div>
-	</#if>
-
-
 </#if>
