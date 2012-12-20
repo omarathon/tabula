@@ -63,7 +63,7 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
 		val searchResults = search(
-			query = all(termQuery("eventType", "SubmitAssignment"), 
+			query = all(termQuery("eventType", "SubmitAssignment"),
 						some(moduleTerms:_*)
 					),
 			max = max,
@@ -78,7 +78,7 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
 		val searchResults = search(
-			query = all(termQuery("eventType", "SubmitAssignment"), 
+			query = all(termQuery("eventType", "SubmitAssignment"),
 						termQuery("submissionIsNoteworthy", "true"),
 						some(moduleTerms:_*)
 					),

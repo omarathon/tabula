@@ -147,6 +147,9 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 			else throw new IllegalStateException("Index path missing", new FileNotFoundException(indexPath.getAbsolutePath))
 		}
 		if (!indexPath.isDirectory) throw new IllegalStateException("Index path not a directory: " + indexPath.getAbsolutePath)
+		
+		// don't want this. http://www.lifeinthefastlane.ca/wp-content/uploads/2008/12/santa_claus_13sfw.jpg
+		BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE)
 
 		initialiseSearching
 
