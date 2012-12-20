@@ -53,9 +53,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	private val Title = """^(?:Mr|Ms|Mrs|Miss|Dr|Sir|Doctor|Prof(?:essor)?)(\.?|\b)\s*""".r
 	private val FullStops = """\.(\S)""".r
 	
-	override lazy val parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
+	// QueryParser isn't thread safe, hence why this is a def
+	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]) =
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]): Seq[Member] =
 		if (!StringUtils.hasText(query)) Seq()
 		else if (departments.isEmpty) Seq()
 		else try {

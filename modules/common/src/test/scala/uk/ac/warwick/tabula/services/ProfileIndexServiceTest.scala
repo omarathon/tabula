@@ -35,6 +35,9 @@ import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.Staff
 import uk.ac.warwick.tabula.Fixtures
+import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorCompletionService
+import java.util.concurrent.Callable
 
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
@@ -159,5 +162,22 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		// index again to check that it doesn't do any once-only stuff
 		indexer.index
 		
+	}
+	
+	@Test def threading {
+		val dept = Fixtures.department("CS", "Computer Science")
+		val callable = new Callable[Seq[Member]] {
+			override def call() = indexer.find("mathew james mannion", Seq(dept), Set())
+		}
+		
+		// TAB-296
+		val executionService = Executors.newFixedThreadPool(5)
+		val cs = new ExecutorCompletionService[Seq[Member]](executionService)
+		
+		for (i <- 1 to 100)
+			cs.submit(callable)
+			
+		for (i <- 1 to 100)
+			cs.take().get() should be ('empty)
 	}
 }
