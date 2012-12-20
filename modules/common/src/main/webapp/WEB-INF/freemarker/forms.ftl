@@ -196,6 +196,7 @@ To not bind:
 		<#if types?size &gt; 0>
 			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>
 		</#if>
+		<span id="multifile-column-description"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
 	</div>
 	
 	<script><!--
