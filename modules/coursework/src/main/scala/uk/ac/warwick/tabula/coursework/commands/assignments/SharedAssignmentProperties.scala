@@ -47,7 +47,7 @@ trait SharedAssignmentProperties {
 	@BeanProperty var wordCountMin: JInteger = _
 	@Max(Assignment.MaximumWordCount)
 	@BeanProperty var wordCountMax: JInteger = _
-	@Length(max = 500)
+	@Length(max = 600)
 	@BeanProperty var wordCountConventions: String = "Exclude any bibliography or appendices."
 	
 	// linked feedback template (optional)
