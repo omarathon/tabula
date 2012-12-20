@@ -11,13 +11,15 @@ import uk.ac.warwick.tabula.actions._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.spring.Wire
 
 /**
  * Checks permissions.
  */
 @Service
 class SecurityService extends Logging {
-	@Autowired var userLookup: UserLookupService = _
+	var userLookup = Wire.auto[UserLookupService]
+	var profileService = Wire.auto[ProfileService]
 	
 	@Value("${permissions.admin.group}") var adminGroup: String = _
 	@Value("${permissions.masquerade.group}") var masqueradeGroup: String = _
@@ -84,10 +86,22 @@ class SecurityService extends Logging {
 
 		case Masquerade() => user.sysadmin || user.masquerader
 		
-		case View(member: Member) => 
-		  user.sysadmin || 
-		  (member.homeDepartment != null && can(user, View(member.homeDepartment))) || 
-		  (member.studyDepartment != null && can(user, View(member.studyDepartment)))
+		case View(member: Member) => {
+			def isSamePerson = user.apparentId == member.userId
+			
+			def inSameDepartment = {
+				val myDepartments = profileService.getMemberByUserId(user.apparentId) map { _.affiliatedDepartments } getOrElse(Seq())
+				val theirDepartments = member.affiliatedDepartments
+				
+				val sameDepartments = myDepartments intersect member.affiliatedDepartments
+				
+				!sameDepartments.isEmpty
+			}
+			
+			isSamePerson || (user.isStaff && inSameDepartment)
+		}
+		
+		case Search(clazz: Class[Member]) => user.isStaff
 
 		case action: Action[_] => throw new IllegalArgumentException(action.toString)
 		case _ => throw new IllegalArgumentException()

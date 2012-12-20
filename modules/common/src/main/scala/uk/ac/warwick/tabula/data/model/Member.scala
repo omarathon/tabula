@@ -15,6 +15,8 @@ import org.joda.time.DateTime
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.AccessType
+import uk.ac.warwick.tabula.actions.Searchable
+import uk.ac.warwick.tabula.CurrentUser
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -33,7 +35,23 @@ object Member {
 @Filter(name = Member.StudentsOnlyFilter)
 @Entity
 @AccessType("field")
-class Member extends Viewable with StudentProperties with StaffProperties with AlumniProperties with ToString {
+class Member extends Viewable with Searchable with StudentProperties with StaffProperties with AlumniProperties with ToString {
+	
+	def this(user: CurrentUser) = {
+		this()
+		
+		this.userId = user.apparentId
+		this.firstName = user.firstName
+		this.lastName = user.lastName
+		this.universityId = user.universityId
+		this.email = user.email
+		this.userType = 
+			if (user.isStudent) Student
+			else if (user.isStaff) Staff
+			else Other
+	}
+	
+	
 	@Id @BeanProperty var universityId: String = _
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
@@ -83,6 +101,13 @@ class Member extends Viewable with StudentProperties with StaffProperties with A
 		 
 		userType.get + courseName.get + deptName.get
 	}
+	
+	/** 
+	 * Get all departments that this student is affiliated with. This includes their home department, 
+	 * the department running their course and any departments that they are taking modules in.
+	 */
+	def affiliatedDepartments = 
+		Seq(Option(homeDepartment), Option(studyDepartment)) flatten
 
 	def asSsoUser = {
 		val u = new User

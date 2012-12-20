@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
 
-class SearchProfilesCommand extends Command[List[Member]] with ReadOnly {
+class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Member]] with ReadOnly {
 	import SearchProfilesCommand._
 	
 	final val userTypes: Set[MemberUserType] = Set(Student)
@@ -21,27 +21,39 @@ class SearchProfilesCommand extends Command[List[Member]] with ReadOnly {
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	@BeanProperty var query: String = _
 	
-	override def applyInternal() = usercodeMatches ++ universityIdMatches ++ queryMatches
+	override def applyInternal() =
+		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
+		else Seq()
+		
+	private def validQuery = 
+		(query.trim().length > MinimumQueryLength) &&
+		(query.split("""\s+""") find {_.length > MinimumTermLength} isDefined)
 	
 	private def singleton(option: Option[Member]) = 
-		if (option.isDefined) List(option.get) filter {userTypes contains _.userType}
-		else List()
+		if (option.isDefined) Seq(option.get) filter {userTypes contains _.userType}
+		else Seq()
 	
 	private def usercodeMatches =
-		if (!isMaybeUsercode(query)) List()
+		if (!isMaybeUsercode(query)) Seq()
 		else singleton(service.getMemberByUserId(query))
 	
 	private def universityIdMatches = 
-		if (!isMaybeUniversityId(query)) List()
+		if (!isMaybeUniversityId(query)) Seq()
 		else singleton(service.getMemberByUniversityId(query))
 	
-	private def queryMatches = service.findMembersByQuery(query, userTypes)
+	private def queryMatches = service.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes)
 	
 	override def describe(d: Description) = d.property("query" -> query)
 
 }
 
 object SearchProfilesCommand {
+	
+	/** The minimum length of the whole query */
+	val MinimumQueryLength = 3
+	
+	/** The minimum length of at least one term in the query, avoids searches for "m m m" getting through */
+	val MinimumTermLength = 2
 	
 	private val UniversityIdPattern = """^\d{7,}$"""
 	

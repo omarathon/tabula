@@ -28,8 +28,8 @@ import org.joda.time.DateTime
 trait ProfileService {
 	def save(member: Member)
 	def getMemberByUniversityId(universityId: String): Option[Member]
-	def getMemberByUserId(userId: String): Option[Member]
-	def findMembersByQuery(query: String, userTypes: Set[MemberUserType]): Seq[Member]
+	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 }
 
@@ -43,12 +43,12 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getByUniversityId(universityId)
 	}
 	
-	def getMemberByUserId(userId: String) = transactional(readOnly = true) {
-		memberDao.getByUserId(userId)
+	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
+		memberDao.getByUserId(userId, disableFilter)
 	}
 	
-	def findMembersByQuery(query: String, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
-		profileIndexService.find(query, userTypes)
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
+		profileIndexService.find(query, departments, userTypes)
 	} 
 	
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

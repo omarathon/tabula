@@ -14,19 +14,29 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import org.springframework.util.FileCopyUtils
+import java.io.File
+import java.io.FileInputStream
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
+	
+	private val NoPhotoFile = new File(getClass.getResource("/no-photo.png").getFile)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@PathVariable member: Member, response: HttpServletResponse): Unit = {
 		mustBeAbleTo(View(mandatory(member)))
+		
+		def renderDefaultPhoto: Unit = {
+			response.addHeader("Content-Type", "image/png")
+			response.addHeader("Content-Length", NoPhotoFile.length.toString)
+	  		FileCopyUtils.copy(new FileInputStream(NoPhotoFile), response.getOutputStream)
+		}
 
 		Option(member.photo) match {
 		  	case Some(photo) => 
 		  		photo.dataStream match {
-		  			case null => throw new ItemNotFoundException
+		  			case null => renderDefaultPhoto
 		  			case inStream => {
 		  				// TODO We don't use fileserver here at the moment because it's for serving 
 	  					// files for download. We could probably extend RenderableFile to provide options 
@@ -39,7 +49,7 @@ class PhotoController extends ProfilesController {
 				  		FileCopyUtils.copy(inStream, response.getOutputStream)
 		  			}
 		  		}
-		  	case None => throw new ItemNotFoundException
+		  	case None => renderDefaultPhoto
 		}
 	}
 

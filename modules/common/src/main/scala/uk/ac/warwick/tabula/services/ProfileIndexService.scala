@@ -33,7 +33,7 @@ import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
 import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.MemberDao
-import org.apache.lucene.queryparser.flexible.standard.parser.ParseException
+import org.apache.lucene.queryparser.classic.ParseException
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.MemberUserType
@@ -53,27 +53,32 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	private val Title = """^(?:Mr|Ms|Mrs|Miss|Dr|Sir|Doctor|Prof(?:essor)?)(\.?|\b)\s*""".r
 	private val FullStops = """\.(\S)""".r
 	
-	override lazy val parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
+	// QueryParser isn't thread safe, hence why this is a def
+	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	def find(query: String, userTypes: Set[MemberUserType]) =
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]): Seq[Member] =
 		if (!StringUtils.hasText(query)) Seq()
+		else if (departments.isEmpty) Seq()
 		else try {
 			val q = parser.parse(stripTitles(query))
 			
-			val bq = 
-				if (userTypes.isEmpty) q
-				else {
-					val bq = new BooleanQuery
-					bq.add(q, Occur.MUST)
+			val bq = new BooleanQuery
+			bq.add(q, Occur.MUST)
+			
+			val deptQuery = new BooleanQuery
+			for (dept <- departments)
+				deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
 					
-					// Restrict user type
-					val typeQuery = new BooleanQuery
-					for (userType <- userTypes)
-						typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
-						
-					bq.add(typeQuery, Occur.MUST)
-					bq
-				}
+			bq.add(deptQuery, Occur.MUST)
+			
+			if (!userTypes.isEmpty) {
+				// Restrict user type
+				val typeQuery = new BooleanQuery
+				for (userType <- userTypes)
+					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
+					
+				bq.add(typeQuery, Occur.MUST)
+			}
 			
 			search(bq) flatMap { toItem(_) }
 		} catch {
@@ -162,8 +167,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
 		indexTokenised(doc, "fullName", Option(item.fullName))
 		
-		val departments: Seq[Option[Department]] = Seq(Option(item.homeDepartment), Option(item.studyDepartment))
-		indexSeq(doc, "departments", departments map { dept => if (dept.isDefined) Option(dept.get.code) else None })
+		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
 		
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		
@@ -181,8 +185,9 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 			doc add plainStringField(fieldName, value.get)
 	}
 	
-	private def indexSeq(doc: Document, fieldName: String, values: Seq[Option[_]]) = {
-		doc add seqField(fieldName, values filter(_.isDefined) map {_.get})
+	private def indexSeq(doc: Document, fieldName: String, values: Seq[_]) = {
+		if (!values.isEmpty)
+			doc add seqField(fieldName, values)
 	}
 	
 }

@@ -123,8 +123,10 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 			finally indexing = false
 			
 	val analyzer: Analyzer
-	lazy val indexAnalyzer = analyzer	
-	lazy val parser = new QueryParser(LuceneVersion, "", analyzer)
+	lazy val indexAnalyzer = analyzer
+	
+	// QueryParser isn't thread safe, hence why this is a def
+	def parser = new QueryParser(LuceneVersion, "", analyzer)
 
 	/**
 	 * When an index run finishes, we note down the date of the newest item,

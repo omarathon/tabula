@@ -759,6 +759,11 @@ h1.with-settings {
 	}
 	
 	#container .profile {
+		span[rel="tooltip"] {
+			cursor:help;
+			border-bottom: 1px dotted black;
+		}
+	
 		.personal-details {
 			@photoTargetWidth: 186px;
 			@polaroidPadding: 8px;
@@ -850,6 +855,21 @@ h1.with-settings {
 		
 		@searchFontSize: @baseFontSize * 1.5;
 		@searchLineHeight: @baseLineHeight * 1.5;
+		
+		.input-append {
+			margin-bottom: 0;
+			position: relative;
+			
+			div.spinner-container {
+				position: absolute;
+				line-height: 40px;
+				height: 40px;
+				width: 40px;
+				top: 1px;
+				left: 330px;
+				z-index: 10;
+			}
+		}
 		
 		input[type="text"] {
 			height: @searchLineHeight;

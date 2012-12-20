@@ -13,22 +13,25 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.actions.Create
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
-  
-	hideDeletedItems
-	studentProfilesOnly
 	
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
 	
 	@RequestMapping
 	def viewProfile(@PathVariable member: Member) = {
 		mustBeAbleTo(View(mandatory(member)))
+		
+		val isSelf = (member.universityId == user.universityId)
+		
 		Mav("profile/view", 
-		    "profile" -> member)
-		   .crumbs(Breadcrumbs.Profile(member))
+		    "profile" -> member,
+		    "isSelf" -> isSelf)
+		   .crumbs(Breadcrumbs.Profile(member, isSelf))
 	}
 	
 	@RequestMapping(value=Array("/reimport"), method=Array(POST))

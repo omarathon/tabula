@@ -57,9 +57,9 @@
 
 <#macro nationality nationality><#--
 --><#if nationality = 'British (ex. Channel Islands & Isle of Man)' || nationality = 'British [NO LONGER IN USE: change to 2826]' || nationality = 'NAT code 000 should be used for British'><#--
-	--><abbr title="${nationality}">British</abbr><#--
+	--><span rel="tooltip" data-placement="right" title="${nationality}">British</span><#--
 --><#elseif nationality?starts_with('(Obsolete) Formerly ')><#--
-	--><abbr title="${nationality}">${nationality?substring(20)}</abbr><#--
+	--><span rel="tooltip" data-placement="right" title="${nationality}">${nationality?substring(20)}</span><#--
 --><#else><#--
 	-->${nationality}<#--
 --></#if></#macro>
