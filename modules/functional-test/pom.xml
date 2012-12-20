@@ -67,8 +67,8 @@
 					<version>1.0-M2</version>
 				</dependency>
 			</dependencies>
-			<repositories>
-				<repository>
+			<pluginRepositories>
+				<pluginRepository>
 					<id>sonatype</id>
 					<name>Sonatype Public</name>
 					<url>https://oss.sonatype.org/content/groups/public</url>
@@ -78,8 +78,8 @@
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
-				</repository>
-			</repositories>
+				</pluginRepository>
+			</pluginRepositories>
 		</profile>
 	</profiles>
 
@@ -104,7 +104,7 @@
 			<artifactId>common</artifactId>
 			<scope>test</scope>
 		</dependency> -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>common</artifactId>
 		</dependency>
@@ -113,6 +113,6 @@
 			<artifactId>common</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 </project>
