@@ -14,8 +14,8 @@ object ProfileBreadcrumbs {
 	/**
 	 * Special case breadcrumb for a profile.
 	 */
-	case class Profile(val profile: model.Member) extends Abstract {
-		val title = profile.fullName
+	case class Profile(val profile: model.Member, val isSelf: Boolean = false) extends Abstract {
+		val title = if (isSelf) "Your profile" else profile.fullName
 		val url = Routes.profile.view(profile)
 		override val tooltip = profile.fullName + " (" + profile.universityId + ")"
 	}

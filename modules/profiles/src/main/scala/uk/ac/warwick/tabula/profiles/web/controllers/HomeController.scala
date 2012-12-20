@@ -13,11 +13,16 @@ import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.profiles.web.Routes
 
 @Controller class HomeController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
 
-	@RequestMapping(Array("/")) def home() = Mav("home/view")
+	@RequestMapping(Array("/")) def home() = 
+		if (user.isStaff) Mav("home/view")
+		else if (optionalCurrentMember.isDefined && currentMember.userType == Student) Redirect(Routes.profile.view(currentMember))
+		else Mav("home/nopermission")
 	
 }

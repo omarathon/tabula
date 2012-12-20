@@ -2,7 +2,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-<#if features.profiles>
+<#if features.profiles && user.staff>
 <#include "../profile/search/form.ftl" />
 <#else>
 <p>Here is where you'd see student profiles.</p>

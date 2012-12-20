@@ -25,9 +25,13 @@ class ViewProfileController extends ProfilesController {
 	@RequestMapping
 	def viewProfile(@PathVariable member: Member) = {
 		mustBeAbleTo(View(mandatory(member)))
+		
+		val isSelf = (member.universityId == user.universityId)
+		
 		Mav("profile/view", 
-		    "profile" -> member)
-		   .crumbs(Breadcrumbs.Profile(member))
+		    "profile" -> member,
+		    "isSelf" -> isSelf)
+		   .crumbs(Breadcrumbs.Profile(member, isSelf))
 	}
 	
 	@RequestMapping(value=Array("/reimport"), method=Array(POST))

@@ -28,6 +28,7 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 		}
 	}
 	
-	final def currentMember = profileService.getMemberByUserId(user.apparentId, true) getOrElse(new Member(user))
+	final def optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, true)
+	final def currentMember = optionalCurrentMember getOrElse(new Member(user))
 	
 }
