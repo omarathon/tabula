@@ -18,6 +18,8 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.services.ProfileIndexService
+import uk.ac.warwick.tabula.services.ProfileImporter
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -107,6 +109,19 @@ class ImportSitsController extends BaseSysadminController {
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
 		val command = new ImportAssignmentsCommand
+		command.apply()
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-profiles"))
+class ImportProfilesController extends BaseSysadminController {
+	var importer = Wire.auto[ProfileImporter]
+	
+	@RequestMapping(method = Array(POST))
+	def reindex() = {
+		val command = new ImportProfilesCommand
 		command.apply()
 		redirectToHome
 	}
