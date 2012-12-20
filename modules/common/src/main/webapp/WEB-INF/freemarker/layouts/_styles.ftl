@@ -9,6 +9,7 @@
 <#else>
 	<@stylesheet "/static/css/render.css" />
 </#if>
+<@stylesheet "/static/css/bootstrap.css" />
 
 <link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
 
