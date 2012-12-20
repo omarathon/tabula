@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def getByUniversityId(universityId: String): Option[Member]
-	def getByUserId(userId: String): Option[Member]
+	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 }
@@ -25,8 +25,18 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def getByUniversityId(universityId: String) = 
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
 	
-	def getByUserId(userId: String) =
-		session.newCriteria[Member].add(is("userId", userId.trim.toLowerCase)).uniqueResult
+	def getByUserId(userId: String, disableFilter: Boolean = false) = {
+		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
+		try {
+			if (disableFilter) 
+				session.disableFilter(Member.StudentsOnlyFilter)
+				
+			session.newCriteria[Member].add(is("userId", userId.trim.toLowerCase)).uniqueResult
+		} finally {
+			if (disableFilter && filterEnabled)
+				session.enableFilter(Member.StudentsOnlyFilter)
+		}
+	}
 	
 	def listUpdatedSince(startDate: DateTime, max: Int) = 
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list

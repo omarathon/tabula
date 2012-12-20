@@ -34,6 +34,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.Staff
+import uk.ac.warwick.tabula.Fixtures
 
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
@@ -61,12 +62,15 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Transactional
 	@Test def find = withFakeTime(dateTime(2000, 6)) {
+		val dept = Fixtures.department("CS", "Computer Science")
+		
 		val m = new Member
 		m.universityId = "0672089"
 		m.userId = "cuscav"
 		m.firstName = "Mathew"
 		m.fullFirstName = "Mathew James"
 		m.lastName = "Mannion"
+		m.homeDepartment = dept
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
 		m.userType = Student
 		
@@ -76,15 +80,17 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		indexer.listRecent(0, 1000).size should be (1)
 		
-		indexer.find("bob thornton", Set()) should be ('empty)
-		indexer.find("Mathew", Set()).head should be (m)
-		indexer.find("mat", Set()).head should be (m)
-		indexer.find("m mannion", Set()).head should be (m)
-		indexer.find("mathew james mannion", Set()).head should be (m)
-		indexer.find("mat mannion", Set()).head should be (m)
-		indexer.find("m m", Set()).head should be (m)
-		indexer.find("m m", Set(Student, Staff)).head should be (m)
-		indexer.find("m m", Set(Staff)) should be ('empty)
+		indexer.find("bob thornton", Seq(dept), Set()) should be ('empty)
+		indexer.find("Mathew", Seq(dept), Set()).head should be (m)
+		indexer.find("mat", Seq(dept), Set()).head should be (m)
+		indexer.find("m mannion", Seq(dept), Set()).head should be (m)
+		indexer.find("mathew james mannion", Seq(dept), Set()).head should be (m)
+		indexer.find("mat mannion", Seq(dept), Set()).head should be (m)
+		indexer.find("m m", Seq(dept), Set()).head should be (m)
+		indexer.find("m m", Seq(dept), Set(Student, Staff)).head should be (m)
+		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department"), dept), Set(Student, Staff)).head should be (m)
+		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff)) should be ('empty)
+		indexer.find("m m", Seq(dept), Set(Staff)) should be ('empty)
 	}
 	
 	@Transactional

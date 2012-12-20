@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
 
-class SearchProfilesCommand extends Command[Seq[Member]] with ReadOnly {
+class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Member]] with ReadOnly {
 	import SearchProfilesCommand._
 	
 	final val userTypes: Set[MemberUserType] = Set(Student)
@@ -41,7 +41,7 @@ class SearchProfilesCommand extends Command[Seq[Member]] with ReadOnly {
 		if (!isMaybeUniversityId(query)) Seq()
 		else singleton(service.getMemberByUniversityId(query))
 	
-	private def queryMatches = service.findMembersByQuery(query, userTypes)
+	private def queryMatches = service.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes)
 	
 	override def describe(d: Description) = d.property("query" -> query)
 
