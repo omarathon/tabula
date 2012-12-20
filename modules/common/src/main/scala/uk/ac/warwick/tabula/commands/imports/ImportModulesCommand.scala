@@ -19,6 +19,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		transactional() {
 			importDepartments
 			importModules
+			importRoutes
 		}
 	}
 
@@ -52,6 +53,32 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
+	def importRoutes {
+		logger.info("Importing routes")
+		for (dept <- moduleService.allDepartments) {
+			importRoutes(moduleImporter.getRoutes(dept.code), dept)
+		}
+	}
+
+	def importRoutes(routes: Seq[RouteInfo], dept: Department) {
+		for (rot <- routes) {
+			moduleService.getRouteByCode(rot.code) match {
+				case None => {
+					debug("Route code %s not found in database, so inserting", rot.code)
+					session.saveOrUpdate(newRouteFrom(rot, dept))
+				}
+				case Some(route) => {
+					// HFC-354 Update route name if it changes.
+					if (rot.name != route.name) {
+						logger.info("Updating name of %s to %s".format(rot.code, rot.name))
+						route.name = rot.name
+						session.saveOrUpdate(route)
+					}
+				}
+			}
+		}
+	}
+
 	def importDepartments {
 		logger.info("Importing departments")
 		for (dept <- moduleImporter.getDepartments) {
@@ -76,6 +103,15 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		department.code = d.code
 		department.name = d.name
 		department
+	}
+	
+	private def newRouteFrom(r: RouteInfo, dept: Department): Route = {
+		val route = new Route
+		route.code = r.code
+		route.name = r.name
+		route.degreeType = r.degreeType
+		route.department = dept
+		route
 	}
 
 }

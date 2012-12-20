@@ -33,9 +33,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	override def applyInternal() {
-		val admins =
-			if (!module.participants.isEmpty) module.participants
-			else module.department.owners
+		val admins = module.department.owners
 
 		val adminUsers = userLookup.getUsersByUserIds(seqAsJavaList(admins.members))
 		val manageAssignmentUrl = Routes.admin.assignment.edit(assignment)

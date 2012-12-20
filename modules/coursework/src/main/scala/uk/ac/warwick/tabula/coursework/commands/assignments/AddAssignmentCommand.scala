@@ -39,4 +39,6 @@ class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCo
 		"openDate" -> openDate,
 		"closeDate" -> closeDate)
 
+	// can be overridden in concrete implementations to provide additional validation
+	def contextSpecificValidation(errors: Errors) {}
 }

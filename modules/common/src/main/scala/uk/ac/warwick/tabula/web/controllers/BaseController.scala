@@ -84,7 +84,6 @@ trait ControllerViews {
 	
 	def Redirect(path: String) = Mav("redirect:" + path)
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
-	def Reload() = Redirect(currentPath)
 
 	private def currentUri = requestInfo.get.requestedUri
 	private def currentPath: String = currentUri.getPath
@@ -158,7 +157,12 @@ abstract class BaseController extends ControllerMethods
 		if (_hideDeletedItems) {
 			session.enableFilter("notDeleted")
 		}
+		
+		onPreRequest
 	}
+	
+	// Stub implementation that can be overridden for logic that goes before a request
+	def onPreRequest {}
 
 	/**
 	 * Sets up @Valid validation.

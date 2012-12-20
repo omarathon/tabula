@@ -58,6 +58,8 @@ case class AuditEvent(
 	def combinedParsedData = relatedParsedData.foldLeft(Map.empty[String, Any]) { (list, map) => map ++ list }
 
 	def assignmentId = stringProperty("assignment")
+	def submissionId = stringProperty("submission")
+	def submissionIsNoteworthy = stringProperty("submissionIsNoteworthy")
 	def submissionIds = stringListProperty("submissions")
 	def feedbackIds = stringListProperty("feedbacks")
 
@@ -66,6 +68,9 @@ case class AuditEvent(
 
 	def findStage(stage: String) = related.find(_.eventStage == stage)
 	def findBeforeStage = findStage("before")
+
+	/** Returns whether any of the events have a property. */
+	def hasProperty(name: String): Boolean = stringProperty(name).isDefined
 
 	/** Returns whether any of the events have a property with this string value. */
 	def hasProperty(name: String, value: String): Boolean =

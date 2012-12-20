@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
+import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -29,7 +30,10 @@ class ScheduledJobs {
 	var exceptionResolver: ExceptionResolver = _
 
 	@Autowired @BeanProperty
-	var indexingService: AuditEventIndexService = _
+	var auditIndexingService: AuditEventIndexService = _
+	
+	@Autowired @BeanProperty
+	var profileIndexingService: ProfileIndexService = _
 
 	@Autowired @BeanProperty
 	var jobService: JobService = _
@@ -37,6 +41,11 @@ class ScheduledJobs {
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = exceptionResolver.reportExceptions {
 		new ImportModulesCommand().apply()
+	}
+
+	@Scheduled(cron = "0 30 7 * * *")
+	def importMembers: Unit = exceptionResolver.reportExceptions {
+		new ImportProfilesCommand().apply()
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")
@@ -50,7 +59,10 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(fixedRate = 60000) // every minute
-	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { indexingService.index }
+	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.index }
+	
+	@Scheduled(fixedRate = 60000) // every 5 minutes
+	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.index }
 
 	@Scheduled(fixedDelay = 10000) // every 10 seconds, non-concurrent
 	def jobs: Unit = exceptionResolver.reportExceptions { jobService.run }

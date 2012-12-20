@@ -6,19 +6,11 @@ import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
+import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
-
-import javax.persistence.FetchType
 import forms.Extension
 import scala.util.matching.Regex
-import javax.persistence.OneToOne
 import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
 
@@ -42,13 +34,24 @@ class FileAttachment extends GeneratedId {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="extension_id")
 	@BeanProperty var extension:Extension =_
-	
+
+	@ManyToOne
+	@JoinTable(name="MarkerFeedbackAttachment",
+		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
+		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
+	@BeanProperty var markerFeedback:MarkerFeedback = _
+
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
-    @BeanProperty var originalityReport: OriginalityReport = _
+	@BeanProperty var originalityReport: OriginalityReport = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
 	@BeanProperty var feedbackForm: FeedbackTemplate = _
 
+	/**
+	 * WARNING this method isn't exhaustive. It only checks fields that are directly on this
+	 * attachment table. It won't check mappings where the foreign key is on the other side,
+	 * which is the case for things like member photos.
+	 */
 	def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
 
 	@BeanProperty var temporary: JBoolean = true

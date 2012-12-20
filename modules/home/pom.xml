@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>21</version>
+		<version>22</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -125,77 +125,18 @@
 			</plugin>
 
 			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>yuicompressor-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>compress</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<nosuffix>true</nosuffix>
-					<nomunge>true</nomunge>
-					<excludes>
-						<exclude>**/static/libs/**/*.*</exclude>
-					</excludes>
-					<jswarn>false</jswarn>
-					<aggregations>
-						<aggregation>
-							<insertNewLine>true</insertNewLine>
-							<output>${project.build.directory}/${project.build.finalName}/static/js/common.js</output>
-							<includes>
-								<include>scripts.js</include>
-								<include>jquery-copyable.js</include>
-								<include>jquery-biglist.js</include>
-								<include>jquery-tableform.js</include>
-								<include>userpicker.js</include>
-								<include>ajax-popup.js</include>
-								<include>app-comments.js</include>
-							</includes>
-						</aggregation>
-						<aggregation>
-							<insertNewLine>true</insertNewLine>
-							<output>${project.build.directory}/${project.build.finalName}/static/js/courses.js</output>
-							<includes>
-								<include>common.js</include>
-								<include>coursework-admin.js</include>
-								<include>coursework-submission.js</include>
-							</includes>
-						</aggregation>
-						<aggregation>
-							<insertNewLine>true</insertNewLine>
-							<output>${project.build.directory}/${project.build.finalName}/static/js/home.js</output>
-							<includes>
-								<include>common.js</include>
-							</includes>
-						</aggregation>
-						<aggregation>
-							<insertNewLine>true</insertNewLine>
-							<output>${project.build.directory}/${project.build.finalName}/static/js/profiles.js</output>
-							<includes>
-								<include>common.js</include>
-							</includes>
-						</aggregation>
-					</aggregations>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>lesscss</id>
-						<phase>prepare-package</phase>
+						<phase>compile</phase>
 						<configuration>
 							<target>
 								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="maven.plugin.classpath" />
 
 								<lesscss todir="${project.build.directory}/${project.build.finalName}/static/css">
-									<fileset dir="${project.build.directory}/${project.build.finalName}/static/css" includes="*.less" excludes="*.inc.less" />
+									<fileset dir="${basedir}/src/main/webapp/static/css" includes="*.less" excludes="*.inc.less" />
 								</lesscss>
 							</target>
 						</configuration>
@@ -232,6 +173,105 @@
 						<version>1.2.17</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>compress</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nosuffix>true</nosuffix>
+					<nomunge>true</nomunge>
+					<disableOptimizations>true</disableOptimizations>
+					<excludes>
+						<exclude>**/static/libs/**/*.*</exclude>
+						<exclude>**/*.css</exclude>
+					</excludes>
+					<jswarn>false</jswarn>
+					<aggregations>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/css/render.css</output>
+							<inputDir>${basedir}/src/main/webapp/static</inputDir>
+							<includes>
+								<include>css/concat6.css</include>
+								<include>${project.build.directory}/${project.build.finalName}/static/css/main.css</include>
+								<include>libs/anytime/anytimec.css</include>
+								<include>libs/bootstrap-editable/css/bootstrap-editable.css</include>
+								<include>libs/popup/popup.css</include>
+								<include>libs/jquery-rating/jquery.rating.css</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/render.js</output>
+							<inputDir>${basedir}/src/main/webapp/static</inputDir>
+							<includes>
+								<include>js/id6scripts.js</include>
+								<include>libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js</include>
+								<include>libs/jquery.delayedObserver.js</include>
+								<include>libs/jquery-rating/jquery.rating.pack.js</include>
+								<!--<include>libs/jquery-caret/jquery.caret.1.02.js</include>-->
+								<include>libs/anytime/anytimec.js</include>
+								<include>libs/popup/popup.js</include>
+								<include>libs/bootstrap/js/bootstrap.js</include>
+								<include>libs/bootstrap-editable/js/bootstrap-editable.js</include>
+								<include>libs/spin-js/spin.min.js</include>
+								<include>libs/spin-js/jquery.spin.js</include>
+								<include>js/modernizr.js</include>
+								<include>js/browser-info.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/common.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>scripts.js</include>
+								<include>jquery-copyable.js</include>
+								<include>jquery-biglist.js</include>
+								<include>jquery-tableform.js</include>
+								<include>userpicker.js</include>
+								<include>ajax-popup.js</include>
+								<include>app-comments.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/courses.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+								<include>coursework-admin.js</include>
+								<include>coursework-submission.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/home.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/profiles.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+								<include>profiles-render.js</include>
+							</includes>
+						</aggregation>
+					</aggregations>
+				</configuration>
 			</plugin>
 
 			<!-- Build a zip of our static-hashes now it's generated -->

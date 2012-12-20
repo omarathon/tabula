@@ -20,7 +20,6 @@ Adding or editing a new markscheme
 <@f.form method="post" action="${form_url}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
-
 <#--
 
 Common form fields.
@@ -34,30 +33,7 @@ Common form fields.
 </@form.labelled_row>
 
 <@form.labelled_row "firstMarkers" "First markers">
-	<div id="firstmarkers-list">
 	<@form.userpicker path="firstMarkers" list=true multiple=true />
-	<#--
-	<@spring.bind path="firstMarkers">
-		<#assign _users=status.actualValue />
-		<@userlookup ids=_users>
-			<#list returned_users?values as _user>
-				<div><input type="text" class="text" name="${status.expression}" value="${_user.userId}" /></div>
-			</#list>
-			<div><input type="text" class="text" name="${status.expression}" /></div>
-			<button class="btn" data-expression="${status.expression}">Add</button>
-		</@userlookup>
-	</@spring.bind>
-	-->
-	</div>
-	<script>
-		jQuery('#firstmarkers-list button').on('click', function(e){
-			e.preventDefault();
-			var name = jQuery(this).data('expression'); 
-			var newButton = jQuery('<div><input type="text" class="text" name="'+name+'" /></div>');
-			jQuery('#firstmarkers-list button').before(newButton);
-			return false;
-		});
-	</script>
 </@form.labelled_row>
 
 <div class="control-group">
@@ -71,7 +47,7 @@ Common form fields.
 		</div>
 	</div>
 </div>
-<#-- TODO - replace with above block when more options become available-->
+<#-- TODO - replace with block below when more options become available - but disable it if existingSubmissions is true -->
 <#--@form.labelled_row "studentsChooseMarker" "">
 	<label class="checkbox">
 		<@f.checkbox path="studentsChooseMarker" />

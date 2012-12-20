@@ -24,15 +24,22 @@ so that they can be passed around between requests.
 </#if>
 
 <#if features.markSchemes && department.markSchemes?has_content>
+
+	<#assign disabled = !(canUpdateMarkScheme!true)>
+
 	<@form.labelled_row "markScheme" "Mark scheme">
-		<@f.select path="markScheme">
+		<@f.select path="markScheme" disabled="${disabled?string}">
 			<@f.option value="" label="None"/>
 			<#list department.markSchemes as markScheme>
 				<@f.option value="${markScheme.id}" label="${markScheme.name}"/>
 			</#list>
 		</@f.select>
 		<div class="help-block">
-			Select the way in which this assignment will be marked.
+			<#if disabled>
+				<span class="warning">You cannot change the mark scheme for this assignment as it already has submissions.</span>
+			<#else>
+				Select the way in which this assignment will be marked.
+			</#if>
 		</div>
 	</@form.labelled_row>
 </#if>
@@ -88,7 +95,7 @@ so that they can be passed around between requests.
 			<@form.field>
 				<label class="checkbox">
 					<@f.checkbox path="allowLateSubmissions" />
-					Allow submissions after the close date
+					Allow new submissions after the close date
 				</label>
 			</@form.field>
 		</@form.row>
@@ -101,7 +108,7 @@ so that they can be passed around between requests.
 				</label>
 				<div class="help-block">
 					Students will be able to submit new work, replacing any previous submission.
-					Re-submission is only allowed before the close date.
+					Re-submission is <em>never</em> allowed after the close date.
 				</div>
 			</@form.field>
 		</@form.row>

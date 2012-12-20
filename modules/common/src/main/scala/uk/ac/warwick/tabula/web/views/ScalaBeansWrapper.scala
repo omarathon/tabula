@@ -28,6 +28,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	override def wrap(obj: Object): TemplateModel = {
 		obj match {
 			case Some(x: Object) => wrap(x)
+			case Some(null) => null
 			case None => null
 			//      case long:Long => superWrap(long:JLong)
 			case jcol: java.util.Collection[_] => superWrap(jcol)

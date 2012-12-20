@@ -12,15 +12,18 @@ import collection.JavaConversions._
 import org.springframework.jdbc.core.SqlParameter
 import java.sql.Types
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
+import uk.ac.warwick.tabula.data.model.DegreeType
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)
+case class RouteInfo(val name: String, val code: String, val degreeType: DegreeType)
 
 /**
  * Retrieves department and module information from an external location.
  */
 trait ModuleImporter {
 	def getModules(deptCode: String): Seq[ModuleInfo]
+	def getRoutes(deptCode: String): Seq[RouteInfo]
 	def getDepartments: Seq[DepartmentInfo]
 }
 
@@ -35,15 +38,11 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 
 	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(ads)
 	lazy val moduleInfoMappingQuery = new ModuleInfoMappingQuery(ads)
+	lazy val routeInfoMappingQuery = new RouteInfoMappingQuery(ads)
 
-	def getDepartments: Seq[DepartmentInfo] = {
-		departmentInfoMappingQuery.execute()
-	}
-
-	def getModules(deptCode: String): Seq[ModuleInfo] = {
-		val result = moduleInfoMappingQuery.execute(deptCode.toUpperCase)
-		result
-	}
+	def getDepartments: Seq[DepartmentInfo] = departmentInfoMappingQuery.execute
+	def getModules(deptCode: String): Seq[ModuleInfo] = moduleInfoMappingQuery.execute(deptCode.toUpperCase)
+	def getRoutes(deptCode: String): Seq[RouteInfo] = routeInfoMappingQuery.execute(deptCode.toUpperCase)
 }
 
 object ModuleImporter {
@@ -61,6 +60,8 @@ object ModuleImporter {
                       and in_use = 'Y'
                       group by substr(module_code,0,5)
         ) x inner join module m on substr(m.module_code,0,5) = xcode and m.modified_date = maxmod"""
+	final val GetRoutesSql =
+	  	"""select r.route_code as code, r.name, r.degree_type from route r where r.department_code = ? and r.in_use = 'Y'"""
 
 
 	class DepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[DepartmentInfo](ds, GetDepartmentsSql) {
@@ -82,6 +83,18 @@ object ModuleImporter {
 				rs.getString("name"),
 				moduleCode,
 				deptCode + "-" + moduleCode)
+		}
+	}
+	
+	class RouteInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[RouteInfo](ds, GetRoutesSql) {
+		declareParameter(new SqlParameter("dept", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+			val routeCode = rs.getString("code").toLowerCase
+			RouteInfo(
+				rs.getString("name"),
+				routeCode,
+				DegreeType.fromCode(rs.getString("degree_type")))
 		}
 	}
 

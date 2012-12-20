@@ -1,19 +1,30 @@
 <#escape x as x?html>
 
-<h1>Background jobs</h1>
+<#macro paginator>
+<#if page gt 0>
+<a href="?page=${page-1}">Newer</a>
+</#if>
+<a href="?page=${page+1}">Older</a>
+</#macro>
 
-<#if jobs?size gt 0>
-<table class="jobs-list">
+<#macro jobs jobs actions=false>
+<table class="jobs-list" width="100%">
+<thead>
 <tr>
-	<td>Created</td>
-	<td>Type</td>
-	<td>User</td>
-	<td>Status</td>
-	<td>Progress</td>
-	<td>Data</td>
+	<th>Created</th>
+	<th>Type</th>
+	<th>User</th>
+	<th>Status</th>
+	<th>Progress</th>
+	<th>Data</th>
+	<#if actions>
+		<th>Actions</th>
+	</#if>
 </tr>
+</thead>
+<tbody>
 <#list jobs as job>
-<tr>
+<tr class="type-${job.jobType}<#if job_index % 2 = 0> even-row</#if>">
 	<td><@fmt.date date=job.createdDate seconds=true /></td>
 	<td>${job.jobType}</td>
 	<td>
@@ -23,21 +34,49 @@
 	</td>
 	<td>${job.status!''}</td>
 	<td>
-		<#if job.started>
-			<span class="label-green">Started</span>
+		<#if job.finished && job.succeeded>
+			<span class="label-green">Succeeded</span>
+		<#elseif job.finished>
+			<span class="label-red">Failed</span>
+		<#elseif job.started>
+			<span class="label-blue">Started</span>
 		<#else>
 			<span class="label-orange">Waiting</span>
 		</#if>
 		<span class="percent">${job.progress!'?'}%</span>
 	</td>
-	<td class="data">${job.data}</td>
+	<td class="data"><div class="extra-data">${job.data}</div></td>
+	<#if actions>
+		<td class="actions">
+			<a class="btn btn-small btn-danger" href="<@url page="/sysadmin/jobs/kill" />?id=${job.id}">Kill</a>
+		</td>
+	</#if>
 </tr>
 </#list>
+</tbody>
 </table>
+</#macro>
+
+<h1>Background jobs</h1>
+
+<#if page == 0>
+<h2>Incomplete jobs</h2>
+
+<#if unfinished?size gt 0>
+<@jobs unfinished true />
 <#else>
+<p>There are no incomplete jobs.</p>
+</#if>
+</#if>
 
-<p>Il n'y a pas de jobs.</p>
+<h2>Completed jobs</h2>
 
+<p>Results ${startIndex} - ${endIndex} <@paginator /></p>
+
+<#if finished?size gt 0>
+<@jobs finished />
+<#else>
+<p>There are no completed jobs.</p>
 </#if>
 
 </#escape>

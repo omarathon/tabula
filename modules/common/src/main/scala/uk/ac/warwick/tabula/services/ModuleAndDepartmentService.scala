@@ -16,6 +16,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.userlookup.Group
 import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.data.RouteDao
 
 /**
  * Handles data about modules and departments
@@ -25,6 +26,7 @@ class ModuleAndDepartmentService extends Logging {
 
 	@Autowired var moduleDao: ModuleDao = _
 	@Autowired var departmentDao: DepartmentDao = _
+	@Autowired var routeDao: RouteDao = _
 	@Autowired var userLookup: UserLookupService = _
 	def groupService = userLookup.getGroupService
 
@@ -40,11 +42,22 @@ class ModuleAndDepartmentService extends Logging {
 	def getModuleByCode(code: String) = transactional(readOnly = true) {
 		moduleDao.getByCode(code)
 	}
+	
+	def getRouteByCode(code: String) = transactional(readOnly = true) {
+		routeDao.getByCode(code)
+	} 
 
 	def departmentsOwnedBy(usercode: String) = departmentDao.getByOwner(usercode)
 
 	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
 	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
+	
+	def modulesAdministratedBy(usercode: String) = {
+		departmentsOwnedBy(usercode).toSeq flatMap (dept => dept.modules.asScala)
+	}
+	def modulesAdministratedBy(usercode: String, dept: Department) = {
+		if (departmentsOwnedBy(usercode) contains dept) dept.modules.asScala else Nil
+	}
 
 	def addOwner(dept: Department, owner: String) = transactional() {
 		dept.owners.addUser(owner)

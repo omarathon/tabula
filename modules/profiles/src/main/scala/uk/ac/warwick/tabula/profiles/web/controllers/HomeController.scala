@@ -10,13 +10,19 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.profiles.web.Routes
 
-@Controller class HomeController extends BaseController {
+@Controller class HomeController extends ProfilesController {
+	
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
 
-  var userLookup = Wire.auto[UserLookupService]
-	def groupService = userLookup.getGroupService
-
-	hideDeletedItems
-
-	@RequestMapping(Array("/")) def home(user: CurrentUser) = Mav("home/view")
+	@RequestMapping(Array("/")) def home() = 
+		if (user.isStaff) Mav("home/view")
+		else if (optionalCurrentMember.isDefined && currentMember.userType == Student) Redirect(Routes.profile.view(currentMember))
+		else Mav("home/nopermission")
+	
 }

@@ -24,7 +24,8 @@ class Cookie(val cookie: http.Cookie) {
 /**
  * Scala-ish wrapper for the array of servlet Cookies from a request.
  */
-class Cookies(val cookies: Array[http.Cookie]) {
+class Cookies(val _cookies: Array[http.Cookie]) {
+	lazy val cookies = if (_cookies == null) Array.empty[http.Cookie] else _cookies
 	def getCookie(name: String): Option[Cookie] = wrap(cookies.find { _.getName == name })
 	def getString(name: String): Option[String] = getCookie(name) match {
 		case Some(cookie) => Some(cookie.value)

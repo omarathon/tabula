@@ -47,13 +47,14 @@ trait SharedAssignmentProperties {
 	@BeanProperty var wordCountMin: JInteger = _
 	@Max(Assignment.MaximumWordCount)
 	@BeanProperty var wordCountMax: JInteger = _
-	@Length(max = 500)
+	@Length(max = 600)
 	@BeanProperty var wordCountConventions: String = "Exclude any bibliography or appendices."
 	
 	// linked feedback template (optional)
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
+
 	@BeanProperty var markScheme: MarkScheme = _
 
 	@Min(1)

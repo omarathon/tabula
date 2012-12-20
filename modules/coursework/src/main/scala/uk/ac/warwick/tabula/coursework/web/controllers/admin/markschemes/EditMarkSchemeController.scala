@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.markschemes
 
 import javax.validation.Valid
-
-import org.springframework.beans.factory.annotation.Configurable
+import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
@@ -13,6 +12,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.MarkSchemeDao
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes/edit/{markscheme}"))
@@ -50,6 +51,8 @@ class EditMarkSchemeController extends CourseworkController {
 	}
 	
 	// do extra property processing on the form.
-	def doBind(cmd: EditMarkSchemeCommand) = cmd.doBind()
+	def doBind(cmd: EditMarkSchemeCommand) {
+		cmd.doBind()
+	}
 	
 }

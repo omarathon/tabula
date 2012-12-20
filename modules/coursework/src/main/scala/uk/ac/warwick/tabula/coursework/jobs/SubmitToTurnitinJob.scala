@@ -260,7 +260,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
 			"user" -> user,
-			"path" -> Routes.admin.assignment.submission(assignment)
+			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
 		))
 	}
 
