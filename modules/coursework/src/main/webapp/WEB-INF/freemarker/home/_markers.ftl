@@ -1,9 +1,5 @@
 <#if nonempty(assignmentsForMarking)>
 
-<#macro format_name assignment>
-	${assignment.module.code?upper_case} (${assignment.module.name}) - ${assignment.name}
-</#macro>
-
 <#macro download_link info>
 	<#local assignment = info.assignment />
 	<#local numSubmissions = info.numSubmissions!0 />
@@ -35,12 +31,12 @@
 	</#if>
 </#macro>
 
-<h2>Assignments for marking</h2>
+<h2 class="section">Assignments for marking</h2>
 <p>You're a marker for one or more assignments.</p>
 <div class="simple-assignment-list">
 	<#list assignmentsForMarking as info>
 		<div class="simple-assignment-info">
-			<@format_name info.assignment />
+			<@fmt.assignment_link info.assignment />
 			<@download_link info />
 		</div>
 	</#list>

@@ -30,15 +30,18 @@ class ActivityService {
 	/** wrapper class to turn ScoreDoc plus searcher id token into a
 	 *  tuple of simple values ready to pass as parameters
 	 */  
-	class PagedActivities(val activities: Seq[Activity[Any]], val doc: FieldDoc, val token: Long, val total: Int) {
-		def getTokens: String = doc.doc + "/" + doc.fields(0) + "/" + token
+	class PagedActivities(val activities: Seq[Activity[Any]], val doc: Option[FieldDoc], val token: Long, val total: Int) {
+		def getTokens: String = doc match {
+			case None => "empty"
+			case _ => doc.get.doc + "/" + doc.get.fields(0) + "/" + token
+		}
 	}
 
 	// first page
 	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, StreamSize)
 		
-		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last.get, events.token, events.total)
+		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
 	
 	// following pages
@@ -47,7 +50,7 @@ class ActivityService {
 		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:java.lang.Long))
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
 		
-		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last.get, events.token, events.total)
+		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
 	
 	private def getModules(user: CurrentUser): Seq[Module] = {

@@ -16,7 +16,7 @@
 </#assign>
 
 <#if has_pending_items || has_historical_items || user.student>
-	<h2>Your assignments</h2>
+	<h2 class="section">Your assignments</h2>
 	
 	<div class="row-fluid">
 		<div class="span6">

@@ -1,11 +1,11 @@
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
-	<h2>Administration</h2>
+	<h2 class="section">Administration</h2>
 
 	<div class="row-fluid">
 		<div class="span6">
 			<h6>Late &amp; suspicious activity</h6>
 			
-			<#if activities?has_content>
+			<#if activities?has_content && activities.total gt 0>
 				<table class="table table-condensed table-hover" id="activities">
 					<#include "activities.ftl" />
 					
@@ -49,22 +49,25 @@
 	
 	<script type="text/javascript">
 		(function ($) {
-			$("#activity-fetcher").show().click(function(e) {
-				e.preventDefault();
-				
-				$.get($("#activities").data("url"), function(pagelet) {
-					$("#activities tbody:last").after(pagelet);
+			if ($("#activities").length > 0) {
+				var sUrl = $("#activities").data("url");
+				$("#activity-fetcher").show().click(function(e) {
+					e.preventDefault();
 					
-					if ($("#activities tbody tr").length >= ${activities.total}) {
-						$("#activity-fetcher").remove();
-					}
-					
-					$(".streaming").fadeIn("normal", function() {
-						var $streaming = $(this);
-						$streaming.replaceWith($streaming.contents());
+					$.get(sUrl, function(pagelet) {
+						$("#activities tbody:last").after(pagelet);
+						
+						if ($("#activities tbody tr").length >= ${activities.total}) {
+							$("#activity-fetcher").remove();
+						}
+						
+						$(".streaming").fadeIn("normal", function() {
+							var $streaming = $(this);
+							$streaming.replaceWith($streaming.contents());
+						});
 					});
 				});
-			});
+			}
 		})(jQuery);
 	</script>
 </#if>
