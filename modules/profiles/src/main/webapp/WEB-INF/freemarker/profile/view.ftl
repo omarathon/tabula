@@ -37,7 +37,7 @@
 		
 		<div class="data">
 			<div class="col1">
-				<table role="presentation" class="profile-info">
+				<table class="profile-info">
 					<tbody>
 						<tr>
 							<th>Official name</th>
@@ -95,7 +95,7 @@
 			</div>
 			
 			<div class="col2">
-				<table role="presentation" class="profile-info">
+				<table class="profile-info">
 					<tbody>
 						<#if profile.email??>
 							<tr>
