@@ -38,7 +38,7 @@ abstract class Features {
 	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = true
 	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = true
 	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = true
-	@Value("${features.profiles:false}") @BeanProperty var profiles: Boolean = false
+	@Value("${features.profiles:true}") @BeanProperty var profiles: Boolean = true
 }
 
 class FeaturesImpl extends Features
