@@ -38,14 +38,13 @@ import uk.ac.warwick.tabula.Fixtures
 
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
-	var indexer:ProfileIndexService = _
+	@Autowired var indexer:ProfileIndexService = _
 	@Autowired var dao:MemberDao = _
 	var TEMP_DIR:File = _
 	
 	@Before def setup {
 		TEMP_DIR = createTemporaryDirectory
 		val maintenanceMode = mock[MaintenanceModeService]
-		indexer = new ProfileIndexService
 		indexer.dao = dao
 		indexer.indexPath = TEMP_DIR
 		indexer.searcherManager = null
@@ -63,6 +62,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	@Transactional
 	@Test def find = withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")
+		session.save(dept)
 		
 		val m = new Member
 		m.universityId = "0672089"
@@ -98,7 +98,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		val stopwatch = new StopWatch
 		stopwatch.start("creating items")
 		
-		val items = for (i <- 1 to 1000)
+		val items = for (i <- 1 to 100)
 			yield {
 				val m = new Member
 				m.universityId = i.toString
@@ -114,8 +114,8 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		session.flush
 		dao.getByUniversityId("1").isDefined should be (Boolean.TRUE)
 		
-		dao.listUpdatedSince(new DateTime(2000,1,1,0,0,0), 100).size should be (100)
-		dao.listUpdatedSince(new DateTime(1999,6,1,0,0,0), 250).size should be (250)
+		dao.listUpdatedSince(new DateTime(2000,1,1,0,0,0), 10).size should be (10)
+		dao.listUpdatedSince(new DateTime(1999,6,1,0,0,0), 25).size should be (25)
 		
 		stopwatch.start("indexing")
 		
@@ -128,7 +128,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		
 		stopwatch.stop()
 		
-		indexer.listRecent(0, 1000).size should be (1000)
+		indexer.listRecent(0, 100).size should be (100)
 				
 		val moreItems = {
 			val m = new Member
@@ -152,7 +152,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
 			stopwatch.stop()
-			newest.head.getValues("universityId").toList.head should be ("1000")
+			newest.head.getValues("universityId").toList.head should be ("100")
 		}
 		println(stopwatch.prettyPrint())
 		
