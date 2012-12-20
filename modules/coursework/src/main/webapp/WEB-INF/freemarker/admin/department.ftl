@@ -38,6 +38,7 @@
 			<#if features.markSchemes>
 				<li><a href="markschemes"><i class="icon-inbox"></i> Mark schemes</a></li>
 			</#if>
+			<li><a href="settings/display"><i class="icon-list-alt"></i> Display</li>
 		</ul>
 	</div>
 <#else>
