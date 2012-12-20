@@ -10,15 +10,7 @@
 	<@form.labelled_row "file.upload" "Upload feedback forms">
 		<input type="file" name="file.upload" multiple />
 		<div id="multifile-column-description" class="help-block">
-			Your browser doesn't seem able to handle uploading multiple files<noscript>
-			(or it does, but your browser is not running the Javascript needed to support it)</noscript>.
-			A recent browser like Google Chrome or Firefox will be able to upload multiple files.
-			You can still upload a single file here if you want.
-			<div id="multifile-column-description-enabled" style="display:none">
-				This uploader allows you to upload multiple files at once. They
-				will need to be in the same folder on your computer for you to be
-				able to select them all.
-			</div>
+			<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 		</div>
 	</@form.labelled_row>
 	<script>
@@ -30,9 +22,6 @@
 		}
 
 		jQuery(function($){
-			if (Supports.multipleFiles) {
-				jQuery('#multifile-column-description').html(jQuery('#multifile-column-description-enabled').html());
-			}
 
 			// models use ajax to retrieve their contents
 			$('#feedback-template-list').on('click', 'a[data-toggle=modal]', function(e){

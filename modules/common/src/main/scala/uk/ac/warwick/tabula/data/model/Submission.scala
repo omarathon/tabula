@@ -76,6 +76,7 @@ class Submission extends GeneratedId with Deleteable {
 	
 	def hasOriginalityReport: JBoolean = allAttachments.exists( _.originalityReport != null )
 
+	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 
 	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
 	def zipFileName(attachment: FileAttachment) = {

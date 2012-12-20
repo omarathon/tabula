@@ -25,6 +25,12 @@ html.iframe {
 	.border-radius(@box-style-border-radius);
 }
 
+.subtle-box-style() {
+	border: 1px solid #bbb;
+	border-bottom: 1px solid #aaa;
+	.border-radius(8px);
+}
+
 .warning-box-style() {
 	.border-radius(@box-style-border-radius);
 	padding: 0.5em;
@@ -51,6 +57,20 @@ html.iframe {
 }
 
 .tabula-page {
+	
+.span6 > h6 {
+	margin: 12px 0 6px; 
+	color: #333;
+}
+
+.lead {
+	font-size: 150%;
+	line-height: 150%;
+}
+
+table.stream > caption {
+	display: none;
+}
 
 .error { 
 	color: crimson;
@@ -81,6 +101,10 @@ html.iframe {
 
 	// fade out glypicons a bit, too dark
 	i, .caret { .opacity-one(0.6); }
+}
+
+h2.section {
+	margin-top: 1em;
 }
 
 ul {
@@ -143,7 +167,6 @@ ul {
 }
 
 .assignment-info {
-
 	border-top: 2px groove white;
 
 	//fix appearance against bottom of rounded module box
@@ -211,7 +234,7 @@ ul {
 // small assignment items as used on home page. Used to be same
 // as assignment-info on department page, but no more.
 .simple-assignment-info {
-	.box-style();
+	.subtle-box-style;
 	padding: 4px;
 	margin: 4px 0;
 
@@ -223,10 +246,20 @@ ul {
 
 // assignment deadlines
 .deadline {
-	overflow: hidden;
+	color: #468847;
+	
+	.time-remaining {
+		display: block;
+		font-weight: bold;
+		font-size: 115%;
+	}
+	
 	a.btn {
 		float: right;
 	}
+	
+	&.late { color: #B94A48; }
+	&.extended { color: #3A87AD; }
 }
 
 .end-assignment-info { clear: both; }
@@ -344,6 +377,12 @@ table {
 	  }
 	}
 
+	ul.links {
+		list-style: none;
+		padding-left:0;
+		margin: 7px 0;
+	}
+
 	textarea.big-textarea {
 		display: block;
 		width: 80%;
@@ -412,7 +451,32 @@ table {
 	
 }
 
-.mod-name { font-size: 85%; padding-left: 8px; }
+.activity-message {
+	line-height: 21px;
+}
+
+.mod-code {
+	letter-spacing: 1px;
+	font-weight: bold;
+	font-size: 130%;
+	color: #606060;
+}
+
+.mod-name {
+	color: #666;
+	font-size: 85%;
+	&:before { 
+		content: '// ';
+		position: relative;
+		bottom: 1px;
+		color: #AAA;
+	}
+}
+
+.ass-name {
+	display: block;
+	margin-top: -3px;
+}
 
 .disabled-zone {
   .opacity-one(0.6);
@@ -519,11 +583,6 @@ span.press-ctrl-c {
   padding: 3px 5px;
   border: 1px solid #aaf;
   .box-shadow(0, 2px, 2px, rgba(0,0,0,0.3));
-}
-
-ul.links {
-  list-style: none;
-  li {  }
 }
 
 #submission-options {

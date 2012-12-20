@@ -2,21 +2,32 @@
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
 
 <#macro module_name module>
-<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+</#macro>
+
+<#macro assignment_name assignment>
+	<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>
+</#macro>
+
+<#macro assignment_link assignment>
+	<@module_name assignment.module />
+	<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+		<span class="ass-name">${assignment.name}</span>
+	</a>
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true><#--
 -->${dateBuilder(date, seconds, at, timezone, capitalise, relative)}<#--
 --></#macro>
 
+<#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
+--><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
+--> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
+
 <#macro interval start end=""><#--
 --><#if end?has_content>${intervalFormatter(start, end)}<#--
 --><#else>${intervalFormatter(start)}</#if><#--
 --></#macro>
-
-<#macro p number singular plural="${singular}s" one="1" zero="0"><#--
---><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
---> <#if number=1>${singular}<#else>${plural}</#if></#macro>
 
 <#macro tense date future past><#if date.afterNow>${future}<#else>${past}</#if></#macro>
 

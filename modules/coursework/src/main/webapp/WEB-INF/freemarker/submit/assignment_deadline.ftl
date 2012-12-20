@@ -4,7 +4,7 @@
 
 -->
 <#if !assignment.openEnded>
-	<#assign time_remaining=durationFormatter(assignment.closeDate) />
+	<#assign time_remaining = durationFormatter(assignment.closeDate) />
 
 	<#macro extensionButton label assignment>
 		<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-mini">
@@ -13,31 +13,34 @@
 	</#macro>
 
 	<#if isExtended>
-		<#assign extension_time_remaining=durationFormatter(extension.expiryDate) />
-		<div class="alert alert-info deadline">
-			You have been granted an extension for this assignment.
-			Extended submission deadline: <strong><@fmt.date date=extension.expiryDate timezone=true /></strong> (${extension_time_remaining})
-			<#if extensionRequested>
-				<@extensionButton "Review extension request" assignment/>
-			</#if>
-		</div>
+		<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
+		
+		<p class="extended deadline">
+			<span class="time-remaining">${extension_time_remaining}</span>
+			Extension granted until <@fmt.date date=extension.expiryDate timezone=true />
+		</p>
+		<#if extensionRequested>
+			<@extensionButton "Review extension request" assignment />
+		</#if>
 	<#elseif assignment.closed>
-		<div class="alert alert-error deadline">
-			Submission deadline: <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
-			<#if extensionRequested>
-				<@extensionButton "Review extension request" assignment/>
-			</#if>
-		</div>
+		<p class="late deadline">
+			<span class="time-remaining">${time_remaining}</span>
+			Deadline was <@fmt.date date=assignment.closeDate timezone=true />
+		</p>
+		<#if extensionRequested>
+			<@extensionButton "Review extension request" assignment />
+		</#if>
 	<#else>
-		<div class="alert alert-info deadline">
-			Submission deadline: <strong><@fmt.date date=assignment.closeDate timezone=true /></strong> (${time_remaining})
-			<#if assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
-				<#if extensionRequested>
-					<@extensionButton "Review extension request" assignment/>
-				<#else>
-					<@extensionButton "Request an extension" assignment/>
-				</#if>
+		<p class="deadline">
+			<span class="time-remaining">${time_remaining}</span>
+			Deadline <@fmt.date date=assignment.closeDate timezone=true />
+		</p>
+		<#if assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
+			<#if extensionRequested>
+				<@extensionButton "Review extension request" assignment />
+			<#else>
+				<@extensionButton "Request an extension" assignment />
 			</#if>
-		</div>
+		</#if>
 	</#if>
 </#if>

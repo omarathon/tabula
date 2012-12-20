@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
+import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
+import uk.ac.warwick.spring.Wire
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -45,6 +47,48 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 	def student(user: User) = search(termQuery("students", user.getWarwickId))
 
 	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
+	
+	class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
+		// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
+		// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
+		// pass a specific subclass of FieldDoc.
+		def last: Option[FieldDoc] = lastscore match {
+			case None => None
+			case Some(f:FieldDoc) => Some(f)
+			case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
+		}
+	}
+	
+	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
+		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
+		
+		val searchResults = search(
+			query = all(termQuery("eventType", "SubmitAssignment"),
+						some(moduleTerms:_*)
+					),
+			max = max,
+			sort = reverseDateSort,
+			last = last,
+			token = token)
+			
+		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
+	}
+
+	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
+		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
+		
+		val searchResults = search(
+			query = all(termQuery("eventType", "SubmitAssignment"),
+						termQuery("submissionIsNoteworthy", "true"),
+						some(moduleTerms:_*)
+					),
+			max = max,
+			sort = reverseDateSort,
+			last = last,
+			token = token)
+		
+		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
+	}
 
 	/**
 	 * Work out which submissions have been downloaded from the admin interface
@@ -130,7 +174,6 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
  */
 @Component
 class AuditEventIndexService extends AbstractIndexService[AuditEvent] with AuditEventQueryMethods {
-
 	// largest batch of event items we'll load in at once.
 	final override val MaxBatchSize = 100000
 
@@ -241,10 +284,13 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {
-		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId")) {
+		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")) {
 			data.get(key) match {
 				case Some(value: String) => {
 					doc add plainStringField(key, value, isStored = false)
+				}
+				case Some(value: Boolean) => {
+					doc add plainStringField(key, value.toString, isStored = false)
 				}
 				case _ => // missing or not a string
 			}
