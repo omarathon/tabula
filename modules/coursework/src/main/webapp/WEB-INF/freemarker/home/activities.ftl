@@ -29,7 +29,7 @@
 							<#if activity.entity.late>
 								<span class="label-red">Late</span>
 							<#elseif activity.entity.authorisedLate>
-								<span class="label-blue">Authorised Late</span>
+								<span class="label-blue">Within Extension</span>
 							</#if>
 							<#if activity.entity.suspectPlagiarised>
 								<span class="label-orange">Suspect Plagiarised</span>
