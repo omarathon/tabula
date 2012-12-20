@@ -13,20 +13,26 @@ import uk.ac.warwick.tabula.data.model.Member
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.actions.Search
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.spring.Wire
 
 @Controller
 class SearchController extends ProfilesController {
 	
-	hideDeletedItems
-	studentProfilesOnly
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchProfilesCommand) = {
+		mustBeAbleTo(Search(classOf[Member]))
+		
 		Mav("profile/search/form")
 	}
 	
 	@RequestMapping(value=Array("/search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
+		mustBeAbleTo(Search(classOf[Member]))
+		
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -37,6 +43,8 @@ class SearchController extends ProfilesController {
 	
 	@RequestMapping(value=Array("/search.json"), params=Array("query"))
 	def submitJson(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
+		mustBeAbleTo(Search(classOf[Member]))
+		
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {

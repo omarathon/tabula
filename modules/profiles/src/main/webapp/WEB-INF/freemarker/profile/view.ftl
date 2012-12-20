@@ -18,9 +18,21 @@
 	</div>
 </#macro>
 
-<#include "search/form.ftl" />
+<#if user.staff>
+	<#include "search/form.ftl" />
 
-<hr class="full-width" />
+	<hr class="full-width" />
+<#elseif isSelf>
+	<div class="alert alert-info">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		
+		<h4>This is your profile!</h4>
+		
+		<p>Here, you can see information about yourself. This information can only be seen by those with permission to see student records.</p>
+	</div>
+
+	<hr class="full-width" />
+</#if>
 
 <section class="profile">
 	<section class="personal-details clearfix">

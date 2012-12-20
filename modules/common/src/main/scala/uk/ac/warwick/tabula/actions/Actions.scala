@@ -16,6 +16,8 @@ sealed abstract class Action[T]
 
 case class View(val item: Viewable) extends Action[Viewable]
 
+case class Search(val clazz: Class[_ <: Searchable]) extends Action[Searchable]
+
 case class Submit(val item: Assignment) extends Action[Assignment]
 
 case class DownloadSubmissions(val item: Assignment) extends Action[Assignment]
@@ -38,6 +40,8 @@ case class Create() extends Action[Unit]
 
 /** Applied to any object that can have the View action on it. */
 trait Viewable
+/** Applied to any class of object that can have the Search action on it. */
+trait Searchable
 /** Applied to any object that can have the Manage action on it. */
 trait Manageable
 /** Applied to any object that can have the Participate action on it. */
