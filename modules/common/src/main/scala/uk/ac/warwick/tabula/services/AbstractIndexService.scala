@@ -173,6 +173,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		}
 		if (searcherLifetimeManager == null) {
 			try {
+				logger.debug("Opening a new searcher lifetime manager at " + indexPath)
 				searcherLifetimeManager = new SearcherLifetimeManager
 			} catch {
 				case e: IllegalStateException => logger.warn("Could not create SearcherLifetimeManager.")
@@ -358,6 +359,8 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		if (searcher == null) 
 			throw new IllegalStateException("Original IndexSearcher has expired.")
 		
+		logger.debug("Running paging search for query: " + query)
+			
 		try {
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results = (lastDoc, sort) match {
