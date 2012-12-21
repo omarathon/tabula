@@ -47,15 +47,6 @@
 							</li>
 						</#list>
 					</#if>
-
-					<#if has_feedback>
-						<#list assignmentsWithFeedback as assignment>
-							<li class="simple-assignment-info">
-								<span class="pull-right label label-success">Marked</span>
-								<@fmt.assignment_link assignment />
-							</li>
-						</#list>
-					</#if>
 				</ul>	
 			
 				<div class="alert alert-block">
@@ -74,8 +65,15 @@
 			<h6>Past</h6>
 
 			<#if has_historical_items>
-				<#if has_submissions>
+				<#if has_submissions || has_feedback>
 					<ul class="links" id="submitted-assignments-list">
+						<#list assignmentsWithFeedback as assignment>
+							<li class="simple-assignment-info">
+								<span class="pull-right label label-success">Marked</span>
+								<@fmt.assignment_link assignment />
+							</li>
+						</#list>
+						
 						<#list assignmentsWithSubmission as assignment>
 							<li class="simple-assignment-info">
 								<span class="pull-right label">Submitted</span>
@@ -98,7 +96,7 @@
 					</div>
 				</#if>
 			<#else>
-				<p class="alert">There are no archived assignments to show you right now.</p>
+				<p class="alert">There are no old assignments to show you right now.</p>
 			</#if>
 		</div>
 	</div>
