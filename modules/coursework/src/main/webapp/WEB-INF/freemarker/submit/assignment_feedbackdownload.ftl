@@ -27,17 +27,19 @@
 			</a>
 		</p>
 		<p>Or download the attachments individually below.</p>
-	<#else>
+	<#elseif feedbackcount gt 0>
 		<p>Your feedback file is available to download below.</p>
 	</#if>
-	
-	<ul class="file-list">
-	<#list feedback.attachments as attachment>
-		<li>
-		<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
-			${attachment.name}
-		</a>
-		</li>
-	</#list>
-	</ul>
+
+	<#if feedback.attachments?has_content>
+		<ul class="file-list">
+		<#list feedback.attachments as attachment>
+			<li>
+			<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
+				${attachment.name}
+			</a>
+			</li>
+		</#list>
+		</ul>
+	</#if>
 </p>
