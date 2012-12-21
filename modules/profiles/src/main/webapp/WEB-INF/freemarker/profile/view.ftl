@@ -150,7 +150,7 @@
 </section>
 
 <#if user.sysadmin>
-	<div class="alert alert-info" style="margin-top: 2em;">
+	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		
 		<h4>Sysadmin-only actions</h4>
