@@ -38,7 +38,7 @@
 						
 						<#list enrolledAssignments as info>
 							<li class="simple-assignment-info">
-								<#if !info.isExtended!false && info.closed>
+								<#if !info.isExtended && info.closed>
 									<span class="pull-right label label-important">Late</span>
 								<#elseif info.isExtended!false>
 									<span class="pull-right label label-info">Extended</span>

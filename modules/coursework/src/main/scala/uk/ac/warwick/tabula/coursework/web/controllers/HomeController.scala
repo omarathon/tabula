@@ -86,7 +86,8 @@ import org.springframework.web.bind.annotation._
 					"extension" -> extension,
 					"isExtended" -> isExtended,
 					"extensionRequested" -> extensionRequested,
-					"submittable" -> assignment.submittable(user.apparentId)
+					"submittable" -> assignment.submittable(user.apparentId),
+					"closed" -> assignment.isClosed
 				)
 			}
 
