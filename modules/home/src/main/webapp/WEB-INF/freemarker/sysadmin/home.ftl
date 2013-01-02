@@ -14,6 +14,7 @@
 <p><a class="btn" href="<@url page="/sysadmin/audit/list" />">List audit events</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
 </div>
 
 <div class="span4">

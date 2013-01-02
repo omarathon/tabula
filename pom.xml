@@ -31,7 +31,7 @@
 		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20121211-1508</warwickutils.version>
+		<warwickutils.version>20130102-1437</warwickutils.version>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>

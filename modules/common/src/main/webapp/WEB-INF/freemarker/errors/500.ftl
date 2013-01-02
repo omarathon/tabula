@@ -13,5 +13,5 @@
 		Show technical details about this error
 	</button></p>
 	
-	<pre id="dev" class="collapse">${stackTrace}</pre>
+	<pre id="dev" class="collapse" style="overflow-x:scroll;">${stackTrace}</pre>
 </#if>

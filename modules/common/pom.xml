@@ -208,6 +208,11 @@
 			<artifactId>warwickutils-web</artifactId>
 			<version>${warwickutils.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-queue</artifactId>
+			<version>${warwickutils.version}</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
