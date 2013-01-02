@@ -123,7 +123,13 @@ Publications: ${r.publicationOverlap}%)
 			
 			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 				<td><@form.selector_check_row "students" student.uniId /></td>
-				<td class="id">${student.uniId}</td>
+				<td class="id">
+				<#if module.department.showStudentName>
+					${student.fullName}
+				<#else>
+					${student.uniId}
+				</#if>
+				</td>
 				<#-- TODO show student name if allowed by department --> 
 				<td class="submitted">
 					<#if submission.submittedDate??>
