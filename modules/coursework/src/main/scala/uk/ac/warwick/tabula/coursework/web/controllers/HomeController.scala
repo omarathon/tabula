@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.services.ActivityService
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -75,7 +76,8 @@ import org.springframework.web.bind.annotation._
 				else Seq.empty
 				
 			// exclude assignments already included in other lists.
-			val enrolledAssignmentsTrimmed = enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission)
+			val enrolledAssignmentsTrimmed = enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission).sortBy(_.closeDate)  
+				
 			// adorn the enrolled assignments with extra data.
 			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield {
 				val extension = assignment.extensions.find(_.userId == user.apparentId)
