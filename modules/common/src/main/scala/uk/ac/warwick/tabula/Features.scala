@@ -93,7 +93,7 @@ class FeaturesMessage {
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
 	
-		var queue = Wire.named[Queue]("featureFlagsTopic")
+		var queue = Wire.named[Queue]("settingsSyncTopic")
 		var features = Wire.auto[Features]
 		
 		override def isListeningToQueue = true

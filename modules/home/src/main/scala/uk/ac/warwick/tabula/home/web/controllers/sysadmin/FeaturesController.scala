@@ -23,15 +23,13 @@ case class FeatureItem(val name: String, val value: Boolean)
 
 /**
  * Read and write feature flags. Alternative to using JMX.
- *
- * TODO unfinished
  */
 @Controller
 @RequestMapping(value = Array("/sysadmin/features"))
 final class FeaturesController extends BaseController with InitializingBean {
 
 	var features = Wire.auto[Features]
-	var queue = Wire.named[Queue]("featureFlagsTopic")
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 
 	private var wrapper: BeanWrapper = _
 	private var properties: List[PropertyDescriptor] = _

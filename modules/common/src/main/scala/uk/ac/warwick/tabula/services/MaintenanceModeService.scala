@@ -6,8 +6,22 @@ import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import scala.react.EventSource
 import uk.ac.warwick.tabula.system.exceptions.HandledException
+import uk.ac.warwick.util.queue.QueueListener
+import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.spring.Wire
+import org.codehaus.jackson.annotate.JsonAutoDetect
+import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.Queue
+import org.springframework.beans.BeanWrapperImpl
 
-trait MaintenanceModeService {
+trait MaintenanceStatus {
+	def enabled: Boolean
+	def until: Option[DateTime]
+	def message: Option[String]
+}
+
+trait MaintenanceModeService extends MaintenanceStatus {
 
 	/** Enable maintenance mode. **/
 	def enable
@@ -33,10 +47,26 @@ trait MaintenanceModeService {
 
 	@BeanProperty var until: Option[DateTime]
 	@BeanProperty var message: Option[String]
+	
+	private val bean = new BeanWrapperImpl(this)
+	def update(message: MaintenanceModeMessage) = {
+		val values = new BeanWrapperImpl(message)
+		
+		this.message = Option(message.message)
+		this.until = message.until match {
+			case -1 => None
+			case millis => Some(new DateTime(millis))
+		}
+		
+		if (message.enabled) this.enable
+		else this.disable
+		
+		this
+	}
 }
 
 @Service
-class MaintenanceModeServiceImpl extends MaintenanceModeService with MaintenanceStatus {
+class MaintenanceModeServiceImpl extends MaintenanceModeService {
 	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	@BeanProperty def enabled: Boolean = _enabled
@@ -67,12 +97,6 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Maintenance
 	}
 }
 
-trait MaintenanceStatus {
-	def enabled: Boolean
-	def until: Option[DateTime]
-	def message: Option[String]
-}
-
 /**
  * Exception thrown when a command tries to run during
  * maintenance mode, and it's not readonly. The view handler
@@ -87,4 +111,40 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 
 	def getMessageOrEmpty = message.getOrElse("")
 
+}
+
+@ItemType("MaintenanceMode")
+@JsonAutoDetect
+class MaintenanceModeMessage {
+	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the MaintenanceModeController
+	
+	def this(status: MaintenanceStatus) {
+		this()
+		
+		this.enabled = status.enabled
+		this.until = status.until map { _.getMillis } getOrElse(-1)
+		this.message = status.message getOrElse(null)
+	}
+	
+	@BeanProperty var enabled: Boolean = _
+	@BeanProperty var until: Long = _
+	@BeanProperty var message: String = _
+}
+
+class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
+	
+		var queue = Wire.named[Queue]("settingsSyncTopic")
+		var service = Wire.auto[MaintenanceModeService]
+		
+		override def isListeningToQueue = true
+		override def onReceive(item: Any) {	
+				item match {
+						case copy: MaintenanceModeMessage => service.update(copy)
+				}
+		}
+		
+		override def afterPropertiesSet = {
+				queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
+		}
+	
 }

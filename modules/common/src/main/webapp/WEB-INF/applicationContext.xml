@@ -306,10 +306,10 @@
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
 	
-	<bean id="featureFlagsTopic" parent="abstractQueue">
-		<constructor-arg value="FeatureFlags" />
+	<bean id="settingsSyncTopic" parent="abstractQueue">
+		<constructor-arg value="SynchronisedSettings" />
 		
-		<!-- We don't need this to be persistent, it's for setting feature flags etc -->
+		<!-- We don't need this to be persistent, it's for setting feature flags, maintenance mode etc -->
 		<property name="persistent" value="false" />
 		
 		<!-- This isn't a Queue, it's a Topic - we are effectively broadcasting -->
@@ -321,6 +321,7 @@
 				<property name="annotatedClasses">
 					<list>
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
+						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
 					</list>
 				</property>
 			</bean>
@@ -328,6 +329,7 @@
 	</bean>
 	
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
+	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
