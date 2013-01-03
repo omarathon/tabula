@@ -21791,7 +21791,7 @@ var shadowboxOptions = {
 	
 				if ($('#sb-wrapper .close-button').length == 0) {
 					$('#sb-wrapper').prepend(
-						$('<img class="close-button" src="../images/mediaplayers/closebox.png" />')
+						$('<img class="close-button" src="/static/images/mediaplayers/closebox.png" />')
 						.click(function() {
 							Shadowbox.close();
 						})

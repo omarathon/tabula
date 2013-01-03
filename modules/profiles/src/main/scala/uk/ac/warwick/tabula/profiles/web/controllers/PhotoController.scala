@@ -16,21 +16,35 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import org.springframework.util.FileCopyUtils
 import java.io.File
 import java.io.FileInputStream
+import org.apache.http.HttpStatus
+import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
+	
+	private def read() = {
+		val is = getClass.getResourceAsStream("/no-photo.png")
+		val os = new ByteArrayOutputStream
+		
+		FileCopyUtils.copy(is, os)
+		os.toByteArray
+	}
+	
+	// TODO is keeping this in memory the right thing to do? It's only 3kb
+	private val NoPhoto = read()
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@PathVariable member: Member, response: HttpServletResponse): Unit = {
 		mustBeAbleTo(View(mandatory(member)))
 		
-		def renderDefaultPhoto: Unit = {
-			val NoPhotoFile = new File(getClass.getResource("/no-photo.png").getFile)
-			
+		def renderDefaultPhoto: Unit = {			
 			response.addHeader("Content-Type", "image/png")
-			response.addHeader("Content-Length", NoPhotoFile.length.toString)
-	  		FileCopyUtils.copy(new FileInputStream(NoPhotoFile), response.getOutputStream)
+			response.addHeader("Content-Length", NoPhoto.length.toString)
+			response.setStatus(HttpStatus.SC_NOT_FOUND)
+			
+	  		FileCopyUtils.copy(new ByteArrayInputStream(NoPhoto), response.getOutputStream)
 		}
 
 		Option(member.photo) match {
