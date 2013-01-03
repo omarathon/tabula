@@ -336,6 +336,20 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	}
 
 	/**
+	 * Optionally returns the first marker for the given submission
+	 * Returns none if this assignment doesn't have a valid mark scheme attached
+	 */
+	def getStudentsFirstMarker(submission: Submission): Option[String] = markerSelectField match {
+		case Some(field) => {
+			submission.getValue(field) match {
+				case Some(sv) => Some(sv.value)
+				case None => None
+			}
+		}
+		case None => None
+	}
+
+		/**
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
 	 */
