@@ -22,6 +22,8 @@ case class Submit(val item: Assignment) extends Action[Assignment]
 
 case class DownloadSubmissions(val item: Assignment) extends Action[Assignment]
 
+case class UploadMarkerFeedback(val item: Assignment) extends Action[Assignment]
+
 /**
  * At the moment, participating means you can do most admin actions within this object, but
  * stops short of [Manage]-level things such as editing permissions.
