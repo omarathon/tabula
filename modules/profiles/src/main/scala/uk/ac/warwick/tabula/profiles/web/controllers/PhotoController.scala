@@ -20,14 +20,14 @@ import java.io.FileInputStream
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
-	
-	private val NoPhotoFile = new File(getClass.getResource("/no-photo.png").getFile)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@PathVariable member: Member, response: HttpServletResponse): Unit = {
 		mustBeAbleTo(View(mandatory(member)))
 		
 		def renderDefaultPhoto: Unit = {
+			val NoPhotoFile = new File(getClass.getResource("/no-photo.png").getFile)
+			
 			response.addHeader("Content-Type", "image/png")
 			response.addHeader("Content-Length", NoPhotoFile.length.toString)
 	  		FileCopyUtils.copy(new FileInputStream(NoPhotoFile), response.getOutputStream)
