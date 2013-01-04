@@ -289,16 +289,19 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 			case _ => None
 		}
 
+	// feedback that has been been through the marking process (not placeholders for marker feedback)
+	def fullFeedback = feedbacks.filterNot(_.isPlaceholder)
+
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.
 	 * If the old-style assignment-wide published flag is true, then it
 	 * assumes all feedback has already been published.
 	 */
-	def unreleasedFeedback = feedbacks.filterNot(_.released == true) // ==true because can be null
+	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
-	def anyReleasedFeedback = feedbacks.exists(_.released == true)
+	def anyReleasedFeedback = fullFeedback.exists(_.released == true)
 
-	def anyUnreleasedFeedback = feedbacks.exists(_.released != true) // should catch false and null
+	def anyUnreleasedFeedback = fullFeedback.exists(_.released != true) // should catch false and null
 	
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 
@@ -313,11 +316,11 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	}
 
 	// returns feedback for a specified student
-	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
+	def findFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
-		!feedbacks.isEmpty &&
+		!fullFeedback.isEmpty &&
 			!unreleasedFeedback.isEmpty &&
 			(closeDate.isBeforeNow || openEnded)
 
@@ -377,7 +380,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
         var idsWithSubmissionOrFeedback: Set[String] = Set()
         
         for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
-        for (feedback <- feedbacks) idsWithSubmissionOrFeedback += feedback.universityId
+        for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
         
         idsWithSubmissionOrFeedback
     }   
@@ -402,7 +405,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 case class SubmissionsReport(val assignment: Assignment) {
 
-	private def feedbacks = assignment.feedbacks
+	private def feedbacks = assignment.fullFeedback
 	private def submissions = assignment.submissions
 
 	// Get sets of University IDs

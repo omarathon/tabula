@@ -18,5 +18,5 @@ class AdminGetAllFeedbackCommand(assignment: Assignment) extends Command[Rendera
 	}
 
 	override def describe(d: Description) = d.assignment(assignment).properties(
-		"feedbackCount" -> assignment.feedbacks.size)
+		"feedbackCount" -> assignment.fullFeedback.size)
 }

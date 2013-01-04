@@ -104,6 +104,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 			// create a feedback for the assignment, not yet released
 			val feedback = new Feedback
 			feedback.universityId = "0070790"
+			feedback.actualMark = Some(41)
 			feedback.released = false
 			assmt.addFeedback(feedback)
 			session.save(feedback)

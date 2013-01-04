@@ -54,7 +54,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 		val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
-			val usersFeedback = assignment.feedbacks.filter(feedback => feedback.universityId == uniId)
+			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
 		
 			val userFilter = moduleMembers.filter(member => member.getWarwickId() == uniId)
 			val user = if(userFilter.isEmpty) {

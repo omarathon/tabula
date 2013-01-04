@@ -93,7 +93,7 @@
 	<div class="module-info-contents">
 		<#list module.assignments as assignment>
 		<#if !assignment.deleted>
-		<#assign has_feedback = assignment.feedbacks?size gt 0 >
+		<#assign has_feedback = assignment.fullFeedback?size gt 0 >
 		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
 			<h3 class="name">
@@ -140,7 +140,7 @@
 				<#if !features.combinedForm>
 					<div class="feedback-count">
 					<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-					${assignment.feedbacks?size} feedback<#if has_feedback></a></#if>
+					${assignment.fullFeedback?size} feedback<#if has_feedback></a></#if>
 					<#assign unreleasedFeedback=assignment.unreleasedFeedback />
 					<#if unreleasedFeedback?size gt 0>
 						<span class="has-unreleased-feedback">
@@ -157,7 +157,7 @@
 					<div class="submission-and-feedback-count">							
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" />
-							<#if has_feedback> and ${assignment.feedbacks?size} feedback</#if>
+							<#if has_feedback> and ${assignment.fullFeedback?size} feedback</#if>
 						</a>
 						<#assign unreleasedFeedback=assignment.unreleasedFeedback />
 						<#if unreleasedFeedback?size gt 0>

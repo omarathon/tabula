@@ -47,7 +47,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	def prevalidate(errors: Errors) {
 		if (!assignment.isClosed()) {
 			errors.rejectValue("assignment", "feedback.publish.notclosed")
-		} else if (assignment.feedbacks.isEmpty) {
+		} else if (assignment.fullFeedback.isEmpty) {
 			errors.rejectValue("assignment", "feedback.publish.nofeedback")
 		}
 	}
@@ -63,7 +63,7 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 		transactional() {
 			val users = getUsersForFeedback
 			for ((studentId, user) <- users) {
-				val feedbacks = assignment.feedbacks.find { _.universityId == studentId }
+				val feedbacks = assignment.fullFeedback.find { _.universityId == studentId }
 				for (feedback <- feedbacks)
 					feedback.released = true
 			}

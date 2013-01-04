@@ -31,7 +31,7 @@ jQuery(function($){ "use strict";
 
 <@f.errors path="assignment" cssClass="error" />
 
-<#assign feedbackCount=assignment.feedbacks?size />
+<#assign feedbackCount=assignment.fullFeedback?size />
 <#assign unreleasedFeedbackCount=assignment.unreleasedFeedback?size />
 
 <p>This will publish feedback for <strong><@fmt.p unreleasedFeedbackCount "student"/></strong>.

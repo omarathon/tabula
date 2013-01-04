@@ -197,7 +197,6 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</#if>
 				</td>
-				
 				<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 				<td class="feedbackReleased">
 					<#if student.feedback??>

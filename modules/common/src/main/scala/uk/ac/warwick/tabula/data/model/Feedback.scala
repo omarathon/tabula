@@ -64,6 +64,9 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 		secondMarkerFeedback = markerFeedback
 	}
 
+	// if the feedback has no marks or attachments then it is a placeholder for marker feedback
+	def isPlaceholder = !(hasMarkOrGrade || hasAttachments)
+
 	def hasMarkOrGrade = hasMark || hasGrade
 
 	def hasMark: Boolean = actualMark match {
