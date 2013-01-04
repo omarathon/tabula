@@ -114,7 +114,7 @@
 						<div class="tab-pane ${tab1class}" id="membership-tab1">
 							<#if membershipDetails?size gt 0>
 								<a href="#"
-										class="btn disabled refresh-form has-tooltip"
+										class="btn disabled hide-checked-users has-tooltip"
 										id="membership-remove-selected"
 										<#if assessmentGroup??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 										>
@@ -250,6 +250,10 @@
 			$('.refresh-form').click(function(e) {
 			    e.preventDefault();
 				refreshForm();
+			});
+			$('.hide-checked-users').click(function(e) {
+			    e.preventDefault();
+			    $membershipPicker.find('input.collection-checkbox:checked').parents('.membership-item').hide();
 			});
 
 			$('select#academicYear').change(function(e) {
