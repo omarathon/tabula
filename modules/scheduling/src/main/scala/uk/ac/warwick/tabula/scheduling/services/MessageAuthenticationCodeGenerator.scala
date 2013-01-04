@@ -9,9 +9,9 @@ import org.apache.commons.codec.digest.DigestUtils
 trait MessageAuthenticationCodeGenerator {
 	
     /**
-     * Generate the Message Authentication Code for this query String.
+     * Generate the Message Authentication Code for this String.
      */
-	def generateMessageAuthenticationCode(urlParams: String): String
+	def generateMessageAuthenticationCode(message: String): String
 	
 	def isValidSalt: Boolean
 	
@@ -31,9 +31,9 @@ class SHAMessageAuthenticationCodeGenerator extends MessageAuthenticationCodeGen
 	
 	var salt = Wire[String]("${tabula.sync.shared.secret}")
 
-	override def generateMessageAuthenticationCode(urlParams: String) =
+	override def generateMessageAuthenticationCode(message: String) =
 		if (!isValidSalt) null
-		else getSHAHash(urlParams.concat(salt))
+		else getSHAHash(message.concat(salt))
 		
 	// backed by Apache Commons-Codec
 	private def getSHAHash(input: String) = DigestUtils.shaHex(input)

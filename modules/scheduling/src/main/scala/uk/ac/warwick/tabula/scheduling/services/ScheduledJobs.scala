@@ -86,7 +86,7 @@ class ScheduledJobs {
 	
 	/* Filesystem syncing jobs, should only run on standby */
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def fileSync = syncGuard {
+	def fileSync: Unit = syncGuard {
 		exceptionResolver.reportExceptions {
 			new SyncReplicaFilesystemCommand().apply()
 		}
