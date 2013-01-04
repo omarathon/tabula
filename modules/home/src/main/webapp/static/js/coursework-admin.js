@@ -97,6 +97,9 @@ $(function(){
 		$('.hide-awaiting-submission').hide();
 	}
     
+    // enable shift-click on multiple checkboxes in tables
+    $('table').find('input[type="checkbox"]').shiftSelectable();
+    
     $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
     
         setup : function() {
@@ -184,11 +187,43 @@ $(function(){
     
     });
     
+    
+    
 });
 
 // take anything we've attached to "exports" and add it to the global "Courses"
 // we use extend() to add to any existing variable rather than clobber it
 window.Courses = jQuery.extend(window.Courses, exports);
+
+
+// shift selectable checkboxes
+$.fn.shiftSelectable = function() {
+    var lastChecked,
+        $boxes = this;
+ 
+    $boxes.click(function(evt) {
+        if(!lastChecked) {
+            lastChecked = this;
+            return;
+        }
+ 
+        if(evt.shiftKey) {
+            var start = $boxes.index(this),
+                end = $boxes.index(lastChecked);
+            $boxes.slice(Math.min(start, end), Math.max(start, end) + 1)
+                .attr('checked', lastChecked.checked)
+                .trigger('change');
+        }
+ 
+        lastChecked = this;
+    });
+};
+
+
+$(function(){
+	
+});
+
 
 
 }(jQuery));
