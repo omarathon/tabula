@@ -86,7 +86,7 @@ class FileAttachment extends GeneratedId {
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream = Option(file) map { new FileInputStream(_) } orNull
+	def dataStream: InputStream = Option(file) map { new FileInputStream(_) } orNull
 
 	def hasData = file != null
 

@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import scala.reflect.BeanProperty
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -26,45 +28,68 @@ import scala.reflect.BeanProperty
  */
 @Service
 class ScheduledJobs {
-	@Autowired @BeanProperty
-	var exceptionResolver: ExceptionResolver = _
-
-	@Autowired @BeanProperty
-	var auditIndexingService: AuditEventIndexService = _
 	
-	@Autowired @BeanProperty
-	var profileIndexingService: ProfileIndexService = _
+	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
 
-	@Autowired @BeanProperty
-	var jobService: JobService = _
+	var exceptionResolver = Wire.auto[ExceptionResolver]
+	
+	var maintenanceModeService = Wire.auto[MaintenanceModeService]
+
+	var auditIndexingService = Wire.auto[AuditEventIndexService]
+	
+	var profileIndexingService = Wire.auto[ProfileIndexService]
+
+	var jobService = Wire.auto[JobService]
+	
+	def maintenanceGuard[T](fn: => T) = if (!maintenanceModeService.enabled) fn
+	
+	def syncGuard[T](fn: => T) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
-	def importData: Unit = exceptionResolver.reportExceptions {
-		new ImportModulesCommand().apply()
+	def importData: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions {
+			new ImportModulesCommand().apply()
+		}
 	}
 
 	@Scheduled(cron = "0 30 7 * * *")
-	def importMembers: Unit = exceptionResolver.reportExceptions {
-		new ImportProfilesCommand().apply()
+	def importMembers: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions {
+			new ImportProfilesCommand().apply()
+		}
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")
-	def importAssignments: Unit = exceptionResolver.reportExceptions {
-		new ImportAssignmentsCommand().apply()
+	def importAssignments: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions {
+			new ImportAssignmentsCommand().apply()
+		}
 	}
 
 	@Scheduled(cron = "0 0 2 * * *") // 2am
-	def cleanupTemporaryFiles: Unit = exceptionResolver.reportExceptions {
-		new CleanupTemporaryFilesCommand().apply()
+	def cleanupTemporaryFiles: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions {
+			new CleanupTemporaryFilesCommand().apply()
+		}
 	}
 
-	@Scheduled(fixedRate = 60000) // every minute
+	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.index }
 	
-	@Scheduled(fixedRate = 60000) // every 5 minutes
+	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
 	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.index }
 
-	@Scheduled(fixedDelay = 10000) // every 10 seconds, non-concurrent
-	def jobs: Unit = exceptionResolver.reportExceptions { jobService.run }
+	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
+	def jobs: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions { jobService.run }
+	}
+	
+	/* Filesystem syncing jobs, should only run on standby */
+	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
+	def fileSync = syncGuard {
+		exceptionResolver.reportExceptions {
+			new SyncReplicaFilesystemCommand().apply()
+		}
+	}
 
 }

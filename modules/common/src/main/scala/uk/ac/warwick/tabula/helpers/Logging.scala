@@ -53,6 +53,20 @@ trait Logging {
 			}
 		}
 	}
+	
+	/**
+	 * The same as benchmark, but passes the StopWatch as a callback to the function
+	 */
+	def timed[T](description: String, level: Priority = Info, minMillis: Int = 0)(fn: => (uk.ac.warwick.util.core.StopWatch => T)): T = {
+		val s = StopWatch()
+		try s.record(description) {
+			fn(s)
+		} finally {
+			if (s.getTotalTimeMillis > minMillis) {
+				logger.log(level, s.prettyPrint)
+			}
+		}
+	}
 
 }
 

@@ -15,11 +15,14 @@ import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
 import java.io.InputStream
 import org.hibernate.criterion.{ Restrictions => Is }
+import org.hibernate.criterion.Order._
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.JavaImports._
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
@@ -42,8 +45,8 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	 * whether the File already exists. If you want to retrieve an existing file you must
 	 * use #getData which checks whether it exists and also knows to check the old-style path if needed.
 	 */
-	private def targetFile(id: String): File = new File(attachmentDir, partition(id))
-	private def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
+	def targetFile(id: String): File = new File(attachmentDir, partition(id))
+	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
 	private def saveAttachment(file: FileAttachment) {
 		session.saveOrUpdate(file)
@@ -80,6 +83,29 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			case file: File if file.exists => Some(file)
 			case _ => None
 		}
+	}
+	
+	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = {
+		session.newCriteria[FileAttachment]
+				.add(Is.ge("dateUploaded", createdSince))
+				.setMaxResults(maxResults)
+				.addOrder(asc("dateUploaded"))
+				.addOrder(asc("id"))
+				.list
+	}
+	
+	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = {
+		val criteria = 
+			session.newCriteria[FileAttachment]
+				.add(Is.eq("dateUploaded", createdOn))
+				
+		if (StringUtils.hasText(startingId))
+			criteria.add(Is.gt("id", startingId))
+				
+		criteria
+			.setMaxResults(maxResults)
+			.addOrder(asc("id"))
+			.list
 	}
 
 	/**
