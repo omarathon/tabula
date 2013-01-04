@@ -33,6 +33,7 @@ import java.io.FileWriter
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.DownloadFileController
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.ListFilesController
+import org.json.JSONException
 
 /**
  * This is a ReadOnly command because it runs in Maintenance mode on the replica
@@ -43,7 +44,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	// Back once again
 	var replicaMaster = Wire[String]("${tabula.sync.replica.master}")
 	
-	var dataDir = Wire[File]("${base.data.dir}")
+	var dataDir = Wire[String]("${base.data.dir}")
 	
 	var macGenerator = Wire.auto[MessageAuthenticationCodeGenerator]
 	
@@ -114,7 +115,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			result
 		} catch {
 			case e: Exception => {
-				logger.error("Couldn't sync replica - error reading file: " + lastCreatedFile.getPath + " - " + e.getMessage)
+				logger.error("Couldn't sync replica - error reading file: " + lastCreatedFile.getPath, e)
 				
 				// if we have synched any files, should update the last-created date file
 	            // Store the Last-Created Date of the last-updated file
@@ -127,7 +128,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 		}
 	}
 	
-	lazy val lastCreatedFile = new File(dataDir, LastSyncedDateFilename)
+	lazy val lastCreatedFile = new File(new File(dataDir), LastSyncedDateFilename)
 	
 	private def lastCreatedDate = {
 		if (lastCreatedFile.exists) {
@@ -150,7 +151,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 		}
 	}
 	
-	lazy val lastSyncJobDetailsFile = new File(dataDir, LastSyncJobDetailsFilename)
+	lazy val lastSyncJobDetailsFile = new File(new File(dataDir), LastSyncJobDetailsFilename)
 	
 	private def updateSyncLogFile(result: SyncReplicaResult, timer: StopWatch, success: Boolean) {
 		val lastCreatedDateBeforeFailures = Option(result.lastCreatedDateBeforeAnyFailures) map { _.getMillis } getOrElse(-1)
@@ -175,7 +176,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	private def listFiles(startDate: DateTime, startFromId: String = null) = {
 		logger.debug("Getting all files created since: " + startDate)
 		
-		val url = new UriBuilder(getFileUrl).addQueryParameter(StartParam, startDate.getMillis.toString)
+		val url = new UriBuilder(listFilesUrl).addQueryParameter(StartParam, startDate.getMillis.toString)
 		
 		if (StringUtils.hasText(startFromId)) url.addQueryParameter(StartFromIdParam, startFromId)
 		
@@ -186,17 +187,24 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 		
 		try {
 			ex.execute(handle({ response =>
-				response.getStatusLine.getStatusCode match {
-					case HttpStatus.SC_OK => Option(response.getEntity) match {
-						case Some(entity) => Some(new JSONObject(EntityUtils.toString(entity)))
+				try {
+					response.getStatusLine.getStatusCode match {
+						case HttpStatus.SC_OK => Option(response.getEntity) match {
+							case Some(entity) => Some(new JSONObject(EntityUtils.toString(entity)))
+							case _ => None
+						}
 						case _ => None
 					}
-					case _ => None
+				} catch {
+					case e: JSONException => {
+						logger.error("Invalid JSON received from " + url)
+						None
+					}
 				}
 			})).getRight
 		} catch {
 			case e: IOException => {
-				logger.error("Couldn't get files from " + listFilesUrl)
+				logger.error("Couldn't get files from " + url)
 				None
 			}
 		}
@@ -375,7 +383,7 @@ object SyncReplicaFilesystemCommand {
 	
 	val StartFromIdParam = ListFilesController.StartFromIdParam
 		
-	val FirstTimeStartDate = new DateTime(1970, DateTimeConstants.JANUARY, 1)
+	val FirstTimeStartDate = new DateTime(LastJobOverlapMillis)
 	
 	// 30 seconds
 	val HttpTimeout = 30 * 1000

@@ -47,11 +47,9 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Before def setup {
 		TEMP_DIR = createTemporaryDirectory
-		val maintenanceMode = mock[MaintenanceModeService]
 		indexer.dao = dao
 		indexer.indexPath = TEMP_DIR
 		indexer.searcherManager = null
-		indexer.maintenanceService = maintenanceMode
 		indexer.afterPropertiesSet
 	}
 	

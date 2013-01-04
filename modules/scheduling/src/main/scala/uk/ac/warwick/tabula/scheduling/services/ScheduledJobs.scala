@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service
 import scala.reflect.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
+import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,

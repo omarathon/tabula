@@ -20,6 +20,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.services.ProfileIndexService
 import uk.ac.warwick.tabula.services.ProfileImporter
 import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -123,6 +124,20 @@ class ImportProfilesController extends BaseSysadminController {
 	def reindex() = {
 		val command = new ImportProfilesCommand
 		command.apply()
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/sync"))
+class SyncFilesystemController extends BaseSysadminController {
+	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
+	
+	@RequestMapping
+	def sync() = {
+		if (!fileSyncEnabled) throw new IllegalStateException("File syncing not enabled")
+		
+		new SyncReplicaFilesystemCommand().apply()
 		redirectToHome
 	}
 }
