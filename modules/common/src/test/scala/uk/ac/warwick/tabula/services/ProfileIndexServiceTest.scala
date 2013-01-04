@@ -81,17 +81,17 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		indexer.listRecent(0, 1000).size should be (1)
 		
-		indexer.find("bob thornton", Seq(dept), Set()) should be ('empty)
-		indexer.find("Mathew", Seq(dept), Set()).head should be (m)
-		indexer.find("mat", Seq(dept), Set()).head should be (m)
-		indexer.find("m mannion", Seq(dept), Set()).head should be (m)
-		indexer.find("mathew james mannion", Seq(dept), Set()).head should be (m)
-		indexer.find("mat mannion", Seq(dept), Set()).head should be (m)
-		indexer.find("m m", Seq(dept), Set()).head should be (m)
-		indexer.find("m m", Seq(dept), Set(Student, Staff)).head should be (m)
-		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department"), dept), Set(Student, Staff)).head should be (m)
-		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff)) should be ('empty)
-		indexer.find("m m", Seq(dept), Set(Staff)) should be ('empty)
+		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
+		indexer.find("Mathew", Seq(dept), Set(), false).head should be (m)
+		indexer.find("mat", Seq(dept), Set(), false).head should be (m)
+		indexer.find("m mannion", Seq(dept), Set(), false).head should be (m)
+		indexer.find("mathew james mannion", Seq(dept), Set(), false).head should be (m)
+		indexer.find("mat mannion", Seq(dept), Set(), false).head should be (m)
+		indexer.find("m m", Seq(dept), Set(), false).head should be (m)
+		indexer.find("m m", Seq(dept), Set(Student, Staff), false).head should be (m)
+		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department"), dept), Set(Student, Staff), false).head should be (m)
+		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), false) should be ('empty)
+		indexer.find("m m", Seq(dept), Set(Staff), false) should be ('empty)
 	}
 	
 	@Transactional
@@ -165,7 +165,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	@Test def threading {
 		val dept = Fixtures.department("CS", "Computer Science")
 		val callable = new Callable[Seq[Member]] {
-			override def call() = indexer.find("mathew james mannion", Seq(dept), Set())
+			override def call() = indexer.find("mathew james mannion", Seq(dept), Set(), false)
 		}
 		
 		// TAB-296
