@@ -43,7 +43,7 @@ class SecurityService extends Logging {
 
 	val checks: Seq[PermissionChecker] = List(checkSysadmin _, checkEnrolled _, checkGroup _)
 
-	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (user.god) Allow else Continue
+	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (isSysadmin(user.userId)) Allow else Continue
 
 	def checkEnrolled(user: CurrentUser, action: Action[_]): Response = action match {
 		case Submit(assignment: Assignment) => if (assignment.canSubmit(user.apparentUser)) Allow else Deny
