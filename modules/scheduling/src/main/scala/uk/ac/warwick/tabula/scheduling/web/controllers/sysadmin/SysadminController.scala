@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -154,6 +155,16 @@ class SyncFilesystemController extends BaseSysadminController {
 		if (!fileSyncEnabled) throw new IllegalStateException("File syncing not enabled")
 		
 		new SyncReplicaFilesystemCommand().apply()
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/filesystem-cleanup"))
+class CleanupFilesystemController extends BaseSysadminController {	
+	@RequestMapping
+	def sync() = {
+		new CleanupUnreferencedFilesCommand().apply()
 		redirectToHome
 	}
 }

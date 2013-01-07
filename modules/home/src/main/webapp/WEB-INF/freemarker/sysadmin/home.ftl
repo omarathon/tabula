@@ -15,6 +15,10 @@
 <p><a class="btn" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
+
+<h2>File syncing</h2>
+<p><a class="btn" href="<@url page="/sysadmin/sync" context="/scheduling" />">Run file syncing</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/filesystem-cleanup" context="/scheduling" />">Delete unreferenced files from filesystem</a></p>
 </div>
 
 <div class="span4">

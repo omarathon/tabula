@@ -17,12 +17,15 @@ import java.io.InputStream
 import org.hibernate.criterion.{ Restrictions => Is }
 import org.hibernate.criterion.Order._
 import collection.JavaConversions._
+import collection.JavaConverters._
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.criterion.Projections
+import org.hibernate.`type`.StringType
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
@@ -74,6 +77,12 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	}
 
 	def getFileById(id: String) = getById[FileAttachment](id)
+	
+	def getFileByStrippedId(id: String) = 
+		session.newCriteria[FileAttachment]
+				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
+				.setMaxResults(1)
+				.uniqueResult
 
 	/** Only for use by FileAttachment to find its own backing file. */
 	def getData(id: String): Option[File] = targetFile(id) match {
@@ -107,6 +116,13 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			.addOrder(asc("id"))
 			.list
 	}
+	
+	def getAllFileIds(): Set[String] =
+		session.createCriteria(classOf[FileAttachment])
+			.setProjection(Projections.id())
+			.list
+			.asInstanceOf[java.util.List[String]]
+			.toSet[String]
 
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.
