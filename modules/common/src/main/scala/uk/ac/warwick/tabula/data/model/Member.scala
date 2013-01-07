@@ -35,7 +35,7 @@ object Member {
 @Filter(name = Member.StudentsOnlyFilter)
 @Entity
 @AccessType("field")
-class Member extends Viewable with Searchable with StudentProperties with StaffProperties with AlumniProperties with ToString {
+class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {
 	
 	def this(user: CurrentUser) = {
 		this()
@@ -51,43 +51,10 @@ class Member extends Viewable with Searchable with StudentProperties with StaffP
 			else Other
 	}
 	
-	
-	@Id @BeanProperty var universityId: String = _
-	@BeanProperty @Column(nullable = false) var userId: String = _
-	@BeanProperty var firstName: String = _
-	@BeanProperty var lastName: String = _
-	@BeanProperty var email: String = _
-	
-	@BeanProperty var title: String = _
-	@BeanProperty var fullFirstName: String = _
-	
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.MemberUserTypeUserType")
-	@BeanProperty var userType: MemberUserType = _
-	
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
-	@BeanProperty var gender: Gender = _
-	
-	@BeanProperty var nationality: String = _
-	@BeanProperty var homeEmail: String = _
-	@BeanProperty var mobileNumber: String = _
-	
-	@OneToOne
-	@JoinColumn(name="PHOTO_ID")
-	@BeanProperty var photo: FileAttachment = _
-	
-	@BeanProperty var inUseFlag: String = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var inactivationDate: LocalDate = _
-	
-	@BeanProperty var groupName: String = _
-	
-	@ManyToOne
-	@JoinColumn(name = "home_department_id")
-	@BeanProperty var homeDepartment: Department = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var dateOfBirth: LocalDate = _
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var lastUpdatedDate = DateTime.now
@@ -129,6 +96,45 @@ class Member extends Viewable with Searchable with StudentProperties with StaffP
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
+}
+
+trait MemberProperties {
+	@Id @BeanProperty var universityId: String = _
+	@BeanProperty @Column(nullable = false) var userId: String = _
+	@BeanProperty var firstName: String = _
+	@BeanProperty var lastName: String = _
+	@BeanProperty var email: String = _
+	
+	@BeanProperty var title: String = _
+	@BeanProperty var fullFirstName: String = _
+	
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.MemberUserTypeUserType")
+	@BeanProperty var userType: MemberUserType = _
+	
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
+	@BeanProperty var gender: Gender = _
+	
+	@BeanProperty var nationality: String = _
+	@BeanProperty var homeEmail: String = _
+	@BeanProperty var mobileNumber: String = _
+	
+	@OneToOne
+	@JoinColumn(name="PHOTO_ID")
+	@BeanProperty var photo: FileAttachment = _
+	
+	@BeanProperty var inUseFlag: String = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var inactivationDate: LocalDate = _
+	
+	@BeanProperty var groupName: String = _
+	
+	@ManyToOne
+	@JoinColumn(name = "home_department_id")
+	@BeanProperty var homeDepartment: Department = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var dateOfBirth: LocalDate = _
 }
 
 trait StudentProperties {

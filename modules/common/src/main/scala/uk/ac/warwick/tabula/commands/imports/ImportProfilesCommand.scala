@@ -42,7 +42,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 				logger.info("Fetching member details for " + usercodes.size + " members from ADS")
 
 				transactional() {
-					saveMemberDetails(profileImporter.getMemberDetails(usercodes).map(profileImporter.processNames(_, users)))
+					profileImporter.getMemberDetails(usercodes).map(profileImporter.processNames(_, users)) map { _.apply }
 					session.flush
 					session.clear
 				}
@@ -86,31 +86,23 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 //			for (kin <- member.nextOfKins) session.delete(kin)
 //		}
 //				
-		transactional() {
-			// The importer creates a new object and does saveOrUpdate; so evict the current object
-			session.evict(member)
-			
+		transactional() {		
 			val usercode = member.userId
 			val user = userLookup.getUserByUserId(usercode)
 		
-			val members = profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user)))
-			saveMemberDetails(members)
+			val memberCommands = profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user)))
+			val members = memberCommands map { _.apply }
 			
-			val newMember = members.head
+			session.flush
+			for (member <- members) session.evict(member)
 			
-			doAddressDetails(newMember)
-			doNextOfKinDetails(newMember)
-			
-			saveMemberDetails(Seq(newMember))
+//			val newMember = members.head
+//			
+//			doAddressDetails(newMember)
+//			doNextOfKinDetails(newMember)
+//			
+//			saveMemberDetails(Seq(newMember))
 		}
-	}
-	
-	def saveMemberDetails(seq: Seq[Member]) {
-		for (member <- seq) session.saveOrUpdate(member)
-		
-		session.flush
-		
-		for (member <- seq) session.evict(member)
 	}
 	
 	def equal(s1: Seq[String], s2: Seq[String]) =
