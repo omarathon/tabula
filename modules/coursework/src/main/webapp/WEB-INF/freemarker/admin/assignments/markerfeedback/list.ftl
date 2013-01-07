@@ -21,7 +21,13 @@
 		</tr>
 		<#list items as item>
 			<tr>
-				<td>${item.submission.universityId}</td>
+				<td>
+					<#if assignment.module.department.showStudentName>
+						${item.student.fullName}
+					<#else>
+						${item.student.warwickId}
+					</#if>
+				</td>
 				<td><@fmt.date date=item.submission.submittedDate seconds=true capitalise=true /></td>
 				<td><#if item.markerFeedback??>
 					${item.markerFeedback.mark!''}
