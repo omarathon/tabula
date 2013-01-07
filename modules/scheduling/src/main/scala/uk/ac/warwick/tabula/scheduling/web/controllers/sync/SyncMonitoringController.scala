@@ -30,7 +30,7 @@ class SyncMonitoringController extends BaseController {
 	def lastrun(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val lastSyncJobDetails = FileCopyUtils.copyToString(new FileReader(lastSyncJobDetailsFile)).trim
 		val lastRun = lastSyncJobDetails.substring(lastSyncJobDetails.indexOf(LastRunDelimiter) + LastRunDelimiter.length())
-		val minutesSinceLastRun = (new DateTime().getMillis - lastRun.toLong) / MillisInASecond
+		val minutesSinceLastRun = (new DateTime().getMillis - lastRun.toLong) / MillisInAMinute
 		
 		val allDetails = lastSyncJobDetails.concat(",minutesSinceLastRun," + minutesSinceLastRun)
 		
