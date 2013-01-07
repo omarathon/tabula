@@ -44,8 +44,8 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] {
 		
 			val (successful, deleted) = checkBucket(fileDao.attachmentDir)
 			
-			val logString = "successfulFiles," + successful + ",deletedFiles," + deleted + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis;
-			logger.info(logString);
+			val logString = "successfulFiles," + successful + ",deletedFiles," + deleted + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
+			logger.info(logString)
 
 			try {
 				FileCopyUtils.copy(logString, new FileWriter(lastCleanupJobDetailsFile))

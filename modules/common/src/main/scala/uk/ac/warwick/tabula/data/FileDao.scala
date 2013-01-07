@@ -117,12 +117,17 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			.list
 	}
 	
-	def getAllFileIds(): Set[String] =
-		session.createCriteria(classOf[FileAttachment])
-			.setProjection(Projections.id())
-			.list
-			.asInstanceOf[java.util.List[String]]
-			.toSet[String]
+	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = {
+		val criteria = 
+			session.createCriteria(classOf[FileAttachment])
+				.setProjection(Projections.id())
+				
+		createdBefore.map { date =>
+			criteria.add(Is.lt("dateUploaded", date))
+		}
+		
+		criteria.list.asInstanceOf[java.util.List[String]].toSet[String]
+	}
 
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.

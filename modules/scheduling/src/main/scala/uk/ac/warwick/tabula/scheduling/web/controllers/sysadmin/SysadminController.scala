@@ -25,6 +25,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
+import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -163,8 +164,18 @@ class SyncFilesystemController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/filesystem-cleanup"))
 class CleanupFilesystemController extends BaseSysadminController {	
 	@RequestMapping
-	def sync() = {
+	def cleanup() = {
 		new CleanupUnreferencedFilesCommand().apply()
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/filesystem-sanity"))
+class SanityCheckFilesystemController extends BaseSysadminController {	
+	@RequestMapping
+	def sanityCheck() = {
+		new SanityCheckFilesystemCommand().apply()
 		redirectToHome
 	}
 }

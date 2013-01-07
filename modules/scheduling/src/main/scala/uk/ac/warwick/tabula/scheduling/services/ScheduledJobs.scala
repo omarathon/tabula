@@ -84,9 +84,10 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(cron = "0 0 19 ? * * *") // 7pm
-	def cleanupUnreferencedFiles: Unit = 
+	def cleanupUnreferencedFilesAndSanityCheck: Unit = 
 		exceptionResolver.reportExceptions {
 			new CleanupUnreferencedFilesCommand().apply()
+			new SanityCheckFilesystemCommand().apply()
 		}
 
 }
