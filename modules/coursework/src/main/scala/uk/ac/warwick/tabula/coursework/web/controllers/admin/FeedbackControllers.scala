@@ -37,7 +37,21 @@ class DownloadFeedback extends CourseworkController {
 			case None => throw new ItemNotFoundException
 		}
 	}
-	
+
+	@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def getMarkerFeedback(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		mustBeLinked(assignment, module)
+		mustBeAbleTo(Participate(module))
+
+		feedbackDao.getMarkerFeedback(feedbackId) match {
+			case Some(markerFeedback) => {
+				val renderable = new AdminGetSingleMarkerFeedbackCommand(markerFeedback).apply()
+				fileServer.serve(renderable)
+			}
+			case None => throw new ItemNotFoundException
+		}
+	}
+
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
     def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
         val (assignment, module, filename) = (command.assignment, command.module, command.filename)

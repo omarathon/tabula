@@ -15,10 +15,10 @@ class AddMarkerFeedbackCommand(assignment:Assignment, submitter: CurrentUser, va
 	// list to contain feedback files that are not for a student you should be marking
 	@BeanProperty var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
 
-	def processStudents() {
-		val submissions = assignment.getMarkersSubmissions(submitter.apparentUser).getOrElse(Seq())
-		val universityIds = submissions.map(_.getUniversityId)
+	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser).getOrElse(Seq())
 
+	def processStudents() {
+		val universityIds = submissions.map(_.getUniversityId)
 		invalidStudents = items.filter(item => !universityIds.contains(item.uniNumber))
 		items = items.filter(item => universityIds.contains(item.uniNumber))
 	}

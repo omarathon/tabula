@@ -1,6 +1,6 @@
 <#if nonempty(assignmentsForMarking)>
 
-<#macro download_link info>
+<#macro marker_info info>
 	<#local assignment = info.assignment />
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
@@ -14,15 +14,15 @@
 		<#assign class="" />
 		<#assign title="" />
 		<#assign href>
-			<@routes.downloadmarkersubmissions assignment=assignment />
+			<@routes.listmarkersubmissions assignment=assignment />
 		</#assign>
 	</#if>
 	<#if assignment.closed>
 		<div class="alert alert-success deadline">
 			Assignment closed: <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
-			<a href="${href}" class="btn btn-mini ${class}" data-title="${title}">
-				<i class="icon-download"></i> Download submissions (${numSubmissions})
-			</a>
+			<div class="marker-btn btn-group">
+				<a class="btn btn-mini ${class}" href="${href}" data-title="${title}" >Manage <i class="icon-cog"></i></a>
+			</div>
 		</div>
 	<#else>
 		<div class="alert alert-info deadline">
@@ -37,7 +37,7 @@
 	<#list assignmentsForMarking as info>
 		<div class="simple-assignment-info">
 			<@fmt.assignment_link info.assignment />
-			<@download_link info />
+			<@marker_info info />
 		</div>
 	</#list>
 </div>
