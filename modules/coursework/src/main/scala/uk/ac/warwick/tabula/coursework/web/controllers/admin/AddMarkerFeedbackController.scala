@@ -56,7 +56,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 		} else {
 			// do apply, redirect back
 			cmd.apply()
-			Redirect(Routes.admin.module(module))
+			Redirect(Routes.admin.assignment.markerFeedback(assignment))
 		}
 	}
 
