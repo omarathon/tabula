@@ -53,9 +53,22 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		membership.size should be (0)
 	}
 	
+	@Test def emptyWithNone {
+		val membership = assignmentService.determineMembership(None, None)
+		membership.size should be (0)
+	}
+	
 	@Test def plainSits {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val membership = assignmentService.determineMembership(Some(upstream), Option(nobody))
+		membership.size should be (2)
+		membership(0).user.getFullName should be ("Roger Aaaaf")
+		membership(1).user.getFullName should be ("Roger Aaaag")
+	}
+	
+	@Test def plainSitsWithNone {
+		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
+		val membership = assignmentService.determineMembership(Some(upstream), None)
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
