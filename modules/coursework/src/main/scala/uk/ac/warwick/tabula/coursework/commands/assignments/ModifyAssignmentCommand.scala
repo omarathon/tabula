@@ -245,7 +245,7 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 	 * Returns a sequence of MembershipItems
 	 */
 	def membershipDetails =
-		service.determineMembership(assessmentGroup, members)
+		service.determineMembership(assessmentGroup, Option(members))
 
 	/**
 	 * If upstream assignment, academic year and occurrence are all set,

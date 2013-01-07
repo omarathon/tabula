@@ -80,11 +80,11 @@ trait AssignmentService {
 	def save(group: UpstreamAssessmentGroup)
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
-	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[MembershipItem]
-	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[User]
+	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem]
+	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
 
-	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Boolean
+	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean
 
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
 }
@@ -353,15 +353,15 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 
-	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[MembershipItem] = {
+	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem] = {
 
 		val sitsUsers = upstream map { upstream =>
 			upstream.members.members map { id =>
 				id -> userLookup.getUserByWarwickUniId(id)
 			}
 		} getOrElse Nil
-		val includes = others.includeUsers map { id => id -> userLookup.getUserByUserId(id) }
-		val excludes = others.excludeUsers map { id => id -> userLookup.getUserByUserId(id) }
+		val includes = others map { _.includeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
+		val excludes = others map { _.excludeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 
 		// convert lists of Users to lists of MembershipItems that we can render neatly together.
 
@@ -375,7 +375,7 @@ trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 	/**
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
-	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Seq[User] = {
+	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User] = {
 		determineMembership(upstream, others) filter notExclude map toUser filter notNull
 	}
 
@@ -383,12 +383,12 @@ trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 	 * Returns a simple list of User objects for students who are enrolled on this assignment. May be empty.
 	 */
 	def determineMembershipUsers(assignment: Assignment): Seq[User] = {
-		determineMembershipUsers(assignment.assessmentGroup, assignment.members)
+		determineMembershipUsers(assignment.assessmentGroup, Option(assignment.members))
 	}
 
-	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: UserGroup): Boolean = {
-		if (others.excludeUsers contains user.getUserId) false
-		else if (others.includeUsers contains user.getUserId) true
+	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean = {
+		if (others map {_.excludeUsers contains user.getUserId } getOrElse false) false
+		else if (others map { _.includeUsers contains user.getUserId } getOrElse false) true
 		else upstream map {
 			_.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
 		} getOrElse false // not in any group at all
