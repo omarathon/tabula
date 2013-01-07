@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.io.ByteArrayInputStream
 import java.sql.Blob
@@ -9,16 +9,17 @@ import org.joda.time.LocalDate
 import org.junit.Test
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.imports.ImportSingleMemberCommand
-import uk.ac.warwick.tabula.commands.imports.ImportSingleMemberCommand
 import uk.ac.warwick.tabula.data.MemberDao
-import org.scalatest.mock.MockitoSugar
-
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.userlookup.AnonymousUser
 
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
   

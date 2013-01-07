@@ -1,18 +1,21 @@
-package uk.ac.warwick.tabula.commands.imports
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import java.sql.ResultSet
-import java.sql.Blob
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.FileDao
 import java.io.ByteArrayInputStream
+import java.sql.Blob
 import java.sql.Date
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.data.model.Member
+import java.sql.ResultSet
+
 import org.joda.time.DateTimeConstants
+import org.joda.time.LocalDate
+import org.junit.Test
+
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Male
+import uk.ac.warwick.tabula.data.model.Member
 
 class ImportSingleMemberCommandTest extends TestBase with Mockito {
 	

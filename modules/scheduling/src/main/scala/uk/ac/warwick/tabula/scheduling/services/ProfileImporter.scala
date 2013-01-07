@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
@@ -6,26 +6,21 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.mapAsJavaMap
 import scala.util.matching.Regex
 import org.apache.commons.lang3.text.WordUtils
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
-import javax.persistence.Entity
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.commands.imports.ImportSingleMemberCommand
 import uk.ac.warwick.tabula.data.model.Address
 import uk.ac.warwick.tabula.data.model.AddressType
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.NextOfKin
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.MemberProperties
-import uk.ac.warwick.tabula.commands.imports.ImportSingleMemberCommand
+import org.springframework.stereotype.Service
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
 
 @Service
 class ProfileImporter extends InitializingBean {

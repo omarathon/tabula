@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.imports
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 

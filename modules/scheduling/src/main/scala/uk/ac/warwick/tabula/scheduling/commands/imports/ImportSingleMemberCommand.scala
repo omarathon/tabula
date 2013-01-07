@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.imports
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command

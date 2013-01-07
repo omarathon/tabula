@@ -1,26 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import uk.ac.warwick.tabula.services._
-import java.util.Collections.newSetFromMap
-import java.util.concurrent.ConcurrentHashMap
-import scala.reflect.BeanProperty
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.CleanupTemporaryFilesCommand
-import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
+
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.scheduling.commands._
+import uk.ac.warwick.tabula.scheduling.commands.imports._
+import uk.ac.warwick.tabula.services.AuditEventIndexService
+import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.ProfileIndexService
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
-import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
-import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Service
-import scala.reflect.BeanProperty
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
-import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
