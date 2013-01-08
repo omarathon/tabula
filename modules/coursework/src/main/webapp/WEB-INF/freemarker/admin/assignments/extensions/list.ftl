@@ -19,7 +19,7 @@
     <div id="extension-list">
         <table class="extensionListTable table table-striped table-bordered">
             <tr class="extension-header">
-				<th>University ID</th>
+				<th>Name</th>
 				<th>Status</th>
 				<th>New deadline</th>
 				<th><!-- Actions column--></th>
@@ -40,7 +40,7 @@
 						<#assign highlightClass = "">
 					</#if>
 					<tr id="row${extension.universityId}" class="extension-row ${highlightClass}">
-						<td>${extension.universityId}</td>
+						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
 								<span class="label-green">Approved</span>
@@ -65,7 +65,7 @@
 			<#if existingExtensions??>
 				<#list existingExtensions as extension>
 					<tr id="row${extension.universityId}" class="extension-row">
-						<td>${extension.universityId}</td>
+						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
 								<span class="label-green">Approved</span>
@@ -91,7 +91,7 @@
 			<#if potentialExtensions??>
 				<#list potentialExtensions as universityId>
 					<tr id="row${universityId}" class="extension-row">
-						<td>${universityId}</td>
+						<td>${studentNameLookup[universityId]}</td>
 						<td  class="status"></td>
 						<td class="expiryDate"></td>
 						<td>

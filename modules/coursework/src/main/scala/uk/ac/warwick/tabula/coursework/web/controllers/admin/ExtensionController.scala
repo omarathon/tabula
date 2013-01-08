@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.actions.{Manage, Participate}
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/extensions"))
@@ -49,18 +50,35 @@ class ExtensionController extends CourseworkController{
 		mustBeLinked(assignment,module)
 		mustBeAbleTo(Participate(module))
 
-		val assignmentMembership = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
+		val assignmentUsers = assignmentService.determineMembershipUsers(assignment)
+		
+		val assignmentMembership = Map() ++ (
+			for(assignmentUser <- assignmentUsers)  
+				yield (assignmentUser.getWarwickId -> assignmentUser.getFullName())	
+		)
+			
 		val manualExtensions = assignment.extensions.filter(_.requestedOn == null)
 		val isExtensionManager = module.department.isExtensionManager(user.apparentId)
 		val extensionRequests = assignment.extensions.filterNot(manualExtensions contains(_))
 
-
+		// all the users that aren't members of this assignment, but have submitted work to it
+		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.getUniversityId))	
+		val nonMembers = Map() ++ (
+			for(extension <- extensionsFromNonMembers) 
+				yield (extension.getUniversityId -> userLookup.getUserByWarwickUniId(extension.getUniversityId).getFullName()) 
+		)
+		
+		// build lookup of names from non members of the assignment that have submitted work plus members 
+		val studentNameLookup = nonMembers ++ assignmentMembership		
+		
 		// users that are members of the assignment but have not yet requested or been granted an extension
 		val potentialExtensions =
-			assignmentMembership -- (manualExtensions.map(_.universityId).toSet) --
+			assignmentMembership.keySet -- (manualExtensions.map(_.universityId).toSet) --
 				(extensionRequests.map(_.universityId).toSet)
 
+							
 		val model = Mav("admin/assignments/extensions/list",
+			"studentNameLookup" -> studentNameLookup,
 			"module" -> module,
 			"assignment" -> assignment,
 			"existingExtensions" -> manualExtensions,
