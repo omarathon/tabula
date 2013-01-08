@@ -121,6 +121,8 @@ Publications: ${r.publicationOverlap}%)
 			
 			<#if submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 				<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+			<#else>
+				<#assign lateness = "" />
 			</#if>
 			
 			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
