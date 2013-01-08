@@ -43,8 +43,10 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 	var actualMark: Option[Int] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var agreedMark: Option[Int] = None
-	var actualGrade: String = _
-	var agreedGrade: String = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var actualGrade: Option[String] = None
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var agreedGrade: Option[String] = None
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")

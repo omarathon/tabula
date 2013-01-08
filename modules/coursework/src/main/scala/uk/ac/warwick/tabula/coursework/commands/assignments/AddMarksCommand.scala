@@ -100,8 +100,8 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 					noErrors = false
 				}
 			}
-		} else {
-			// If a row has no mark, we will quietly ignore it 
+		} else if (!hasText(mark.actualGrade)) {
+			// If a row has no mark or grade, we will quietly ignore it 
 			noErrors = false
 		}
 		noErrors
@@ -114,8 +114,12 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 			feedback.uploaderId = submitter.apparentId
 			feedback.universityId = universityId
 			feedback.released = false
-			feedback.actualMark = Option(actualMark.toInt)
-			feedback.actualGrade = actualGrade
+			if (hasText(actualMark)){
+				feedback.actualMark = Option(actualMark.toInt)
+			}
+			if (hasText(actualGrade)){
+				feedback.actualGrade = Option(actualGrade)
+			}
 			session.saveOrUpdate(feedback)
 			feedback
 		}

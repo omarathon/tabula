@@ -55,7 +55,7 @@ class AddMarksController extends CourseworkController {
 		feedback match {
 			case Some(f) => {
 				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
-				markItem.actualGrade = f.actualGrade
+				markItem.actualGrade = f.actualGrade.map { _.toString }.getOrElse("")
 			}
 			case None => {
 				markItem.actualMark = ""

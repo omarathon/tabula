@@ -34,9 +34,11 @@ class MarksTemplateController extends CourseworkController {
 			val row = sheet.createRow(i + 1)
 			row.createCell(0).setCellValue(member.getWarwickId)
 			val marksCell = row.createCell(1)
-			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
-			feedback.foreach {
-				_.actualMark.foreach(marksCell.setCellValue(_))
+			val gradesCell = row.createCell(2)
+			val feedbacks = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
+			feedbacks.foreach { feedback =>
+			  feedback.actualMark.foreach(marksCell.setCellValue(_))
+			  feedback.actualGrade.foreach(gradesCell.setCellValue(_))
 			}
 		}
 
@@ -53,6 +55,7 @@ class MarksTemplateController extends CourseworkController {
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("ID")
 		header.createCell(1).setCellValue("Mark")
+		header.createCell(2).setCellValue("Grade")
 
 		sheet
 	}
