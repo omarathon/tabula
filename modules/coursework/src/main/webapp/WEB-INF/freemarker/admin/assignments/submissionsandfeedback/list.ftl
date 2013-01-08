@@ -93,10 +93,10 @@ Publications: ${r.publicationOverlap}%)
 				<th title="Declared word count">Words</th>
 			</#if>
 			<th>First Marker</th>
+			<th>Files</th>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
 			</#if>
-			<th>Files</th>
 			<th>Feedback</th>
 			<th>Feedback Uploaded</th>
 			<th>Feedback status</th>
@@ -109,9 +109,9 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
-				<td></td>
+				<td></td><td></td>
 				<#if assignment.collectMarks><td></td></#if>
-				<td></td><td></td><td></td><td></td>
+				<td></td><td></td><td></td>
 				<#if hasOriginalityReport><td></td></#if>
 			</tr>
 		</#list>
@@ -166,11 +166,6 @@ Publications: ${r.publicationOverlap}%)
 				<td>
 					<#if submission.assignment??>${submission.firstMarker!""}</#if>
 				</td>
-				 <#if assignment.collectMarks>
-					<td class="mark">
-						${(student.feedback.actualMark)!''}
-					</td>
-				</#if>
 				<td nowrap="nowrap" class="files">
 					<#assign attachments=submission.allAttachments />
 					<#if attachments?size gt 0>
@@ -183,6 +178,11 @@ Publications: ${r.publicationOverlap}%)
 					</a>
 					</#if>
 				</td>
+				<#if assignment.collectMarks>
+					<td class="mark">
+						${(student.feedback.actualMark)!''}
+					</td>
+				</#if>
 				<td nowrap="nowrap" class="download">
 					<#if student.feedback??>
 						<#assign attachments=student.feedback.attachments />
