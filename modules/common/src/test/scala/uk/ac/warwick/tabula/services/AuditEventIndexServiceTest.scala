@@ -40,11 +40,9 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Before def setup {		
 		TEMP_DIR = createTemporaryDirectory
-		val maintenanceMode = mock[MaintenanceModeService]
 		indexer = new AuditEventIndexService
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
-		indexer.maintenanceService = maintenanceMode
 		indexer.afterPropertiesSet
 	}
 

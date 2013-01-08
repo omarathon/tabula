@@ -19,6 +19,8 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/list"))
@@ -26,6 +28,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentService = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(command: ListSubmissionsCommand) = {
@@ -36,12 +39,13 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 		val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
+		val moduleMembers = assignmentService.determineMembershipUsers(assignment)		
+		
 		val awaitingSubmission = 
-			if (assignment.members == null) {
+			if (moduleMembers == null) {
 				Nil
 			} else {
-				val moduleMembers = assignmentService.determineMembershipUsers(assignment).map(_.getWarwickId).toSet
-				(moduleMembers -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+				((moduleMembers.map(_.getWarwickId).toSet) -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
 			}
 
 		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
@@ -50,7 +54,16 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 
 		val students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
-			val usersFeedback = assignment.feedbacks.filter(feedback => feedback.universityId == uniId)
+			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
+		
+			val userFilter = moduleMembers.filter(member => member.getWarwickId() == uniId)
+			val user = if(userFilter.isEmpty) {
+				userLookup.getUserByWarwickUniId(uniId)
+			} else {
+				userFilter.head
+			}
+						
+			val userFullName = user.getFullName()
 			
 			val enhancedSubmissionForUniId = usersSubmissions.toList match {
 				case head :: Nil => head
@@ -64,7 +77,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 			
 			val feedbackForUniId: Feedback = usersFeedback.headOption.orNull
 
-			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId)
+			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId, userFullName)
 		}
 		
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
@@ -84,6 +97,6 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 	}
 
 	// Simple object holder
-	class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val feedback: Feedback) 
+	class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val feedback: Feedback, val fullName: String) 
 	
 }

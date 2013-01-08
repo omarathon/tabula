@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -25,6 +25,8 @@ class DownloadSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var assignmentService = Wire.auto[AssignmentService]
+	var userLookup = Wire.auto[UserLookupService]
+
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
 	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
@@ -61,7 +63,7 @@ class DownloadSubmissionsController extends CourseworkController {
 			fileServer.serve(renderable)
 		}
 	}
-	
+
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
     def downloadSingle(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submissionId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		mustBeLinked(assignment, module)
@@ -82,6 +84,23 @@ class DownloadSubmissionsController extends CourseworkController {
 		val assignment = command.assignment
 		mustBeLinked(assignment, assignment.module)
 		mustBeAbleTo(Participate(assignment.module))
+		command.apply { renderable =>
+			fileServer.serve(renderable)
+		}
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker-templates.zip"))
+	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		val assignment = command.assignment
+		mustBeLinked(assignment, assignment.module)
+		mustBeAbleTo(Participate(assignment.module))
+
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
+			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
+		)
+
+		val users = submissions.map(s => userLookup.getUserByUserId(s.userId))
+		command.members = users
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}

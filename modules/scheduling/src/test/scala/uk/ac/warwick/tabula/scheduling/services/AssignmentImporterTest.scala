@@ -1,20 +1,17 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
-import uk.ac.warwick.tabula.TestBase
+import scala.collection.JavaConversions.mapAsJavaMap
+
 import org.junit.Test
-import uk.ac.warwick.tabula.Mockito
-import javax.sql.DataSource
-import uk.ac.warwick.tabula.helpers.ArrayList
-import collection.JavaConversions._
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils
-import uk.ac.warwick.tabula.PersistenceTestBase
-
+import org.springframework.stereotype.Service
 
 import javax.annotation.Resource
-import org.apache.log4j.Logger
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import javax.sql.DataSource
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.helpers.ArrayList
 
 class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 

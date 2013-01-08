@@ -4,7 +4,7 @@
 <#assign has_archived = archivedAssignments?has_content />
 
 <#assign has_pending_items = (has_feedback || has_assignments) />
-<#assign has_historical_items = (has_submissions || has_archived) />
+<#assign has_historical_items = (has_submissions || has_archived || has_feedback) />
 
 <#assign missing_assignments_markup>
 	<p>Talk to your module convenor if this seems like a mistake.</p>

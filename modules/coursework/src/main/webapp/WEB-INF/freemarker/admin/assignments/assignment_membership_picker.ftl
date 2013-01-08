@@ -17,6 +17,7 @@
 			<a href="#" class="use-popover" 
 			   data-title="Student membership"
 			   data-trigger="hover"
+	   		   data-html="true"
 			   data-content="&lt;p&gt;Here you can specify where this assignment should get its list of enrolled students from.
 			     You can link to a central SITS assignment and a live list of students will be maintained.
 			     If you are not using SITS you can manually specify a list of users.&lt;/p&gt;&lt;p&gt;
@@ -113,7 +114,7 @@
 						<div class="tab-pane ${tab1class}" id="membership-tab1">
 							<#if membershipDetails?size gt 0>
 								<a href="#"
-										class="btn disabled refresh-form has-tooltip"
+										class="btn disabled hide-checked-users has-tooltip"
 										id="membership-remove-selected"
 										<#if assessmentGroup??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 										>
@@ -249,6 +250,10 @@
 			$('.refresh-form').click(function(e) {
 			    e.preventDefault();
 				refreshForm();
+			});
+			$('.hide-checked-users').click(function(e) {
+			    e.preventDefault();
+			    $membershipPicker.find('input.collection-checkbox:checked').parents('.membership-item').hide();
 			});
 
 			$('select#academicYear').change(function(e) {

@@ -56,20 +56,22 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType]): Seq[Member] =
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
 		if (!StringUtils.hasText(query)) Seq()
-		else if (departments.isEmpty) Seq()
+		else if (departments.isEmpty && !sysAdmin) Seq()
 		else try {
 			val q = parser.parse(stripTitles(query))
 			
 			val bq = new BooleanQuery
 			bq.add(q, Occur.MUST)
-			
-			val deptQuery = new BooleanQuery
-			for (dept <- departments)
-				deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
-					
-			bq.add(deptQuery, Occur.MUST)
+
+			if (!sysAdmin) {
+				val deptQuery = new BooleanQuery
+				for (dept <- departments)
+					deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
+
+				bq.add(deptQuery, Occur.MUST)
+			}
 			
 			if (!userTypes.isEmpty) {
 				// Restrict user type

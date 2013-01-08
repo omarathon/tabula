@@ -150,14 +150,14 @@
 </section>
 
 <#if user.sysadmin>
-	<div class="alert alert-info" style="margin-top: 2em;">
+	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		
 		<h4>Sysadmin-only actions</h4>
 		
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 	
-		<@f.form method="post" action="${url('/view/' + profile.universityId + '/reimport')}">
+		<@f.form method="post" action="${url('/sysadmin/import-profiles/' + profile.universityId, '/scheduling')}">
 			<button class="btn btn-large" type="submit">Re-import details from ADS</button>
 		</@f.form>
 	</div>

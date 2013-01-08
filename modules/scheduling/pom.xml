@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>22</version>
+		<version>23</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -80,6 +80,12 @@
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>home</artifactId>
 			<classifier>jar</classifier>
+		</dependency>
+		
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-httpclient4</artifactId>
+			<version>${warwickutils.version}</version>
 		</dependency>
 	</dependencies>
 </project>

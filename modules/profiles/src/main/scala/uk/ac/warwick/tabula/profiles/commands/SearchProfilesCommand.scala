@@ -10,13 +10,15 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.services.SecurityService
 
 class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Member]] with ReadOnly {
 	import SearchProfilesCommand._
 	
 	final val userTypes: Set[MemberUserType] = Set(Student)
 	
-	var service = Wire.auto[ProfileService]
+	var profileService = Wire.auto[ProfileService]
+	var securityService = Wire.auto[SecurityService]
 	
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	@BeanProperty var query: String = _
@@ -35,13 +37,15 @@ class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Membe
 	
 	private def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()
-		else singleton(service.getMemberByUserId(query))
+		else singleton(profileService.getMemberByUserId(query))
 	
 	private def universityIdMatches = 
 		if (!isMaybeUniversityId(query)) Seq()
-		else singleton(service.getMemberByUniversityId(query))
+		else singleton(profileService.getMemberByUniversityId(query))
 	
-	private def queryMatches = service.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes)
+	private def queryMatches = {
+		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, securityService.isSysadmin(currentMember.userId))
+	}
 	
 	override def describe(d: Description) = d.property("query" -> query)
 

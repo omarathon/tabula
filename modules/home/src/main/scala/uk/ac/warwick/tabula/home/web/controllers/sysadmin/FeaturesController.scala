@@ -15,27 +15,29 @@ import scala.annotation.target.field
 import scala.annotation.target.param
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.BeanWrapper
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.util.queue.Queue
+import uk.ac.warwick.tabula.FeaturesMessage
 
 case class FeatureItem(val name: String, val value: Boolean)
 
 /**
  * Read and write feature flags. Alternative to using JMX.
- *
- * TODO unfinished
  */
 @Controller
 @RequestMapping(value = Array("/sysadmin/features"))
 final class FeaturesController extends BaseController with InitializingBean {
 
-	@Autowired var features: Features = _
+	var features = Wire.auto[Features]
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 
 	private var wrapper: BeanWrapper = _
 	private var properties: List[PropertyDescriptor] = _
 
 	override def afterPropertiesSet {
 		wrapper = new BeanWrapperImpl(features)
-		properties = wrapper.getPropertyDescriptors.toList
-			.filter { _.getPropertyType.isAssignableFrom(classOf[java.lang.Boolean]) }
+		properties = new BeanWrapperImpl(new FeaturesMessage).getPropertyDescriptors.toList
+			.filter { _.getWriteMethod != null }
 			.sortBy { _.getDisplayName }
 	}
 
@@ -57,6 +59,10 @@ final class FeaturesController extends BaseController with InitializingBean {
 			}
 			case None => throw new IllegalArgumentException
 		}
+		
+		// Broadcast it to the world!
+		queue.send(new FeaturesMessage(features))
+		
 		Redirect("/sysadmin/features")
 	}
 }

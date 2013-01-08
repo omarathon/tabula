@@ -92,6 +92,7 @@ Publications: ${r.publicationOverlap}%)
 			<#if assignment.wordCountField??>
 				<th title="Declared word count">Words</th>
 			</#if>
+			<th>First Marker</th>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
 			</#if>
@@ -108,6 +109,7 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
+				<td></td>
 				<#if assignment.collectMarks><td></td></#if>
 				<td></td><td></td><td></td><td></td>
 				<#if hasOriginalityReport><td></td></#if>
@@ -123,7 +125,13 @@ Publications: ${r.publicationOverlap}%)
 			
 			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 				<td><@form.selector_check_row "students" student.uniId /></td>
-				<td class="id">${student.uniId}</td>
+				<td class="id">
+				<#if module.department.showStudentName>
+					${student.fullName}
+				<#else>
+					${student.uniId}
+				</#if>
+				</td>
 				<#-- TODO show student name if allowed by department --> 
 				<td class="submitted">
 					<#if submission.submittedDate??>
@@ -155,11 +163,14 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</td>
 				</#if>
+				<td>
+					<#if submission.assignment??>${submission.firstMarker!""}</#if>
+				</td>
 				 <#if assignment.collectMarks>
-                    <td class="mark">
-                        ${(student.feedback.actualMark)!''}
-                    </td>
-                </#if>
+					<td class="mark">
+						${(student.feedback.actualMark)!''}
+					</td>
+				</#if>
 				<td nowrap="nowrap" class="files">
 					<#assign attachments=submission.allAttachments />
 					<#if attachments?size gt 0>
@@ -186,7 +197,6 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</#if>
 				</td>
-				
 				<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 				<td class="feedbackReleased">
 					<#if student.feedback??>

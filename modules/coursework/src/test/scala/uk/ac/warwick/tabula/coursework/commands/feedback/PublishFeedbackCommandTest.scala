@@ -39,7 +39,9 @@ class PublishFeedbackCommandTest extends TestBase {
 		val command = new PublishFeedbackCommand
 		val errors = new BindException(command, "command")
 		command.assignment = assignment
-		assignment.feedbacks = ArrayList( new Feedback() )
+		val feedback = new Feedback()
+		feedback.actualMark = Some(41)
+		assignment.feedbacks = ArrayList( feedback )
 	}
 	
 }

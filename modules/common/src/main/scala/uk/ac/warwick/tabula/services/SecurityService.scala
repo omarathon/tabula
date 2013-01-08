@@ -43,7 +43,7 @@ class SecurityService extends Logging {
 
 	val checks: Seq[PermissionChecker] = List(checkSysadmin _, checkEnrolled _, checkGroup _)
 
-	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (user.god) Allow else Continue
+	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (isSysadmin(user.userId)) Allow else Continue
 
 	def checkEnrolled(user: CurrentUser, action: Action[_]): Response = action match {
 		case Submit(assignment: Assignment) => if (assignment.canSubmit(user.apparentUser)) Allow else Deny
@@ -83,6 +83,8 @@ class SecurityService extends Logging {
 
 		case DownloadSubmissions(assignment: Assignment) => assignment.isMarker(user.apparentUser) ||
 			can(user, Participate(assignment.module))
+
+		case UploadMarkerFeedback(assignment: Assignment) => assignment.isMarker(user.apparentUser)
 
 		case Masquerade() => user.sysadmin || user.masquerader
 		

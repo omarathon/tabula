@@ -1,17 +1,37 @@
 package uk.ac.warwick.tabula
 
-import java.util.Properties
+import org.codehaus.jackson.annotate.JsonAutoDetect
+import org.codehaus.jackson.map.ObjectMapper
 import org.junit.Test
-import java.lang.Boolean
-import org.junit.Ignore
+
+import uk.ac.warwick.util.queue.conversion.ItemType
 
 class FeaturesTest extends TestBase {
-	@Ignore @Test def validFeature {
-		val props = new Properties
-		props.setProperty("irrelevant.property", "who cares")
-		props.setProperty("features.emailStudents", "true")
+	
+		@Test def jackson() {
+				val features = new FeaturesImpl				
+				val mapper = new ObjectMapper
+				
+				val json = mapper.writeValueAsString(features)
+				assert(Option(json).isDefined)
+				
+				val features2 = mapper.readValue(json, classOf[FeaturesImpl])
+				assert(features != features2)
+				assert(features.emailStudents === features2.emailStudents)
+		}
 		
-//		val features = Features.fromProperties(props)
-//		features.emailStudents should be (Boolean.TRUE)
-	}
+		@Test def update() {
+				val features1 = new FeaturesImpl
+				val features2 = new FeaturesImpl
+				
+				// Toggle
+				features1.emailStudents = !features1.emailStudents
+				
+				val message = new FeaturesMessage(features1)
+				message.emailStudents should be (features1.emailStudents)
+				
+				features2.update(message)
+				features2.emailStudents should be (features1.emailStudents)
+		}
+
 }

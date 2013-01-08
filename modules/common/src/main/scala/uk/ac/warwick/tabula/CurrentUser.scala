@@ -45,6 +45,8 @@ class CurrentUser(
 	def departmentName = apparentUser.getDepartment
 	/** Email address of the apparent user. */
 	def email = apparentUser.getEmail
+	/** User code of the apparent user. */	
+	def userId = apparentUser.getUserId()
 	
 	/** Is of type Student? (includes PGT) */
 	def isStudent = apparentUser.isStudent

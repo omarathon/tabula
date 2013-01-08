@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.imports
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.data.Transactions._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
+import uk.ac.warwick.tabula.scheduling.services.ModuleRegistration
 
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 

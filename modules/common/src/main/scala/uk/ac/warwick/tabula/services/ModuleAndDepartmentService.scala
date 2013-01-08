@@ -14,7 +14,6 @@ import uk.ac.warwick.userlookup.GroupService
 import org.springframework.scheduling.annotation.Async
 import collection.JavaConverters._
 import uk.ac.warwick.userlookup.Group
-import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.RouteDao
 

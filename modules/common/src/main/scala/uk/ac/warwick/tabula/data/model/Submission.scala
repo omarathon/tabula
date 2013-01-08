@@ -67,6 +67,8 @@ class Submission extends GeneratedId with Deleteable {
 	def getValue(field: FormField): Option[SavedSubmissionValue] = {
 		values.find( _.name == field.name )
 	}
+
+	def firstMarker:String = assignment.getStudentsFirstMarker(this).getOrElse("")
 	
 	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
 

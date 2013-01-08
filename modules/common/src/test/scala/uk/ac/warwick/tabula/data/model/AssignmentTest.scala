@@ -33,20 +33,35 @@ class AssignmentTest extends TestBase {
 		assignment.feedbacks should be ('empty)
 		assignment.unreleasedFeedback should be ('empty)
 		
-		val feedback = new Feedback
+		val feedback = mockFeedback
 		assignment.feedbacks add feedback
 		assignment.feedbacks.size should be (1)
-		assignment.unreleasedFeedback.size should be (1)		
+		assignment.unreleasedFeedback.size should be (1)
 		feedback.released = true
 		assignment.unreleasedFeedback should be ('empty)
+	}
+
+	@Test def placeholderFeedback {
+		val assignment = new Assignment
+		assignment.fullFeedback should be ('empty)
+
+		val feedback = new Feedback
+		assignment.feedbacks add feedback
+		assignment.fullFeedback should be ('empty)
+
+		feedback.actualMark = Some(41)
+		assignment.fullFeedback.size should be (1)
 	}
 	
 	@Test def submissionsReport {
 		val assignment = new Assignment
 		assignment.submissionsReport should not be ('hasProblems) // not be has problems?
 		
-		for (i <- 1 to 10) // 0000001 .. 0000010 
-			assignment.feedbacks add new Feedback(universityId = idFormat(i))
+		for (i <- 1 to 10) {// 0000001 .. 0000010
+			val feedback = new Feedback(universityId = idFormat(i))
+			feedback.actualMark = Some(i*10)
+			assignment.feedbacks add feedback
+		}
 		
 		for (i <- 8 to 20) // 0000008 .. 0000020
 			assignment.submissions add new Submission(universityId = idFormat(i))
@@ -80,7 +95,8 @@ class AssignmentTest extends TestBase {
 	
 	@Test def canPublishFeedback {
 		val assignment = new Assignment
-		assignment.feedbacks add new Feedback
+		assignment.feedbacks add mockFeedback
+
 		assignment.openDate = new DateTime().minusDays(3)
 		assignment.closeDate = new DateTime().plusDays(10)
 		assignment.openEnded = false
@@ -99,4 +115,11 @@ class AssignmentTest extends TestBase {
 	
 	/** Zero-pad integer to a 7 digit string */
 	def idFormat(i:Int) = "%07d" format i
+
+	def mockFeedback:Feedback = {
+		val f = new Feedback()
+		// add a mark so this is not treated like a placeholder
+		f.actualMark = Some(41)
+		f
+	}
 }

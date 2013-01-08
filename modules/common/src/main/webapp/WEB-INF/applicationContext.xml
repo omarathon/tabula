@@ -302,15 +302,52 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	
+	<!-- ActiveMQ -->
+	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
+	
+	<bean id="settingsSyncTopic" parent="abstractQueue">
+		<constructor-arg value="SynchronisedSettings" />
+		
+		<!-- We don't need this to be persistent, it's for setting feature flags, maintenance mode etc -->
+		<property name="persistent" value="false" />
+		
+		<!-- This isn't a Queue, it's a Topic - we are effectively broadcasting -->
+		<property name="pubSub" value="true" />
+		<property name="pubSubNoLocal" value="true" />
+		
+		<property name="messageConverter">
+			<bean class="uk.ac.warwick.util.queue.conversion.JsonMessageConverter">
+				<property name="annotatedClasses">
+					<list>
+						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
+						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
+	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
+		<!-- This is the default embedded broker -->
+		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
 	
 	<beans profile="dev,production">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
 				p:ssosUrl="${ssoclient.ssos.url}"
 				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+				
+		<!-- This may still be an embedded broker (i.e. for dev) but probably has JMX enabled -->	
+		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider">
+			<constructor-arg value="${activemq.broker}" />
+			<constructor-arg value="${activemq.user}" />
+			<constructor-arg value="${activemq.pass}" />
+		</bean>
 	</beans>
 	
 	<beans profile="scheduling">
@@ -370,7 +407,7 @@
 		    <property name="server" ref="jmxServerLocator" />
 		    <property name="beans">
 		      <map>
-		        <entry key="tabula-${module.name}:name=features" value-ref="features" />
+		        <!-- DON'T expose features by JMX - we use a controller for that now! -->
 		      </map>
 		    </property>
 		  </bean>

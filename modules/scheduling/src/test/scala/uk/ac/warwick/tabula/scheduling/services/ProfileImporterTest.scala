@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.io.ByteArrayInputStream
 import java.sql.Blob
@@ -9,12 +9,17 @@ import org.joda.time.LocalDate
 import org.junit.Test
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
-
+import uk.ac.warwick.tabula.data.MemberDao
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.userlookup.AnonymousUser
 
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
   
@@ -25,7 +30,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val importer = new ProfileImporter
 		
 		for (name <- names) {
-			val member = new Member
+			val member = new ImportSingleMemberCommand("0123456")
 			member.firstName = name.toUpperCase()
 			
 			importer.processNames(member, Map().withDefaultValue(new AnonymousUser))
@@ -42,7 +47,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val importer = new ProfileImporter
 		
 		for (name <- names) {
-			val member = new Member
+			val member = new ImportSingleMemberCommand("0123456")
 			member.lastName = name.toUpperCase()
 			
 			importer.processNames(member, Map().withDefaultValue(new AnonymousUser))
@@ -65,12 +70,12 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		
 		val users = Map("user1" -> user1, "user2" -> user2)
 		
-		val member1 = new Member
+		val member1 = new ImportSingleMemberCommand("0123456")
 		member1.userId = "user1"
 		member1.firstName = "MATHEW JAMES"
 		member1.lastName = "MACINTOSH"
 		  
-		val member2 = new Member
+		val member2 = new ImportSingleMemberCommand("0123457")
 		member2.userId = "user2"
 		member2.firstName = "MATHEW JAMES"
 		member2.lastName = "MACINTOSH"
@@ -103,7 +108,14 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val importer = new ProfileImporter()
 		val fileDao = mock[FileDao]
 		
-		val member = importer.processNames(ProfileImporter.createMember(rs, fileDao, null), Map().withDefaultValue(new AnonymousUser))
+		val memberDao = mock[MemberDao]
+		memberDao.getByUniversityId("0672089") returns(None)
+		
+		val command = new ImportSingleMemberCommand(rs)
+		command.memberDao = memberDao
+		command.fileDao = fileDao
+		
+		val member = importer.processNames(command, Map().withDefaultValue(new AnonymousUser)).applyInternal
 		member.title should be ("Mr")
 		member.universityId should be ("0672089")
 		member.userId should be ("cuscav")
@@ -116,6 +128,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		
 		there was one(fileDao).savePermanent(any[FileAttachment])
 		there was no(fileDao).saveTemporary(any[FileAttachment])
+		
+		there was one(memberDao).saveOrUpdate(any[Member])
 	}
 
 }

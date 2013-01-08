@@ -71,22 +71,14 @@
 						</div>
 						
 						<div id="custom-header">
-							<div class="">
+							<div>
 							<#if (info.maintenance)!false>
-								<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="bottom" data-content="This system has been placed in a read-only mode. You will be able to downoad files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
+								<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="left" data-content="This system has been placed in a read-only mode. You will be able to downoad files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
 								<script>
 									jQuery(function($){
 										$('#maintenance-mode-label').popover();
 									});
 								</script>
-							</#if>
-							<#if user??>
-								<#if user.sysadmin>
-									<a class="btn btn-inverse" href="<@url page="/sysadmin/" context="/" />">Sysadmin</a>
-								</#if>
-								<#if user.masquerader || user.sysadmin>
-									<a class="btn btn-inverse" href="<@url page="/admin/masquerade" context="/" />">Masquerade</a>
-								</#if>
 							</#if>
 							</div>
 						</div>
@@ -198,6 +190,30 @@
 		          			
 		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}</#if>">Give feedback</a></div>
 		          				      					
+<#if user?? && (user.sysadmin || user.masquerader)>
+<div id="sysadmin-link">
+<div class="btn-group">
+	<a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog icon-white"></i> System <span class="caret"></span></a>
+	<ul class="dropdown-menu pull-right">
+		<#if user.sysadmin>
+		<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
+		</#if>
+		<#if user.masquerader || user.sysadmin>
+		<li><a href="<@url page="/admin/masquerade" context="/" />">Masquerade</a></li>
+		</#if>
+		<li><a href="#" id="hide-sysadmin-only-content">Hide sysadmin content</a></li>
+	</ul>
+</div>
+</div>
+<script type="text/javascript">
+jQuery('#hide-sysadmin-only-content').on('click', function(){
+  jQuery('#sysadmin-link').fadeOut('slow')
+  jQuery('.sysadmin-only-content').hide('slow');
+  return false;
+});
+</script>
+</#if>
+		          				      					
 	      					<div style="clear:both;"></div>
 		          		</div>
 					</div>
@@ -205,7 +221,6 @@
 			</div>
 		</div>
 		
-	
 		
 	</body>
 </html>

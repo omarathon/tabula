@@ -1,17 +1,18 @@
-package uk.ac.warwick.tabula.services
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.DepartmentDao
-import org.specs.mock.JMocker._
-import org.specs.mock.JMocker.{mock => jmock}
-import org.specs.mock.JMocker.{expect => expecting}
-import org.hamcrest.BaseMatcher
-import org.hamcrest.Matchers._
+package uk.ac.warwick.tabula.scheduling.services
+
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasProperty
 import org.junit.Before
-import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Test
+import org.specs.mock.JMocker.{expect => expecting}
+import org.specs.mock.JMocker.mock
+import org.specs.mock.JMocker.one
+import org.specs.mock.JMocker.returnValue
+import org.specs.mock.JMocker.will
+
 import uk.ac.warwick.tabula.TestBase
-
-
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 class ModuleServiceTest extends TestBase {
   
