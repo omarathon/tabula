@@ -78,11 +78,12 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	def getFileById(id: String) = getById[FileAttachment](id)
 	
-	def getFileByStrippedId(id: String) = 
+	def getFileByStrippedId(id: String) = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
 				.setMaxResults(1)
 				.uniqueResult
+	}
 
 	/** Only for use by FileAttachment to find its own backing file. */
 	def getData(id: String): Option[File] = targetFile(id) match {
@@ -94,7 +95,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		}
 	}
 	
-	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = {
+	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.ge("dateUploaded", createdSince))
 				.setMaxResults(maxResults)
@@ -103,7 +104,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.list
 	}
 	
-	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = {
+	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
 		val criteria = 
 			session.newCriteria[FileAttachment]
 				.add(Is.eq("dateUploaded", createdOn))
@@ -117,7 +118,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			.list
 	}
 	
-	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = {
+	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
 		val criteria = 
 			session.createCriteria(classOf[FileAttachment])
 				.setProjection(Projections.id())
