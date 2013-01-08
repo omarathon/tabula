@@ -76,7 +76,7 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 		case None => false
 	}
 
-	def hasGrade: Boolean = Option(actualGrade) match {
+	def hasGrade: Boolean = actualGrade match {
 		case Some(string) => true
 		case None => false
 	}
