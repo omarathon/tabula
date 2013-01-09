@@ -3,16 +3,14 @@ import java.io.File
 import java.io.FileFilter
 import java.io.FileWriter
 import java.io.IOException
-
 import org.joda.time.DateTime
 import org.springframework.util.FileCopyUtils
-
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.util.core.spring.FileUtils
+import uk.ac.warwick.tabula.commands.ReadOnly
 
 /** 
  * Go through each synced file on the filesystem and delete any file where there isn't 
@@ -22,7 +20,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
  * there is any lag between syncing the database that the files aren't deleted before the 
  * relevant database record can be synced across.
  */
-class CleanupUnreferencedFilesCommand extends Command[Unit] {
+class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 	import CleanupUnreferencedFilesCommand._
 	import FunctionalFileFilter._
 	

@@ -10,6 +10,7 @@ import java.io.FileReader
 import uk.ac.warwick.tabula.data.FileDao
 import java.io.IOException
 import java.io.FileWriter
+import uk.ac.warwick.tabula.commands.ReadOnly
 
 /**
  * Job to go through each FileAttachment in the database and alert if there
@@ -18,7 +19,7 @@ import java.io.FileWriter
  * This will ignore any files that have been created since the last sync, if we
  * are a standby.
  */
-class SanityCheckFilesystemCommand extends Command[Unit] {
+class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	import SyncReplicaFilesystemCommand._
 	import SanityCheckFilesystemCommand._
 	
