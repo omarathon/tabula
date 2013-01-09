@@ -25,9 +25,9 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 
 		val fileDao = mock[FileDao]
 		
-		val route = Option(new Route)
+		val route = new Route
 		val mds = mock[ModuleAndDepartmentService]
-		mds.getRouteByCode("C100") returns (route)
+		mds.getRouteByCode("c100") returns (Some(route))
 		
 		blob.getBinaryStream() returns(new ByteArrayInputStream(blobBytes))
 		blob.length() returns (blobBytes.length)
