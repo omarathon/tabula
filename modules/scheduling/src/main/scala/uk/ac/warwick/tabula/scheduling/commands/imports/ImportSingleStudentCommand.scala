@@ -30,6 +30,7 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.Route
 
 class ImportSingleStudentCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
 	with Logging with Daoisms with StudentProperties {
@@ -100,10 +101,31 @@ class ImportSingleStudentCommand(val rs: ResultSet) extends ImportSingleMemberCo
 	
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
-		copyBasicProperties(basicStudentProperties, commandBean, memberBean)/* |
-		copyRoute("route", routeCode, memberBean) |
-		copyDepartment("studyDepartment", studyDepartmentCode, memberBean)*/
-	
+		copyBasicProperties(basicStudentProperties, commandBean, memberBean) |
+		copyRoute("route", routeCode, memberBean)
+		
+		private def copyRoute(property: String, routeCode: String, memberBean: BeanWrapper) = {
+		val oldValue = memberBean.getPropertyValue(property) match {
+			case null => null
+			case value: Route => value
+		}
+		
+		if (oldValue == null && routeCode == null) false
+		else if (oldValue == null) {
+			// From no route to having a route
+			memberBean.setPropertyValue(property, toRoute(routeCode))
+			true
+		} else if (routeCode == null) {
+			// User had a route but now doesn't
+			memberBean.setPropertyValue(property, null)
+			true
+		} else if (oldValue.code == routeCode.toLowerCase) {
+			false
+		}	else {
+			memberBean.setPropertyValue(property, toRoute(routeCode))
+			true
+		}
+	}
 	
 	private def toRoute(routeCode: String) = {
 		if (routeCode == null || routeCode == "") {
