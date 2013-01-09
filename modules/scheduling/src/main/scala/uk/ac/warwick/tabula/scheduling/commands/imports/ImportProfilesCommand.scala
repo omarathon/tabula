@@ -14,6 +14,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
+import uk.ac.warwick.tabula.scheduling.services.UserIdAndCategory
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
@@ -36,14 +37,15 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	/** Import basic info about all members in ADS, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 	def doMemberDetails {
 		benchmark("Import all member details") {
-			for (usercodes <- logSize(profileImporter.allUserCodes).grouped(250)) {
-				logger.info("Fetching details for " + usercodes.size + " usercodes from websignon")
-				val users: Map[String, User] = userLookup.getUsersByUserIds(usercodes).toMap
+			for (userIdsAndCategories <- logSize(profileImporter.userIdsAndCategories).grouped(250)) {
+				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")
+				val users: Map[String, User] = userLookup.getUsersByUserIds(userIdsAndCategories.map(x => x.userId)).toMap
 				
-				logger.info("Fetching member details for " + usercodes.size + " members from ADS")
+				logger.info("Fetching member details for " + userIdsAndCategories.size + " members from ADS")
 
 				transactional() {
-					profileImporter.getMemberDetails(usercodes).map(profileImporter.processNames(_, users)) map { _.apply }
+					profileImporter.getMemberDetails(userIdsAndCategories).map(profileImporter.processNames(_, users)) map { _.apply }
+					
 					session.flush
 					session.clear
 				}
@@ -90,8 +92,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		transactional() {		
 			val usercode = member.userId
 			val user = userLookup.getUserByUserId(usercode)
+			val category = member.getUserType.dbValue
+			val userIdAndCategory = new UserIdAndCategory(usercode, category)
 		
-			val memberCommands = profileImporter.getMemberDetails(List(usercode)).map(profileImporter.processNames(_, Map(usercode -> user)))
+			val memberCommands = profileImporter.getMemberDetails(List(userIdAndCategory)).map(profileImporter.processNames(_, Map(usercode -> user)))
 			val members = memberCommands map { _.apply }
 			
 			session.flush

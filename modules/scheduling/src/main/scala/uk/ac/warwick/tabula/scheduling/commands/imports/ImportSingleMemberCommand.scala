@@ -31,12 +31,12 @@ import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
 
-class ImportSingleMemberCommand(val id: String) extends Command[Member] with Logging with Daoisms
-	with MemberProperties with StudentProperties with StaffProperties with AlumniProperties {
+abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
+	with MemberProperties  {
 	
 	var memberDao = Wire.auto[MemberDao]
 	var fileDao = Wire.auto[FileDao]
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]	
 	
 	// A couple of intermediate properties that will be transformed later
 	@BeanProperty var photoBlob: Blob = _
@@ -44,23 +44,7 @@ class ImportSingleMemberCommand(val id: String) extends Command[Member] with Log
 	//@BeanProperty var studyDepartmentCode: String = _
 	
 	def this(rs: ResultSet) {
-		this(rs.getString("university_id"))
-		
-		def toLocalDate(date: Date) = {
-			if (date == null) {
-				null
-			} else {
-				new LocalDate(date)
-			}
-		}
-		
-		def toAcademicYear(code: String) = {
-			if (code == null || code == "") {
-				null
-			} else {
-				AcademicYear.parse(code)
-			}
-		}
+		this()
 		
 		this.universityId = rs.getString("university_id")
 		this.userId = rs.getString("user_code")
@@ -83,72 +67,28 @@ class ImportSingleMemberCommand(val id: String) extends Command[Member] with Log
 			
 		this.homeDepartmentCode = rs.getString("home_department_code")
 		this.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
-		
-		/*
-		// Staff-specific properties
-		this.teachingStaff = rs.getString("teaching_staff") == "Y"
-			
-		// Student-specific properties
-		this.sprCode = rs.getString("spr_code")
-		this.sitsCourseCode = rs.getString("sits_course_code")
-		
-		this.routeCode = rs.getString("route_code")
-		
-		this.yearOfStudy = rs.getInt("year_of_study")
-		this.attendanceMode = rs.getString("mode_of_attendance")
-		this.studentStatus = rs.getString("student_status")
-		this.fundingSource = rs.getString("source_of_funding")
-		this.programmeOfStudy = rs.getString("programme_of_study")
-		this.intendedAward = rs.getString("intended_award")
-		
-		this.academicYear = toAcademicYear(rs.getString("academic_year_code"))
-		this.studyDepartmentCode = rs.getString("study_department")
-		this.courseStartYear = toAcademicYear(rs.getString("course_start_year"))
-		this.yearCommencedDegree = toAcademicYear(rs.getString("year_commenced_degree"))
-		this.courseBaseYear = toAcademicYear(rs.getString("course_base_start_year"))
-		this.courseEndDate = toLocalDate(rs.getDate("course_end_date"))
-		this.transferReason = rs.getString("transfer_reason")
-		this.beginDate = toLocalDate(rs.getDate("begin_date"))
-		this.endDate = toLocalDate(rs.getDate("end_date"))
-		this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
-		this.feeStatus = rs.getString("fee_status")
-		this.domicile = rs.getString("domicile")
-		this.highestQualificationOnEntry = rs.getString("highest_qualification_on_entry")
-		this.lastInstitute = rs.getString("last_institute")
-		this.lastSchool = rs.getString("last_school")
-		*/
 	}
 	
-	def applyInternal(): Member = transactional() {
-		val memberExisting = memberDao.getByUniversityId(id)
-		
-		logger.debug("Importing member " + id + " into " + memberExisting)
-		
-		val isTransient = !memberExisting.isDefined
-		val member = memberExisting getOrElse(new Member(id))
-		
-		val commandBean = new BeanWrapperImpl(this)
-		val memberBean = new BeanWrapperImpl(member)
-		
-		// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
-		val hasChanged = 
-			copyMemberProperties(commandBean, memberBean) |
-			copyStudentProperties(commandBean, memberBean) |
-			copyStaffProperties(commandBean, memberBean) |
-			copyAlumniProperties(commandBean, memberBean)
-			
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + member)
-			
-			member.lastUpdatedDate = DateTime.now
-			memberDao.saveOrUpdate(member)
+	protected def toLocalDate(date: Date) = {
+		if (date == null) {
+			null
+		} else {
+			new LocalDate(date)
 		}
-		
-		member
 	}
 	
+	protected def toAcademicYear(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			AcademicYear.parse(code)
+		}
+	}
+	
+	def applyForTesting = applyInternal
+		
 	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
-	private def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, memberBean: BeanWrapper) = {
+	protected def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, memberBean: BeanWrapper) = {
 		// Transform the set of properties to a set of booleans saying whether the value has changed
 		val changedProperties = for (property <- properties) yield {
 			val oldValue = memberBean.getPropertyValue(property)
@@ -232,37 +172,12 @@ class ImportSingleMemberCommand(val id: String) extends Command[Member] with Log
 	)
 	
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
-	private def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
+	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
 		copyPhoto("photo", photoBlob, memberBean) |
 		copyDepartment("homeDepartment", homeDepartmentCode, memberBean)
 	
-	private val basicStudentProperties = Set(
-		"sprCode", "sitsCourseCode", "yearOfStudy", "attendanceMode", "studentStatus", 
-		"fundingSource", "programmeOfStudy", "intendedAward", "academicYear", "courseStartYear",
-		"yearCommencedDegree", "courseBaseYear", "courseEndDate", "transferReason", "beginDate",
-		"endDate", "expectedEndDate", "feeStatus", "domicile", "highestQualificationOnEntry",
-		"lastInstitute", "lastSchool"
-	)
-	
-	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
-	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
-		copyBasicProperties(basicStudentProperties, commandBean, memberBean)/* |
-		copyRoute("route", routeCode, memberBean) |
-		copyDepartment("studyDepartment", studyDepartmentCode, memberBean)*/
-	
-	private val basicStaffProperties = Set(
-		"teachingStaff"
-	)
-	
-	private def copyStaffProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
-		copyBasicProperties(basicStaffProperties, commandBean, memberBean)
-	
-	private val basicAlumniProperties: Set[String] = Set()
-	
-	private def copyAlumniProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
-		copyBasicProperties(basicAlumniProperties, commandBean, memberBean)
-		
+
 	private def toPhoto(photoBlob: Blob) = {
 		val photo = new FileAttachment
 		photo.name = universityId + ".jpg"
@@ -270,14 +185,6 @@ class ImportSingleMemberCommand(val id: String) extends Command[Member] with Log
 		photo.uploadedDataLength = photoBlob.length
 		fileDao.savePermanent(photo)
 		photo
-	}
-	
-	private def toRoute(routeCode: String) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
 	}
 	
 	private def toDepartment(departmentCode: String) = {
@@ -288,6 +195,6 @@ class ImportSingleMemberCommand(val id: String) extends Command[Member] with Log
 		}
 	}
 	
-	def describe(d: Description) = d.property("universityId" -> id)
+	def describe(d: Description) = d.property("universityId" -> universityId)
 
 }

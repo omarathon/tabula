@@ -21,9 +21,18 @@ import uk.ac.warwick.tabula.data.model.NextOfKin
 import uk.ac.warwick.userlookup.User
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.tabula.data.model.Staff
+import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
+import uk.ac.warwick.tabula.helpers.Logging
+
+class UserIdAndCategory(val userId: String, val category: String) {
+}
 
 @Service
-class ProfileImporter extends InitializingBean {
+class ProfileImporter extends InitializingBean with Logging {
 	import ProfileImporter._
 	
 	var ads = Wire[DataSource]("academicDataStore")
@@ -34,13 +43,25 @@ class ProfileImporter extends InitializingBean {
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 	
-	lazy val basicInformationQuery = new BasicInformationQuery(ads)
+	lazy val studentInformationQuery = new StudentInformationQuery(ads)
+	lazy val staffInformationQuery = new StaffInformationQuery(ads)
 
-	def getMemberDetails(usercodes: JList[String]): Seq[ImportSingleMemberCommand] = 
-		basicInformationQuery.executeByNamedParam(Map("usercodes" -> usercodes))
+	def getMemberDetails(userIdsAndCategories: Seq[UserIdAndCategory]): Seq[ImportSingleMemberCommand] = {
+		val commands = for (userIdAndCategory <- userIdsAndCategories) yield {
+			val userId = userIdAndCategory.userId
+			val category = MemberUserType.fromCode(userIdAndCategory.category)
+			logger.debug("Reading data for " + category.description + " member, " + userId)
+			category match {
+				case Student =>	studentInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
+				case Staff =>	staffInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
+				case _ => Seq()
+			}
+		}
+		commands.flatten
+	}
 	
-	lazy val allUserIdsQuery = new AllUserIdsQuery(ads)
-	lazy val allUserCodes: Seq[String] = allUserIdsQuery.execute
+	lazy val allUserIdsAndCategoriesQuery = new AllUserIdsAndCategoriesQuery(ads)
+	lazy val userIdsAndCategories: Seq[UserIdAndCategory] = allUserIdsAndCategoriesQuery.execute
 	
 	lazy val nextOfKinQuery = new NextOfKinsQuery(ads)
 	lazy val addressQuery = new AddressesQuery(ads)
@@ -65,15 +86,15 @@ class ProfileImporter extends InitializingBean {
 
 object ProfileImporter {
   
-	val GetAllUserIds = """
-		select primary_user_code from member
+	val GetAllUsersAndCategories = """
+		select primary_user_code, group_ctg from member
 		where primary_user_code is not null
 		and preferred_email_address is not null
 		and preferred_email_address != 'No Email'
 		and in_use_flag = 'Active'
 		"""
   
-	val GetBasicInformation = """
+	val BasicInformationPrologue = """
 	  	select
 			m.university_id as university_id,
 			m.title as title,
@@ -93,18 +114,19 @@ object ProfileImporter {
 			m.primary_user_code as user_code,
 			m.date_of_birth as date_of_birth,
 			m.group_ctg as group_ctg
-		from member m
-    		left outer join member_photo_details photo 
-      			on m.university_id = photo.university_id
-        
-    		left outer join nationality nat 
-	  			on m.nationality = nat.nationality_code
-		where m.primary_user_code in (:usercodes)
-	  	"""
+		"""
 		
-	val GetStudentInformation = """
-		select
-			m.university_id as university_id,
+	val BasicInformationEpilogue = """
+		left outer join member_photo_details photo 
+			on m.university_id = photo.university_id
+
+		left outer join nationality nat 
+			on m.nationality = nat.nationality_code
+		
+		where m.primary_user_code in (:usercodes)
+		"""
+		
+	val GetStudentInformation = BasicInformationPrologue + """,
 			study.spr_code as spr_code,
 			study.sits_course_code as sits_course_code,
 			levl.name as study_level,
@@ -134,6 +156,7 @@ object ProfileImporter {
 			details.year_commenced_degree as year_commenced_degree
 
 		from member m
+	
     		left outer join student_current_study_details study 
       			on m.university_id = study.university_id
     
@@ -178,17 +201,12 @@ object ProfileImporter {
 	  
     		left outer join school last_school 
 	  			on details.last_school = last_school.school_code
-
-		where m.primary_user_code in (:usercodes)
-		"""
+		""" + BasicInformationEpilogue
 		
-	val GetStaffInformation = """
-		select
-			m.university_id as university_id,
+	val GetStaffInformation = BasicInformationPrologue + """,
 			m.teaching_staff as teaching_staff
 		from member m
-		where m.primary_user_code in (:usercodes)
-		"""
+		""" + BasicInformationEpilogue
 	  
 	val GetNextOfKins = """
 		select 
@@ -222,15 +240,21 @@ object ProfileImporter {
 			where university_id = :universityId
 		"""
 	  
-	class AllUserIdsQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetAllUserIds) {
+	class AllUserIdsAndCategoriesQuery(ds: DataSource) extends MappingSqlQuery[UserIdAndCategory](ds, GetAllUsersAndCategories) {
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("primary_user_code")
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new UserIdAndCategory(rs.getString("primary_user_code"), rs.getString("group_ctg"))
 	}
 	  
-	class BasicInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleMemberCommand](ds, GetBasicInformation) {
+	class StudentInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()		
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleMemberCommand(rs)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(rs)
+	}
+	
+	class StaffInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()		
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(rs)
 	}
 	
 	class NextOfKinsQuery(ds: DataSource) extends MappingSqlQuery[NextOfKin](ds, GetNextOfKins) {
