@@ -102,10 +102,16 @@ Publications: ${r.publicationOverlap}%)
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
-		<#list awaitingSubmission as student>
+		<#list awaitingSubmission?keys as universityId>
 			<tr class="itemContainer awaiting-submission">
 				<td></td>
-				<td>${student}</td>
+				<td>				
+				<#if module.department.showStudentName>
+					${awaitingSubmission[universityId]}
+				<#else>
+					${universityId}
+				</#if>
+				</td>
 				<td></td>
 				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>

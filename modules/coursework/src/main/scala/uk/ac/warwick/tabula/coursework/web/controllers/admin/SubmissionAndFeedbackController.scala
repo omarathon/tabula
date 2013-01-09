@@ -45,7 +45,8 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 			if (moduleMembers == null) {
 				Nil
 			} else {
-				((moduleMembers.map(_.getWarwickId).toSet) -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+				val memberMap = Map() ++ ( for (member <- moduleMembers) yield (member.getWarwickId -> member.getFullName) )
+				(memberMap -- uniIdsWithSubmissionOrFeedback).toList.sorted.toMap				
 			}
 
 		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
