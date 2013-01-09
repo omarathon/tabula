@@ -59,7 +59,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
 			// add the number of submissions to each assignment for marking
 			val assignmentsForMarkingInfo = for (assignment <- assignmentsForMarking) yield {
-				val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(Seq())
+				val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 				Map(
 					"assignment" -> assignment,
 					"numSubmissions" -> submissions.size

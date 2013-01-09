@@ -11,6 +11,11 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
 
+	def this(parent:Feedback){
+		this()
+		feedback = parent
+	}
+
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "feedback_id")
 	@BeanProperty var feedback: Feedback = _
@@ -35,5 +40,4 @@ class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
 		attachment.markerFeedback = this
 		attachments.add(attachment)
 	}
-
 }

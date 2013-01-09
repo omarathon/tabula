@@ -15,7 +15,7 @@ class AddMarkerFeedbackCommand(assignment:Assignment, submitter: CurrentUser, va
 	// list to contain feedback files that are not for a student you should be marking
 	@BeanProperty var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
 
-	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser).getOrElse(Seq())
+	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser)
 
 	def processStudents() {
 		val universityIds = submissions.map(_.getUniversityId)
@@ -36,22 +36,8 @@ class AddMarkerFeedbackCommand(assignment:Assignment, submitter: CurrentUser, va
 
 		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => {
-				Option(parentFeedback.firstMarkerFeedback).getOrElse({
-					val newMarkerFeedback = new MarkerFeedback
-					newMarkerFeedback.feedback = parentFeedback
-					parentFeedback.firstMarkerFeedback = newMarkerFeedback
-					newMarkerFeedback
-				})
-			}
-			case false => {
-				Option(parentFeedback.secondMarkerFeedback).getOrElse({
-					val newMarkerFeedback = new MarkerFeedback
-					newMarkerFeedback.feedback = parentFeedback
-					parentFeedback.secondMarkerFeedback = newMarkerFeedback
-					newMarkerFeedback
-				})
-			}
+			case true => parentFeedback.retrieveFirstMarkerFeedback
+			case false => parentFeedback.retrieveSecondMarkerFeedback
 			case _ => null
 		}
 

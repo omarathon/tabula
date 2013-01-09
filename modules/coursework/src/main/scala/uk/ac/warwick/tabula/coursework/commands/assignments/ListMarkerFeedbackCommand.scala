@@ -15,7 +15,7 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, val user:CurrentUser,
 	var userLookup = Wire.auto[UserLookupService]
 
 	def applyInternal:Seq[MarkerFeedbackItem] = {
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(Seq())
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		submissions.map { submission =>
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 

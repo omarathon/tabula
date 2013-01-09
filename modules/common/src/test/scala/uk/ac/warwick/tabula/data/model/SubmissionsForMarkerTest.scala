@@ -44,13 +44,13 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 
 		withUser(code = "cusebr", universityId = "0678022") {
 			val user = RequestInfo.fromThread.get.user
-			val submissions = assignment.getMarkersSubmissions(user.apparentUser).get
+			val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 			submissions.size should be (1)
 		}
 
 		withUser(code = "cuslaj", universityId = "1170836") {
 			val user = RequestInfo.fromThread.get.user
-			val submissions = assignment.getMarkersSubmissions(user.apparentUser).get
+			val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 			submissions.size should be (2)
 		}
 

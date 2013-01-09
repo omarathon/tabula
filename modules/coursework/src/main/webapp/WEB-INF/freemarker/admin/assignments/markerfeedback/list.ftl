@@ -10,6 +10,9 @@
 		<a class="btn" href="<@routes.uploadmarkerfeedback assignment=assignment />">
 			<i class="icon-upload"></i> Upload feedback
 		</a>
+		<a class="btn" href="<@routes.markeraddmarks assignment=assignment />">
+			<i class="icon-plus"></i> Add Marks
+		</a>
 	</div>
 	<table class="table table-bordered table-striped">
 		<tr>

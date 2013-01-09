@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.util.matching.Regex
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.Transactions._
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.util.core.StringUtils.hasText
-import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.helpers.Logging
@@ -26,11 +21,10 @@ import uk.ac.warwick.tabula.helpers.NoUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
-import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
 
 
-class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
+abstract class AddMarksCommand[T](val assignment: Assignment, val submitter: CurrentUser) extends Command[T] with Daoisms with Logging {
 
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
@@ -105,24 +99,6 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 			noErrors = false
 		}
 		noErrors
-	}
-
-	override def applyInternal(): List[Feedback] = transactional() {
-		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
-			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
-			feedback.assignment = assignment
-			feedback.uploaderId = submitter.apparentId
-			feedback.universityId = universityId
-			feedback.released = false
-			feedback.actualMark = Option(actualMark.toInt)
-			feedback.actualGrade = actualGrade
-			session.saveOrUpdate(feedback)
-			feedback
-		}
-
-		// persist valid marks
-		val markList = marks filter (_.isValid) map { (mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade) }
-		markList.toList
 	}
 
 	def onBind {

@@ -44,9 +44,7 @@ class DownloadSubmissionsController extends CourseworkController {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(DownloadSubmissions(assignment))
 
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
-			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
-		)
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		command.submissions = submissions.toList
 
 		command.apply { renderable =>
@@ -95,9 +93,7 @@ class DownloadSubmissionsController extends CourseworkController {
 		mustBeLinked(assignment, assignment.module)
 		mustBeAbleTo(Participate(assignment.module))
 
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
-			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
-		)
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 
 		val users = submissions.map(s => userLookup.getUserByUserId(s.userId))
 		command.members = users

@@ -356,11 +356,9 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
 	 */
-	def getMarkersSubmissions(marker: User): Option[Seq[Submission]] = {
-		if (markScheme != null){
-			Some(markScheme.getSubmissions(this, marker))
-		}
-		else None
+	def getMarkersSubmissions(marker: User): Seq[Submission] = {
+		if (markScheme != null)	markScheme.getSubmissions(this, marker)
+		else Seq()
 	}
 
 	/**
