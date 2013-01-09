@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -36,7 +37,7 @@ class MarkerAddMarksController extends CourseworkController {
 		val marksToDisplay:Seq[MarkItem] = submissions.map { submission =>
 			val universityId = submission.universityId
 			val member = userLookup.getUserByWarwickUniId(universityId)
-			val feedback = assignmentService.getStudentFeedback(assignment, universityId)
+			val feedback = assignment.feedbacks.find(_.universityId == universityId)
 			feedback match {
 				case Some(f) => {
 					val markerFeedback = assignment.isFirstMarker(user.apparentUser) match {

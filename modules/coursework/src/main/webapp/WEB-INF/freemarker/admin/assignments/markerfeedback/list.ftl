@@ -2,17 +2,19 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 	<h1>Feedback for ${assignment.name}</h1>
-	<p>You are the first marker for the following submissions</p>
+	<p>You are the <#if isFirstMarker>first marker<#else>second marker</#if> for the following submissions</p>
 	<div class="btn-toolbar">
 		<a class="btn" href="<@routes.downloadmarkersubmissions assignment=assignment />">
 			<i class="icon-download"></i> Download submissions (${items?size})
 		</a>
-		<a class="btn" href="<@routes.uploadmarkerfeedback assignment=assignment />">
-			<i class="icon-upload"></i> Upload feedback
-		</a>
-		<a class="btn" href="<@routes.markeraddmarks assignment=assignment />">
-			<i class="icon-plus"></i> Add Marks
-		</a>
+		<#if features.markerFeedback>
+			<a class="btn" href="<@routes.uploadmarkerfeedback assignment=assignment />">
+				<i class="icon-upload"></i> Upload feedback
+			</a>
+			<a class="btn" href="<@routes.markeraddmarks assignment=assignment />">
+				<i class="icon-plus"></i> Add Marks
+			</a>
+		</#if>
 	</div>
 	<table class="table table-bordered table-striped">
 		<tr>
