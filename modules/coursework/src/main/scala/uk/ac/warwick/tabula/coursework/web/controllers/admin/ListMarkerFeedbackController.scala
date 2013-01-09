@@ -12,8 +12,9 @@ import uk.ac.warwick.tabula.CurrentUser
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/list"))
 class ListMarkerFeedbackController  extends CourseworkController {
 
+
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new ListMarkerFeedbackCommand(assignment, user, true) //TODO switch flag depending on which marker this is
+		new ListMarkerFeedbackCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def list(@ModelAttribute command: ListMarkerFeedbackCommand): Mav = {

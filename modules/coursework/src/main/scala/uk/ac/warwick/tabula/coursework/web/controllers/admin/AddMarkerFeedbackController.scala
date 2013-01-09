@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddMarkerFeedbackController extends CourseworkController {
 
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new AddMarkerFeedbackCommand(assignment, user, true) //TODO switch flag depending on which marker this is
+		new AddMarkerFeedbackCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	def onBind(cmd: AddMarkerFeedbackCommand){ cmd.onBind }
 

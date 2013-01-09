@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.{AdminAddMarksCommand, MarkerAddMarksCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
@@ -22,10 +22,8 @@ class MarkerAddMarksController extends CourseworkController {
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var userLookup: UserLookupService = _
 
-	val isFirstMarker = true //TODO - change this depending on which marker this is
-
 	@ModelAttribute def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new MarkerAddMarksCommand(assignment, user, isFirstMarker)
+		new MarkerAddMarksCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
@@ -41,7 +39,7 @@ class MarkerAddMarksController extends CourseworkController {
 			val feedback = assignmentService.getStudentFeedback(assignment, universityId)
 			feedback match {
 				case Some(f) => {
-					val markerFeedback = isFirstMarker match {
+					val markerFeedback = assignment.isFirstMarker(user.apparentUser) match {
 						case true => f.firstMarkerFeedback
 						case false => f.secondMarkerFeedback
 						case _ => throw new IllegalStateException("isFirstMarker must be true or false")

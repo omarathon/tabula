@@ -332,7 +332,15 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		}
 	}
 
-	def isMarker(user: User): Boolean = {
+	def isMarker(user: User) = isFirstMarker(user)|| isSecondMarker(user)
+
+	def isFirstMarker(user: User): Boolean = {
+		if (markScheme != null)
+			markScheme.firstMarkers.includes(user.getUserId)
+		else false
+	}
+
+	def isSecondMarker(user: User): Boolean = {
 		if (markScheme != null)
 			markScheme.firstMarkers.includes(user.getUserId)
 		else false

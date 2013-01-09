@@ -14,17 +14,20 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, val user:CurrentUser,
 
 	var userLookup = Wire.auto[UserLookupService]
 
-	def applyInternal:Seq[MarkerFeedbackItem] = {
+	def applyInternal():Seq[MarkerFeedbackItem] = {
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		submissions.map { submission =>
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 
 			val parentFeedback = assignment.feedbacks.find(_.universityId == submission.universityId)
-			val markerFeedback = parentFeedback.map(_.firstMarkerFeedback)
+			val markerFeedback = parentFeedback.map{
+				if (firstMarker) _.firstMarkerFeedback
+				else  _.secondMarkerFeedback
+			}
 
 			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null))
 		}
 	}
 }
 
-case class MarkerFeedbackItem(val student: User, val submission: Submission, val markerFeedback: MarkerFeedback)
+case class MarkerFeedbackItem(student: User, submission: Submission, markerFeedback: MarkerFeedback)
