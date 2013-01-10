@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
 import org.hibernate.criterion.Restrictions
@@ -27,6 +26,7 @@ import org.joda.time.DateTime
  */
 trait ProfileService {
 	def save(member: Member)
+	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member]
@@ -56,5 +56,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def save(member: Member) = memberDao.saveOrUpdate(member)
-
+	
+	def getRegisteredModules(universityId: String): Seq[Module] = transactional(readOnly = true) {
+		memberDao.getRegisteredModules(universityId)
+	}
 }

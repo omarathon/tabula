@@ -19,6 +19,8 @@ import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filters
 import org.hibernate.annotations.Filter
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileService
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -46,6 +48,9 @@ object Member {
 @AccessType("field")
 class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {
 	
+	@transient 
+	var profileService = Wire.auto[ProfileService]
+		
 	def this(user: CurrentUser) = {
 		this()
 		
@@ -79,15 +84,36 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	}
 	
 	/** 
-	 * Get all departments that this student is affiliated with. This includes their home department, 
-	 * the department running their course and any departments that they are taking modules in.
+	 * Get all departments that this student is affiliated with at a departmental level.
+	 * This includes their home department, and the department running their course.
 	 */
 	def affiliatedDepartments = {
-		val depts = Set(Option(homeDepartment), Option(studyDepartment), Option(route).map(x=> x.department))
+		val affDepts = Set(Option(homeDepartment), 
+				Option(studyDepartment), 
+				Option(route).map(x => x.department)
+		)
 		
-		depts.flatten.toSeq
+		affDepts.flatten.toSeq
 	}
 
+	/** 
+	 * Get all departments that this student touches. This includes their home department, 
+	 * the department running their course and any departments that they are taking modules in.
+	 */
+	def touchedDepartments = {
+		val moduleDepts = registeredModules.map(x => x.department)
+		
+		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+	}
+
+	/**
+	 * Get all modules this this student is registered on, including historically.
+	 * TODO consider caching based on getLastUpdatedDate
+	 */
+	def registeredModules = {
+		profileService.getRegisteredModules(getUniversityId)
+	}
+	
 	def asSsoUser = {
 		val u = new User
 		u.setUserId(userId)

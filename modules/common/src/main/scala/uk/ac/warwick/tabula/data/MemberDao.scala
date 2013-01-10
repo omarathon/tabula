@@ -6,6 +6,8 @@ import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
 import org.joda.time.DateTime
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.JavaImports.JList
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -13,6 +15,7 @@ trait MemberDao {
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
+	def getRegisteredModules(universityId: String): Seq[Module]
 }
 
 @Repository
@@ -46,4 +49,19 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	//TODO
 	def findByQuery(query: String) = Seq()
+	
+	def getRegisteredModules(universityId: String): Seq[Module] = {
+		session.createSQLQuery("""
+				 select distinct ua.modulecode from upstreamassignment  ua
+                   join upstreamassessmentgroup uag 
+                    on uag.modulecode = ua.modulecode 
+                    and uag.assessmentgroup = ua.assessmentgroup
+                  join usergroupstatic ugs on uag.membersgroup_id = ugs.group_id
+                   where ugs.usercode = :universityId
+				""")
+				
+		    .addEntity(classOf[Module])
+            .setString("universityId", universityId)
+            .list.asInstanceOf[JList[Module]]
+	}
 }
