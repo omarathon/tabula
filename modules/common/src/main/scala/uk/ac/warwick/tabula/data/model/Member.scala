@@ -73,8 +73,11 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	 * Get all departments that this student is affiliated with. This includes their home department, 
 	 * the department running their course and any departments that they are taking modules in.
 	 */
-	def affiliatedDepartments = 
-		Seq(Option(homeDepartment), Option(studyDepartment)) flatten
+	def affiliatedDepartments = {
+		val depts = Set(Option(homeDepartment), Option(studyDepartment), Option(route).map(x=> x.department))
+		
+		depts.flatten.toSeq
+	}
 
 	def asSsoUser = {
 		val u = new User
