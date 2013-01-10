@@ -12,14 +12,17 @@ import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.actions.Searchable
 import uk.ac.warwick.tabula.CurrentUser
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Filters
+import org.hibernate.annotations.Filter
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
+	final val ActiveOnlyFilter = "activeOnly"
 }
 
 /**
@@ -31,8 +34,14 @@ object Member {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'")
-@Filter(name = Member.StudentsOnlyFilter)
+@FilterDefs(Array(
+	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
+	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+))
+@Filters(Array(
+	new Filter(name = Member.StudentsOnlyFilter),
+	new Filter(name = Member.ActiveOnlyFilter)
+))
 @Entity
 @AccessType("field")
 class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {

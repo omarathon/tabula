@@ -31,7 +31,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			if (disableFilter) 
 				session.disableFilter(Member.StudentsOnlyFilter)
 				
-			session.newCriteria[Member].add(is("userId", userId.trim.toLowerCase)).uniqueResult
+			session.newCriteria[Member]
+					.add(is("userId", userId.trim.toLowerCase))
+					.addOrder(asc("universityId"))
+					.list.headOption
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
