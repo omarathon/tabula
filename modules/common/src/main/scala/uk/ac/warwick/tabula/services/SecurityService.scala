@@ -93,9 +93,9 @@ class SecurityService extends Logging {
 			
 			def inSameDepartment = {
 				val myDepartments = profileService.getMemberByUserId(user.apparentId) map { _.affiliatedDepartments } getOrElse(Seq())
-				val theirDepartments = member.affiliatedDepartments
+				val theirDepartments = member.touchedDepartments
 				
-				val sameDepartments = myDepartments intersect member.affiliatedDepartments
+				val sameDepartments = myDepartments intersect member.touchedDepartments
 				
 				!sameDepartments.isEmpty
 			}
