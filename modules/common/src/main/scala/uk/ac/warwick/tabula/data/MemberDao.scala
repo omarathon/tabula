@@ -8,6 +8,8 @@ import org.joda.time.DateTime
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.data.model.RelationshipType
+import uk.ac.warwick.tabula.data.model.MemberRelationship
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -16,6 +18,7 @@ trait MemberDao {
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
+	def getRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship]
 }
 
 @Repository
@@ -64,4 +67,13 @@ class MemberDaoImpl extends MemberDao with Daoisms {
             .setString("universityId", universityId)
             .list.asInstanceOf[JList[Module]]
 	}
+	
+	def getRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship] = {
+			session.newCriteria[MemberRelationship]
+					.add(is("subjectUniversityId", subjectUniversityId))
+					.add(is("relationshipType", relationshipType))	
+					.uniqueResult
+	}		
+
+	
 }
