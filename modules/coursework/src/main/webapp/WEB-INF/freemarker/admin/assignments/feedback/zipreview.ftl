@@ -38,7 +38,7 @@
 </@spring.bind>
 
 <#if addFeedbackCommand.unrecognisedFiles?size gt 0>
-<div class="unrecognised-files">
+<div class="alert alert-block">
 <div>There were some files in the zip which I didn't understand, and will be ignored:</div>
 <ul class="file-list">
 <#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
@@ -53,7 +53,7 @@
 </#if>
 
 <#if addFeedbackCommand.invalidFiles?size gt 0>
-<div class="invalid-files">
+<div class="alert alert-block alert-error">
 <div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
 <ul class="file-list">
 <#list addFeedbackCommand.invalidFiles as invalidFile>

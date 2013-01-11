@@ -6,28 +6,51 @@
 // Global values
 // --------------------------------------------------
 
+// Style guide colours http://www2.warwick.ac.uk/services/its/intranet/projects/webdev/tabulastyleguide
+// -------------------------
+
+@tabulaTurquoise:		#239b92;
+@tabulaGreen:			#468847;
+@tabulaGreenDark:		#185c54;
+@tabulaYellowGreen:		#889117;
+@tabulaPurple:			#93225f;
+@tabulaPink:			#df4094;
+@tabulaGreenLight:		#a3b139;
+@tabulaBlueLight:		#4daacc;
+@tabulaBlue:			#167ec2;
+@tabulaBlueDark:		#3c5f80;
+@tabulaOrangeLight:		#ec8d22;
+@tabulaOrange:			#f1592a;
+@tabulaOrangeDark:		#9d5c14;
+@tabulaRed:				#ef3e36;
+@tabulaRedDark:			#b0302e;
+@tabulaPurpleDark:		#524761;
+@tabulaGrayLight:		#818285;
+@tabulaGrayDark:		#3a3a3c;
+@tabulaGray:			#404041;
+
 
 // Grays
 // -------------------------
 @black:                 #000;
 @grayDarker:            #222;
-@grayDark:              #333;
-@gray:                  #555;
-@grayLight:             #999;
+@grayDark:              @tabulaGrayDark;
+@gray:                  @tabulaGray;
+@grayLight:             @tabulaGrayLight;
 @grayLighter:           #eee;
 @white:                 #fff;
 
 
 // Accent colors
 // -------------------------
-@blue:                  #049cdb;
-@blueDark:              #0064cd;
-@green:                 #46a546;
-@red:                   #9d261d;
-@yellow:                #ffc40d;
-@orange:                #f89406;
-@pink:                  #c3325f;
-@purple:                #7a43b6;
+@blue:                  @tabulaBlue;
+@blueDark:              @tabulaBlueDark;
+@green:                 @tabulaGreen;
+@red:                   @tabulaRedDark;
+@yellow:                @tabulaOrangeLight;
+@orange:                @tabulaOrangeDark;
+@pink:                  @tabulaPink;
+@purple:                @tabulaPurple;
 
 
 // Scaffolding
@@ -88,20 +111,20 @@
 @btnBackgroundHighlight:            darken(@white, 10%);
 @btnBorder:                         #bbb;
 
-@btnPrimaryBackground:              @linkColor;
-@btnPrimaryBackgroundHighlight:     spin(@btnPrimaryBackground, 20%);
+@btnPrimaryBackground:              #4888ba;
+@btnPrimaryBackgroundHighlight:     @tabulaBlueDark;
 
-@btnInfoBackground:                 #5bc0de;
-@btnInfoBackgroundHighlight:        #2f96b4;
+@btnInfoBackground:                 @tabulaBlueLight;
+@btnInfoBackgroundHighlight:        #1b7cc1;
 
-@btnSuccessBackground:              #62c462;
-@btnSuccessBackgroundHighlight:     #51a351;
+@btnSuccessBackground:              #299874;
+@btnSuccessBackgroundHighlight:     #1c7267;
 
-@btnWarningBackground:              lighten(@orange, 15%);
-@btnWarningBackgroundHighlight:     @orange;
+@btnWarningBackground:              #e69030;
+@btnWarningBackgroundHighlight:     #bd6004;
 
-@btnDangerBackground:               #ee5f5b;
-@btnDangerBackgroundHighlight:      #bd362f;
+@btnDangerBackground:               #db5755;
+@btnDangerBackgroundHighlight:      #af2723;
 
 @btnInverseBackground:              #444;
 @btnInverseBackgroundHighlight:     @grayDarker;
@@ -230,21 +253,21 @@
 
 // Form states and alerts
 // -------------------------
-@warningText:             #c09853;
+@warningText:             @orange;
 @warningBackground:       #fcf8e3;
-@warningBorder:           darken(spin(@warningBackground, -10), 3%);
+@warningBorder:           #f9d99c;
 
-@errorText:               #b94a48;
+@errorText:               #af2723;
 @errorBackground:         #f2dede;
-@errorBorder:             darken(spin(@errorBackground, -10), 3%);
+@errorBorder:             #e7c5ca;
 
-@successText:             #468847;
+@successText:             #1c7267;
 @successBackground:       #dff0d8;
-@successBorder:           darken(spin(@successBackground, -10), 5%);
+@successBorder:           #c9dcb9;
 
-@infoText:                #3a87ad;
+@infoText:                #3c5e7f;
 @infoBackground:          #d9edf7;
-@infoBorder:              darken(spin(@infoBackground, -10), 7%);
+@infoBorder:              #bce8f1;
 
 
 // Tooltips and popovers
