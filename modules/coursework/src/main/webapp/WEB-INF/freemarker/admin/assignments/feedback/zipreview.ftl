@@ -8,7 +8,7 @@
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch')}" commandName=commandName>
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch')}" commandName=commandName cssClass="submission-form double-submit-protection">
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>
