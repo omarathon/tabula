@@ -264,6 +264,38 @@
           <code>&lt;span class="label label-inverse"&gt;Inverse&lt;/span&gt;</code>
         </td>
       </tr>
+      <tr>
+      	<td>
+      	  <span class="label-blue">Blue</span>
+      	</td>
+      	<td>
+      	  <code>&lt;span class="label-blue"&gt;Blue&lt;/span&gt;</code>
+      	</td>
+      </tr>
+      <tr>
+      	<td>
+      	  <span class="label-green">Green</span>
+      	</td>
+      	<td>
+      	  <code>&lt;span class="label-green"&gt;Green&lt;/span&gt;</code>
+      	</td>
+      </tr>
+      <tr>
+      	<td>
+      	  <span class="label-orange">Orange</span>
+      	</td>
+      	<td>
+      	  <code>&lt;span class="label-orange"&gt;Orange&lt;/span&gt;</code>
+      	</td>
+      </tr>
+      <tr>
+      	<td>
+      	  <span class="label-red">Red</span>
+      	</td>
+      	<td>
+      	  <code>&lt;span class="label-red"&gt;Red&lt;/span&gt;</code>
+      	</td>
+      </tr>
     </tbody>
 </table>
 
