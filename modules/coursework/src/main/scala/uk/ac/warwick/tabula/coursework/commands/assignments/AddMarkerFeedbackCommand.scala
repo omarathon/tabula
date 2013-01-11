@@ -25,7 +25,7 @@ class AddMarkerFeedbackCommand(assignment:Assignment, submitter: CurrentUser, va
 
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.findFeedback(uniNumber).getOrElse({
+		val parentFeedback = assignment.feedbacks.find(_.universityId == uniNumber).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = submitter.apparentId

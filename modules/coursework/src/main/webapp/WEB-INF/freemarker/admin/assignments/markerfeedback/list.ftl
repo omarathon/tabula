@@ -47,7 +47,15 @@
 						</a>
 					</#if>
 				</#if></td>
-				<td></td>
+				<td>
+					<#if item.markerFeedback.state.toString == "ReleasedForMarking">
+						<span class="label-orange">Ready for marking</span>
+					<#elseif item.markerFeedback.state.toString == "DownloadedByMarker">
+						<span class="label-blue">Downloaded</span>
+					<#elseif item.markerFeedback.state.toString == "MarkingCompleted">
+						<span class="label-green">Marking completed</span>
+					</#if>
+				</td>
 			</tr>
 		</#list>
 	</table>

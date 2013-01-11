@@ -149,7 +149,7 @@ Publications: ${r.publicationOverlap}%)
 					<#if enhancedSubmission.downloaded>
 						<span class="label-green">Downloaded</span>
 					</#if>
-					<#if submission.state?? && submission.state.toString == "ReleasedForMarking">
+					<#if submission.releasedForMarking>
 						<span class="label-green">Markable</span>
 					</#if>
 					<#if submission.suspectPlagiarised>

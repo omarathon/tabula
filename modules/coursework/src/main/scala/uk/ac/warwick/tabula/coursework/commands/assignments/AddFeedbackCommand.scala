@@ -25,15 +25,10 @@ class AddFeedbackCommand(assignment: Assignment, submitter: CurrentUser)
 				feedback addAttachment attachment
 			}
 			session.saveOrUpdate(feedback)
-			updateSubmissionState(uniNumber)
 
 			feedback
 		}
 
-		def updateSubmissionState(uniNumber: String) {
-			val submission = assignmentService.getSubmissionByUniId(assignment, uniNumber)
-			submission.foreach(submissionService.updateState(_, MarkingCompleted))
-		}
 
 		if (items != null && !items.isEmpty()) {
 

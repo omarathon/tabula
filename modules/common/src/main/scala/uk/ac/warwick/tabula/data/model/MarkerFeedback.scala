@@ -27,8 +27,8 @@ class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.SubmissionStateUserType")
-	@BeanProperty var state : SubmissionState = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
+	@BeanProperty var state : MarkingState = _
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
 	@Fetch(FetchMode.JOIN)

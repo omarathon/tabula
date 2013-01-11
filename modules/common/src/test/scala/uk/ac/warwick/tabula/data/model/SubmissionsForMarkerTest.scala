@@ -41,6 +41,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 			newSubmission(assignment, values2),
 			newSubmission(assignment, values3)
 		)
+		releaseAllSubmissions(assignment)
 
 		withUser(code = "cusebr", universityId = "0678022") {
 			val user = RequestInfo.fromThread.get.user
@@ -64,6 +65,19 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 		sv
 	}
 
+	def releaseAllSubmissions(assignment: Assignment){
+		assignment.submissions.foreach{s=>
+			val newFeedback = new Feedback
+			newFeedback.assignment = assignment
+			newFeedback.uploaderId = "test"
+			newFeedback.universityId = s.universityId
+			newFeedback.released = false
+			val markerFeedback = newFeedback.retrieveFirstMarkerFeedback
+			markerFeedback.state = ReleasedForMarking
+			assignment.feedbacks.add(newFeedback)
+		}
+	}
+
 	def newMarkScheme(): MarkScheme = {
 		val ug = new UserGroup()
 		ug.includeUsers = List ("cuslaj", "cusebr")
@@ -77,7 +91,6 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 
 	def newSubmission(a:Assignment, values:JSet[SavedSubmissionValue]=null) = {
 		val s = new Submission
-		s.state = ReleasedForMarking
 		s.assignment = a
 		if (values != null) s.values = values
 		s

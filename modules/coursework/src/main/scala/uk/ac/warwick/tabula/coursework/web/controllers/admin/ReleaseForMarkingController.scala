@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.tabula.CurrentUser
 
 
 @Controller
@@ -18,7 +19,8 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedComma
 class ReleaseForMarkingController extends CourseworkController {
 
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment) = new ReleaseForMarkingCommand(assignment)
+	def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+		new ReleaseForMarkingCommand(assignment, user)
 
 	validatesSelf[MarkPlagiarisedCommand]
 
@@ -52,8 +54,9 @@ class ReleaseForMarkingController extends CourseworkController {
 			mustBeLinked(assignment, module)
 			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors)
-				confirmView(assignment)
+				showForm(module,assignment, form, errors)
 			else {
+				form.preSubmitValidation()
 				form.apply()
 				RedirectBack(assignment)
 			}

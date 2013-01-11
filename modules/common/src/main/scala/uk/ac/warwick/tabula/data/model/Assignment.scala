@@ -346,6 +346,14 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		else false
 	}
 
+	def isReleasedForMarking(submission:Submission) : Boolean = {
+		val feedback = feedbacks.find(_.universityId == submission.universityId)
+		feedback match {
+			case Some(f) => f.firstMarkerFeedback != null
+			case _ => false
+		}
+	}
+
 	/**
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
