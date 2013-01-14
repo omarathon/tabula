@@ -9,7 +9,20 @@ import org.hibernate.annotations.AccessType
 
 @Entity
 @AccessType("field")
-class MemberRelationship(
+class MemberRelationship extends GeneratedId {
+	
+	@BeanProperty var agent: String = new String("")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") @BeanProperty var relationshipType: RelationshipType	= PersonalTutor
+	@BeanProperty var subjectUniversityId: String = new String("")
+	
+	def init(agent: String, relType: RelationshipType, subjectUniversityId: String) {
+		this.agent = agent
+		this.relationshipType = relType
+		this.subjectUniversityId = subjectUniversityId
+	}
+}
+
+/*class MemberRelationship(
 			@BeanProperty var agent: String, 
 			@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") @BeanProperty var relationshipType: RelationshipType, 
 			@BeanProperty var subjectUniversityId: String) 
@@ -19,7 +32,7 @@ class MemberRelationship(
 		// stupid hibernate
 		this(null, null, null)
 	}
-}
+}*/
 
 
 sealed abstract class RelationshipType(val dbValue: String, @BeanProperty val description: String)

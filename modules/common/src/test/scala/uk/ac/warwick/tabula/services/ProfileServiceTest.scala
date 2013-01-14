@@ -54,10 +54,13 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	@Test def findRelationship = withFakeTime(dateTime(2000, 6)) {
 		ps.findRelationship(PersonalTutor, "0070790") should be (None)
 		
-		val mr = new MemberRelationship("1234567", PersonalTutor, "0070790")
+		//val mr = new MemberRelationship("1234567", PersonalTutor, "0070790")
+		val mr = new MemberRelationship
+		mr.init("1234567", PersonalTutor, "0070790")
+		
 		session.save(mr)
 		
-		ps.findRelationship(PersonalTutor, "0070790") should be ("1234567")
+		ps.findRelationship(PersonalTutor, "0070790").getOrElse(fail).agent should be ("1234567")
 		
 	}
 }
