@@ -47,7 +47,12 @@
 			</li>
 			<#if features.markSchemes && mustReleaseForMarking>
 				<li>
-					<a class="use-tooltip" title="Release the submissions for marking. First markers will be able to download their submissions from the app." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />" id="release-submissions-button">Release for marking</a>
+					<a class="use-tooltip form-post"
+					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
+					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
+					   id="release-submissions-button">
+						Release for marking
+					</a>
 				</li>
 			</#if>
 		    <li>
@@ -75,7 +80,7 @@ Publications: ${r.publicationOverlap}%)
 <#if students?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 <#else>
-<div class="submission-feedback-list">
+<div class="marker-feedback-list">
 	<div class="clearfix">
 		<@form.selector_check_all />
 		<a class="btn btn-mini hide-awaiting-submission" href="#">

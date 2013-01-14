@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.actions.{UploadMarkerFeedback, Participate}
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
@@ -31,7 +31,7 @@ class MarkerAddMarksController extends CourseworkController {
 	             @ModelAttribute cmd: MarkerAddMarksCommand): Mav = {
 
 		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
+		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 
 		val marksToDisplay:Seq[MarkItem] = submissions.map { submission =>
@@ -73,21 +73,20 @@ class MarkerAddMarksController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def confirmBatchUpload(@PathVariable module: Module,  @PathVariable(value = "assignment") assignment: Assignment,
 	                       @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors) = {
-		bindAndValidate(module, cmd, errors)
+		bindAndValidate(assignment, cmd, errors)
 		Mav("admin/assignments/markerfeedback/markspreview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def doUpload(@PathVariable module: Module,  @PathVariable(value = "assignment") assignment: Assignment,
 	             @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors) = {
-		bindAndValidate(module, cmd, errors)
+		bindAndValidate(assignment, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.assignment.markerFeedback(assignment))
 	}
 
-	private def bindAndValidate(module: Module, cmd: MarkerAddMarksCommand, errors: Errors) {
-		mustBeLinked(cmd.assignment, module)
-		mustBeAbleTo(Participate(module))
+	private def bindAndValidate(assignment: Assignment, cmd: MarkerAddMarksCommand, errors: Errors) {
+		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		cmd.onBind
 		cmd.postExtractValidation(errors)
 	}

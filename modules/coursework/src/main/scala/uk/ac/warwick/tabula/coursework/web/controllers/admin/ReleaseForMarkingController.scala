@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
 import uk.ac.warwick.tabula.CurrentUser
 
 
@@ -22,7 +21,7 @@ class ReleaseForMarkingController extends CourseworkController {
 	def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new ReleaseForMarkingCommand(assignment, user)
 
-	validatesSelf[MarkPlagiarisedCommand]
+	validatesSelf[ReleaseForMarkingCommand]
 
 	def confirmView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)

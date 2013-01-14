@@ -100,7 +100,7 @@ $(function(){
     // enable shift-click on multiple checkboxes in tables
     $('table').find('input[type="checkbox"]').shiftSelectable();
     
-    $('.submission-feedback-list, .submission-list, .feedback-list').bigList({
+    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list').bigList({
     
         setup : function() {
             var $container = this;
@@ -138,7 +138,7 @@ $(function(){
                 return false;
             });
 
-            $('#release-submissions-button').click(function(event){
+            $('.form-post').click(function(event){
                 event.preventDefault();
                 var $checkedBoxes = $(".collection-checkbox:checked", $container);
                 if ($container.data('checked') != 'none') {
