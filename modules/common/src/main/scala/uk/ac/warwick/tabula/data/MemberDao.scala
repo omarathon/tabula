@@ -16,6 +16,7 @@ trait MemberDao {
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
+	//def getSomethingForTesting(): Seq[Module]
 }
 
 @Repository
@@ -51,17 +52,16 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def findByQuery(query: String) = Seq()
 	
 	def getRegisteredModules(universityId: String): Seq[Module] = {
-		session.createSQLQuery("""
-				 select distinct ua.modulecode from upstreamassignment  ua
-                   join upstreamassessmentgroup uag 
-                    on uag.modulecode = ua.modulecode 
-                    and uag.assessmentgroup = ua.assessmentgroup
-                  join usergroupstatic ugs on uag.membersgroup_id = ugs.group_id
-                   where ugs.usercode = :universityId
+		val modules = session.createQuery("""
+				 select distinct m from Module m where code in 
+				(select distinct substring(lower(uag.moduleCode),1,5)
+					from UpstreamAssessmentGroup as uag
+				join uag.members as usergroup
+				join usergroup.staticIncludeUsers as uniId
+				where uniId = :universityId)
 				""")
-				
-		    .addEntity(classOf[Module])
             .setString("universityId", universityId)
             .list.asInstanceOf[JList[Module]]
+		modules
 	}
 }
