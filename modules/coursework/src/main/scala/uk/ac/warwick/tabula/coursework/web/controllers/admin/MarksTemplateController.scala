@@ -11,7 +11,7 @@ import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.coursework.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))

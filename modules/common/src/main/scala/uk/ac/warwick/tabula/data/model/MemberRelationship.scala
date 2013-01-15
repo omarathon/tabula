@@ -14,25 +14,17 @@ class MemberRelationship extends GeneratedId {
 	@BeanProperty var agent: String = new String("")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") @BeanProperty var relationshipType: RelationshipType	= PersonalTutor
 	@BeanProperty var subjectUniversityId: String = new String("")
-	
-	def init(agent: String, relType: RelationshipType, subjectUniversityId: String) {
-		this.agent = agent
-		this.relationshipType = relType
-		this.subjectUniversityId = subjectUniversityId
-	}
 }
 
-/*class MemberRelationship(
-			@BeanProperty var agent: String, 
-			@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") @BeanProperty var relationshipType: RelationshipType, 
-			@BeanProperty var subjectUniversityId: String) 
-		extends GeneratedId {
-	
-	private def this() {
-		// stupid hibernate
-		this(null, null, null)
+object MemberRelationship {
+	def apply(agent: String, relType: RelationshipType, subjectUniversityId: String) = {
+		val mr = new MemberRelationship
+		mr.agent = agent
+		mr.relationshipType = relType
+		mr.subjectUniversityId = subjectUniversityId
+		mr
 	}
-}*/
+}
 
 
 sealed abstract class RelationshipType(val dbValue: String, @BeanProperty val description: String)
