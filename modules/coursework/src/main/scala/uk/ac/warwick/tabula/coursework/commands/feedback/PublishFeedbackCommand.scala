@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import org.springframework.mail.MailException
-import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import freemarker.template.Configuration
@@ -21,9 +20,10 @@ import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
 
-class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating {
+class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 	var assignmentService = Wire.auto[AssignmentService]
@@ -92,14 +92,13 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	
 	def getUsersForFeedback = assignmentService.getUsersForFeedback(assignment)
 
-	private def messageFor(user: User): SimpleMailMessage = {
-		val message = new SimpleMailMessage
+	private def messageFor(user: User) = createMessage(studentMailSender) { message =>
 		val moduleCode = assignment.module.code.toUpperCase
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
 		message.setTo(user.getEmail)
 		// TODO configurable subject
-		message.setSubject(moduleCode + ": Your coursework feedback is ready")
+		message.setSubject(encodeSubject(moduleCode + ": Your coursework feedback is ready"))
 		// TODO configurable body
 		message.setText(messageTextFor(user))
 
