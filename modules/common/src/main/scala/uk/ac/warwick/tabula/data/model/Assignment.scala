@@ -354,6 +354,22 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 		}
 	}
 
+	/*
+		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first markers feedback item.
+		false returns the second markers item
+	 */
+	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.universityId == uniId)
+		parentFeedback match {
+			case Some(f) => this.isFirstMarker(user) match {
+				case true => Some(f.retrieveFirstMarkerFeedback)
+				case false => Some(f.retrieveSecondMarkerFeedback)
+				case _ => throw throw new IllegalStateException("isFirstMarker must be true or false")
+			}
+			case None => None
+		}
+	}
+
 	/**
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid mark scheme attached

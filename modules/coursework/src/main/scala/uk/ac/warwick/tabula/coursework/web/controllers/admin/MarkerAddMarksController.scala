@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{MarkingCompleted, MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.{UploadMarkerFeedback, Participate}
+import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
@@ -33,20 +33,17 @@ class MarkerAddMarksController extends CourseworkController {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedback(s.universityId, user.apparentUser))
+		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
+		val filteredSubmissions = submissions.filter(s => filteredFeedbackId.contains(s.universityId))
 
-		val marksToDisplay:Seq[MarkItem] = submissions.map { submission =>
+		val marksToDisplay:Seq[MarkItem] = filteredSubmissions.map{ submission =>
 			val universityId = submission.universityId
 			val member = userLookup.getUserByWarwickUniId(universityId)
-			val feedback = assignment.feedbacks.find(_.universityId == universityId)
-			feedback match {
-				case Some(f) => {
-					val markerFeedback = assignment.isFirstMarker(user.apparentUser) match {
-						case true => f.firstMarkerFeedback
-						case false => f.secondMarkerFeedback
-						case _ => throw new IllegalStateException("isFirstMarker must be true or false")
-					}
-					noteMarkItem(member, Option(markerFeedback))
-				}
+
+			val markerFeedback = markerFeedbacks.find(_.feedback.universityId == universityId)
+			markerFeedback match  {
+				case Some(f) if f.state != MarkingCompleted => noteMarkItem(member, Option(f))
 				case None => noteMarkItem(member, None)
 			}
 		}

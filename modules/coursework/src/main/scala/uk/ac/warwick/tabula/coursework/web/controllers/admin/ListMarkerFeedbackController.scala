@@ -21,6 +21,7 @@ class ListMarkerFeedbackController  extends CourseworkController {
 		val markerFeedbackItems = command.apply()
 		Mav("admin/assignments/markerfeedback/list",
 			"items" -> markerFeedbackItems,
+			"completedFeedback" -> command.completedFeedback,
 			"isFirstMarker" -> command.firstMarker)
 	}
 

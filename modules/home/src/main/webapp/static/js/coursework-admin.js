@@ -221,9 +221,10 @@ $.fn.shiftSelectable = function() {
 
 
 $(function(){
-	
+	$('a.disabled').on('click', function(e){
+    	e.preventDefault();
+    })
 });
-
 
 
 }(jQuery));

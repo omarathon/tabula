@@ -40,4 +40,7 @@ class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
 		attachment.markerFeedback = this
 		attachments.add(attachment)
 	}
+
+	def hasMarks = mark.isDefined
+	def hasFeedback = attachments != null && attachments.size() > 0
 }

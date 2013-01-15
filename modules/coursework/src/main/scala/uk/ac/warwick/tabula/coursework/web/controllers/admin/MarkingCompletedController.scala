@@ -36,6 +36,8 @@ class MarkingCompletedController extends CourseworkController {
 		            form: MarkingCompletedCommand, errors: Errors) = {
 		mustBeLinked(assignment, module)
 		mustBeAbleTo(UploadMarkerFeedback(assignment))
+		form.onBind()
+		form.preSubmitValidation()
 		confirmView(assignment)
 	}
 
@@ -45,9 +47,11 @@ class MarkingCompletedController extends CourseworkController {
 		transactional() {
 			mustBeLinked(assignment, module)
 			mustBeAbleTo(UploadMarkerFeedback(assignment))
+			form.onBind()
 			if (errors.hasErrors)
 				showForm(module,assignment, form, errors)
 			else {
+				form.preSubmitValidation()
 				form.apply()
 				RedirectBack(assignment)
 			}

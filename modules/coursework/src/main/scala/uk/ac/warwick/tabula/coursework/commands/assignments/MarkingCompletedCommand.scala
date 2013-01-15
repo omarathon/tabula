@@ -17,27 +17,34 @@ class MarkingCompletedCommand(val assignment: Assignment, currentUser: CurrentUs
 	var stateService = Wire.auto[StateService]
 
 	@BeanProperty var students: JList[String] = ArrayList()
+	@BeanProperty var markerFeedback: JList[MarkerFeedback] = ArrayList()
+
+	@BeanProperty var noMarks: JList[MarkerFeedback] = ArrayList()
+	@BeanProperty var noFeedback: JList[MarkerFeedback] = ArrayList()
+
 	@BeanProperty var confirm: Boolean = false
 
+	def onBind() {
+		markerFeedback = students.flatMap(assignment.getMarkerFeedback(_, currentUser.apparentUser))
+	}
+
 	def applyInternal() {
-
-		for (
-			uniId <- students;
-			parentFeedback <- assignment.feedbacks.find(_.universityId == uniId)
-		) {
-			val markerFeedback = firstMarker match {
-				case true => parentFeedback.retrieveFirstMarkerFeedback
-				case false => parentFeedback.retrieveSecondMarkerFeedback
-				case _ => throw throw new IllegalStateException("isFirstMarker must be true or false")
-			}
-			stateService.updateState(markerFeedback, MarkingCompleted)
-		}
-
+		markerFeedback.foreach(stateService.updateState(_, MarkingCompleted))
 	}
 
 	override def describe(d: Description){
 		d.assignment(assignment)
 			.property("students" -> students)
+	}
+
+	override def describeResult(d: Description){
+		d.assignment(assignment)
+			.property("numFeedbackUpdated" -> markerFeedback.size())
+	}
+
+	def preSubmitValidation() {
+		noMarks = markerFeedback.filter(!_.hasMarks)
+		noFeedback = markerFeedback.filter(!_.hasFeedback)
 	}
 
 	def validate(errors: Errors) {

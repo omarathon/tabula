@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import uk.ac.warwick.tabula.Features
-
-
 import java.util.Properties
+import org.scalatest.Ignore
 
 class FeaturesControllerTest extends TestBase {
-	@Test def access {
+	def access {
 		val features = Features.empty
 		val controller = new FeaturesController
 		controller.features = features

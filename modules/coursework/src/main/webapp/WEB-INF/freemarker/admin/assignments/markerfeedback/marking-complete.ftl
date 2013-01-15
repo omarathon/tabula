@@ -13,7 +13,28 @@
 <@spring.bind path="students">
 	<@form.errors path="students" />
 	<#assign students=status.actualValue />
-
+	<#assign noMarks = markingCompletedCommand.noMarks />
+	<#assign noFeedback = markingCompletedCommand.noFeedback />
+	<#if (noMarks?size > 0) >
+		<div class="alert">
+			<#if (noMarks?size > 1)>
+				${noFeedback?size} submissions do not have a mark. You will not be able to add a mark to these submissions later.
+			<#else>
+				One submission does not have a mark. You will not be able to add a mark to this submission later.
+			</#if>
+		</div>
+	</#if>
+	<#if (noFeedback?size > 0) >
+		<div class="alert">
+			<#if (noFeedback?size > 1)>
+				${noFeedback?size} submissions do not have any feedback files attached.
+				You will not be able to add feedback files to these submissions later.
+			<#else>
+				One submission does not have any feedback files attached.
+				You will not be able to add feedback files to this submission later.
+			</#if>
+		</div>
+	</#if>
 	<p>
 		<strong><@fmt.p (students?size) "student" /></strong> submissions will be listed as completed. Note that you will not be able
 		to make any further changes to the marks or feedback associated with these submissions after this point. If there are
