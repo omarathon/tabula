@@ -35,7 +35,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 		timed("Sanity check filesystem") { timer =>
 			val allIds = fileDao.getAllFileIds(lastSyncDate)
 			
-			val (successful, unsuccessful) = (for (id <- allIds) yield fileDao.getData(id) match {
+			val (successful, unsuccessful) = ((for (id <- allIds) yield fileDao.getData(id) match {
 				case Some(file) => (1, 0)
 				case None =>
 					// Check whether the file has since been cleaned up
@@ -44,7 +44,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 						logger.error("*** File didn't exist for: " + id)
 						(0, 1)
 					}
-			}).foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)}
+			}).foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)})
 			
 			val logString = "successfulFiles," + successful + ",failedFiles," + unsuccessful + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
 			logger.info(logString)
