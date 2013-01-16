@@ -13,15 +13,15 @@ class MemberRelationship extends GeneratedId {
 	
 	@BeanProperty var agent: String = new String("")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") @BeanProperty var relationshipType: RelationshipType	= PersonalTutor
-	@BeanProperty var subjectUniversityId: String = new String("")
+	@BeanProperty var targetUniversityId: String = new String("")
 }
 
 object MemberRelationship {
-	def apply(agent: String, relType: RelationshipType, subjectUniversityId: String) = {
+	def apply(agent: String, relType: RelationshipType, targetUniversityId: String) = {
 		val mr = new MemberRelationship
 		mr.agent = agent
 		mr.relationshipType = relType
-		mr.subjectUniversityId = subjectUniversityId
+		mr.targetUniversityId = targetUniversityId
 		mr
 	}
 }

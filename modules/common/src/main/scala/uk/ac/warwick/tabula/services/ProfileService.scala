@@ -31,7 +31,7 @@ trait ProfileService {
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
-	def findRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship]
+	def findRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship]
 }
 
 @Service(value = "profileService")
@@ -62,7 +62,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRegisteredModules(universityId)
 	}
 	
-	def findRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship] = transactional() {
-		memberDao.getRelationship(relationshipType, subjectUniversityId)
+	def findRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship] = transactional() {
+		memberDao.getRelationship(relationshipType, targetUniversityId)
 	}
 }

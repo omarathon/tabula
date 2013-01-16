@@ -28,6 +28,10 @@ import uk.ac.warwick.tabula.profiles.services.docconversion.RawMemberRelationshi
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.MemberRelationship
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model.Department
 
 
 class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with Daoisms with Logging {
@@ -43,36 +47,48 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
-	def postExtractValidation(errors: Errors) = {
+	def postExtractValidation(errors: Errors, department: Department) = {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (rawMemberRelationships != null && !rawMemberRelationships.isEmpty()) {
 			for (i <- 0 until rawMemberRelationships.length) {
 				val rawMemberRelationship = rawMemberRelationships.get(i)
-				val newSubject = uniIdsSoFar.add(rawMemberRelationship.subjectUniversityId)
+				val newtarget = uniIdsSoFar.add(rawMemberRelationship.targetUniversityId)
 				errors.pushNestedPath("rawMemberRelationships[" + i + "]")
-				rawMemberRelationship.isValid = validateRawMemberRelationship(rawMemberRelationship, errors, newSubject)
+				rawMemberRelationship.isValid = validateRawMemberRelationship(rawMemberRelationship, errors, newtarget, department)
 				errors.popNestedPath()
 			}
 		}
 	}
 
-	def validateRawMemberRelationship(rawMemberRelationship: RawMemberRelationship, errors: Errors, newPerson: Boolean) = {
+	def validateRawMemberRelationship(rawMemberRelationship: RawMemberRelationship, errors: Errors, newPerson: Boolean, department: Department) = {
 
 		var noErrors = true
-		// validate subject
-		if (hasText(rawMemberRelationship.subjectUniversityId)) {
-			if (!UniversityId.isValid(rawMemberRelationship.subjectUniversityId)) {
-				errors.rejectValue("subjectUniversityId", "uniNumber.invalid")
+		val targetUniId = rawMemberRelationship.targetUniversityId
+		
+		// validate target
+		if (hasText(rawMemberRelationship.targetUniversityId)) {
+			if (!UniversityId.isValid(rawMemberRelationship.targetUniversityId)) {
+				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
 				noErrors = false
 			} else if (!newPerson) {
-					errors.rejectValue("subjectUniversityId", "uniNumber.duplicate.relationship")
+					errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
 					noErrors = false
 				} else {
-				userLookup.getUserByWarwickUniId(rawMemberRelationship.subjectUniversityId) match {
-					case FoundUser(u) =>
+				userLookup.getUserByWarwickUniId(targetUniId) match {
+					case FoundUser(u) => {
+						val member = profileService.getMemberByUniversityId(targetUniId).getOrElse[Member] { 
+							// going with an exception rather than an error here, since we know the uni ID is OK
+							// so we'd expect our db to have the corresponding member
+							throw new ItemNotFoundException("Failed to determine member for user")
+						}
+						if (!member.affiliatedDepartments.contains(department)) {
+							errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
+							noErrors = false
+						}
+					}
 					case NoUser(u) => {
-						errors.rejectValue("subjectUniversityId", "uniNumber.userNotFound", Array(rawMemberRelationship.subjectUniversityId), "")
+						errors.rejectValue("targetUniversityId", "uniNumber.userNotFound", Array(rawMemberRelationship.targetUniversityId), "")
 						noErrors = false
 					}
 				}
@@ -85,7 +101,7 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 //				}
 			}
 		} else {
-			errors.rejectValue("subjectUniversityId", "NotEmpty")
+			errors.rejectValue("targetUniversityId", "NotEmpty")
 		}
 		
 		// validate agent
@@ -119,11 +135,11 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 				agent = rawMemberRelationship.agentUniversityId
 			else
 				agent = rawMemberRelationship.agentName
-			val subject = rawMemberRelationship.subjectUniversityId
+			val target = rawMemberRelationship.targetUniversityId
 
-			val oldRelationship = profileService.findRelationship(PersonalTutor, subject)
+			val oldRelationship = profileService.findRelationship(PersonalTutor, target)
 			val relationship = oldRelationship match {
-				case None => MemberRelationship(agent, PersonalTutor, subject)
+				case None => MemberRelationship(agent, PersonalTutor, target)
 				case Some(rel) => {
 					rel.setAgent(agent)
 					rel
@@ -132,7 +148,7 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 			
 			session.saveOrUpdate(relationship)
 
-			logger.debug("Saved personal tutor for " + subject)
+			logger.debug("Saved personal tutor for " + target)
 			
 			relationship
 		}

@@ -18,7 +18,7 @@ trait MemberDao {
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
-	def getRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship]
+	def getRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship]
 }
 
 @Repository
@@ -67,12 +67,11 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		modules
 	}
 	
-	def getRelationship(relationshipType: RelationshipType, subjectUniversityId: String): Option[MemberRelationship] = {
+	def getRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship] = {
 			session.newCriteria[MemberRelationship]
-					.add(is("subjectUniversityId", subjectUniversityId))
+					.add(is("targetUniversityId", targetUniversityId))
 					.add(is("relationshipType", relationshipType))	
 					.uniqueResult
 	}		
 
-	
 }

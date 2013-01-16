@@ -68,15 +68,15 @@
 						</#if>
 						
 						<tr class="${errorClass}">
-							<@f.hidden path="subjectUniversityId" />
+							<@f.hidden path="targetUniversityId" />
 							<@f.hidden path="agentUniversityId" />
 							<@f.hidden path="agentName" />
 							<@f.hidden path="isValid" />
 							<td>
-								<@spring.bind path="subjectUniversityId">
+								<@spring.bind path="targetUniversityId">
 									${status.value}
 								</@spring.bind>
-								<@f.errors path="subjectUniversityId" cssClass="error" />
+								<@f.errors path="targetUniversityId" cssClass="error" />
 								
 								<#if item.warningMessage??>
 								     <div class="warning">

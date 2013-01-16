@@ -22,15 +22,15 @@ import org.apache.poi.ss.util.CellReference
 
 class RawMemberRelationship {
 
-	@BeanProperty var subjectUniversityId: String = _
+	@BeanProperty var targetUniversityId: String = _
 	@BeanProperty var agentUniversityId: String = _
 	@BeanProperty var agentName: String = _
 	@BeanProperty var isValid = true
 	@BeanProperty var warningMessage: String = _
 
-	def this(subjectUniversityId: String, agentUniversityId: String, agentName: String) = {
+	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
 		this();
-		this.subjectUniversityId = subjectUniversityId
+		this.targetUniversityId = targetUniversityId
 		this.agentUniversityId = agentUniversityId
 		this.agentName = agentName
 	}
@@ -96,7 +96,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			}
 			case false => {
 				columnMap(col) match {
-					case "student_id" => currentRawMemberRelationship.subjectUniversityId = formattedValue
+					case "student_id" => currentRawMemberRelationship.targetUniversityId = formattedValue
 					case "tutor_id" => currentRawMemberRelationship.agentUniversityId = formattedValue
 					case "tutor_name" => currentRawMemberRelationship.agentName = formattedValue
 					case _ => // ignore anything else

@@ -51,7 +51,7 @@ class UploadPersonalTutorsController extends ProfilesController {
 		//mustBeLinked(cmd.assignment, module)
 		mustBeAbleTo(Manage(department))
 		cmd.onBind
-		cmd.postExtractValidation(errors)
+		cmd.postExtractValidation(errors, department)
 	}
 
 }

@@ -55,8 +55,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		ps.findRelationship(PersonalTutor, "0070790") should be (None)
 		
 		//val mr = new MemberRelationship("1234567", PersonalTutor, "0070790")
-		val mr = new MemberRelationship
-		mr.init("1234567", PersonalTutor, "0070790")
+		val mr = MemberRelationship("1234567", PersonalTutor, "0070790")
 		
 		session.save(mr)
 		
