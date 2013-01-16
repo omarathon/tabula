@@ -51,13 +51,13 @@
 	<@spring.bind path="rawMemberRelationships">
 		<#assign itemList=status.actualValue />
 		<#if itemList?size gt 0>
-			<table class="uploadTable">
+			<table class="tutorTable">
 				<tr>
 					<th>Student ID</th>
 					<th>Student Name</th>
 					<th>Tutor ID</th>
-					<th>Tutor Name (derived from tutor ID)</th>
-					<th>Tutor Name (for non-University members)</th>
+					<th>Tutor Name <span class="muted">derived from tutor ID</span></th>
+					<th>Tutor Name <span class="muted">for non-University members</span></th>
 				</tr>
 				<#list itemList as item>
 					<@spring.nestedPath path="rawMemberRelationships[${item_index}]">
