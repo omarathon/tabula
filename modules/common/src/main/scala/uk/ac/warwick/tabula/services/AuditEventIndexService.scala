@@ -59,6 +59,17 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 		}
 	}
 	
+	def findPublishFeedbackEvents(dept: Department) = {
+		val searchResults = search(all(
+			termQuery("eventType", "PublishFeedback"),
+			termQuery("department", dept.code)))
+			.flatMap{ toParsedAuditEvent(_) }
+			.filterNot { _.hadError }
+		
+		searchResults
+	}
+		
+	
 	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
