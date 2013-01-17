@@ -51,14 +51,14 @@ class TutorTemplateController extends ProfilesController {
 		style.setDataFormat(format.getFormat("@"))
 		
 		// set style on all three columns
-		1 to 3 foreach { col => sheet.setDefaultColumnStyle(col, style) }
+		0 to 2 foreach {
+			col => sheet.setDefaultColumnStyle(col, style)
+			sheet.setColumnWidth(col, 3000) // unit = typical_char_width/256
+		}
 
 		// add header row
 		val header = sheet.createRow(0)
 
-		// tried this but it was a bit hopeful:
-		header.createCell(0).setCellValue("student_id").formatted("text")
-				
 		header.createCell(0).setCellValue("student_id")
 		header.createCell(1).setCellValue("tutor_id")
 		header.createCell(2).setCellValue("tutor_name")
