@@ -12,9 +12,10 @@
 	<div class="tab-content">
 		<div class="tab-pane active" id="upload">
 			<p>
-				The tutor spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
-				The spreadsheet should have two columns in the following order: student ID then tutor ID.
-				An optional third column may be added to contain tutor name in the case of external tutors.
+				The tutor spreadsheet that you upload must be an <tt>.xlsx</tt> spreadsheet (created in Microsoft Office 2007+).
+				The spreadsheet must have two columns headed: <tt>student_id</tt> and <tt>tutor_id</tt>.
+				An optional <tt>tutor_name</tt> column may be added, but should <b>only</b> be set for external tutors
+				who do not have a University number from Warwick. Tabula will ignore any other columns which you may set for your own reference.
 				You can use this <a href="<@routes.tutor_template department=department />" >generated spreadsheet</a> as a template.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/department/${department.code}/tutors')}" commandName="uploadPersonalTutorsCommand">
