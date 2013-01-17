@@ -153,7 +153,10 @@ abstract class ModifyAssignmentCommand extends Command[Assignment] with SharedAs
 
 		// add includeUsers to members.includeUsers
 		(includeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
-			members.addUser(userId)
+			if (members.excludeUsers contains userId) {
+				members.unexcludeUser(userId)
+			}
+			else members.addUser(userId)
 		}
 		// for excludeUsers, either remove from previously-added users or add to excluded users.
 		(excludeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
