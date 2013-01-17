@@ -4,7 +4,7 @@
 <@f.form enctype="multipart/form-data"
 	method="post"
 	class="form-horizontal"
-	action="${url('/admin/department/${department.code}/settings/feedback-templates/save')}"
+	action="${url('/admin/department/${department.code}/settings/feedback-templates/edit/${template.id}')}"
 	commandName="editFeedbackTemplateCommand">
 		<@f.hidden path="id"/>
 		<@form.labelled_row "file.upload" "Update feedback template">

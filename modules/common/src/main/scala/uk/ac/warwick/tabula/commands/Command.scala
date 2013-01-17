@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Action
+import uk.ac.warwick.tabula.permissions.PermissionsChecking
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -42,7 +44,7 @@ trait Describable[T] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[R] extends Describable[R] with JavaImports with EventHandling {
+abstract class Command[R] extends Describable[R] with JavaImports with EventHandling with PermissionsChecking {
 	var maintenanceMode = Wire.auto[MaintenanceModeService]
 
 	final def apply(): R = {
@@ -190,6 +192,11 @@ abstract class Description {
 
 	def department(department: Department) = {
 		property("department", department.code)
+		this
+	}
+
+	def member(member: Member) = {
+		property("member", member.universityId)
 		this
 	}
 

@@ -19,81 +19,102 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 
 @Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
 class DownloadSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	var assignmentService = Wire.auto[AssignmentService]
-	var userLookup = Wire.auto[UserLookupService]
 
+	@ModelAttribute def getSingleSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		new DownloadSubmissionsCommand(module, assignment)
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
-	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
+	@RequestMapping
+	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {		
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
 	}
+	
+}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
-	def downloadMarkersSubmissions(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val (assignment, module) = (command.assignment, command.module)
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(DownloadSubmissions(assignment))
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+class DownloadMarkerSubmissionsController extends CourseworkController {
 
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
-			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
-		)
-		command.submissions = submissions.toList
+	var fileServer = Wire.auto[FileServer]
+	
+	@ModelAttribute def getMarkersSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+		new DownloadMarkersSubmissionsCommand(module, assignment, user)
 
+	@RequestMapping
+	def downloadMarkersSubmissions(command: DownloadMarkersSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
 	}
+	
+}
+	
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
+class DownloadAllSubmissionsController extends CourseworkController {
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
+	var fileServer = Wire.auto[FileServer]
+	
+	@ModelAttribute def getAllSubmissionsSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String) = 
+		new DownloadAllSubmissionsCommand(module, assignment, filename)
+
+	@RequestMapping
 	def downloadAll(command: DownloadAllSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
 	}
+	
+}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
-    def downloadSingle(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submissionId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		mustBeLinked(assignment, module)
-	    mustBeAbleTo(Participate(module))
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
+class DownloadSingleSubmissionController extends CourseworkController {
 
-	    assignmentService.getSubmission(submissionId) match {
-	        case Some(submission) => {
-	            mustBeLinked(submission, assignment)
-                val renderable = new AdminGetSingleSubmissionCommand(submission).apply()
-                fileServer.serve(renderable)
-	        }
-	        case None => throw new ItemNotFoundException
-        }
+	var fileServer = Wire.auto[FileServer]
+	var assignmentService = Wire.auto[AssignmentService]
+	
+	@ModelAttribute def getSingleSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submissionId: String) = 
+		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(assignmentService.getSubmission(submissionId)))
+
+	@RequestMapping
+    def downloadSingle(cmd: AdminGetSingleSubmissionCommand, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		fileServer.serve(cmd.apply())
     }
+	
+}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback-templates.zip"))
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}"))
+class DownloadFeedbackSheetsController extends CourseworkController {
+
+	var fileServer = Wire.auto[FileServer]
+	var userLookup = Wire.auto[UserLookupService]
+		
+	@ModelAttribute def feedbackSheetsCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		new DownloadFeedbackSheetsCommand(module, assignment)
+
+	@RequestMapping(value = Array("/feedback-templates.zip"))
 	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val assignment = command.assignment
-		mustBeLinked(assignment, assignment.module)
-		mustBeAbleTo(Participate(assignment.module))
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
 	}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker-templates.zip"))
+	@RequestMapping(value = Array("/marker-templates.zip"))
 	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val assignment = command.assignment
-		mustBeLinked(assignment, assignment.module)
-		mustBeAbleTo(Participate(assignment.module))
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
 			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")

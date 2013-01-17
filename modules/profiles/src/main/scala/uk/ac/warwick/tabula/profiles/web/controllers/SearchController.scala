@@ -23,16 +23,10 @@ class SearchController extends ProfilesController {
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchProfilesCommand) = {
-		mustBeAbleTo(Search(classOf[Member]))
-		
-		Mav("profile/search/form")
-	}
+	def form(@ModelAttribute cmd: SearchProfilesCommand) = Mav("profile/search/form")
 	
 	@RequestMapping(value=Array("/search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
-		mustBeAbleTo(Search(classOf[Member]))
-		
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -43,8 +37,6 @@ class SearchController extends ProfilesController {
 	
 	@RequestMapping(value=Array("/search.json"), params=Array("query"))
 	def submitJson(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
-		mustBeAbleTo(Search(classOf[Member]))
-		
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {

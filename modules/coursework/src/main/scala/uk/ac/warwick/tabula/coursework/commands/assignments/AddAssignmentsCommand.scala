@@ -23,6 +23,9 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.CurrentUser
 
 
 /**
@@ -65,7 +68,9 @@ class AssignmentItem(
 /**
  * Command for adding many assignments at once, usually from SITS.
  */
-class AddAssignmentsCommand(val department: Department) extends Command[Unit] with SelfValidating {
+class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
+	
+	PermissionsCheck(Manage(department))
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var moduleDao = Wire.auto[ModuleDao]
@@ -154,7 +159,21 @@ class AddAssignmentsCommand(val department: Department) extends Command[Unit] wi
 		}
 
 		validateNames(errors)
+		
+		if (!errors.hasErrors()) checkPermissions()
+	}
 
+	def checkPermissions() = {
+		// check that all the selected items are part of this department. Otherwise you could post the IDs of
+		// unrelated assignments and do stuff with them.
+		// Use .exists() to see if there is at least one with a matching department code
+		val hasInvalidAssignments = assignmentItems.exists { (item) =>
+			item.upstreamAssignment.departmentCode.toLowerCase != department.code
+		}
+		if (hasInvalidAssignments) {
+			logger.warn("Rejected request to setup assignments that aren't in this department")
+			throw new PermissionDeniedException(user, Manage(department))
+		}
 	}
 
 	def validateNames(errors: Errors) {

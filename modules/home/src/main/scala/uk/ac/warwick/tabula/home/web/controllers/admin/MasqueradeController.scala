@@ -21,43 +21,22 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import collection.JavaConversions._
 import java.util.HashMap
 import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.tabula.home.commands.admin.MasqueradeCommand
+import org.hibernate.validator.Valid
 
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends BaseController {
-
-	@Autowired var userLookup: UserLookupInterface = _
-
-	private def checkPermissions() = mustBeAbleTo(Masquerade())
-
-	//@ModelAttribute def model = new HashMap[String,Object]
+	
+	@ModelAttribute("masqueradeCommand") def command = new MasqueradeCommand()
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def form(): Mav = {
-		checkPermissions()
-		Mav("sysadmin/masquerade/form")
-	}
+	def form(@ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand): Mav = Mav("sysadmin/masquerade/form")
 
-	@RequestMapping(method = Array(POST), params = Array("!action"))
-	def submit(@RequestParam usercode: String, response: HttpServletResponse): Mav = {
-		checkPermissions()
-		userLookup.getUserByUserId(usercode) match {
-			case FoundUser(user) => response addCookie newCookie(usercode)
-			case NoUser(user) =>
-		}
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, response: HttpServletResponse): Mav = {
+		cmd.apply() map { response addCookie _ }
 		Redirect("/admin/masquerade")
 	}
-
-	@RequestMapping(method = Array(POST), params = Array("action=remove"))
-	def remove(response: HttpServletResponse): Mav = {
-		checkPermissions()
-		response addCookie newCookie(null)
-		Redirect("/admin/masquerade")
-	}
-
-	private def newCookie(usercode: String) = new Cookie(
-		name = "tabulaMasqueradeAs",
-		value = usercode,
-		path = "/")
 
 }

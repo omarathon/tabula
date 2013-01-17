@@ -55,7 +55,6 @@ class ExtensionRequestController extends CourseworkController{
 	@RequestMapping(method=Array(POST))
 	def persistExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
 								cmd:ExtensionRequestCommand, errors: Errors):Mav = {
-		cmd.onBind()
 		cmd.validate(errors)
 		if(errors.hasErrors){
 			showForm(module, assignment, cmd)

@@ -51,7 +51,6 @@ class AssignmentController extends AbstractAssignmentController {
 		} else {
 		    val feedback = checkCanGetFeedback(assignment, user)
 
-			form.onBind
 			checks(form, feedback)
 
 			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
@@ -100,9 +99,6 @@ class AssignmentController extends AbstractAssignmentController {
 		 */
 		val assignment = form.assignment
 		val module = form.module
-		transactional() {
-			form.onBind
-		}
 		checks(form, None)
 		if (errors.hasErrors || !user.loggedIn) {
 			view(user, form, errors)

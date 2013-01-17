@@ -12,14 +12,18 @@ import uk.ac.warwick.tabula.helpers.{Logging, ArrayList}
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.actions.Manage
 
 abstract class FeedbackTemplateCommand(val department:Department)
-	extends Command[Unit] with Daoisms{
+	extends Command[Unit] with Daoisms with BindListener {
+	
+	PermissionsCheck(Manage(department))
 
 	@BeanProperty var file:UploadedFile = new UploadedFile
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 
-	def onBind() {
+	override def onBind {
 		transactional() {
 			file.onBind
 		}
@@ -51,14 +55,13 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	}
 }
 
-class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) {
+class EditFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) {
 
 	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var id:String = _
 	@BeanProperty var name:String = _
 	@BeanProperty var description:String = _
-	@BeanProperty var template:FeedbackTemplate = _  // retained in case errors are found
 
 	override def applyInternal() {
 		transactional() {
@@ -78,7 +81,7 @@ class EditFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	}
 }
 
-class DeleteFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) with Logging {
+class DeleteFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) with Logging {
 
 	@BeanProperty var id:String = _
 

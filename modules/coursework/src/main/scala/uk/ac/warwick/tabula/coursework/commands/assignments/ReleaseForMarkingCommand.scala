@@ -9,8 +9,14 @@ import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentService}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.SubmissionState._
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
 
-class ReleaseForMarkingCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
+	
 	var assignmentService = Wire.auto[AssignmentService]
 	var submissionService = Wire.auto[SubmissionService]
 

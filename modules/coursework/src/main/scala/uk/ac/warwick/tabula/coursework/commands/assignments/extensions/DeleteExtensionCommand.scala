@@ -11,10 +11,15 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
+class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
+	
+	mustBeLinked(assignment,module)
+	PermissionsCheck(Participate(module))
 
 	var userLookup = Wire.auto[UserLookupService]
 	

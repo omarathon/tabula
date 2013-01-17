@@ -31,11 +31,15 @@ class ExtensionController extends CourseworkController{
 	@Autowired var assignmentService:AssignmentService =_
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var json:ObjectMapper =_
+	
+	@ModelAttribute
+	def listCommand(@PathVariable module:Module, @PathVariable assignment:Assignment) = new ListExtensionsCommand(module, assignment, user)
 
 	@ModelAttribute
-	def addCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new ModifyExtensionCommand(assignment, user)
+	def addCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser) = new ModifyExtensionCommand(module, assignment, user)
+	
 	@ModelAttribute
-	def deleteCommand(@PathVariable assignment:Assignment, user:CurrentUser) = new DeleteExtensionCommand(assignment, user)
+	def deleteCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser) = new DeleteExtensionCommand(module, assignment, user)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
@@ -46,60 +50,28 @@ class ExtensionController extends CourseworkController{
 	}
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(@PathVariable module:Module, @PathVariable assignment:Assignment):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
-
-		val assignmentUsers = assignmentService.determineMembershipUsers(assignment)
+	def listExtensions(cmd: ListExtensionsCommand):Mav = {
+		val extensionsInfo = cmd.apply()
 		
-		val assignmentMembership = Map() ++ (
-			for(assignmentUser <- assignmentUsers)  
-				yield (assignmentUser.getWarwickId -> assignmentUser.getFullName())	
-		)
-			
-		val manualExtensions = assignment.extensions.filter(_.requestedOn == null)
-		val isExtensionManager = module.department.isExtensionManager(user.apparentId)
-		val extensionRequests = assignment.extensions.filterNot(manualExtensions contains(_))
-
-		// all the users that aren't members of this assignment, but have submitted work to it
-		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.getUniversityId))	
-		val nonMembers = Map() ++ (
-			for(extension <- extensionsFromNonMembers) 
-				yield (extension.getUniversityId -> userLookup.getUserByWarwickUniId(extension.getUniversityId).getFullName()) 
-		)
-		
-		// build lookup of names from non members of the assignment that have submitted work plus members 
-		val studentNameLookup = nonMembers ++ assignmentMembership		
-		
-		// users that are members of the assignment but have not yet requested or been granted an extension
-		val potentialExtensions =
-			assignmentMembership.keySet -- (manualExtensions.map(_.universityId).toSet) --
-				(extensionRequests.map(_.universityId).toSet)
-
-							
 		val model = Mav("admin/assignments/extensions/list",
-			"studentNameLookup" -> studentNameLookup,
-			"module" -> module,
-			"assignment" -> assignment,
-			"existingExtensions" -> manualExtensions,
-			"extensionRequests" -> extensionRequests,
-			"isExtensionManager" -> isExtensionManager,
-			"potentialExtensions" -> potentialExtensions
+			"studentNameLookup" -> extensionsInfo.studentNames,
+			"module" -> cmd.module,
+			"assignment" -> cmd.assignment,
+			"existingExtensions" -> extensionsInfo.manualExtensions,
+			"extensionRequests" -> extensionsInfo.extensionRequests,
+			"isExtensionManager" -> extensionsInfo.isExtensionManager,
+			"potentialExtensions" -> extensionsInfo.potentialExtensions
 		)
 
-		crumbed(model, module)
+		crumbed(model, cmd.module)
 	}
 
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(value=Array("add"), method=Array(GET))
-	def addExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-					 @RequestParam("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
-
+	def addExtension(@RequestParam("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
 		val model = Mav("admin/assignments/extensions/add",
-			"module" -> module,
-			"assignment" -> assignment,
+			"module" -> cmd.module,
+			"assignment" -> cmd.assignment,
 			"universityId" -> universityId
 		).noLayout()
 		model
@@ -107,18 +79,14 @@ class ExtensionController extends CourseworkController{
 
 	// edit an existing manually created extension
 	@RequestMapping(value=Array("edit/{universityId}"), method=Array(GET))
-	def editExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-					  @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
-
-		val extension = assignment.findExtension(universityId).get
+	def editExtension(@PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
+		val extension = cmd.assignment.findExtension(universityId).get
 		cmd.copyExtensions(List(extension))
 
 		val model = Mav("admin/assignments/extensions/edit",
 			"command" -> cmd,
-			"module" -> module,
-			"assignment" -> assignment,
+			"module" -> cmd.module,
+			"assignment" -> cmd.assignment,
 			"universityId" -> universityId
 		).noLayout()
 		model
@@ -126,12 +94,10 @@ class ExtensionController extends CourseworkController{
 
 	// review an extension request
 	@RequestMapping(value=Array("review-request/{universityId}"), method=Array(GET))
-	def reviewExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
-							   @PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
-
-		val extension = assignment.findExtension(universityId).get
+	def reviewExtensionRequest(@PathVariable("universityId") universityId:String, @ModelAttribute cmd:ModifyExtensionCommand, errors:Errors):Mav = {		
+		val extension = cmd.assignment.findExtension(universityId).get
+		
+		// FIXME TAB-377 This needs splitting out. Currently we don't check this permission in ModifyExtensionCommand
 		mustBeAbleTo(Manage(extension))
 
 		cmd.copyExtensions(List(extension))
@@ -139,8 +105,8 @@ class ExtensionController extends CourseworkController{
 		val model = Mav("admin/assignments/extensions/review_request",
 			"command" -> cmd,
 			"extension" ->  extension,
-			"module" -> module,
-			"assignment" -> assignment,
+			"module" -> cmd.module,
+			"assignment" -> cmd.assignment,
 			"universityId" -> universityId
 		).noLayout()
 		model
@@ -148,17 +114,12 @@ class ExtensionController extends CourseworkController{
 
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(value=Array("delete/{universityId}"), method=Array(GET))
-	def deleteExtension(@PathVariable module:Module, @PathVariable assignment:Assignment,
-						@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
-
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
-
+	def deleteExtension(@PathVariable("universityId") universityId:String, @ModelAttribute cmd:DeleteExtensionCommand):Mav = {
 		cmd.universityIds.add(universityId)
 
 		val model = Mav("admin/assignments/extensions/delete",
-			"module" -> module,
-			"assignment" -> assignment,
+			"module" -> cmd.module,
+			"assignment" -> cmd.assignment,
 			"universityId" -> universityId
 		).noLayout()
 		model
@@ -167,18 +128,15 @@ class ExtensionController extends CourseworkController{
 
 	@RequestMapping(value=Array("{action:add}", "{action:edit}"), method=Array(POST))
 	@ResponseBody
-	def persistExtension(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("action") action:String,
+	def persistExtension(@PathVariable("action") action:String,
 						 @Valid @ModelAttribute cmd:ModifyExtensionCommand, result:BindingResult,
 						 response:HttpServletResponse, errors: Errors):Mav = {
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
 		if(errors.hasErrors){
 			val errorList = errors.getFieldErrors
 			val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
 			val errorJson = Map("status" -> "error", "result" -> errorMap)
 			Mav(new JSONView(errorJson))
-		}
-		else {
+		} else {
 			val extensions = cmd.apply()
 			extensions.foreach(sendPersistExtensionMessage(_, action))
 			val extensionMap = toJson(extensions)
@@ -238,17 +196,13 @@ class ExtensionController extends CourseworkController{
 
 	@RequestMapping(value=Array("delete"), method=Array(POST))
 	@ResponseBody
-	def deleteExtension(@PathVariable module:Module, @PathVariable("assignment") assignment:Assignment,
-						@ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse,
+	def deleteExtension(@ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse,
 						errors: Errors):Mav = {
-
-		mustBeLinked(assignment,module)
-		mustBeAbleTo(Participate(module))
 		val universityIds = cmd.apply()
 		// send messages
 		universityIds.foreach(id => {
 			val user = userLookup.getUserByWarwickUniId(id)
-			val message = new ExtensionDeletedMessage(assignment, user.getUserId)
+			val message = new ExtensionDeletedMessage(cmd.assignment, user.getUserId)
 			message.apply()
 		})
 		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit

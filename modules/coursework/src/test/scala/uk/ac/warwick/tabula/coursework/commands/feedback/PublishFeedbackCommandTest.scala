@@ -19,14 +19,14 @@ class PublishFeedbackCommandTest extends TestBase {
 			/* a whole */ new World {
 				assignment.closeDate = closeDateAfter
 				command.validate(errors)
-				errors.hasFieldErrors("assignment") should be (true)
-				errors.getFieldError("assignment").getCode should be ("feedback.publish.notclosed")
+				errors.hasGlobalErrors() should be (true)
+				errors.getGlobalError().getCode should be ("feedback.publish.notclosed")
 			}
 
 			/* a whole */ new World {
 				assignment.closeDate = closeDateBefore
 				command.validate(errors)
-				errors.hasFieldErrors("assignment") should be (false)
+				errors.hasGlobalErrors() should be (false)
 			}
 			
 		}
@@ -36,9 +36,8 @@ class PublishFeedbackCommandTest extends TestBase {
 	// reusable environment
 	trait World {
 		val assignment = newDeepAssignment(moduleCode = "IN101")
-		val command = new PublishFeedbackCommand
+		val command = new PublishFeedbackCommand(assignment.module, assignment)
 		val errors = new BindException(command, "command")
-		command.assignment = assignment
 		val feedback = new Feedback()
 		feedback.actualMark = Some(41)
 		assignment.feedbacks = ArrayList( feedback )

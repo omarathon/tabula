@@ -1,27 +1,28 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
-
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.actions.Search
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
+
+class ViewProfileCommand(member: Member) extends ViewViewableCommand(member)
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
 	
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
+		optional(new SearchProfilesCommand(currentMember)) orNull
+	
+	@ModelAttribute("viewProfileCommand")
+	def viewProfileCommand(@PathVariable member: Member) = new ViewProfileCommand(member)
 	
 	@RequestMapping
-	def viewProfile(@PathVariable member: Member) = {
-		mustBeAbleTo(View(mandatory(member)))
+	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
+		val member = cmd.apply
 		
 		val isSelf = (member.universityId == user.universityId)
 		

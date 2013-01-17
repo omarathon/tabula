@@ -11,9 +11,12 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
+import uk.ac.warwick.tabula.actions.Manage
 
 
 class ExtensionSettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
+	
+	PermissionsCheck(Manage(department))
 
 	@BeanProperty var allowExtensionRequests:JBoolean =_
 	@BeanProperty var extensionGuidelineSummary:String =_

@@ -37,39 +37,33 @@ class AddAssignment extends CourseworkController {
 
 	// Used for initial load and for prefilling from a chosen assignment
 	@RequestMapping()
-	def form(user: CurrentUser, @PathVariable module: Module,
-		form: AddAssignmentCommand, errors: Errors) = {
-		permCheck(module)
+	def form(form: AddAssignmentCommand) = {
 		form.afterBind()
 		form.prefillFromRecentAssignment()
-		formView(form, module)
+		formView(form)
 	}
 
 	// when reloading the form
 	@RequestMapping(params = Array("action=refresh"))
-	def formRefresh(user: CurrentUser, @PathVariable module: Module,
-		form: AddAssignmentCommand, errors: Errors) = {
-		permCheck(module)
+	def formRefresh(form: AddAssignmentCommand) = {
 		form.afterBind()
-		formView(form, module)
+		formView(form)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
-	def submit(user: CurrentUser, @PathVariable module: Module,
-		@Valid form: AddAssignmentCommand, errors: Errors) = {
+	def submit(@Valid form: AddAssignmentCommand, errors: Errors) = {
 		form.afterBind()
-		permCheck(module)
 		if (errors.hasErrors) {
-			formView(form, module)
+			formView(form)
 		} else {
 			form.apply()
-			Redirect(Routes.admin.module(module))
+			Redirect(Routes.admin.module(form.module))
 		}
 	}
 
-	def permCheck(module: Module) { mustBeAbleTo(Participate(module)) }
-
-	def formView(form: AddAssignmentCommand, module: Module) = {
+	def formView(form: AddAssignmentCommand) = {
+		val module = form.module
+		
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module,
@@ -91,17 +85,16 @@ class EditAssignment extends CourseworkController {
 		}
 	}
 
-	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
-		new EditAssignmentCommand(mandatory(assignment))
+	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+		new EditAssignmentCommand(module, mandatory(assignment))
 
 	@RequestMapping
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-		form: EditAssignmentCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		checkPerms(module)
+	def showForm(form: EditAssignmentCommand) = {
 		form.afterBind()
 
-		val couldDelete = canDelete(assignment)
+		val (module, assignment) = (form.module, form.assignment)
+		
+		val couldDelete = canDelete(module, assignment)
 		Mav("admin/assignments/edit",
 			"department" -> module.department,
 			"module" -> module,
@@ -113,28 +106,19 @@ class EditAssignment extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action!=refresh"))
-	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: EditAssignmentCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		checkPerms(module)
+	def submit(@Valid form: EditAssignmentCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-			showForm(module, assignment, form, errors)
+			showForm(form)
 		} else {
 			form.afterBind()
 			form.apply()
-			Redirect(Routes.admin.module(module))
+			Redirect(Routes.admin.module(form.module))
 		}
 
 	}
 
-	private def checkPerms(module: Module) {
-		mustBeAbleTo(Participate(module))
-	}
-
-	private def canDelete(assignment: Assignment): Boolean = {
-		val cmd = new DeleteAssignmentCommand(assignment)
+	private def canDelete(module: Module, assignment: Assignment): Boolean = {
+		val cmd = new DeleteAssignmentCommand(module, assignment)
 		val errors = new BeanPropertyBindingResult(cmd, "cmd")
 		cmd.prechecks(errors)
 		!errors.hasErrors
@@ -150,15 +134,13 @@ class DeleteAssignment extends CourseworkController {
 		form.validate(errors)
 	}
 
-	@ModelAttribute def formObject(@PathVariable("assignment") assignment: Assignment) =
-		new DeleteAssignmentCommand(mandatory(assignment))
+	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment) =
+		new DeleteAssignmentCommand(module, mandatory(assignment))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-		form: DeleteAssignmentCommand, errors: Errors) = {
-
-		if (assignment.module != module) throw new ItemNotFoundException
-		mustBeAbleTo(Participate(module))
+	def showForm(form: DeleteAssignmentCommand) = {
+		val (module, assignment) = (form.module, form.assignment)
+		
 		Mav("admin/assignments/delete",
 			"department" -> module.department,
 			"module" -> module,
@@ -168,17 +150,12 @@ class DeleteAssignment extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))
-	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@Valid form: DeleteAssignmentCommand, errors: Errors) = {
-
-		mustBeAbleTo(Participate(module))
+	def submit(@Valid form: DeleteAssignmentCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-			showForm(module, assignment, form, errors)
+			showForm(form)
 		} else {
 			form.apply()
-			Redirect(Routes.admin.module(module))
+			Redirect(Routes.admin.module(form.module))
 		}
 
 	}

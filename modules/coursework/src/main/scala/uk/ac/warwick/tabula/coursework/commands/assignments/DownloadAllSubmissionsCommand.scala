@@ -11,13 +11,13 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class DownloadAllSubmissionsCommand extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadAllSubmissionsCommand(val module: Module, val assignment: Assignment, val filename: String) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var module: Module = _
-	@BeanProperty var filename: String = _
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var zipService = Wire.auto[ZipService]
 
