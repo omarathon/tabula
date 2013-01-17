@@ -166,6 +166,12 @@
 			<groupId>net.databinder</groupId>
 			<artifactId>dispatch-core_${scala.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
@@ -212,12 +218,23 @@
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-queue</artifactId>
 			<version>${warwickutils.version}</version>
-		</dependency>
-		
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>		
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
 			<version>1.90</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
@@ -233,6 +250,12 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>${org.apache.poi.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
