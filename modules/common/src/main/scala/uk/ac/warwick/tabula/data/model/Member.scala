@@ -74,6 +74,8 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	@BeanProperty var lastUpdatedDate = DateTime.now
 	
 	@BeanProperty def fullName = firstName + " " + lastName
+	def getFullName = fullName // need this as reference to fullName within Spring tag requires a getter
+	
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 	@BeanProperty def description = {
 		def userType = Option(groupName) orElse(Option(""))

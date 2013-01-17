@@ -33,7 +33,6 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.Department
 
-
 class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with Daoisms with Logging {
 
 	var userLookup = Wire.auto[UserLookupService]
@@ -53,68 +52,72 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 		if (rawMemberRelationships != null && !rawMemberRelationships.isEmpty()) {
 			for (i <- 0 until rawMemberRelationships.length) {
 				val rawMemberRelationship = rawMemberRelationships.get(i)
-				val newtarget = uniIdsSoFar.add(rawMemberRelationship.targetUniversityId)
+				val newTarget = uniIdsSoFar.add(rawMemberRelationship.targetUniversityId)
 				errors.pushNestedPath("rawMemberRelationships[" + i + "]")
-				rawMemberRelationship.isValid = validateRawMemberRelationship(rawMemberRelationship, errors, newtarget, department)
+				rawMemberRelationship.isValid = validateRawMemberRelationship(rawMemberRelationship, errors, newTarget, department)
 				errors.popNestedPath()
 			}
 		}
 	}
 
-	def validateRawMemberRelationship(rawMemberRelationship: RawMemberRelationship, errors: Errors, newPerson: Boolean, department: Department) = {
+	def validateRawMemberRelationship(rawMemberRelationship: RawMemberRelationship, errors: Errors, newTarget: Boolean, department: Department) = {
+		var valid = true
+		valid = valid && setTargetMember(rawMemberRelationship, department, newTarget, errors)
+		valid = valid && setAgentMember(rawMemberRelationship, errors)
 
-		var noErrors = true
+		valid
+	}
+	
+	private def setTargetMember(rawMemberRelationship: RawMemberRelationship, department: Department, newTarget: Boolean, errors: Errors): Boolean = {
+		var valid: Boolean = true
 		val targetUniId = rawMemberRelationship.targetUniversityId
-		
-		// validate target
+
 		if (hasText(rawMemberRelationship.targetUniversityId)) {
 			if (!UniversityId.isValid(rawMemberRelationship.targetUniversityId)) {
 				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
-				noErrors = false
-			} else if (!newPerson) {
-					errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
-					noErrors = false
-				} else {
-				userLookup.getUserByWarwickUniId(targetUniId) match {
-					case FoundUser(u) => {
-						val member = profileService.getMemberByUniversityId(targetUniId).getOrElse[Member] { 
-							// going with an exception rather than an error here, since we know the uni ID is OK
-							// so we'd expect our db to have the corresponding member
-							throw new ItemNotFoundException("Failed to determine member for user")
-						}
-						if (!member.affiliatedDepartments.contains(department)) {
-							errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
-							noErrors = false
-						}
-					}
-					case NoUser(u) => {
-						errors.rejectValue("targetUniversityId", "uniNumber.userNotFound", Array(rawMemberRelationship.targetUniversityId), "")
-						noErrors = false
+				valid = false
+			} else if (!newTarget) {
+				errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
+				valid = false
+			} else {
+				try {
+					rawMemberRelationship.targetMember = getMember(targetUniId)
+					if (!rawMemberRelationship.targetMember.affiliatedDepartments.contains(department)) {
+						errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
+						valid = false
 					}
 				}
-				// Warn if relationship for this member is already uploaded
-//				assignment.feedbacks.find { (feedback) => feedback.universityId == memberRelationship.universityId && (feedback.hasMark || feedback.hasGrade) } match {
-//					case Some(feedback) => {
-//						memberRelationship.warningMessage = markWarning
-//					}
-//					case None => {}
-//				}
+				catch {
+					case e: ItemNotFoundException => {
+						//errors.rejectValue("targetUniId", e.getMessage())
+						errors.rejectValue("targetUniversityId", "uniNumber.userNotFound")
+						valid = false
+					}
+				}
 			}
 		} else {
-			errors.rejectValue("targetUniversityId", "NotEmpty")
+			errors.rejectValue("targetUniId", "NotEmpty")
+			valid = false
 		}
-		
-		// validate agent
+		valid
+	}
+
+	private def setAgentMember(rawMemberRelationship: RawMemberRelationship, errors: Errors):Boolean = {
+		var valid: Boolean = true
+		val agentUniId = rawMemberRelationship.agentUniversityId
 		if (hasText(rawMemberRelationship.agentUniversityId)) {
-			if (!UniversityId.isValid(rawMemberRelationship.agentUniversityId)) {
+			if (!UniversityId.isValid(agentUniId)) {
 					errors.rejectValue("agentUniversityId", "uniNumber.invalid")
-					noErrors = false
-				} else {
-				userLookup.getUserByWarwickUniId(rawMemberRelationship.agentUniversityId) match {
-					case FoundUser(u) =>
-					case NoUser(u) => {
-						errors.rejectValue("agentUniversityId", "uniNumber.userNotFound", Array(rawMemberRelationship.agentUniversityId), "")
-						noErrors = false
+					valid = false
+			} else {
+				try {
+					rawMemberRelationship.agentMember = getMember(agentUniId)
+				}
+				catch {
+					case e: ItemNotFoundException => {
+						//errors.rejectValue("agentUniversityId", e.getMessage())
+						errors.rejectValue("agentUniversityId", "uniNumber.userNotFound")
+						valid = false
 					}
 				}
 			}
@@ -122,10 +125,22 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 			// just check for some free text
 			// TODO could look for name-like qualities (> 3 chars etc)
 			errors.rejectValue("agentName", "NotEmpty")
-			noErrors = false
+			valid = false
 		}
-		
-		noErrors
+		valid
+	}	
+	
+	private def getMember(uniId: String): Member = {
+		userLookup.getUserByWarwickUniId(uniId) match {
+			case FoundUser(u) => {
+				profileService.getMemberByUniversityId(uniId).getOrElse[Member] {
+					throw new ItemNotFoundException("uniNumber.member.missing")
+				}
+			}
+			case NoUser(u) => {
+				throw new ItemNotFoundException("uniNumber.userNotFound")
+			}
+		}
 	}
 
 	override def applyInternal(): List[MemberRelationship] = transactional() {

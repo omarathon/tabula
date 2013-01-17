@@ -19,6 +19,8 @@ import org.apache.poi.xssf.model.StylesTable
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
 import org.apache.poi.ss.util.CellReference
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.util.core.StringUtils.hasText
 
 class RawMemberRelationship {
 
@@ -27,12 +29,20 @@ class RawMemberRelationship {
 	@BeanProperty var agentName: String = _
 	@BeanProperty var isValid = true
 	@BeanProperty var warningMessage: String = _
+	
+	@BeanProperty var agentMember: Member = _
+	@BeanProperty var targetMember: Member = _
 
 	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
 		this();
 		this.targetUniversityId = targetUniversityId
 		this.agentUniversityId = agentUniversityId
 		this.agentName = agentName
+	}
+	
+	def getAgentNameIfNonMember(): String = {
+		if (hasText(agentUniversityId)) ""
+		else agentName
 	}
 }
 
@@ -88,7 +98,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	
 	def cell(cellReference: String, formattedValue: String) = {
 		val col = new CellReference(cellReference).getCol
-		logger.debug("cell: " + col.toString + ": " + formattedValue)
+		//logger.debug("cell: " + col.toString + ": " + formattedValue)
 		
 		isParsingHeader match {
 			case true => {

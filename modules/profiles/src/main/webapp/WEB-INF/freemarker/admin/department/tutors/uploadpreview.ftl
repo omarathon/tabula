@@ -54,7 +54,9 @@
 			<table class="uploadTable">
 				<tr>
 					<th>Student ID</th>
+					<th>Student Name</th>
 					<th>Tutor ID</th>
+					<th>Tutor Name (derived from tutor ID)</th>
 					<th>Tutor Name (for non-University members)</th>
 				</tr>
 				<#list itemList as item>
@@ -77,12 +79,12 @@
 									${status.value}
 								</@spring.bind>
 								<@f.errors path="targetUniversityId" cssClass="error" />
-								
-								<#if item.warningMessage??>
-								     <div class="warning">
-								     	${item.warningMessage}
-								     </div>
-								</#if>
+							</td>
+							<td>
+								<@spring.bind path="targetMember.fullName">
+									${status.value}
+								</@spring.bind>
+								<@f.errors path="targetMember.fullName" cssClass="error" />							
 							</td>
 							<td>
 								<@spring.bind path="agentUniversityId">
@@ -91,10 +93,16 @@
 								<@f.errors path="agentUniversityId" cssClass="error" />
 							</td>
 							<td>
-								<@spring.bind path="agentName">
+								<@spring.bind path="agentMember.fullName">
 									${status.value}
 								</@spring.bind>
-								<@f.errors path="agentName" cssClass="error" />
+								<@f.errors path="agentMember.fullName" cssClass="error" />							
+							</td>
+							<td>
+								<@spring.bind path="agentNameIfNonMember">
+									${status.value}
+								</@spring.bind>
+								<@f.errors path="agentNameIfNonMember" cssClass="error" />
 							</td>
 						</tr>
 					</@spring.nestedPath>

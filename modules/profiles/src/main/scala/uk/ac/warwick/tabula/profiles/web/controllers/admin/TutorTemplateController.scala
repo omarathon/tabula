@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.web.views.ExcelView
+import org.apache.poi.hssf.usermodel.HSSFDataFormat
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/tutors/template"))
@@ -47,6 +48,10 @@ class TutorTemplateController extends ProfilesController {
 
 		// add header row
 		val header = sheet.createRow(0)
+
+		// tried this but it was a bit hopeful:
+		header.createCell(0).setCellValue("student_id").formatted("text")
+				
 		header.createCell(0).setCellValue("student_id")
 		header.createCell(1).setCellValue("tutor_id")
 		header.createCell(2).setCellValue("tutor_name")

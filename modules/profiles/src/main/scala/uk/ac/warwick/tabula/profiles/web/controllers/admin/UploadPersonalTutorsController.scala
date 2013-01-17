@@ -53,5 +53,4 @@ class UploadPersonalTutorsController extends ProfilesController {
 		cmd.onBind
 		cmd.postExtractValidation(errors, department)
 	}
-
 }
