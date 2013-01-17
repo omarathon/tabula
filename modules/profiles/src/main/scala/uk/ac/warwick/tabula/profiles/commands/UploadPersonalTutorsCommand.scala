@@ -77,6 +77,10 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
 				valid = false
 			} else if (!newTarget) {
+//						// Warn (not error) if relationship for this member is already uploaded
+//						profileService.findRelationship(PersonalTutor, targetUniId) match {
+//							case Some(rel) => rawMemberRelationship.warningMessage = extractWarning
+//						}
 				errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
 				valid = false
 			} else {
@@ -89,7 +93,6 @@ class UploadPersonalTutorsCommand extends Command[List[MemberRelationship]] with
 				}
 				catch {
 					case e: ItemNotFoundException => {
-						//errors.rejectValue("targetUniId", e.getMessage())
 						errors.rejectValue("targetUniversityId", "uniNumber.userNotFound")
 						valid = false
 					}

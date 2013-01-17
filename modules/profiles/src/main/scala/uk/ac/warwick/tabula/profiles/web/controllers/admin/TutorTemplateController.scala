@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
 import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
-import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
+import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook, XSSFCell }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.web.views.ExcelView
-import org.apache.poi.hssf.usermodel.HSSFDataFormat
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/tutors/template"))
@@ -44,7 +43,15 @@ class TutorTemplateController extends ProfilesController {
 	}
 
 	def generateNewSheet(department: Department, workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet("Tutors for " + safeDepartmentName(department))
+		val sheet = workbook.createSheet("Tutors for " + safeDepartmentName(department))		
+		val style = workbook.createCellStyle
+		val format = workbook.createDataFormat
+		
+		// using an @ sets text format (from BuiltinFormats.class)
+		style.setDataFormat(format.getFormat("@"))
+		
+		// set style on all three columns
+		1 to 3 foreach { col => sheet.setDefaultColumnStyle(col, style) }
 
 		// add header row
 		val header = sheet.createRow(0)
