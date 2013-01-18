@@ -27,14 +27,11 @@ class AssignmentController extends AbstractAssignmentController {
 
 	validatesSelf[SubmitAssignmentCommand]
 
-	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		val feedback = checkCanGetFeedback(mandatory(assignment), user)
-		val cmd = new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)
-		
-		// Only optional if you have feedback
-		if (!feedback.isEmpty) optional(cmd)
-		else cmd
-	}
+	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+		restrictedBy {
+			val feedback = checkCanGetFeedback(mandatory(assignment), user)
+			!feedback.isEmpty
+		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user))
 
 	/**
 	 * Sitebuilder-embeddable view.

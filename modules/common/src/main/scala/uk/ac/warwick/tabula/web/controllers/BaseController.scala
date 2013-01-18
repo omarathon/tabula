@@ -32,9 +32,13 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 	def user: CurrentUser
 	var securityService: SecurityService
 	
-	def optional[T <: PermissionsChecking](something: T): Option[T] = 
+	def restricted[T <: PermissionsChecking](something: => T): Option[T] = 
 		if (something.permissionsChecks forall(securityService.can(user, _))) Some(something)
 		else None
+		
+	def restrictedBy[T <: PermissionsChecking](fn: => Boolean)(something: => T): Option[T] =
+		if (fn) restricted(something)
+		else Some(something)
 }
 
 trait ControllerViews {

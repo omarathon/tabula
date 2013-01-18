@@ -15,7 +15,7 @@ class ViewProfileCommand(member: Member) extends ViewViewableCommand(member)
 class ViewProfileController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		optional(new SearchProfilesCommand(currentMember)) orNull
+		restricted(new SearchProfilesCommand(currentMember)) orNull
 	
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable member: Member) = new ViewProfileCommand(member)

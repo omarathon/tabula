@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.Member
 @Controller class HomeController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		optional(new SearchProfilesCommand(currentMember)) orNull
+		restricted(new SearchProfilesCommand(currentMember)) orNull
 
 	@RequestMapping(Array("/")) def home() = 
 		if (user.isStaff) Mav("home/view")
