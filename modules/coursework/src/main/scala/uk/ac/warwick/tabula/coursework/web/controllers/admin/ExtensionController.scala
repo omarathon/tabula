@@ -88,7 +88,7 @@ class ListExtensionRequestsController extends ExtensionController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/add"))
 class AddExtensionController extends ExtensionController {
 	
-	@ModelAttribute
+	@ModelAttribute("modifyExtensionCommand")
 	def addCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser) = 
 		new AddExtensionCommand(module, assignment, user)
 	
@@ -98,7 +98,7 @@ class AddExtensionController extends ExtensionController {
 	
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(method=Array(GET))
-	def addExtension(@RequestParam("universityId") universityId:String, @ModelAttribute cmd:AddExtensionCommand, errors:Errors):Mav = {
+	def addExtension(@RequestParam("universityId") universityId:String, @ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand, errors:Errors):Mav = {
 		val model = Mav("admin/assignments/extensions/add",
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
@@ -109,7 +109,7 @@ class AddExtensionController extends ExtensionController {
 	
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute cmd:AddExtensionCommand, result:BindingResult,
+	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand, result:BindingResult,
 						 response:HttpServletResponse, errors: Errors):Mav = {
 		if (errors.hasErrors) {
 			val errorList = errors.getFieldErrors
@@ -133,7 +133,7 @@ class AddExtensionController extends ExtensionController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/edit/{universityId}"))
 class EditExtensionController extends ExtensionController {
 	
-	@ModelAttribute
+	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
@@ -143,7 +143,7 @@ class EditExtensionController extends ExtensionController {
 	
 	// edit an existing manually created extension
 	@RequestMapping(method=Array(GET))
-	def editExtension(@ModelAttribute cmd:EditExtensionCommand, errors:Errors):Mav = {
+	def editExtension(@ModelAttribute("modifyExtensionCommand") cmd:EditExtensionCommand, errors:Errors):Mav = {
 		val model = Mav("admin/assignments/extensions/edit",
 			"command" -> cmd,
 			"module" -> cmd.module,
@@ -155,7 +155,7 @@ class EditExtensionController extends ExtensionController {
 	
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute cmd:EditExtensionCommand, result:BindingResult,
+	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:EditExtensionCommand, result:BindingResult,
 						 response:HttpServletResponse, errors: Errors):Mav = {
 		if (errors.hasErrors) {
 			val errorList = errors.getFieldErrors
@@ -182,7 +182,7 @@ class EditExtensionController extends ExtensionController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
 class ReviewExtensionRequestController extends ExtensionController {
 	
-	@ModelAttribute
+	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
@@ -192,7 +192,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 	
 	// review an extension request
 	@RequestMapping(method=Array(GET))
-	def reviewExtensionRequest(@ModelAttribute cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {		
+	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {		
 		val model = Mav("admin/assignments/extensions/review_request",
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
@@ -205,7 +205,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 	
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute cmd:ReviewExtensionRequestCommand, result:BindingResult,
+	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, result:BindingResult,
 						 response:HttpServletResponse, errors: Errors):Mav = {
 		if (errors.hasErrors) {
 			val errorList = errors.getFieldErrors
