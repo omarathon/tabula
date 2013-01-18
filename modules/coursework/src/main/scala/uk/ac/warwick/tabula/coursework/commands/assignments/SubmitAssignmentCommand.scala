@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.actions.Submit
 
 class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
-
+	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionsCheck(Submit(assignment))
 	

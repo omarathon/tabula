@@ -36,7 +36,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
-				val mav = controller.view(currentUser, form, errors)
+				val mav = controller.view(form.module, form.assignment, currentUser, form, errors)
 				withClue(mav) { mav.map should contain key ("feedback") }
 			}
 		}

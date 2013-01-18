@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -27,25 +28,25 @@ class AssignmentController extends AbstractAssignmentController {
 
 	validatesSelf[SubmitAssignmentCommand]
 
-	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
 		restrictedBy {
 			val feedback = checkCanGetFeedback(mandatory(assignment), user)
 			!feedback.isEmpty
-		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user))
+		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)) orNull
 
 	/**
 	 * Sitebuilder-embeddable view.
 	 */
 	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
-	def embeddedView(user: CurrentUser, form: SubmitAssignmentCommand, errors: Errors) = {
-		view(user, form, errors).embedded
+	def embeddedView(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+		view(module, assignment, user, formOrNull, errors).embedded
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
-	def view(user: CurrentUser, form: SubmitAssignmentCommand, errors: Errors) = {
-		val assignment = form.assignment
-		val module = form.module
-
+	def view(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+		val form = Option(formOrNull)
+		
+		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
 		if (!user.loggedIn) {
 			RedirectToSignin()
 		} else {
@@ -77,7 +78,7 @@ class AssignmentController extends AbstractAssignmentController {
 				"assignment" -> assignment,
 				"feedback" -> feedback,
 				"submission" -> submission,
-				"justSubmitted" -> form.justSubmitted,
+				"justSubmitted" -> (form map { _.justSubmitted } getOrElse (false)),
 				"canSubmit" -> canSubmit,
 				"canReSubmit" -> canReSubmit,
 				"extension" -> extension,
@@ -89,16 +90,18 @@ class AssignmentController extends AbstractAssignmentController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable module: Module, user: CurrentUser, @Valid form: SubmitAssignmentCommand, errors: Errors) = {
+	def submit(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, @Valid formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
+			throw new SubmitPermissionDeniedException(assignment)
+		}
+		
 		/*
 		 * Note the multiple transactions. The submission transaction should commit before the confirmation email
 		 * command runs, to ensure that it has fully committed successfully. So don't wrap this method in an outer transaction
 		 * or you'll just make it be one transaction! (HFC-385)
 		 */
-		val assignment = form.assignment
-		val module = form.module
 		if (errors.hasErrors || !user.loggedIn) {
-			view(user, form, errors)
+			view(form.module, form.assignment, user, form, errors)
 		} else {
 			val submission = transactional() { form.apply() }
 			// submission creation should be committed to DB at this point, 
