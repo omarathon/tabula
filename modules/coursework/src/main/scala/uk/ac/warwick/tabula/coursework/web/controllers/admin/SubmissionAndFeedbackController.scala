@@ -27,6 +27,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 	def list(command: ListSubmissionsCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 
+		// TODO This is too much logic for a controller. This should go in a command object, possibly nesting the ListSubmissionsCommand
 		val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
