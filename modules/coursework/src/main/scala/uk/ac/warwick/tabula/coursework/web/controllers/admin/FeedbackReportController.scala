@@ -33,77 +33,12 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
 	
-	@Autowired var features: Features = _
-	@Autowired var assignmentService: AssignmentService = _
-	var auditIndexService = Wire.auto[AuditEventIndexService]
-	@ModelAttribute def feedbackReportCommand(@PathVariable dept:Department) = new FeedbackReportCommand(dept, features)
+	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department) =
+		new FeedbackReportCommand(dept)
 
-	val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-	
-	
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewReport(@PathVariable dept: Department, user: CurrentUser, cmd:FeedbackReportCommand, errors:Errors) = {
-		val events = auditIndexService.findPublishFeedbackEvents(dept)	
+	@RequestMapping(method = Array(HEAD, GET))
+	def generateReport(cmd: FeedbackReportCommand) = {
+		new ExcelView(cmd.department.getName + " feedback report.xlsx", cmd.apply())
+	}
 		
-		val workbook = new XSSFWorkbook()
-		val sheet = generateNewSheet(dept, workbook) 
-		
-		for (event <- events) {
-			val submissions = getSubmissionsForFeedbackEvent(event)
-			
-			for (submission <- submissions) {
-				val row = sheet.createRow(sheet.getLastRowNum() + 1)
-				row.createCell(0).setCellValue(submission.assignment.module.code)				
-				row.createCell(1).setCellValue(dateFormatter.print(submission.submittedDate))
-				row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))
-			}			
-		}
-		
-		formatWorksheet(sheet)
-		new ExcelView(dept.name + "-feedback.xlsx", workbook)
-	}
-	
-	
-	
-	private def getSubmissionsForFeedbackEvent(event: AuditEvent) : Array[Submission] = {
-		val assignment = assignmentService.getAssignmentById(event.assignmentId.get)
-		val students = event.parsedData.get("students").asInstanceOf[ArrayList[String]].toArray.toList
-
-		val submissions = assignment.get.submissions.toArray().map(_.asInstanceOf[Submission])
-		
-		// only return the submissions from students in this feedback round and 
-		// also anything that was submitted before the feedback was sent out
-		submissions.filter(x => students.contains(x.universityId) && x.submittedDate.isBefore(event.eventDate) )
-	}
-	
-	
-	
-	def generateNewSheet(dept: Department, workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet("Report for " + safeDeptName(dept))
-
-		// add header row
-		val header = sheet.createRow(0)
-		header.createCell(0).setCellValue("Module code")
-		header.createCell(1).setCellValue("Submission date")
-		header.createCell(2).setCellValue("Return date")
-		header.createCell(3).setCellValue("Within 20 days?")
-
-		sheet
-	}
-
-	def formatWorksheet(sheet: XSSFSheet) = {
-	    (0 to 5) map (sheet.autoSizeColumn(_))
-	}
-
-	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
-	def trimmedDeptName(dept: Department) = {
-		if (dept.name.length > 20)
-			dept.name.substring(0, 20)
-		else
-			dept.name
-	}
-
-	// util to replace unsafe characters with spaces
-	def safeDeptName(dept: Department) = WorkbookUtil.createSafeSheetName(trimmedDeptName(dept))
-	
 }
