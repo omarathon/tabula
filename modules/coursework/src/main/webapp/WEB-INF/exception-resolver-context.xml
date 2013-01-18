@@ -8,7 +8,7 @@
 	<bean parent="defaultExceptionResolver">
 		<property name="viewMappings">
 			<map merge="true">
-               	<entry key="uk.ac.warwick.tabula.coursework.web.controllers.SubmitPermissionDeniedException" value="submit/assignment_permissionDenied" />
+               	<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="submit/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean> 

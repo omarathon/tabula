@@ -28,9 +28,12 @@ class AssignmentController extends AbstractAssignmentController {
 	validatesSelf[SubmitAssignmentCommand]
 
 	@ModelAttribute def form(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		val cmd = new SubmitAssignmentCommand(mandatory(assignment), user)
-		cmd.module = module
-		cmd
+		val feedback = checkCanGetFeedback(mandatory(assignment), user)
+		val cmd = new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)
+		
+		// Only optional if you have feedback
+		if (!feedback.isEmpty) optional(cmd)
+		else cmd
 	}
 
 	/**
@@ -50,8 +53,6 @@ class AssignmentController extends AbstractAssignmentController {
 			RedirectToSignin()
 		} else {
 		    val feedback = checkCanGetFeedback(assignment, user)
-
-			checks(form, feedback)
 
 			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
@@ -99,7 +100,6 @@ class AssignmentController extends AbstractAssignmentController {
 		 */
 		val assignment = form.assignment
 		val module = form.module
-		checks(form, None)
 		if (errors.hasErrors || !user.loggedIn) {
 			view(user, form, errors)
 		} else {
@@ -113,16 +113,5 @@ class AssignmentController extends AbstractAssignmentController {
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}
-
-	private def checks(form: SubmitAssignmentCommand, feedback: Option[Feedback]) = {
-		val assignment = form.assignment
-		val module = form.module
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		if (feedback.isEmpty && !can(Submit(assignment))) { // includes check for restricted submission.
-			throw new SubmitPermissionDeniedException(assignment)
-		}
-	}
-
-	private def hasPermission(form: SubmitAssignmentCommand) = can(Submit(form.assignment))
 
 }

@@ -15,8 +15,10 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.actions.Participate
 
 
-class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
+class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
+	
+	universityIds.add(universityId)
 	
 	mustBeLinked(assignment,module)
 	PermissionsCheck(Participate(module))

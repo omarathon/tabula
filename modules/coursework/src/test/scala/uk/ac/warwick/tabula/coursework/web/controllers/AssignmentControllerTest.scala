@@ -20,8 +20,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val controller = new AssignmentController with TestControllerOverrides
 		val assignment = newDeepAssignment("CS101")
 		val module = assignment.module
-		val form = new SubmitAssignmentCommand(assignment, currentUser)
-		form.module = module
+		val form = new SubmitAssignmentCommand(module, assignment, currentUser)
 		val errors = new BindException(form, "command")
 		
 		val feedbackDao = smartMock[FeedbackDao]

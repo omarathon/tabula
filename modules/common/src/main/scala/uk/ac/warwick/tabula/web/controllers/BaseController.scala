@@ -31,11 +31,9 @@ import uk.ac.warwick.tabula.permissions.PermissionsChecking
 abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
 	var securityService: SecurityService
-	def can(action: Action[_]) = securityService.can(user, action)
-	def mustBeAbleTo(action: Action[_]) = securityService.check(user, action)
 	
 	def optional[T <: PermissionsChecking](something: T): Option[T] = 
-		if (something.permissionsChecks forall(can(_))) Some(something)
+		if (something.permissionsChecks forall(securityService.can(user, _))) Some(something)
 		else None
 }
 
