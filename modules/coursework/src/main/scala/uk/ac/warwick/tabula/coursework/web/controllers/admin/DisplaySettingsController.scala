@@ -19,9 +19,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(Array("/admin/department/{dept}/settings/display"))
 class DisplaySettingsController extends CourseworkController {
 
-	@Autowired var moduleService: ModuleAndDepartmentService = _
-	@Autowired var features: Features = _
-	@ModelAttribute def displaySettingsCommand(@PathVariable dept:Department) = new DisplaySettingsCommand(dept, features)
+	@ModelAttribute def displaySettingsCommand(@PathVariable dept:Department) = new DisplaySettingsCommand(dept)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
@@ -31,7 +29,7 @@ class DisplaySettingsController extends CourseworkController {
 		if(!errors.hasErrors){
 			cmd.copySettings()
 		}
-		mustBeAbleTo(Manage(dept))
+
 		val model = Mav("admin/display-settings",
 			"department" -> dept
 		)
@@ -40,7 +38,6 @@ class DisplaySettingsController extends CourseworkController {
 
 	@RequestMapping(method=Array(RequestMethod.POST))
 	def saveSettings(cmd:DisplaySettingsCommand, errors:Errors) = {
-		mustBeAbleTo(Manage(cmd.department))
 		cmd.validate(errors)
 		if (errors.hasErrors){
 			viewSettings(cmd.department, user, cmd, errors)

@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/turnitin"))
@@ -21,17 +23,15 @@ class TurnitinController extends CourseworkController {
 	@Autowired var jobService: JobService = _
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def model(user: CurrentUser) = new SubmitToTurnitinCommand(user)
+	@ModelAttribute def model(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = new SubmitToTurnitinCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("!jobId"))
 	def confirm(command: SubmitToTurnitinCommand) = {
-		check(command)
 		Mav("admin/assignments/turnitin/form", "incompatibleFiles" -> command.incompatibleFiles)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
 	def submit(command: SubmitToTurnitinCommand) = {
-		check(command)
 		val jobId = command.apply()
 		Redirect(Routes.admin.assignment.turnitin.status(command.assignment) + "?jobId=" + jobId)
 	}
@@ -47,11 +47,6 @@ class TurnitinController extends CourseworkController {
 			}
 		}
 		mav
-	}
-
-	def check(command: SubmitToTurnitinCommand) {
-		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		mustBeAbleTo(Participate(command.module))
 	}
 
 }

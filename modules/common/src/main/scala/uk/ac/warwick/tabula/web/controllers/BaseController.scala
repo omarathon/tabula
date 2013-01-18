@@ -25,58 +25,20 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import org.springframework.web.servlet.view.RedirectView
+import uk.ac.warwick.tabula.permissions.PermissionsCheckingMethods
+import uk.ac.warwick.tabula.permissions.PermissionsChecking
 
-abstract trait ControllerMethods extends Logging {
-	def mustBeLinked(assignment: Assignment, module: Module) =
-		if (mandatory(assignment).module.id != mandatory(module).id) {
-			logger.info("Not displaying assignment as it doesn't belong to specified module")
-			throw new ItemNotFoundException(assignment)
-		}
-
-	def mustBeLinked(feedback: Feedback, assignment: Assignment) =
-		if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
-			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
-			throw new ItemNotFoundException(feedback)
-		}
-	
-	def mustBeLinked(markScheme: MarkScheme, department: Department) =
-		if (mandatory(markScheme).department.id != mandatory(department.id)) {
-			logger.info("Not displaying mark scheme as it doesn't belong to specified department")
-			throw new ItemNotFoundException(markScheme)
-		}
-
-    def mustBeLinked(submission: Submission, assignment: Assignment) =
-        if (mandatory(submission).assignment.id != mandatory(assignment).id) {
-            logger.info("Not displaying submission as it doesn't belong to specified assignment")
-            throw new ItemNotFoundException(submission)
-        }	
-	
-	/**
-	 * Returns an object if it is non-null and not None. Otherwise
-	 * it throws an ItemNotFoundException, which should get picked
-	 * up by an exception handler to display a 404 page.
-	 */
-	def mandatory[T](something: T)(implicit m: Manifest[T]): T = something match {
-		case thing: Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
-		case _ => throw new ItemNotFoundException()
-	}
-	/**
-	 * Pass in an Option and receive either the actual value, or
-	 * an ItemNotFoundException is thrown.
-	 */
-	def mandatory[T](option: Option[T])(implicit m: Manifest[T]): T = option match {
-		case Some(thing: Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
-		case _ => throw new ItemNotFoundException()
-	}
-
-	def notDeleted[T <: CanBeDeleted](entity: T): T =
-		if (entity.deleted) throw new ItemNotFoundException()
-		else entity
-
+abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
 	var securityService: SecurityService
-	def can(action: Action[_]) = securityService.can(user, action)
-	def mustBeAbleTo(action: Action[_]) = securityService.check(user, action)
+	
+	def restricted[T <: PermissionsChecking](something: => T): Option[T] = 
+		if (something.permissionsChecks forall(securityService.can(user, _))) Some(something)
+		else None
+		
+	def restrictedBy[T <: PermissionsChecking](fn: => Boolean)(something: => T): Option[T] =
+		if (fn) restricted(something)
+		else Some(something)
 }
 
 trait ControllerViews {

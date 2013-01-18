@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-
 import org.junit.Test
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
-
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.CurrentUser
 
 
 
@@ -17,10 +16,10 @@ import uk.ac.warwick.tabula.data.model._
 class AddAssignmentsCommandTest extends AppContextTestBase {
 	
 	@Transactional
-	@Test def applyCommand {
+	@Test def applyCommand = withUser("cuscav") {
 		val f = MyFixtures()
 		
-		val cmd = new AddAssignmentsCommand(f.department)
+		val cmd = new AddAssignmentsCommand(f.department, currentUser)
 		cmd.academicYear = new AcademicYear(2012)
 		cmd.assignmentItems = Seq(
 			item(f.upstream1, true, "A"),

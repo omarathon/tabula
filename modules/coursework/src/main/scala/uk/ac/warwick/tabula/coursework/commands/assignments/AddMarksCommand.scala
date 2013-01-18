@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
 import uk.ac.warwick.tabula.commands.UploadedFile
@@ -28,9 +28,14 @@ import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging {
+class AddMarksCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging with BindListener {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
@@ -129,7 +134,7 @@ class AddMarksCommand(val assignment: Assignment, val submitter: CurrentUser) ex
 		markList.toList
 	}
 
-	def onBind {
+	override def onBind {
 		transactional() {
 			file.onBind
 			if (!file.attached.isEmpty()) {

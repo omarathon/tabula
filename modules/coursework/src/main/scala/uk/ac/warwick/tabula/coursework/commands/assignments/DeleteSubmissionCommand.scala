@@ -17,9 +17,14 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class DeleteSubmissionCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]

@@ -12,10 +12,13 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Manage
 
-class RemoveModulePermissionCommand extends Command[Unit] {
+class RemoveModulePermissionCommand(val module: Module) extends Command[Unit] {
+	
+	PermissionsCheck(Manage(module))
+	module.ensureParticipantsGroup
 
-	@BeanProperty var module: Module = _
 	@BeanProperty var usercodes: JList[String] = _
 	@BeanProperty val permissionType: String = "Participate"
 

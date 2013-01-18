@@ -28,14 +28,12 @@ class EditMarkSchemeController extends CourseworkController {
 	 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: EditMarkSchemeCommand): Mav = {
-		doPermissions(cmd)
 		doBind(cmd)
 		Mav("admin/markschemes/edit")
 	}
 	
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: EditMarkSchemeCommand, errors: Errors): Mav = {
-		doPermissions(cmd)
 		doBind(cmd)
 		if (errors.hasErrors) {
 			form(cmd)
@@ -43,11 +41,6 @@ class EditMarkSchemeController extends CourseworkController {
 			cmd.apply()
 			Redirect(Routes.admin.markscheme.list(cmd.department))
 		}
-	}
-	
-	def doPermissions(cmd: EditMarkSchemeCommand) {
-		mustBeAbleTo(Manage(cmd.department))
-		mustBeLinked(cmd.markScheme, cmd.department)
 	}
 	
 	// do extra property processing on the form.

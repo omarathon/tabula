@@ -20,7 +20,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()
-			val command = new AddMarksCommand(assignment, currentUser)
+			val command = new AddMarksCommand(assignment.module, assignment, currentUser)
 			command.userLookup = mock[UserLookupService]
 			command.userLookup.getUserByWarwickUniId("0672088") answers { id => 
 				currentUser.apparentUser
@@ -49,7 +49,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()
-			val command = new AddMarksCommand(assignment, currentUser)
+			val command = new AddMarksCommand(assignment.module, assignment, currentUser)
 			command.userLookup = mock[UserLookupService]
 			command.userLookup.getUserByWarwickUniId("0672088") answers { id => 
 				currentUser.apparentUser

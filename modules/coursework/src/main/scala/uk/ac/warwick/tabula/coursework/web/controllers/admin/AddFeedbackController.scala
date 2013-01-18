@@ -23,42 +23,28 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddFeedbackController extends CourseworkController {
 
 	@ModelAttribute
-	def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new AddFeedbackCommand(assignment, user)
-
-	def onBind(command: AddFeedbackCommand) {
-		command.onBind
-	}
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+		new AddFeedbackCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-		@ModelAttribute form: AddFeedbackCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		onBind(form)
+	def showForm(@ModelAttribute form: AddFeedbackCommand) = {
 		Mav("admin/assignments/feedback/form",
-			"department" -> module.department,
-			"module" -> module,
-			"assignment" -> assignment)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			"department" -> form.module.department,
+			"module" -> form.module,
+			"assignment" -> form.assignment)
+			.crumbs(Breadcrumbs.Department(form.module.department), Breadcrumbs.Module(form.module))
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@Valid form: AddFeedbackCommand, errors: Errors) = {
+	def submit(@Valid form: AddFeedbackCommand, errors: Errors) = {
 		transactional() {
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(Participate(module))
 			form.preExtractValidation(errors)
-			onBind(form)
 			form.postExtractValidation(errors)
 			if (errors.hasErrors) {
-				showForm(module, assignment, form, errors)
+				showForm(form)
 			} else {
 				form.apply
-				Mav("redirect:" + Routes.admin.module(module))
+				Mav("redirect:" + Routes.admin.module(form.module))
 			}
 		}
 	}

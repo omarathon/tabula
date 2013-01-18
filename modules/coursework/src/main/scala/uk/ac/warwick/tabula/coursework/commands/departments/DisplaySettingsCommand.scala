@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
+import scala.reflect.BeanProperty
 
-import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
-import uk.ac.warwick.tabula.commands.{Description, Command}
-import reflect.BeanProperty
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.Features
+
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.validators.UsercodeListValidator
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 
-class DisplaySettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
+class DisplaySettingsCommand (val department:Department) extends Command[Unit] {
+	
+	PermissionsCheck(Manage(department))
 
 	@BeanProperty var showStudentName:JBoolean =_
 

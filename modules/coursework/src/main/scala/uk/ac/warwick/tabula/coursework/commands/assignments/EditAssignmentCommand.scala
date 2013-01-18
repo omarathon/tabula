@@ -5,13 +5,16 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
 
 
-class EditAssignmentCommand(val assignment: Assignment = null) extends ModifyAssignmentCommand {
+class EditAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends ModifyAssignmentCommand {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	this.copyFrom(assignment)
-
-	def module = assignment.module
 
 	def canUpdateMarkScheme = {
 		Option(assignment.markScheme) match {

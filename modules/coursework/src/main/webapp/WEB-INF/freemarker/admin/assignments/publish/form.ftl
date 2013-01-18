@@ -29,7 +29,7 @@ jQuery(function($){ "use strict";
 
 <h1>Publish feedback for ${assignment.name}</h1>
 
-<@f.errors path="assignment" cssClass="error" />
+<@f.errors cssClass="error" />
 
 <#assign feedbackCount=assignment.fullFeedback?size />
 <#assign unreleasedFeedbackCount=assignment.unreleasedFeedback?size />

@@ -12,12 +12,14 @@ import uk.ac.warwick.tabula.services.AuditEventIndexService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
 
-class ListSubmissionsCommand extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
-  var auditIndex = Wire.auto[AuditEventIndexService]
-
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var module: Module = _
+class ListSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(Participate(module))
+	
+	var auditIndex = Wire.auto[AuditEventIndexService]
 
 	var checkIndex = true
 

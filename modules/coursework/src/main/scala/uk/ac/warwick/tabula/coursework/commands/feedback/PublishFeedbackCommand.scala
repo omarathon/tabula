@@ -21,10 +21,14 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
+class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(Participate(module))
+	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]
@@ -33,8 +37,6 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 	
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var module: Module = _
 	@BeanProperty var confirm: Boolean = false
 
 	case class MissingUser(universityId: String)
@@ -46,9 +48,9 @@ class PublishFeedbackCommand extends Command[Unit] with FreemarkerRendering with
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
 		if (!assignment.isClosed()) {
-			errors.rejectValue("assignment", "feedback.publish.notclosed")
+			errors.reject("feedback.publish.notclosed")
 		} else if (assignment.fullFeedback.isEmpty) {
-			errors.rejectValue("assignment", "feedback.publish.nofeedback")
+			errors.reject("feedback.publish.nofeedback")
 		}
 	}
 

@@ -25,6 +25,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import scala.Some
+import uk.ac.warwick.tabula.system.BindListener
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
@@ -67,7 +68,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * remove all the code in here that handles it, to simplify it a little.
  */
 abstract class UploadFeedbackCommand[T](val assignment: Assignment, val submitter: CurrentUser)
-	extends Command[T] with Daoisms with Logging {
+	extends Command[T] with Daoisms with Logging with BindListener {
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 
@@ -160,7 +161,7 @@ abstract class UploadFeedbackCommand[T](val assignment: Assignment, val submitte
 		item.duplicateFileNames = attachedFiles & feedbackFiles
 	}
 
-	def onBind = transactional() {
+	override def onBind = transactional() {
 		file.onBind
 
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
