@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.system
 
-abstract trait BindListener {
+trait BindListener {
 	def onBind
 }
