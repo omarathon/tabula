@@ -105,11 +105,13 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 				columnMap(col) = formattedValue
 			}
 			case false => {
-				columnMap(col) match {
-					case "student_id" => currentRawMemberRelationship.targetUniversityId = formattedValue
-					case "tutor_id" => currentRawMemberRelationship.agentUniversityId = formattedValue
-					case "tutor_name" => currentRawMemberRelationship.agentName = formattedValue
-					case _ => // ignore anything else
+				if (columnMap.containsKey(col)) {
+					columnMap(col) match {
+						case "student_id" => currentRawMemberRelationship.targetUniversityId = formattedValue
+						case "tutor_id" => currentRawMemberRelationship.agentUniversityId = formattedValue
+						case "tutor_name" => currentRawMemberRelationship.agentName = formattedValue
+						case _ => // ignore anything else
+					}
 				}
 			}
 		}
