@@ -6,6 +6,7 @@ If you agree that they should have access, you can update the assignment members
 
 <@url page=path context="/coursework" />
 
-In any case, you may wish to contact the student at ${student.email}. This email has been sent to all department administrators.
+
+In any case, you may wish to contact the user at ${student.email}. This email has been sent to all department administrators.
 
 
