@@ -43,8 +43,6 @@ class FeedbackReportController extends CourseworkController {
 	
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def viewReport(@PathVariable dept: Department, user: CurrentUser, cmd:FeedbackReportCommand, errors:Errors) = {
-		mustBeAbleTo(Manage(cmd.department))
-			
 		val events = auditIndexService.findPublishFeedbackEvents(dept)	
 		
 		val workbook = new XSSFWorkbook()
