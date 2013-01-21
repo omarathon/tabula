@@ -24,26 +24,22 @@ class DeleteSubmission extends CourseworkController {
 	validatesSelf[DeleteSubmissionCommand]
 	
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionCommand(assignment)
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+		new DeleteSubmissionCommand(module, assignment)
 	
 	@RequestMapping(method = Array(GET))
 	def get(form: DeleteSubmissionCommand) = RedirectBack(form.assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable("module") module: Module, form: DeleteSubmissionCommand, errors: Errors) = {
-		val assignment = form.assignment
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Delete(mandatory(form.submissions.headOption)))
+	def showForm(form: DeleteSubmissionCommand, errors: Errors) = {
 		form.prevalidate(errors)
-		formView(assignment)
+		formView(form.assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@PathVariable("module") module: Module, @Valid form: DeleteSubmissionCommand,errors: Errors) = {
+	def submit(@Valid form: DeleteSubmissionCommand,errors: Errors) = {
 		transactional() {
 			val assignment = form.assignment
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors) {
 				formView(assignment)
 			} else {

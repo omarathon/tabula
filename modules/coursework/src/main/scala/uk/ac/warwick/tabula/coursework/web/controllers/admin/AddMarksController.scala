@@ -25,23 +25,22 @@ class AddMarksController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) = new AddMarksCommand(assignment, user)
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+		new AddMarksCommand(module, assignment, user)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AddMarksCommand): Mav = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		val members = assignmentService.determineMembershipUsers(assignment)
+	def uploadZipForm(@ModelAttribute cmd: AddMarksCommand): Mav = {
+		val members = assignmentService.determineMembershipUsers(cmd.assignment)
 
 		var marksToDisplay = members.map { member => 
-			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
+			val feedback = assignmentService.getStudentFeedback(cmd.assignment, member.getWarwickId)
 			noteMarkItem(member, feedback)
 		}
 
-		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
+		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), cmd.module)
 
 	}
 
@@ -55,7 +54,7 @@ class AddMarksController extends CourseworkController {
 		feedback match {
 			case Some(f) => {
 				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
-				markItem.actualGrade = f.actualGrade
+				markItem.actualGrade = f.actualGrade.map { _.toString }.getOrElse("")
 			}
 			case None => {
 				markItem.actualMark = ""
@@ -67,22 +66,19 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		bindAndValidate(module, cmd, errors)
-		crumbed(Mav("admin/assignments/marks/markspreview"), module)
+	def confirmBatchUpload(@ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(cmd, errors)
+		crumbed(Mav("admin/assignments/marks/markspreview"), cmd.module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
-		bindAndValidate(module, cmd, errors)
+	def doUpload(@ModelAttribute cmd: AddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(cmd, errors)
 		cmd.apply()
-		Redirect(Routes.admin.module(module))
+		Redirect(Routes.admin.module(cmd.module))
 	}
 
-	private def bindAndValidate(module: Module, cmd: AddMarksCommand, errors: Errors) {
-		mustBeLinked(cmd.assignment, module)
-		mustBeAbleTo(Participate(module))
-		cmd.onBind
+	private def bindAndValidate(cmd: AddMarksCommand, errors: Errors) {
 		cmd.postExtractValidation(errors)
 	}
 

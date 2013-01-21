@@ -6,9 +6,12 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.tabula.actions.Manage
 
 class AddMarkSchemeCommand(department: Department) extends ModifyMarkSchemeCommand(department) {
 	
+	PermissionsCheck(Manage(department))
+
 	// Copy properties to a new markscheme, save it transactionally, return it.
 	def applyInternal() = {
 		transactional() { 

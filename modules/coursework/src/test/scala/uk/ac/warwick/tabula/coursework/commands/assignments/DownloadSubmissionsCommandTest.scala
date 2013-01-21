@@ -42,9 +42,10 @@ class DownloadSubmissionsCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def test {
-		val cmd = new DownloadSubmissionsCommand
-		cmd.assignment = new Assignment
-		cmd.assignment.module = new Module(code="ph105", department=new Department)
+		val assignment = new Assignment
+		assignment.module = new Module(code="ph105", department=new Department)
+		
+		val cmd = new DownloadSubmissionsCommand(assignment.module, assignment)
 		
 		cmd.submissions = ArrayList(
 			newSubmission(cmd.assignment),

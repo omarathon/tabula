@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Male
 import uk.ac.warwick.tabula.data.model.Member
 
-class ImportSingleMemberCommandTest extends TestBase with Mockito {
+class ImportSingleStaffCommandTest extends TestBase with Mockito {
 	
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
@@ -36,6 +36,7 @@ class ImportSingleMemberCommandTest extends TestBase with Mockito {
 		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
 		rs.getDate("date_of_birth") returns(new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDate().getTime()))
+		rs.getString("teaching_staff") returns("Y")
 	}
 	
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
@@ -46,7 +47,7 @@ class ImportSingleMemberCommandTest extends TestBase with Mockito {
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 			
-			val command = new ImportSingleMemberCommand(rs)
+			val command = new ImportSingleStaffCommand(rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			
@@ -60,6 +61,7 @@ class ImportSingleMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+			member.teachingStaff.booleanValue() should be (true)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -77,7 +79,7 @@ class ImportSingleMemberCommandTest extends TestBase with Mockito {
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 			
-			val command = new ImportSingleMemberCommand(rs)
+			val command = new ImportSingleStaffCommand(rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			
@@ -91,6 +93,7 @@ class ImportSingleMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+			member.teachingStaff.booleanValue() should be (true)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

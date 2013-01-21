@@ -18,22 +18,22 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.spring.Wire
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/picker"))
 class AssignmentPickerController extends CourseworkController {
-	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var json: ObjectMapper = _
+	
+	@ModelAttribute def command(@PathVariable module: Module) = new AssignmentPickerForm(module)
 
 	@RequestMapping
-	def submit(user: CurrentUser, @PathVariable module: Module,
-		form: AssignmentPickerForm, response: HttpServletResponse, errors: Errors) = {
-
-		mustBeAbleTo(Participate(module))
-
-		val assignments = assignmentService.getAssignmentsByName(form.searchTerm, module.department)
-
-		val assignmentsJson: JList[Map[String, Object]] = toJson(assignments)
+	def submit(cmd: AssignmentPickerForm) = {
+		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
 
 		new JSONView(assignmentsJson)
 	}
@@ -52,6 +52,12 @@ class AssignmentPickerController extends CourseworkController {
 
 }
 
-class AssignmentPickerForm {
+class AssignmentPickerForm(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
+	PermissionsCheck(Participate(module))
+	
+	var assignmentService = Wire.auto[AssignmentService]
+	
 	@BeanProperty var searchTerm: String = ""
+		
+	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.department)
 }

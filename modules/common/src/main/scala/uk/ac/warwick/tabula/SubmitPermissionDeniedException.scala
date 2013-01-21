@@ -1,6 +1,5 @@
-package uk.ac.warwick.tabula.coursework.web.controllers
+package uk.ac.warwick.tabula
 
-import uk.ac.warwick.tabula._
 import data.model.Assignment
 import actions.Action
 import uk.ac.warwick.tabula.system.exceptions.UserError

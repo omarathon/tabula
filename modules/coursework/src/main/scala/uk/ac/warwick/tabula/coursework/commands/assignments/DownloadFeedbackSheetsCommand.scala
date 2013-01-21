@@ -9,15 +9,19 @@ import uk.ac.warwick.tabula.commands.{ApplyWithCallback, ReadOnly, Command, Desc
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 
 /**
  * Downloads a feedback sheet per student in the assignment member list
  */
-class DownloadFeedbackSheetsCommand extends Command[RenderableZip]
+class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip]
 	with ReadOnly with ApplyWithCallback[RenderableZip] with Logging {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
-	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var members: Seq[User] = _
 
 	var zipService = Wire.auto[ZipService]

@@ -8,10 +8,12 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkSchemeDao
+import uk.ac.warwick.tabula.actions.Manage
 
-class DeleteMarkSchemeCommand(var markScheme: MarkScheme) extends Command[Unit] with SelfValidating {
-
-	@BeanProperty var department: Department = _
+class DeleteMarkSchemeCommand(val department: Department, val markScheme: MarkScheme) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(markScheme, department)
+	PermissionsCheck(Manage(department))
 	
 	var dao = Wire.auto[MarkSchemeDao]
 	

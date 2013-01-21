@@ -7,16 +7,22 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import org.springframework.stereotype._
 import collection.JavaConversions._
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
+
+class ViewModuleCommand(module: Module) extends ViewViewableCommand(module)
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))
 class ModuleController extends CourseworkController {
 
 	hideDeletedItems
+	
+	@ModelAttribute def command(@PathVariable module: Module) = new ViewModuleCommand(module)
 
 	@RequestMapping
-	def viewModule(@PathVariable module: Module) = {
-		mustBeAbleTo(View(mandatory(module)))
+	def viewModule(@ModelAttribute cmd: ViewModuleCommand) = {
+		val module = cmd.apply()
+		
 		Mav("submit/module",
 			"module" -> module,
 			"assignments" -> module.assignments

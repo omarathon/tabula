@@ -14,6 +14,7 @@ import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
+import uk.ac.warwick.tabula.actions.Manage
 
 /**
  * Command for adding permissions to a module.
@@ -25,9 +26,11 @@ import uk.ac.warwick.tabula.validators.UsercodeListValidator
  * You might still use this version for places where you need to deal with a lot of
  * users (hundreds or more) where it can get slow to submit hundreds of values at once.
  */
-class AddModulePermissionCommand extends Command[Unit] {
+class AddModulePermissionCommand(val module: Module) extends Command[Unit] {
+	
+	PermissionsCheck(Manage(module))
+	module.ensureParticipantsGroup
 
-	@BeanProperty var module: Module = _
 	@BeanProperty var usercodes: JList[String] = ArrayList()
 	@BeanProperty val permissionType: String = "Participate"
 

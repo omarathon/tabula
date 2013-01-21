@@ -4,11 +4,16 @@ import org.junit.Test
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.CurrentUser
-
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
+import javax.mail.internet.MimeMultipart
+import uk.ac.warwick.util.mail.WarwickMailSender
+import javax.mail.internet.MimeMessage
+import uk.ac.warwick.tabula.Mockito
+import javax.mail.Session
+import java.util.Properties
 
-class EmailingExceptionHandlerTest extends TestBase {
+class EmailingExceptionHandlerTest extends TestBase with Mockito {
 
 	@Test def renderEmail {
 		val user = new User("cusebr")
@@ -24,9 +29,23 @@ class EmailingExceptionHandlerTest extends TestBase {
 		RequestInfo.use(info) {
 			val handler = new EmailingExceptionHandler
 			handler.freemarker = newFreemarkerConfiguration
+			
+			val mailSender = mock[WarwickMailSender]
+	   
+			val session = Session.getDefaultInstance(new Properties)
+			val mimeMessage = new MimeMessage(session)	   
+			mailSender.createMimeMessage() returns mimeMessage
+			
+			handler.mailSender = mailSender
+			handler.recipient = "exceptions@warwick.ac.uk"
 			handler.afterPropertiesSet
+			
 			val message = handler.makeEmail(context)
-			val text = message.getText()
+			val text = message.getContent match {
+				case string: String => string
+				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+			}
+			
 			text should include ("time=")
 			text should include ("info.requestedUri="+uri)
 			text should include ("request.requestURI="+uri)

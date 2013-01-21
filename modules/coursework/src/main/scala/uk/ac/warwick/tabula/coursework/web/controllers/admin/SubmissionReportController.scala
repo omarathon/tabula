@@ -11,10 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.Command
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 
-class SubmissionReportCommand {
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var module: Module = _
+class SubmissionReportCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionsReport] with ReadOnly with Unaudited {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
+
+	def applyInternal() = assignment.submissionsReport
+	
 }
 
 @Controller
@@ -23,13 +32,14 @@ class SubmissionReportController extends CourseworkController {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupInterface = _
+	
+	@ModelAttribute def command(@PathVariable module:Module, @PathVariable assignment: Assignment) =
+		new SubmissionReportCommand(module, assignment)
 
-	@RequestMapping()
+	@RequestMapping
 	def get(command: SubmissionReportCommand): Mav = {
-		mustBeLinked(command.assignment, command.module)
-		mustBeAbleTo(Participate(command.module))
-
-		val report = command.assignment.submissionsReport
+		val report = command.apply()
+		
 		val submissionOnly = report.submissionOnly.toList.sorted.map { userByWarwickId }
 		val feedbackOnly = report.feedbackOnly.toList.sorted.map { userByWarwickId }
 		val hasNoAttachments = report.withoutAttachments.toList.sorted.map { userByWarwickId }

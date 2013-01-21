@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.spring.Wire
 import org.springframework.beans.factory.annotation.{Autowired,Value}
+import uk.ac.warwick.tabula.system.BindListener
 
 
 /**
@@ -26,7 +27,7 @@ import org.springframework.beans.factory.annotation.{Autowired,Value}
  * Works well with the filewidget macro in forms.ftl. Remember to set the
  * multipart/form-data encoding type on your form.
  */
-class UploadedFile {
+class UploadedFile extends BindListener {
 	var fileDao = Wire.auto[FileDao]
 
 	def disallowedFilenames: String = Wire.property("${uploads.disallowedFilenames}")
@@ -68,7 +69,7 @@ class UploadedFile {
 	 * FileAttachments are marked as "temporary" until persisted by whatever
 	 * command needs them. This method will throw an exception
 	 */
-	def onBind {
+	override def onBind {
 		
 		for (item <- attached) {
 			if (item != null && !item.temporary) {

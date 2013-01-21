@@ -12,14 +12,19 @@ import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.actions.Searchable
 import uk.ac.warwick.tabula.CurrentUser
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Filters
+import org.hibernate.annotations.Filter
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileService
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
+	final val ActiveOnlyFilter = "activeOnly"
 }
 
 /**
@@ -31,12 +36,21 @@ object Member {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'")
-@Filter(name = Member.StudentsOnlyFilter)
+@FilterDefs(Array(
+	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
+	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+))
+@Filters(Array(
+	new Filter(name = Member.StudentsOnlyFilter),
+	new Filter(name = Member.ActiveOnlyFilter)
+))
 @Entity
 @AccessType("field")
 class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {
 	
+	@transient 
+	var profileService = Wire.auto[ProfileService]
+		
 	def this(user: CurrentUser) = {
 		this()
 		
@@ -70,12 +84,36 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	}
 	
 	/** 
-	 * Get all departments that this student is affiliated with. This includes their home department, 
+	 * Get all departments that this student is affiliated with at a departmental level.
+	 * This includes their home department, and the department running their course.
+	 */
+	def affiliatedDepartments = {
+		val affDepts = Set(Option(homeDepartment), 
+				Option(studyDepartment), 
+				Option(route).map(x => x.department)
+		)
+		
+		affDepts.flatten.toSeq
+	}
+
+	/** 
+	 * Get all departments that this student touches. This includes their home department, 
 	 * the department running their course and any departments that they are taking modules in.
 	 */
-	def affiliatedDepartments = 
-		Seq(Option(homeDepartment), Option(studyDepartment)) flatten
+	def touchedDepartments = {
+		val moduleDepts = registeredModules.map(x => x.department)
+		
+		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+	}
 
+	/**
+	 * Get all modules this this student is registered on, including historically.
+	 * TODO consider caching based on getLastUpdatedDate
+	 */
+	def registeredModules = {
+		profileService.getRegisteredModules(getUniversityId)
+	}
+	
 	def asSsoUser = {
 		val u = new User
 		u.setUserId(userId)

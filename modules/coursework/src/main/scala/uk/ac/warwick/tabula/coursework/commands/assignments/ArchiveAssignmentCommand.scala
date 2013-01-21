@@ -6,10 +6,15 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
 import scala.reflect.BeanProperty
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
 
 
 /** Simply marks an assignment as archived. */
-class ArchiveAssignmentCommand(val assignment: Assignment) extends Command[Unit] {
+class ArchiveAssignmentCommand(val module: Module, val assignment: Assignment) extends Command[Unit] {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	@BeanProperty var unarchive: Boolean = false
 

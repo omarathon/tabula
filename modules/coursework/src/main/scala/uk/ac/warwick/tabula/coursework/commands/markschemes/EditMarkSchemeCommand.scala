@@ -8,9 +8,13 @@ import org.springframework.validation.Errors
 import reflect.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkSchemeDao
+import uk.ac.warwick.tabula.actions.Manage
 
 /** Edit an existing markscheme. */
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
+	
+	mustBeLinked(markScheme, department)
+	PermissionsCheck(Manage(department))
 
 	var dao = Wire.auto[MarkSchemeDao]
 

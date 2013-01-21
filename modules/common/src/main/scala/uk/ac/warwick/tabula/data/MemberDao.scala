@@ -6,6 +6,8 @@ import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
 import org.joda.time.DateTime
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.JavaImports.JList
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -13,6 +15,8 @@ trait MemberDao {
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
+	def getRegisteredModules(universityId: String): Seq[Module]
+	//def getSomethingForTesting(): Seq[Module]
 }
 
 @Repository
@@ -31,7 +35,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			if (disableFilter) 
 				session.disableFilter(Member.StudentsOnlyFilter)
 				
-			session.newCriteria[Member].add(is("userId", userId.trim.toLowerCase)).uniqueResult
+			session.newCriteria[Member]
+					.add(is("userId", userId.trim.toLowerCase))
+					.addOrder(asc("universityId"))
+					.list.headOption
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
@@ -43,4 +50,18 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	//TODO
 	def findByQuery(query: String) = Seq()
+	
+	def getRegisteredModules(universityId: String): Seq[Module] = {
+		val modules = session.createQuery("""
+				 select distinct m from Module m where code in 
+				(select distinct substring(lower(uag.moduleCode),1,5)
+					from UpstreamAssessmentGroup as uag
+				join uag.members as usergroup
+				join usergroup.staticIncludeUsers as uniId
+				where uniId = :universityId)
+				""")
+            .setString("universityId", universityId)
+            .list.asInstanceOf[JList[Module]]
+		modules
+	}
 }

@@ -15,9 +15,12 @@ import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.actions.Participate
 
 
 class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
+	
+	PermissionsCheck(Participate(module))
 
 	openDate = new DateTime().withTime(12, 0, 0, 0)
 	closeDate = openDate.plusWeeks(2)

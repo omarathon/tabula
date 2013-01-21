@@ -10,6 +10,7 @@ import java.io.FileReader
 import uk.ac.warwick.tabula.data.FileDao
 import java.io.IOException
 import java.io.FileWriter
+import uk.ac.warwick.tabula.commands.ReadOnly
 
 /**
  * Job to go through each FileAttachment in the database and alert if there
@@ -18,7 +19,7 @@ import java.io.FileWriter
  * This will ignore any files that have been created since the last sync, if we
  * are a standby.
  */
-class SanityCheckFilesystemCommand extends Command[Unit] {
+class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	import SyncReplicaFilesystemCommand._
 	import SanityCheckFilesystemCommand._
 	
@@ -34,7 +35,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] {
 		timed("Sanity check filesystem") { timer =>
 			val allIds = fileDao.getAllFileIds(lastSyncDate)
 			
-			val (successful, unsuccessful) = (for (id <- allIds) yield fileDao.getData(id) match {
+			val (successful, unsuccessful) = ((for (id <- allIds) yield fileDao.getData(id) match {
 				case Some(file) => (1, 0)
 				case None =>
 					// Check whether the file has since been cleaned up
@@ -43,7 +44,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] {
 						logger.error("*** File didn't exist for: " + id)
 						(0, 1)
 					}
-			}).foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)}
+			}).foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)})
 			
 			val logString = "successfulFiles," + successful + ",failedFiles," + unsuccessful + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
 			logger.info(logString)

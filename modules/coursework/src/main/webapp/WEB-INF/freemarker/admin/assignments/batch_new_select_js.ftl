@@ -10,17 +10,33 @@ jQuery(function($){
 
 
 	// editable name field
-	$('.editable-name').editable({
-		toggle: '<a class="name-edit-link"><i class="icon-pencil"></i></a>',
-		validate: function(value) {
-		  if ($.trim(value) == '') {
-		    return "A name is required.";
-		  }
-		}
-	}).on('update', function(){
-		// set the hidden field to the new value.
-		var newVal = $(this).data('editable').value;
-		$(this).closest('.itemContainer').find('input.name-field').val( newVal );
+	$('.editable-name').each(function() {
+		var $this = $(this);
+		
+		var $target = $('<a class="name-edit-link"><i class="icon-pencil"></i></a>');
+		
+		$this.editable({
+			toggle: 'manual',
+			mode: 'inline',
+			validate: function(value) {
+			  if ($.trim(value) == '') {
+			    return "A name is required.";
+			  }
+			}
+		}).on('save', function(e, params){
+			// set the hidden field to the new value.
+			var newVal = params.newValue;
+			$(this).closest('.itemContainer').find('input.name-field').val( newVal );
+		}).on('shown', function() {
+			$target.hide();
+		}).on('hidden', function() {
+			$target.show();
+		});
+		
+		$this.after($target.on('click', function(e) {
+			e.stopPropagation();
+			$this.editable('toggle');
+		})).after('&nbsp;');
 	});
 	
 	

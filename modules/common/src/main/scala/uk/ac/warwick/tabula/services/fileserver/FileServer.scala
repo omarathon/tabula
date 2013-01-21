@@ -7,6 +7,16 @@ import javax.servlet.http.HttpServletRequest
 
 @Service
 class FileServer {
+	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+		val inStream = file.inputStream
+		file.contentLength.map { length =>
+			out.addHeader("Content-Length", length.toString)
+		}
+		
+		if (request.getMethod.toUpperCase != "HEAD")
+			FileCopyUtils.copy(inStream, out.getOutputStream)
+	}
+	
 	/**
 	 * Serves a RenderableFile out to an HTTP response.
 	 */
@@ -17,13 +27,8 @@ class FileServer {
 		 * to the only reliable method of specifying the filename which
 		 * is to put it as the last part of the URL path.
 		 */
-		val inStream = file.inputStream
 		out.addHeader("Content-Disposition", "attachment")
-		file.contentLength.map { length =>
-			out.addHeader("Content-Length", length.toString)
-		}
 		
-		if (request.getMethod.toUpperCase != "HEAD")
-			FileCopyUtils.copy(inStream, out.getOutputStream)
+		stream(file)
 	}
 }

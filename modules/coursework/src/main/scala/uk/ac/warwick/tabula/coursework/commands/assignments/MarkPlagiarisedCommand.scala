@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.helpers.ArrayList
 import scala.reflect.BeanProperty
@@ -18,8 +19,12 @@ import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
 
-class MarkPlagiarisedCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module)) 
 
 	var assignmentService = Wire.auto[AssignmentService]
 

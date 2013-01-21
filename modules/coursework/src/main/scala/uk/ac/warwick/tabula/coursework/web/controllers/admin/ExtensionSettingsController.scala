@@ -31,7 +31,6 @@ class ExtensionSettingsController extends CourseworkController {
 		if(!errors.hasErrors){
 			cmd.copySettings()
 		}
-		mustBeAbleTo(Manage(dept))
 		val model = Mav("admin/extension-settings",
 			"department" -> dept
 		)
@@ -40,7 +39,6 @@ class ExtensionSettingsController extends CourseworkController {
 
 	@RequestMapping(method=Array(RequestMethod.POST))
 	def saveSettings(cmd:ExtensionSettingsCommand, errors:Errors) = {
-		mustBeAbleTo(Manage(cmd.department))
 		cmd.validate(errors)
 		if (errors.hasErrors){
 			viewSettings(cmd.department, user, cmd, errors)

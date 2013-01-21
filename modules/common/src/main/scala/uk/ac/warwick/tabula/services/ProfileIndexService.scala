@@ -169,7 +169,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
 		indexTokenised(doc, "fullName", Option(item.fullName))
 		
-		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
+		indexSeq(doc, "department", item.touchedDepartments map { _.code })
 		
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		

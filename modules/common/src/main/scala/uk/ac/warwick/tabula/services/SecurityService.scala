@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 
 /**
  * Checks permissions.
@@ -93,9 +94,9 @@ class SecurityService extends Logging {
 			
 			def inSameDepartment = {
 				val myDepartments = profileService.getMemberByUserId(user.apparentId) map { _.affiliatedDepartments } getOrElse(Seq())
-				val theirDepartments = member.affiliatedDepartments
+				val theirDepartments = member.touchedDepartments
 				
-				val sameDepartments = myDepartments intersect member.affiliatedDepartments
+				val sameDepartments = myDepartments intersect member.touchedDepartments
 				
 				!sameDepartments.isEmpty
 			}
@@ -129,6 +130,9 @@ class SecurityService extends Logging {
 	}
 
 	def check(user: CurrentUser, action: Action[_]) = if (!can(user, action)) {
-		throw new PermissionDeniedException(user, action)
+		action match {
+			case Submit(assignment) => throw new SubmitPermissionDeniedException(assignment)
+			case action => throw new PermissionDeniedException(user, action)
+		}
 	}
 }

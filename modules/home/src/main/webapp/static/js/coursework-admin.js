@@ -178,11 +178,11 @@ $(function(){
         },
     
         onSomeChecked : function() {
-            $('#modify-selected').removeClass('disabled');
+            $('.must-have-selected').removeClass('disabled');
         },
     
         onNoneChecked : function() {
-            $('#modify-selected').addClass('disabled');
+            $('.must-have-selected').addClass('disabled');
         }
     
     });

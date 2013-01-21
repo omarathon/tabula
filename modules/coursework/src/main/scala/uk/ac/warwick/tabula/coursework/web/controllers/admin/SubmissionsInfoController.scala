@@ -18,6 +18,9 @@ import uk.ac.warwick.tabula.web.views.CSVView
 import uk.ac.warwick.util.csv.CSVLineWriter
 import uk.ac.warwick.util.csv.GoodCsvDocument
 import scala.collection.immutable.ListMap
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.data.model.Module
 
 /**
  * Download submissions metadata.
@@ -32,11 +35,12 @@ class SubmissionsInfoController extends CourseworkController {
 	def csvFormat(i: ReadableInstant) = csvFormatter print i
 
 	var checkIndex = true
+	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
 	def xml(command: ListSubmissionsCommand) = {
-		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		mustBeAbleTo(Participate(command.module))
 		command.checkIndex = checkIndex
 
 		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
@@ -73,8 +77,6 @@ class SubmissionsInfoController extends CourseworkController {
 			
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
 	def csv(command: ListSubmissionsCommand) = {
-		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		mustBeAbleTo(Participate(command.module))
 		command.checkIndex = checkIndex
 
 		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
