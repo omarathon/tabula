@@ -59,7 +59,7 @@
 		<#if itemList?size gt 0>
 			<table class="tutorTable">
 				<tr>
-					<th>Student SPR Code</th>
+					<th>Student ID</th>
 					<th>Student Name</th>
 					<th>Tutor ID</th>
 					<th>Tutor Name <span class="muted">derived from tutor ID</span></th>

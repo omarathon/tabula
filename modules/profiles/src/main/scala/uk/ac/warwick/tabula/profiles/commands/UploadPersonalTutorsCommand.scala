@@ -76,10 +76,6 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
 				valid = false
 			} else if (!newTarget) {
-//						// Warn (not error) if relationship for this member is already uploaded
-//						profileService.findRelationship(PersonalTutor, targetUniId) match {
-//							case Some(rel) => rawStudentRelationship.warningMessage = extractWarning
-//						}
 				errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
 				valid = false
 			} else {

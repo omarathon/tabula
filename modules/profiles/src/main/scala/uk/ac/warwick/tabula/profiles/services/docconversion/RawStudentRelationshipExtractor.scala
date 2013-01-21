@@ -32,7 +32,7 @@ class RawStudentRelationship {
 	
 	@BeanProperty var agentMember: Member = _
 	@BeanProperty var targetMember: Member = _
-
+	
 	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
 		this();
 		this.targetUniversityId = targetUniversityId
@@ -73,6 +73,8 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
+	var foundDataInRow = false
+	
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	var currentRawStudentRelationship: RawStudentRelationship = _
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
@@ -93,6 +95,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 		if (row > 0) {
 			isParsingHeader = false
 			currentRawStudentRelationship = new RawStudentRelationship
+			foundDataInRow = false
 		}
 	}
 	
@@ -106,6 +109,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			}
 			case false => {
 				if (columnMap.containsKey(col)) {
+					foundDataInRow = true
 					columnMap(col) match {
 						case "student_id" => currentRawStudentRelationship.targetUniversityId = formattedValue
 						case "tutor_id" => currentRawStudentRelationship.agentUniversityId = formattedValue
@@ -118,6 +122,6 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	}
 	
 	def endRow = {
-		if (!isParsingHeader) rawStudentRelationships.add(currentRawStudentRelationship)
+		if (!isParsingHeader && foundDataInRow) rawStudentRelationships.add(currentRawStudentRelationship)
 	}
 }
