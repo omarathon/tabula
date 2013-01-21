@@ -41,6 +41,7 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 					row.createCell(0).setCellValue(assignment.module.code.toUpperCase())				
 					row.createCell(1).setCellValue(dateFormatter.print(assignment.closeDate))
 					row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))
+				case None =>
 			}
 			
 		}
