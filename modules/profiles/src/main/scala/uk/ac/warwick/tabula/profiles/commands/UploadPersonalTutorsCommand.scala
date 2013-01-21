@@ -32,7 +32,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.util.core.StringUtils.hasText
 import scala.collection.mutable.Buffer
 
-class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms with Logging {
+class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging {
 
 	var userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
@@ -76,6 +76,7 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
 				valid = false
 			} else if (!newTarget) {
+				// student appears more than once within the spreadsheet
 				errors.rejectValue("targetUniversityId", "uniNumber.duplicate.relationship")
 				valid = false
 			} else {
@@ -113,7 +114,6 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 				}
 				catch {
 					case e: ItemNotFoundException => {
-						//errors.rejectValue("agentUniversityId", e.getMessage())
 						errors.rejectValue("agentUniversityId", "uniNumber.userNotFound")
 						valid = false
 					}
@@ -141,8 +141,7 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 		}
 	}
 
-	//override def applyInternal(): List[StudentRelationship] = transactional() {
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Int = transactional() {
 		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship) = {
 			var agent = ""
 			if (hasText(rawStudentRelationship.agentUniversityId))
@@ -158,16 +157,13 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 			
 			profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
-			logger.debug("Saved personal tutor for " + targetUniversityId)
+			logger.debug("Saved personal tutor for " + targetUniversityId)			
 		}
 
 		// persist valid personal tutors
 		rawStudentRelationships filter (_.isValid) map { 
 			(rawStudentRelationship) => savePersonalTutor(rawStudentRelationship) 
-		}
-
-		//val studentRelationshipList = rawStudentRelationships filter (_.isValid) map { (rawStudentRelationship) => savePersonalTutor(rawStudentRelationship) }
-		//studentRelationshipList.toList
+		} size
 	}
 
 	def onBind {

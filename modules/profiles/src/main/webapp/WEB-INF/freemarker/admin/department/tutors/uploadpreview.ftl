@@ -30,13 +30,13 @@
 	</#if>
 	
 		
-	<h1>Upload personal tutors for ${department.name}</h1>
+	<h1>Review personal tutor changes for ${department.name}</h1>
 	
 	<@spring.bind path="rawStudentRelationships">
 	<#assign itemsList=status.actualValue /> 
 	<p>
 		<#if itemsList?size gt 0>
-			${text_acknowledge} ${itemsList?size} students (below). 
+			${text_acknowledge} <@fmt.p itemsList?size "student" /> (below). 
 			<#if hasErrors>
 				${text_problems}
 			<#else>

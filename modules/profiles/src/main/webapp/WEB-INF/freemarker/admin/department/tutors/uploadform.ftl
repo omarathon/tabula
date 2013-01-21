@@ -4,6 +4,10 @@
 <div id="tutor-upload-form">
 	<h1>Upload personal tutors for ${department.name}</h1>
 	
+	<#if (tutorCount!0) gt 0>
+		<div class="alert alert-success"><@fmt.p tutorCount?number "valid personal tutor" /> saved.</div>
+	</#if>
+	
 	<p>
 		The tutor spreadsheet that you upload must be an <tt>.xlsx</tt> spreadsheet (created in Microsoft Office 2007+).
 		The spreadsheet must have two columns headed: <tt>student_id</tt> and <tt>tutor_id</tt>.
