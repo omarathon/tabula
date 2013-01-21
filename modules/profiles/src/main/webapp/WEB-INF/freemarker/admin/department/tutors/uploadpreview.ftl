@@ -3,7 +3,6 @@
 <#escape x as x?html>
 
 	<#assign commandName="uploadPersonalTutorsCommand" />
-	<#assign verbed_your_noun="received your data"/>
 		
 	<@spring.bind path=commandName>
 	<#assign hasErrors=status.errors.allErrors?size gt 0 />
@@ -14,7 +13,7 @@
 	<#assign isfile=RequestParameters.isfile/>
 	
 	<#if isfile = "true">
-		<#assign text_acknowledge="I've ${verbed_your_noun} and I found tutors for"/>
+		<#assign text_acknowledge="Your data contains tutors for "/>
 		<#assign text_problems="However, there were some problems with its contents, which are shown below.
 				You'll need to correct these problems with the spreadsheet and try again.
 				If you choose to confirm without fixing the spreadsheet any rows with errors
@@ -32,28 +31,35 @@
 	
 		
 	<h1>Upload personal tutors for ${department.name}</h1>
-	<#assign verbed_your_noun="received your data"/>
 	
 	<@spring.bind path="rawStudentRelationships">
 	<#assign itemsList=status.actualValue /> 
 	<p>
 		<#if itemsList?size gt 0>
-			${text_acknowledge} ${itemsList?size} students.  
+			${text_acknowledge} ${itemsList?size} students (below). 
 			<#if hasErrors>
 				${text_problems}
+			<#else>
+				Click "Confirm" to store them.
 			</#if>
 		<#else>
-			I've ${verbed_your_noun} but I couldn't find any rows that looked like valid tutors. ${column_headings_warning}
+			No rows found with recognisable tutor data. ${column_headings_warning}
 		</#if>
 	</p>
 	</@spring.bind>
 		
+	<div class="submit-buttons">
+		<input type="hidden" name="confirm" value="true">
+		<input class="btn btn-primary" type="submit" value="Confirm">
+		or <a class="btn" href="<@routes.home />">Cancel</a>
+	</div>
+	
 	<@spring.bind path="rawStudentRelationships">
 		<#assign itemList=status.actualValue />
 		<#if itemList?size gt 0>
 			<table class="tutorTable">
 				<tr>
-					<th>Student ID</th>
+					<th>Student SPR Code</th>
 					<th>Student Name</th>
 					<th>Tutor ID</th>
 					<th>Tutor Name <span class="muted">derived from tutor ID</span></th>
