@@ -5,7 +5,10 @@
 	<h1>Upload personal tutors for ${department.name}</h1>
 	
 	<#if (tutorCount!0) gt 0>
-		<div class="alert alert-success"><@fmt.p tutorCount?number "valid personal tutor" /> saved.</div>
+		<div class="alert alert-success">
+			<a class="close" data-dismiss="alert">&times;</a>
+			<p><i class="icon-ok"></i> <@fmt.p tutorCount?number "valid personal tutor" /> saved.</p>
+		</div>
 	</#if>
 	
 	<p>
