@@ -19,9 +19,8 @@ abstract class ModifyMarkSchemeCommand(
 
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
-
-	//TODO - reinstate when other options become available
-	//@BeanProperty var studentsChooseMarker: Boolean = _
+	@BeanProperty var secondMarkers: JList[String] = ArrayList()
+	@BeanProperty var studentsChooseMarker: Boolean = _
 	
 	// Subclasses can provide the "current" markscheme if one applies, for validation.
 	def currentMarkScheme: Option[MarkScheme]
@@ -39,7 +38,8 @@ abstract class ModifyMarkSchemeCommand(
 		
 		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers")
 		firstMarkersValidator.validate(errors)
-		
+		val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers")
+		secondMarkersValidator.validate(errors)
 	}
 	
 	// If there's a current markscheme, returns whether "other" is a different
@@ -55,22 +55,23 @@ abstract class ModifyMarkSchemeCommand(
 	// Called manually by controller.
 	def doBind() {
 	  firstMarkers = firstMarkers.filter(StringUtils.hasText)
+		secondMarkers = secondMarkers.filter(StringUtils.hasText)
 	}
 
 	def copyTo(scheme: MarkScheme) {
 		scheme.name = name
 		scheme.firstMarkers.setIncludeUsers(firstMarkers)
-		//TODO - reinstate when other options become available
-		//scheme.studentsChooseMarker = studentsChooseMarker
-		scheme.studentsChooseMarker = true // default until more options are available
+		scheme.secondMarkers.setIncludeUsers(secondMarkers)
+		scheme.studentsChooseMarker = studentsChooseMarker
 	}
 
 	def copyFrom(scheme: MarkScheme) {
 		name = scheme.name
 		firstMarkers.clear()
 		firstMarkers.addAll(scheme.firstMarkers.includeUsers)
-		//TODO - reinstate when other options become available
-		//studentsChooseMarker = scheme.studentsChooseMarker
+		secondMarkers.clear()
+		secondMarkers.addAll(scheme.secondMarkers.includeUsers)
+		studentsChooseMarker = scheme.studentsChooseMarker
 	}
 
 }

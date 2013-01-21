@@ -8,16 +8,9 @@ import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.IndexColumn
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.OneToMany
-import javax.persistence.ManyToOne
+import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import javax.persistence.Basic
-import javax.persistence.JoinColumn
-import javax.persistence.OrderBy
-import javax.persistence.OneToOne
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -36,6 +29,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import scala.Some
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import scala.Some
+import uk.ac.warwick.tabula.data.model.SubmissionsReport
+import scala.Some
+import uk.ac.warwick.tabula.data.model.SubmissionsReport
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -151,7 +148,12 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	@BeanProperty var markScheme: MarkScheme = _
-	
+
+	/** Map between markers and the students assigned to them */
+	@OneToMany @JoinTable(name="marker_usergroup")
+	@MapKeyColumn(name="marker_uni_id")
+	var markerMap: JMap[String, UserGroup] = Map[String, UserGroup]()
+
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
 	}

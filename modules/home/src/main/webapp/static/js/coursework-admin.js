@@ -219,11 +219,127 @@ $.fn.shiftSelectable = function() {
     });
 };
 
+// assign markers javascript
+$(function(){
+
+	var draggableOptions = {
+		containment: "#assign-markers",
+		scroll: false,
+		revert: true,
+		helper: 'clone',
+		zIndex: 350,
+		start: function() { $(this).toggle(); },
+		stop: function() { $(this).toggle(); }
+	};
+
+	var addStudent = function(student, marker){
+		var markerId = marker.data("marker-id");
+		var studentId = student.data("student-id");
+		var studentIndex = jQuery('.student-container input', marker).length;
+		var formElement = jQuery('<input type="hidden" />');
+		formElement.attr('name', 'markerMapping['+markerId+']['+studentIndex+']');
+		formElement.attr('value', studentId);
+		jQuery('.student-container', marker).append(formElement);
+		var studentElement = jQuery('<li>'+studentId+' </li>');
+		var button = jQuery('<a href="#" class="remove-student btn btn-mini"><i class="icon-remove"></i> Remove</a>');
+		button.attr("data-marker-id", markerId);
+		button.attr("data-student-id", studentId);
+		studentElement.append(button);
+		jQuery('.student-list', marker).append(studentElement);
+	}
+
+	var removeStudent = function(studentId, tab){
+		var studentElement = jQuery('<div class="student ui-draggable"><i class="icon-user"></i> '+studentId+'</div>');
+		studentElement.attr('data-student-id', studentId);
+		var listElement = jQuery('<li class="hide"></li>') ;
+		listElement.append(studentElement);
+		$('.students .member-list', tab).append(listElement);
+		studentElement.draggable(draggableOptions);
+		return listElement;
+	};
+
+	$("#assign-markers .student").draggable(draggableOptions);
+
+	$("#assign-markers .marker").droppable({
+		hoverClass: "drop-hover",
+		drop: function( event, ui ) {
+			var marker = $(this);
+			var countBadge = marker.find(".count");
+			countBadge.html(parseInt(countBadge.html()) + 1);
+			var student = ui.draggable;
+			addStudent(student, marker);
+			student.hide("scale", {percent: 0}, 250);
+			student.closest('li').remove();
+		}
+	});
+
+	$("#assign-markers .first-markers, #assign-markers .second-markers").on("click", ".remove-student", function(e){
+		var studentId = $(this).data("student-id");
+		var markerId = $(this).data("marker-id");
+		var marker = jQuery('#container-'+markerId).closest('.marker');
+
+		jQuery('li:contains('+studentId+')', marker).remove();
+		jQuery('input[value="'+studentId+'"]', marker).remove();
+
+		var countBadge = marker.find(".count");
+		countBadge.html(parseInt(countBadge.html()) - 1);
+		var tab =marker.closest(".tab-pane");
+		removeStudent(studentId, tab).show('scale', {percent: 100}, 250);;
+
+		e.preventDefault();
+		return false;
+	});
+
+	$("#first-markers, #second-markers").on("click", ".random", function(e){
+		var tab = $(this).closest(".tab-pane");
+		// shuffle the students
+		var students = $(".student", tab).sort(function(){
+			return Math.random() > 0.5 ? 1 : -1;
+		});
+
+		var markers = $(".marker", tab);
+		var studentPerMarker =  Math.floor(students.length / markers.length);
+        var remainder = students.slice(students.length - (students.length % markers.length));
+		markers.each(function(index){
+			var marker = $(this);
+			var from = (index*studentPerMarker);
+			var to = ((index+1)*studentPerMarker);
+			var studentsForMarker = students.slice(from, to);
+			// if there are remainder student left add one to this marker
+			if(remainder.length > 0)
+				studentsForMarker = studentsForMarker.add(remainder.splice(0,1));
+			var countBadge = $(".count", marker);
+			countBadge.html(parseInt(countBadge.html()) + studentsForMarker.length);
+			studentsForMarker.each(function(){
+				addStudent($(this), marker);
+				$(this).closest('li').remove();
+			});
+		});
+
+		e.preventDefault();
+		return false;
+	});
+
+	$("#first-markers, #second-markers").on("click", ".remove-all", function(e){
+		var tab = $(this).closest(".tab-pane");
+		$('.student-container input',tab).each(function(){
+			var studentId = $(this).val();
+			$(this).remove();
+			removeStudent(studentId, tab).show();
+		});
+		$('.student-container .student-list',tab).html("");
+		$('.count',tab).html("0");
+
+		e.preventDefault();
+		return false;
+	});
+});
+
 
 $(function(){
 	$('a.disabled').on('click', function(e){
-    	e.preventDefault();
-    })
+		e.preventDefault();
+	})
 });
 
 

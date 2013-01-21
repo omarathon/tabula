@@ -4,9 +4,11 @@ import org.hibernate.annotations.AccessType
 import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports._
+import scala.Some
 
 /** A MarkScheme defines how an assignment will be marked, including who
-  * will be the markers and what rules should be used to decide how submssions
+  * will be the markers and what rules should be used to decide how submissions
   * are distributed.
   *
   * A MarkScheme is created against a Department and can then be reused by
@@ -61,7 +63,10 @@ class MarkScheme extends GeneratedId {
 				case None => Seq()
 			}
 		}
-		else Seq() //TODO-RITCHIE - no defined behaviour for default mark schemes yet
+		else {
+			val submissionIds:JList[String] = assignment.markerMap.get(user).includeUsers
+			assignment.submissions.filter(s => submissionIds.exists(_ == s.universityId))
+		}
 	}
 
 }

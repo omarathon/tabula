@@ -36,6 +36,10 @@ Common form fields.
 	<@form.userpicker path="firstMarkers" list=true multiple=true />
 </@form.labelled_row>
 
+<@form.labelled_row "secondMarkers" "Second markers">
+	<@form.userpicker path="secondMarkers" list=true multiple=true />
+</@form.labelled_row>
+
 <div class="control-group">
 	<label class="control-label">Students must select their marker</label>
 	<div class="controls">
