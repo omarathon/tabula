@@ -160,7 +160,7 @@ class UploadPersonalTutorsCommand extends Command[Buffer[Unit]] with Daoisms wit
 				case Some(mem) => targetSprCode = mem.sprCode
 			}
 			
-			profileService.saveRelationship(PersonalTutor, targetSprCode, agent)
+			profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
 			logger.debug("Saved personal tutor for " + targetUniversityId)
 		}
