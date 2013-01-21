@@ -22,7 +22,7 @@ import org.apache.poi.ss.util.CellReference
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.util.core.StringUtils.hasText
 
-class RawMemberRelationship {
+class RawStudentRelationship {
 
 	@BeanProperty var targetUniversityId: String = _
 	@BeanProperty var agentUniversityId: String = _
@@ -47,34 +47,34 @@ class RawMemberRelationship {
 }
 
 @Service
-class RawMemberRelationshipExtractor {
+class RawStudentRelationshipExtractor {
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of relationships
 	 */
-	def readXSSFExcelFile(file: InputStream): JList[RawMemberRelationship] = {
+	def readXSSFExcelFile(file: InputStream): JList[RawStudentRelationship] = {
 		val pkg = OPCPackage.open(file);
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
-		val rawMemberRelationships: JList[RawMemberRelationship] = ArrayList()
-		val handler = new XslxParser(styles, sst, rawMemberRelationships)
+		val rawStudentRelationships: JList[RawStudentRelationship] = ArrayList()
+		val handler = new XslxParser(styles, sst, rawStudentRelationships)
 		val parser = handler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet close
 		}
-		rawMemberRelationships
+		rawStudentRelationships
 	}
 }
 
-class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var rawMemberRelationships: JList[RawMemberRelationship])
+class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var rawStudentRelationships: JList[RawStudentRelationship])
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
 	var columnMap = scala.collection.mutable.Map[Short, String]()
-	var currentRawMemberRelationship: RawMemberRelationship = _
+	var currentRawStudentRelationship: RawStudentRelationship = _
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
 	def fetchSheetParser = {
@@ -92,7 +92,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 		logger.debug("startRow: " + row.toString)
 		if (row > 0) {
 			isParsingHeader = false
-			currentRawMemberRelationship = new RawMemberRelationship
+			currentRawStudentRelationship = new RawStudentRelationship
 		}
 	}
 	
@@ -107,9 +107,9 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			case false => {
 				if (columnMap.containsKey(col)) {
 					columnMap(col) match {
-						case "student_id" => currentRawMemberRelationship.targetUniversityId = formattedValue
-						case "tutor_id" => currentRawMemberRelationship.agentUniversityId = formattedValue
-						case "tutor_name" => currentRawMemberRelationship.agentName = formattedValue
+						case "student_id" => currentRawStudentRelationship.targetUniversityId = formattedValue
+						case "tutor_id" => currentRawStudentRelationship.agentUniversityId = formattedValue
+						case "tutor_name" => currentRawStudentRelationship.agentName = formattedValue
 						case _ => // ignore anything else
 					}
 				}
@@ -118,6 +118,6 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	}
 	
 	def endRow = {
-		if (!isParsingHeader) rawMemberRelationships.add(currentRawMemberRelationship)
+		if (!isParsingHeader) rawStudentRelationships.add(currentRawStudentRelationship)
 	}
 }

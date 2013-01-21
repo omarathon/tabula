@@ -1,24 +1,32 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.data.model.Member
-import org.springframework.stereotype.Repository
+import scala.collection.JavaConversions.asScalaBuffer
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.Filters
+import org.hibernate.criterion.Order.asc
 import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.Restrictions.gt
 import org.joda.time.DateTime
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.stereotype.Repository
+import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.RelationshipType
-import uk.ac.warwick.tabula.data.model.MemberRelationship
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import org.hibernate.criterion.Order
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
+	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
-	def getRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship]
+	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
+	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 }
 
 @Repository
@@ -27,7 +35,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	import Order._
 	
 	def saveOrUpdate(member: Member) = session.saveOrUpdate(member)
-
+	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
+	
 	def getByUniversityId(universityId: String) = 
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
 	
@@ -67,11 +76,19 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		modules
 	}
 	
-	def getRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship] = {
-			session.newCriteria[MemberRelationship]
-					.add(is("targetUniversityId", targetUniversityId))
-					.add(is("relationshipType", relationshipType))	
+	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
+					.add(is("targetSprCode", targetSprCode))
+					.add(is("relationshipType", relationshipType))
+					.add(Restrictions.isNull("endDate"))
 					.uniqueResult
-	}		
+	}
+	
+	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
+					.add(is("targetSprCode", targetSprCode))
+					.add(is("relationshipType", relationshipType))
+					.list.asInstanceOf[JList[StudentRelationship]]
+	}	
 
 }
