@@ -30,6 +30,7 @@ trait ProfileService {
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member]
+	def findMembersByDepartment(department: Department, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def findRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[MemberRelationship]
 }
@@ -50,6 +51,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean) = transactional(readOnly = true) {
 		profileIndexService.find(query, departments, userTypes, sysAdmin)
+	} 
+	
+	def findMembersByDepartment(department: Department, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
+		profileIndexService.find(department, userTypes)
 	} 
 	
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

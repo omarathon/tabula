@@ -68,10 +68,32 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			if (!sysAdmin) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments)
-					deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
+					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
 
 				bq.add(deptQuery, Occur.MUST)
 			}
+			
+			if (!userTypes.isEmpty) {
+				// Restrict user type
+				val typeQuery = new BooleanQuery
+				for (userType <- userTypes)
+					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
+					
+				bq.add(typeQuery, Occur.MUST)
+			}
+			
+			search(bq) flatMap { toItem(_) }
+		} catch {
+			case e: ParseException => Seq() // Invalid query string
+		}
+	
+	def find(ownDepartment: Department, userTypes: Set[MemberUserType]): Seq[Member] =
+		try {
+			val bq = new BooleanQuery
+			
+			val deptQuery = new BooleanQuery
+			deptQuery.add(new TermQuery(new Term("department", ownDepartment.code)), Occur.SHOULD)
+			bq.add(deptQuery, Occur.MUST)
 			
 			if (!userTypes.isEmpty) {
 				// Restrict user type
@@ -169,7 +191,8 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
 		indexTokenised(doc, "fullName", Option(item.fullName))
 		
-		indexSeq(doc, "department", item.touchedDepartments map { _.code })
+		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
+		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
 		
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		

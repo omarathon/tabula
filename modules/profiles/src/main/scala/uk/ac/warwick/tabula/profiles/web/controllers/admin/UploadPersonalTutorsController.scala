@@ -1,20 +1,16 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.Manage
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.profiles.commands.UploadPersonalTutorsCommand
-import uk.ac.warwick.tabula.data.model.Department
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.helpers.Logging
+
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.profiles.commands.UploadPersonalTutorsCommand
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/tutors"))
@@ -25,13 +21,7 @@ class UploadPersonalTutorsController extends ProfilesController {
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@PathVariable department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
 		mustBeAbleTo(Manage(department))
-
-//		var marksToDisplay = members.map { member => 
-//			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
-//			noteMarkItem(member, feedback)
-//		}
-//
-		Mav("admin/department/tutors/uploadform") //, "marksToDisplay" -> marksToDisplay)
+		Mav("admin/department/tutors/uploadform")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
@@ -48,7 +38,6 @@ class UploadPersonalTutorsController extends ProfilesController {
 	}
 
 	private def bindAndValidate(department: Department, cmd: UploadPersonalTutorsCommand, errors: Errors) {
-		//mustBeLinked(cmd.assignment, module)
 		mustBeAbleTo(Manage(department))
 		cmd.onBind
 		cmd.postExtractValidation(errors, department)
