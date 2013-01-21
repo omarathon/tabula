@@ -10,5 +10,5 @@ create table StudentRelationship (
 	CONSTRAINT "MEMBERRELATIONSHIP_PK" PRIMARY KEY ("ID")
 );
 
-create index studentRelationship_target on StudentRelationship(targetSprCode);
-create index studentRel_targetAndType on StudentRelationship(targetSprCode, relationshipType);
+create index studentRelationship_target on StudentRelationship(target_SprCode);
+create index studentRel_targetAndType on StudentRelationship(target_SprCode, relationship_Type);

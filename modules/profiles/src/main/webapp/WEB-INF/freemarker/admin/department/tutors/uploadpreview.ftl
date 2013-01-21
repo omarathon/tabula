@@ -34,7 +34,7 @@
 	<h1>Upload personal tutors for ${department.name}</h1>
 	<#assign verbed_your_noun="received your data"/>
 	
-	<@spring.bind path="rawMemberRelationships">
+	<@spring.bind path="rawStudentRelationships">
 	<#assign itemsList=status.actualValue /> 
 	<p>
 		<#if itemsList?size gt 0>
@@ -48,7 +48,7 @@
 	</p>
 	</@spring.bind>
 		
-	<@spring.bind path="rawMemberRelationships">
+	<@spring.bind path="rawStudentRelationships">
 		<#assign itemList=status.actualValue />
 		<#if itemList?size gt 0>
 			<table class="tutorTable">
@@ -60,7 +60,7 @@
 					<th>Tutor Name <span class="muted">for non-University members</span></th>
 				</tr>
 				<#list itemList as item>
-					<@spring.nestedPath path="rawMemberRelationships[${item_index}]">
+					<@spring.nestedPath path="rawStudentRelationships[${item_index}]">
 						<#if !item.isValid>
 							<#assign errorClass="alert-error" />
 						<#elseif item.warningMessage??>

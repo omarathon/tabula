@@ -45,7 +45,6 @@ object StudentRelationship {
 		val mr = new StudentRelationship
 		mr.agent = agent
 		mr.relationshipType = relType
-		//mr.targetUniversityId = targetUniversityId
 		mr.targetSprCode = targetSprCode
 		mr
 	}
