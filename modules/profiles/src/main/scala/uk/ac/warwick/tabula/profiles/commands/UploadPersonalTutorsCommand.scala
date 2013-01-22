@@ -59,14 +59,11 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 		}
 	}
 
-	def validateRawStudentRelationship(rawStudentRelationship: RawStudentRelationship, errors: Errors, newTarget: Boolean, department: Department) = {
-		var valid = true
-		valid = valid && setAndValidateStudentMember(rawStudentRelationship, department, newTarget, errors)
-		valid = valid && setAndValidateAgentMember(rawStudentRelationship, errors)
-
-		valid
+	def validateRawStudentRelationship(rawStudentRelationship: RawStudentRelationship, errors: Errors, newTarget: Boolean, department: Department): Boolean = {
+		setAndValidateStudentMember(rawStudentRelationship, department, newTarget, errors) && 
+			setAndValidateAgentMember(rawStudentRelationship, errors)
 	}
-	
+
 	private def setAndValidateStudentMember(rawStudentRelationship: RawStudentRelationship, department: Department, newTarget: Boolean, errors: Errors): Boolean = {
 		var valid: Boolean = true
 		val targetUniId = rawStudentRelationship.targetUniversityId
@@ -100,7 +97,7 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 				}
 			}
 		} else {
-			errors.rejectValue("targetUniId", "NotEmpty")
+			errors.rejectValue("targetUniversityId", "NotEmpty.uniNumber")
 			valid = false
 		}
 		valid
