@@ -56,14 +56,15 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
-		if (!StringUtils.hasText(query)) Seq()
-		else if (departments.isEmpty && !sysAdmin) Seq()
+	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
+		if (departments.isEmpty && !sysAdmin) Seq()
 		else try {
-			val q = parser.parse(stripTitles(query))
-			
 			val bq = new BooleanQuery
-			bq.add(q, Occur.MUST)
+
+			if (StringUtils.hasText(query)) {
+				val q = parser.parse(stripTitles(query))
+				bq.add(q, Occur.MUST)
+			}
 
 			if (!sysAdmin) {
 				val deptQuery = new BooleanQuery
@@ -87,27 +88,12 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			case e: ParseException => Seq() // Invalid query string
 		}
 	
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
+		if (!StringUtils.hasText(query)) Seq()
+		else findWithQuery(query, departments, userTypes, sysAdmin)
+	
 	def find(ownDepartment: Department, userTypes: Set[MemberUserType]): Seq[Member] =
-		try {
-			val bq = new BooleanQuery
-			
-			val deptQuery = new BooleanQuery
-			deptQuery.add(new TermQuery(new Term("department", ownDepartment.code)), Occur.SHOULD)
-			bq.add(deptQuery, Occur.MUST)
-			
-			if (!userTypes.isEmpty) {
-				// Restrict user type
-				val typeQuery = new BooleanQuery
-				for (userType <- userTypes)
-					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
-					
-				bq.add(typeQuery, Occur.MUST)
-			}
-			
-			search(bq) flatMap { toItem(_) }
-		} catch {
-			case e: ParseException => Seq() // Invalid query string
-		}
+		findWithQuery("", Seq(ownDepartment), userTypes, false)
 	
 	def stripTitles(query: String) = 
 		FullStops.replaceAllIn(
