@@ -18,6 +18,8 @@ import uk.ac.warwick.tabula.actions.Participate
 class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
 	
+	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
+
 	universityIds.add(universityId)
 	
 	mustBeLinked(assignment,module)
@@ -25,8 +27,6 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 
 	var userLookup = Wire.auto[UserLookupService]
 	
-	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
-
 	override def applyInternal(): List[String] = transactional() {
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true
