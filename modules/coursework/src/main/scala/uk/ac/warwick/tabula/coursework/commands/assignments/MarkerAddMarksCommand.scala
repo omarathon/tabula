@@ -1,12 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 
-class MarkerAddMarksCommand(assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
-	extends AddMarksCommand[List[MarkerFeedback]](assignment, submitter){
+class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
+	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, submitter){
+
+	mustBeLinked(assignment, module)
+	PermissionsCheck(UploadMarkerFeedback(assignment))
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 

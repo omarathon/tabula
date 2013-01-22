@@ -23,15 +23,15 @@ class MarkerAddMarksController extends CourseworkController {
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var userLookup: UserLookupService = _
 
-	@ModelAttribute def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new MarkerAddMarksCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
+	@ModelAttribute def command(@PathVariable("module") module: Module,
+	                            @PathVariable("assignment") assignment: Assignment,
+	                            user: CurrentUser) =
+		new MarkerAddMarksCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
 	             @ModelAttribute cmd: MarkerAddMarksCommand): Mav = {
 
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedback(s.universityId, user.apparentUser))
 		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
@@ -83,7 +83,6 @@ class MarkerAddMarksController extends CourseworkController {
 	}
 
 	private def bindAndValidate(assignment: Assignment, cmd: MarkerAddMarksCommand, errors: Errors) {
-		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		cmd.onBind
 		cmd.postExtractValidation(errors)
 	}

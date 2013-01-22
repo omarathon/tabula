@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.Transactions._
 
@@ -17,8 +16,11 @@ import uk.ac.warwick.tabula.data.Transactions._
 class MarkingCompletedController extends CourseworkController {
 
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new MarkingCompletedCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
+	def command(@PathVariable("module") module: Module,
+	            @PathVariable("assignment")
+	            assignment: Assignment,
+	            user: CurrentUser) =
+		new MarkingCompletedCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	validatesSelf[MarkingCompletedCommand]
 
@@ -34,8 +36,6 @@ class MarkingCompletedController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
 		            form: MarkingCompletedCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(UploadMarkerFeedback(assignment))
 		form.onBind()
 		form.preSubmitValidation()
 		confirmView(assignment)
@@ -45,8 +45,6 @@ class MarkingCompletedController extends CourseworkController {
 	def submit(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
 		         @Valid form: MarkingCompletedCommand, errors: Errors) = {
 		transactional() {
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(UploadMarkerFeedback(assignment))
 			form.onBind()
 			if (errors.hasErrors)
 				showForm(module,assignment, form, errors)

@@ -11,26 +11,22 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, Module, FileAttachment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.NoUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.actions.Participate
 
 
-class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T] with Daoisms with Logging with BindListener {
-
-	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T]
+	with Daoisms with Logging with BindListener {
 	
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
@@ -105,24 +101,6 @@ class AddMarksCommand[T](val module: Module, val assignment: Assignment, val sub
 			noErrors = false
 		}
 		noErrors
-	}
-
-	override def applyInternal(): List[Feedback] = transactional() {
-		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
-			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
-			feedback.assignment = assignment
-			feedback.uploaderId = submitter.apparentId
-			feedback.universityId = universityId
-			feedback.released = false
-			feedback.actualMark = Option(actualMark.toInt)
-			feedback.actualGrade = actualGrade
-			session.saveOrUpdate(feedback)
-			feedback
-		}
-
-		// persist valid marks
-		val markList = marks filter (_.isValid) map { (mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade) }
-		markList.toList
 	}
 
 	override def onBind {
