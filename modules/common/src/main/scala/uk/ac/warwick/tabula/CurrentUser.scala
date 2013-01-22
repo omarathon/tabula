@@ -69,6 +69,8 @@ class CurrentUser(
 
 object CurrentUser {
 	val keyName = "CurrentUser"
+	val masqueradeCookie = "tabulaMasqueradeAs"
+	val godModeCookie = "tabulaGodMode"
 }
 
 object NoCurrentUser {

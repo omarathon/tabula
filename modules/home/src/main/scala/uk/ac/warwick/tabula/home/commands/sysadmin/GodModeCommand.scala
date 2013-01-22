@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.home.commands.admin
+package uk.ac.warwick.tabula.home.commands.sysadmin
 
 import uk.ac.warwick.tabula.web.Cookie
 import uk.ac.warwick.tabula.commands.Command
@@ -12,31 +12,25 @@ import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.actions.Sysadmin
 
-class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
+class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
-	PermissionsCheck(Masquerade())
+	PermissionsCheck(Sysadmin())
 	
-	var userLookup = Wire.auto[UserLookupInterface]
-	
-	@BeanProperty var usercode: String = _	
 	@BeanProperty var action: String = _
 	
 	def applyInternal() = {
-		if (action == "remove") Some(newCookie(null))
-		else userLookup.getUserByUserId(usercode) match {
-			case FoundUser(user) => Some(newCookie(usercode))
-			case NoUser(user) => None
-		}
+		if (action == "remove") Some(newCookie(false))
+		else Some(newCookie(true))
 	}
 
-	private def newCookie(usercode: String) = new Cookie(
-		name = CurrentUser.masqueradeCookie,
-		value = usercode,
+	private def newCookie(isGod: Boolean) = new Cookie(
+		name = CurrentUser.godModeCookie,
+		value = isGod.toString,
 		path = "/")
 	
 	def describe(d: Description) = d.properties(
-		"usercode" -> usercode, 
 		"action" -> action
 	)
 

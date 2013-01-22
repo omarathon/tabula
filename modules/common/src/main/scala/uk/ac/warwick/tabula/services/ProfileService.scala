@@ -29,7 +29,7 @@ trait ProfileService {
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member]
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 }
 
@@ -47,8 +47,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getByUserId(userId, disableFilter)
 	}
 	
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean) = transactional(readOnly = true) {
-		profileIndexService.find(query, departments, userTypes, sysAdmin)
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
+		profileIndexService.find(query, departments, userTypes, isGod)
 	} 
 	
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

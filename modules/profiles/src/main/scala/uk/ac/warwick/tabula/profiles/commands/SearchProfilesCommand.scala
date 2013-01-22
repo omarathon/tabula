@@ -13,8 +13,9 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.actions.Search
 import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.CurrentUser
 
-class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
 	
 	PermissionsCheck(Search(classOf[Member]))
@@ -48,7 +49,7 @@ class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Membe
 		else singleton(profileService.getMemberByUniversityId(query))
 	
 	private def queryMatches = {
-		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, securityService.isSysadmin(currentMember.userId))
+		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, user.god)
 	}
 	
 	override def describe(d: Description) = d.property("query" -> query)
