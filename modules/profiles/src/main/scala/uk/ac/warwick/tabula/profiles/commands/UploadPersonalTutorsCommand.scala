@@ -61,13 +61,13 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 
 	def validateRawStudentRelationship(rawStudentRelationship: RawStudentRelationship, errors: Errors, newTarget: Boolean, department: Department) = {
 		var valid = true
-		valid = valid && setTargetMember(rawStudentRelationship, department, newTarget, errors)
-		valid = valid && setAgentMember(rawStudentRelationship, errors)
+		valid = valid && setAndValidateStudentMember(rawStudentRelationship, department, newTarget, errors)
+		valid = valid && setAndValidateAgentMember(rawStudentRelationship, errors)
 
 		valid
 	}
 	
-	private def setTargetMember(rawStudentRelationship: RawStudentRelationship, department: Department, newTarget: Boolean, errors: Errors): Boolean = {
+	private def setAndValidateStudentMember(rawStudentRelationship: RawStudentRelationship, department: Department, newTarget: Boolean, errors: Errors): Boolean = {
 		var valid: Boolean = true
 		val targetUniId = rawStudentRelationship.targetUniversityId
 
@@ -81,8 +81,13 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 				valid = false
 			} else {
 				try {
-					rawStudentRelationship.targetMember = getMember(targetUniId)
-					if (!rawStudentRelationship.targetMember.affiliatedDepartments.contains(department)) {
+					val targetMember: Member = getMember(targetUniId)
+					if (targetMember.sprCode == null) {
+						errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+						valid = false						
+					}
+					rawStudentRelationship.targetMember = targetMember
+					if (!targetMember.affiliatedDepartments.contains(department)) {
 						errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
 						valid = false
 					}
@@ -101,7 +106,7 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 		valid
 	}
 
-	private def setAgentMember(rawStudentRelationship: RawStudentRelationship, errors: Errors):Boolean = {
+	private def setAndValidateAgentMember(rawStudentRelationship: RawStudentRelationship, errors: Errors):Boolean = {
 		var valid: Boolean = true
 		val agentUniId = rawStudentRelationship.agentUniversityId
 		if (hasText(rawStudentRelationship.agentUniversityId)) {
