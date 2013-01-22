@@ -97,6 +97,8 @@ class SecurityService extends Logging {
 		
 		case Sysadmin() => user.sysadmin
 		
+		case UniversityMember() => user.isMember
+		
 		case View(member: Member) => {
 			def isSamePerson = user.apparentId == member.userId
 			

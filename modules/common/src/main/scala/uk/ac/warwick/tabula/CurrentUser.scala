@@ -53,6 +53,8 @@ class CurrentUser(
 	
 	/** Is of type Staff? (includes PGR) */
 	def isStaff = apparentUser.isStaff
+	
+	def isMember = isStudent || isStaff
 
 	override def toString = {
 		val builder = new StringBuilder("User ")
