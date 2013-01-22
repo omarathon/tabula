@@ -1,11 +1,8 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.helpers.Logging
 import javax.sql.DataSource
 import javax.annotation.Resource
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import java.sql.ResultSet
 import collection.JavaConversions._
@@ -13,6 +10,8 @@ import org.springframework.jdbc.core.SqlParameter
 import java.sql.Types
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.data.model.DegreeType
+import javax.annotation.Resource
+import org.springframework.stereotype.Service
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)

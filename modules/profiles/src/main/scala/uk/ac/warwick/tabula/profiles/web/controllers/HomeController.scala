@@ -15,10 +15,13 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.actions.Search
+import uk.ac.warwick.tabula.data.model.Member
 
 @Controller class HomeController extends ProfilesController {
 	
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
+		restricted(new SearchProfilesCommand(currentMember)) orNull
 
 	@RequestMapping(Array("/")) def home() = 
 		if (user.isStaff) Mav("home/view")

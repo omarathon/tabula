@@ -1,26 +1,16 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
-
-import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.seqAsJavaList
-import scala.collection.immutable.TreeSet
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.ItemNotFoundException
+
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.services.fileserver.FileServer
-import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/list"))
@@ -29,13 +19,15 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]
+	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(command: ListSubmissionsCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
-		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		mustBeAbleTo(Participate(command.module))
 
+		// TODO This is too much logic for a controller. This should go in a command object, possibly nesting the ListSubmissionsCommand
 		val enhancedSubmissions = command.apply()  // an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
@@ -45,7 +37,8 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 			if (moduleMembers == null) {
 				Nil
 			} else {
-				((moduleMembers.map(_.getWarwickId).toSet) -- uniIdsWithSubmissionOrFeedback).toSeq.sorted
+				val memberMap = Map() ++ ( for (member <- moduleMembers) yield (member.getWarwickId -> member.getFullName) )
+				(memberMap -- uniIdsWithSubmissionOrFeedback).toList.sorted.toMap				
 			}
 
 		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually

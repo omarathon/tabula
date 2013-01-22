@@ -83,9 +83,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	val IncrementalBatchSize: Int
-	
-	var maintenanceService = Wire.auto[MaintenanceModeService]
-	
+		
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	var indexPath: File
 	
@@ -125,8 +123,6 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	def ifNotIndexing(work: => Unit) =
 		if (indexing)
 			logger.info("Skipped indexing because the indexer is already/still running.")
-		else if (maintenanceService.enabled)
-			logger.info("Skipped indexing because maintenance mode is enabled.")
 		else
 			try { indexing = true; work }
 			finally indexing = false

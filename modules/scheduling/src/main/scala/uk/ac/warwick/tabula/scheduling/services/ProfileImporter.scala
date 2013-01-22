@@ -1,44 +1,41 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
-import scala.collection.JavaConversions._
+import java.sql.Types
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.mapAsJavaMap
 import scala.util.matching.Regex
-import org.joda.time.LocalDate
+import org.apache.commons.lang3.text.WordUtils
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.jdbc.`object`.MappingSqlQuery
-import org.springframework.jdbc.core.RowCallbackHandler
+import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.AcademicYear
-import java.sql.Blob
-import java.sql.Date
-import org.apache.commons.lang3.text.WordUtils
-import org.springframework.jdbc.core.SqlParameter
-import java.sql.Types
-import uk.ac.warwick.tabula.data.model.NextOfKin
-import uk.ac.warwick.tabula.data.model.NextOfKin
+import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Address
-import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.data.model.AddressType
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.NextOfKin
+import uk.ac.warwick.userlookup.User
+import org.springframework.stereotype.Service
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.tabula.data.model.Staff
+import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
+import uk.ac.warwick.tabula.helpers.Logging
+
+class UserIdAndCategory(val userId: String, val category: String) {
+}
 
 @Service
-class ProfileImporter extends InitializingBean {
+class ProfileImporter extends InitializingBean with Logging {
 	import ProfileImporter._
 	
 	var ads = Wire[DataSource]("academicDataStore")
-	var fileDao = Wire.auto[FileDao]
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 	
 	var jdbc: NamedParameterJdbcTemplate = _
 	
@@ -46,13 +43,25 @@ class ProfileImporter extends InitializingBean {
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 	
-	lazy val basicInformationQuery = new BasicInformationQuery(ads, fileDao, moduleAndDepartmentService)
+	lazy val studentInformationQuery = new StudentInformationQuery(ads)
+	lazy val staffInformationQuery = new StaffInformationQuery(ads)
 
-	def getMemberDetails(usercodes: JList[String]): Seq[Member] = basicInformationQuery.executeByNamedParam(Map(
-	    "usercodes" -> usercodes))
+	def getMemberDetails(userIdsAndCategories: Seq[UserIdAndCategory]): Seq[ImportSingleMemberCommand] = {
+		val commands = for (userIdAndCategory <- userIdsAndCategories) yield {
+			val userId = userIdAndCategory.userId
+			val category = MemberUserType.fromCode(userIdAndCategory.category)
+			logger.debug("Reading data for " + category.description + " member, " + userId)
+			category match {
+				case Student =>	studentInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
+				case Staff =>	staffInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
+				case _ => Seq()
+			}
+		}
+		commands.flatten
+	}
 	
-	lazy val allUserIdsQuery = new AllUserIdsQuery(ads)
-	lazy val allUserCodes: Seq[String] = allUserIdsQuery.execute
+	lazy val allUserIdsAndCategoriesQuery = new AllUserIdsAndCategoriesQuery(ads)
+	lazy val userIdsAndCategories: Seq[UserIdAndCategory] = allUserIdsAndCategoriesQuery.execute
 	
 	lazy val nextOfKinQuery = new NextOfKinsQuery(ads)
 	lazy val addressQuery = new AddressesQuery(ads)
@@ -63,7 +72,7 @@ class ProfileImporter extends InitializingBean {
 	def getAddresses(member: Member): Seq[Address] = addressQuery.executeByNamedParam(Map(
 	    "universityId" -> member.universityId))
 	
-	def processNames(member: Member, users: Map[String, User]) = {
+	def processNames(member: ImportSingleMemberCommand, users: Map[String, User]) = {
 		val ssoUser = users(member.userId)
 		
 		member.title = WordUtils.capitalizeFully(Option(member.title).getOrElse("")).trim()
@@ -77,15 +86,15 @@ class ProfileImporter extends InitializingBean {
 
 object ProfileImporter {
   
-	val GetAllUserIds = """
-		select primary_user_code from member
+	val GetAllUsersAndCategories = """
+		select primary_user_code, group_ctg from member
 		where primary_user_code is not null
 		and preferred_email_address is not null
 		and preferred_email_address != 'No Email'
 		and in_use_flag = 'Active'
 		"""
   
-	val GetBasicInformation = """
+	val BasicInformationPrologue = """
 	  	select
 			m.university_id as university_id,
 			m.title as title,
@@ -105,18 +114,19 @@ object ProfileImporter {
 			m.primary_user_code as user_code,
 			m.date_of_birth as date_of_birth,
 			m.group_ctg as group_ctg
-		from member m
-    		left outer join member_photo_details photo 
-      			on m.university_id = photo.university_id
-        
-    		left outer join nationality nat 
-	  			on m.nationality = nat.nationality_code
-		where m.primary_user_code in (:usercodes)
-	  	"""
+		"""
 		
-	val GetStudentInformation = """
-		select
-			m.university_id as university_id,
+	val BasicInformationEpilogue = """
+		left outer join member_photo_details photo 
+			on m.university_id = photo.university_id
+
+		left outer join nationality nat 
+			on m.nationality = nat.nationality_code
+		
+		where m.primary_user_code in (:usercodes)
+		"""
+		
+	val GetStudentInformation = BasicInformationPrologue + """,
 			study.spr_code as spr_code,
 			study.sits_course_code as sits_course_code,
 			levl.name as study_level,
@@ -146,6 +156,7 @@ object ProfileImporter {
 			details.year_commenced_degree as year_commenced_degree
 
 		from member m
+	
     		left outer join student_current_study_details study 
       			on m.university_id = study.university_id
     
@@ -190,17 +201,12 @@ object ProfileImporter {
 	  
     		left outer join school last_school 
 	  			on details.last_school = last_school.school_code
-
-		where m.primary_user_code in (:usercodes)
-		"""
+		""" + BasicInformationEpilogue
 		
-	val GetStaffInformation = """
-		select
-			m.university_id as university_id,
+	val GetStaffInformation = BasicInformationPrologue + """,
 			m.teaching_staff as teaching_staff
 		from member m
-		where m.primary_user_code in (:usercodes)
-		"""
+		""" + BasicInformationEpilogue
 	  
 	val GetNextOfKins = """
 		select 
@@ -234,122 +240,21 @@ object ProfileImporter {
 			where university_id = :universityId
 		"""
 	  
-	class AllUserIdsQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetAllUserIds) {
+	class AllUserIdsAndCategoriesQuery(ds: DataSource) extends MappingSqlQuery[UserIdAndCategory](ds, GetAllUsersAndCategories) {
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("primary_user_code")
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new UserIdAndCategory(rs.getString("primary_user_code"), rs.getString("group_ctg"))
 	}
 	  
-	private def toPhoto(photoBlob: Blob, universityId: String, fileDao: FileDao) = {
-		if (photoBlob == null || photoBlob.length == 0) { 
-			null
-		} else {
-			val photo = new FileAttachment
-			photo.name = universityId + ".jpg"
-			photo.uploadedData = photoBlob.getBinaryStream
-			photo.uploadedDataLength = photoBlob.length
-			fileDao.savePermanent(photo)
-			photo
-		}
-	}
-	
-	private def toRoute(routeCode: String, moduleAndDepartmentService: ModuleAndDepartmentService) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
-	}
-	
-	private def toDepartment(departmentCode: String, moduleAndDepartmentService: ModuleAndDepartmentService) = {
-		if (departmentCode == null || departmentCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
-		}
-	}
-	
-	private def toLocalDate(date: Date) = {
-		if (date == null) {
-			null
-		} else {
-			new LocalDate(date)
-		}
-	}
-	
-	private def toAcademicYear(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			AcademicYear.parse(code)
-		}
-	}
-	
-	def createMember(rs: ResultSet, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) = {
-		val member = new Member
-					
-		member.universityId = rs.getString("university_id")
-		member.userId = rs.getString("user_code")
-		member.userType = MemberUserType.fromCode(rs.getString("group_ctg"))
-		
-		member.firstName = rs.getString("preferred_forename")
-		member.lastName = rs.getString("family_name")
-		member.email = rs.getString("email_address")
-		member.title = rs.getString("title")
-		member.fullFirstName = rs.getString("forenames")
-		member.gender = Gender.fromCode(rs.getString("gender"))
-		member.nationality = rs.getString("nationality")
-		member.homeEmail = rs.getString("alternative_email_address")
-		member.mobileNumber = rs.getString("mobile_number")
-		member.photo = toPhoto(rs.getBlob("photo"), member.universityId, fileDao)
-				
-		member.inUseFlag = rs.getString("in_use_flag")
-		member.inactivationDate = toLocalDate(rs.getDate("date_of_inactivation"))
-		member.groupName = rs.getString("group_name")
-			
-		member.homeDepartment = toDepartment(rs.getString("home_department_code"), moduleAndDepartmentService)
-		member.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
-		
-		/*
-		// Staff-specific properties
-		member.teachingStaff = rs.getString("teaching_staff") == "Y"
-			
-		// Student-specific properties
-		member.sprCode = rs.getString("spr_code")
-		member.sitsCourseCode = rs.getString("sits_course_code")
-		
-		member.route = toRoute(rs.getString("route_code"), moduleAndDepartmentService)
-		
-		member.yearOfStudy = rs.getInt("year_of_study")
-		member.attendanceMode = rs.getString("mode_of_attendance")
-		member.studentStatus = rs.getString("student_status")
-		member.fundingSource = rs.getString("source_of_funding")
-		member.programmeOfStudy = rs.getString("programme_of_study")
-		member.intendedAward = rs.getString("intended_award")
-		
-		member.academicYear = toAcademicYear(rs.getString("academic_year_code"))
-		member.studyDepartment = toDepartment(rs.getString("study_department"), moduleAndDepartmentService)
-		member.courseStartYear = toAcademicYear(rs.getString("course_start_year"))
-		member.yearCommencedDegree = toAcademicYear(rs.getString("year_commenced_degree"))
-		member.courseBaseYear = toAcademicYear(rs.getString("course_base_start_year"))
-		member.courseEndDate = toLocalDate(rs.getDate("course_end_date"))
-		member.transferReason = rs.getString("transfer_reason")
-		member.beginDate = toLocalDate(rs.getDate("begin_date"))
-		member.endDate = toLocalDate(rs.getDate("end_date"))
-		member.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
-		member.feeStatus = rs.getString("fee_status")
-		member.domicile = rs.getString("domicile")
-		member.highestQualificationOnEntry = rs.getString("highest_qualification_on_entry")
-		member.lastInstitute = rs.getString("last_institute")
-		member.lastSchool = rs.getString("last_school")
-		*/
-		
-		member
-	}
-	  
-	class BasicInformationQuery(ds: DataSource, fileDao: FileDao, moduleAndDepartmentService: ModuleAndDepartmentService) extends MappingSqlQuery[Member](ds, GetBasicInformation) {
+	class StudentInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()		
-		override def mapRow(rs: ResultSet, rowNumber: Int) = createMember(rs, fileDao, moduleAndDepartmentService)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(rs)
+	}
+	
+	class StaffInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()		
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(rs)
 	}
 	
 	class NextOfKinsQuery(ds: DataSource) extends MappingSqlQuery[NextOfKin](ds, GetNextOfKins) {

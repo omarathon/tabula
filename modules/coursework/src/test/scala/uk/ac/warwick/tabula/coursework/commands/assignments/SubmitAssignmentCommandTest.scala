@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model.forms.FileField
 import uk.ac.warwick.tabula.data.model.forms.FileSubmissionValue
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.data.model.Module
 
 
 class SubmitAssignmentCommandTest extends AppContextTestBase {
@@ -30,7 +31,7 @@ class SubmitAssignmentCommandTest extends AppContextTestBase {
 	@Test def multipleSubmissions = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = new SubmitAssignmentCommand(assignment, user)
+		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
 
 		var errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -67,7 +68,7 @@ class SubmitAssignmentCommandTest extends AppContextTestBase {
 
 		// common reusable setup
 		trait Setup {
-			val cmd = new SubmitAssignmentCommand(assignment, user)
+			val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
 			var errors = new BindException(cmd, "command")
 			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileSubmissionValue]
 		}
@@ -117,6 +118,7 @@ class SubmitAssignmentCommandTest extends AppContextTestBase {
 		assignment.closeDate = new DateTime().plusWeeks(1)
 		assignment.collectSubmissions = true
 		assignment.active = true
+		assignment.module = new Module
 		assignment
 	}
 }

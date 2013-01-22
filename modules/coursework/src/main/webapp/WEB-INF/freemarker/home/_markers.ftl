@@ -36,7 +36,11 @@
 <div class="simple-assignment-list">
 	<#list assignmentsForMarking as info>
 		<div class="simple-assignment-info">
-			<@fmt.assignment_link info.assignment />
+			<#if info.isAdmin>
+				<@fmt.admin_assignment_link info.assignment />
+			<#else>
+				<@fmt.assignment_name info.assignment />
+			</#if>
 			<@marker_info info />
 		</div>
 	</#list>

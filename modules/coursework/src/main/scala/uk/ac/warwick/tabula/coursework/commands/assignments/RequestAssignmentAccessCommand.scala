@@ -13,15 +13,15 @@ import freemarker.template.Configuration
 import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.coursework.web.Routes
-import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
 /**
  * Sends a message to one or more admins to let them know that the current
  * user thinks they should have access to an assignment.
  */
-class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering {
+class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering with UnicodeEmails {
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _
@@ -44,13 +44,14 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 				"student" -> user,
 				"admin" -> admin,
 				"path" -> manageAssignmentUrl))
-			val message = new SimpleMailMessage
-			val moduleCode = module.code.toUpperCase
-			message.setFrom(fromAddress)
-			message.setReplyTo(replyAddress)
-			message.setTo(admin.getEmail)
-			message.setSubject(moduleCode + ": Access request")
-			message.setText(messageText)
+			val message = createMessage(mailSender) { message => 
+				val moduleCode = module.code.toUpperCase
+				message.setFrom(fromAddress)
+				message.setReplyTo(replyAddress)
+				message.setTo(admin.getEmail)
+				message.setSubject(encodeSubject(moduleCode + ": Access request"))
+				message.setText(messageText)
+			}
 
 			mailSender.send(message)
 		}

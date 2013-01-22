@@ -11,17 +11,17 @@ html.iframe {
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
 
-@grid-size:16px;
-@warning-color: #933;
-@subtle-text-color: #444;
-@very-subtle-text-color: #777;
+@grid-size: 16px;
+@warning-color: @red;
+@subtle-text-color: @gray;
+@very-subtle-text-color: @grayLight;
 @very-subtle-font-size: 0.8em;
 
 @box-style-border-radius: 8px;
 
 .box-style() {
-	border: 1px solid #999;
-	border-bottom: 1px solid #666;
+	border: 1px solid @grayLight;
+	border-bottom: 1px solid @gray;
 	.border-radius(@box-style-border-radius);
 }
 
@@ -29,20 +29,6 @@ html.iframe {
 	border: 1px solid #bbb;
 	border-bottom: 1px solid #aaa;
 	.border-radius(8px);
-}
-
-.warning-box-style() {
-	.border-radius(@box-style-border-radius);
-	padding: 0.5em;
-	.vertical-gradient(#ffffcc, #ffee99);
-	border: 1px solid #ffcc66;
-}
-
-.error-box-style() {
-	.border-radius(@box-style-border-radius);
-	padding: 0.5em;
-	.vertical-gradient(#ffeeee, #ffcccc);
-	border: 1px solid #ff6666;
 }
 
 .fade-transition() {
@@ -142,9 +128,9 @@ ul {
 #feedback-table, #submission-table {
     tbody {
     	tr.selected td {
-        	background-color: #F2DEDE;
+        	background-color: @errorBackground;
         	&:hover{
-	            background-color: #F2DEDE;
+	            background-color: @errorBackground;
     	    }
     	}
     }
@@ -250,7 +236,7 @@ ul {
 
 // assignment deadlines
 .deadline {
-	color: #468847;
+	color: @green;
 	
 	.time-remaining {
 		display: block;
@@ -262,8 +248,8 @@ ul {
 		float: right;
 	}
 	
-	&.late { color: #B94A48; }
-	&.extended { color: #3A87AD; }
+	&.late { color: @red; }
+	&.extended { color: @blue; }
 }
 
 .end-assignment-info { clear: both; }
@@ -292,26 +278,6 @@ ul {
 	#zip-column { 
 		padding-left: 1em; 
 	}
-}
-
-// Don't actually use this, it's too amazing
-.sweet-button() {
-	background: #C63929;
-	background: -moz-linear-gradient(0% 100% 90deg, #891100 0%, #B51700 50%, #C63929 50%, #EE432E 100%);
-	background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #EE432E), color-stop(0.5, #C63929), color-stop(0.5, #B51700), color-stop(1, #891100));
-	border: 1px solid #951100;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
-	-moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
-	-webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
-	box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4),0 1px 3px #333333;
-	color: white;
-	font-weight: bold;
-	line-height: 1;
-	padding: 4px 6px 6px 6px;
-	text-align: center;
-	text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.8);
 }
 
 .actions {
@@ -345,7 +311,7 @@ ul {
 	
 	.popover {
 		// For Read-only mode text
-		color: #404041;
+		color: @tabulaGray;
 	}
 }
 
@@ -426,18 +392,6 @@ table {
    	    color: #666;
    	  }
    }
-}
-
-.unrecognised-files {
-    .warning-box-style;
-}
-
-.invalid-files {
-    .error-box-style;
-}
-
-.potential-problem {
-    .warning-box-style;
 }
 
 .bad-recipients {
@@ -621,25 +575,25 @@ span.press-ctrl-c {
 }
 
 .label-green {
-	background: #393;
+	background: @green;
 	color: white;
 	.label-ANY();
 }
 
 .label-orange {
-	background: #fc0;
-	color: #333;
+	background: @orange;
+	color: white;
 	.label-ANY();
 }
 
 .label-red {
-	background: #c00;
+	background: @red;
 	color: white;
 	.label-ANY();
 }
 
 .label-blue {
-	background: #3A87AD;
+	background: @blue;
 	color: white;
 	.label-ANY();
 }
@@ -749,27 +703,26 @@ input[type=text] {
 
 #main-content {
 // distinct coloured labels for assigning options groups.
-.label-A { background-color: #FFB300; }
-.label-B { background-color: #803E75; }
-.label-C { background-color: #FF6800; }
-.label-D { background-color: #A6BDD7; }
-.label-E { background-color: #C10020; }
-.label-F { background-color: #CEA262; }
-.label-G { background-color: #817066; }
-.label-H { background-color: #007D34; }
-.label-I { background-color: #F6768E; }
-.label-J { background-color: #00538A; }
-.label-K { background-color: #FF7A5C; }
-.label-L { background-color: #53377A; }
-.label-M { background-color: #FF8E00; }
-.label-N { background-color: #B32851; }
-.label-O { background-color: #F4C800; }
-.label-P { background-color: #7F180D; }
-.label-Q { background-color: #93AA00; }
-.label-R { background-color: #593315; }
-.label-S { background-color: #F13A13; }
-.label-T { background-color: #232C16; }
-// if you've gone past T then you have too many options. Grey for you!
+.label-A { background-color: @tabulaTurquoise; }
+.label-B { background-color: @tabulaPurple; }
+.label-C { background-color: @tabulaBlueLight; }
+.label-D { background-color: @tabulaGreen; }
+.label-E { background-color: @tabulaPink; }
+.label-F { background-color: @tabulaBlue; }
+.label-G { background-color: @tabulaGreenDark; }
+.label-H { background-color: @tabulaOrangeLight; }
+.label-I { background-color: @tabulaBlueDark; }
+.label-J { background-color: @tabulaYellowGreen; }
+.label-K { background-color: @tabulaOrange; }
+.label-L { background-color: @tabulaRed; }
+.label-M { background-color: @tabulaGreenLight; }
+.label-N { background-color: @tabulaOrangeDark; }
+.label-O { background-color: @tabulaRedDark; }
+.label-P { background-color: @tabulaPurpleDark; }
+.label-Q { background-color: @tabulaGrayLight; }
+.label-R { background-color: @tabulaGrayDark; }
+.label-S { background-color: @tabulaGray; }
+// if you've gone past S then you have too many options. Grey for you!
 }
 
 // highlightable table rows
@@ -791,6 +744,11 @@ h1.with-settings {
 .dept-settings {
 	display: inline-block;
 	margin: 0px 0px 16px 10px;
+}
+
+#container .feedback-report {
+ vertical-align: middle;
+ margin: 0px 0px 16px 10px;
 }
 
 // Fix modals to be wider (e.g. for SITS import options)
@@ -884,7 +842,7 @@ h1.with-settings {
 				
 				th { 
 					text-align: right;
-					color: #818285;
+					color: @grayLight;
 					white-space: nowrap;
 					
 					&:after { content: ':'; margin-right: 3px; } 

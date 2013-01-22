@@ -11,8 +11,11 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.Features
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import javax.mail.Message.RecipientType
+import javax.mail.internet.MimeMultipart
 
-final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMailSender with Logging {
+final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMailSender with Logging with UnicodeEmails {
 
 	@Autowired var features: Features = _
 
@@ -21,25 +24,42 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 	override def createMimeMessage() = delegate.createMimeMessage()
 
 	override def send(message: MimeMessage): Future[Boolean] = {
-		// implement this as and when we need it.
-		throw new UnsupportedOperationException()
+		val messageToSend = if (!features.emailStudents) {
+			prepareMessage(message) { helper =>
+				val oldTo = message.getRecipients(RecipientType.TO).map({_.toString}).mkString(", ")
+				
+				helper.setTo(Array(testEmailTo))
+				helper.setBcc(Array(): Array[String])
+				helper.setCc(Array(): Array[String])
+				
+				val oldText = message.getContent match {
+					case string: String => string
+					case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+				}
+				
+				helper.setText("This is a copy of a message that isn't being sent to the real recipients (" + oldTo + ")  " +
+											 "because it is being sent from a non-production server.\n\n-------\n\n"
+											 + oldText)
+			}
+		} else message
+		
+		delegate.send(messageToSend)
 	}
 
 	implicit def ArrayOrEmpty[T: Manifest](a: Array[T]) = new {
 		def orEmpty: Array[T] = Option(a).getOrElse(Array.empty)
 	}
 
-	override def send(message: SimpleMailMessage): Future[Boolean] = {
-		if (!features.emailStudents) {
-			val oldTo = message.getTo.mkString(", ")
-			message.setTo(Array(testEmailTo))
-			message.setBcc(null: Array[String])
-			message.setCc(null: Array[String])
-			message.setText("This is a copy of a message that isn't being sent to the real recipients (" + oldTo + ")  " +
-				"because it is being sent from a non-production server.\n\n-------\n\n"
-				+ message.getText())
-		}
-		delegate.send(message)
-	}
+	override def send(simpleMessage: SimpleMailMessage): Future[Boolean] = send(createMessage(delegate) { message =>
+		Option(simpleMessage.getFrom) map {message.setFrom(_)}
+		Option(simpleMessage.getReplyTo) map {message.setReplyTo(_)}
+		
+		Option(simpleMessage.getTo) map {message.setTo(_)}
+		message.setCc(Option(simpleMessage.getCc).getOrElse(Array(): Array[String]))
+		message.setBcc(Option(simpleMessage.getBcc).getOrElse(Array(): Array[String]))
+		
+		Option(simpleMessage.getSubject) map {message.setSubject(_)}
+		Option(simpleMessage.getText) map {message.setText(_)}
+	})
 
 }

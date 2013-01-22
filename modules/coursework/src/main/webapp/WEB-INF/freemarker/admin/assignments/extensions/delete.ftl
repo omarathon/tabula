@@ -5,7 +5,7 @@
 		<button type="button" class="close" data-dismiss="modal">×</button>
 		<h3>Revoke extension for ${universityId}</h3>
 	</div>
-	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/delete')}" commandName="deleteExtensionCommand">
+	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/delete/${universityId}')}" commandName="deleteExtensionCommand">
 		<div class="modal-body">
 			<p>
 				Are you sure that you wish to revoke the extension for ${universityId}?

@@ -1,14 +1,14 @@
-package uk.ac.warwick.tabula.commands.imports
-
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model._
-
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.hibernate.classic.Session
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
+
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.scheduling.services._
+import uk.ac.warwick.tabula.services._
 
 class ImportModulesCommandTest extends TestBase with MockitoSugar {
 

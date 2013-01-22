@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import scala.util.matching.Regex
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -10,7 +11,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
 import uk.ac.warwick.tabula.commands.UploadedFile
@@ -22,14 +23,19 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.actions.Participate
 
 
-abstract class AddMarksCommand[T](val assignment: Assignment, val submitter: CurrentUser) extends Command[T] with Daoisms with Logging {
+class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T] with Daoisms with Logging with BindListener {
 
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
+	
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
 
-  var markWarning = Wire.property("${mark.warning}")
+	var markWarning = Wire.property("${mark.warning}")
   
 	@BeanProperty var file: UploadedFile = new UploadedFile
 	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()
@@ -94,14 +100,32 @@ abstract class AddMarksCommand[T](val assignment: Assignment, val submitter: Cur
 					noErrors = false
 				}
 			}
-		} else {
-			// If a row has no mark, we will quietly ignore it 
+		} else if (!hasText(mark.actualGrade)) {
+			// If a row has no mark or grade, we will quietly ignore it 
 			noErrors = false
 		}
 		noErrors
 	}
 
-	def onBind {
+	override def applyInternal(): List[Feedback] = transactional() {
+		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
+			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
+			feedback.assignment = assignment
+			feedback.uploaderId = submitter.apparentId
+			feedback.universityId = universityId
+			feedback.released = false
+			feedback.actualMark = Option(actualMark.toInt)
+			feedback.actualGrade = actualGrade
+			session.saveOrUpdate(feedback)
+			feedback
+		}
+
+		// persist valid marks
+		val markList = marks filter (_.isValid) map { (mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade) }
+		markList.toList
+	}
+
+	override def onBind {
 		transactional() {
 			file.onBind
 			if (!file.attached.isEmpty()) {

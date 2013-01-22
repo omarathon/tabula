@@ -21,7 +21,8 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedComma
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class MarkPlagiarisedController extends CourseworkController {
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment) = new MarkPlagiarisedCommand(assignment)
+	def command(@PathVariable("module") module: Module,
+				@PathVariable("assignment") assignment: Assignment) = new MarkPlagiarisedCommand(module, assignment)
 
 	validatesSelf[MarkPlagiarisedCommand]
 
@@ -40,8 +41,6 @@ class MarkPlagiarisedController extends CourseworkController {
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment,
 			form: MarkPlagiarisedCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module)) 
 		formView(assignment) 
 	}
 
@@ -51,8 +50,6 @@ class MarkPlagiarisedController extends CourseworkController {
 			@PathVariable("assignment") assignment: Assignment,
 			@Valid form: MarkPlagiarisedCommand, errors: Errors) = {
 		transactional() {
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors) {
 				formView(assignment)
 			} else {

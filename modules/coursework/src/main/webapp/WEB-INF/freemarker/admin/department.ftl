@@ -41,6 +41,11 @@
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display</a></li>
 		</ul>
 	</div>
+	<a class="btn btn-mini feedback-report" href="reports/feedback">
+		<i class="icon-download"></i>
+		Download feedback report
+	</a>
+	
 <#else>
 	<h1>${department.name}</h1>
 </#if>

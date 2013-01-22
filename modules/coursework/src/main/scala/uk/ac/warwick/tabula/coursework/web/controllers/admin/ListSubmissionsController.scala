@@ -20,16 +20,20 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.data.model.Assignment
+import org.springframework.web.bind.annotation.PathVariable
+import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
 class ListSubmissionsController extends CourseworkController {
+	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(command: ListSubmissionsCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
-		mustBeLinked(mandatory(command.assignment), mandatory(command.module))
-		mustBeAbleTo(Participate(command.module))
 
 		val submissions = command.apply()
 		val hasOriginalityReport = submissions.exists( _.submission.hasOriginalityReport )

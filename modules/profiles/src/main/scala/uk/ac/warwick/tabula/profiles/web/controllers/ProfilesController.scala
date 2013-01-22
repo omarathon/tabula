@@ -9,6 +9,7 @@ import uk.ac.warwick.spring.Wire
 abstract class ProfilesController extends BaseController with ProfileBreadcrumbs {
 	
 	hideDeletedItems
+	activeProfilesOnly
 	studentProfilesOnly
 	
 	var profileService = Wire.auto[ProfileService]
@@ -21,10 +22,18 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	def studentProfilesOnly = { _studentProfilesOnly = true }
 	def notStudentProfilesOnly = { _studentProfilesOnly = false }
 	
+	private var _activeProfilesOnly = false
+	def activeProfilesOnly = { _activeProfilesOnly = true }
+	def notActiveProfilesOnly = { _activeProfilesOnly = false }
+	
 	final override def onPreRequest {
 		// if studentsOnly has been called, activate the studentsOnly filter
 		if (_studentProfilesOnly) {
 			session.enableFilter(Member.StudentsOnlyFilter)
+		}
+		
+		if (_activeProfilesOnly) {
+			session.enableFilter(Member.ActiveOnlyFilter)
 		}
 	}
 	

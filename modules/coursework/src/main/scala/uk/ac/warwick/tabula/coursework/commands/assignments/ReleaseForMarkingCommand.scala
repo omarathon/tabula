@@ -8,12 +8,17 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.Daoisms
 
-class ReleaseForMarkingCommand(val assignment: Assignment, currentUser: CurrentUser) extends Command[Unit]
-	with SelfValidating with Daoisms {
-
+class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
+	extends Command[Unit] with SelfValidating with Daoisms {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
+	
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]
 
@@ -24,6 +29,10 @@ class ReleaseForMarkingCommand(val assignment: Assignment, currentUser: CurrentU
 	var feedbacksUpdated = 0
 
 	def applyInternal() {
+		val submissions = for (
+			uniId <- students;
+			submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
+		) yield submission
 
 		// get the parent feedback or create one if none exist
 		val feedbacks = students.map{ uniId:String =>

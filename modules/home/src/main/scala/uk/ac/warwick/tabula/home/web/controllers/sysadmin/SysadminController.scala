@@ -1,35 +1,26 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import scala.reflect.BeanProperty
+
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+
 import javax.validation.Valid
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.home.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.tabula.home.commands.departments.RemoveDeptOwnerCommand
-import uk.ac.warwick.tabula.commands.imports.ImportModulesCommand
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.tabula.services.AssignmentImporter
-import uk.ac.warwick.tabula.commands.imports.ImportAssignmentsCommand
-import uk.ac.warwick.tabula.commands.imports.ImportProfilesCommand
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.ProfileImporter
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.

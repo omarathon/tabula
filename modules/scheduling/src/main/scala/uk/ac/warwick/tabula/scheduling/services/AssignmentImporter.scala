@@ -1,11 +1,10 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
 import collection.JavaConversions._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowCallbackHandler
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -19,9 +18,9 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
-import java.sql.Connection
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import uk.ac.warwick.tabula.data.model.Member
+import javax.annotation.Resource
+import org.springframework.stereotype.Service
 
 @Service
 class AssignmentImporter extends InitializingBean {

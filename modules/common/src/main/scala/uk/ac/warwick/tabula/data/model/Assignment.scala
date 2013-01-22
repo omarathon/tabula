@@ -328,7 +328,7 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
-			assignmentService.isStudentMember(user, assessmentGroup, members)
+			assignmentService.isStudentMember(user, assessmentGroup, Option(members))
 		} else {
 			true
 		}

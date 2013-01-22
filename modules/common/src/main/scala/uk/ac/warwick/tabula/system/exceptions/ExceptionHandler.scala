@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.mail.MailException
-import org.springframework.mail.SimpleMailMessage
 import freemarker.template.{ Configuration => FreemarkerConfiguration }
 import freemarker.template.Template
 import javax.annotation.Resource
@@ -19,6 +18,7 @@ import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.system.exceptions._
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
 case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None) {
 	def getHasRequest = request.isDefined
@@ -51,7 +51,7 @@ class LoggingExceptionHandler extends ExceptionHandler with Logging {
 	}
 }
 
-class EmailingExceptionHandler extends ExceptionHandler with Logging with InitializingBean with FreemarkerRendering {
+class EmailingExceptionHandler extends ExceptionHandler with Logging with InitializingBean with FreemarkerRendering with UnicodeEmails {
 	@Resource(name = "mailSender") var mailSender: WarwickMailSender = _
 	@Value("${mail.exceptions.to}") var recipient: String = _
 	@Autowired var freemarker: FreemarkerConfiguration = _
@@ -74,9 +74,8 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 		}
 	}
 
-	def makeEmail(context: ExceptionContext) = {
+	def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
 		val info = RequestInfo.fromThread
-		val message = new SimpleMailMessage
 		message.setTo(recipient)
 		message.setSubject("[HFCX] %s %s" format (userId(info), context.token))
 		message.setText(renderToString(template, Map(
@@ -86,7 +85,6 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 			"requestInfo" -> info,
 			"time" -> new DateTime,
 			"request" -> context.request)))
-		message
 	}
 
 	private def userId(info: Option[RequestInfo]) = info.map { _.user }.map { _.realId }.getOrElse("ANON")

@@ -157,7 +157,7 @@
 		
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 	
-		<@f.form method="post" action="${url('/view/' + profile.universityId + '/reimport')}">
+		<@f.form method="post" action="${url('/sysadmin/import-profiles/' + profile.universityId, '/scheduling')}">
 			<button class="btn btn-large" type="submit">Re-import details from ADS</button>
 		</@f.form>
 	</div>

@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.util.mail.WarwickMailSender
-import org.springframework.mail.SimpleMailMessage
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
@@ -16,6 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
 /**
  * Send an email confirming the receipt of a submission to the student
@@ -23,7 +23,7 @@ import uk.ac.warwick.spring.Wire
  */
 class SendSubmissionReceiptCommand(
 	@BeanProperty var submission: Submission,
-	@BeanProperty var user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering {
+	@BeanProperty var user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {
 
 	def this() = this(null, null)
 
@@ -46,13 +46,12 @@ class SendSubmissionReceiptCommand(
 		}
 	}
 
-	def messageFor(user: CurrentUser) = {
-		val message = new SimpleMailMessage
+	def messageFor(user: CurrentUser) = createMessage(studentMailSender) { message =>
 		val moduleCode = module.code.toUpperCase
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
 		message.setTo(user.email)
-		message.setSubject(moduleCode + ": Submission receipt")
+		message.setSubject(encodeSubject(moduleCode + ": Submission receipt"))
 		message.setText(renderToString("/WEB-INF/freemarker/emails/submissionreceipt.ftl", Map(
 			"submission" -> submission,
 			"submissionDate" -> dateFormatter.print(submission.submittedDate),
@@ -61,7 +60,6 @@ class SendSubmissionReceiptCommand(
 			"user" -> user,
 			"path" -> Routes.assignment.receipt(assignment)
 		)))
-		message
 	}
 
 	override def describe(d: Description) {

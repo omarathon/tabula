@@ -1,31 +1,32 @@
+@import "bootstrap/variables.less";
 @import "css3.less";
 
 @background-colour: #f2e8cf;
 
-@body-colour: #404041;
+@body-colour: @tabulaGray;
 
 // Link colours
-@link-colour: #3C5E7F;
-@link-hover: #209990;
+@link-colour: @tabulaBlueDark;
+@link-hover: @tabulaTurquoise;
 @link-visited-colour: @link-colour;
 
 // Search tab background and colour
-@search-tab-background: #80716a;
+@search-tab-background: @tabulaGreenDark;
 @search-tab-colour: #ffffff;
 
 // Navigation
 @nav-colour: #80716a;
 @nav-border-colour: #a0958f;
-@nav-link-colour: #aaa;
-@nav-hover-colour: #fff;
+@nav-link-colour: #fff;
+@nav-hover-colour: #bbb;
 
 // Heading colours - defaults to inheriting the base font colour
-@h1-colour: #209990;
-@h2-colour: #93225E;
-@h3-colour: #3C5E7F;
-@h4-colour: #889117;
-@h5-colour: #404041;
-@h6-colour: #93225E;
+@h1-colour: @tabulaTurquoise;
+@h2-colour: @tabulaPurple;
+@h3-colour: @tabulaBlueDark;
+@h4-colour: @tabulaYellowGreen;
+@h5-colour: @tabulaGray;
+@h6-colour: @tabulaPurple;
 
 // Heading link colours - defaults to the standard link colours
 // Change these to inherit and they will have the same colours as the heading colour
@@ -52,10 +53,10 @@
 @hr-colour: #888;
 
 // Footer
-@footer-bg: #80716a;
+@footer-bg: @nav-colour;
 @footer-colour: #aaa;
-@footer-link-colour: #aaa;
-@footer-hover-colour: #fff;
+@footer-link-colour: @nav-link-colour;
+@footer-hover-colour: @nav-hover-colour;
 
 #custom-header {
     position: absolute;

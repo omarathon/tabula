@@ -2,10 +2,14 @@ package uk.ac.warwick.tabula.system
 
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import scala.reflect.BeanProperty
+import collection.JavaConverters._
 import collection.JavaConversions._
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
+import org.springframework.web.method.support.InvocableHandlerMethod
+import uk.ac.warwick.tabula.permissions.PermissionsCheckingDataBinderFactory
+import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
 
 /**
  * Extension of RequestMappingHandlerAdapter that allows you to place
@@ -33,5 +37,8 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		composite.addHandler(defaultHandlers)
 		returnValueHandlersField.set(this, composite)
 	}
+	
+	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory = 
+		new PermissionsCheckingDataBinderFactory(binderMethods.toList, getWebBindingInitializer())
 
 }

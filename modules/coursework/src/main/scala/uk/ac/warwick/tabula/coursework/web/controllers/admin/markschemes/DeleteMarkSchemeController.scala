@@ -22,28 +22,22 @@ class DeleteMarkSchemeController extends CourseworkController {
 	validatesSelf[DeleteMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable("markscheme") markScheme: MarkScheme) = new DeleteMarkSchemeCommand(markScheme)
+	def cmd(@PathVariable department: Department, @PathVariable("markscheme") markScheme: MarkScheme) = 
+		new DeleteMarkSchemeCommand(department, markScheme)
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkSchemeCommand): Mav = {
-		doPermissions(cmd)
 		Mav("admin/markschemes/delete").noLayoutIf(ajax)
 	}
 	
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: DeleteMarkSchemeCommand, errors: Errors): Mav = {
-		doPermissions(cmd)
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.markscheme.list(cmd.department))
 		}
-	}
-	
-	def doPermissions(cmd: DeleteMarkSchemeCommand) {
-		mustBeAbleTo(Manage(cmd.department))
-		mustBeLinked(cmd.markScheme, cmd.department)
 	}
 	
 }

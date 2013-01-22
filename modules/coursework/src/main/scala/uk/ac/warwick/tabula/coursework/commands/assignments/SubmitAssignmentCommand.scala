@@ -19,16 +19,18 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.actions.Submit
 
-class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating {
-
+class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(Submit(assignment))
+	
 	var service = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var fields = buildEmptyFields
-
-	// not important to command - only used to bind to request.
-	@transient @BeanProperty var module: Module = _
 
 	// used as a hint to the view.
 	@transient @BeanProperty var justSubmitted: Boolean = false
@@ -36,7 +38,9 @@ class SubmitAssignmentCommand(val assignment: Assignment, val user: CurrentUser)
 	// just used as a hint to the view.
 	@transient @BeanProperty var plagiarismDeclaration: Boolean = false
 
-	def onBind: Unit = for ((key, field) <- fields) field.onBind
+	override def onBind {
+		for ((key, field) <- fields) field.onBind
+	}
 
 	/**
 	 * Goes through the assignment's fields building a set of empty SubmissionValue

@@ -12,14 +12,19 @@ import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.actions.Searchable
 import uk.ac.warwick.tabula.CurrentUser
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Filters
+import org.hibernate.annotations.Filter
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileService
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
+	final val ActiveOnlyFilter = "activeOnly"
 }
 
 /**
@@ -31,12 +36,21 @@ object Member {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'")
-@Filter(name = Member.StudentsOnlyFilter)
+@FilterDefs(Array(
+	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
+	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+))
+@Filters(Array(
+	new Filter(name = Member.StudentsOnlyFilter),
+	new Filter(name = Member.ActiveOnlyFilter)
+))
 @Entity
 @AccessType("field")
-class Member extends Viewable with Searchable with StudentProperties with StaffProperties with AlumniProperties with ToString {
+class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {
 	
+	@transient 
+	var profileService = Wire.auto[ProfileService]
+		
 	def this(user: CurrentUser) = {
 		this()
 		
@@ -51,7 +65,78 @@ class Member extends Viewable with Searchable with StudentProperties with StaffP
 			else Other
 	}
 	
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}
 	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@BeanProperty var lastUpdatedDate = DateTime.now
+	
+	@BeanProperty def fullName = firstName + " " + lastName
+	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
+	@BeanProperty def description = {
+		def userType = Option(groupName) orElse(Option(""))
+		def courseName = Option(route) map (", " + _.name) orElse(Option(""))
+		def deptName = Option(homeDepartment) map (", " + _.name) orElse(Option(""))
+		 
+		userType.get + courseName.get + deptName.get
+	}
+	
+	/** 
+	 * Get all departments that this student is affiliated with at a departmental level.
+	 * This includes their home department, and the department running their course.
+	 */
+	def affiliatedDepartments = {
+		val affDepts = Set(Option(homeDepartment), 
+				Option(studyDepartment), 
+				Option(route).map(x => x.department)
+		)
+		
+		affDepts.flatten.toSeq
+	}
+
+	/** 
+	 * Get all departments that this student touches. This includes their home department, 
+	 * the department running their course and any departments that they are taking modules in.
+	 */
+	def touchedDepartments = {
+		val moduleDepts = registeredModules.map(x => x.department)
+		
+		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+	}
+
+	/**
+	 * Get all modules this this student is registered on, including historically.
+	 * TODO consider caching based on getLastUpdatedDate
+	 */
+	def registeredModules = {
+		profileService.getRegisteredModules(getUniversityId)
+	}
+	
+	def asSsoUser = {
+		val u = new User
+		u.setUserId(userId)
+		u.setWarwickId(universityId)
+		u.setFirstName(firstName)
+		u.setLastName(lastName)
+		u.setFullName(fullName)
+		u.setEmail(email)
+		u.setDepartment(homeDepartment.name)
+		u.setDepartmentCode(homeDepartment.code)
+		u.setFoundUser(true)
+		u
+	}
+	
+	def toStringProps = Seq(
+		"universityId" -> universityId,
+		"userId" -> userId,
+		"name" -> (firstName + " " + lastName),
+		"email" -> email)
+
+}
+
+trait MemberProperties {
 	@Id @BeanProperty var universityId: String = _
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
@@ -88,47 +173,6 @@ class Member extends Viewable with Searchable with StudentProperties with StaffP
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var lastUpdatedDate = DateTime.now
-	
-	@BeanProperty def fullName = firstName + " " + lastName
-	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
-	@BeanProperty def description = {
-		def userType = Option(groupName) orElse(Option(""))
-		def courseName = Option(route) map (", " + _.name) orElse(Option(""))
-		def deptName = Option(homeDepartment) map (", " + _.name) orElse(Option(""))
-		 
-		userType.get + courseName.get + deptName.get
-	}
-	
-	/** 
-	 * Get all departments that this student is affiliated with. This includes their home department, 
-	 * the department running their course and any departments that they are taking modules in.
-	 */
-	def affiliatedDepartments = 
-		Seq(Option(homeDepartment), Option(studyDepartment)) flatten
-
-	def asSsoUser = {
-		val u = new User
-		u.setUserId(userId)
-		u.setWarwickId(universityId)
-		u.setFirstName(firstName)
-		u.setLastName(lastName)
-		u.setFullName(fullName)
-		u.setEmail(email)
-		u.setDepartment(homeDepartment.name)
-		u.setDepartmentCode(homeDepartment.code)
-		u.setFoundUser(true)
-		u
-	}
-	
-	def toStringProps = Seq(
-		"universityId" -> universityId,
-		"userId" -> userId,
-		"name" -> (firstName + " " + lastName),
-		"email" -> email)
-
 }
 
 trait StudentProperties {

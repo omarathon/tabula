@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
 import freemarker.template.Configuration
@@ -20,8 +19,9 @@ import uk.ac.warwick.util.core.StringUtils._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
-class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with InitializingBean {
+class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with InitializingBean {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
 	var adminMailAddress = Wire.property("${mail.admin.to}")
@@ -41,11 +41,12 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 	@BeanProperty var ipAddress: String = _
 
 	def applyInternal() = {
-		val mail = new SimpleMailMessage
-		mail setTo adminMailAddress
-		mail setFrom adminMailAddress
-		mail setSubject "Tabula feedback"
-		mail setText generateText
+		val mail = createMessage(mailSender) { mail => 
+			mail setTo adminMailAddress
+			mail setFrom adminMailAddress
+			mail setSubject encodeSubject("Tabula feedback")
+			mail setText generateText
+		}
 
 		mailSender send mail
 	}

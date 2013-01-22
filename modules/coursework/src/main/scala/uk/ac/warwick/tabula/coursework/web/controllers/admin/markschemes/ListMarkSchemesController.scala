@@ -13,29 +13,21 @@ import uk.ac.warwick.tabula.data.model.MarkScheme
 import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkSchemeDao
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.Command
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes"))
-class ListMarkSchemesController extends CourseworkController with Daoisms {
+class ListMarkSchemesController extends CourseworkController {
 	import ListMarkSchemesController._
 	
-	var dao = Wire.auto[MarkSchemeDao]
+	@ModelAttribute("command") def command(@PathVariable department: Department) = new Form(department)
 	
 	@RequestMapping
 	def list(@ModelAttribute("command") form: Form): Mav = {
-		mustBeAbleTo(Manage(form.department))
-		val markSchemes = session.newCriteria[MarkScheme]
-		  .add(Restrictions.eq("department", form.department))
-		  .list
-		  
-		val markSchemeInfo = for (markScheme <- markSchemes) yield Map(
-					"markScheme" -> markScheme,
-					"assignmentCount" -> dao.getAssignmentsUsingMarkScheme(markScheme).size
-				)
-		
-		  
 		Mav("admin/markschemes/list", 
-		    "markSchemeInfo" -> markSchemeInfo)
+		    "markSchemeInfo" -> form.apply())
 		    .crumbsList(getCrumbs(form))
 	}
 	
@@ -46,7 +38,20 @@ class ListMarkSchemesController extends CourseworkController with Daoisms {
 }
 
 object ListMarkSchemesController {
-	class Form {
-		@BeanProperty var department: Department = _
+	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited with Daoisms {
+		PermissionsCheck(Manage(department))
+	
+		var dao = Wire.auto[MarkSchemeDao]
+
+		def applyInternal() = {
+			val markSchemes = session.newCriteria[MarkScheme]
+				.add(Restrictions.eq("department", department))
+				.list
+		  
+			for (markScheme <- markSchemes) yield Map(
+				"markScheme" -> markScheme,
+				"assignmentCount" -> dao.getAssignmentsUsingMarkScheme(markScheme).size
+			)
+		}
 	}
 }

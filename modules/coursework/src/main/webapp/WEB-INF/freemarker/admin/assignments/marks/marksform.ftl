@@ -48,14 +48,14 @@
 			</div>
 		</td>
 		<td><input name="actualMark" type="text" /></td>
-		<!--td><input name="actualGrade" type="text" /></td-->
+		<td><input name="actualGrade" type="text" /></td>
 	</tr>
 	</tbody>
 </table>
 <@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="adminAddMarksCommand">
 <input name="isfile" value="false" type="hidden"/>
 <table class="marksUploadTable">
-	<tr class="mark-header"><th>University ID</th><th>Marks</th><!--th>Grade</th--></tr>
+	<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
 	<#if marksToDisplay??>
 	<#list marksToDisplay as markItem>
 	<tr class="mark-row">
@@ -66,7 +66,7 @@
 			</div>
 		</td>
 		<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
-		<!--td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td-->
+		<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
 	</tr>
 </#list>
 </#if>

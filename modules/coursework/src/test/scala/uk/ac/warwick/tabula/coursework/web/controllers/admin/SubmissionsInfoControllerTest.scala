@@ -56,11 +56,11 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		val controller = new SubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
-		val command = new ListSubmissionsCommand
+		
 		val assignment = newDeepAssignment()
+		val command = new ListSubmissionsCommand(assignment.module, assignment)
+		
 		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 10, 44)
-		command.assignment = assignment
-		command.module = assignment.module
 		command.assignment.submissions.addAll(Seq(
 			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
 		))
@@ -75,12 +75,12 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		val controller = new SubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
-		val command = new ListSubmissionsCommand
+		
 		val assignment = newDeepAssignment()
+		val command = new ListSubmissionsCommand(assignment.module, assignment)
+		
 		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 15, 44)
 		assignment.id = "fakeassid"
-		command.assignment = assignment
-		command.module = assignment.module
 		command.assignment.submissions.addAll(Seq(
 			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
 		))

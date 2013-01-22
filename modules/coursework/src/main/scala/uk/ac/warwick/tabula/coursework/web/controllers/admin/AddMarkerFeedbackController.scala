@@ -15,54 +15,39 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new AddMarkerFeedbackCommand(assignment, user, assignment.isFirstMarker(user.apparentUser))
-
-	def onBind(cmd: AddMarkerFeedbackCommand){ cmd.onBind }
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+		new AddMarkerFeedbackCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadForm(@PathVariable module: Module, @PathVariable assignment: Assignment,
-	                  @ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
-		doChecks(module, assignment)
+	def uploadForm(@ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
 		Mav("admin/assignments/markerfeedback/form")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmUpload(@PathVariable module: Module, @PathVariable assignment: Assignment,
-	                       @ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
+	def confirmUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
-			uploadForm(module, assignment, cmd)
+			uploadForm(cmd)
 		} else {
-			cmd.onBind
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
-			doChecks(module, assignment)
 			Mav("admin/assignments/markerfeedback/preview")
 		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @PathVariable assignment: Assignment,
-							 @ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
+	def doUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, @PathVariable assignment: Assignment, errors: Errors): Mav = {
 
-		doChecks(module, assignment)
 		cmd.preExtractValidation(errors)
-		cmd.onBind
 		cmd.postExtractValidation(errors)
 
 		if (errors.hasErrors) {
-			confirmUpload(module, assignment, cmd, errors)
+			confirmUpload(cmd, errors)
 		} else {
 			// do apply, redirect back
 			cmd.apply()
 			Redirect(Routes.admin.assignment.markerFeedback(assignment))
 		}
-	}
-
-	def doChecks(module: Module, assignment: Assignment){
-		mustBeAbleTo(UploadMarkerFeedback(assignment))
-		mustBeLinked(mandatory(assignment), mandatory(module))
 	}
 
 }

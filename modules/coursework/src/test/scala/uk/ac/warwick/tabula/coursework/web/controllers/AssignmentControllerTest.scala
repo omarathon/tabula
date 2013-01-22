@@ -20,8 +20,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val controller = new AssignmentController with TestControllerOverrides
 		val assignment = newDeepAssignment("CS101")
 		val module = assignment.module
-		val form = new SubmitAssignmentCommand(assignment, currentUser)
-		form.module = module
+		val form = new SubmitAssignmentCommand(module, assignment, currentUser)
 		val errors = new BindException(form, "command")
 		
 		val feedbackDao = smartMock[FeedbackDao]
@@ -37,7 +36,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
-				val mav = controller.view(currentUser, form, errors)
+				val mav = controller.view(form.module, form.assignment, currentUser, form, errors)
 				withClue(mav) { mav.map should contain key ("feedback") }
 			}
 		}

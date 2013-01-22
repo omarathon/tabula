@@ -114,7 +114,7 @@
 						<div class="tab-pane ${tab1class}" id="membership-tab1">
 							<#if membershipDetails?size gt 0>
 								<a href="#"
-										class="btn disabled refresh-form has-tooltip"
+										class="btn disabled hide-checked-users has-tooltip"
 										id="membership-remove-selected"
 										<#if assessmentGroup??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 										>
@@ -148,7 +148,7 @@
 														<#if item.itemType='include'><i class="icon-plus-sign"></i></#if>
 														<#if item.itemType='exclude'><i class="icon-minus-sign"></i></#if>
 
-														<#if item.itemType='exclude' && item.userId??><a class="btn btn-mini restore refresh-form" data-usercode="${item.userId}">Restore</a></#if>
+														<#if item.itemType='exclude' && item.userId??><a class="btn btn-mini restore-user" data-usercode="${item.userId}">Restore</a></#if>
 
 														<#if u.foundUser>
 															${u.userId} <#if item.universityId??>(${item.universityId})</#if>
@@ -250,6 +250,25 @@
 			$('.refresh-form').click(function(e) {
 			    e.preventDefault();
 				refreshForm();
+			});
+						
+			$('.restore-user').click(function(e) {
+			    e.preventDefault();			    
+			    var $this = $(this);
+				$('#focusOn').val('member-list');				
+				var $usercode = $this.data('usercode');
+				$membershipPicker.find('input:hidden[value=$usercode][name=excludeUsers]').remove();
+				$this.closest('form').append(
+					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
+				);
+				$(this).closest('tr').removeClass('item-type-exclude').addClass('item-type-sits');
+				$(this).closest('tr').find('i.icon-minus-sign').remove();
+				$(this).closest('tr').find('a.restore-user').remove();
+			});
+			
+			$('.hide-checked-users').click(function(e) {
+			    e.preventDefault();
+			    $membershipPicker.find('input.collection-checkbox:checked').parents('.membership-item').hide();
 			});
 
 			$('select#academicYear').change(function(e) {

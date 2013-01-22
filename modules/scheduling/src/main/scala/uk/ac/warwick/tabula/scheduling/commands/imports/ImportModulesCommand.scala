@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.imports
+package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
+import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
+import uk.ac.warwick.tabula.scheduling.services.ModuleImporter
+import uk.ac.warwick.tabula.scheduling.services.RouteInfo
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 

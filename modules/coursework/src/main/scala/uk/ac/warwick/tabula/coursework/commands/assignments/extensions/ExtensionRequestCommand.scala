@@ -15,10 +15,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.tabula.system.BindListener
 
 
 class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
-	extends Command[Extension] with Daoisms {
+	extends Command[Extension] with Daoisms with BindListener {
 
 	@BeanProperty var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -50,7 +51,7 @@ class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentU
 		modified = true
 	}
 
-	def onBind() = transactional() {
+	override def onBind = transactional() {
 		file.onBind
 	}
 

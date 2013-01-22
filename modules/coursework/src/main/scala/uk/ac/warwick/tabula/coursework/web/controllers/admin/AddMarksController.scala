@@ -32,16 +32,14 @@ class AddMarksController extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AdminAddMarksCommand): Mav = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		val members = assignmentService.determineMembershipUsers(assignment)
+		val members = assignmentService.determineMembershipUsers(cmd.assignment)
 
 		val marksToDisplay = members.map { member =>
 			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
 			noteMarkItem(member, feedback)
 		}
 
-		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), module)
+		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), cmd.module)
 
 	}
 
@@ -55,7 +53,7 @@ class AddMarksController extends CourseworkController {
 		feedback match {
 			case Some(f) => {
 				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
-				markItem.actualGrade = f.actualGrade
+				markItem.actualGrade = f.actualGrade.map { _.toString }.getOrElse("")
 			}
 			case None => {
 				markItem.actualMark = ""
@@ -80,9 +78,6 @@ class AddMarksController extends CourseworkController {
 	}
 
 	private def bindAndValidate(module: Module, cmd: AdminAddMarksCommand, errors: Errors) {
-		mustBeLinked(cmd.assignment, module)
-		mustBeAbleTo(Participate(module))
-		cmd.onBind
 		cmd.postExtractValidation(errors)
 	}
 
