@@ -20,8 +20,9 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.permissions.Public
 
-class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with InitializingBean {
+class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with Public with InitializingBean {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
 	var adminMailAddress = Wire.property("${mail.admin.to}")

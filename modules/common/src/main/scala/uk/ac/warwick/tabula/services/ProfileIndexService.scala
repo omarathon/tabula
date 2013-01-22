@@ -56,8 +56,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 	
-	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
-		if (departments.isEmpty && !sysAdmin) Seq()
+	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
+		if (departments.isEmpty && !isGod) Seq()
 		else try {
 			val bq = new BooleanQuery
 
@@ -66,7 +66,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 				bq.add(q, Occur.MUST)
 			}
 
-			if (!sysAdmin) {
+			if (!isGod) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments)
 					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
@@ -87,10 +87,11 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}
+	}
 	
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], sysAdmin: Boolean): Seq[Member] =
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] =
 		if (!StringUtils.hasText(query)) Seq()
-		else findWithQuery(query, departments, userTypes, sysAdmin)
+		else findWithQuery(query, departments, userTypes, isGod)
 	
 	def find(ownDepartment: Department, userTypes: Set[MemberUserType]): Seq[Member] =
 		findWithQuery("", Seq(ownDepartment), userTypes, false)

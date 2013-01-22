@@ -33,7 +33,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
-		val currentUser: CurrentUser = request.getAttribute("SSO_USER") match {
+		val currentUser: CurrentUser = request.getAttribute(SSOClientFilter.USER_KEY) match {
 			case FoundUser(user) => resolveCurrentUser(user, apparentUser(request), godCookieExists(request))
 			case _ => NoCurrentUser()
 		}
@@ -42,12 +42,12 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	private def godCookieExists(request: HttpServletRequest): Boolean =
-		request.getCookies().getBoolean("tabulaGodMode", false)
+		request.getCookies().getBoolean(CurrentUser.godModeCookie, false)
 
 	// masquerade support
 	private def apparentUser(request: HttpServletRequest)(realUser: User, sysadmin: Boolean): User =
 		if (sysadmin) {
-			request.getCookies.getString("tabulaMasqueradeAs") match {
+			request.getCookies.getString(CurrentUser.masqueradeCookie) match {
 				case Some(userid) => userLookup.getUserByUserId(userid) match {
 					case user: User if user.isFoundUser() => user
 					case _ => realUser

@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.actions.UniversityMember
 
 /**
  * Trait that allows classes to call PermissionsCheck() in their inline definitions 
@@ -26,6 +27,12 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 		permissionsChecks += action
 	}
 
+}
+
+trait Public extends PermissionsChecking
+
+trait AllUniversityMembers extends PermissionsChecking {
+		PermissionsCheck(UniversityMember())
 }
 
 abstract trait PermissionsCheckingMethods extends Logging {

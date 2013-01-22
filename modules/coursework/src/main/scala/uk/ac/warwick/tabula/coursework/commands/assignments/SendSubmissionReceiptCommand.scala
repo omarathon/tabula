@@ -16,19 +16,17 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.actions.View
 
 /**
  * Send an email confirming the receipt of a submission to the student
  * who submitted it.
  */
-class SendSubmissionReceiptCommand(
-	@BeanProperty var submission: Submission,
-	@BeanProperty var user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {
-
-	def this() = this(null, null)
-
-	@BeanProperty var assignment: Assignment = Option(submission).map { _.assignment }.orNull
-	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
+class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(View(mandatory(submission)))
 
 	implicit var freemarker = Wire.auto[Configuration]
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")

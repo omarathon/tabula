@@ -34,6 +34,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.Public
 
 /**
  * Screens for department and module admins.
@@ -68,7 +69,12 @@ class AdminHome extends CourseworkController {
 
 }
 
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
+/**
+ * This command has the Public trait, which is semantically wrong - but it does its permissions checking in-line to handle module managers.
+ * 
+ * If we didn't have the Public trait, we'd throw an assertion error for module managers.
+ */
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited with Public {
 	
 	var securityService = Wire.auto[SecurityService]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]

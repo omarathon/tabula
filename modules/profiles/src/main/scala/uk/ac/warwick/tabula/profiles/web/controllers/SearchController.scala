@@ -20,7 +20,7 @@ import uk.ac.warwick.spring.Wire
 @Controller
 class SearchController extends ProfilesController {
 	
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember)
+	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember, user)
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchProfilesCommand) = Mav("profile/search/form")

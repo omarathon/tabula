@@ -30,9 +30,12 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties  {
+	
+	PermissionsCheck(Sysadmin())
 	
 	var memberDao = Wire.auto[MemberDao]
 	var fileDao = Wire.auto[FileDao]

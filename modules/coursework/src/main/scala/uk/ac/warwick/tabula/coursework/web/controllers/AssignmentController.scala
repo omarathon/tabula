@@ -16,22 +16,30 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.SubmitPermissionDeniedException
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.FeedbackDao
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
  */
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
-class AssignmentController extends AbstractAssignmentController {
+class AssignmentController extends CourseworkController {
+	
+	var assignmentService = Wire.auto[AssignmentService]
+	var feedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
 
 	validatesSelf[SubmitAssignmentCommand]
+	
+	private def getFeedback(assignment: Assignment, user: CurrentUser) = 
+		feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
 
 	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
 		restrictedBy {
-			val feedback = checkCanGetFeedback(mandatory(assignment), user)
-			!feedback.isEmpty
+			getFeedback(assignment, user).isDefined
 		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)) orNull
 
 	/**
@@ -50,7 +58,7 @@ class AssignmentController extends AbstractAssignmentController {
 		if (!user.loggedIn) {
 			RedirectToSignin()
 		} else {
-		    val feedback = checkCanGetFeedback(assignment, user)
+		    val feedback = getFeedback(assignment, user)
 
 			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
@@ -107,7 +115,7 @@ class AssignmentController extends AbstractAssignmentController {
 			// submission creation should be committed to DB at this point, 
 			// so we can safely send out a submission receipt.
 			transactional() {
-				val sendReceipt = new SendSubmissionReceiptCommand(submission, user)
+				val sendReceipt = new SendSubmissionReceiptCommand(module, assignment, submission, user)
 				sendReceipt.apply()
 			}
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)

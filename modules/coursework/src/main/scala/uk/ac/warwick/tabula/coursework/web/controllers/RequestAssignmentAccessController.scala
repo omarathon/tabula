@@ -11,7 +11,7 @@ import collection.mutable
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/request-access"))
-class RequestAssignmentAccessController extends AbstractAssignmentController {
+class RequestAssignmentAccessController extends CourseworkController {
 
 	hideDeletedItems
 

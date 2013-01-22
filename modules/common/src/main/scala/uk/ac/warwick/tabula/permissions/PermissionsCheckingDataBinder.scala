@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.permissions
 import scala.collection.JavaConversions._
-
 import org.springframework.web.bind.support.WebBindingInitializer
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.InvocableHandlerMethod
 import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
-
 import javax.servlet.ServletRequest
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.util.Assert
 
 class PermissionsCheckingDataBinder(val target: Any, val objectName: String) extends ExtendedServletRequestDataBinder(target, objectName) with Logging {
 	
@@ -23,7 +22,11 @@ class PermissionsCheckingDataBinder(val target: Any, val objectName: String) ext
 		
 	// Permissions checking
 	if (target.isInstanceOf[PermissionsChecking]) {
-		for (action <- target.asInstanceOf[PermissionsChecking].permissionsChecks)
+		val checkThis = target.asInstanceOf[PermissionsChecking]
+		
+		Assert.isTrue(!checkThis.permissionsChecks.isEmpty || target.isInstanceOf[Public], "Bind target " + target.getClass + " must specify permissions or extend Public")
+		
+		for (action <- checkThis.permissionsChecks)
 			securityService.check(user, action)
 	}
 

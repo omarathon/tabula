@@ -19,10 +19,11 @@ import javax.persistence.FetchType
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import uk.ac.warwick.tabula.data.model.SubmissionState._
+import uk.ac.warwick.tabula.actions.Viewable
 
 
 @Entity @AccessType("field")
-class Submission extends GeneratedId with Deleteable {
+class Submission extends GeneratedId with Deleteable with Viewable {
 
 	def this(universityId: String = null) {
 		this()

@@ -3,18 +3,19 @@ package uk.ac.warwick.tabula.coursework.commands.modules
 import uk.ac.warwick.tabula
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.Transactions._
-
 import commands.{ Description, SelfValidating }
 import data.Daoisms
 import data.model._
-
 import collection.JavaConversions._
 import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
 import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 
 class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidating {
+	
+	PermissionsCheck(Sysadmin())
 
 	@BeanProperty var department: Department = _
 

@@ -66,7 +66,10 @@ class SecurityService extends Logging {
 
 		// should only be called on extension requests i.e. extension.isManual == false
 		case Manage(extensionRequest: Extension) =>
-			extensionRequest.assignment.module.department.isExtensionManager(user.apparentId)
+			extensionRequest.assignment.module.department.isExtensionManager(user.apparentId) || can(user, Participate(extensionRequest.assignment.module))
+			
+		case View(extensionRequest: Extension) =>
+			extensionRequest.userId == user.apparentId || can(user, Manage(extensionRequest)) || can(user, Participate(extensionRequest.assignment.module))
 
 		// View module = see what assignments are in a module
 		case View(module: Module) => can(user, View(module.department))
@@ -74,6 +77,9 @@ class SecurityService extends Logging {
 		case View(assignment: Assignment) => can(user, View(assignment.module))
 
 		case Submit(assignment: Assignment) => can(user, View(assignment.module))
+		
+		case View(submission: Submission) => submission.universityId == user.universityId ||
+			can(user, View(submission.assignment))
 
 		case View(feedback: Feedback) => feedback.universityId == user.universityId ||
 			can(user, View(feedback.assignment))
@@ -88,6 +94,10 @@ class SecurityService extends Logging {
 		case UploadMarkerFeedback(assignment: Assignment) => assignment.isMarker(user.apparentUser)
 
 		case Masquerade() => user.sysadmin || user.masquerader
+		
+		case Sysadmin() => user.sysadmin
+		
+		case UniversityMember() => user.isMember
 		
 		case View(member: Member) => {
 			def isSamePerson = user.apparentId == member.userId
