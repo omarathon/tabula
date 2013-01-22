@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 /** 
  * Go through each synced file on the filesystem and delete any file where there isn't 
@@ -23,6 +24,8 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 	import CleanupUnreferencedFilesCommand._
 	import FunctionalFileFilter._
+	
+	PermissionsCheck(Sysadmin())
 	
 	var fileDao = Wire.auto[FileDao]
 	

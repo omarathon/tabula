@@ -17,22 +17,21 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import scala.None
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.actions.View
 
+class DownloadAttachmentCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[Option[RenderableFile]] with ReadOnly {
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(View(submission))
 
-class DownloadAttachmentCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
-  var assignmentService = Wire.auto[AssignmentService]
-
-	@BeanProperty var module: Module = _
-	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var filename: String = _
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
 	def applyInternal() = {
-		val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId);
-		val allAttachments = submission map { _.allAttachments } getOrElse Nil
-		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
+		val attachment = submission.allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 
 		fileFound = attachment.isDefined
 		if (callback != null) {

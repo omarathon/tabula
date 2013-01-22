@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.{Type, AccessType}
-
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.actions.{Manageable, Deleteable}
 import scala.Array
@@ -14,9 +13,10 @@ import org.joda.time.DateTime
 import javax.persistence.FetchType._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.actions.Viewable
 
 @Entity @AccessType("field")
-class Extension extends GeneratedId with Deleteable with Manageable {
+class Extension extends GeneratedId with Deleteable with Manageable with Viewable {
 
 	def this(universityId:String=null) {
 		this()

@@ -26,6 +26,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.commands.Description
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -49,36 +53,44 @@ class HomeController extends BaseSysadminController {
 	@RequestMapping(Array("/")) def home = redirectToHome
 }
 
-class ReindexAuditEventsForm {
+class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
+	PermissionsCheck(Sysadmin())
+	
 	var indexer = Wire.auto[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
 
-	def reindex = {
+	def applyInternal() = {
 		indexer.indexFrom(from)
 	}
+	
+	def describe(d: Description) = d.property("from" -> from)
 }
 
-class ReindexProfilesForm {
+class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
+	PermissionsCheck(Sysadmin())
+	
 	var indexer = Wire.auto[ProfileIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
 
-	def reindex = {
+	def applyInternal() = {
 		indexer.indexFrom(from)
 	}
+	
+	def describe(d: Description) = d.property("from" -> from)
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-audit"))
 class SysadminIndexAuditController extends BaseSysadminController {
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsForm
+	@ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsCommand
 	
 	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexAuditEventsForm) = {
-		form.reindex
+	def reindex(form: ReindexAuditEventsCommand) = {
+		form.apply
 		redirectToHome
 	}
 }
@@ -86,11 +98,11 @@ class SysadminIndexAuditController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-profiles"))
 class SysadminIndexProfilesController extends BaseSysadminController {
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesForm
+	@ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesCommand
 	
 	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexProfilesForm) = {
-		form.reindex
+	def reindex(form: ReindexProfilesCommand) = {
+		form.apply
 		redirectToHome
 	}
 }

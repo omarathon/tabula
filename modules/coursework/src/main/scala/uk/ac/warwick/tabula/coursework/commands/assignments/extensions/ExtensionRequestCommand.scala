@@ -16,10 +16,16 @@ import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Submit
+import uk.ac.warwick.tabula.commands.SelfValidating
 
 
-class ExtensionRequestCommand(val assignment:Assignment, val submitter: CurrentUser)
-	extends Command[Extension] with Daoisms with BindListener {
+class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
+	extends Command[Extension] with Daoisms with BindListener with SelfValidating {
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(Submit(assignment))
 
 	@BeanProperty var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

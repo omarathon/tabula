@@ -39,6 +39,9 @@ case class Masquerade() extends Action[Unit]
 /** Whether you're allowed to perform system administration actions */
 case class Sysadmin() extends Action[Unit]
 
+/** A simple test of whether you're a member of the University */
+case class UniversityMember() extends Action[Unit]
+
 case class Delete(val d: Deleteable) extends Action[Deleteable]
 
 case class Create() extends Action[Unit]

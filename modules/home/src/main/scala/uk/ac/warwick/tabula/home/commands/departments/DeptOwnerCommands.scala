@@ -6,9 +6,12 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.Department
 import org.hibernate.validator.constraints.NotEmpty
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 
 class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with Daoisms {
+	
+	PermissionsCheck(Sysadmin())
 
 	def getUsercodes: Seq[String] = department.owners.members
 
@@ -25,6 +28,8 @@ class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with
 }
 
 class RemoveDeptOwnerCommand(val department: Department) extends Command[Unit] with Daoisms {
+	
+	PermissionsCheck(Sysadmin())
 
 	def getUsercodes: Seq[String] = department.owners.members
 

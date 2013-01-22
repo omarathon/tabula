@@ -16,12 +16,13 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.permissions.Public
 
 /**
  * Sends a message to one or more admins to let them know that the current
  * user thinks they should have access to an assignment.
  */
-class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering with UnicodeEmails {
+class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering with UnicodeEmails with Public {
 
 	@BeanProperty var module: Module = _
 	@BeanProperty var assignment: Assignment = _

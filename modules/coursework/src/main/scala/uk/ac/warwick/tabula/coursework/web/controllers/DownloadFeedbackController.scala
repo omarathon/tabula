@@ -12,12 +12,20 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletRequest
+import org.springframework.web.bind.annotation.PathVariable
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
-class DownloadFeedbackController extends AbstractAssignmentController {
+class DownloadFeedbackController extends CourseworkController {
+	
+	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@ModelAttribute def command(user: CurrentUser) = new DownloadFeedbackCommand(user)
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) 
+		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 
 	@Autowired var fileServer: FileServer = _
 
@@ -29,11 +37,6 @@ class DownloadFeedbackController extends AbstractAssignmentController {
 
 	@RequestMapping(value = Array("/get/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getOne(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		mustBeLinked(command.assignment, command.module)
-
-		// Does permission checks.
-		checkCanGetFeedback(command.assignment, user)
-
 		// specify callback so that audit logging happens around file serving
 		command.callback = { (renderable) => fileServer.serve(renderable) }
 		command.apply().orElse { throw new ItemNotFoundException() }

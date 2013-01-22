@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.actions.Manage
 
 class AddMarkSchemeCommand(department: Department) extends ModifyMarkSchemeCommand(department) {
-	
-	PermissionsCheck(Manage(department))
 
 	// Copy properties to a new markscheme, save it transactionally, return it.
 	def applyInternal() = {

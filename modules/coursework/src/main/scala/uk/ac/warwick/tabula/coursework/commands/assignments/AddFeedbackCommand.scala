@@ -9,10 +9,9 @@ import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.actions.Participate
 
-class AddFeedbackCommand(val module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[Feedback]](assignment, submitter)  {
+class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
+	extends UploadFeedbackCommand[List[Feedback]](module, assignment, submitter)  {
 	
-	mustBeLinked(assignment, module)
 	PermissionsCheck(Participate(module))
 
 	override def applyInternal(): List[Feedback] = transactional() {
