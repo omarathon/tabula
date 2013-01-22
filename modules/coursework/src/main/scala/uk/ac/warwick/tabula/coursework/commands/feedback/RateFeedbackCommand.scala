@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.View
 
 
 /**
@@ -24,7 +26,14 @@ case class NullableBoolean(@BeanProperty var value: JBoolean) {
 	}
 }
 
-class RateFeedbackCommand(val feedback: Feedback, val features: Features) extends Command[Unit] {
+class RateFeedbackCommand(val feedback: Feedback) extends Command[Unit] {
+	def this(opt: Option[Feedback]) {
+		this(opt.orNull)
+	}
+	
+	PermissionsCheck(View(mandatory(feedback)))
+	
+	var features = Wire.auto[Features]
 
 	//	@BeanProperty var rating:JInteger = _ 
 

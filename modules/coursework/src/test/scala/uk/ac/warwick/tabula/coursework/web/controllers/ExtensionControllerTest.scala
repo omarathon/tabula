@@ -8,21 +8,22 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{ExtensionItem, ModifyExtensionCommand}
+import uk.ac.warwick.tabula.coursework.web.controllers.admin.AddExtensionController
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.AddExtensionCommand
 
 
 class ExtensionControllerTest extends TestBase with Mockito {
 
   @Test def returnJson(){
     withUser("cuslaj") {
-      val controller = new ExtensionController()
-      controller.assignmentService = mock[AssignmentService]
+      val controller = new AddExtensionController()
       controller.json = json
 
       val assignment = newDeepAssignment()
       assignment.closeDate = DateTime.parse("2012-08-15T12:00")
       assignment.extensions += new Extension("1170836")
 
-      val command = new ModifyExtensionCommand(assignment, currentUser)
+      val command = new AddExtensionCommand(assignment.module, assignment, currentUser)
       command.userLookup = mock[UserLookupService]
       command.extensionItems = mockExtensions
 

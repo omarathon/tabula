@@ -7,10 +7,15 @@ import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
+import uk.ac.warwick.tabula.data.model.Module
 
 
-class AddMarkerFeedbackCommand(assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
+class AddMarkerFeedbackCommand(val module: Module, assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](assignment, submitter)  {
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionsCheck(UploadMarkerFeedback(assignment))
 
 	// list to contain feedback files that are not for a student you should be marking
 	@BeanProperty var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()

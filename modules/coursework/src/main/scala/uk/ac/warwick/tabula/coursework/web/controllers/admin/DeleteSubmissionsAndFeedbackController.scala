@@ -1,36 +1,27 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
+import scala.collection.JavaConversions._
+
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.data.model.Assignment
-import org.springframework.transaction.annotation.Transactional
+
 import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Delete
-import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionsAndFeedbackCommand
-import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Module
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/delete"))
 class DeleteSubmissionsAndFeedback extends CourseworkController {
-	
-	@Autowired var assignmentService: AssignmentService = _
-	@Autowired var feedbackDao: FeedbackDao = _
 
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionsAndFeedbackCommand(assignment)
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionsAndFeedbackCommand(module, assignment)
 
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 
@@ -44,39 +35,24 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
+	def get(form: DeleteSubmissionsAndFeedbackCommand) = RedirectBack(form.assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable("module") module: Module, form: DeleteSubmissionsAndFeedbackCommand, errors: Errors) = {
-		val assignment = form.assignment
-		mustBeLinked(assignment, module)
-
-		for (uniId <- form.students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-			mustBeAbleTo(Delete(mandatory(submission)))
-		}
-
-		for (uniId <- form.students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-			mustBeAbleTo(Delete(mandatory(feedback)))
-		}
-		
+	def showForm(form: DeleteSubmissionsAndFeedbackCommand, errors: Errors) = {
 		form.prevalidate(errors)
-		formView(assignment)
+		formView(form.assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-			@PathVariable("module") module: Module,
 			@Valid form: DeleteSubmissionsAndFeedbackCommand,
 			errors: Errors) = {
 		transactional() {
-			val assignment = form.assignment
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors) {
-				formView(assignment)
+				formView(form.assignment)
 			} else {
 				form.apply()
-				RedirectBack(assignment)
+				RedirectBack(form.assignment)
 			}
 		}
 	}

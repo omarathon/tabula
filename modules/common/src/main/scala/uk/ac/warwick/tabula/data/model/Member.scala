@@ -85,11 +85,11 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 	@BeanProperty def description = {
-		def userType = Option(groupName) orElse(Option(""))
-		def courseName = Option(route) map (", " + _.name) orElse(Option(""))
-		def deptName = Option(homeDepartment) map (", " + _.name) orElse(Option(""))
+		val userType = Option(groupName).getOrElse("")
+		val courseName = Option(route).map(", " + _.name).getOrElse("")
+		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 		 
-		userType.get + courseName.get + deptName.get
+		userType + courseName + deptName
 	}
 	
 	/** 

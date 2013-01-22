@@ -11,15 +11,22 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 
-class DeleteExtensionCommand(val assignment: Assignment, val submitter: CurrentUser) extends Command[List[String]]
+class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
-
-	var userLookup = Wire.auto[UserLookupService]
 	
 	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
 
+	universityIds.add(universityId)
+	
+	mustBeLinked(assignment,module)
+	PermissionsCheck(Participate(module))
+
+	var userLookup = Wire.auto[UserLookupService]
+	
 	override def applyInternal(): List[String] = transactional() {
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true

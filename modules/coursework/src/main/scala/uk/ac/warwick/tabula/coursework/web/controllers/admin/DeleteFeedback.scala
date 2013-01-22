@@ -21,7 +21,8 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/delete"))
 class DeleteFeedback extends CourseworkController {
 	@ModelAttribute
-	def command(@PathVariable("assignment") assignment: Assignment) = new DeleteFeedbackCommand(assignment)
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+		new DeleteFeedbackCommand(module, assignment)
 
 	validatesSelf[DeleteFeedbackCommand]
 
@@ -30,29 +31,22 @@ class DeleteFeedback extends CourseworkController {
 		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable("assignment") assignment: Assignment) = Redirect(Routes.admin.assignment.feedback(assignment))
+	def get(form: DeleteFeedbackCommand) = Redirect(Routes.admin.assignment.feedback(form.assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
-		form: DeleteFeedbackCommand, errors: Errors) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Delete(mandatory(form.feedbacks.headOption)))
+	def showForm(form: DeleteFeedbackCommand, errors: Errors) = {
 		form.prevalidate(errors)
-		formView(assignment)
+		formView(form.assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-		@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
-		@Valid form: DeleteFeedbackCommand, errors: Errors) = {
+	def submit(@Valid form: DeleteFeedbackCommand, errors: Errors) = {
 		transactional() {
-			mustBeLinked(assignment, module)
-			mustBeAbleTo(Participate(module))
 			if (errors.hasErrors) {
-				formView(assignment)
+				formView(form.assignment)
 			} else {
 				form.apply()
-				Redirect(Routes.admin.assignment.feedback(assignment))
+				Redirect(Routes.admin.assignment.feedback(form.assignment))
 			}
 		}
 	}

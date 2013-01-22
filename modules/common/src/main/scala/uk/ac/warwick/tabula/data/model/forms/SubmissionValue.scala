@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.BindListener
 
 /**
  * Base object for binding an individual submitted field from an assignment
@@ -22,9 +23,9 @@ import uk.ac.warwick.spring.Wire
  * For persisting a submission, a SavedSubmissionValue is created and persist()
  * is called to insert the specific data for saving.
  */
-abstract class SubmissionValue {
+abstract class SubmissionValue extends BindListener {
 	val field: FormField
-	def onBind {}
+	override def onBind {}
 	def persist(value: SavedSubmissionValue)
 }
 

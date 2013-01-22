@@ -12,19 +12,17 @@ import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
 
 /**
  * Creates a job that submits the assignment to Turnitin.
  *
  * Returns the job instance ID for status tracking.
  */
-class SubmitToTurnitinCommand(@BeanProperty var user: CurrentUser) extends Command[String] {
-
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var module: Module = _
-
-	// empty constructor for Spring binding
-	def this() = this(null)
+class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[String] {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var jobService = Wire.auto[JobService]
 

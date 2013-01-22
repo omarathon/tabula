@@ -29,14 +29,12 @@ class FeedbackRatingController extends AbstractAssignmentController {
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("module") module: Module) = {
 		mustBeLinked(assignment, module)
-		new RateFeedbackCommand(mandatory(checkCanGetFeedback(assignment, user).orNull), features)
+		new RateFeedbackCommand(checkCanGetFeedback(assignment, user))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(command: RateFeedbackCommand): Mav = {
-		mustBeAbleTo(View(command.feedback))
+	def form(command: RateFeedbackCommand): Mav = 
 		Mav("submit/rating").noLayoutIf(ajax)
-	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(command: RateFeedbackCommand, errors: Errors): Mav = {

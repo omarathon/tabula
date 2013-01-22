@@ -12,18 +12,21 @@ import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
 import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.spring.Wire
+import org.springframework.web.bind.annotation.ModelAttribute
 
-@Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
-class MarksTemplateController extends CourseworkController {
+class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
+	import MarksTemplateCommand._
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
-	@Autowired var assignmentService: AssignmentService = _
-
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-
+	var assignmentService = Wire.auto[AssignmentService]
+	
+	def applyInternal() = {
 		val members = assignmentService.determineMembershipUsers(assignment)
 
 		val workbook = new XSSFWorkbook()
@@ -44,8 +47,8 @@ class MarksTemplateController extends CourseworkController {
 
 		// add conditional formatting for invalid marks
 		addConditionalFormatting(sheet)
-
-		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", workbook)
+		
+		workbook
 	}
 
 	def generateNewMarkSheet(assignment: Assignment, workbook: XSSFWorkbook) = {
@@ -71,6 +74,28 @@ class MarksTemplateController extends CourseworkController {
 		val marksColumn = Array(new CellRangeAddress(1, sheet.getLastRowNum, 1, 1))
 		sheetCF.addConditionalFormatting(marksColumn, invalidMarkRule)
 	}
+	
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
+class MarksTemplateController extends CourseworkController {
+	import MarksTemplateCommand._
+	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+		new GenerateMarksTemplateCommand(module, assignment)
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand) = {
+		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
+	}
+
+}
+
+object MarksTemplateCommand {
+
+	// util to replace unsafe characters with spaces
+	def safeAssignmentName(assignment: Assignment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assignment))
 
 	// trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
 	// "Marks for " = 10 chars + assignment name (max 21) = 31
@@ -79,9 +104,6 @@ class MarksTemplateController extends CourseworkController {
 			assignment.name.substring(0, 21)
 		else
 			assignment.name
-	}
-
-	// util to replace unsafe characters with spaces
-	def safeAssignmentName(assignment: Assignment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assignment))
-
+	}	
+	
 }

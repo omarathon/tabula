@@ -16,6 +16,13 @@
 	</a>
 </#macro>
 
+<#macro admin_assignment_link assignment>
+	<@module_name assignment.module />
+	<a href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
+		<span class="ass-name">${assignment.name}</span>
+	</a>
+</#macro>
+
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true><#--
 -->${dateBuilder(date, seconds, at, timezone, capitalise, relative)}<#--
 --></#macro>

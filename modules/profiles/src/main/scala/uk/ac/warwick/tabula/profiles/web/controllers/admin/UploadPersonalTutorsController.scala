@@ -16,11 +16,10 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/admin/department/{department}/tutors"))
 class UploadPersonalTutorsController extends ProfilesController {
 
-	@ModelAttribute def command = new UploadPersonalTutorsCommand
+	@ModelAttribute def command(@PathVariable department: Department) = new UploadPersonalTutorsCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@PathVariable department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
-		mustBeAbleTo(Manage(department))
 		Mav("admin/department/tutors/uploadform")
 	}
 
@@ -38,7 +37,6 @@ class UploadPersonalTutorsController extends ProfilesController {
 	}
 
 	private def bindAndValidate(department: Department, cmd: UploadPersonalTutorsCommand, errors: Errors) {
-		mustBeAbleTo(Manage(department))
 		cmd.onBind
 		cmd.postExtractValidation(errors, department)
 	}

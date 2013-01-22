@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.reflect.BeanProperty
-
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -16,12 +14,17 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.actions.Participate
 
 /**
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
  * depending on the value of submissionOrFeedback
  */
-class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]
@@ -45,7 +48,7 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 	def applyInternal() = {			
 		if (shouldDeleteSubmissions) {
 			for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-				assignmentService.delete(submission)
+				assignmentService.delete(mandatory(submission))
 				submissionsDeleted = submissionsDeleted + 1
 			}
 			zipService.invalidateSubmissionZip(assignment)
@@ -53,7 +56,7 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 
 		if (shouldDeleteFeedback) {
 			for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-				feedbackDao.delete(feedback)
+				feedbackDao.delete(mandatory(feedback))
 				feedbacksDeleted = feedbacksDeleted + 1
 			}
 			zipService.invalidateFeedbackZip(assignment)
@@ -62,11 +65,11 @@ class DeleteSubmissionsAndFeedbackCommand(val assignment: Assignment) extends Co
 
 	def prevalidate(errors: Errors) {
 		for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-			if (submission.assignment != assignment) errors.reject("submission.bulk.wrongassignment")
+			if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
 		}
 
 		for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-			if (feedback.assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
+			if (mandatory(feedback).assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
 		}
 		
 		if (!Seq(SubmissionOnly, FeedbackOnly, SubmissionAndFeedback).contains(submissionOrFeedback)) {

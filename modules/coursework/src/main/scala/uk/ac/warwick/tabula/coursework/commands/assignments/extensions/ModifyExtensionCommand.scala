@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Description, Command}
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -16,13 +16,33 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.actions.Manage
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
-class ModifyExtensionCommand(val assignment:Assignment, val submitter: CurrentUser)
+class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
+	extends ModifyExtensionCommand(module, assignment, submitter)
+
+class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
+	extends ModifyExtensionCommand(module, assignment, submitter) {
+	
+	copyExtensions(List(extension))	
+}
+
+class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
+	extends EditExtensionCommand(module, assignment, extension, submitter) {
+	
+	PermissionsCheck(Manage(extension))
+}
+
+abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
 		extends Command[List[Extension]] with Daoisms with Logging	{
+	
+	mustBeLinked(assignment,module)
+	PermissionsCheck(Participate(module))
 		
 	var userLookup = Wire.auto[UserLookupService]
 	

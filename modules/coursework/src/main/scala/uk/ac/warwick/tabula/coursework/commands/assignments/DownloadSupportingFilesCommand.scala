@@ -7,20 +7,18 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
-
-class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
-
-	@BeanProperty var module: Module = _
-	@BeanProperty var assignment: Assignment = _
-	@BeanProperty var filename: String = _
+class DownloadSupportingFilesCommand(val module: Module, val assignment: Assignment, val extension: Extension, val filename: String) extends Command[Option[RenderableFile]] with ReadOnly{
+	
+	mustBeLinked(mandatory(assignment), mandatory(module))
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
 	def applyInternal() = {
-		val extension = assignment.findExtension(user.universityId)
-		val allAttachments = extension map {_.nonEmptyAttachments} getOrElse Nil
+		val allAttachments = extension.nonEmptyAttachments
 		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 
 		fileFound = attachment.isDefined
@@ -39,4 +37,10 @@ class DownloadSupportingFilesCommand(user: CurrentUser) extends Command[Option[R
 		d.property("fileFound", fileFound)
 	}
 
+}
+
+class AdminDownloadSupportingFilesCommand(module: Module, assignment: Assignment, extension: Extension, filename: String) 
+	extends DownloadSupportingFilesCommand(module, assignment, extension, filename) {
+	
+	PermissionsCheck(Manage(mandatory(extension)))
 }

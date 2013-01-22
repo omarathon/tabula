@@ -31,8 +31,11 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.util.core.StringUtils.hasText
 import scala.collection.mutable.Buffer
+import uk.ac.warwick.tabula.actions.Manage
 
-class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging {
+class UploadPersonalTutorsCommand(val department: Department) extends Command[Int] with Daoisms with Logging {
+	
+	PermissionsCheck(Manage(department))
 
 	var userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]

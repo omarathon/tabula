@@ -19,30 +19,32 @@ import uk.ac.warwick.tabula.services.fileserver.FileServer
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-class DownloadFeedback extends CourseworkController {
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+class DownloadSelectedFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
-
-	@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-
-		feedbackDao.getFeedback(feedbackId) match {
-			case Some(feedback) => {
-				mustBeLinked(feedback, assignment)
-				val renderable = new AdminGetSingleFeedbackCommand(feedback).apply()
-				fileServer.serve(renderable)
-			}
-			case None => throw new ItemNotFoundException
-		}
-	}
 	
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
+	@ModelAttribute def singleFeedbackCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String) = 
+		new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
+
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		fileServer.serve(cmd.apply())
+	}
+}
+
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
+class DownloadAllFeedbackController extends CourseworkController {
+	
+	var fileServer = Wire.auto[FileServer]
+	
+	@ModelAttribute def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		new DownloadSelectedFeedbackCommand(module, assignment)
+	
+	@RequestMapping
     def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
         val (assignment, module, filename) = (command.assignment, command.module, command.filename)
-        mustBeLinked(assignment, module)
-        mustBeAbleTo(Participate(module))
         command.apply { renderable =>
             fileServer.serve(renderable)
         }
@@ -54,27 +56,26 @@ class DownloadFeedback extends CourseworkController {
 class DownloadAllFeedback extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		new AdminGetAllFeedbackCommand(module, assignment)
+	
 	@RequestMapping
-	def download(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
-		val renderable = new AdminGetAllFeedbackCommand(assignment).apply()
-		fileServer.serve(renderable)
+	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		fileServer.serve(cmd.apply())
 	}
 }
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
-class ListFeedback extends CourseworkController {
-	var auditIndexService = Wire.auto[AuditEventIndexService]
+class ListFeedback extends CourseworkController {	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		new ListFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(@PathVariable module: Module, @PathVariable assignment: Assignment) = {
-		mustBeLinked(assignment, module)
-		mustBeAbleTo(Participate(module))
+	def get(cmd: ListFeedbackCommand) = {
 		Mav("admin/assignments/feedback/list",
-			"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment))
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			"whoDownloaded" -> cmd.apply())
+			.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 }
 

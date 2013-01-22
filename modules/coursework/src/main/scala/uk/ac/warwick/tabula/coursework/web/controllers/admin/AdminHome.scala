@@ -32,6 +32,8 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.spring.Wire
 
 /**
  * Screens for department and module admins.
@@ -43,6 +45,9 @@ class AdminHome extends CourseworkController {
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
 	hideDeletedItems
+	
+	@ModelAttribute def command(@PathVariable dept: Department, user: CurrentUser) =
+		new AdminDepartmentHomeCommand(dept, user)
 
 	@RequestMapping(Array("/admin/"))
 	def homeScreen(user: CurrentUser) = {
@@ -51,28 +56,39 @@ class AdminHome extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/admin/department/{dept}/"))
-	def adminDepartment(@PathVariable dept: Department, user: CurrentUser) = {
-		val isDeptManager = can(Manage(mandatory(dept)))
-		val modules: JList[Module] = if (isDeptManager) {
-			dept.modules
-		} else {
-			moduleService.modulesManagedBy(user.idForPermissions, dept).toList
-		}
-		if (modules.isEmpty()) {
-			mustBeAbleTo(Manage(dept))
-		}
+	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
+		val info = cmd.apply()
 		
+		Mav("admin/department",
+			"department" -> cmd.department,
+			"modules" -> info.modules,
+			"notices" -> info.notices)
+
+	}
+
+}
+
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
+	
+	var securityService = Wire.auto[SecurityService]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	
+	val modules: JList[Module] = 
+		if (securityService.can(user, Manage(mandatory(department)))) department.modules
+		else moduleService.modulesManagedBy(user.idForPermissions, department).toList
+		
+	if (modules.isEmpty) {
+		PermissionsCheck(Manage(department))
+	}
+	
+	def applyInternal() = {
 		val sortedModules = modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
 		val notices = gatherNotices(modules)
 		
-		Mav("admin/department",
-			"department" -> dept,
-			"modules" -> sortedModules,
-			"notices" -> notices)
-
+		new DepartmentHomeInformation(sortedModules, notices)
 	}
 	
-	def gatherNotices(modules: Seq[Module])= {
+	def gatherNotices(modules: Seq[Module]) = {
 		val unpublished = for ( 
 				module <- modules;
 				assignment <- module.assignments
@@ -83,5 +99,7 @@ class AdminHome extends CourseworkController {
 			"unpublishedAssignments" -> unpublished
 		)
 	}
-
+	
 }
+
+case class DepartmentHomeInformation(modules: Seq[Module], notices: Map[String, Seq[Assignment]])

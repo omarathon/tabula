@@ -7,6 +7,10 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackRecipientCheckC
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.actions.Participate
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
 
 /**
  * For calling by AJAX. Returns a report of the email addresses that would be
@@ -16,11 +20,12 @@ import uk.ac.warwick.tabula.actions.Participate
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class FeedbackRecipientCheckController extends CourseworkController {
+	
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+		new FeedbackRecipientCheckCommand(module, assignment)
 
 	@RequestMapping()
 	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
-		mustBeLinked(command.assignment, command.module)
-		mustBeAbleTo(Participate(command.module))
 		val report = command.apply()
 		Mav("admin/assignments/publish/checkrecipients",
 			"assignment" -> command.assignment,

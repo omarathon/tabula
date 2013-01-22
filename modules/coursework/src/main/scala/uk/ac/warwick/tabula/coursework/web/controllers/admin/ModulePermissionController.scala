@@ -21,18 +21,12 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 
 trait ModulePermissionControllerMethods extends CourseworkController {
 
-	@ModelAttribute("addCommand") def addCommandModel = new AddModulePermissionCommand()
-	@ModelAttribute("removeCommand") def removeCommandModel = new RemoveModulePermissionCommand()
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("module") module: Module) = new AddModulePermissionCommand(module)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("module") module: Module) = new RemoveModulePermissionCommand(module)
 
 	def form(module: Module): Mav = {
-		checks(module)
 		Mav("admin/modules/permissions/form", "module" -> module)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-	}
-
-	def checks(module: Module) = {
-		mustBeAbleTo(Manage(module))
-		module.ensureParticipantsGroup
 	}
 }
 
@@ -49,7 +43,6 @@ class ModuleAddPermissionController extends CourseworkController with ModulePerm
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@ModelAttribute("addCommand") command: AddModulePermissionCommand, errors: Errors): Mav = {
 		val module = command.module
-		checks(module)
 		command.validate(errors)
 		if (errors.hasErrors()) {
 			form(module)
@@ -66,7 +59,6 @@ class ModuleRemovePermissionController extends CourseworkController with ModuleP
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
 	def addPermission(@ModelAttribute("removeCommand") command: RemoveModulePermissionCommand, errors: Errors): Mav = {
 		val module = command.module
-		checks(module)
 		command.validate(errors)
 		if (errors.hasErrors()) {
 			form(module)

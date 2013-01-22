@@ -56,13 +56,14 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			
 			val pagedActivities = activityService.getNoteworthySubmissions(user)
 
-			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
+			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
 			// add the number of submissions to each assignment for marking
 			val assignmentsForMarkingInfo = for (assignment <- assignmentsForMarking) yield {
 				val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(Seq())
 				Map(
 					"assignment" -> assignment,
-					"numSubmissions" -> submissions.size
+					"numSubmissions" -> submissions.size,
+					"isAdmin" -> (ownedDepartments.contains(assignment.module.department) || ownedModules.contains(assignment.module))
 				)
 			}
 

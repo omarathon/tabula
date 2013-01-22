@@ -14,9 +14,14 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.data.model.Module
 
 
-class DeleteFeedbackCommand(val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class DeleteFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+	
+	mustBeLinked(assignment, module)
+	PermissionsCheck(Participate(module))
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 

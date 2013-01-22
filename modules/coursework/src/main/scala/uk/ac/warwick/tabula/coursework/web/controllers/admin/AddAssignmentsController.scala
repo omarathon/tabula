@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.CurrentUser
 
 /**
  * Controller that handles the multi-step process of creating many assignments from SITS data.
@@ -41,7 +42,6 @@ class AddAssignmentsController extends CourseworkController {
 	@RequestMapping(method = Array(GET))
 	def selectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		cmd.afterBind()
-		checkPermissions(cmd)
 		cmd.populateWithItems()
 		getMav(cmd).addObjects("action" -> "select")
 	}
@@ -50,7 +50,6 @@ class AddAssignmentsController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("action=refresh-select"))
 	def refreshSelectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		cmd.afterBind()
-		checkPermissions(cmd)
 //		cmd.populateWithMissingItems()
 		getMav(cmd).addObjects("action" -> "select")
 	}
@@ -59,7 +58,6 @@ class AddAssignmentsController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("action=options"))
 	def optionsForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		cmd.afterBind()
-		checkPermissions(cmd)
 		cmd.validateNames(errors)
 		getMav(cmd).addObjects("action" -> "options")
 	}
@@ -74,7 +72,6 @@ class AddAssignmentsController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
 	def submit(@Valid @ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		cmd.afterBind()
-		checkPermissions(cmd)
 		if (errors.hasErrors()) {
 			optionsForm(cmd, errors)
 		} else {
@@ -87,29 +84,14 @@ class AddAssignmentsController extends CourseworkController {
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
 	}
 
-	@ModelAttribute def cmd(department: Department) = {
-		new AddAssignmentsCommand(department)
+	@ModelAttribute def cmd(department: Department, user: CurrentUser) = {
+		new AddAssignmentsCommand(department, user)
 	}
 
 	// The shared Mav for most of the request mappings
 	def getMav(cmd: AddAssignmentsCommand) = {
 		Mav("admin/assignments/batch_new_select")
 			.crumbs(Breadcrumbs.Department(cmd.department))
-	}
-
-	def checkPermissions(cmd: AddAssignmentsCommand) = {
-		mustBeAbleTo(Manage(cmd.department))
-
-		// check that all the selected items are part of this department. Otherwise you could post the IDs of
-		// unrelated assignments and do stuff with them.
-		// Use .exists() to see if there is at least one with a matching department code
-		val hasInvalidAssignments = cmd.assignmentItems.exists { (item) =>
-			item.upstreamAssignment.departmentCode.toLowerCase != cmd.department.code
-		}
-		if (hasInvalidAssignments) {
-			logger.warn("Rejected request to setup assignments that aren't in this department")
-			throw new PermissionDeniedException(user, Manage(cmd.department))
-		}
 	}
 
 }

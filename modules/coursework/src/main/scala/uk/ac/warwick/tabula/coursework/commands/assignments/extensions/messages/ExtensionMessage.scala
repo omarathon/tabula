@@ -1,25 +1,27 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
+import scala.reflect.BeanProperty
 
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import freemarker.template.Configuration
-import uk.ac.warwick.util.mail.WarwickMailSender
 import org.joda.time.format.DateTimeFormat
-import org.springframework.mail.SimpleMailMessage
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.UserLookupService
+import org.springframework.mail.javamail.MimeMessageHelper
+
+import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 /**
  * Send an email confirming the creation of a manual extension request to the student
  */
 abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanProperty var assignment: Assignment,
 								@BeanProperty var userId: String)
-	extends Command[Boolean] with ReadOnly with FreemarkerRendering with Logging {
+	extends Command[Boolean] with ReadOnly with FreemarkerRendering with Logging with UnicodeEmails {
 
 	def this(assignment:Assignment, uniId:String) = this(null, assignment, uniId)
 	def this(extension:Extension, uniId:String) = this(extension, extension.assignment, uniId)
@@ -41,8 +43,11 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 
 	def applyInternal() = {
 		if (recipient.getEmail.hasText) {
-			val baseMessage = generateBaseMessage()
-			val message = setMessageContent(baseMessage)
+			val message = createMessage(studentMailSender) { message =>
+				generateBaseMessage(message)
+				setMessageContent(message)
+			}
+
 			studentMailSender.send(message)
 			true
 		}
@@ -61,15 +66,13 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	protected def getSubjectPrefix = module.code.toUpperCase + ": "
 
 	// generates a message with common attributes pre-defined
-	def generateBaseMessage():SimpleMailMessage = {
-		val message = new SimpleMailMessage
+	def generateBaseMessage(message: MimeMessageHelper): Unit = {
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
 		message.setTo(recipient.getEmail)
-		message
 	}
 
 	// applied to a base message to set a context specific subject and body
-	def setMessageContent(baseMessage: SimpleMailMessage) : SimpleMailMessage
+	def setMessageContent(message: MimeMessageHelper): Unit
 
 }

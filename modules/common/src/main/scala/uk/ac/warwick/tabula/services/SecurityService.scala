@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 
 /**
  * Checks permissions.
@@ -43,7 +44,7 @@ class SecurityService extends Logging {
 
 	val checks: Seq[PermissionChecker] = List(checkSysadmin _, checkEnrolled _, checkGroup _)
 
-	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (isSysadmin(user.userId)) Allow else Continue
+	def checkSysadmin(user: CurrentUser, action: Action[_]): Response = if (user.god) Allow else Continue
 
 	def checkEnrolled(user: CurrentUser, action: Action[_]): Response = action match {
 		case Submit(assignment: Assignment) => if (assignment.canSubmit(user.apparentUser)) Allow else Deny
@@ -129,6 +130,9 @@ class SecurityService extends Logging {
 	}
 
 	def check(user: CurrentUser, action: Action[_]) = if (!can(user, action)) {
-		throw new PermissionDeniedException(user, action)
+		action match {
+			case Submit(assignment) => throw new SubmitPermissionDeniedException(assignment)
+			case action => throw new PermissionDeniedException(user, action)
+		}
 	}
 }
