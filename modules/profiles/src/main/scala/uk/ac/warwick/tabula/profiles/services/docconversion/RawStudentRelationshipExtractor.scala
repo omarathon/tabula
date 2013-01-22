@@ -73,7 +73,8 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
-	var foundDataInRow = false
+	var foundStudentInRow = false
+	var foundTutorInRow = false
 	
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	var currentRawStudentRelationship: RawStudentRelationship = _
@@ -95,7 +96,8 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 		if (row > 0) {
 			isParsingHeader = false
 			currentRawStudentRelationship = new RawStudentRelationship
-			foundDataInRow = false
+			foundStudentInRow = false
+			foundTutorInRow = false
 		}
 	}
 	
@@ -109,11 +111,19 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			}
 			case false => {
 				if (columnMap.containsKey(col)) {
-					foundDataInRow = true
 					columnMap(col) match {
-						case "student_id" => currentRawStudentRelationship.targetUniversityId = formattedValue
-						case "tutor_id" => currentRawStudentRelationship.agentUniversityId = formattedValue
-						case "tutor_name" => currentRawStudentRelationship.agentName = formattedValue
+						case "student_id" => {
+							currentRawStudentRelationship.targetUniversityId = formattedValue	
+							foundStudentInRow = true
+						}
+						case "tutor_id" => {
+							currentRawStudentRelationship.agentUniversityId = formattedValue
+							foundTutorInRow = true
+						}
+						case "tutor_name" => {
+							currentRawStudentRelationship.agentName = formattedValue
+							foundTutorInRow = true
+						}
 						case _ => // ignore anything else
 					}
 				}
@@ -122,6 +132,9 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	}
 	
 	def endRow = {
-		if (!isParsingHeader && foundDataInRow) rawStudentRelationships.add(currentRawStudentRelationship)
+		if (!isParsingHeader) 
+			//if (foundStudentInRow) 
+				rawStudentRelationships.add(currentRawStudentRelationship)
+			//else if (foundTutorInRow) // TODO need to give some kind of warning
 	}
 }

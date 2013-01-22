@@ -9,9 +9,6 @@
 	</@spring.bind>
 	
 	<@f.form method="post" action="${url('/admin/department/${department.code}/tutors')}" commandName=commandName>	
-		<#assign text_problems=""/>
-		<#assign column_headings_warning="Remember that the first row in all spreadsheets needs to contain specific column headings."/>
-		
 		<h1>Preview personal tutor changes for ${department.name}</h1>
 		
 		<@spring.bind path="rawStudentRelationships">
@@ -93,7 +90,13 @@
 					or <a class="btn" href="<@routes.home />">Cancel</a>
 				</div>
 			<#else>
-				No rows found with recognisable tutor data. ${column_headings_warning}
+				<div class="alert alert-error alert-block">
+					<h4>I couldn't find any valid data.</h4>
+					<ul>
+						<li>Check that the first row has the required column headings.</li>
+						<li>Check that there are data rows with valid student IDs, and either tutor IDs or names for each.</li>
+					</ul>
+				</div>
 				
 				<div class="submit-buttons">
 					<a class="btn" href="<@routes.home />">Cancel</a>

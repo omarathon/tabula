@@ -51,7 +51,10 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 		if (rawStudentRelationships != null && !rawStudentRelationships.isEmpty()) {
 			for (i <- 0 until rawStudentRelationships.length) {
 				val rawStudentRelationship = rawStudentRelationships.get(i)
-				val newTarget = uniIdsSoFar.add(rawStudentRelationship.targetUniversityId)
+				val newTarget = uniIdsSoFar.add(rawStudentRelationship.targetUniversityId match {
+					case null => "[missing value]"
+					case id => id 
+				})
 				errors.pushNestedPath("rawStudentRelationships[" + i + "]")
 				rawStudentRelationship.isValid = validateRawStudentRelationship(rawStudentRelationship, errors, newTarget, department)
 				errors.popNestedPath()
@@ -78,21 +81,22 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 				valid = false
 			} else {
 				try {
-					val targetMember: Member = getMember(targetUniId)
-					if (targetMember.sprCode == null) {
-						errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
-						valid = false						
-					}
-					rawStudentRelationship.targetMember = targetMember
-					if (!targetMember.affiliatedDepartments.contains(department)) {
-						errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
-						valid = false
-					}
-				}
-				catch {
-					case e: ItemNotFoundException => {
-						errors.rejectValue("targetUniversityId", "uniNumber.userNotFound")
-						valid = false
+					getMember(targetUniId) match {
+						case None => {
+							errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+							valid = false
+						}
+						case Some(targetMember) => {
+							rawStudentRelationship.targetMember = targetMember
+							if (targetMember.sprCode == null) {
+								errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+								valid = false
+							}
+							if (!targetMember.affiliatedDepartments.contains(department)) {
+								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
+								valid = false
+							}
+						}
 					}
 				}
 			}
@@ -106,19 +110,18 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 	private def setAndValidateAgentMember(rawStudentRelationship: RawStudentRelationship, errors: Errors):Boolean = {
 		var valid: Boolean = true
 		val agentUniId = rawStudentRelationship.agentUniversityId
-		if (hasText(rawStudentRelationship.agentUniversityId)) {
+		if (hasText(agentUniId)) {
 			if (!UniversityId.isValid(agentUniId)) {
 					errors.rejectValue("agentUniversityId", "uniNumber.invalid")
 					valid = false
 			} else {
-				try {
-					rawStudentRelationship.agentMember = getMember(agentUniId)
-				}
-				catch {
-					case e: ItemNotFoundException => {
+				getMember(agentUniId) match {
+					case None => {
 						errors.rejectValue("agentUniversityId", "uniNumber.userNotFound")
 						valid = false
 					}
+					case Some(agentMember) => 
+						rawStudentRelationship.agentMember = agentMember
 				}
 			}
 		} else if (!hasText(rawStudentRelationship.agentName)) {
@@ -130,15 +133,17 @@ class UploadPersonalTutorsCommand extends Command[Int] with Daoisms with Logging
 		valid
 	}	
 	
-	private def getMember(uniId: String): Member = {
-		userLookup.getUserByWarwickUniId(uniId) match {
-			case FoundUser(u) => {
-				profileService.getMemberByUniversityId(uniId).getOrElse[Member] {
-					throw new ItemNotFoundException("uniNumber.member.missing")
+	private def getMember(uniId: String): Option[Member] = {
+		if (!hasText(uniId)) 
+			None
+		else {
+			userLookup.getUserByWarwickUniId(uniId) match {
+				case FoundUser(u) => {
+					profileService.getMemberByUniversityId(uniId)
 				}
-			}
-			case NoUser(u) => {
-				throw new ItemNotFoundException("uniNumber.userNotFound")
+				case NoUser(u) => {
+					None
+				}
 			}
 		}
 	}
