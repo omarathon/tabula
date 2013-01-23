@@ -56,6 +56,12 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<jvmArgs>
+						<jvmArg>-Xms256m</jvmArg>
+						<jvmArg>-Xmx2048m</jvmArg>
+					</jvmArgs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -166,6 +172,12 @@
 			<groupId>net.databinder</groupId>
 			<artifactId>dispatch-core_${scala.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
@@ -212,19 +224,65 @@
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-queue</artifactId>
 			<version>${warwickutils.version}</version>
-		</dependency>
-		
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>		
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
 			<version>1.90</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
 			<artifactId>spring-scala-glue_2.9.2</artifactId>
 			<version>1.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>${org.apache.poi.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${org.apache.poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>${org.apache.poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>ooxml-schemas</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad</artifactId>
+			<version>${org.apache.poi.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>net.oauth.core</groupId>
 			<artifactId>oauth</artifactId>
@@ -342,8 +400,8 @@
 			<version>2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.directory.studio</groupId>
-			<artifactId>org.apache.commons.codec</artifactId>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
 			<version>1.6</version>
 		</dependency>
 		<dependency>

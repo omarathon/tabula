@@ -95,7 +95,7 @@
 			<type>zip</type>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<!-- libphonenumber, for formatting phone numbers -->
 		<dependency>
 			<groupId>com.googlecode.libphonenumber</groupId>

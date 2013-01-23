@@ -73,7 +73,16 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var lastUpdatedDate = DateTime.now
 	
-	@BeanProperty def fullName = firstName + " " + lastName
+	@BeanProperty def fullName = {
+		def fn = firstName + " " + lastName
+		if (fn.size == 0 || fn == "null null")
+			// print something human-readable for invalid members
+			"[Unknown]"
+		else
+			fn
+	}
+	def getFullName = fullName // need this as reference to fullName within Spring tag requires a getter
+	
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 	@BeanProperty def description = {
 		val userType = Option(groupName).getOrElse("")
