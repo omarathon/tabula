@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Callable
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import org.joda.time.DateTimeUtils
 
 class ProfileServiceTest extends AppContextTestBase with Mockito {
 	
@@ -67,10 +68,17 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (1)
 		
 		// now store a new personal tutor for the same student:
+		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "7654321")
 		
+		val rels = profileService.getRelationships(PersonalTutor, "1250148/1")
+/*		for (rel <- rels) {
+			println(rel.agent + " is " + rel.getRelationshipType + " to " + rel.targetSprCode + " - start date: " + rel.startDate + ", end date: " + rel.endDate)
+		}*/
+		
+		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
 		val currentRelationshipUpdated = profileService.findCurrentRelationship(PersonalTutor, "1250148/1").getOrElse(fail("Failed to get current relationship after storing another"))
-		currentRelationshipUpdated.agent should be ("7654321")		
+		currentRelationshipUpdated.agent should be ("7654321")
 		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (2)
 	}

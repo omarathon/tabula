@@ -27,6 +27,7 @@
 				</#if>
 				
 				<table class="tutorTable">
+					<thead>
 					<tr>
 						<th>Student ID</th>
 						<th>Student Name</th>
@@ -34,6 +35,8 @@
 						<th>Tutor Name <span class="muted">derived from tutor ID</span></th>
 						<th>Tutor Name <span class="muted">for non-University members</span></th>
 					</tr>
+					</thead>
+					<tbody>
 					<#list itemList as item>
 						<@spring.nestedPath path="rawStudentRelationships[${item_index}]">
 							<#if !item.isValid>
@@ -82,6 +85,7 @@
 							</tr>
 						</@spring.nestedPath>
 					</#list>
+					</tbody>
 				</table>
 				
 				<div class="submit-buttons">
