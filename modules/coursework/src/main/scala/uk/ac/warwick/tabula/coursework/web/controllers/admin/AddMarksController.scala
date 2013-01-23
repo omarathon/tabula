@@ -25,7 +25,7 @@ class AddMarksController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
 		new AddMarksCommand(module, assignment, user)
 
 	// Add the common breadcrumbs to the model.

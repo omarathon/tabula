@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 @Controller
 class PublishFeedbackController extends CourseworkController {
 	
-	@ModelAttribute def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new PublishFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))

@@ -34,7 +34,7 @@ class MarkPlagiarisedController extends CourseworkController {
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(

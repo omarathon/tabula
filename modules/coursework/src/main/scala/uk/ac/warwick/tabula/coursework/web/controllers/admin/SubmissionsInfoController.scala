@@ -36,7 +36,7 @@ class SubmissionsInfoController extends CourseworkController {
 
 	var checkIndex = true
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))

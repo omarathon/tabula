@@ -149,7 +149,7 @@ class ImportProfilesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-profiles/{member}"))
 class ImportSingleProfileController extends BaseSysadminController {
 	@RequestMapping(method = Array(POST))
-	def reindex(@PathVariable member: Member) = {
+	def reindex(@PathVariable("member") member: Member) = {
 		val command = new ImportProfilesCommand
 		command.refresh(member)
 		

@@ -19,13 +19,13 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(Array("/admin/department/{dept}/settings/display"))
 class DisplaySettingsController extends CourseworkController {
 
-	@ModelAttribute def displaySettingsCommand(@PathVariable dept:Department) = new DisplaySettingsCommand(dept)
+	@ModelAttribute def displaySettingsCommand(@PathVariable("dept") dept:Department) = new DisplaySettingsCommand(dept)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:DisplaySettingsCommand, errors:Errors) = {
+	def viewSettings(@PathVariable("dept") dept: Department, user: CurrentUser, cmd:DisplaySettingsCommand, errors:Errors) = {
 		if(!errors.hasErrors){
 			cmd.copySettings()
 		}

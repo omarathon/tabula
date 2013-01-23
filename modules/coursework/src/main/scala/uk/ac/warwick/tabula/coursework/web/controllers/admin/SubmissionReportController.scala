@@ -33,7 +33,7 @@ class SubmissionReportController extends CourseworkController {
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupInterface = _
 	
-	@ModelAttribute def command(@PathVariable module:Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable("module") module:Module, @PathVariable("assignment") assignment: Assignment) =
 		new SubmissionReportCommand(module, assignment)
 
 	@RequestMapping

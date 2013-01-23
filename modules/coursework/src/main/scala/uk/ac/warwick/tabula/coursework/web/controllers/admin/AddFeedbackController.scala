@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddFeedbackController extends CourseworkController {
 
 	@ModelAttribute
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(GET, HEAD))

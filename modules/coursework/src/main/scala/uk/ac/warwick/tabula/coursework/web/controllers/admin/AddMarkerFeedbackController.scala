@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AddMarkerFeedbackCommand(module, assignment, user, true) //TODO switch flag depending on which marker this is
 
 	@RequestMapping(method = Array(HEAD, GET))

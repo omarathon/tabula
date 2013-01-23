@@ -98,7 +98,7 @@ class AssignmentController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, @Valid formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+	def submit(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, @Valid formOrNull: SubmitAssignmentCommand, errors: Errors) = {
 		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
 			throw new SubmitPermissionDeniedException(assignment)
 		}

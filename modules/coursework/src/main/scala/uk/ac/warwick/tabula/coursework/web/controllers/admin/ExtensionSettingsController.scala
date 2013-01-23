@@ -21,13 +21,13 @@ class ExtensionSettingsController extends CourseworkController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 	@Autowired var features: Features = _
-	@ModelAttribute def extensionSettingsCommand(@PathVariable dept:Department) = new ExtensionSettingsCommand(dept, features)
+	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(dept, features)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) = {
+	def viewSettings(@PathVariable("dept") dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) = {
 		if(!errors.hasErrors){
 			cmd.copySettings()
 		}

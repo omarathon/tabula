@@ -22,7 +22,7 @@ class DeleteMarkSchemeController extends CourseworkController {
 	validatesSelf[DeleteMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable department: Department, @PathVariable("markscheme") markScheme: MarkScheme) = 
+	def cmd(@PathVariable("department") department: Department, @PathVariable("markscheme") markScheme: MarkScheme) = 
 		new DeleteMarkSchemeCommand(department, markScheme)
 	
 	@RequestMapping(method=Array(GET, HEAD))

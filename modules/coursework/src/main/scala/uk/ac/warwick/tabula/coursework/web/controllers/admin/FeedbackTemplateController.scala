@@ -50,7 +50,7 @@ class FeedbackTemplateController extends CourseworkController {
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
 class EditFeedbackTemplateController extends CourseworkController {
 	
-	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
+	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
 		= new EditFeedbackTemplateCommand(dept, template)
 	
 	@RequestMapping(method=Array(GET))
@@ -87,7 +87,7 @@ class EditFeedbackTemplateController extends CourseworkController {
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
 class DeleteFeedbackTemplateController extends CourseworkController {
 	
-	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
+	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
 		= new DeleteFeedbackTemplateCommand(dept, template)
 
 	@RequestMapping(method=Array(GET))

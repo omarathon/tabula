@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.commands.Command
 class ListMarkSchemesController extends CourseworkController {
 	import ListMarkSchemesController._
 	
-	@ModelAttribute("command") def command(@PathVariable department: Department) = new Form(department)
+	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = new Form(department)
 	
 	@RequestMapping
 	def list(@ModelAttribute("command") form: Form): Mav = {

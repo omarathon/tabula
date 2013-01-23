@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 class AssignmentPickerController extends CourseworkController {
 	@Autowired var json: ObjectMapper = _
 	
-	@ModelAttribute def command(@PathVariable module: Module) = new AssignmentPickerCommand(module)
+	@ModelAttribute def command(@PathVariable("module") module: Module) = new AssignmentPickerCommand(module)
 
 	@RequestMapping
 	def submit(cmd: AssignmentPickerCommand) = {

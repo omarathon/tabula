@@ -16,7 +16,7 @@ abstract class BaseDeptOwnerController extends BaseSysadminController {
 
 	def redirectToDeptOwners(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/owners/")
 
-	def viewDepartmentOwners(@PathVariable dept: Department): Mav =
+	def viewDepartmentOwners(@PathVariable("dept") dept: Department): Mav =
 		Mav("sysadmin/departments/owners",
 			"department" -> dept,
 			"owners" -> dept.owners)
@@ -32,13 +32,13 @@ class DeptOwnerController extends BaseDeptOwnerController {
 		"departments" -> moduleService.allDepartments)
 
 	@RequestMapping(Array("/{dept}/"))
-	def department(@PathVariable dept: Department) = {
+	def department(@PathVariable("dept") dept: Department) = {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
 	}
 
 	@RequestMapping(value = Array("/{dept}/owners/"), method = Array(GET))
-	def departmentOwners(@PathVariable dept: Department) = viewDepartmentOwners(dept)
+	def departmentOwners(@PathVariable("dept") dept: Department) = viewDepartmentOwners(dept)
 	
 }
 
@@ -50,7 +50,7 @@ class RemoveDeptOwnerController extends BaseDeptOwnerController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def addDeptOwner(@PathVariable dept: Department, @Valid @ModelAttribute("removeOwner") form: RemoveDeptOwnerCommand, errors: Errors) = {
+	def addDeptOwner(@PathVariable("dept") dept: Department, @Valid @ModelAttribute("removeOwner") form: RemoveDeptOwnerCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			viewDepartmentOwners(dept)
 		} else {
@@ -78,13 +78,13 @@ class AddDeptOwnerController extends BaseDeptOwnerController {
 	}
 
 	@RequestMapping(method = Array(GET))
-	def showForm(@PathVariable dept: Department, @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
+	def showForm(@PathVariable("dept") dept: Department, @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
 		Mav("sysadmin/departments/owners/add",
 			"department" -> dept)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
+	def submit(@PathVariable("dept") dept: Department, @Valid @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			showForm(dept, form, errors)
 		} else {

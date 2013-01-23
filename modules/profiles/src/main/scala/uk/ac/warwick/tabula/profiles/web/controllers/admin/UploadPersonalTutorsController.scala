@@ -22,18 +22,18 @@ class UploadPersonalTutorsController extends ProfilesController {
 	@ModelAttribute def command(@PathVariable("department") department: Department) = new UploadPersonalTutorsCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadForm(@PathVariable department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
+	def uploadForm(@PathVariable("department") department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
 		Mav("admin/department/tutors/uploadform")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
+	def confirmBatchUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 		//validate(department, cmd, errors)
 		Mav("admin/department/tutors/uploadpreview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
+	def doUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 		//validate(department, cmd, errors)
 		val tutorCount = cmd.apply().size
 		Mav("admin/department/tutors/uploadform", "tutorCount" -> tutorCount)

@@ -47,7 +47,7 @@ class AdminHome extends CourseworkController {
 
 	hideDeletedItems
 	
-	@ModelAttribute def command(@PathVariable dept: Department, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable("dept") dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
 
 	@RequestMapping(Array("/admin/"))

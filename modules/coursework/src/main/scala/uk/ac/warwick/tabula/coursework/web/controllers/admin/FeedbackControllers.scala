@@ -24,11 +24,11 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def singleFeedbackCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String) = 
+	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
 		new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}
 }
@@ -39,7 +39,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 	
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def selectedFeedbacksCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DownloadSelectedFeedbackCommand(module, assignment)
 	
 	@RequestMapping
@@ -56,11 +56,11 @@ class DownloadAllFeedbackController extends CourseworkController {
 class DownloadAllFeedback extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new AdminGetAllFeedbackCommand(module, assignment)
 	
 	@RequestMapping
-	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}
 }
@@ -68,7 +68,7 @@ class DownloadAllFeedback extends CourseworkController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
 class ListFeedback extends CourseworkController {	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new ListFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

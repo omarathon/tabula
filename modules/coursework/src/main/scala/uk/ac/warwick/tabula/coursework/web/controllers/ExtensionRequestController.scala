@@ -19,7 +19,7 @@ import org.hibernate.validator.Valid
 class ExtensionRequestController extends CourseworkController{
 
 	@ModelAttribute
-	def extensionRequestCommand(@PathVariable module: Module, @PathVariable assignment:Assignment, user:CurrentUser) =
+	def extensionRequestCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) =
 		new ExtensionRequestCommand(module, assignment, user)
 	
 	validatesSelf[ExtensionRequestCommand]

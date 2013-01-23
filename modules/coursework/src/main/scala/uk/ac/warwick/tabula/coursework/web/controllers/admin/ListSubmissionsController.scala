@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
 class ListSubmissionsController extends CourseworkController {
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
