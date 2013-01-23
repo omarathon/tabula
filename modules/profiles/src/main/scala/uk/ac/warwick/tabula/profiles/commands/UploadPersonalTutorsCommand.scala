@@ -89,7 +89,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 				try {
 					getMember(targetUniId) match {
 						case None => {
-							errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+							errors.rejectValue("targetUniversityId", "uniNumber.userNotFound")
 							valid = false
 						}
 						case Some(targetMember) => {
@@ -162,16 +162,17 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 			else
 				rawStudentRelationship.agentName
 				
-			val targetUniversityId = rawStudentRelationship.targetUniversityId
+			val targetUniId = rawStudentRelationship.targetUniversityId
 			
-			var targetSprCode = profileService.getMemberByUniversityId(targetUniversityId) match {
-				case None => throw new ItemNotFoundException("Can't find student " + targetUniversityId)
+			var targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
+				// should never be None as validation has already checked for this
+				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId) 
 				case Some(mem) => mem.sprCode
 			}
 			
 			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
-			logger.debug("Saved personal tutor for " + targetUniversityId)
+			logger.debug("Saved personal tutor for " + targetUniId)
 			
 			rel
 		}
