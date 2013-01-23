@@ -42,12 +42,15 @@
 	<div class="submit-buttons">
 		<#if bulkFeedbackTemplateCommand.feedbackTemplates?has_content>
 			<table id="feedback-template-list" class="table table-striped table-bordered">
-				<tr>
-					<th>Name</th>
-					<th>Description</th>
-					<th>Assignments</th>
-					<th><!-- Actions column--></th>
-				</tr>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Description</th>
+						<th>Assignments</th>
+						<th><!-- Actions column--></th>
+					</tr>
+				</thead>
+				<tbody>
 				<#list bulkFeedbackTemplateCommand.feedbackTemplates as template>
 					<tr>
 						<td>${template.name}</td>
@@ -104,6 +107,7 @@
 						</td>
 					</tr>
 				</#list>
+				</tbody>
 			</table>
 			<div id="feedback-template-model" class="modal fade">
 				<div class="modal-header">

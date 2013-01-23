@@ -12,10 +12,13 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 
 <#if markSchemeInfo?has_content>
 <table class="mark-schemes table table-bordered table-striped">
-<tr>
-	<th>Mark scheme name</th>
-	<th></th>
-</tr>
+<thead>
+	<tr>
+		<th>Mark scheme name</th>
+		<th></th>
+	</tr>
+</thead>
+<tbody>
 <#list markSchemeInfo as info>
 <#assign markScheme = info.markScheme />
 <#assign canDelete = (info.assignmentCount == 0) />
@@ -32,20 +35,34 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 	</td>
 </tr>
 </#list>
+</tbody>
 </table>
 </#if>
 
 <div id="markscheme-modal" class="modal fade">
-
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Delete mark scheme</h3>
+	</div>
+	<div class="modal-body"></div>
+	<div class="modal-footer"></div>
 </div>
 
 <script>
 jQuery(function($){
 
-$('a[data-toggle=modal]').click(function(event){
-	var $this = $(event.target);
+$('.mark-schemes').on('click', 'a[data-toggle=modal]', function(e){
+	var $this = $(this);
 	var $modal = $($this.data('target'));
-	$modal.load($this.attr('href'));
+	var $body = $modal.find('.modal-body').empty();
+	var $footer = $modal.find('.modal-footer').empty();
+	$body.load($this.attr('href'), function() {
+		$body.find('.btn').appendTo($footer).each(function() {
+			if ($(this).text() == 'Cancel') {
+				$(this).attr('data-dismiss', 'modal');
+			}
+		});
+	});
 });
 
 $("a.disabled").on('click', function(e){e.preventDefault(e); return false;})
