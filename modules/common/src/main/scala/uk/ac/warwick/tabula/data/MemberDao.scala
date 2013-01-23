@@ -4,7 +4,6 @@ import scala.collection.JavaConversions.asScalaBuffer
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
-import org.hibernate.criterion.Order.asc
 import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Restrictions.gt
 import org.joda.time.DateTime
@@ -15,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import org.hibernate.criterion.Order
+import org.hibernate.criterion._
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -63,7 +62,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def findByQuery(query: String) = Seq()
 	
 	def getRegisteredModules(universityId: String): Seq[Module] = {
-		val modules = session.createQuery("""
+		session.createQuery("""
 				 select distinct m from Module m where code in 
 				(select distinct substring(lower(uag.moduleCode),1,5)
 					from UpstreamAssessmentGroup as uag
@@ -71,16 +70,18 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				join usergroup.staticIncludeUsers as uniId
 				where uniId = :universityId)
 				""")
-            .setString("universityId", universityId)
-            .list.asInstanceOf[JList[Module]]
-		modules
+					.setString("universityId", universityId)
+					.list.asInstanceOf[JList[Module]]
 	}
 	
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
-					.add(Restrictions.isNull("endDate"))
+					.add( Restrictions.or(
+							Restrictions.isNull("endDate"),
+							Restrictions.ge("endDate", new DateTime())
+							))				
 					.uniqueResult
 	}
 	
@@ -88,7 +89,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
-					.list.asInstanceOf[JList[StudentRelationship]]
+					.seq
+					//.list.asInstanceOf[JList[StudentRelationship]]
 	}	
-
 }

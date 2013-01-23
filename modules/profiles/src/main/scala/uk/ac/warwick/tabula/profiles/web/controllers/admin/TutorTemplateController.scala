@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/tutors/template"))
 class TutorTemplateController extends ProfilesController {
-	@ModelAttribute def command(@PathVariable department: Department) =
+	@ModelAttribute def command(@PathVariable("department") department: Department) =
 		new TutorTemplateCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))

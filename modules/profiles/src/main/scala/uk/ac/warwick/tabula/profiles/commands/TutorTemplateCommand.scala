@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.actions.Manage
-import uk.ac.warwick.tabula.data.model.Department
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+
+import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.views.ExcelView
-import org.springframework.web.bind.annotation.PathVariable
 
 class TutorTemplateCommand(val department: Department) extends Command[ExcelView] with Unaudited {
 	

@@ -14,9 +14,15 @@ import javax.persistence.Entity
 
 @Entity
 @AccessType("field")
+/*
+ * The relationship is made up of an agent (e.g. tutor), a relationship type and 
+ * the SPR code of the student - so <some agent> is <some relationship e.g. personal tutor> 
+ * to <some spr code>
+ */
 class StudentRelationship extends GeneratedId {
 	
-	@BeanProperty var agent: String = new String("")
+	// "agent" is the the actor in the relationship, e.g. tutor
+	@BeanProperty var agent: String = _
 	
 	@Column(name="relationship_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") 

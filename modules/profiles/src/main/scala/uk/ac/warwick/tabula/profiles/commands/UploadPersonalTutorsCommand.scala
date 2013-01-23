@@ -32,8 +32,10 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.util.core.StringUtils.hasText
 import scala.collection.mutable.Buffer
 import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.commands.SelfValidating
 
-class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging {
+class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
 	PermissionsCheck(Manage(department))
 
@@ -48,7 +50,8 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
-	def postExtractValidation(errors: Errors, department: Department) = {
+	//def postExtractValidation(errors: Errors, department: Department) = {
+	def validate(errors: Errors) = {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (rawStudentRelationships != null && !rawStudentRelationships.isEmpty()) {
@@ -153,16 +156,17 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 	override def applyInternal(): Seq[StudentRelationship] = transactional() {
 		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship): StudentRelationship = {
-			var agent = ""
+			val agent = 
 			if (hasText(rawStudentRelationship.agentUniversityId))
-				agent = rawStudentRelationship.agentUniversityId
+				rawStudentRelationship.agentUniversityId
 			else
-				agent = rawStudentRelationship.agentName
+				rawStudentRelationship.agentName
+				
 			val targetUniversityId = rawStudentRelationship.targetUniversityId
-			var targetSprCode = ""
-			val targetMember = profileService.getMemberByUniversityId(targetUniversityId) match {
+			
+			var targetSprCode = profileService.getMemberByUniversityId(targetUniversityId) match {
 				case None => throw new ItemNotFoundException("Can't find student " + targetUniversityId)
-				case Some(mem) => targetSprCode = mem.sprCode
+				case Some(mem) => mem.sprCode
 			}
 			
 			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)

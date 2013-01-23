@@ -74,7 +74,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRelationships(relationshipType, targetSprCode)
 	}
 	
-	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = {
+	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
 			val currentRelationship = this.findCurrentRelationship(PersonalTutor, targetSprCode)
 			currentRelationship match {
 				case None => {
