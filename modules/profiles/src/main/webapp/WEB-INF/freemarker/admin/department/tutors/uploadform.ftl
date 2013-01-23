@@ -4,11 +4,18 @@
 <div id="tutor-upload-form">
 	<h1>Upload personal tutors for ${department.name}</h1>
 	
-	<#if (tutorCount!0) gt 0>
-		<div class="alert alert-success">
-			<a class="close" data-dismiss="alert">&times;</a>
-			<p><i class="icon-ok"></i> <@fmt.p tutorCount?number "valid personal tutor" /> saved.</p>
-		</div>
+	<#if tutorCount??>
+		<#if tutorCount?number == 0>
+			<div class="alert alert-error">
+				<a class="close" data-dismiss="alert">&times;</a>
+				<p><i class="icon-warning-sign"></i> There were no valid personal tutors in the list you confirmed.</p>
+			</div>
+		<#else>
+			<div class="alert alert-success">
+				<a class="close" data-dismiss="alert">&times;</a>
+				<p><i class="icon-ok"></i> <@fmt.p tutorCount?number "valid personal tutor" /> saved.</p>
+			</div>
+		</#if>
 	</#if>
 	
 	<p>

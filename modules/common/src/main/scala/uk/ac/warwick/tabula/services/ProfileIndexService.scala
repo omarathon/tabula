@@ -89,9 +89,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 		}
 	}
 	
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] =
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
 		if (!StringUtils.hasText(query)) Seq()
 		else findWithQuery(query, departments, userTypes, isGod)
+	}
 	
 	def find(ownDepartment: Department, userTypes: Set[MemberUserType]): Seq[Member] =
 		findWithQuery("", Seq(ownDepartment), userTypes, false)

@@ -32,7 +32,7 @@ class UploadPersonalTutorsController extends ProfilesController {
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def doUpload(@PathVariable department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 		bindAndValidate(department, cmd, errors)
-		val tutorCount = cmd.apply()
+		val tutorCount = cmd.apply().size
 		Mav("admin/department/tutors/uploadform", "tutorCount" -> tutorCount)
 	}
 

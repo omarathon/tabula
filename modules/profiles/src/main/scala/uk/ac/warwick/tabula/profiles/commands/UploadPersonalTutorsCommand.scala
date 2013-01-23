@@ -33,7 +33,7 @@ import uk.ac.warwick.util.core.StringUtils.hasText
 import scala.collection.mutable.Buffer
 import uk.ac.warwick.tabula.actions.Manage
 
-class UploadPersonalTutorsCommand(val department: Department) extends Command[Int] with Daoisms with Logging {
+class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging {
 	
 	PermissionsCheck(Manage(department))
 
@@ -151,8 +151,8 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[In
 		}
 	}
 
-	override def applyInternal(): Int = transactional() {
-		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship) = {
+	override def applyInternal(): Seq[StudentRelationship] = transactional() {
+		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship): StudentRelationship = {
 			var agent = ""
 			if (hasText(rawStudentRelationship.agentUniversityId))
 				agent = rawStudentRelationship.agentUniversityId
@@ -165,15 +165,17 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[In
 				case Some(mem) => targetSprCode = mem.sprCode
 			}
 			
-			profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
+			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
-			logger.debug("Saved personal tutor for " + targetUniversityId)			
+			logger.debug("Saved personal tutor for " + targetUniversityId)
+			
+			rel
 		}
 
 		// persist valid personal tutors
 		rawStudentRelationships filter (_.isValid) map { 
-			(rawStudentRelationship) => savePersonalTutor(rawStudentRelationship) 
-		} size
+			(rawStudentRelationship) => savePersonalTutor(rawStudentRelationship)
+		}
 	}
 
 	def onBind {
