@@ -2,13 +2,12 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.modules
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.validation.Valid
-
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.coursework.commands.modules.AddModuleCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @Controller
 @RequestMapping(value = Array("/admin/module/new"))

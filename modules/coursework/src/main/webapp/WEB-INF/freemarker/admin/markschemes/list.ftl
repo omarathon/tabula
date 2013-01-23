@@ -26,12 +26,7 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 	<td>${markScheme.name}</td>
 	<td>
 		<a class="btn btn-mini" href="<@routes.markschemeedit markScheme />"><i class="icon-edit"></i> Modify</a>
-		<a class="btn btn-mini btn-danger use-tooltip <#if !canDelete>disabled</#if>" 
-			href="<@routes.markschemedelete markScheme />" 
-			data-toggle="modal" data-target="#markscheme-modal" 
-			<#if !canDelete>title="You can't delete this mark scheme as it is in use by <@fmt.p info.assignmentCount "assignment" "one" />."</#if>
-			<i class="icon-remove icon-white"></i> Delete 
-		</a>
+		<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.markschemedelete markScheme />" data-toggle="modal" data-target="#markscheme-modal"<#if !canDelete> title="You can't delete this mark scheme as it is in use by <@fmt.p info.assignmentCount "assignment" "one" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>
 	</td>
 </tr>
 </#list>
@@ -45,7 +40,6 @@ No mark schemes have been created yet. Click <strong>Create</strong> below to ma
 		<h3>Delete mark scheme</h3>
 	</div>
 	<div class="modal-body"></div>
-	<div class="modal-footer"></div>
 </div>
 
 <script>
@@ -55,9 +49,8 @@ $('.mark-schemes').on('click', 'a[data-toggle=modal]', function(e){
 	var $this = $(this);
 	var $modal = $($this.data('target'));
 	var $body = $modal.find('.modal-body').empty();
-	var $footer = $modal.find('.modal-footer').empty();
 	$body.load($this.attr('href'), function() {
-		$body.find('.btn').appendTo($footer).each(function() {
+		$body.find('.btn').each(function() {
 			if ($(this).text() == 'Cancel') {
 				$(this).attr('data-dismiss', 'modal');
 			}
