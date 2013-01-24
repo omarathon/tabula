@@ -5,14 +5,17 @@ import org.junit.Test
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.mock.web.MockHttpServletResponse
 import uk.ac.warwick.tabula.HttpMocking
-
 import collection.JavaConversions.asJavaMap
 import collection.mutable
+import org.springframework.web.servlet.DispatcherServlet
+import org.springframework.web.servlet.support.SessionFlashMapManager
 
 class RedirectViewResolverTest extends TestBase with HttpMocking {
 
   @Test def redirectPage {
     val request = mockRequest
+    request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
+    
     val response = mockResponse
 	val resolver = new RedirectViewResolver
 	resolver.setToplevelUrl("https://tabula.warwick.ac.uk")
