@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
+import scala.collection.JavaConversions._
+
 import uk.ac.warwick.tabula.permissions.Public
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -38,7 +40,13 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	private def setupDepartmentAndModules() {
 		// Blitz the test department
 		transactional() {
-			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { session.delete(_) }
+			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
+				for (module <- dept.modules) session.delete(module)
+				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)
+				for (markScheme <- dept.markSchemes) session.delete(markScheme)
+				
+				session.delete(dept) 
+			}
 		}
 		
 		val department = newDepartmentFrom(Fixtures.TestDepartment)

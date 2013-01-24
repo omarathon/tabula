@@ -25,8 +25,6 @@ class FeedbackTemplateController extends CourseworkController {
 	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
 		val dept = cmd.department
 		
-		cmd.feedbackTemplates = dept.feedbackTemplates
-
 		val model = Mav("admin/feedbackforms/manage-feedback-templates",
 			"department" -> dept
 		)

@@ -21,7 +21,6 @@ abstract class FeedbackTemplateCommand(val department:Department)
 	PermissionsCheck(Manage(department))
 
 	@BeanProperty var file:UploadedFile = new UploadedFile
-	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 
 	override def onBind {
 		transactional() {
@@ -45,11 +44,10 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 					feedbackForm.name = attachment.name
 					feedbackForm.department = department
 					feedbackForm.attachFile(attachment)
-					feedbackTemplates.add(feedbackForm)
+					department.feedbackTemplates.add(feedbackForm)
 					session.saveOrUpdate(feedbackForm)
 				}
 			}
-			department.feedbackTemplates = feedbackTemplates
 			session.saveOrUpdate(department)
 		}
 	}
@@ -91,7 +89,7 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 			if (feedbackTemplate.hasAssignments)
 				logger.error("Cannot delete feedbackt template "+feedbackTemplate.id+" - it is still linked to assignments")
 			else
-				session.delete(feedbackTemplate)
+				department.feedbackTemplates.remove(feedbackTemplate)
 		}
 	}
 }

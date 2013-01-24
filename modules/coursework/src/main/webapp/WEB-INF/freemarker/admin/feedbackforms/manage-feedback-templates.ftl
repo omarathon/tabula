@@ -40,7 +40,7 @@
 		<i class="icon-upload icon-white"></i> Upload
 	</button>
 	<div class="submit-buttons">
-		<#if bulkFeedbackTemplateCommand.feedbackTemplates?has_content>
+		<#if bulkFeedbackTemplateCommand.department.feedbackTemplates?has_content>
 			<table id="feedback-template-list" class="table table-striped table-bordered">
 				<thead>
 					<tr>
@@ -51,7 +51,7 @@
 					</tr>
 				</thead>
 				<tbody>
-				<#list bulkFeedbackTemplateCommand.feedbackTemplates as template>
+				<#list bulkFeedbackTemplateCommand.department.feedbackTemplates as template>
 					<tr>
 						<td>${template.name}</td>
 						<td>${template.description!""}</td>
