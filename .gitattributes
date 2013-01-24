@@ -14,6 +14,9 @@
 *.htm text
 *.html text
 *.ics text
+*.prefs text
+*.md text
+
 
 # things that should definitely not be text
 *.png binary
