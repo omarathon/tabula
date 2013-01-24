@@ -6,15 +6,9 @@ import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.BeforeAndAfterAll
 import org.openqa.selenium.By
 
-class CourseworkFeedbackTemplatesTest extends BrowserTest with BeforeAndAfter {
-	
-	before {
-		go to (Path("/scheduling/fixtures/setup"))
-	}
-	
-	"Department admin" should "be able to manage feedback templates" in {
-		signIn as(P.Admin1) to (Path("/coursework"))
+class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 		
+	"Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
 		
 		def openFeedbackTemplates() = {

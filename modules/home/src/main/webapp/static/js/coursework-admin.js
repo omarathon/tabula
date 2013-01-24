@@ -56,7 +56,7 @@ $(function(){
         .hide()
         .first().before(
             $('<p>').html('Modules with no assignments are hidden. ').append(
-                $('<a>').addClass('btn btn-success').attr('href','#').html("Show all modules").click(function(event){
+                $('<a>').addClass('btn btn-info').attr('href','#').html("Show all modules").click(function(event){
                     event.preventDefault();
                     $(this.parentNode).remove();
                     $('.module-info.empty').show();

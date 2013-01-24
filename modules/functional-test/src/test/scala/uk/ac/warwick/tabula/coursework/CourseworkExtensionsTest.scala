@@ -6,18 +6,12 @@ import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.BeforeAndAfterAll
 import org.openqa.selenium.By
 
-class CourseworkExtensionsTest extends BrowserTest with BeforeAndAfter {
-	
-	before {
-		go to (Path("/scheduling/fixtures/setup"))
-	}
-	
+class CourseworkExtensionsTest extends BrowserTest with CourseworkFixtures {
+		
 	val ExtensionGuidelines = "You must be dying of something awful"
 	val ExtensionInfoUrl = "http://warwick.ac.uk/"
 	
-	"Department admin" should "be able to enable extensions" in {
-		signIn as(P.Admin1) to (Path("/coursework"))
-
+	"Department admin" should "be able to enable extensions" in as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
 		
 		def openExtensionSettings() = {

@@ -52,7 +52,7 @@ Include by default as "form", e.g.
 	<#local clazz="checkbox" />
 </#if>
 <#if path!="">
-  <@f.label path=path cssClass=clazz><#nested/></@f.label>
+  <@f.label path="${path}" for="${path}" cssClass="${clazz}"><#nested/></@f.label>
 <#elseif for!="">
   <label for="${for}" class="${clazz}"><#nested /></label>
 <#else>
@@ -180,14 +180,14 @@ To not bind:
 	</#if>
 	
 	<#if multiple>
-		<input type="file" name="${basename}.upload" multiple>
+		<input type="file" id="${basename}.upload" name="${basename}.upload" multiple>
 		<noscript>
 			<#list (2..max) as i>
 				<br><input type="file" name="${basename}.upload">
 			</#list>
 		</noscript>
 	<#else>
-		<input type="file" name="${basename}.upload" >
+		<input type="file" id="${basename}.upload" name="${basename}.upload" >
 	</#if>
 	</div>
 	

@@ -88,6 +88,13 @@ object FunctionalTestProperties {
 	lazy val Marker1 = userDetails("marker1", "Marker")
 	lazy val Marker2 = userDetails("marker2", "Marker")
 	lazy val Marker3 = userDetails("marker3", "Marker")
+	lazy val ModuleManager1 = userDetails("modman1", "Module Manager")
+	lazy val ModuleManager2 = userDetails("modman2", "Module Manager")
+	lazy val Student1 = userDetails("student1", "Student")
+	lazy val Student2 = userDetails("student2", "Student")
+	lazy val Student3 = userDetails("student3", "Student")
+	lazy val Student4 = userDetails("student4", "Student")
+	lazy val Student5 = userDetails("student5", "Student")
 
 	/**
 	 * Get a property by name, or null if not found anywhere. Checks in this order
