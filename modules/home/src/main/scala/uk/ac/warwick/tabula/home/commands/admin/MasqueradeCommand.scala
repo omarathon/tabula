@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.CurrentUser
 
 class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
@@ -30,7 +31,7 @@ class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	}
 
 	private def newCookie(usercode: String) = new Cookie(
-		name = "tabulaMasqueradeAs",
+		name = CurrentUser.masqueradeCookie,
 		value = usercode,
 		path = "/")
 	

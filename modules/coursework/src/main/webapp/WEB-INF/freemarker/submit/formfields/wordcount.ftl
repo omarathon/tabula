@@ -11,5 +11,5 @@
 </#assign>
 
 <@form.labelled_row "fields[${field.id}].value" "Word count" "" help>
-	<@f.input path="fields[${field.id}].value" cssClass="input-small" maxlength="${assignment.MaximumWordCount?c?length}" />
+	<@f.input id="fields[${field.id}].value" path="fields[${field.id}].value" cssClass="input-small" maxlength="${assignment.MaximumWordCount?c?length}" />
 </@form.labelled_row>

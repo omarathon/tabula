@@ -8,12 +8,14 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FeedbackTemplate
+import uk.ac.warwick.tabula.actions.Manage
 
 
-class DownloadFeedbackTemplateCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
+class DownloadFeedbackTemplateCommand(val department: Department, user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
+	
+	PermissionsCheck(Manage(department))
 
 	@BeanProperty var template: FeedbackTemplate = _
-	@BeanProperty var department: Department = _
 	@BeanProperty var filename: String = _
 
 	private var fileFound: Boolean = _

@@ -29,10 +29,10 @@ import org.springframework.web.bind.annotation.ModelAttribute
 class AssignmentPickerController extends CourseworkController {
 	@Autowired var json: ObjectMapper = _
 	
-	@ModelAttribute def command(@PathVariable module: Module) = new AssignmentPickerForm(module)
+	@ModelAttribute def command(@PathVariable("module") module: Module) = new AssignmentPickerCommand(module)
 
 	@RequestMapping
-	def submit(cmd: AssignmentPickerForm) = {
+	def submit(cmd: AssignmentPickerCommand) = {
 		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
 
 		new JSONView(assignmentsJson)
@@ -52,7 +52,7 @@ class AssignmentPickerController extends CourseworkController {
 
 }
 
-class AssignmentPickerForm(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
+class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
 	PermissionsCheck(Participate(module))
 	
 	var assignmentService = Wire.auto[AssignmentService]

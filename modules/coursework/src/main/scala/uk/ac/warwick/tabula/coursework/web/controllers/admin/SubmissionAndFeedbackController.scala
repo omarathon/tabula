@@ -20,7 +20,7 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))

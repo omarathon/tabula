@@ -70,9 +70,9 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 class TurnitinReportController extends CourseworkController {
 	
 	@ModelAttribute def command(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable fileId: String
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("fileId") fileId: String
 	) = new ViewPlagiarismReportCommand(module, assignment, fileId, user)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/turnitin-report/{fileId}"))

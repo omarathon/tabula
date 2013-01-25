@@ -13,8 +13,12 @@ import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleImporter
 import uk.ac.warwick.tabula.scheduling.services.RouteInfo
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
+	import ImportModulesCommand._
+	
+	PermissionsCheck(Sysadmin())
 
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -93,7 +97,11 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	private def newModuleFrom(m: ModuleInfo, dept: Department): Module = {
+}
+
+object ImportModulesCommand {
+
+	def newModuleFrom(m: ModuleInfo, dept: Department): Module = {
 		val module = new Module
 		module.code = m.code
 		module.name = m.name
@@ -102,14 +110,14 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		module
 	}
 
-	private def newDepartmentFrom(d: DepartmentInfo): Department = {
+	def newDepartmentFrom(d: DepartmentInfo): Department = {
 		val department = new Department
 		department.code = d.code
 		department.name = d.name
 		department
 	}
 	
-	private def newRouteFrom(r: RouteInfo, dept: Department): Route = {
+	def newRouteFrom(r: RouteInfo, dept: Department): Route = {
 		val route = new Route
 		route.code = r.code
 		route.name = r.name
@@ -117,5 +125,5 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		route.department = dept
 		route
 	}
-
+	
 }

@@ -1,40 +1,44 @@
 package uk.ac.warwick.tabula.web.controllers
+
+import scala.collection.JavaConverters._
 import java.io.Writer
 import scala.reflect.BeanProperty
 import org.codehaus.jackson.map.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
-import UserPickerController.QueryForm
+import UserPickerController.UserPickerCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.AllUniversityMembers
 
 @Controller
 class UserPickerController extends BaseController {
-	@Autowired var json: ObjectMapper = _
-	@Autowired var userLookup: UserLookupService = _
+	var json = Wire.auto[ObjectMapper]
 
 	@RequestMapping(value = Array("/api/userpicker/form"))
 	def form: Mav = Mav("api/userpicker/form").noLayout()
 
 	@RequestMapping(value = Array("/api/userpicker/query.json"))
-	def queryJson(form: QueryForm, out: Writer) = {
+	def queryJson(form: UserPickerCommand, out: Writer) = {
 		def toJson(user: User) = Map(
 			"value" -> user.getUserId,
 			"label" -> user.getFullName,
 			"type" -> user.getUserType,
 			"dept" -> user.getShortDepartment)
-		var users = userLookup.findUsersWithFilter(form.filter)
-		if (users.size < 10) users ++= userLookup.findUsersWithFilter(form.filterBackwards)
-		json.writeValue(out, (users map toJson));
+		json.writeValue(out, (form.apply() map toJson));
 	}
 
 	@RequestMapping(value = Array("/api/userpicker/query"))
-	def query(form: QueryForm, out: Writer) = {
-		val foundUsers = userLookup.findUsersWithFilter(form.filter)
+	def query(form: UserPickerCommand, out: Writer) = {
+		val foundUsers = form.apply()
 		val (staff, students) = foundUsers.partition { _.isStaff }
 		Mav("api/userpicker/results",
 			"staff" -> staff,
@@ -44,9 +48,18 @@ class UserPickerController extends BaseController {
 }
 
 object UserPickerController {
-	class QueryForm {
+	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited with AllUniversityMembers {
+		var userLookup = Wire.auto[UserLookupService]
+	
 		@BeanProperty var firstName: String = ""
 		@BeanProperty var lastName: String = ""
+			
+		def applyInternal() = {
+			var users = userLookup.findUsersWithFilter(filter)
+			if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards)
+			
+			users.asScala.toSeq
+		}
 
 		/**
 		 * If one word is given, it's used as surname.

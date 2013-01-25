@@ -1,6 +1,4 @@
-package uk.ac.warwick.tabula.coursework.web.views
-
-import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
+package uk.ac.warwick.tabula.web.views
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.web.servlet.View

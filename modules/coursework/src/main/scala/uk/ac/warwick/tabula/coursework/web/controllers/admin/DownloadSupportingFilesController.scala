@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.AdminDownloadSupport
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
 class DownloadSupportingFilesController extends CourseworkController{
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String, user:CurrentUser) = {
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("filename") filename: String, user:CurrentUser) = {
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(user.universityId)), filename)
 	}
 
@@ -39,7 +39,7 @@ class DownloadSupportingFilesController extends CourseworkController{
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
 class AdminDownloadSupportingFilesController extends CourseworkController{
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable filename: String, @PathVariable universityId: String) = {
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("filename") filename: String, @PathVariable("universityId") universityId: String) = {
 		new AdminDownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(universityId)), filename)
 	}
 

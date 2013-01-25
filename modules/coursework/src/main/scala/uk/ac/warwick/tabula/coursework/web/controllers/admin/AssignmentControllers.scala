@@ -32,7 +32,7 @@ class AddAssignment extends CourseworkController {
 		cmd.validate(errors)
 	}
 
-	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
+	@ModelAttribute def addAssignmentForm(@PathVariable("module") module: Module) =
 		new AddAssignmentCommand(mandatory(module))
 
 	// Used for initial load and for prefilling from a chosen assignment
@@ -134,7 +134,7 @@ class DeleteAssignment extends CourseworkController {
 		form.validate(errors)
 	}
 
-	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable("assignment") assignment: Assignment) =
+	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DeleteAssignmentCommand(module, mandatory(assignment))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

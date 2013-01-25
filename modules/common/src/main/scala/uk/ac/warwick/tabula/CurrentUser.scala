@@ -53,6 +53,8 @@ class CurrentUser(
 	
 	/** Is of type Staff? (includes PGR) */
 	def isStaff = apparentUser.isStaff
+	
+	def isMember = isStudent || isStaff
 
 	override def toString = {
 		val builder = new StringBuilder("User ")
@@ -69,6 +71,8 @@ class CurrentUser(
 
 object CurrentUser {
 	val keyName = "CurrentUser"
+	val masqueradeCookie = "tabulaMasqueradeAs"
+	val godModeCookie = "tabulaGodMode"
 }
 
 object NoCurrentUser {

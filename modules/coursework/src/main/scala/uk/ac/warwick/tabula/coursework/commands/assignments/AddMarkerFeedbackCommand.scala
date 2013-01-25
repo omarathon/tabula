@@ -11,10 +11,9 @@ import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.tabula.data.model.Module
 
 
-class AddMarkerFeedbackCommand(val module: Module, assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
-	extends UploadFeedbackCommand[List[MarkerFeedback]](assignment, submitter)  {
+class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
+	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, submitter)  {
 	
-	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionsCheck(UploadMarkerFeedback(assignment))
 
 	// list to contain feedback files that are not for a student you should be marking

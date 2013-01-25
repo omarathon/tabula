@@ -18,9 +18,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.actions.Participate
 
 
-class AddAssignmentCommand(val module: Module = null) extends ModifyAssignmentCommand {
-	
-	PermissionsCheck(Participate(module))
+class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentCommand(module) {
 
 	openDate = new DateTime().withTime(12, 0, 0, 0)
 	closeDate = openDate.plusWeeks(2)

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class AddBatchFeedbackController extends CourseworkController {
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(module, assignment, user)
 
 	// Add the common breadcrumbs to the model.

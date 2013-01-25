@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>24</version>
+		<version>25</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -86,6 +86,12 @@
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-httpclient4</artifactId>
 			<version>${warwickutils.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

@@ -33,13 +33,14 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(department, workbook) 
 		
-		for (event <- events) {
-			val assignment = assignmentService.getAssignmentById(event.assignmentId.get)
-			
-			val row = sheet.createRow(sheet.getLastRowNum() + 1)
-			row.createCell(0).setCellValue(assignment.get.module.code.toUpperCase())				
-			row.createCell(1).setCellValue(dateFormatter.print(assignment.get.closeDate))
-			row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))
+		for (event <- events;
+			 assignmentId <- event.assignmentId;
+			 assignment <- assignmentService.getAssignmentById(assignmentId)) {
+
+				val row = sheet.createRow(sheet.getLastRowNum() + 1)
+				row.createCell(0).setCellValue(assignment.module.code.toUpperCase())				
+				row.createCell(1).setCellValue(dateFormatter.print(assignment.closeDate))
+				row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))	
 		}
 		
 		formatWorksheet(sheet)

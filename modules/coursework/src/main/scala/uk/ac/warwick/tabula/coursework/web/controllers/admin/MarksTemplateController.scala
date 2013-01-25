@@ -11,7 +11,7 @@ import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.coursework.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
@@ -82,7 +82,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 class MarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))

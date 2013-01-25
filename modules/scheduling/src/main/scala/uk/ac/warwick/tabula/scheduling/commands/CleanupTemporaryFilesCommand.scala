@@ -7,8 +7,11 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 class CleanupTemporaryFilesCommand extends Command[Unit] {
+	
+	PermissionsCheck(Sysadmin())
 
 	var dao = Wire.auto[FileDao]
 

@@ -26,7 +26,7 @@
 			<a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
 		<#else>
 			<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
-				<button class=btn><#noescape>${button_text}</#noescape></button>
+				<button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
 			</form>
 		</#if>
 

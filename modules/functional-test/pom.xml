@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>24</version>
+		<version>25</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -84,7 +84,7 @@
 	</profiles>
 
 
-	<dependencies>
+	<dependencies>	
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
@@ -99,20 +99,17 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- <dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>common</artifactId>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.0</version>
 			<scope>test</scope>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>common</artifactId>
-			<type>test-jar</type>
+			<groupId>org.joda</groupId>
+			<artifactId>joda-convert</artifactId>
+			<version>1.1</version>
 			<scope>test</scope>
-		</dependency> -->
+		</dependency>
 	</dependencies>
 </project>

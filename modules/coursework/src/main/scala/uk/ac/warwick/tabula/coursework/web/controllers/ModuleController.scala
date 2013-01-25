@@ -17,7 +17,7 @@ class ModuleController extends CourseworkController {
 
 	hideDeletedItems
 	
-	@ModelAttribute def command(@PathVariable module: Module) = new ViewModuleCommand(module)
+	@ModelAttribute def command(@PathVariable("module") module: Module) = new ViewModuleCommand(module)
 
 	@RequestMapping
 	def viewModule(@ModelAttribute cmd: ViewModuleCommand) = {

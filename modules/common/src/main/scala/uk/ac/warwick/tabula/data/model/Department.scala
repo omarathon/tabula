@@ -18,7 +18,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	
 	@BeanProperty var name:String = null
 	
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var modules:JList[Module] = List()
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
@@ -27,7 +27,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	
 	@BeanProperty var collectFeedbackRatings:Boolean = false
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 	
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -37,6 +37,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var allowExtensionRequests:JBoolean = false
 	@BeanProperty var extensionGuidelineSummary:String = null
 	@BeanProperty var extensionGuidelineLink:String = null
+	
 	/** The group of extension managers */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "extension_managers_id")

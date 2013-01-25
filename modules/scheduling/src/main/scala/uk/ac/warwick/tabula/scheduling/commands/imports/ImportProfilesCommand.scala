@@ -15,8 +15,11 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.scheduling.services.UserIdAndCategory
+import uk.ac.warwick.tabula.actions.Sysadmin
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
+	
+	PermissionsCheck(Sysadmin())
 
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]

@@ -23,7 +23,7 @@ class EditMarkSchemeController extends CourseworkController {
 	validatesSelf[EditMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable department: Department, @PathVariable markscheme: MarkScheme) = 
+	def cmd(@PathVariable("department") department: Department, @PathVariable("markscheme") markscheme: MarkScheme) = 
 		new EditMarkSchemeCommand(department, markscheme)
 	 
 	@RequestMapping(method=Array(GET, HEAD))

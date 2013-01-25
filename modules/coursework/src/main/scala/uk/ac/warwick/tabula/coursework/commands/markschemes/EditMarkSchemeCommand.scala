@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.actions.Manage
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
 	
 	mustBeLinked(markScheme, department)
-	PermissionsCheck(Manage(department))
 
 	var dao = Wire.auto[MarkSchemeDao]
 

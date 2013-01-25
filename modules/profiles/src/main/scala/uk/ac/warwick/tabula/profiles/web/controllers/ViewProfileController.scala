@@ -15,10 +15,10 @@ class ViewProfileCommand(member: Member) extends ViewViewableCommand(member)
 class ViewProfileController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember)) orNull
+		restricted(new SearchProfilesCommand(currentMember, user)) orNull
 	
 	@ModelAttribute("viewProfileCommand")
-	def viewProfileCommand(@PathVariable member: Member) = new ViewProfileCommand(member)
+	def viewProfileCommand(@PathVariable("member") member: Member) = new ViewProfileCommand(member)
 	
 	@RequestMapping
 	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
