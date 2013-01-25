@@ -24,8 +24,8 @@
 	<hr class="full-width" />
 </#if>
 
-<section class="profile">
-	<section class="personal-details clearfix">
+<article class="profile">
+	<section id="personal-details" class="clearfix">
 		<div class="photo">
 			<img src="<@routes.photo profile />" />
 		</div>
@@ -147,7 +147,25 @@
 			<p><span rel="tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></p>
 		</#if>
 	</section>
-</section>
+
+	<#if profile.student>
+		<section id="personal-development" class="clearfix">
+			<h4>Personal tutor</h4>
+				<#if profile.personalTutor?is_string>
+					<p>${profile.personalTutor} <span class="muted">External to Warwick</span></p>
+				<#else>
+					<div class="tutor">
+						<div class="photo">
+							<img src="<@routes.photo profile.personalTutor />" />
+						</div>
+						<p><a href="mailto:${profile.personalTutor.email}">${profile.personalTutor.fullName}</a></p>
+					</div>
+				</#if>
+			</h4>
+		</div>
+		</section>
+	</#if>
+</article>
 
 <#if user.sysadmin>
 	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">

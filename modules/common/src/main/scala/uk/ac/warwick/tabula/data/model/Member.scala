@@ -143,6 +143,17 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
+			
+	def personalTutor = userType match {
+		case Student => {
+			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.getAgentParsed) match {
+				case None => "Not recorded"
+				case Some(name: String) => name
+				case Some(member: Member) => member
+			}
+		}
+		case _ => "Not applicable"
+	}
 }
 
 trait MemberProperties {
@@ -182,6 +193,9 @@ trait MemberProperties {
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
+	
+	def isStaff = (userType == Staff)
+	def isStudent = (userType == Student)
 }
 
 trait StudentProperties {

@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
-
 import scala.reflect.BeanProperty
-
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-
 import javax.persistence.Column
 import javax.persistence.Entity
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.spring.Wire
 
 @Entity
 @AccessType("field")
@@ -25,7 +24,7 @@ class StudentRelationship extends GeneratedId {
 	@BeanProperty var agent: String = _
 	
 	@Column(name="relationship_type")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType") 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType")
 	@BeanProperty var relationshipType: RelationshipType	= PersonalTutor
 	
 	//@BeanProperty var targetUniversityId: String = new String("")
@@ -43,6 +42,25 @@ class StudentRelationship extends GeneratedId {
 	@Column(name = "end_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var endDate: DateTime = _
+	
+	// assume that all-numeric value is a member (not proven though)
+	def isAgentMember: Boolean = agent.forall(_.isDigit)
+	
+	def getAgentMember: Option[Member] = {
+			val profileService = Wire.auto[ProfileService]
+			
+			isAgentMember match {
+				case true => profileService.getMemberByUniversityId(agent)
+				case false => None
+			}
+	}
+	
+	def getAgentParsed = {
+		getAgentMember match {
+			case None => agent
+			case Some(m) => m
+		}
+	}
 }
 
 object StudentRelationship {
