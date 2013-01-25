@@ -214,8 +214,7 @@ class FileField extends FormField {
 	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: JList[String])
 	
-	// This is before onBind is called, so multipart files have not been persisted
-	// as attachments yet.
+	// This is after onBind is called, so any multipart files have been persisted as attachments
 	override def validate(value: SubmissionValue, errors: Errors) {
 		
 		/** Are there any duplicate values (ignoring case)? */

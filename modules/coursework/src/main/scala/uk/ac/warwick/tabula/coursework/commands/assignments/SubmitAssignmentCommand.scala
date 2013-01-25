@@ -125,7 +125,10 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 		}.toSet[SavedSubmissionValue]
 		
 		// TAB-413 assert that we have at least one attachment
-		Assert.isTrue(submission.values.find(!_.attachments.isEmpty).isDefined, "Submission must have at least one attachment")
+		Assert.isTrue(
+			submission.values.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined, 
+			"Submission must have at least one attachment"
+		)
 
 		zipService.invalidateSubmissionZip(assignment)
 		service.saveSubmission(submission)

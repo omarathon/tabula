@@ -102,7 +102,7 @@ class AssignmentController extends CourseworkController {
 		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
 			throw new SubmitPermissionDeniedException(assignment)
 		}
-		
+				
 		/*
 		 * Note the multiple transactions. The submission transaction should commit before the confirmation email
 		 * command runs, to ensure that it has fully committed successfully. So don't wrap this method in an outer transaction
