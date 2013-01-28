@@ -55,35 +55,44 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
-	
+
 	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
-		if (departments.isEmpty && !isGod) Seq()
-		else try {
+
+		//if (departments.isEmpty && !isGod) Seq()
+		//else 
+
+		try {
+
 			val bq = new BooleanQuery
 
 			if (StringUtils.hasText(query)) {
 				val q = parser.parse(stripTitles(query))
 				bq.add(q, Occur.MUST)
-			}
 
-			if (!isGod) {
+				//}
+
+				/*			if (!isGod) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments)
 					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
 
 				bq.add(deptQuery, Occur.MUST)
+			}*/
+
+				if (!userTypes.isEmpty) {
+					// Restrict user type
+					val typeQuery = new BooleanQuery
+					for (userType <- userTypes)
+						typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
+
+					bq.add(typeQuery, Occur.MUST)
+				}
+
+				search(bq) flatMap { toItem(_) }
 			}
-			
-			if (!userTypes.isEmpty) {
-				// Restrict user type
-				val typeQuery = new BooleanQuery
-				for (userType <- userTypes)
-					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
-					
-				bq.add(typeQuery, Occur.MUST)
+			else {
+				Seq()
 			}
-			
-			search(bq) flatMap { toItem(_) }
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}
@@ -180,7 +189,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullName", Option(item.fullName))
 		
 		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
-		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
+		//indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
 		
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		
