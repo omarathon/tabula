@@ -108,10 +108,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods {	
 	
 	// largest batch of items we'll load in at once.
-	final override val MaxBatchSize = 100000
+	final override val MaxBatchSize = 1000
 
 	// largest batch of items we'll load in at once during scheduled incremental index.
-	final override val IncrementalBatchSize = 1000
+	final override val IncrementalBatchSize = 250
 	
 	var dao = Wire.auto[MemberDao]
 	
