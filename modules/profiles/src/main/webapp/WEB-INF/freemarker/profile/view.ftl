@@ -35,7 +35,7 @@
 			<h5><@fmt.profile_description profile /></h5>
 		</header>
 		
-		<div class="data">
+		<div class="data clearfix">
 			<div class="col1">
 				<table class="profile-info">
 					<tbody>
@@ -100,14 +100,14 @@
 						<#if profile.email??>
 							<tr>
 								<th>Warwick email</th>
-								<td>${profile.email}</td>
+								<td><i class="icon-envelope"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
 							</tr>
 						</#if>
 						
 						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
-								<td>${profile.homeEmail}</td>
+								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 						
@@ -136,11 +136,7 @@
 						</#if>
 					</tbody>
 				</table>
-			
-				<br class="clearfix">
 			</div>
-			
-			<br class="clearfix">
 		</div>
 			
 		<#if isSelf>
@@ -149,21 +145,9 @@
 	</section>
 
 	<#if profile.student>
-		<section id="personal-development" class="clearfix">
-			<h4>Personal tutor</h4>
-				<#if profile.personalTutor?is_string>
-					<p>${profile.personalTutor} <span class="muted">External to Warwick</span></p>
-				<#else>
-					<div class="tutor">
-						<div class="photo">
-							<img src="<@routes.photo profile.personalTutor />" />
-						</div>
-						<p><a href="mailto:${profile.personalTutor.email}">${profile.personalTutor.fullName}</a></p>
-					</div>
-				</#if>
-			</h4>
+		<div class="untabbed">
+			<#include "_personal_development.ftl" />
 		</div>
-		</section>
 	</#if>
 </article>
 
