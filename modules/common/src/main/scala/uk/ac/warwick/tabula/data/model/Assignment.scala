@@ -344,17 +344,21 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 
 	def isSecondMarker(user: User): Boolean = {
 		if (markScheme != null)
-			markScheme.firstMarkers.includes(user.getUserId)
+			markScheme.secondMarkers.includes(user.getUserId)
 		else false
 	}
 
-	def isReleasedForMarking(submission:Submission) : Boolean = {
-		val feedback = feedbacks.find(_.universityId == submission.universityId)
-		feedback match {
+	def isReleasedForMarking(submission:Submission) : Boolean =
+		feedbacks.find(_.universityId == submission.universityId) match {
 			case Some(f) => f.firstMarkerFeedback != null
 			case _ => false
 		}
-	}
+
+	def isReleasedToSecondMarker(submission:Submission) : Boolean =
+		feedbacks.find(_.universityId == submission.universityId) match {
+			case Some(f) => f.secondMarkerFeedback != null
+			case _ => false
+		}
 
 	/*
 		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first markers feedback item.
@@ -376,14 +380,24 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = markerSelectField match {
-		case Some(field) => {
-			submission.getValue(field) match {
-				case Some(sv) => Some(sv.value)
-				case None => None
+	def getStudentsFirstMarker(submission: Submission): Option[String] = markScheme.markingMethod match {
+		case SeenSecondMarking =>  {
+			val mapEntry = markerMap.find{p:(String,UserGroup) => p._2.includes(submission.userId)}
+			mapEntry match {
+				case Some((markerId, students)) => Some(markerId)
+				case _ => None
 			}
 		}
-		case None => None
+		case StudentsChooseMarker => markerSelectField match {
+			case Some(field) => {
+				submission.getValue(field) match {
+					case Some(sv) => Some(sv.value)
+					case None => None
+				}
+			}
+			case None => None
+		}
+		case _ => None
 	}
 
 		/**

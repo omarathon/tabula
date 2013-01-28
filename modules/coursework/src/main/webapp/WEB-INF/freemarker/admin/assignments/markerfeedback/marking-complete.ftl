@@ -57,6 +57,7 @@
 
 <div class="submit-buttons">
 	<input class="btn btn-warn" type="submit" value="Confirm">
+	<a class="btn" href="<@routes.listmarkersubmissions assignment />">Cancel</a>
 </div>
 </@f.form>
 </#escape>

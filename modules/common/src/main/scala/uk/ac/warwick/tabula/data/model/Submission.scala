@@ -88,6 +88,7 @@ class Submission extends GeneratedId with Deleteable {
 	}
 
 	def isReleasedForMarking: JBoolean = assignment.isReleasedForMarking(this)
+	def isReleasedToSecondMarker: JBoolean = assignment.isReleasedToSecondMarker(this)
 }
 
 /**

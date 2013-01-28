@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.actions.Manage
 
 /** Edit an existing markscheme. */
 class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) extends ModifyMarkSchemeCommand(department) {
-	
+
 	mustBeLinked(markScheme, department)
 	PermissionsCheck(Manage(department))
 
@@ -25,15 +25,17 @@ class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) 
 
 	def contextSpecificValidation(errors:Errors){
 		if (hasExistingSubmissions){
-			/* TODO - reinstate when other options become available
-			if (markScheme.studentsChooseMarker != studentsChooseMarker)
-				errors.rejectValue("studentsChooseMarker", "markScheme.studentsChooseMarker.submissionsExist")
-		  */
+
+			if (markScheme.markingMethod != markingMethod)
+				errors.rejectValue("markingMethod", "markScheme.markingMethod.submissionsExist")
+
 			if (markScheme.studentsChooseMarker){
-				val existingMarkers = markScheme.firstMarkers.includeUsers.toSet
-				val newMarkers = firstMarkers.toSet
+				val existingFirstMarkers = markScheme.firstMarkers.includeUsers.toSet
+				val newFirstMarkers = firstMarkers.toSet
+				val existingSecondMarkers = markScheme.secondMarkers.includeUsers.toSet
+				val newSecondMarkers = secondMarkers.toSet
 				// if newMarkers is not a super set of existingMarker, markers have been removed.
-				if (!(existingMarkers -- newMarkers).isEmpty){
+				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty){
 					errors.rejectValue("firstMarkers", "markScheme.firstMarkers.cannotRemoveMarkers")
 				}
 			}
@@ -47,7 +49,7 @@ class EditMarkSchemeCommand(department: Department, val markScheme: MarkScheme) 
 			markScheme
 		}
 	}
-	
+
 	def currentMarkScheme = Some(markScheme)
 
 	override def validate(errors: Errors) {

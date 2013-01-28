@@ -27,6 +27,9 @@ class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var grade: Option[String] = None
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
 	@BeanProperty var state : MarkingState = _
 

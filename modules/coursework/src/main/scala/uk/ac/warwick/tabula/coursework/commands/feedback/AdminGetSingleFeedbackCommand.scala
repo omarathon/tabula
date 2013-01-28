@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.actions.{UploadMarkerFeedback, Participate}
 import uk.ac.warwick.tabula.services.ZipService
 
 
@@ -35,7 +35,11 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 		"attachmentCount" -> feedback.attachments.size)
 }
 
-class AdminGetSingleMarkerFeedbackCommand(markerFeedback: MarkerFeedback) extends Command[RenderableZip] with ReadOnly {
+class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableZip] with ReadOnly {
+
+	mustBeLinked(assignment, module)
+	PermissionsCheck(UploadMarkerFeedback(assignment))
+
 	var zipService = Wire.auto[ZipService]
 
 	override def applyInternal() = {

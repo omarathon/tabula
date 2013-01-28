@@ -12,13 +12,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.StateService
 import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 
-class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean )
+class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
 	extends Command[Unit] with SelfValidating with Daoisms {
 
 	var stateService = Wire.auto[StateService]
 
 	@BeanProperty var students: JList[String] = ArrayList()
-	@BeanProperty var markerFeedback: JList[MarkerFeedback] = ArrayList()
+	@BeanProperty var markerFeedbacks: JList[MarkerFeedback] = ArrayList()
 
 	@BeanProperty var noMarks: JList[MarkerFeedback] = ArrayList()
 	@BeanProperty var noFeedback: JList[MarkerFeedback] = ArrayList()
@@ -30,11 +30,32 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 
 	def onBind() {
-		markerFeedback = students.flatMap(assignment.getMarkerFeedback(_, currentUser.apparentUser))
+		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, currentUser.apparentUser))
 	}
 
 	def applyInternal() {
-		markerFeedback.foreach(stateService.updateState(_, MarkingCompleted))
+		markerFeedbacks.foreach(stateService.updateState(_, MarkingCompleted))
+
+		def finaliseFeedback(){
+			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, markerFeedbacks)
+			finaliseFeedbackCommand.apply()
+		}
+
+		def createSecondMarkerFeedback(){
+			markerFeedbacks.foreach{ mf =>
+				val parentFeedback = mf.feedback
+				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
+				stateService.updateState(secondMarkerFeedback, ReleasedForMarking)
+				session.saveOrUpdate(parentFeedback)
+			}
+		}
+
+		assignment.markScheme.markingMethod match {
+			case StudentsChooseMarker => finaliseFeedback()
+			case SeenSecondMarking if firstMarker => createSecondMarkerFeedback()
+			case SeenSecondMarking if !firstMarker => finaliseFeedback()
+			case _ => // do nothing
+		}
 	}
 
 	override def describe(d: Description){
@@ -44,12 +65,12 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 	override def describeResult(d: Description){
 		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> markerFeedback.size())
+			.property("numFeedbackUpdated" -> markerFeedbacks.size())
 	}
 
 	def preSubmitValidation() {
-		noMarks = markerFeedback.filter(!_.hasMarks)
-		noFeedback = markerFeedback.filter(!_.hasFeedback)
+		noMarks = markerFeedbacks.filter(!_.hasMarks)
+		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
 	}
 
 	def validate(errors: Errors) {

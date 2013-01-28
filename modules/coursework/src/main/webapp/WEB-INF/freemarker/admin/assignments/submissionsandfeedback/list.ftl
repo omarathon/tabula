@@ -89,118 +89,103 @@ Publications: ${r.publicationOverlap}%)
 		</a>
 	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
-		<tr>
-			<th></th>
-			<th>Student</th>
-			<th>Submitted</th>
-			<th>Submission status</th>
-			<#if assignment.wordCountField??>
-				<th title="Declared word count">Words</th>
-			</#if>
-			<th>First Marker</th>
-			<th>Files</th>
-			<#if assignment.collectMarks>
-				<th>Mark</th>
-			</#if>
-			<th>Feedback</th>
-			<th>Feedback Uploaded</th>
-			<th>Feedback status</th>
-			<#if hasOriginalityReport><th>Originality report</th></#if>
-		</tr>
-		<#list awaitingSubmission?keys as universityId>
-			<tr class="itemContainer awaiting-submission">
-				<td></td>
-				<td>				
-				<#if module.department.showStudentName>
-					${awaitingSubmission[universityId]}
-				<#else>
-					${universityId}
-				</#if>
-				</td>
-				<td></td>
-				<td><span class="label-blue">Unsubmitted</span></td>
-				<#if assignment.wordCountField??><td></td></#if>
-				<td></td><td></td>
-				<#if assignment.collectMarks><td></td></#if>
-				<td></td><td></td><td></td>
-				<#if hasOriginalityReport><td></td></#if>
-			</tr>
-		</#list>
-		<#list students as student>
-			<#assign enhancedSubmission=student.enhancedSubmission>
-			<#assign submission=enhancedSubmission.submission>
-			
-			<#if submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-				<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
-			<#else>
-				<#assign lateness = "" />
-			</#if>
-			
-			<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-				<td><@form.selector_check_row "students" student.uniId /></td>
-				<td class="id">
-				<#if module.department.showStudentName>
-					${student.fullName}
-				<#else>
-					${student.uniId}
-				</#if>
-				</td>
-				<#-- TODO show student name if allowed by department --> 
-				<td class="submitted">
-					<#if submission.submittedDate??>
-						<span class="date use-tooltip" title="${lateness!''}">
-							<@fmt.date date=submission.submittedDate seconds=true capitalise=true />
-						</span>
-					</#if>
-				</td>
-				<td class="submission-status">
-					<#if submission.late>
-						<span class="label-red use-tooltip" title="${lateness!''}">Late</span>
-					<#elseif  submission.authorisedLate>
-						<span class="label-blue use-tooltip" title="${lateness!''}">Within Extension</span>
-					</#if>
-					<#if enhancedSubmission.downloaded>
-						<span class="label-green">Downloaded</span>
-					</#if>
-					<#if submission.releasedForMarking>
-						<span class="label-green">Markable</span>
-					</#if>
-					<#if submission.suspectPlagiarised>
-						<span class="label-orange">Suspect Plagiarised</span>
-					</#if>
-				</td>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Student</th>
+				<th>Submitted</th>
+				<th>Submission status</th>
 				<#if assignment.wordCountField??>
-					<td>
-						<#if submission.valuesByFieldName[assignment.defaultWordCountName]??>
-							${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
-						</#if>
-					</td>
+					<th title="Declared word count">Words</th>
 				</#if>
-				<td>
-					<#if submission.assignment??>${submission.firstMarker!""}</#if>
-				</td>
-				<td nowrap="nowrap" class="files">
-					<#assign attachments=submission.allAttachments />
-					<#if attachments?size gt 0>
-					<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
-						<i class="icon-download"></i>
-						${attachments?size}
-						<#if attachments?size == 1> file
-						<#else> files
-						</#if>
-					</a>
-					</#if>
-				</td>
+				<th>First Marker</th>
+				<th>Files</th>
 				<#if assignment.collectMarks>
-					<td class="mark">
-						${(student.feedback.actualMark)!''}
-					</td>
+					<th>Mark</th>
 				</#if>
-				<td nowrap="nowrap" class="download">
-					<#if student.feedback??>
-						<#assign attachments=student.feedback.attachments />
+				<th>Feedback</th>
+				<th>Feedback Uploaded</th>
+				<th>Feedback status</th>
+				<#if hasOriginalityReport><th>Originality report</th></#if>
+			</tr>
+		</thead>
+		<tbody>
+			<#list awaitingSubmission?keys as universityId>
+				<tr class="itemContainer awaiting-submission">
+					<td></td>
+					<td>
+					<#if module.department.showStudentName>
+						${awaitingSubmission[universityId]}
+					<#else>
+						${universityId}
+					</#if>
+					</td>
+					<td></td>
+					<td><span class="label-blue">Unsubmitted</span></td>
+					<#if assignment.wordCountField??><td></td></#if>
+					<td></td><td></td>
+					<#if assignment.collectMarks><td></td></#if>
+					<td></td><td></td><td></td>
+					<#if hasOriginalityReport><td></td></#if>
+				</tr>
+			</#list>
+			<#list students as student>
+				<#assign enhancedSubmission=student.enhancedSubmission>
+				<#assign submission=enhancedSubmission.submission>
+
+				<#if submission.submittedDate?? && (submission.late || submission.authorisedLate)>
+					<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+				<#else>
+					<#assign lateness = "" />
+				</#if>
+
+				<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
+					<td><@form.selector_check_row "students" student.uniId /></td>
+					<td class="id">
+					<#if module.department.showStudentName>
+						${student.fullName}
+					<#else>
+						${student.uniId}
+					</#if>
+					</td>
+					<#-- TODO show student name if allowed by department -->
+					<td class="submitted">
+						<#if submission.submittedDate??>
+							<span class="date use-tooltip" title="${lateness!''}">
+								<@fmt.date date=submission.submittedDate seconds=true capitalise=true />
+							</span>
+						</#if>
+					</td>
+					<td class="submission-status">
+						<#if submission.late>
+							<span class="label-red use-tooltip" title="${lateness!''}">Late</span>
+						<#elseif  submission.authorisedLate>
+							<span class="label-blue use-tooltip" title="${lateness!''}">Within Extension</span>
+						</#if>
+						<#if enhancedSubmission.downloaded>
+							<span class="label-green">Downloaded</span>
+						</#if>
+						<#if submission.releasedForMarking>
+							<span class="label-green">Markable</span>
+						</#if>
+						<#if submission.suspectPlagiarised>
+							<span class="label-orange">Suspect Plagiarised</span>
+						</#if>
+					</td>
+					<#if assignment.wordCountField??>
+						<td>
+							<#if submission.valuesByFieldName[assignment.defaultWordCountName]??>
+								${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
+							</#if>
+						</td>
+					</#if>
+					<td>
+						<#if submission.assignment??>${submission.firstMarker!""}</#if>
+					</td>
+					<td nowrap="nowrap" class="files">
+						<#assign attachments=submission.allAttachments />
 						<#if attachments?size gt 0>
-						<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.feedback.id}/feedback-${student.feedback.universityId}.zip'/>">
+						<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
 							<i class="icon-download"></i>
 							${attachments?size}
 							<#if attachments?size == 1> file
@@ -208,29 +193,48 @@ Publications: ${r.publicationOverlap}%)
 							</#if>
 						</a>
 						</#if>
-					</#if>
-				</td>
-				<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
-				<td class="feedbackReleased">
-					<#if student.feedback??>
-						<#if student.feedback.released>Published
-						<#else>Not yet published
-						</#if>
-					</#if>
-				</td>
-				<#if hasOriginalityReport>
-					<td>
-						<#list submission.allAttachments as attachment>
-                    		<!-- Checking originality report for ${attachment.name} ... -->
-                        	<#if attachment.originalityReport??>
-                            	<@originalityReport attachment />
-                        		<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View report</a>
-                        	</#if>
-						</#list>
 					</td>
-				</#if>
-			</tr>
-		</#list>
+					<#if assignment.collectMarks>
+						<td class="mark">
+							${(student.feedback.actualMark)!''}
+						</td>
+					</#if>
+					<td nowrap="nowrap" class="download">
+						<#if student.feedback??>
+							<#assign attachments=student.feedback.attachments />
+							<#if attachments?size gt 0>
+							<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.feedback.id}/feedback-${student.feedback.universityId}.zip'/>">
+								<i class="icon-download"></i>
+								${attachments?size}
+								<#if attachments?size == 1> file
+								<#else> files
+								</#if>
+							</a>
+							</#if>
+						</#if>
+					</td>
+					<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
+					<td class="feedbackReleased">
+						<#if student.feedback??>
+							<#if student.feedback.released>Published
+							<#else>Not yet published
+							</#if>
+						</#if>
+					</td>
+					<#if hasOriginalityReport>
+						<td>
+							<#list submission.allAttachments as attachment>
+								<!-- Checking originality report for ${attachment.name} ... -->
+								<#if attachment.originalityReport??>
+									<@originalityReport attachment />
+									<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View report</a>
+								</#if>
+							</#list>
+						</td>
+					</#if>
+				</tr>
+			</#list>
+		</tbody>
 	</table>
 </div>
 </#if>

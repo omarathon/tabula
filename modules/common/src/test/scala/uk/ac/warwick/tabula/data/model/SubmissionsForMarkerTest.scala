@@ -84,7 +84,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 
 		val ms = new MarkScheme()
 		ms.name = "Test mark scheme"
-		ms.studentsChooseMarker = true
+		ms.markingMethod = StudentsChooseMarker
 		ms.firstMarkers = ug
 		ms
 	}

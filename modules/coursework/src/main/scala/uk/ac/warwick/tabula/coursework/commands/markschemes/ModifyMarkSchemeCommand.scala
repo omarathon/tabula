@@ -5,8 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.data.model.{MarkingMethod, StudentsChooseMarker, Department, MarkScheme}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
@@ -20,7 +19,7 @@ abstract class ModifyMarkSchemeCommand(
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
 	@BeanProperty var secondMarkers: JList[String] = ArrayList()
-	@BeanProperty var studentsChooseMarker: Boolean = _
+	@BeanProperty var markingMethod: MarkingMethod = _
 	
 	// Subclasses can provide the "current" markscheme if one applies, for validation.
 	def currentMarkScheme: Option[MarkScheme]
@@ -31,10 +30,13 @@ abstract class ModifyMarkSchemeCommand(
 		contextSpecificValidation(errors)
 
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
-		
+
 		if (department.markSchemes.exists(sameName)) {
 			errors.rejectValue("name", "name.duplicate.markScheme", Array(this.name), null)
 		}
+
+		if (markingMethod == null)
+			errors.rejectValue("markingMethod", "markScheme.markingMethod.none")
 		
 		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers")
 		firstMarkersValidator.validate(errors)
@@ -62,7 +64,7 @@ abstract class ModifyMarkSchemeCommand(
 		scheme.name = name
 		scheme.firstMarkers.setIncludeUsers(firstMarkers)
 		scheme.secondMarkers.setIncludeUsers(secondMarkers)
-		scheme.studentsChooseMarker = studentsChooseMarker
+		scheme.markingMethod = markingMethod
 	}
 
 	def copyFrom(scheme: MarkScheme) {
@@ -71,7 +73,7 @@ abstract class ModifyMarkSchemeCommand(
 		firstMarkers.addAll(scheme.firstMarkers.includeUsers)
 		secondMarkers.clear()
 		secondMarkers.addAll(scheme.secondMarkers.includeUsers)
-		studentsChooseMarker = scheme.studentsChooseMarker
+		markingMethod = scheme.markingMethod
 	}
 
 }

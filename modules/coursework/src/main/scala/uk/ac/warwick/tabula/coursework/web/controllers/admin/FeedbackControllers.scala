@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.feedback._
@@ -36,29 +36,6 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
 class DownloadAllFeedbackController extends CourseworkController {
-	
-	var fileServer = Wire.auto[FileServer]
-	var feedbackDao = Wire.auto[FeedbackDao]
-	
-	@ModelAttribute def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new DownloadSelectedFeedbackCommand(module, assignment)
-	
-
-    def getMarkerFeedback(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		
-		feedbackDao.getMarkerFeedback(feedbackId) match {
-			case Some(markerFeedback) => {
-				val renderable = new AdminGetSingleMarkerFeedbackCommand(markerFeedback).apply()
-				fileServer.serve(renderable)
-			}
-			case None => throw new ItemNotFoundException
-		}
-    }   
-}
-
-@Controller
-@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
-class DownloadMarkerFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 
@@ -74,6 +51,41 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 	}
 }
 
+@Controller
+@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+class DownloadMarkerFeedbackController extends CourseworkController {
+
+	var fileServer = Wire.auto[FileServer]
+	var feedbackDao = Wire.auto[FeedbackDao]
+
+	@RequestMapping
+	def getMarkerFeedback(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		feedbackDao.getMarkerFeedback(feedbackId) match {
+			case Some(markerFeedback) => {
+				val renderable = new AdminGetSingleMarkerFeedbackCommand(module, assignment, markerFeedback).apply()
+				fileServer.serve(renderable)
+			}
+			case None => throw new ItemNotFoundException
+		}
+	}
+}
+
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/firstmarker/feedbacks.zip"))
+class DownloadFirstMarkersFeedbackController extends CourseworkController {
+
+	var fileServer = Wire.auto[FileServer]
+
+	@ModelAttribute def downloadFirstMarkersFeedbackCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, currentUser:CurrentUser) =
+		new DownloadFirstMarkersFeedbackCommand(module, assignment, currentUser)
+
+	@RequestMapping
+	def getSelected(command: DownloadFirstMarkersFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		command.apply { renderable =>
+			fileServer.serve(renderable)
+		}
+	}
+}
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))

@@ -46,7 +46,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	@RequestMapping
 	def downloadMarkersSubmissions(command: DownloadMarkersSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val (assignment, module) = (command.assignment, command.module)
+		val assignment = command.assignment
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		
 		// do not download submissions where the marker has completed marking

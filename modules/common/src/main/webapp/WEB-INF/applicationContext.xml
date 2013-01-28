@@ -114,6 +114,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkSchemeIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 	        </list>
 	    </property>
 	    <property name="formatters">

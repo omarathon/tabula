@@ -10,6 +10,23 @@
 				</#if>
 			</td>
 			<td><@fmt.date date=item.submission.submittedDate seconds=true capitalise=true /></td>
+			<#if !isFirstMarker>
+				<td>
+					${item.firstMarkerFeedback.mark!''}
+				</td>
+				<td>
+					<#if item.firstMarkerFeedback??>
+						<#assign attachments=item.firstMarkerFeedback.attachments />
+						<#if attachments?size gt 0>
+							<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
+								<i class="icon-download"></i>
+								${attachments?size}
+								<#if attachments?size == 1> file<#else> files</#if>
+							</a>
+						</#if>
+					</#if>
+				</td>
+			</#if>
 			<td><#if item.markerFeedback??>
 				${item.markerFeedback.mark!''}
 			</#if></td>
@@ -48,6 +65,11 @@
 		   href="<@routes.downloadmarkersubmissions assignment=assignment />">
 			<i class="icon-download"></i> Download submissions (${items?size})
 		</a>
+		<#if !isFirstMarker>
+			<a class="btn" href="<@routes.downloadfirstmarkerfeedback assignment=assignment />">
+				<i class="icon-download"></i> Download first marker feedback
+			</a>
+		</#if>
 		<!--if features.markerFeedback-->
 			<a class="btn ${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment />">
 				<i class="icon-upload"></i> Upload feedback
@@ -78,16 +100,22 @@
 			<@form.selector_check_all />
 		</div>
 		<table class="table table-bordered table-striped">
-			<tr>
+			<thead><tr>
 				<th></th>
 				<th>Student</th>
 				<th>Date submitted</th>
+				<#if !isFirstMarker>
+					<th>First mark</th>
+					<th>First feedback</th>
+				</#if>
 				<th>Mark</th>
 				<th>Feedback files</th>
 				<th>Status</th>
-			</tr>
-			<@listMarkerFeedback completedFeedback/>
-			<@listMarkerFeedback items/>
+			</tr></thead>
+			<tbody>
+				<@listMarkerFeedback completedFeedback/>
+				<@listMarkerFeedback items/>
+			</tbody>
 		</table>
 	</div>
 </#escape>
