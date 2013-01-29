@@ -48,7 +48,10 @@ class SearchController extends ProfilesController {
 	
 	def toJson(profiles: Seq[Member]) = {
 		def memberToJson(member: Member) = Map[String, String](
-			"name" -> member.fullName,
+			"name" -> {member.fullName match {
+				case None => "[Unknown user]"
+				case Some(name) => name
+			}},
 			"id" -> member.universityId,
 			"userId" -> member.userId,
 			"description" -> member.description)
