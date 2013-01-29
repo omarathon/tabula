@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.StateService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
 
 class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 

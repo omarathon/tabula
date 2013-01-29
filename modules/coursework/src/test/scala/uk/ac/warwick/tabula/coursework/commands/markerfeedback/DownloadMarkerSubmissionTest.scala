@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.Zips
 import uk.ac.warwick.tabula.data.model.{SavedSubmissionValue, FileAttachment}
 import org.mockito.Mockito._
 import org.junit.Before
+import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 
 
 class DownloadMarkerSubmissionTest extends AppContextTestBase with Mockito with MarkingWorkflowWorld {

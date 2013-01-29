@@ -1,9 +1,10 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCommand
 
 
 class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorld {

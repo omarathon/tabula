@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
