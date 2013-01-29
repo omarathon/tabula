@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.Daoisms
 
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
-	extends Command[Unit] with SelfValidating with Daoisms {
+	extends Command[List[Feedback]] with SelfValidating with Daoisms {
 	
 	mustBeLinked(assignment, module)
 	PermissionsCheck(Participate(module))
@@ -28,12 +28,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 
 	var feedbacksUpdated = 0
 
-	def applyInternal() {
-		val submissions = for (
-			uniId <- students;
-			submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
-		) yield submission
-
+	def applyInternal() = {
 		// get the parent feedback or create one if none exist
 		val feedbacks = students.map{ uniId:String =>
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
@@ -51,6 +46,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 		val feedbackToUpdate:Seq[Feedback] = feedbacks -- invalidFeedback
 		feedbackToUpdate foreach (f => stateService.updateState(f.retrieveFirstMarkerFeedback, ReleasedForMarking))
 		feedbacksUpdated = feedbackToUpdate.size
+		feedbackToUpdate.toList
 	}
 
 	override def describe(d: Description){

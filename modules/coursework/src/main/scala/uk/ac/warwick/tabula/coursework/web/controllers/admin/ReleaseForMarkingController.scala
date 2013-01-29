@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.CurrentUser
