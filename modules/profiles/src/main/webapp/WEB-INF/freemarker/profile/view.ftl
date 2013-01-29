@@ -24,8 +24,8 @@
 	<hr class="full-width" />
 </#if>
 
-<section class="profile">
-	<section class="personal-details clearfix">
+<article class="profile">
+	<section id="personal-details" class="clearfix">
 		<div class="photo">
 			<img src="<@routes.photo profile />" />
 		</div>
@@ -35,7 +35,7 @@
 			<h5><@fmt.profile_description profile /></h5>
 		</header>
 		
-		<div class="data">
+		<div class="data clearfix">
 			<div class="col1">
 				<table class="profile-info">
 					<tbody>
@@ -100,14 +100,14 @@
 						<#if profile.email??>
 							<tr>
 								<th>Warwick email</th>
-								<td>${profile.email}</td>
+								<td><i class="icon-envelope"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
 							</tr>
 						</#if>
 						
 						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
-								<td>${profile.homeEmail}</td>
+								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 						
@@ -136,18 +136,20 @@
 						</#if>
 					</tbody>
 				</table>
-			
-				<br class="clearfix">
 			</div>
-			
-			<br class="clearfix">
 		</div>
 			
 		<#if isSelf>
 			<p><span rel="tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></p>
 		</#if>
 	</section>
-</section>
+
+	<#if profile.student>
+		<div class="untabbed">
+			<#include "_personal_development.ftl" />
+		</div>
+	</#if>
+</article>
 
 <#if user.sysadmin>
 	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">
