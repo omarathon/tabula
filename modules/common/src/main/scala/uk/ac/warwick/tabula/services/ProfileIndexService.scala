@@ -57,42 +57,33 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 
 	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
-
-		//if (departments.isEmpty && !isGod) Seq()
-		//else 
-
-		try {
-
+		if (departments.isEmpty && !isGod) Seq()
+		else try {
 			val bq = new BooleanQuery
 
 			if (StringUtils.hasText(query)) {
 				val q = parser.parse(stripTitles(query))
 				bq.add(q, Occur.MUST)
+			}
 
-				//}
-
-				/*			if (!isGod) {
+			if (!isGod) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments)
-					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
+					deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
 
 				bq.add(deptQuery, Occur.MUST)
-			}*/
-
-				if (!userTypes.isEmpty) {
-					// Restrict user type
-					val typeQuery = new BooleanQuery
-					for (userType <- userTypes)
-						typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
-
-					bq.add(typeQuery, Occur.MUST)
-				}
-
-				search(bq) flatMap { toItem(_) }
 			}
-			else {
-				Seq()
+			
+			if (!userTypes.isEmpty) {
+				// Restrict user type
+				val typeQuery = new BooleanQuery
+				for (userType <- userTypes)
+					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
+					
+				bq.add(typeQuery, Occur.MUST)
 			}
+			
+			search(bq) flatMap { toItem(_) }
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}
@@ -117,10 +108,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods {	
 	
 	// largest batch of items we'll load in at once.
-	final override val MaxBatchSize = 1000
+	final override val MaxBatchSize = 100000
 
 	// largest batch of items we'll load in at once during scheduled incremental index.
-	final override val IncrementalBatchSize = 250
+	final override val IncrementalBatchSize = 1000
 	
 	var dao = Wire.auto[MemberDao]
 	
@@ -136,7 +127,8 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	
 	// Fields that will be split on whitespace
 	val whitespaceDelimitedFields = Set(
-		"departments"
+		"department",
+		"touchedDepartments"
 	)
 	
 	override val analyzer = {
@@ -189,7 +181,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullName", Option(item.fullName))
 		
 		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
-		//indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
+		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
 		
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
 		
