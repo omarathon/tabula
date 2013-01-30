@@ -28,7 +28,7 @@ class RoleService extends Logging {
 	@Autowired var providers: Array[RoleProvider] = Array()
 	
 	// TAB-19 Not yet implemented
-	def getExplicitPermissionsFor(user: CurrentUser): Map[Permission, Option[PermissionsTarget]] = Map()
+	def getExplicitPermissionsFor(user: CurrentUser, scope: => PermissionsTarget): Map[Permission, Option[PermissionsTarget]] = Map()
 	
 	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget) = {	
 		// Split providers into Scopeless and scoped

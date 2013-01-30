@@ -38,7 +38,7 @@ class SecurityService extends Logging {
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	val checks: Seq[PermissionChecker] = List(checkGod _, /*checkEnrolled _, */checkPermissions _, checkRoles _)
+	val checks: Seq[PermissionChecker] = List(checkGod _, checkPermissions _, checkRoles _)
 
 	def checkGod(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = if (user.god) Allow else Continue
 	
@@ -62,7 +62,7 @@ class SecurityService extends Logging {
 	}
 	
 	def checkPermissions(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = 
-			checkPermissions(roleService.getExplicitPermissionsFor(user), user, permission, scope)
+			checkPermissions(roleService.getExplicitPermissionsFor(user, scope), user, permission, scope)
 			
 	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = Some(
 		roles exists { role =>
