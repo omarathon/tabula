@@ -367,10 +367,13 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback match {
-			case Some(f) => this.isFirstMarker(user) match {
-				case true => Some(f.retrieveFirstMarkerFeedback)
-				case false => Some(f.retrieveSecondMarkerFeedback)
-				case _ => throw throw new IllegalStateException("isFirstMarker must be true or false")
+			case Some(f) => {
+				if(this.isFirstMarker(user))
+					Some(f.retrieveFirstMarkerFeedback)
+				else if(this.isSecondMarker(user))
+					Some(f.retrieveSecondMarkerFeedback)
+				else
+					None
 			}
 			case None => None
 		}
