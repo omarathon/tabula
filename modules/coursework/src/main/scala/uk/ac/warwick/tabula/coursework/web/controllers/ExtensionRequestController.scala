@@ -33,7 +33,7 @@ class ExtensionRequestController extends CourseworkController{
 		val (assignment, module) = (cmd.assignment, cmd.module)
 		
 		if (!module.department.canRequestExtension)
-			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest(), assignment)
+			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)

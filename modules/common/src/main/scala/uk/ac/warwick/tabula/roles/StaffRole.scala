@@ -8,10 +8,10 @@ case class StaffRole(department: model.Department) extends BuiltInRole {
 	GrantsRole(UniversityMemberRole(department))
 	
 	GrantsGlobalPermission(
-		Profiles.Search()
+		Profiles.Search
 	)
 	
 	GrantsPermissionFor(department,
-		Profiles.Read()
+		Profiles.Read
 	)
 }

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.permissions._
 class DownloadAllSubmissionsCommand(val module: Module, val assignment: Assignment, val filename: String) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read(), assignment)
+	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var zipService = Wire.auto[ZipService]
 

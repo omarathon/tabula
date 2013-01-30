@@ -26,14 +26,14 @@ import uk.ac.warwick.tabula.permissions._
 class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
 	extends ModifyExtensionCommand(module, assignment, submitter) {
 	
-	PermissionCheck(Permissions.Extension.Create(), assignment)
+	PermissionCheck(Permissions.Extension.Create, assignment)
 	
 }
 
 class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
 	extends ModifyExtensionCommand(module, assignment, submitter) {
 	
-	PermissionCheck(Permissions.Extension.Update(), extension)
+	PermissionCheck(Permissions.Extension.Update, extension)
 	
 	copyExtensions(List(extension))	
 }
@@ -41,7 +41,7 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
 	extends EditExtensionCommand(module, assignment, extension, submitter) {
 	
-	PermissionCheck(Permissions.Extension.ReviewRequest(), extension)
+	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)

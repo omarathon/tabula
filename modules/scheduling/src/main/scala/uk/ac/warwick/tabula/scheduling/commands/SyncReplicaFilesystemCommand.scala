@@ -42,7 +42,7 @@ import uk.ac.warwick.tabula.permissions._
 class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadOnly with Logging with HttpResponseHandlers {
 	import SyncReplicaFilesystemCommand._
 	
-	PermissionCheck(Permissions.ReplicaSyncing())
+	PermissionCheck(Permissions.ReplicaSyncing)
 	
 	// Back once again
 	var replicaMaster = Wire[String]("${tabula.sync.replica.master}")

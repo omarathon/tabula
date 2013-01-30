@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.CurrentUser
  */
 class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read(), assignment)
+	PermissionCheck(Permissions.Submission.Read, assignment)
 	
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

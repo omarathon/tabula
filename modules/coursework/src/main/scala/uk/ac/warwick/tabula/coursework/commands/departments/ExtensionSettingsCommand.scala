@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class ExtensionSettingsCommand (val department:Department, val features:Features) extends Command[Unit] {
 	
-	PermissionCheck(Permissions.Department.ManageExtensionSettings(), department)
+	PermissionCheck(Permissions.Department.ManageExtensionSettings, department)
 
 	@BeanProperty var allowExtensionRequests:JBoolean =_
 	@BeanProperty var extensionGuidelineSummary:String =_

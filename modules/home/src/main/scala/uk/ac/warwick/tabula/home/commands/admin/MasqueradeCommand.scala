@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.CurrentUser
 
 class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
-	PermissionCheck(Permissions.Masquerade())
+	PermissionCheck(Permissions.Masquerade)
 	
 	var userLookup = Wire.auto[UserLookupInterface]
 	

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.permissions._
 class SubmissionReportCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionsReport] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read(), assignment)
+	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	def applyInternal() = assignment.submissionsReport
 	

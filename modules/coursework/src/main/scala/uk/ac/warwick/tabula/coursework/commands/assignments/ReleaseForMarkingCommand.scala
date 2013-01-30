@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.ReleaseForMarking(), assignment)
+	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var submissionService = Wire.auto[SubmissionService]

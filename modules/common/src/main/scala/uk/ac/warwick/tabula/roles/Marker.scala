@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 case class Marker(assignment: Assignment) extends BuiltInRole {
 	
 	GrantsPermissionFor(assignment,
-		Feedback.Create(),
-		Submission.Read()
+		Feedback.Create,
+		Submission.Read
 	)
 
 }

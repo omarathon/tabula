@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class AdminGetAllFeedbackCommand(module: Module, assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read(), assignment)
+	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
 	var zipService = Wire.auto[ZipService]
 

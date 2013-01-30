@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 case class ExtensionManager(department: Department) extends BuiltInRole {
 	
 	GrantsPermissionFor(department, 
-		Extension.ReviewRequest(),
-		Extension.Update(),
-		Extension.Read()
+		Extension.ReviewRequest,
+		Extension.Update,
+		Extension.Read
 	)
 
 }

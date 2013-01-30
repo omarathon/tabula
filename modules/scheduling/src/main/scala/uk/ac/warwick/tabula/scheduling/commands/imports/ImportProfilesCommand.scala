@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	
-	PermissionCheck(Permissions.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData)
 
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]

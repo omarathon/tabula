@@ -23,7 +23,7 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 	extends Command[Mav] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.ViewPlagiarismStatus(), assignment)
+	PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, assignment)
 	
 	var turnitinService = Wire.auto[Turnitin]
 	

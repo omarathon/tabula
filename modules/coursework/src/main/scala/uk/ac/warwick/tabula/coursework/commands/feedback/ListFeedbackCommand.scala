@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.AuditEventIndexService
 
 class ListFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Seq[String]] with ReadOnly with Unaudited {
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read(), assignment)
+	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
 	var auditIndexService = Wire.auto[AuditEventIndexService]
 	

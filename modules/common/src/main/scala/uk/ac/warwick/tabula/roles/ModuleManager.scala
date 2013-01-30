@@ -10,40 +10,40 @@ case class ModuleManager(module: model.Module) extends BaseModuleManager(module)
 abstract class BaseModuleManager (scope: PermissionsTarget) extends BuiltInRole {
 	
 	GrantsPermissionFor(scope, 
-		Module.Read(),
+		Module.Read,
 		
-		Assignment.Archive(),
-		Assignment.Create(),
-		Assignment.Read(),
-		Assignment.Update(),
-		Assignment.Delete(),
+		Assignment.Archive,
+		Assignment.Create,
+		Assignment.Read,
+		Assignment.Update,
+		Assignment.Delete,
 		
-		Submission.ViewPlagiarismStatus(),
-		Submission.ManagePlagiarismStatus(),
-		Submission.CheckForPlagiarism(),
-		Submission.ReleaseForMarking(),
+		Submission.ViewPlagiarismStatus,
+		Submission.ManagePlagiarismStatus,
+		Submission.CheckForPlagiarism,
+		Submission.ReleaseForMarking,
 		// No Submission.Create() here for obvious reasons!		
-		Submission.Read(),
-		Submission.Update(),
-		Submission.Delete(),
+		Submission.Read,
+		Submission.Update,
+		Submission.Delete,
 		
-		Marks.DownloadTemplate(),
-		Marks.Create(),
-		Marks.Read(),
-		Marks.Update(),
-		Marks.Delete(),
+		Marks.DownloadTemplate,
+		Marks.Create,
+		Marks.Read,
+		Marks.Update,
+		Marks.Delete,
 		
-		Extension.ReviewRequest(),
-		Extension.Create(),
-		Extension.Read(),
-		Extension.Update(),
-		Extension.Delete(),
+		Extension.ReviewRequest,
+		Extension.Create,
+		Extension.Read,
+		Extension.Update,
+		Extension.Delete,
 		
-		Feedback.Publish(),
-		Feedback.Create(),
-		Feedback.Read(),
-		Feedback.Update(),
-		Feedback.Delete()
+		Feedback.Publish,
+		Feedback.Create,
+		Feedback.Read,
+		Feedback.Update,
+		Feedback.Delete
 	)
 
 }

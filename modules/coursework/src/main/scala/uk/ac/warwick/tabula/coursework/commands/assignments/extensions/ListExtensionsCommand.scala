@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[ExtensionInformation] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment,module)
-	PermissionCheck(Permissions.Extension.Read(), assignment)
+	PermissionCheck(Permissions.Extension.Read, assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]

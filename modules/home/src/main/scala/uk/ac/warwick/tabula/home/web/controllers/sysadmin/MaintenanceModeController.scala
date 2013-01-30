@@ -35,7 +35,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
 	
-	PermissionCheck(Permissions.ManageMaintenanceMode())
+	PermissionCheck(Permissions.ManageMaintenanceMode)
 	
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	

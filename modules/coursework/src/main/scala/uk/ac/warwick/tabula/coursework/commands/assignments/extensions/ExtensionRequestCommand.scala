@@ -25,7 +25,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	extends Command[Extension] with Daoisms with BindListener with SelfValidating {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Extension.MakeRequest(), assignment)
+	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
 
 	@BeanProperty var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

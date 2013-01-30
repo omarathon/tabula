@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Delete(), assignment)
+	PermissionCheck(Permissions.Submission.Delete, assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]

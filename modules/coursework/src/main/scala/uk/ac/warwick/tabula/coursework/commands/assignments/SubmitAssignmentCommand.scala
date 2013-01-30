@@ -26,7 +26,7 @@ import org.springframework.util.Assert
 class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Submission.Create(), assignment)
+	PermissionCheck(Permissions.Submission.Create, assignment)
 	
 	var service = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]

@@ -49,7 +49,7 @@ class UserPickerController extends BaseController {
 
 object UserPickerController {
 	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
-		PermissionCheck(Permissions.UserPicker())
+		PermissionCheck(Permissions.UserPicker)
 		
 		var userLookup = Wire.auto[UserLookupService]
 	

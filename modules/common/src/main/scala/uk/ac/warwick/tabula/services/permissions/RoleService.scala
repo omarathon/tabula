@@ -41,6 +41,8 @@ class RoleService extends Logging {
 		 * have returned something that isn't an empty Seq. Anything that isn't an empty Seq 
 		 * can be treated as the final action of this provider. */  
 		def streamScoped(providers: Stream[RoleProvider], scope: => PermissionsTarget): Stream[Role] = {
+			if (scope == null) Stream.empty
+			
 			val results = providers.toStream map { provider => (provider, provider.getRolesFor(user, scope)) }
 			val (hasResults, noResults) = results.partition { !_._2.isEmpty }
 			

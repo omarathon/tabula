@@ -7,7 +7,7 @@ class PermissionTest extends TestBase {
 
 	@Test def of {		
 		Permissions.of("Module.Read") match {
-			case Module.Read() => 
+			case Module.Read => 
 			case what:Any => fail("what is this?" + what) 
 		}
 	}

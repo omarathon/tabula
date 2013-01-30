@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class DisplaySettingsCommand (val department:Department) extends Command[Unit] {
 	
-	PermissionCheck(Permissions.Department.ManageDisplaySettings(), department)
+	PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
 
 	@BeanProperty var showStudentName:JBoolean =_
 

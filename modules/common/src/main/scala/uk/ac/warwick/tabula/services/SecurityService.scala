@@ -95,7 +95,7 @@ class SecurityService extends Logging {
 
 	private def _check(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
 		(permission, scope) match {
-			case (Permissions.Submission.Create(), Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
+			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
 			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
 		}
 	}

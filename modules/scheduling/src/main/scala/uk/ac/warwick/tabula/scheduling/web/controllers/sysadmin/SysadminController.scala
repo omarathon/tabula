@@ -54,7 +54,7 @@ class HomeController extends BaseSysadminController {
 }
 
 class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData)
 	
 	var indexer = Wire.auto[AuditEventIndexService]
 
@@ -69,7 +69,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 }
 
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData)
 	
 	var indexer = Wire.auto[ProfileIndexService]
 

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class ArchiveAssignmentCommand(val module: Module, val assignment: Assignment) extends Command[Unit] {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Assignment.Archive(), assignment)
+	PermissionCheck(Permissions.Assignment.Archive, assignment)
 
 	@BeanProperty var unarchive: Boolean = false
 

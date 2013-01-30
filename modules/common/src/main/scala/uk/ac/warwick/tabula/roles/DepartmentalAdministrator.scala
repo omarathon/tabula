@@ -11,27 +11,27 @@ case class DepartmentalAdministrator(department: model.Department) extends Built
 	GrantsRole(DepartmentModuleManager(department))
 		
 	GrantsPermissionFor(department, 
-		Department.ManageExtensionSettings(),
-		Department.ManageDisplaySettings(),
-		Department.DownloadFeedbackReport(),
+		Department.ManageExtensionSettings,
+		Department.ManageDisplaySettings,
+		Department.DownloadFeedbackReport,
 		
-		Module.ManagePermissions(),
-		Assignment.ImportFromExternalSystem(),
+		Module.ManagePermissions,
+		Assignment.ImportFromExternalSystem,
 		
-		FeedbackTemplate.Create(),
-		FeedbackTemplate.Read(),
-		FeedbackTemplate.Update(),
-		FeedbackTemplate.Delete(),
+		FeedbackTemplate.Create,
+		FeedbackTemplate.Read,
+		FeedbackTemplate.Update,
+		FeedbackTemplate.Delete,
 		
-		MarkScheme.Create(),
-		MarkScheme.Read(),
-		MarkScheme.Update(),
-		MarkScheme.Delete(),
+		MarkScheme.Create,
+		MarkScheme.Read,
+		MarkScheme.Update,
+		MarkScheme.Delete,
 		
-		Profiles.PersonalTutor.Create(),
-		Profiles.PersonalTutor.Read(),
-		Profiles.PersonalTutor.Update(),
-		Profiles.PersonalTutor.Delete()
+		Profiles.PersonalTutor.Create,
+		Profiles.PersonalTutor.Read,
+		Profiles.PersonalTutor.Update,
+		Profiles.PersonalTutor.Delete
 	)
 
 }

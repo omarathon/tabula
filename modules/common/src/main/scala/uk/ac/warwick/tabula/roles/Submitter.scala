@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 case class Submitter(submission: model.Submission) extends BuiltInRole {
 	
 	GrantsPermissionFor(submission, 
-		Submission.Read(),
-		Submission.SendReceipt()
+		Submission.Read,
+		Submission.SendReceipt
 	)
 
 }

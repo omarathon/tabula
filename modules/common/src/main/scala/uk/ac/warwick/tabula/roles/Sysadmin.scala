@@ -11,21 +11,22 @@ case class Sysadmin extends BuiltInRole {
 	 */
 	
 	GrantsPermission(
-		Masquerade(),
-		GodMode(),
-		ManageMaintenanceMode(),
-		ImportSystemData(),
-		ReplicaSyncing()
+		Masquerade,
+		GodMode,
+		ManageMaintenanceMode,
+		ImportSystemData,
+		ReplicaSyncing,
+		PermissionsHelper
 	)
 	
 	GrantsGlobalPermission(
-		Module.Create(),
-		// We don't give Read() here, god up for that
-		Module.Update(),
-		Module.Delete(),
+		Module.Create,
+		// We don't give Read here, god up for that
+		Module.Update,
+		Module.Delete,
 		
 		// To add department owners
-		Department.ManagePermissions()
+		Department.ManagePermissions
 	)
 	
 }

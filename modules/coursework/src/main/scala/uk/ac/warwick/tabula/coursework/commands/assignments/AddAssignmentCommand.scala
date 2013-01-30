@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentCommand(module) {
 	
-	PermissionCheck(Permissions.Assignment.Create(), module)
+	PermissionCheck(Permissions.Assignment.Create, module)
 
 	openDate = new DateTime().withTime(12, 0, 0, 0)
 	closeDate = openDate.plusWeeks(2)

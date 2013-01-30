@@ -23,7 +23,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 	universityIds.add(universityId)
 	
 	mustBeLinked(assignment,module)
-	PermissionCheck(Permissions.Extension.Delete(), module)
+	PermissionCheck(Permissions.Extension.Delete, module)
 
 	var userLookup = Wire.auto[UserLookupService]
 	

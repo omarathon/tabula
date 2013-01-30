@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.permissions
 
-sealed abstract class Permission
-sealed abstract class ScopelessPermission extends Permission
+sealed trait Permission
+sealed trait ScopelessPermission extends Permission
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
 object Permissions {
@@ -18,7 +18,7 @@ object Permissions {
 	def of(name: String): Permission = {
 		try {
 			// Go through the magical heirarchy
-			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
+			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
 			clz.getConstructors()(0).newInstance().asInstanceOf[Permission]
 		} catch {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
@@ -26,106 +26,107 @@ object Permissions {
 	}
 	
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
-	case class UserPicker() extends ScopelessPermission
+	case object UserPicker extends ScopelessPermission
 	
-	case class Masquerade() extends ScopelessPermission
-	case class GodMode() extends ScopelessPermission
-	case class ManageMaintenanceMode() extends ScopelessPermission
-	case class ImportSystemData() extends ScopelessPermission
-	case class ReplicaSyncing() extends ScopelessPermission
+	case object Masquerade extends ScopelessPermission
+	case object GodMode extends ScopelessPermission
+	case object ManageMaintenanceMode extends ScopelessPermission
+	case object ImportSystemData extends ScopelessPermission
+	case object ReplicaSyncing extends ScopelessPermission
+	case object PermissionsHelper extends ScopelessPermission
 	
 	object Department {
-		case class ManageExtensionSettings() extends Permission
-		case class ManageDisplaySettings() extends Permission
-		case class DownloadFeedbackReport() extends Permission
-		case class ManagePermissions() extends Permission
+		case object ManageExtensionSettings extends Permission
+		case object ManageDisplaySettings extends Permission
+		case object DownloadFeedbackReport extends Permission
+		case object ManagePermissions extends Permission
 	}
 	
 	object Module {
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
-		case class ManagePermissions() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
+		case object ManagePermissions extends Permission
 	}
 			
 	object Assignment {
-		case class ImportFromExternalSystem() extends Permission
-		case class Archive() extends Permission
+		case object ImportFromExternalSystem extends Permission
+		case object Archive extends Permission
 		
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 				
 	object Submission {
-		case class ViewPlagiarismStatus() extends Permission
-		case class ManagePlagiarismStatus() extends Permission
-		case class CheckForPlagiarism() extends Permission
-		case class SendReceipt() extends Permission
-		case class ReleaseForMarking() extends Permission
+		case object ViewPlagiarismStatus extends Permission
+		case object ManagePlagiarismStatus extends Permission
+		case object CheckForPlagiarism extends Permission
+		case object SendReceipt extends Permission
+		case object ReleaseForMarking extends Permission
 		
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 	
 	object Feedback {
-		case class Publish() extends Permission
-		case class Rate() extends Permission
+		case object Publish extends Permission
+		case object Rate extends Permission
 		
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 	
 	object Marks {
-		case class DownloadTemplate() extends Permission
+		case object DownloadTemplate extends Permission
 		
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 				
 	object Extension {
-		case class MakeRequest() extends Permission
-		case class ReviewRequest() extends Permission
+		case object MakeRequest extends Permission
+		case object ReviewRequest extends Permission
 		
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 				
 	object FeedbackTemplate {
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 	
 	object MarkScheme {
-		case class Create() extends Permission
-		case class Read() extends Permission
-		case class Update() extends Permission
-		case class Delete() extends Permission
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
 	}
 	
 	object Profiles {
-		case class Search() extends ScopelessPermission
-		case class Read() extends Permission
+		case object Search extends ScopelessPermission
+		case object Read extends Permission
 		
 		/* We need more fine grained control over what users can see here, so this could be a long list */
 		
 		object PersonalTutor {
-			case class Create() extends Permission
-			case class Read() extends Permission
-			case class Update() extends Permission
-			case class Delete() extends Permission			
+			case object Create extends Permission
+			case object Read extends Permission
+			case object Update extends Permission
+			case object Delete extends Permission
 		}
 	}
 }

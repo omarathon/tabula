@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.permissions._
 class DownloadAttachmentCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[Option[RenderableFile]] with ReadOnly {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Submission.Read(), submission)
+	PermissionCheck(Permissions.Submission.Read, submission)
 
 	@BeanProperty var filename: String = _
 

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.permissions._
 class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.ManagePlagiarismStatus(), assignment)
+	PermissionCheck(Permissions.Submission.ManagePlagiarismStatus, assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 

@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.permissions._
 class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.SendReceipt(), mandatory(submission))
+	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 
 	implicit var freemarker = Wire.auto[Configuration]
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")

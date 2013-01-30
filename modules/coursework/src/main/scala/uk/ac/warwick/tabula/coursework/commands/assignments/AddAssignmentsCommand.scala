@@ -70,7 +70,7 @@ class AssignmentItem(
  */
 class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
 	
-	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem(), department)
+	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var moduleDao = Wire.auto[ModuleDao]
@@ -172,7 +172,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 		if (hasInvalidAssignments) {
 			logger.warn("Rejected request to setup assignments that aren't in this department")
-			throw new PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem(), department)
+			throw new PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem, department)
 		}
 	}
 

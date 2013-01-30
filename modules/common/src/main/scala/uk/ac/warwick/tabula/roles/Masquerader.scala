@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 case class Masquerader extends BuiltInRole {
 	
 	GrantsPermission(
-		Masquerade()
+		Masquerade
 	)
 	
 }

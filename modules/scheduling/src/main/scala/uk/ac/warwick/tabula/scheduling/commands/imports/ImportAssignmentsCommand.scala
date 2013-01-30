@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	
-	PermissionCheck(Permissions.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData)
 
 	var assignmentImporter = Wire.auto[AssignmentImporter]
 	var assignmentService = Wire.auto[AssignmentService]

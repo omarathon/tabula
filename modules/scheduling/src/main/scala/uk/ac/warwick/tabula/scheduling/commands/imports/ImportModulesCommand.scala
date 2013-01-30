@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions._
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	import ImportModulesCommand._
 	
-	PermissionCheck(Permissions.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData)
 
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]

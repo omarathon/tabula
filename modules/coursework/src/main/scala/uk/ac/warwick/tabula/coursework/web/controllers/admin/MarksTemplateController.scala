@@ -22,7 +22,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	import MarksTemplateCommand._
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Marks.DownloadTemplate(), assignment)
+	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	
