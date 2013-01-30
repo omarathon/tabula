@@ -31,13 +31,13 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.util.core.StringUtils.hasText
 import scala.collection.mutable.Buffer
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
-	PermissionsCheck(Manage(department))
+	PermissionCheck(Permission.Profiles.PersonalTutor.Create(), department)
 
 	var userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]

@@ -1,6 +1,5 @@
-package uk.ac.warwick.tabula.permissions
+package uk.ac.warwick.tabula.system.permissions
 
-import uk.ac.warwick.tabula.actions.Action
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.MarkScheme
@@ -10,30 +9,38 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.actions.UniversityMember
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.data.model.FeedbackTemplate
+import uk.ac.warwick.tabula.roles.Role
 
 /**
- * Trait that allows classes to call PermissionsCheck() in their inline definitions 
+ * Trait that allows classes to call ActionCheck() in their inline definitions 
  * (i.e. on construction). These are then evaluated on bind.
  */
 trait PermissionsChecking extends PermissionsCheckingMethods {
 	
-	var permissionsChecks: Set[Action[_]] = Set()
-		
-	def PermissionsCheck(action: Action[_]) { 
-		permissionsChecks += action
-	}
+	var permissionChecks: Map[Permission, Option[PermissionsTarget]] = Map()
 
+	def PermissionCheckAll(permission: Permission, scopes: => Iterable[PermissionsTarget]) {
+		for (scope <- scopes) check(permission, Some(scope))
+	}
+	
+	def PermissionCheck(scopelessPermission: ScopelessPermission) {
+		check(scopelessPermission, None)
+	}
+	
+	def PermissionCheck(permission: Permission, scope: => PermissionsTarget) {
+		check(permission, Some(scope))
+	}
+	
+	private def check(permission: Permission, scope: => Option[PermissionsTarget]) {
+		permissionChecks += (permission -> scope)
+	}
+	
 }
 
 trait Public extends PermissionsChecking
-
-trait AllUniversityMembers extends PermissionsChecking {
-		PermissionsCheck(UniversityMember())
-}
 
 abstract trait PermissionsCheckingMethods extends Logging {
 	def mustBeLinked(assignment: Assignment, module: Module) =
@@ -52,6 +59,12 @@ abstract trait PermissionsCheckingMethods extends Logging {
 		if (mandatory(markScheme).department.id != mandatory(department.id)) {
 			logger.info("Not displaying mark scheme as it doesn't belong to specified department")
 			throw new ItemNotFoundException(markScheme)
+		}
+	
+	def mustBeLinked(template: FeedbackTemplate, department: Department) =
+		if (mandatory(template).department.id != mandatory(department.id)) {
+			logger.info("Not displaying feedback template as it doesn't belong to specified department")
+			throw new ItemNotFoundException(template)
 		}
 
   def mustBeLinked(submission: Submission, assignment: Assignment) =

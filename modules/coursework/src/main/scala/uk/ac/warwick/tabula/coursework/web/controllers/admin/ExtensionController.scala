@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.actions.{Manage, Participate}
+import uk.ac.warwick.tabula.permissions._
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime

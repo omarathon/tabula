@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula
 
-import uk.ac.warwick.tabula.actions.Action
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.exceptions.UserError
 
 /**
@@ -19,5 +19,6 @@ import uk.ac.warwick.tabula.system.exceptions.UserError
  */
 class PermissionDeniedException(
 	val user: CurrentUser,
-	val action: Action[_],
+	val permission: Permission,
+	val scope: Any,
 	cause: Throwable = null) extends RuntimeException(cause) with UserError

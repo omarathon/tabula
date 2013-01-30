@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddMarkerFeedbackCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller

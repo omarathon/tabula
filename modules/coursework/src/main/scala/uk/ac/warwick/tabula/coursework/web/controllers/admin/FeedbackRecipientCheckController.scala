@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackRecipientCheckCommand
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module

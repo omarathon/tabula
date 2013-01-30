@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.ArchiveAssignmentCom
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/archive"))

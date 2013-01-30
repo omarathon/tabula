@@ -19,12 +19,12 @@ import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module)) 
+	PermissionCheck(Permission.Submission.ManagePlagiarismStatus(), assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 

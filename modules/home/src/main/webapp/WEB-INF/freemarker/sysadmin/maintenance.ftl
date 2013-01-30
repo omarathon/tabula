@@ -1,6 +1,6 @@
 <h1>Maintenance mode</h1>
 
-<@f.form action="?" cssClass="form-horizontal" commandName="maintenanceModeForm">
+<@f.form action="?" cssClass="form-horizontal" commandName="maintenanceModeCommand">
 
 	<@form.labelled_row "enable" "Enabled?">
 		<@f.checkbox path="enable" />

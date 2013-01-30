@@ -1,0 +1,29 @@
+package uk.ac.warwick.tabula.permissions
+
+/** 
+ * Applying this trait to an object signifies that it fulfils a contract for 
+ * being a target for permissions checking. Roles can grant permissions against
+ * objects of this type, or a parent of this object.
+ * 
+ * For example, Assignment may extend PermissionsTarget. A role may grant the
+ * permission Assignment.Delete() either directly to the Assignment, or to the
+ * module in which the Assignment contains. Permissions checking code can therefore
+ * check against the Assignment itself, or (iteratively) against its permissions
+ * container.
+ * 
+ * If this object is at the top of its permissions tree (for example, a Department)
+ * then permissionsParents should return an empty Seq().
+ */
+trait PermissionsTarget {
+	
+	/**
+	 * This should return a sequence of *DIRECT* permission parents. Usually this will 
+	 * return a singleton Seq(parent) or an empty Seq() (for a top-level permission element 
+	 * such as a Department) but there are some situations (such as for an object that
+	 * exists in multiple departments) where it will return more than one.
+	 */
+	def permissionsParents: Seq[PermissionsTarget]
+	
+	def id: Any
+
+}

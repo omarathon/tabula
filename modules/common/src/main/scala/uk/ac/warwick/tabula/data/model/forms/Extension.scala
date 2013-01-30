@@ -1,22 +1,22 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
+
 import org.hibernate.annotations.{Type, AccessType}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
-import uk.ac.warwick.tabula.actions.{Manageable, Deleteable}
-import scala.Array
+import org.joda.time.DateTime
+
 import javax.persistence._
 import javax.persistence.CascadeType._
-import javax.validation.constraints.NotNull
-import reflect.BeanProperty
-import org.joda.time.DateTime
 import javax.persistence.FetchType._
+import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.actions.Viewable
+import uk.ac.warwick.tabula.permissions._
 
 @Entity @AccessType("field")
-class Extension extends GeneratedId with Deleteable with Manageable with Viewable {
+class Extension extends GeneratedId with PermissionsTarget {
 
 	def this(universityId:String=null) {
 		this()
@@ -26,6 +26,8 @@ class Extension extends GeneratedId with Deleteable with Manageable with Viewabl
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	@BeanProperty var assignment:Assignment = _
+	
+	def permissionsParents = Seq(Option(assignment)).flatten
 
 	@NotNull
 	@BeanProperty var userId:String =_

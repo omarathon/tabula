@@ -7,7 +7,7 @@ import org.joda.time.ReadableInstant
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController

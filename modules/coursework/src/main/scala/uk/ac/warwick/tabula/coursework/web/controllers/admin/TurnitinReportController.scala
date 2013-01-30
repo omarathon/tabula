@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import org.springframework.web.servlet.ModelAndView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Command
@@ -23,7 +23,7 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 	extends Command[Mav] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Submission.ViewPlagiarismStatus(), assignment)
 	
 	var turnitinService = Wire.auto[Turnitin]
 	

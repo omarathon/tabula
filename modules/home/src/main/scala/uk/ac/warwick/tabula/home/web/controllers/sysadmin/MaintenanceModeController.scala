@@ -31,11 +31,11 @@ import uk.ac.warwick.tabula.services.MaintenanceModeMessage
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permission.ManageMaintenanceMode())
 	
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	

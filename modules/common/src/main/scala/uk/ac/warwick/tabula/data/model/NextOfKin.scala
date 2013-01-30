@@ -1,19 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
 import scala.reflect.BeanProperty
+
 import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.actions.Viewable
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.ToString
 
 @Entity
-class NextOfKin extends GeneratedId with Viewable with ToString {	
+class NextOfKin extends GeneratedId with ToString {	
 	@ManyToOne
 	@JoinColumn(name = "member_id")
 	@BeanProperty var member: Member = _

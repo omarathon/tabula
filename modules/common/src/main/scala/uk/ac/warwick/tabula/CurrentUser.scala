@@ -41,6 +41,8 @@ class CurrentUser(
 	def lastName = apparentUser.getLastName
 	/** Warwick Uni ID of the apparent user. */
 	def universityId = apparentUser.getWarwickId
+	/** Department code of the apparent user. */
+	def departmentCode = apparentUser.getDepartmentCode
 	/** Department name of the apparent user. */
 	def departmentName = apparentUser.getDepartment
 	/** Email address of the apparent user. */

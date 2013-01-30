@@ -14,7 +14,7 @@ import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * Command for adding permissions to a module.
@@ -28,7 +28,7 @@ import uk.ac.warwick.tabula.actions.Manage
  */
 class AddModulePermissionCommand(val module: Module) extends Command[Unit] {
 	
-	PermissionsCheck(Manage(module))
+	PermissionCheck(Permission.Module.ManagePermissions(), module)
 	module.ensureParticipantsGroup
 
 	@BeanProperty var usercodes: JList[String] = ArrayList()

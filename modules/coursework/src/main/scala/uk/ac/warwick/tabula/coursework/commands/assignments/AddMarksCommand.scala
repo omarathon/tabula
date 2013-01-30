@@ -29,13 +29,13 @@ import uk.ac.warwick.tabula.UniversityId
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 class AddMarksCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[List[Feedback]] with Daoisms with Logging with BindListener {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Marks.Create(), assignment)
 
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]

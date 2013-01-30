@@ -12,7 +12,7 @@ import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * Creates a job that submits the assignment to Turnitin.
@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.actions.Participate
 class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[String] {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Submission.CheckForPlagiarism(), assignment)
 
 	var jobService = Wire.auto[JobService]
 

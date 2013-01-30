@@ -12,7 +12,7 @@ import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
@@ -23,7 +23,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 	universityIds.add(universityId)
 	
 	mustBeLinked(assignment,module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Extension.Delete(), module)
 
 	var userLookup = Wire.auto[UserLookupService]
 	

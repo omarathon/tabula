@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod._
 
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.modules.AddModulePermissionCommand
 import uk.ac.warwick.tabula.coursework.commands.modules.RemoveModulePermissionCommand
 import uk.ac.warwick.tabula.data.model.Module

@@ -31,7 +31,7 @@ import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 class ImportSingleStudentCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
 	with Logging with Daoisms with StudentProperties {

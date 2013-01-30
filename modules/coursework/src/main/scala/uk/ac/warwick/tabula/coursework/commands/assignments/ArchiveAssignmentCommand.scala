@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 
 
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class ArchiveAssignmentCommand(val module: Module, val assignment: Assignment) extends Command[Unit] {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Assignment.Archive(), assignment)
 
 	@BeanProperty var unarchive: Boolean = false
 

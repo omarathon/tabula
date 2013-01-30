@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.web.Routes
 

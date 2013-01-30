@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ PathVariable, RequestMapping }
 import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
@@ -22,7 +22,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	import MarksTemplateCommand._
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Marks.DownloadTemplate(), assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	

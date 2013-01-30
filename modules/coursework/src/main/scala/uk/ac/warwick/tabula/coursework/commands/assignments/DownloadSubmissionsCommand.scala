@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 /**
@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.actions.Participate
  */
 class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permission.Submission.Read(), assignment)
 	
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

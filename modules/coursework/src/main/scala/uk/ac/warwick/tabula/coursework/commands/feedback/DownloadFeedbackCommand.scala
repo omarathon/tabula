@@ -13,14 +13,14 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.permissions._
 
 
 class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
 	
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
-	PermissionsCheck(View(feedback))
+	PermissionCheck(Permission.Feedback.Read(), feedback)
 	
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]

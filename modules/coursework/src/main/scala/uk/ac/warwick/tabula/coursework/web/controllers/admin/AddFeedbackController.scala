@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.coursework.web.Routes
 
