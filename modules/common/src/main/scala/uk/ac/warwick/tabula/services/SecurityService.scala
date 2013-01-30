@@ -74,30 +74,6 @@ class SecurityService extends Logging {
 	def checkRoles(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = 
 			checkRoles(roleService.getRolesFor(user, scope), user, permission, scope)
 
-//	def checkGroup(user: CurrentUser, action: Action[_]): Response = Some(action match {
-//
-//		case View(member: Member) => {
-//			def isSamePerson = user.apparentId == member.userId
-//			
-//			def inSameDepartment = {
-//				val myDepartments = profileService.getMemberByUserId(user.apparentId) map { _.affiliatedDepartments } getOrElse(Seq())
-//				val theirDepartments = member.touchedDepartments
-//				
-//				val sameDepartments = myDepartments intersect member.touchedDepartments
-//				
-//				!sameDepartments.isEmpty
-//			}
-//			
-//			isSamePerson || (user.isStaff && inSameDepartment)
-//		}
-//		
-//		case Search(clazz: Class[Member]) => user.isStaff
-//
-//		case action: Action[_] => throw new IllegalArgumentException(action.toString)
-//		case _ => throw new IllegalArgumentException()
-//
-//	})
-	
 	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
 	def can(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _can(user, permission, Some(scope)) 
 		
