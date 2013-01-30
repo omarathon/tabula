@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.{MarkingMethod, StudentsChooseMarker, Department, MarkScheme}
+import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkScheme}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
@@ -38,10 +38,24 @@ abstract class ModifyMarkSchemeCommand(
 		if (markingMethod == null)
 			errors.rejectValue("markingMethod", "markScheme.markingMethod.none")
 		
-		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers")
+		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers"){
+			override def alreadyHasCode = hasDuplicates(firstMarkers)
+		}
 		firstMarkersValidator.validate(errors)
-		val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers")
+		val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
+			override def alreadyHasCode = hasDuplicates(secondMarkers)
+		}
 		secondMarkersValidator.validate(errors)
+
+		// there is a marker in both lists
+		val trimmedFirst = firstMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
+		val trimmedSecond = secondMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
+		if ((trimmedFirst & trimmedSecond).size > 0)
+			errors.reject("markScheme.markers.bothLists")
+	}
+
+	def hasDuplicates(markers:JList[_]):Boolean = {
+		markers.distinct.size != markers.size
 	}
 	
 	// If there's a current markscheme, returns whether "other" is a different
