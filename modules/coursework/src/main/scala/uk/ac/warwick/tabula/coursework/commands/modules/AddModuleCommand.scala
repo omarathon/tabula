@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.Command
 
 class AddModuleCommand(val department: Department) extends Command[Module] with Daoisms with SelfValidating {
 	
-	PermissionCheck(Permission.Module.Create(), department)
+	PermissionCheck(Permissions.Module.Create(), department)
 
 	@BeanProperty var code: String = _
 	@BeanProperty var name: String = _

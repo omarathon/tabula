@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 
 class TutorTemplateCommand(val department: Department) extends Command[ExcelView] with Unaudited {
 	
-	PermissionCheck(Permission.Profiles.PersonalTutor.Create(), department)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Create(), department)
 	
 	def applyInternal() = {
 		val workbook = new XSSFWorkbook()

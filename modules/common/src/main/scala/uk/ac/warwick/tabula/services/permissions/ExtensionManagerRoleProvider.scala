@@ -23,6 +23,9 @@ class ExtensionManagerRoleProvider extends RoleProvider {
 			case department: Department => 
 				if (department.isExtensionManager(user.idForPermissions)) Seq(ExtensionManager(department))
 				else Seq()
+			
+			// Extension managers are only checked at department level
+			case _ => Seq()
 		}
 	}
 	

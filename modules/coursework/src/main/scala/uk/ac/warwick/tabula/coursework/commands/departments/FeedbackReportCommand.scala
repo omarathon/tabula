@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited { 
 	
-	PermissionCheck(Permission.Department.DownloadFeedbackReport(), department)
+	PermissionCheck(Permissions.Department.DownloadFeedbackReport(), department)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditIndexService = Wire.auto[AuditEventIndexService]

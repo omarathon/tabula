@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions._
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[Feedback]](module, assignment, submitter)  {
 	
-	PermissionCheck(Permission.Feedback.Create(), assignment)
+	PermissionCheck(Permissions.Feedback.Create(), assignment)
 
 	override def applyInternal(): List[Feedback] = transactional() {
 

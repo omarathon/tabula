@@ -24,7 +24,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	import SyncReplicaFilesystemCommand._
 	import SanityCheckFilesystemCommand._
 	
-	PermissionCheck(Permission.ReplicaSyncing())
+	PermissionCheck(Permissions.ReplicaSyncing())
 	
 	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
 	var dataDir = Wire[String]("${base.data.dir}")

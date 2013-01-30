@@ -35,7 +35,7 @@ import uk.ac.warwick.tabula.permissions._
 abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties  {
 	
-	PermissionCheck(Permission.ImportSystemData())
+	PermissionCheck(Permissions.ImportSystemData())
 	
 	var memberDao = Wire.auto[MemberDao]
 	var fileDao = Wire.auto[FileDao]

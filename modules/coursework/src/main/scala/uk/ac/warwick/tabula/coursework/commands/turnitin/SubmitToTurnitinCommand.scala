@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.permissions._
 class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[String] {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permission.Submission.CheckForPlagiarism(), assignment)
+	PermissionCheck(Permissions.Submission.CheckForPlagiarism(), assignment)
 
 	var jobService = Wire.auto[JobService]
 

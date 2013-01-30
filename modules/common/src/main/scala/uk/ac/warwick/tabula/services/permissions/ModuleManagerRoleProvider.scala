@@ -24,6 +24,9 @@ class ModuleManagerRoleProvider extends RoleProvider {
 			case module: Module =>
 				if (module.ensuredParticipants.includes(user.idForPermissions)) Seq(ModuleManager(module))
 				else Seq()
+				
+			// The only times we'd check for module manager permission is on a department or module
+			case _ => Seq()
 		}
 	
 	def rolesProvided = Set(classOf[ModuleManager])

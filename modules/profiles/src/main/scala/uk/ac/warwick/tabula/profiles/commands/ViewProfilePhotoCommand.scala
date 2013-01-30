@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.Unaudited
 
 class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
 	
-	PermissionCheck(Permission.Profiles.Read(), member)
+	PermissionCheck(Permissions.Profiles.Read(), member)
 	
 	private val DefaultPhoto = new DefaultPhoto
 	private var fileFound: Boolean = _

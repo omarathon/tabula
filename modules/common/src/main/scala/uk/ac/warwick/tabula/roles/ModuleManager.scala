@@ -1,11 +1,15 @@
 package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.permissions.Permission._
+import uk.ac.warwick.tabula.permissions.Permissions._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-case class ModuleManager(module: model.Module) extends BuiltInRole {
+case class DepartmentModuleManager(department: model.Department) extends BaseModuleManager(department)
+case class ModuleManager(module: model.Module) extends BaseModuleManager(module)
+
+abstract class BaseModuleManager (scope: PermissionsTarget) extends BuiltInRole {
 	
-	GrantsPermissionFor(module, 
+	GrantsPermissionFor(scope, 
 		Module.Read(),
 		
 		Assignment.Archive(),

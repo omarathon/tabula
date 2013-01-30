@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.permissions._
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permission.Feedback.Publish(), assignment)
+	PermissionCheck(Permissions.Feedback.Publish(), assignment)
 	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 	var assignmentService = Wire.auto[AssignmentService]

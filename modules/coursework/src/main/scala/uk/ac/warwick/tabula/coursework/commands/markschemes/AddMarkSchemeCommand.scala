@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class AddMarkSchemeCommand(department: Department) extends ModifyMarkSchemeCommand(department) {
 	
-	PermissionCheck(Permission.MarkScheme.Create(), department)
+	PermissionCheck(Permissions.MarkScheme.Create(), department)
 
 	// Copy properties to a new markscheme, save it transactionally, return it.
 	def applyInternal() = {

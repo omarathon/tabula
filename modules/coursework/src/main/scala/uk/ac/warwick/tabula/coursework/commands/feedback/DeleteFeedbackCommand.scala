@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class DeleteFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permission.Feedback.Delete(), assignment)
+	PermissionCheck(Permissions.Feedback.Delete(), assignment)
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 

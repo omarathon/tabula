@@ -28,7 +28,7 @@ import uk.ac.warwick.tabula.permissions._
  */
 class AddModulePermissionCommand(val module: Module) extends Command[Unit] {
 	
-	PermissionCheck(Permission.Module.ManagePermissions(), module)
+	PermissionCheck(Permissions.Module.ManagePermissions(), module)
 	module.ensureParticipantsGroup
 
 	@BeanProperty var usercodes: JList[String] = ArrayList()

@@ -20,7 +20,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permission.Feedback.Read(), feedback)
+	PermissionCheck(Permissions.Feedback.Read(), feedback)
 	
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 class DownloadSupportingFilesCommand(val module: Module, val assignment: Assignment, val extension: Extension, val filename: String) extends Command[Option[RenderableFile]] with ReadOnly{
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permission.Extension.Read(), extension)
+	PermissionCheck(Permissions.Extension.Read(), extension)
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _

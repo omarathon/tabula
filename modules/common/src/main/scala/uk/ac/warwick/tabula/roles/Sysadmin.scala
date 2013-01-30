@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.roles
 
-import uk.ac.warwick.tabula.permissions.Permission._
+import uk.ac.warwick.tabula.permissions.Permissions._
 
 case class Sysadmin extends BuiltInRole {
 	
@@ -22,7 +22,10 @@ case class Sysadmin extends BuiltInRole {
 		Module.Create(),
 		// We don't give Read() here, god up for that
 		Module.Update(),
-		Module.Delete()
+		Module.Delete(),
+		
+		// To add department owners
+		Department.ManagePermissions()
 	)
 	
 }

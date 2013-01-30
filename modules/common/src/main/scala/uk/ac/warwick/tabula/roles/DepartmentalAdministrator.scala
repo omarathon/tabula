@@ -3,19 +3,17 @@ package uk.ac.warwick.tabula.roles
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data._
 
-import uk.ac.warwick.tabula.permissions.Permission._
+import uk.ac.warwick.tabula.permissions.Permissions._
 
 case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole {
 	
 	// Implicitly grants module manager role for all modules in this department
-	for (module <- department.modules)
-		GrantsRole(ModuleManager(module))
+	GrantsRole(DepartmentModuleManager(department))
 		
 	GrantsPermissionFor(department, 
 		Department.ManageExtensionSettings(),
 		Department.ManageDisplaySettings(),
 		Department.DownloadFeedbackReport(),
-		Department.ManagePermissions(),
 		
 		Module.ManagePermissions(),
 		Assignment.ImportFromExternalSystem(),

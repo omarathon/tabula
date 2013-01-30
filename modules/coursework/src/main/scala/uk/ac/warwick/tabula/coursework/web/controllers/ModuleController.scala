@@ -9,7 +9,7 @@ import org.springframework.stereotype._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
-class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permission.Module.Read(), module)
+class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.Read(), module)
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))

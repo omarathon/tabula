@@ -25,7 +25,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 	import CleanupUnreferencedFilesCommand._
 	import FunctionalFileFilter._
 	
-	PermissionCheck(Permission.ReplicaSyncing())
+	PermissionCheck(Permissions.ReplicaSyncing())
 	
 	var fileDao = Wire.auto[FileDao]
 	

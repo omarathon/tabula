@@ -80,7 +80,6 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
 		val membership = assignmentService.determineMembership(Some(upstream), Option(others))
-		println(membership)
 		membership.size should be (3)
 		
 		membership(0).user.getFullName should be ("Roger Aaaaa")
@@ -114,7 +113,6 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         others.includeUsers.add("aaaaf")
         others.excludeUsers.add("aaaah")
         val membership = assignmentService.determineMembership(Some(upstream), Option(others))
-        println(membership)
         membership.size should be (3)
         
         membership(0).user.getFullName should be ("Roger Aaaaf")

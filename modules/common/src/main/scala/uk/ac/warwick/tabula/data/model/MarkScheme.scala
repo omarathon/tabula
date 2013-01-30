@@ -67,5 +67,7 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 		}
 		else Seq() //TODO - no defined behaviour for default mark schemes yet
 	}
+	
+	override def toString = "MarkScheme(" + id + ")"
 
 }

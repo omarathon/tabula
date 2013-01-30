@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
-class ViewProfileCommand(member: Member) extends ViewViewableCommand(Permission.Profiles.Search(), member)
+class ViewProfileCommand(member: Member) extends ViewViewableCommand(Permissions.Profiles.Search(), member)
 
 @Controller
 @RequestMapping(Array("/view/{member}"))

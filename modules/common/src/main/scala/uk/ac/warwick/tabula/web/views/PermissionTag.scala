@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.permissions.Permissions
 
 /**
  * Freemarker directive to show the contents of the tag
@@ -30,7 +30,7 @@ class PermissionTag /*[A <: Action[_] : ClassManifest]*/ extends TemplateDirecti
 
 		val item = DeepUnwrap.unwrap(params.get("object")).asInstanceOf[PermissionsTarget]
 		val actionName = DeepUnwrap.unwrap(params.get("action")).asInstanceOf[String]
-		val permission = Permission.of(actionName)
+		val permission = Permissions.of(actionName)
 
 		if (securityService.can(currentUser, permission, item)) {
 			if (debugEnabled) logger.debug("Rendering content for " + currentUser + " to " + permission + " on " + item)

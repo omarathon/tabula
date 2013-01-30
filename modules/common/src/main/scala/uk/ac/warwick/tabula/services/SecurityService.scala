@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
 import uk.ac.warwick.tabula.services.permissions.RoleService
@@ -23,11 +24,7 @@ import uk.ac.warwick.tabula.roles.Role
  */
 @Service
 class SecurityService extends Logging {
-//	var userLookup = Wire.auto[UserLookupService]
-//	var profileService = Wire.auto[ProfileService]
-//
-//	def groupService = userLookup.getGroupService
-	
+
 	var roleService = Wire.auto[RoleService]
 
 	type Response = Option[Boolean]
@@ -44,49 +41,18 @@ class SecurityService extends Logging {
 	val checks: Seq[PermissionChecker] = List(checkGod _, /*checkEnrolled _, */checkPermissions _, checkRoles _)
 
 	def checkGod(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = if (user.god) Allow else Continue
-
-//	def checkEnrolled(user: CurrentUser, action: Action[_]): Response = action match {
-//		case Submit(assignment: Assignment) => if (assignment.canSubmit(user.apparentUser)) Allow else Deny
-//		case _ => Continue
-//	}
 	
-	/*
-	 * def can(user: CurrentUser, permission: ScopelessPermission): Boolean = 
-		permissions.contains(permission) || roles.exists(_.can(user, permission))
-	
-	def can(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Boolean = {
-		if (permission.isInstanceOf[ScopelessPermission])
-			// Scope is irrelevant here
-			return can(user, permission.asInstanceOf[ScopelessPermission])
-		
-		def scopeMatches(permissionScope: => PermissionsTarget): Boolean =
-			// The ID matches, or there exists a parent that matches (recursive)
-			permissionScope.id == scope.id || permissionScope.permissionsParents.exists(scopeMatches(_))
-			
-		def hasExplicitPermission =
-			permissions.get(permission) match {
-				case Some(permissionScope) => permissionScope match {
-					case Some(permissionScope) => scopeMatches(permissionScope)
-					case None => false
-				}
-				case None => false
-			}
-		
-		hasExplicitPermission || roles.exists(_.can(user, permission, scope))
-	}
-	 */
-	
-	private def checkPermissions(allPermissions: Map[Permission, Option[PermissionsTarget]], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = {
+	private def checkPermissions(allPermissions: Map[Permission, Option[PermissionsTarget]], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = {	
 		permission match {
 			case permission: ScopelessPermission => if (allPermissions.contains(permission)) Allow else Continue
 			case permission => {
-				def scopeMatches(permissionScope: => PermissionsTarget): Boolean =
+				def scopeMatches(permissionScope: => PermissionsTarget, targetScope: => PermissionsTarget): Boolean =					
 					// The ID matches, or there exists a parent that matches (recursive)
-					permissionScope.id == scope.id || permissionScope.permissionsParents.exists(scopeMatches(_))
+					permissionScope.id == targetScope.id || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
 					
 				allPermissions.get(permission) match {
 					case Some(permissionScope) => permissionScope match {
-						case Some(permissionScope) => if (scopeMatches(permissionScope)) Allow else Continue
+						case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
 						case None => Continue
 					}
 					case None => Continue
@@ -153,7 +119,7 @@ class SecurityService extends Logging {
 
 	private def _check(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
 		(permission, scope) match {
-			case (Permission.Submission.Create(), assignment: Assignment) => throw new SubmitPermissionDeniedException(assignment)
+			case (Permissions.Submission.Create(), Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
 			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
 		}
 	}

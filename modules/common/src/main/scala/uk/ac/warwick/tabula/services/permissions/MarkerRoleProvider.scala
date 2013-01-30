@@ -29,6 +29,9 @@ class MarkerRoleProvider extends RoleProvider {
 				
 			case assignment: Assignment =>
 				getRoles(Seq(assignment))
+				
+			// We don't need to check for the marker role on any other scopes
+			case _ => Seq()
 		}
 	}
 	

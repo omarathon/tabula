@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
-	PermissionCheck(Permission.GodMode())
+	PermissionCheck(Permissions.GodMode())
 	
 	@BeanProperty var action: String = _
 	

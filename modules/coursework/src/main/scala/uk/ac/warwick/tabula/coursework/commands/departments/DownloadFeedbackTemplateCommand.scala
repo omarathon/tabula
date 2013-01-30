@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 class DownloadFeedbackTemplateCommand(val department: Department, val template: FeedbackTemplate, val filename: String, user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly{
 	
 	mustBeLinked(template, department)
-	PermissionCheck(Permission.FeedbackTemplate.Read(), template)
+	PermissionCheck(Permissions.FeedbackTemplate.Read(), template)
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _

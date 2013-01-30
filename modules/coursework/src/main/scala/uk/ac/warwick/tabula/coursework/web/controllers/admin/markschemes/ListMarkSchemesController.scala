@@ -39,7 +39,7 @@ class ListMarkSchemesController extends CourseworkController {
 
 object ListMarkSchemesController {
 	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited with Daoisms {
-		PermissionCheck(Permission.MarkScheme.Read(), department)
+		PermissionCheck(Permissions.MarkScheme.Read(), department)
 	
 		var dao = Wire.auto[MarkSchemeDao]
 

@@ -72,9 +72,6 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "7654321")
 		
 		val rels = profileService.getRelationships(PersonalTutor, "1250148/1")
-/*		for (rel <- rels) {
-			println(rel.agent + " is " + rel.getRelationshipType + " to " + rel.targetSprCode + " - start date: " + rel.startDate + ", end date: " + rel.endDate)
-		}*/
 		
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
 		val currentRelationshipUpdated = profileService.findCurrentRelationship(PersonalTutor, "1250148/1").getOrElse(fail("Failed to get current relationship after storing another"))

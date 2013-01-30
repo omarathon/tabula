@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends Command[Unit] {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permission.Assignment.Delete(), assignment)
+	PermissionCheck(Permissions.Assignment.Delete(), assignment)
 
 	@BeanProperty var confirm: JBoolean = false
 

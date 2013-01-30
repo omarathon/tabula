@@ -194,7 +194,6 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 			stopwatch.stop()
 			newest.head.getValues("id").toList.head should be ("1000")
 		}
-		// println(stopwatch.prettyPrint())
 		
 		// index again to check that it doesn't do any once-only stuff
 		indexer.index

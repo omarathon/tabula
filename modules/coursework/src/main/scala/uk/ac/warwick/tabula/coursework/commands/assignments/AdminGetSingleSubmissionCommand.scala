@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 
 class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[RenderableZip] with ReadOnly {
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permission.Submission.Read(), submission)
+	PermissionCheck(Permissions.Submission.Read(), submission)
 	
 	var zipService = Wire.auto[ZipService]
 

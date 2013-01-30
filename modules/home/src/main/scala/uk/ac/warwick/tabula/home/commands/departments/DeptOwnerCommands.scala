@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with Daoisms {
 	
-	PermissionCheck(Permission.Department.ManagePermissions(), department)
+	PermissionCheck(Permissions.Department.ManagePermissions(), department)
 
 	def getUsercodes: Seq[String] = department.owners.members
 
@@ -29,7 +29,7 @@ class AddDeptOwnerCommand(val department: Department) extends Command[Unit] with
 
 class RemoveDeptOwnerCommand(val department: Department) extends Command[Unit] with Daoisms {
 	
-	PermissionCheck(Permission.Department.ManagePermissions(), department)
+	PermissionCheck(Permissions.Department.ManagePermissions(), department)
 
 	def getUsercodes: Seq[String] = department.owners.members
 

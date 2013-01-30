@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteMarkSchemeCommand(val department: Department, val markScheme: MarkScheme) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(markScheme, department)
-	PermissionCheck(Permission.MarkScheme.Delete(), markScheme)
+	PermissionCheck(Permissions.MarkScheme.Delete(), markScheme)
 	
 	var dao = Wire.auto[MarkSchemeDao]
 	

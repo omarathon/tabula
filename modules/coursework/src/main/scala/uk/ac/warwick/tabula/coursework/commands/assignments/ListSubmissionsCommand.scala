@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.permissions._
 class ListSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permission.Submission.Read(), assignment)
+	PermissionCheck(Permissions.Submission.Read(), assignment)
 	
 	var auditIndex = Wire.auto[AuditEventIndexService]
 

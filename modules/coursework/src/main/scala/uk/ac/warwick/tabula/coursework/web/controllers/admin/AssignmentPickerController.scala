@@ -53,7 +53,7 @@ class AssignmentPickerController extends CourseworkController {
 }
 
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
-	PermissionCheck(Permission.Assignment.Read(), module)
+	PermissionCheck(Permissions.Assignment.Read(), module)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	
