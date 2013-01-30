@@ -69,15 +69,13 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var lastUpdatedDate = DateTime.now
 	
-	@BeanProperty def fullName = {
-		def fn = firstName + " " + lastName
-		if (fn.size == 0 || fn == "null null")
-			// print something human-readable for invalid members
-			"[Unknown]"
-		else
-			fn
+	@BeanProperty def fullName: Option[String] = {
+		List(Option(firstName), Option(lastName)).flatten match {
+			case Nil => None
+			case names => Some(names.mkString(" "))
+		}	
 	}
-	def getFullName = fullName // need this as reference to fullName within Spring tag requires a getter
+	def getFullName = fullName // need this for a def, as reference to fullName within Spring tag requires a getter
 	
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 	@BeanProperty def description = {
@@ -127,7 +125,10 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		u.setWarwickId(universityId)
 		u.setFirstName(firstName)
 		u.setLastName(lastName)
-		u.setFullName(fullName)
+		u.setFullName(fullName match {
+			case None => "[Unknown user]"
+			case Some(name) => name
+		})
 		u.setEmail(email)
 		u.setDepartment(homeDepartment.name)
 		u.setDepartmentCode(homeDepartment.code)
@@ -141,6 +142,17 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
+			
+	def personalTutor = userType match {
+		case Student => {
+			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.getAgentParsed) match {
+				case None => "Not recorded"
+				case Some(name: String) => name
+				case Some(member: Member) => member
+			}
+		}
+		case _ => "Not applicable"
+	}
 }
 
 trait MemberProperties {
@@ -182,6 +194,9 @@ trait MemberProperties {
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
+	
+	def isStaff = (userType == Staff)
+	def isStudent = (userType == Student)
 }
 
 trait StudentProperties {

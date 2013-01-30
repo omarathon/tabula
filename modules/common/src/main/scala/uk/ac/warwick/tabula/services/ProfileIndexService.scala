@@ -55,7 +55,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
-	
+
 	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
 		if (departments.isEmpty && !isGod) Seq()
 		else try {
@@ -69,7 +69,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			if (!isGod) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments)
-					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
+					deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
 
 				bq.add(deptQuery, Occur.MUST)
 			}
@@ -127,7 +127,8 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	
 	// Fields that will be split on whitespace
 	val whitespaceDelimitedFields = Set(
-		"departments"
+		"department",
+		"touchedDepartments"
 	)
 	
 	override val analyzer = {
@@ -177,7 +178,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "firstName", Option(item.firstName))
 		indexTokenised(doc, "lastName", Option(item.lastName))
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
-		indexTokenised(doc, "fullName", Option(item.fullName))
+		indexTokenised(doc, "fullName", item.fullName)
 		
 		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
 		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
