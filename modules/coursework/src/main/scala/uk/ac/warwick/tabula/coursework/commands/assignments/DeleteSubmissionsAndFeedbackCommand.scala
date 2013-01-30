@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
@@ -24,7 +24,8 @@ import uk.ac.warwick.tabula.actions.Participate
 class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Feedback.Delete(), assignment)
+	PermissionCheck(Permissions.Submission.Delete(), assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]

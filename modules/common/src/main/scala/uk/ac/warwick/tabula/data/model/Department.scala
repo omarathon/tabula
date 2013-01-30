@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.data.model
+
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.reflect.BeanProperty
+import scala.xml.NodeSeq
 import org.hibernate.annotations.AccessType
 import javax.persistence._
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.actions._
 import uk.ac.warwick.tabula.JavaImports._
-import xml.NodeSeq
-import scala.Array
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity @AccessType("field")
-class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
+class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarget {
   
 	@BeanProperty var code:String = null
 	
@@ -67,6 +67,8 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 		if (owners == null) owners = new UserGroup
 		owners
 	}
+	
+	def permissionsParents = Seq()
 
 	override def toString = "Department(" + code + ")"
 

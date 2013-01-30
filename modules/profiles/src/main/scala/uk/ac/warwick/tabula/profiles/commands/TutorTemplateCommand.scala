@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.model.Department
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 
 class TutorTemplateCommand(val department: Department) extends Command[ExcelView] with Unaudited {
 	
-	PermissionsCheck(Manage(department))
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Create(), department)
 	
 	def applyInternal() = {
 		val workbook = new XSSFWorkbook()

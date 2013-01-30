@@ -3,12 +3,12 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.actions.Search
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
-class ViewProfileCommand(member: Member) extends ViewViewableCommand(member)
+class ViewProfileCommand(member: Member) extends ViewViewableCommand(Permissions.Profiles.Read(), member)
 
 @Controller
 @RequestMapping(Array("/view/{member}"))

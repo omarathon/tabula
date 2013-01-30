@@ -16,18 +16,24 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.permissions._
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
 class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter)
+	extends ModifyExtensionCommand(module, assignment, submitter) {
+	
+	PermissionCheck(Permissions.Extension.Create(), assignment)
+	
+}
 
 class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
 	extends ModifyExtensionCommand(module, assignment, submitter) {
+	
+	PermissionCheck(Permissions.Extension.Update(), extension)
 	
 	copyExtensions(List(extension))	
 }
@@ -35,14 +41,13 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
 	extends EditExtensionCommand(module, assignment, extension, submitter) {
 	
-	PermissionsCheck(Manage(extension))
+	PermissionCheck(Permissions.Extension.ReviewRequest(), extension)
 }
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
 		extends Command[List[Extension]] with Daoisms with Logging	{
 	
 	mustBeLinked(assignment,module)
-	PermissionsCheck(Participate(module))
 		
 	var userLookup = Wire.auto[UserLookupService]
 	

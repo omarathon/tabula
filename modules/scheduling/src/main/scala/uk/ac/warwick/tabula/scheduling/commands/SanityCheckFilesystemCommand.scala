@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import java.io.IOException
 import java.io.FileWriter
 import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * Job to go through each FileAttachment in the database and alert if there
@@ -24,7 +24,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	import SyncReplicaFilesystemCommand._
 	import SanityCheckFilesystemCommand._
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ReplicaSyncing())
 	
 	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
 	var dataDir = Wire[String]("${base.data.dir}")

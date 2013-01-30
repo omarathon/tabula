@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
@@ -16,11 +15,12 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.Command
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
+import uk.ac.warwick.tabula.permissions._
 
 class SubmissionReportCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionsReport] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Submission.Read(), assignment)
 
 	def applyInternal() = assignment.submissionsReport
 	

@@ -17,12 +17,12 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.RequestMethod
 import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
 import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/picker"))
@@ -53,7 +53,7 @@ class AssignmentPickerController extends CourseworkController {
 }
 
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Assignment.Read(), module)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	

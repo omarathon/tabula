@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[ExtensionInformation] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment,module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Extension.Read(), assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]

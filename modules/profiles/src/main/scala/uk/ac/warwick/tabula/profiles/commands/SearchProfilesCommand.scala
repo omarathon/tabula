@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.actions.Search
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.CurrentUser
 
 class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
 	
-	PermissionsCheck(Search(classOf[Member]))
+	PermissionCheck(Permissions.Profiles.Search())
 	
 	final val userTypes: Set[MemberUserType] = Set(Student)
 	

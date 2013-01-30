@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
 import data.model.Assignment
-import actions.Action
 import uk.ac.warwick.tabula.system.exceptions.UserError
 
 /**

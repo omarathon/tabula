@@ -28,7 +28,7 @@ import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Description
 
 /**
@@ -54,7 +54,7 @@ class HomeController extends BaseSysadminController {
 }
 
 class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData())
 	
 	var indexer = Wire.auto[AuditEventIndexService]
 
@@ -69,7 +69,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 }
 
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData())
 	
 	var indexer = Wire.auto[ProfileIndexService]
 

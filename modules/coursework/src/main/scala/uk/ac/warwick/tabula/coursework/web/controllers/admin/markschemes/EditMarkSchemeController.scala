@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.coursework.commands.markschemes.EditMarkSchemeCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController

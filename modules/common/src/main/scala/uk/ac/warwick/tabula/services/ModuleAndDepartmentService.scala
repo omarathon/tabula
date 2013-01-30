@@ -33,6 +33,10 @@ class ModuleAndDepartmentService extends Logging {
 	def allDepartments = transactional(readOnly = true) {
 		departmentDao.allDepartments
 	}
+	
+	def allModules = transactional(readOnly = true) {
+		moduleDao.allModules
+	}
 
 	def getDepartmentByCode(code: String) = transactional(readOnly = true) {
 		departmentDao.getByCode(code)

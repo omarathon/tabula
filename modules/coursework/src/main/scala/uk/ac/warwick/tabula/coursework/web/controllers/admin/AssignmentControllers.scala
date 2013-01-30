@@ -8,7 +8,7 @@ import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import scala.collection.JavaConversions.seqAsJavaList
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._

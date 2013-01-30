@@ -1,22 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
+import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
 
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
-import uk.ac.warwick.tabula.commands.{ Description, Command }
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.CurrentUser
-import org.springframework.beans.factory.annotation.{ Value, Autowired, Configurable }
-import uk.ac.warwick.userlookup.{ User, UserLookup }
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import freemarker.template.Configuration
-import javax.annotation.Resource
-import uk.ac.warwick.util.mail.WarwickMailSender
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{ Description, Command }
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
-import uk.ac.warwick.tabula.permissions.Public
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 /**
  * Sends a message to one or more admins to let them know that the current

@@ -5,18 +5,18 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import org.hibernate.validator.constraints.NotEmpty
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.actions.Masquerade
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.GodMode())
 	
 	@BeanProperty var action: String = _
 	

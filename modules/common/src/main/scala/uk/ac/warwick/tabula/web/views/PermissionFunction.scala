@@ -5,12 +5,13 @@ import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateModel
-import uk.ac.warwick.tabula.actions.Action
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.RequestInfo
 import freemarker.template.TemplateMethodModelEx
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 /**
  * Freemarker directive to show the contents of the tag
@@ -26,10 +27,10 @@ class PermissionFunction /*[A <: Action[_] : ClassManifest]*/ extends TemplateMe
 		val currentUser = request.user
 
 		val actionName = DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String]
-		val item = DeepUnwrap.unwrap(arguments.get(1))
-		val action = Action.of(actionName, item)
+		val item = DeepUnwrap.unwrap(arguments.get(1)).asInstanceOf[PermissionsTarget]
+		val permission = Permissions.of(actionName)
 
-		securityService.can(currentUser, action): java.lang.Boolean
+		securityService.can(currentUser, permission, item): java.lang.Boolean
 
 	}
 

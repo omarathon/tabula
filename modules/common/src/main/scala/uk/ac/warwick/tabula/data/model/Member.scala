@@ -1,26 +1,22 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
-import javax.persistence.CascadeType._
-import org.hibernate.annotations.Type
+
+import org.hibernate.annotations.{AccessType, FilterDef, FilterDefs, Filter, Filters, Type}
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
+
 import javax.persistence._
+import javax.persistence.CascadeType._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.actions.Searchable
-import uk.ac.warwick.tabula.CurrentUser
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Filters
-import org.hibernate.annotations.Filter
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.userlookup.User
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -46,7 +42,7 @@ object Member {
 ))
 @Entity
 @AccessType("field")
-class Member extends Viewable with Searchable with MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString {
+class Member extends MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString with PermissionsTarget {
 	
 	@transient 
 	var profileService = Wire.auto[ProfileService]
@@ -112,6 +108,8 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 		
 		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
 	}
+	
+	def permissionsParents = touchedDepartments
 
 	/**
 	 * Get all modules this this student is registered on, including historically.
@@ -159,6 +157,8 @@ class Member extends Viewable with Searchable with MemberProperties with Student
 
 trait MemberProperties {
 	@Id @BeanProperty var universityId: String = _
+	def id = universityId
+	
 	@BeanProperty @Column(nullable = false) var userId: String = _
 	@BeanProperty var firstName: String = _
 	@BeanProperty var lastName: String = _
