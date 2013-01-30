@@ -200,7 +200,11 @@
 							Archive
 						</#if>
 					</a></li>
-					
+
+					<#if assignment.markScheme?? && !assignment.markScheme.studentsChooseMarker>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />">Assign markers <i class="icon-user"></i></a></li>
+					</#if>
+
 					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
 					
 					<#if assignment.collectMarks >

@@ -1,7 +1,7 @@
 <#macro listMarkerFeedback items>
 	<#list items as item>
 		<tr>
-			<td><@form.selector_check_row "students" item.student.warwickId /></td>
+			<#if features.markerFeedback><td><@form.selector_check_row "students" item.student.warwickId /></td></#if>
 			<td>
 				<#if assignment.module.department.showStudentName>
 					${item.student.fullName}
@@ -27,28 +27,30 @@
 					</#if>
 				</td>
 			</#if>
-			<td><#if item.markerFeedback??>
-				${item.markerFeedback.mark!''}
-			</#if></td>
-			<td><#if item.markerFeedback??>
-				<#assign attachments=item.markerFeedback.attachments />
-				<#if attachments?size gt 0>
-					<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
-						<i class="icon-download"></i>
-						${attachments?size}
-						<#if attachments?size == 1> file<#else> files</#if>
-					</a>
-				</#if>
-			</#if></td>
-			<td>
-				<#if item.markerFeedback.state.toString == "ReleasedForMarking">
-					<span class="label-orange">Ready for marking</span>
-				<#elseif item.markerFeedback.state.toString == "DownloadedByMarker">
-					<span class="label-blue">Downloaded</span>
-				<#elseif item.markerFeedback.state.toString == "MarkingCompleted">
-					<span class="label-green">Marking completed</span>
-				</#if>
-			</td>
+			<#if features.markerFeedback>
+				<td><#if item.markerFeedback??>
+					${item.markerFeedback.mark!''}
+				</#if></td>
+				<td><#if item.markerFeedback??>
+					<#assign attachments=item.markerFeedback.attachments />
+					<#if attachments?size gt 0>
+						<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
+							<i class="icon-download"></i>
+							${attachments?size}
+							<#if attachments?size == 1> file<#else> files</#if>
+						</a>
+					</#if>
+				</#if></td>
+				<td>
+					<#if item.markerFeedback.state.toString == "ReleasedForMarking">
+						<span class="label-orange">Ready for marking</span>
+					<#elseif item.markerFeedback.state.toString == "DownloadedByMarker">
+						<span class="label-blue">Downloaded</span>
+					<#elseif item.markerFeedback.state.toString == "MarkingCompleted">
+						<span class="label-green">Marking completed</span>
+					</#if>
+				</td>
+			</#if>
 		</tr>
 	</#list>
 </#macro>
@@ -70,7 +72,7 @@
 				<i class="icon-download"></i> Download first marker feedback
 			</a>
 		</#if>
-		<!--if features.markerFeedback-->
+		<#if features.markerFeedback>
 			<a class="btn ${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment />">
 				<i class="icon-upload"></i> Upload feedback
 			</a>
@@ -93,24 +95,28 @@
 					</li>
 				</ul>
 			</div>
-	    <!--/if-->
+	    </#if>
 	</div>
 	<div class="submission-feedback-list">
-		<div class="clearfix">
-			<@form.selector_check_all />
-		</div>
+		<#if features.markerFeedback>
+			<div class="clearfix">
+				<@form.selector_check_all />
+			</div>
+		</#if>
 		<table class="table table-bordered table-striped">
 			<thead><tr>
-				<th></th>
+				<#if features.markerFeedback><th></th></#if>
 				<th>Student</th>
 				<th>Date submitted</th>
 				<#if !isFirstMarker>
 					<th>First mark</th>
 					<th>First feedback</th>
 				</#if>
-				<th>Mark</th>
-				<th>Feedback files</th>
-				<th>Status</th>
+				<#if features.markerFeedback>
+					<th>Mark</th>
+					<th>Feedback files</th>
+					<th>Status</th>
+				</#if>
 			</tr></thead>
 			<tbody>
 				<@listMarkerFeedback completedFeedback/>
