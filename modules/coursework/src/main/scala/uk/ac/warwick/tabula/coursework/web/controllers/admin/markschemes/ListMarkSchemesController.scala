@@ -10,12 +10,12 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.MarkScheme
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkSchemeDao
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes"))

@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.commands.feedback.PublishFeedbackCommand
-import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute

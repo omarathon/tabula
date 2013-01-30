@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Features
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.permissions._
 import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav

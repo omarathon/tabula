@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.coursework.commands.departments.{DeleteFeedbackTempl
 import uk.ac.warwick.tabula.web.Mav
 import scala.Array
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller

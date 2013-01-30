@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.data.model.Member
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 

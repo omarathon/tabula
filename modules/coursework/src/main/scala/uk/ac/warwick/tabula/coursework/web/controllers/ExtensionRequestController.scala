@@ -11,8 +11,8 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
-import uk.ac.warwick.tabula.permissions._
 import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))

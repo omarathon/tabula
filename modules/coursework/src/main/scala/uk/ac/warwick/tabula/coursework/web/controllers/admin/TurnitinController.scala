@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.persistence._
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
