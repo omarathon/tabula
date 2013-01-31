@@ -34,7 +34,9 @@ object Permissions {
 	case object ImportSystemData extends ScopelessPermission
 	case object ReplicaSyncing extends ScopelessPermission
 	case object PermissionsHelper extends ScopelessPermission
-	
+	case object ManageAllDepartmentPermissions extends ScopelessPermission
+
+
 	object Department {
 		case object ManageExtensionSettings extends Permission
 		case object ManageDisplaySettings extends Permission
