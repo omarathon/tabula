@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import org.hibernate.criterion._
+import uk.ac.warwick.tabula.data.model.Department
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -23,6 +24,7 @@ trait MemberDao {
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
@@ -54,6 +56,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				session.enableFilter(Member.StudentsOnlyFilter)
 		}
 	}
+	
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = 
+		session.newCriteria[Member]
+				.add(gt("lastUpdatedDate", startDate))
+				.add(is("homeDepartment", department))
+				.setMaxResults(max)
+				.addOrder(asc("lastUpdatedDate"))
+				.list
 	
 	def listUpdatedSince(startDate: DateTime, max: Int) = 
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list

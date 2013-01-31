@@ -71,7 +71,9 @@ Rebuild audit event index from
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="reindexForm">
-Rebuild profiles index from
+Rebuild profiles index for
+<br />
+<@f.input id="profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
 <div class="input-append"> 
 <@f.input id="profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
