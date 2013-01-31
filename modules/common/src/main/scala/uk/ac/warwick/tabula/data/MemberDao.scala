@@ -21,14 +21,15 @@ trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getBySprCode(sprCode: String): Option[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
-	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 }
 
 @Repository
@@ -41,7 +42,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	def getByUniversityId(universityId: String) = 
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
-		
+	
+	def getBySprCode(sprCode: String) = 
+		session.newCriteria[Member].add(is("sprCode", sprCode.trim)).uniqueResult
+	
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
@@ -107,6 +111,24 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
-					//.list.asInstanceOf[JList[StudentRelationship]]
+	}	
+	
+	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
+		// order by agent to separate any named (external) from numeric (member) agents
+		session.createQuery("""
+			select
+				distinct sr from StudentRelationship sr
+			where
+				targetSprCode in (
+					select sprCode from Member where homeDepartment = :department
+				)
+			and
+				relationshipType = :relationshipType
+			order by
+				agent
+		""")
+			.setEntity("department", department)
+			.setString("relationshipType", relationshipType.dbValue)
+			.list.asInstanceOf[JList[StudentRelationship]]
 	}	
 }

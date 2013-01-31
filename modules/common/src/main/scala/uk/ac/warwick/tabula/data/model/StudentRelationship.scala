@@ -8,6 +8,7 @@ import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence.Column
 import javax.persistence.Entity
+import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 
@@ -20,14 +21,15 @@ import uk.ac.warwick.spring.Wire
  */
 class StudentRelationship extends GeneratedId {
 	
+	@transient lazy val memberDao = Wire.auto[MemberDao]
+
 	// "agent" is the the actor in the relationship, e.g. tutor
 	@BeanProperty var agent: String = _
 	
 	@Column(name="relationship_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType")
-	@BeanProperty var relationshipType: RelationshipType	= PersonalTutor
+	@BeanProperty var relationshipType: RelationshipType = PersonalTutor
 	
-	//@BeanProperty var targetUniversityId: String = new String("")
 	@Column(name="target_sprcode")
 	@BeanProperty var targetSprCode: String = new String("")
 	
@@ -60,6 +62,10 @@ class StudentRelationship extends GeneratedId {
 			case None => agent
 			case Some(m) => m
 		}
+	}
+	
+	def getTarget = {
+		memberDao.getBySprCode(targetSprCode) 
 	}
 }
 

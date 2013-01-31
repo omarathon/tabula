@@ -33,6 +33,7 @@ trait ProfileService {
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def findCurrentRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
+	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 }
 
 @Service(value = "profileService")
@@ -80,31 +81,35 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
-			val currentRelationship = this.findCurrentRelationship(PersonalTutor, targetSprCode)
-			currentRelationship match {
-				case None => {
+		val currentRelationship = this.findCurrentRelationship(PersonalTutor, targetSprCode)
+		currentRelationship match {
+			case None => {
+				val newRelationship = StudentRelationship(agent, PersonalTutor, targetSprCode)
+				memberDao.saveOrUpdate(newRelationship)
+				newRelationship
+			}
+			case Some(existingRelationship) => {
+				if (existingRelationship.agent.equals(agent)) {
+					// the same relationship is already there in the db - don't save
+					existingRelationship
+				}
+				else {
+					// set the end date of the existing personal tutor relationship to now
+					existingRelationship.endDate = new DateTime
+					memberDao.saveOrUpdate(existingRelationship)
+					
+					// and then create the new one
 					val newRelationship = StudentRelationship(agent, PersonalTutor, targetSprCode)
+					newRelationship.startDate = new DateTime
 					memberDao.saveOrUpdate(newRelationship)
 					newRelationship
 				}
-				case Some(existingRelationship) => {
-					if (existingRelationship.agent.equals(agent)) {
-						// the same relationship is already there in the db - don't save
-						existingRelationship
-					}
-					else {
-						// set the end date of the existing personal tutor relationship to now
-						existingRelationship.endDate = new DateTime
-						memberDao.saveOrUpdate(existingRelationship)
-						
-						// and then create the new one
-						val newRelationship = StudentRelationship(agent, PersonalTutor, targetSprCode)
-						newRelationship.startDate = new DateTime
-						memberDao.saveOrUpdate(newRelationship)
-						newRelationship
-					}
-				}
 			}
+		}
+	}
+	
+	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = transactional() {
+		memberDao.getRelationships(relationshipType, department)
 	}
 
 }

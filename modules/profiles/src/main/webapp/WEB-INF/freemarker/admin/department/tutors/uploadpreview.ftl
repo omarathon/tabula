@@ -8,7 +8,7 @@
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
 	
-	<@f.form method="post" action="${url('/admin/department/${department.code}/tutors')}" commandName=commandName>	
+	<@f.form method="post" action="${url('/admin/department/${department.code}/tutors/upload')}" commandName=commandName>	
 		<h1>Preview personal tutor changes for ${department.name}</h1>
 		
 		<@spring.bind path="rawStudentRelationships">

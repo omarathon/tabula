@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.hibernate.validator.Valid
 
 @Controller
-@RequestMapping(value = Array("/admin/department/{department}/tutors"))
+@RequestMapping(value = Array("/admin/department/{department}/tutors/upload"))
 class UploadPersonalTutorsController extends ProfilesController {
 	// tell @Valid annotation how to validate
 	validatesSelf[UploadPersonalTutorsCommand]

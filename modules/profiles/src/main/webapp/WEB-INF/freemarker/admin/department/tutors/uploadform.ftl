@@ -25,7 +25,7 @@
 		who do not have a University number from Warwick. Tabula will ignore any other columns which you may set for your own reference.
 		You can use this <a href="<@routes.tutor_template department=department />" >generated spreadsheet</a> as a template.
 	</p>
-	<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/department/${department.code}/tutors')}" commandName="uploadPersonalTutorsCommand">
+	<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/department/${department.code}/tutors/upload')}" commandName="uploadPersonalTutorsCommand">
 		<input name="isfile" value="true" type="hidden"/>
 		<table role="presentation" class="narrowed-form">
 			<tr>
