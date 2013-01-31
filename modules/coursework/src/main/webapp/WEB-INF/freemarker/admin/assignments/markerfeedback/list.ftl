@@ -15,6 +15,9 @@
 					${item.firstMarkerFeedback.mark!''}
 				</td>
 				<td>
+					${item.firstMarkerFeedback.grade!''}
+				</td>
+				<td>
 					<#if item.firstMarkerFeedback??>
 						<#assign attachments=item.firstMarkerFeedback.attachments />
 						<#if attachments?size gt 0>
@@ -28,19 +31,22 @@
 				</td>
 			</#if>
 			<#if features.markerFeedback>
-				<td><#if item.markerFeedback??>
-					${item.markerFeedback.mark!''}
-				</#if></td>
-				<td><#if item.markerFeedback??>
-					<#assign attachments=item.markerFeedback.attachments />
-					<#if attachments?size gt 0>
-						<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
-							<i class="icon-download"></i>
-							${attachments?size}
-							<#if attachments?size == 1> file<#else> files</#if>
-						</a>
-					</#if>
-				</#if></td>
+				<#if item.markerFeedback??>
+					<td>${item.markerFeedback.mark!''}</td>
+					<td>${item.markerFeedback.grade!''}</td>
+					<td>
+						<#assign attachments=item.markerFeedback.attachments />
+						<#if attachments?size gt 0>
+							<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
+								<i class="icon-download"></i>
+								${attachments?size}
+								<#if attachments?size == 1> file<#else> files</#if>
+							</a>
+						</#if>
+					</td>
+				<#else>
+					<td></td><td></td><td></td>
+				</#if>
 				<td>
 					<#if item.markerFeedback.state.toString == "ReleasedForMarking">
 						<span class="label-orange">Ready for marking</span>
@@ -110,10 +116,12 @@
 				<th>Date submitted</th>
 				<#if !isFirstMarker>
 					<th>First mark</th>
+					<th>First grade</th>
 					<th>First feedback</th>
 				</#if>
 				<#if features.markerFeedback>
 					<th>Mark</th>
+					<th>Grade</th>
 					<th>Feedback files</th>
 					<th>Status</th>
 				</#if>

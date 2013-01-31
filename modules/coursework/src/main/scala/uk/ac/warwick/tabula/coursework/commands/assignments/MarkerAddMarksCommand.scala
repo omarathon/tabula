@@ -5,12 +5,26 @@ import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assign
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
+import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 
 class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
 	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, submitter){
 
 	mustBeLinked(assignment, module)
 	PermissionsCheck(UploadMarkerFeedback(assignment))
+
+	override def checkIfDuplicate(mark: MarkItem) {
+		// Warn if marks for this student are already uploaded
+		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
+			case Some(feedback) => {
+				if (assignment.isFirstMarker(submitter.apparentUser) && feedback.firstMarkerFeedback != null && (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade))
+					mark.warningMessage = markWarning
+				else if (assignment.isSecondMarker(submitter.apparentUser) && feedback.secondMarkerFeedback != null && (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade))
+					mark.warningMessage = markWarning
+			}
+			case None =>
+		}
+	}
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
@@ -32,8 +46,8 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 				case _ => null
 			}
 
-			//TODO - UPDATE STATE
 			markerFeedback.mark = Option(actualMark.toInt)
+			markerFeedback.grade = Option(actualGrade)
 			session.saveOrUpdate(parentFeedback)
 			session.saveOrUpdate(markerFeedback)
 			markerFeedback

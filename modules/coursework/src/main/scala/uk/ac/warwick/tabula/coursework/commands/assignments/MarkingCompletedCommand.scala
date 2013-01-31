@@ -69,7 +69,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	}
 
 	def preSubmitValidation() {
-		noMarks = markerFeedbacks.filter(!_.hasMarks)
+		noMarks = markerFeedbacks.filter(!_.hasMark)
 		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
 	}
 

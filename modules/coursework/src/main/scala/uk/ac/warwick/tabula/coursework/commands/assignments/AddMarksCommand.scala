@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.util.matching.Regex
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -52,6 +51,8 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 		}
 	}
 
+	def checkIfDuplicate(mark: MarkItem)
+
 	def validateMarkItem(mark: MarkItem, errors: Errors, newPerson: Boolean) = {
 
 		var noErrors = true
@@ -71,13 +72,7 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 						noErrors = false
 					}
 				}
-				// Warn if marks for this student are already uploaded
-				assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
-					case Some(feedback) => {
-						mark.warningMessage = markWarning
-					}
-					case None => {}
-				}
+				checkIfDuplicate(mark: MarkItem)
 			}
 		} else {
 			errors.rejectValue("universityId", "NotEmpty")

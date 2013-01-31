@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.{MarkingCompleted, MarkerFeedback, Module
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
@@ -57,7 +56,7 @@ class MarkerAddMarksController extends CourseworkController {
 		markerFeedback match {
 			case Some(f) => {
 				markItem.actualMark = f.mark.map { _.toString }.getOrElse("")
-				markItem.actualGrade = ""
+				markItem.actualGrade = f.grade.getOrElse("")
 			}
 			case None => {
 				markItem.actualMark = ""
@@ -83,7 +82,6 @@ class MarkerAddMarksController extends CourseworkController {
 	}
 
 	private def bindAndValidate(assignment: Assignment, cmd: MarkerAddMarksCommand, errors: Errors) {
-		cmd.onBind
 		cmd.postExtractValidation(errors)
 	}
 }
