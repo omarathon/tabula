@@ -25,9 +25,10 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin(), None)
 		val god = sysadmin && godModeEnabled
 		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader(), None)
+		val canMasquerade =  sysadmin || masquerader
 		new CurrentUser(
 			realUser = user,
-			apparentUser = masqueradeUser(user, sysadmin),
+			apparentUser = masqueradeUser(user, canMasquerade),
 			sysadmin = sysadmin,
 			masquerader = masquerader,
 			god = god)
@@ -46,8 +47,8 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		request.getCookies().getBoolean(CurrentUser.godModeCookie, false)
 
 	// masquerade support
-	private def apparentUser(request: HttpServletRequest)(realUser: User, sysadmin: Boolean): User =
-		if (sysadmin) {
+	private def apparentUser(request: HttpServletRequest)(realUser: User, canMasquerade: Boolean): User =
+		if (canMasquerade) {
 			request.getCookies.getString(CurrentUser.masqueradeCookie) match {
 				case Some(userid) => userLookup.getUserByUserId(userid) match {
 					case user: User if user.isFoundUser() => user
