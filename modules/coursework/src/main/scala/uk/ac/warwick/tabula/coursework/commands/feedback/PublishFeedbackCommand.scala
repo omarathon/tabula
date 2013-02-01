@@ -47,7 +47,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
-		if (!assignment.isClosed()) {
+		if (!assignment.openEnded && !assignment.isClosed()) {
 			errors.reject("feedback.publish.notclosed")
 		} else if (assignment.fullFeedback.isEmpty) {
 			errors.reject("feedback.publish.nofeedback")
