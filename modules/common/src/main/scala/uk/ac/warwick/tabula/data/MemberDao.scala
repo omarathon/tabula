@@ -115,20 +115,28 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
-		session.createQuery("""
+		// then by student properties
+		val list = session.createQuery("""
 			select
-				distinct sr from StudentRelationship sr
+				distinct sr, m
+			from
+				StudentRelationship sr,
+				Member m
 			where
-				targetSprCode in (
-					select sprCode from Member where homeDepartment = :department
-				)
+				sr.targetSprCode = m.sprCode
 			and
-				relationshipType = :relationshipType
+				sr.relationshipType = :relationshipType
+			and
+				m.homeDepartment = :department
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
-				agent
+				sr.agent, m.groupName, m.yearOfStudy, m.route, m.lastName
 		""")
 			.setEntity("department", department)
 			.setString("relationshipType", relationshipType.dbValue)
-			.list.asInstanceOf[JList[StudentRelationship]]
-	}	
+			.list.asInstanceOf[JList[Array[Object]]]
+		
+		list map (x => x(0).asInstanceOf[StudentRelationship])
+	}
 }

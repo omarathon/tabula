@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import scala.collection.SortedMap
 import scala.collection.immutable.TreeMap
+import uk.ac.warwick.tabula.data.model.Member
 
 class ViewPersonalTutorsCommand(val department: Department) extends Command[TreeMap[String, Seq[StudentRelationship]]] with Unaudited {
 	
@@ -21,8 +22,9 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Tree
 	
 	override def applyInternal(): TreeMap[String, Seq[StudentRelationship]] = transactional() {
 		val unsortedTutorRelationships = profileService.listStudentRelationshipsByDepartment(PersonalTutor, department)
-
-		// group by tutor's last name (implicitly into map); and then sort by key into a SortedMap
-		TreeMap(unsortedTutorRelationships.groupBy(_.agentLastName).toSeq:_*)
+		
+		val groupedTutorRelationships = unsortedTutorRelationships.groupBy(_.agentLastName)
+		
+		TreeMap(groupedTutorRelationships.toSeq:_*)
 	}
 }

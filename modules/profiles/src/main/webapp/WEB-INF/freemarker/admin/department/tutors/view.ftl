@@ -12,33 +12,34 @@
 				
 				<tbody id="${key}">
 					<tr>
-						<#if tutor?is_string>
-							<td>
+						<td colspan="4">
+							<#if tutor?is_string>
 								<h4>${tutor}</h4>
 								<#if !tutor?string?starts_with("Not ")>
 									<div class="muted">External to Warwick</div>
 								</#if>
-							</td>
-						<#else>
-							<td>
+							<#else>
 								<h4>${tutor.fullName}</h4>
-							</td>
-						</#if>
+							</#if>
+						</td>
 					</tr>
 					<tr>
 						<th>Tutee</th>
+						<th>Type</th>
 						<th>Year</th>
 						<th>Course</th>
 					</tr>
-					
+
 					<#list tutees as tuteeRelationship>
 						<#assign student = tuteeRelationship.studentMember />
 						<tr class="tutee">
 							<td><a href="<@routes.profile student />">${student.fullName}</a></td>
+							<td>${student.groupName}</td>
 							<td>${student.yearOfStudy}</td>
 							<td>${student.route.name}</td>
 						</tr>
 					</#list>
+
 				</tbody>
 			</#list>
 		</table>

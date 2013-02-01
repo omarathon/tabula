@@ -1,2 +1,2 @@
 --- TAB-354
-create index studentRel_agent on StudentRelationship(agent);
+create index member_sprCode on Member(sprCode);
