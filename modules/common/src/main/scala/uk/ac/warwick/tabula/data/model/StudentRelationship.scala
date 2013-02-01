@@ -48,7 +48,7 @@ class StudentRelationship extends GeneratedId {
 	// assume that all-numeric value is a member (not proven though)
 	def isAgentMember: Boolean = agent.forall(_.isDigit)
 	
-	def getAgentMember: Option[Member] = {
+	def agentMember: Option[Member] = {
 			val profileService = Wire.auto[ProfileService]
 			
 			isAgentMember match {
@@ -57,16 +57,22 @@ class StudentRelationship extends GeneratedId {
 			}
 	}
 	
-	def getAgentParsed = {
-		getAgentMember match {
-			case None => agent
-			case Some(m) => m
-		}
+	def agentParsed = agentMember match {
+		case None => agent
+		case Some(m) => m
 	}
 	
-	def getTarget = {
-		memberDao.getBySprCode(targetSprCode) 
+	def agentName = agentMember match {
+		case None => agent
+		case Some(m) => m.fullName.getOrElse("[Unknown]")
 	}
+	
+	def agentLastName = agentMember match {
+		case None => agent // can't reliably resolve further for external names
+		case Some(m) => m.lastName
+	}
+	
+	def studentMember = memberDao.getBySprCode(targetSprCode)
 }
 
 object StudentRelationship {

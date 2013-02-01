@@ -5,62 +5,41 @@
 	<h1>View personal tutors for ${department.name}</h1>
 	
 	<#if tutorRelationships?has_content>
-		<#assign oldTutor = "dummyForGrouping" />
-		
 		<table id="tutors" class="table table-striped table-bordered table-condensed">
-			<#list tutorRelationships as rel>
-				<#assign tutor = rel.agentParsed />
-				<#assign student = rel.target />
+			<#list tutorRelationships?keys?sort as key>
+				<#assign tutor = tutorRelationships[key]?first.agentParsed />
+				<#assign tutees = tutorRelationships[key] />
 				
-				<#if rel.agent != oldTutor>
-					<#-- start a new tbody for each tutor -->
-					<tbody id="${rel.agent}">
-						<tr>
-							<#if tutor?is_string>
-								<td>
-									<#-- TODO: need a default photo here -->
-								</td>
-								<td>
-									<h5>${tutor}</h5>
-									<#if !tutor?string?starts_with("Not ")>
-										<div class="muted">External to Warwick</div>
-									</#if>
-								</td>
-							<#else>
-								<td class="tutor-photo">
-									<div class="photo">
-										<img src="<@routes.photo tutor />" />
-									</div>
-								</td>
-								<td>
-									<h5>${tutor.fullName}</h5>
-								</td>
-							</#if>
+				<tbody id="${key}">
+					<tr>
+						<#if tutor?is_string>
+							<td>
+								<h4>${tutor}</h4>
+								<#if !tutor?string?starts_with("Not ")>
+									<div class="muted">External to Warwick</div>
+								</#if>
+							</td>
+						<#else>
+							<td>
+								<h4>${tutor.fullName}</h4>
+							</td>
+						</#if>
+					</tr>
+					<tr>
+						<th>Tutee</th>
+						<th>Year</th>
+						<th>Course</th>
+					</tr>
+					
+					<#list tutees as tuteeRelationship>
+						<#assign student = tuteeRelationship.studentMember />
+						<tr class="tutee">
+							<td><a href="<@routes.profile student />">${student.fullName}</a></td>
+							<td>${student.yearOfStudy}</td>
+							<td>${student.route.name}</td>
 						</tr>
-						<tr>
-							<td></td>
-							<th>Tutee</th>
-							<th>Year</th>
-							<th>Course</th>
-						</tr>
-				</#if>
-				
-				<tr class="tutee">
-					<td></td>
-					<td>
-						<div class="photo">
-							<img src="<@routes.photo student />" />
-						</div>
-						<a href="<@routes.profile student />">${student.fullName}</a>
-					</td>
-					<td>${student.yearOfStudy}</td>
-					<td>${student.route.name}</td>
-				</tr>
-								
-				<#if rel.agent != oldTutor>
-					</tbody>
-					<#assign oldTutor = rel.agent />
-				</#if>
+					</#list>
+				</tbody>
 			</#list>
 		</table>
 	<#else>
