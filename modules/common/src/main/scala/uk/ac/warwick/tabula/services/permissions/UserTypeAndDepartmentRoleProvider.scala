@@ -18,22 +18,26 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	var profileService = Wire.auto[ProfileService]
 	var departmentService = Wire.auto[ModuleAndDepartmentService]
 
-	def getRolesFor(user: CurrentUser): Seq[Role] =
-		profileService.getMemberByUserId(user.apparentId, true) match {
-			case Some(member) => member.userType match {
-				case Student => member.touchedDepartments map { StudentRole(_) }
-				case Staff => member.affiliatedDepartments map { StaffRole(_) }
-				case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
-				case Other => member.affiliatedDepartments map { UniversityMemberRole(_) }
+	def getRolesFor(user: CurrentUser): Seq[Role] = {
+		if (user.realUser.isLoggedIn){
+			profileService.getMemberByUserId(user.apparentId, true) match {
+				case Some(member) => member.userType match {
+					case Student => member.touchedDepartments map { StudentRole(_) }
+					case Staff => member.affiliatedDepartments map { StaffRole(_) }
+					case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
+					case Other => member.affiliatedDepartments map { UniversityMemberRole(_) }
+				}
+				case None => departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
+					case Some(department) =>
+						if (user.isStaff) Seq(StaffRole(department))
+						else if (user.isStudent) Seq(StudentRole(department))
+						else Seq()
+					case None => Seq()
+				}
 			}
-			case None => departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
-				case Some(department) =>
-					if (user.isStaff) Seq(StaffRole(department))
-					else if (user.isStudent) Seq(StudentRole(department)) 
-					else Seq()
-				case None => Seq()
-			}
-		}
+		} else Seq()
+	}
+
 	
 	def rolesProvided = Set(classOf[StudentRole], classOf[StaffRole], classOf[UniversityMemberRole])
 	

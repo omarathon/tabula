@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services.permissions
 
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.stereotype.Service
-import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
@@ -42,14 +41,15 @@ class RoleService extends Logging {
 		 * can be treated as the final action of this provider. */  
 		def streamScoped(providers: Stream[RoleProvider], scope: => PermissionsTarget): Stream[Role] = {
 			if (scope == null) Stream.empty
-			
-			val results = providers.toStream map { provider => (provider, provider.getRolesFor(user, scope)) }
-			val (hasResults, noResults) = results.partition { !_._2.isEmpty }
-			
-			val stream = hasResults flatMap { _._2 }
-			val next = scope.permissionsParents.toStream flatMap { streamScoped(noResults map {_._1}, _) }
-			
-			stream #::: next
+			else {
+				val results = providers.toStream map { provider => (provider, provider.getRolesFor(user, scope)) }
+				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
+
+				val stream = hasResults flatMap { _._2 }
+				val next = scope.permissionsParents.toStream flatMap { streamScoped(noResults map {_._1}, _) }
+
+				stream #::: next
+			}
 		}
 				
 		scopelessStream #::: streamScoped(scoped.toStream, scope)

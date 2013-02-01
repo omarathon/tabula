@@ -29,4 +29,9 @@ class RoleServiceTest extends TestBase with Mockito {
 		isSysadminRole should be (true)
 	}
 
+	@Test def loggedOutRoleCheck() = withUser(null){
+		val provider = new UserTypeAndDepartmentRoleProvider
+		provider.getRolesFor(currentUser).size should be (0)
+	}
+
 }
