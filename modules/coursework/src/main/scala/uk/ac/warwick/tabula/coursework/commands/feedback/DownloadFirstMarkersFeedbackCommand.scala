@@ -4,17 +4,16 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{Description, ApplyWithCallback, ReadOnly, Command}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class DownloadFirstMarkersFeedbackCommand(val module: Module, val assignment: Assignment, val currentUser:CurrentUser) extends Command[RenderableZip]
 	with ReadOnly with ApplyWithCallback[RenderableZip] {
 
 	mustBeLinked(assignment, module)
-	PermissionsCheck(UploadMarkerFeedback(assignment))
+	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	var zipService = Wire.auto[ZipService]
 

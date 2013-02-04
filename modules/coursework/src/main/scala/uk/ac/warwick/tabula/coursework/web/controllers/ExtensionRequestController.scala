@@ -11,26 +11,29 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
-import uk.ac.warwick.tabula.actions.View
+import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
 class ExtensionRequestController extends CourseworkController{
 
 	@ModelAttribute
-	def extensionRequestCommand(@PathVariable assignment:Assignment, user:CurrentUser) =
-		new ExtensionRequestCommand(assignment, user)
+	def extensionRequestCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) =
+		new ExtensionRequestCommand(module, assignment, user)
+	
+	validatesSelf[ExtensionRequestCommand]
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def showForm(@PathVariable module:Module, @PathVariable assignment:Assignment,
-				 @ModelAttribute cmd:ExtensionRequestCommand):Mav = {
-		mustBeLinked(assignment,module)
+	def showForm(cmd:ExtensionRequestCommand):Mav = {
+		val (assignment, module) = (cmd.assignment, cmd.module)
+		
 		if (!module.department.canRequestExtension)
-			throw new PermissionDeniedException(user, View(assignment))
+			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)
@@ -53,13 +56,12 @@ class ExtensionRequestController extends CourseworkController{
 	}
 
 	@RequestMapping(method=Array(POST))
-	def persistExtensionRequest(@PathVariable module:Module, @PathVariable assignment:Assignment,
-								cmd:ExtensionRequestCommand, errors: Errors):Mav = {
-		cmd.validate(errors)
+	def persistExtensionRequest(@Valid cmd:ExtensionRequestCommand, errors: Errors):Mav = {
+		val (assignment, module) = (cmd.assignment, cmd.module)
+		
 		if(errors.hasErrors){
-			showForm(module, assignment, cmd)
-		}
-		else {
+			showForm(cmd)
+		} else {
 			val extension = cmd.apply()
 			sendExtensionRequestMessage(extension, cmd.modified)
 			val model = Mav("submit/extension_request_success",

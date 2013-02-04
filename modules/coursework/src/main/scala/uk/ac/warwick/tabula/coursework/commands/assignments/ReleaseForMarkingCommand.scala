@@ -8,7 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.Daoisms
@@ -17,7 +17,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 	extends Command[List[Feedback]] with SelfValidating with Daoisms {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]

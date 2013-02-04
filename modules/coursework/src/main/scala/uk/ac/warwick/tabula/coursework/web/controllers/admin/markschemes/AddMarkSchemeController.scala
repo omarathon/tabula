@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.coursework.commands.markschemes.AddMarkSchemeCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -22,7 +21,7 @@ class AddMarkSchemeController extends CourseworkController {
 	validatesSelf[AddMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable department: Department) = new AddMarkSchemeCommand(department)
+	def cmd(@PathVariable("department") department: Department) = new AddMarkSchemeCommand(department)
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: AddMarkSchemeCommand): Mav = {

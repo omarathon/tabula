@@ -136,11 +136,15 @@
 				// any date fields returned by ajax will have datetime pickers bound to them as required
 				$('#extension-list').on('focus', 'input.date-time-picker', function(e){
 					e.preventDefault();
-					$(this).AnyTime_noPicker().AnyTime_picker({
-						format: "%e-%b-%Y %H:%i:%s",
-						firstDOW: 1
-					});
-				});
+					var isPickerHidden = (typeof $('#AnyTime--picker0').filter(':visible')[0] === "undefined") ? true : false;
+					
+					if(isPickerHidden) {
+						$(this).AnyTime_noPicker().AnyTime_picker({
+							format: "%e-%b-%Y %H:%i:%s",
+							firstDOW: 1
+						});
+					}
+				});			
 
 				$('#extension-list').on('click', 'input[type=submit]', function(e){
 					e.preventDefault();

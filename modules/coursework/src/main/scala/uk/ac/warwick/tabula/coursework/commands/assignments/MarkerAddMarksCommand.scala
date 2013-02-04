@@ -4,14 +4,14 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
 	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, submitter){
 
 	mustBeLinked(assignment, module)
-	PermissionsCheck(UploadMarkerFeedback(assignment))
+	PermissionCheck(Permissions.Marks.Create, assignment)
 
 	override def checkIfDuplicate(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded

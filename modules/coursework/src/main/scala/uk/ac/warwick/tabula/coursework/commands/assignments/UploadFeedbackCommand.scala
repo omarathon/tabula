@@ -26,6 +26,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import scala.Some
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.data.model.Module
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
@@ -67,8 +68,10 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * so we could check that this is no longer being accessed by anyone, and then
  * remove all the code in here that handles it, to simplify it a little.
  */
-abstract class UploadFeedbackCommand[T](val assignment: Assignment, val submitter: CurrentUser)
+abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser)
 	extends Command[T] with Daoisms with Logging with BindListener {
+	
+	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 

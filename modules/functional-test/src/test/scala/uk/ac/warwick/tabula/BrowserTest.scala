@@ -82,6 +82,19 @@ object FunctionalTestProperties {
 	 * determine whether we're signed in. Open to a better solution. 
 	 */
 	lazy val Admin1 = userDetails("admin1", "Departmental admin")
+	lazy val Admin2 = userDetails("admin2", "Departmental admin")
+	lazy val ExtensionManager1 = userDetails("extman1", "Extension manager")
+	lazy val ExtensionManager2 = userDetails("extman2", "Extension manager")
+	lazy val Marker1 = userDetails("marker1", "Marker")
+	lazy val Marker2 = userDetails("marker2", "Marker")
+	lazy val Marker3 = userDetails("marker3", "Marker")
+	lazy val ModuleManager1 = userDetails("modman1", "Module Manager")
+	lazy val ModuleManager2 = userDetails("modman2", "Module Manager")
+	lazy val Student1 = userDetails("student1", "Student")
+	lazy val Student2 = userDetails("student2", "Student")
+	lazy val Student3 = userDetails("student3", "Student")
+	lazy val Student4 = userDetails("student4", "Student")
+	lazy val Student5 = userDetails("student5", "Student")
 
 	/**
 	 * Get a property by name, or null if not found anywhere. Checks in this order

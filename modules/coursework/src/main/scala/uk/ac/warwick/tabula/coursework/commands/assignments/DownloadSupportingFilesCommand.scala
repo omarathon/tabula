@@ -7,12 +7,14 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.permissions._
 
 class DownloadSupportingFilesCommand(val module: Module, val assignment: Assignment, val extension: Extension, val filename: String) extends Command[Option[RenderableFile]] with ReadOnly{
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
+	PermissionCheck(Permissions.Extension.Read, extension)
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
@@ -37,10 +39,4 @@ class DownloadSupportingFilesCommand(val module: Module, val assignment: Assignm
 		d.property("fileFound", fileFound)
 	}
 
-}
-
-class AdminDownloadSupportingFilesCommand(module: Module, assignment: Assignment, extension: Extension, filename: String) 
-	extends DownloadSupportingFilesCommand(module, assignment, extension, filename) {
-	
-	PermissionsCheck(Manage(mandatory(extension)))
 }

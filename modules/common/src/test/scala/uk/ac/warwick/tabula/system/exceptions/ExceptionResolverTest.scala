@@ -5,7 +5,6 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.actions._
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 class ExceptionResolverTest extends TestBase {
@@ -35,7 +34,7 @@ class ExceptionResolverTest extends TestBase {
 		withUser(null) {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
-			val exception = new PermissionDeniedException(user, View(null), null)
+			val exception = new PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.doResolve(exception, None)
 			modelAndView.viewName should be ("redirect:"+resolver.loginUrl)
 		}
@@ -51,7 +50,7 @@ class ExceptionResolverTest extends TestBase {
 		withUser("cusebr") {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
-			val exception = new PermissionDeniedException(user, View(null), null)
+			val exception = new PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.doResolve(exception, None)
 			modelAndView.viewName should be (resolver.defaultView)
 		}

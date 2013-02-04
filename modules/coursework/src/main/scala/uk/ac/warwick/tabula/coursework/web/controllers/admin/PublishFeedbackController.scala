@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.commands.feedback.PublishFeedbackCommand
-import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -16,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 @Controller
 class PublishFeedbackController extends CourseworkController {
 	
-	@ModelAttribute def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new PublishFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))

@@ -11,6 +11,7 @@ import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
+import uk.ac.warwick.tabula.permissions._
 
 /** Abstract base command for either creating or editing a MarkScheme */
 abstract class ModifyMarkSchemeCommand(

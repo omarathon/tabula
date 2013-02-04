@@ -1,7 +1,7 @@
 <#compress>
 
-<#function manage item>
-<#return permissions("Manage", item) />
+<#function do permission item>
+<#return permissions(permission, item) />
 </#function>
 
 </#compress>

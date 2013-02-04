@@ -9,9 +9,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Delete
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
@@ -34,7 +32,7 @@ class MarkPlagiarisedController extends CourseworkController {
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited { 
 	
-	PermissionsCheck(Manage(department))
+	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditIndexService = Wire.auto[AuditEventIndexService]
@@ -33,13 +33,14 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(department, workbook) 
 		
-		for (event <- events) {
-			val assignment = assignmentService.getAssignmentById(event.assignmentId.get)
-			
-			val row = sheet.createRow(sheet.getLastRowNum() + 1)
-			row.createCell(0).setCellValue(assignment.get.module.code.toUpperCase())				
-			row.createCell(1).setCellValue(dateFormatter.print(assignment.get.closeDate))
-			row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))
+		for (event <- events;
+			 assignmentId <- event.assignmentId;
+			 assignment <- assignmentService.getAssignmentById(assignmentId)) {
+
+				val row = sheet.createRow(sheet.getLastRowNum() + 1)
+				row.createCell(0).setCellValue(assignment.module.code.toUpperCase())				
+				row.createCell(1).setCellValue(dateFormatter.print(assignment.closeDate))
+				row.createCell(2).setCellValue(dateFormatter.print(event.eventDate))	
 		}
 		
 		formatWorksheet(sheet)

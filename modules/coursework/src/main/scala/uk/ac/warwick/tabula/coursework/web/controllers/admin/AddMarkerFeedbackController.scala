@@ -8,14 +8,13 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddMarkerFeedbackCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AddMarkerFeedbackCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))

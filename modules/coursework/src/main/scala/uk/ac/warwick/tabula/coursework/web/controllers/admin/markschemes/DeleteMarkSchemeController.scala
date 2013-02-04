@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.coursework.commands.markschemes.DeleteMarkSchemeCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -22,7 +21,7 @@ class DeleteMarkSchemeController extends CourseworkController {
 	validatesSelf[DeleteMarkSchemeCommand]
 	
 	@ModelAttribute("command") 
-	def cmd(@PathVariable department: Department, @PathVariable("markscheme") markScheme: MarkScheme) = 
+	def cmd(@PathVariable("department") department: Department, @PathVariable("markscheme") markScheme: MarkScheme) = 
 		new DeleteMarkSchemeCommand(department, markScheme)
 	
 	@RequestMapping(method=Array(GET, HEAD))

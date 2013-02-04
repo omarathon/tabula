@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.persistence._
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -23,7 +22,7 @@ class TurnitinController extends CourseworkController {
 	@Autowired var jobService: JobService = _
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute def model(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = new SubmitToTurnitinCommand(module, assignment, user)
+	@ModelAttribute def model(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = new SubmitToTurnitinCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("!jobId"))
 	def confirm(command: SubmitToTurnitinCommand) = {

@@ -17,14 +17,14 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * Download one or more submissions from an assignment, as a Zip.
  */
 class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]

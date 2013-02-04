@@ -3,36 +3,24 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.reflect.Manifest
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.IndexColumn
+import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-import org.springframework.beans.factory.annotation.Autowired
-import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
-import scala.Some
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
-import scala.Some
-import uk.ac.warwick.tabula.data.model.SubmissionsReport
-import scala.Some
-import uk.ac.warwick.tabula.data.model.SubmissionsReport
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -57,8 +45,7 @@ object Assignment {
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToString {
-
+class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
 	import Assignment._
 
 	@transient
@@ -113,6 +100,8 @@ class Assignment() extends GeneratedId with Viewable with CanBeDeleted with ToSt
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	@BeanProperty var module: Module = _
+	
+	def permissionsParents = Seq(Option(module)).flatten
 
 	@ManyToOne
 	@JoinColumn(name = "upstream_id")

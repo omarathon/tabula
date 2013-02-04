@@ -40,15 +40,18 @@
 		<i class="icon-upload icon-white"></i> Upload
 	</button>
 	<div class="submit-buttons">
-		<#if bulkFeedbackTemplateCommand.feedbackTemplates?has_content>
+		<#if bulkFeedbackTemplateCommand.department.feedbackTemplates?has_content>
 			<table id="feedback-template-list" class="table table-striped table-bordered">
-				<tr>
-					<th>Name</th>
-					<th>Description</th>
-					<th>Assignments</th>
-					<th><!-- Actions column--></th>
-				</tr>
-				<#list bulkFeedbackTemplateCommand.feedbackTemplates as template>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Description</th>
+						<th>Assignments</th>
+						<th><!-- Actions column--></th>
+					</tr>
+				</thead>
+				<tbody>
+				<#list bulkFeedbackTemplateCommand.department.feedbackTemplates as template>
 					<tr>
 						<td>${template.name}</td>
 						<td>${template.description!""}</td>
@@ -104,6 +107,7 @@
 						</td>
 					</tr>
 				</#list>
+				</tbody>
 			</table>
 			<div id="feedback-template-model" class="modal fade">
 				<div class="modal-header">

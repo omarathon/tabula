@@ -10,19 +10,19 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.MarkScheme
-import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkSchemeDao
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markschemes"))
 class ListMarkSchemesController extends CourseworkController {
 	import ListMarkSchemesController._
 	
-	@ModelAttribute("command") def command(@PathVariable department: Department) = new Form(department)
+	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = new Form(department)
 	
 	@RequestMapping
 	def list(@ModelAttribute("command") form: Form): Mav = {
@@ -39,7 +39,7 @@ class ListMarkSchemesController extends CourseworkController {
 
 object ListMarkSchemesController {
 	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited with Daoisms {
-		PermissionsCheck(Manage(department))
+		PermissionCheck(Permissions.MarkScheme.Read, department)
 	
 		var dao = Wire.auto[MarkSchemeDao]
 

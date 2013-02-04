@@ -1,25 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
-import reflect.BeanProperty
-import util.matching.Regex
-import collection.JavaConversions._
-
-import javax.validation.constraints._
-import javax.persistence._
-
-import org.hibernate.annotations.FetchMode
+import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
+import scala.util.matching.Regex
 import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Type
-
-import uk.ac.warwick.tabula.actions._
+import javax.persistence._
+import javax.validation.constraints._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
 	new NamedQuery(name = "module.department", query = "select m from Module m where department = :department")))
-class Module extends GeneratedId
-	with Viewable with Manageable with Participatable {
+class Module extends GeneratedId with PermissionsTarget {
 
 	def this(code: String = null, department: Department = null) {
 		this()
@@ -56,6 +49,8 @@ class Module extends GeneratedId
 	@ManyToOne
 	@JoinColumn(name = "department_id")
 	@BeanProperty var department: Department = _
+	
+	def permissionsParents = Seq(Option(department)).flatten
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BeanProperty var assignments: java.util.List[Assignment] = List()

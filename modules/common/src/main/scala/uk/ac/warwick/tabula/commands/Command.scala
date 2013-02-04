@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Action
-import uk.ac.warwick.tabula.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 /**
  * Trait for a thing that can describe itself to a Description

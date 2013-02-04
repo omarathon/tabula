@@ -3,37 +3,39 @@ package uk.ac.warwick.tabula.system
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.NoCurrentUser
-import uk.ac.warwick.tabula.services.SecurityService
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.web.Cookies._
-import uk.ac.warwick.userlookup.UserLookup
-import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.helpers.FoundUser
+import uk.ac.warwick.tabula.roles.Sysadmin
+import uk.ac.warwick.tabula.services.permissions.RoleService
+import uk.ac.warwick.tabula.web.Cookies._
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.tabula.roles.Masquerader
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
-	@Autowired var securityService: SecurityService = _
-	@Autowired var userLookup: UserLookupInterface = _
+	var roleService = Wire.auto[RoleService]
+	var userLookup = Wire.auto[UserLookupInterface]
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
 	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = {
-		val sysadmin = securityService.isSysadmin(user.getUserId())
+		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin(), None)
 		val god = sysadmin && godModeEnabled
-		val masquerader = securityService.isMasquerader(user.getUserId)
+		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader(), None)
+		val canMasquerade =  sysadmin || masquerader
 		new CurrentUser(
 			realUser = user,
-			apparentUser = masqueradeUser(user, sysadmin),
+			apparentUser = masqueradeUser(user, canMasquerade),
 			sysadmin = sysadmin,
 			masquerader = masquerader,
 			god = god)
 	}
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
-		val currentUser: CurrentUser = request.getAttribute("SSO_USER") match {
+		val currentUser: CurrentUser = request.getAttribute(SSOClientFilter.USER_KEY) match {
 			case FoundUser(user) => resolveCurrentUser(user, apparentUser(request), godCookieExists(request))
 			case _ => NoCurrentUser()
 		}
@@ -42,12 +44,12 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	private def godCookieExists(request: HttpServletRequest): Boolean =
-		request.getCookies().getBoolean("tabulaGodMode", false)
+		request.getCookies().getBoolean(CurrentUser.godModeCookie, false)
 
 	// masquerade support
-	private def apparentUser(request: HttpServletRequest)(realUser: User, sysadmin: Boolean): User =
-		if (sysadmin) {
-			request.getCookies.getString("tabulaMasqueradeAs") match {
+	private def apparentUser(request: HttpServletRequest)(realUser: User, canMasquerade: Boolean): User =
+		if (canMasquerade) {
+			request.getCookies.getString(CurrentUser.masqueradeCookie) match {
 				case Some(userid) => userLookup.getUserByUserId(userid) match {
 					case user: User if user.isFoundUser() => user
 					case _ => realUser

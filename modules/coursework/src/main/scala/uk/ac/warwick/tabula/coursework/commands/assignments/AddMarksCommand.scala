@@ -22,11 +22,12 @@ import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.permissions._
 
 
 abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T]
 	with Daoisms with Logging with BindListener {
-	
+
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
 

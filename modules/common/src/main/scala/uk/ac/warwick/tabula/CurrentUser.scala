@@ -41,6 +41,8 @@ class CurrentUser(
 	def lastName = apparentUser.getLastName
 	/** Warwick Uni ID of the apparent user. */
 	def universityId = apparentUser.getWarwickId
+	/** Department code of the apparent user. */
+	def departmentCode = apparentUser.getDepartmentCode
 	/** Department name of the apparent user. */
 	def departmentName = apparentUser.getDepartment
 	/** Email address of the apparent user. */
@@ -53,6 +55,8 @@ class CurrentUser(
 	
 	/** Is of type Staff? (includes PGR) */
 	def isStaff = apparentUser.isStaff
+	
+	def isMember = isStudent || isStaff
 
 	override def toString = {
 		val builder = new StringBuilder("User ")
@@ -69,6 +73,8 @@ class CurrentUser(
 
 object CurrentUser {
 	val keyName = "CurrentUser"
+	val masqueradeCookie = "tabulaMasqueradeAs"
+	val godModeCookie = "tabulaGodMode"
 }
 
 object NoCurrentUser {

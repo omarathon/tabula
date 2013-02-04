@@ -18,7 +18,7 @@ import org.springframework.web.bind.ServletRequestDataBinder
 class RateFeedbackCommandTest extends TestBase with Mockito {
 	@Test def nullRating {
 		val (feedback,_,_,_) = deepFeedback
-		val command = new RateFeedbackCommand(feedback)
+		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
 		command.features = emptyFeatures
 		
 		command.wasPrompt.value = null
@@ -32,7 +32,7 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 	
 	@Test def invalidRating {
 		val (feedback,_,_,_) = deepFeedback
-		val command = new RateFeedbackCommand(feedback)
+		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
 		command.features = emptyFeatures
 		
 		command.wasPrompt.value = null

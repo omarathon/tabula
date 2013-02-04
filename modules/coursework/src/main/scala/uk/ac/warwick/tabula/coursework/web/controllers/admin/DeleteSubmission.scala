@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionComm
 import uk.ac.warwick.tabula.data.Transactions._
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Delete
+import uk.ac.warwick.tabula.permissions._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand

@@ -1,26 +1,23 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
-import reflect.BeanProperty
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.actions.Deleteable
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
 import java.util.HashSet
-import javax.persistence.FetchType
+
+import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
+
+import org.hibernate.annotations.{AccessType, Type}
+import org.joda.time.DateTime
+
+import javax.persistence._
+import javax.persistence.CascadeType._
+import javax.persistence.FetchType._
+import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormField
+import uk.ac.warwick.tabula.permissions._
 
 @Entity @AccessType("field")
-class Submission extends GeneratedId with Deleteable {
+class Submission extends GeneratedId with PermissionsTarget {
 
 	def this(universityId: String = null) {
 		this()
@@ -30,9 +27,11 @@ class Submission extends GeneratedId with Deleteable {
 	def isLate = submittedDate != null && assignment.isLate(this)
 	def isAuthorisedLate = submittedDate != null && assignment.isAuthorisedLate(this)
 
-	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
 	@JoinColumn(name = "assignment_id")
 	@BeanProperty var assignment: Assignment = _
+	
+	def permissionsParents = Seq(Option(assignment)).flatten
 
 	@BeanProperty var submitted: Boolean = false
 

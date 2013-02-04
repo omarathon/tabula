@@ -1,25 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import reflect.BeanProperty
-import util.matching.Regex
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
 
-import javax.validation.constraints._
-import javax.persistence._
-
-import org.hibernate.annotations.FetchMode
 import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 
-import uk.ac.warwick.tabula.actions._
+import javax.persistence._
+import javax.validation.constraints._
 
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
 	new NamedQuery(name = "route.department", query = "select r from Route r where department = :department")))
-class Route extends GeneratedId
-	with Viewable with Manageable with Participatable {
+class Route extends GeneratedId {
 
 	def this(code: String = null, department: Department = null) {
 		this()

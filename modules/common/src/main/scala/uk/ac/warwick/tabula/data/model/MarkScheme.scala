@@ -12,6 +12,7 @@ import reflect.BeanProperty
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 /** A MarkScheme defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -22,7 +23,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
   */
 @Entity
 @AccessType("field")
-class MarkScheme extends GeneratedId {
+class MarkScheme extends GeneratedId with PermissionsTarget {
 
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
@@ -39,6 +40,8 @@ class MarkScheme extends GeneratedId {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
+	
+	def permissionsParents = Seq(Option(department)).flatten
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))
@@ -87,6 +90,8 @@ class MarkScheme extends GeneratedId {
 				Seq()
 		}
 	}
+	
+	override def toString = "MarkScheme(" + id + ")"
 
 }
 

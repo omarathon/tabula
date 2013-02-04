@@ -7,35 +7,40 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceip
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.spring.Wire
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/resend-receipt"))
-class ResendSubmissionEmail extends AbstractAssignmentController {
+class ResendSubmissionEmail extends CourseworkController {
+	
+	var assignmentService = Wire.auto[AssignmentService]
 
 	hideDeletedItems
+	
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+		new SendSubmissionReceiptCommand(
+			module, assignment, 
+			mandatory(assignmentService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)), 
+			user)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def nope(form: SendSubmissionReceiptCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
 
 	@RequestMapping(method = Array(POST))
-	def sendEmail(user: CurrentUser, form: SendSubmissionReceiptCommand): Mav = {
-		form.user = user
-		mustBeLinked(mandatory(form.assignment), mandatory(form.module))
-
-		val submission = assignmentService.getSubmissionByUniId(form.assignment, user.universityId)
-		val hasEmail = user.email.hasText
-		val sent: Boolean = submission match {
-			case Some(submission) if (submission.submitted) =>
-				form.submission = submission
-				form.apply()
-			case None => false
-		}
+	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
+		val sent = form.apply()
+		
 		Mav("submit/receipt",
-			"submission" -> submission,
+			"submission" -> form.submission,
 			"module" -> form.module,
 			"assignment" -> form.assignment,
 			"sent" -> sent,
-			"hasEmail" -> hasEmail)
+			"hasEmail" -> user.email.hasText)
 
 	}
 

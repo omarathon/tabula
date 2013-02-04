@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.coursework.commands.feedback.RateFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.actions.View
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -16,21 +15,23 @@ import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.spring.Wire
 
 @RequestMapping(Array("/module/{module}/{assignment}/rate"))
 @Controller
-class FeedbackRatingController extends AbstractAssignmentController {
-
-	@Autowired @BeanProperty var features: Features = _
+class FeedbackRatingController extends CourseworkController {
+	
+	var feedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
 
 	@ModelAttribute def cmd(
 		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("module") module: Module) = {
-		mustBeLinked(assignment, module)
-		new RateFeedbackCommand(checkCanGetFeedback(assignment, user))
-	}
+		@PathVariable("module") module: Module,
+		user: CurrentUser) = 
+		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(command: RateFeedbackCommand): Mav = 

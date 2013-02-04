@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Feedback, MarkerFeedback, Assignment}
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.{FileDao, Daoisms}
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.Permissions
 
 /**
  * Copies the appropriate MarkerFeedback item to it's parent Feedback ready for processing by administrators
@@ -16,7 +16,7 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 	var fileDao = Wire.auto[FileDao]
 
-	PermissionsCheck(UploadMarkerFeedback(assignment))
+	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	def applyInternal() {
 		markerFeedbacks.foreach { markerFeedback =>

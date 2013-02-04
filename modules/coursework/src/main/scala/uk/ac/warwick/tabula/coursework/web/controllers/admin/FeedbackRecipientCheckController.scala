@@ -6,7 +6,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackRecipientCheckCommand
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module
@@ -21,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class FeedbackRecipientCheckController extends CourseworkController {
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new FeedbackRecipientCheckCommand(module, assignment)
 
 	@RequestMapping()

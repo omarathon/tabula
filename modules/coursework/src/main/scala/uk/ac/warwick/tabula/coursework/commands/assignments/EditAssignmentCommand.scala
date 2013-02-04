@@ -5,14 +5,14 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 
 
-class EditAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends ModifyAssignmentCommand {
+class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null) extends ModifyAssignmentCommand(module) {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Assignment.Update, assignment)
 
 	this.copyFrom(assignment)
 

@@ -3,28 +3,27 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ PathVariable, RequestMapping }
 import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.coursework.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.spring.Wire
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.userlookup.User
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions._
 
 class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	import MarksTemplateCommand._
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
 	@BeanProperty var members:Seq[String] =_
 	var assignmentService = Wire.auto[AssignmentService]
@@ -85,8 +84,8 @@ class MarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 
 	var assignmentService = Wire.auto[AssignmentService]
-
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+	
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))

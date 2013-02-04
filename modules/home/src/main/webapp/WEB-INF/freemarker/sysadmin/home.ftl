@@ -23,6 +23,17 @@
 </div>
 
 <div class="span4">
+<h2>God mode</h2>
+
+<@f.form method="post" action="${url('/sysadmin/god')}">
+	<#if user.god>
+		<input type="hidden" name="action" value="remove" />
+		<button class="btn btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
+	<#else>
+		<button class="btn btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
+	</#if>
+</@f.form>
+
 <h2>Scary special stuff</h2>
 
 <p>
@@ -60,7 +71,9 @@ Rebuild audit event index from
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="reindexForm">
-Rebuild profiles index from
+Rebuild profiles index for
+<br />
+<@f.input id="profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
 <div class="input-append"> 
 <@f.input id="profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>

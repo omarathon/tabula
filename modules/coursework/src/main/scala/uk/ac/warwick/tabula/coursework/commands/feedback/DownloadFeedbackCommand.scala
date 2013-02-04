@@ -13,14 +13,18 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
+	
+	notDeleted(assignment)
+	mustBeLinked(assignment, module)
+	PermissionCheck(Permissions.Feedback.Read, feedback)
+	
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@BeanProperty var module: Module = _
-	@BeanProperty var assignment: Assignment = _
 	@BeanProperty var filename: String = _
     @BeanProperty var students: JList[String] = ArrayList()
     
@@ -34,14 +38,14 @@ class DownloadFeedbackCommand(user: CurrentUser) extends Command[Option[Renderab
 	 * In either case if it's not found, None is returned.
 	 */
 	def applyInternal() = {
-		val result: Option[RenderableFile] = feedbackDao.getFeedbackByUniId(assignment, user.universityId) flatMap { (feedback) =>
+		val result: Option[RenderableFile] = 
 			filename match {
 				case filename: String if filename.hasText => {
 					feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
 				}
 				case _ => Some(zipped(feedback))
 			}
-		}
+
 		fileFound = result.isDefined
 		if (callback != null) {
 			result.map { callback(_) }

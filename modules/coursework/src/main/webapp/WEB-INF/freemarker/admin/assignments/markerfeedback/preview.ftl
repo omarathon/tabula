@@ -42,7 +42,7 @@
 
 <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
 <div class="unrecognised-files alert alert-block">
-<div>There were some files in the zip which I didn't understand, and will be ignored:</div>
+<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
 <ul class="file-list">
 <#list addMarkerFeedbackCommand.unrecognisedFiles as unrecognisedFile>
 <li>

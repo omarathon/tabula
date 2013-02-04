@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Features
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.actions.Manage
 import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
@@ -18,7 +17,7 @@ import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
 import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.coursework.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.spring.Wire

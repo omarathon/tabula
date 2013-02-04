@@ -21,13 +21,13 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Feedback.Publish, assignment)
 	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 	var assignmentService = Wire.auto[AssignmentService]
@@ -47,7 +47,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
-		if (!assignment.isClosed()) {
+		if (!assignment.openEnded && !assignment.isClosed()) {
 			errors.reject("feedback.publish.notclosed")
 		} else if (assignment.fullFeedback.isEmpty) {
 			errors.reject("feedback.publish.nofeedback")

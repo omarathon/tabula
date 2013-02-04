@@ -10,7 +10,8 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.StateService
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
+import uk.ac.warwick.tabula.permissions.Permissions.Feedback
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
 	extends Command[Unit] with SelfValidating with Daoisms {
@@ -26,7 +27,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	@BeanProperty var confirm: Boolean = false
 
 	mustBeLinked(assignment, module)
-	PermissionsCheck(UploadMarkerFeedback(assignment))
+	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 
 	def onBind() {

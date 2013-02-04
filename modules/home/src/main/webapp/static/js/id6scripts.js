@@ -23327,6 +23327,8 @@ window.SitebuilderInfo = {
 		var footer = jQuery('#footer');
 		var contentContainer = jQuery('#navigation-and-content');
 		
+		if (!contentContainer.length) { return; }
+		
 		var calculateMinHeight; 
 		if (footer.length) {
 			calculateMinHeight = function() {

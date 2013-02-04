@@ -18,7 +18,6 @@ import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.actions.{Manage, Participate}
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
@@ -63,7 +62,7 @@ abstract class ExtensionController extends CourseworkController {
 class ListExtensionRequestsController extends ExtensionController {
 
 	@ModelAttribute
-	def listCommand(@PathVariable module:Module, @PathVariable assignment:Assignment) = new ListExtensionsCommand(module, assignment, user)
+	def listCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment) = new ListExtensionsCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(cmd: ListExtensionsCommand):Mav = {
@@ -89,7 +88,7 @@ class ListExtensionRequestsController extends ExtensionController {
 class AddExtensionController extends ExtensionController {
 	
 	@ModelAttribute("modifyExtensionCommand")
-	def addCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, user:CurrentUser) = 
+	def addCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = 
 		new AddExtensionCommand(module, assignment, user)
 	
 	validatesWith{ (form:AddExtensionCommand, errors:Errors) =>
@@ -134,7 +133,7 @@ class AddExtensionController extends ExtensionController {
 class EditExtensionController extends ExtensionController {
 	
 	@ModelAttribute("modifyExtensionCommand")
-	def editCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
+	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
 	validatesWith{ (form:EditExtensionCommand, errors:Errors) =>
@@ -183,7 +182,7 @@ class EditExtensionController extends ExtensionController {
 class ReviewExtensionRequestController extends ExtensionController {
 	
 	@ModelAttribute("modifyExtensionCommand")
-	def editCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
+	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
 	validatesWith{ (form:ReviewExtensionRequestCommand, errors:Errors) =>
@@ -232,7 +231,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 class DeleteExtensionController extends ExtensionController {
 	
 	@ModelAttribute
-	def deleteCommand(@PathVariable module:Module, @PathVariable assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) 
+	def deleteCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) 
 		= new DeleteExtensionCommand(module, assignment, universityId, user)
 
 	// delete a manually created extension item - this revokes the extension

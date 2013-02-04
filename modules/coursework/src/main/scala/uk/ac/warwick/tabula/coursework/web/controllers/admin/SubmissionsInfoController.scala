@@ -7,7 +7,6 @@ import org.joda.time.ReadableInstant
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -36,7 +35,7 @@ class SubmissionsInfoController extends CourseworkController {
 
 	var checkIndex = true
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))

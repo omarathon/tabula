@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
 case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
@@ -40,7 +40,7 @@ case class RecipientCheckReport(
 class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignment) extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Feedback.Read, assignment)
 
 	var assignmentService = Wire.auto[AssignmentService]
 

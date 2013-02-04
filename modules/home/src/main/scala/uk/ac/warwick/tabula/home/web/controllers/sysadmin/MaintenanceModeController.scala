@@ -28,14 +28,36 @@ import javax.validation.Valid
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.MaintenanceModeMessage
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.permissions._
 
-class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidating {
+class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
+	
+	PermissionCheck(Permissions.ManageMaintenanceMode)
+	
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	
 	@BeanProperty var enable: Boolean = service.enabled
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
 
 	@BeanProperty var message: String = service.message orNull
+	
+	def applyInternal() {
+		if (!enable) {
+			message = null
+			until = null
+		}
+		service.message = Option(message)
+		service.until = Option(until)
+		if (enable) service.enable
+		else service.disable
+		
+		queue.send(new MaintenanceModeMessage(service))
+	}
 
 	def validate(errors: Errors) {
 
@@ -46,32 +68,21 @@ class MaintenanceModeForm(service: MaintenanceModeService) extends SelfValidatin
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
 	var service = Wire.auto[MaintenanceModeService]
-	var queue = Wire.named[Queue]("settingsSyncTopic")
 
-	validatesSelf[MaintenanceModeForm]
+	validatesSelf[MaintenanceModeCommand]
 
-	@ModelAttribute def cmd = new MaintenanceModeForm(service)
+	@ModelAttribute def cmd = new MaintenanceModeCommand(service)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(form: MaintenanceModeForm, errors: Errors) =
+	def showForm(form: MaintenanceModeCommand, errors: Errors) =
 		Mav("sysadmin/maintenance").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: MaintenanceModeForm, errors: Errors) = {
+	def submit(@Valid form: MaintenanceModeCommand, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
-			if (!form.enable) {
-				form.message = null
-				form.until = null
-			}
-			service.message = Option(form.message)
-			service.until = Option(form.until)
-			if (form.enable) service.enable
-			else service.disable
-			
-			queue.send(new MaintenanceModeMessage(service))
-
+			form.apply()
 			Redirect("/sysadmin")
 		}
 	}

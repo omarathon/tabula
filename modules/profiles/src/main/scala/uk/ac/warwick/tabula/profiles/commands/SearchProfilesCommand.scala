@@ -11,13 +11,14 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.actions.Search
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.CurrentUser
 
-class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
 	
-	PermissionsCheck(Search(classOf[Member]))
+	PermissionCheck(Permissions.Profiles.Search)
 	
 	final val userTypes: Set[MemberUserType] = Set(Student)
 	
@@ -35,20 +36,20 @@ class SearchProfilesCommand(val currentMember: Member) extends Command[Seq[Membe
 		(query.trim().length > MinimumQueryLength) &&
 		(query.split("""\s+""") find {_.length > MinimumTermLength} isDefined)
 	
-	private def singleton(option: Option[Member]) = 
+	private def singletonByUserType(option: Option[Member]) = 
 		if (option.isDefined) Seq(option.get) filter {userTypes contains _.userType}
 		else Seq()
 	
 	private def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()
-		else singleton(profileService.getMemberByUserId(query))
+		else singletonByUserType(profileService.getMemberByUserId(query))
 	
 	private def universityIdMatches = 
 		if (!isMaybeUniversityId(query)) Seq()
-		else singleton(profileService.getMemberByUniversityId(query))
+		else singletonByUserType(profileService.getMemberByUniversityId(query))
 	
 	private def queryMatches = {
-		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, securityService.isSysadmin(currentMember.userId))
+		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, user.god)
 	}
 	
 	override def describe(d: Description) = d.property("query" -> query)

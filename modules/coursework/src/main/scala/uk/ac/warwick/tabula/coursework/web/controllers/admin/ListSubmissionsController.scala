@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.actions.Participate
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAllSubmissionsCommand
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/list"))
 class ListSubmissionsController extends CourseworkController {
 	
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = 
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))

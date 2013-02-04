@@ -1,24 +1,24 @@
 package uk.ac.warwick.tabula.data.model
+
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.reflect.BeanProperty
+import scala.xml.NodeSeq
 import org.hibernate.annotations.AccessType
 import javax.persistence._
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.actions._
 import uk.ac.warwick.tabula.JavaImports._
-import xml.NodeSeq
-import scala.Array
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity @AccessType("field")
-class Department extends GeneratedId with PostLoadBehaviour with Viewable with Manageable {
+class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarget {
   
 	@BeanProperty var code:String = null
 	
 	@BeanProperty var name:String = null
 	
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var modules:JList[Module] = List()
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
@@ -27,7 +27,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	
 	@BeanProperty var collectFeedbackRatings:Boolean = false
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 	
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -37,6 +37,7 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 	@BeanProperty var allowExtensionRequests:JBoolean = false
 	@BeanProperty var extensionGuidelineSummary:String = null
 	@BeanProperty var extensionGuidelineLink:String = null
+	
 	/** The group of extension managers */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "extension_managers_id")
@@ -66,6 +67,8 @@ class Department extends GeneratedId with PostLoadBehaviour with Viewable with M
 		if (owners == null) owners = new UserGroup
 		owners
 	}
+	
+	def permissionsParents = Seq()
 
 	override def toString = "Department(" + code + ")"
 

@@ -1,6 +1,6 @@
 <#assign markers=field.markers />
 <@form.labelled_row "fields[${field.id}]" "Select your marker">
-	<@f.select path="fields[${field.id}].value">
+	<@f.select id="fields[${field.id}].value" path="fields[${field.id}].value">
 		<@f.option value="" label="None"/>
 		<#list markers as marker>
 			<@f.option value="${marker.userId}" label="${marker.fullName}"/>

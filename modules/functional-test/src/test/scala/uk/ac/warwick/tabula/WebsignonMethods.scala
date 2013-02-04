@@ -25,6 +25,11 @@ trait WebsignonMethods extends ShouldMatchers {
 					if (pageSource contains ("Signed in as " + details.usercode)) {
 						// we're done
 					} else {
+						if (pageSource contains ("Signed in as ")) {
+							// signed in as someone else; sign out first
+							click on linkText("Sign out")
+						}
+
 						// sign in if we've not already been taken to that page
 						if (!pageTitle.contains("Sign in")) {
 							click on linkText("Sign in")
@@ -38,7 +43,6 @@ trait WebsignonMethods extends ShouldMatchers {
 						if (pageSource contains ("Signed in as " + details.usercode)) {
 							// NOW we're done
 						} else {
-							System.err.println(pageSource);
 							Assertions.fail("Tried to sign in as " + details.description + " but failed.")
 						}
 					}

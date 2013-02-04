@@ -8,15 +8,15 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.actions.UploadMarkerFeedback
 import scala.Some
+import uk.ac.warwick.tabula.permissions.Permissions
 
 
 class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val user:CurrentUser,  val firstMarker:Boolean)
 	extends Command[Seq[MarkerFeedbackItem]] with Unaudited with ReadOnly{
 
 	mustBeLinked(assignment, module)
-	PermissionsCheck(UploadMarkerFeedback(assignment))
+	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	var userLookup = Wire.auto[UserLookupService]
 	@BeanProperty var completedFeedback:Seq[MarkerFeedbackItem] = _

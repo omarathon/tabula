@@ -9,7 +9,9 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.Assignment
 
 
 /**
@@ -26,12 +28,13 @@ case class NullableBoolean(@BeanProperty var value: JBoolean) {
 	}
 }
 
-class RateFeedbackCommand(val feedback: Feedback) extends Command[Unit] {
-	def this(opt: Option[Feedback]) {
-		this(opt.orNull)
+class RateFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Unit] {
+	def this(module: Module, assignment: Assignment, opt: Option[Feedback]) {
+		this(module, assignment, opt.orNull)
 	}
 	
-	PermissionsCheck(View(mandatory(feedback)))
+	mustBeLinked(assignment, module)
+	PermissionCheck(Permissions.Feedback.Rate, feedback)
 	
 	var features = Wire.auto[Features]
 
