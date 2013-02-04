@@ -5,7 +5,37 @@
 
 <#if hasPublishedFeedback>
 	<p>
-		<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date. <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
+		<#if stillToDownload?has_content>
+			<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
+			<@fmt.p stillToDownload?size "student" "students" /> still have not downloaded their feedback.
+			<a id="tool-tip" class="btn btn-mini" data-toggle="button" href="#">
+				<i class="icon-list"></i>
+				List
+			</a>
+			<div id="tip-content" class="hide">
+				<ul><#list stillToDownload as student>
+					<li>
+						<#if module.department.showStudentName>
+							${student.fullName}
+						<#else>
+							${student.warwickId}
+						</#if>
+					</li>
+				</#list></ul>
+			</div>
+			<script type="text/javascript">
+				jQuery(function($){
+					$("#tool-tip").popover({
+						placement: 'right',
+						html: true,
+						content: function(){return $('#tip-content').html();},
+						title: 'Students that haven\'t downloaded feedback'
+					});
+				});
+			</script>
+		<#else>
+			All students have downloaded their feedback
+		</#if>
 	</p>
 </#if>
 

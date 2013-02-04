@@ -78,11 +78,16 @@ class SubmissionsAndFeedbackController extends CourseworkController {
 			student.feedback != null && student.feedback.checkedReleased
 		}
 
+		val whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment)
+		val members =  assignmentService.determineMembershipUsers(assignment).map(_.getUserId)
+		val stillToDownload = (members.toSet -- whoDownloaded.toSet).map(userLookup.getUserByUserId(_))
+
 		Mav("admin/assignments/submissionsandfeedback/list",
 			"assignment" -> assignment,
 			"students" -> students,
 			"awaitingSubmission" -> awaitingSubmission,
-			"whoDownloaded" -> auditIndexService.whoDownloadedFeedback(assignment),
+			"whoDownloaded" -> whoDownloaded,
+			"stillToDownload" -> stillToDownload,
 			"hasPublishedFeedback" -> hasPublishedFeedback,
 			"hasOriginalityReport" -> hasOriginalityReport,
 			"mustReleaseForMarking" -> mustReleaseForMarking)
