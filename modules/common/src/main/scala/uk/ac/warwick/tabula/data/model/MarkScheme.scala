@@ -4,7 +4,6 @@ import org.hibernate.annotations.{Type, AccessType}
 import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 import scala.{Array, Some}
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
@@ -81,13 +80,19 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 		else {
 			val isFirstMarker = assignment.isFirstMarker(user)
 			val isSecondMarker = assignment.isSecondMarker(user)
-			val submissionIds:JList[String] = assignment.markerMap.get(user.getUserId).includeUsers
-			if(isFirstMarker)
-				assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedForMarking)
-			else if(isSecondMarker)
-				assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedToSecondMarker)
-			else
-				Seq()
+			val studentUg = Option(assignment.markerMap.get(user.getUserId))
+			studentUg match {
+				case Some(ug) => {
+					val submissionIds = ug.includeUsers
+					if(isFirstMarker)
+						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedForMarking)
+					else if(isSecondMarker)
+						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedToSecondMarker)
+					else
+						Seq()
+				}
+				case None => Seq()
+			}
 		}
 	}
 	
