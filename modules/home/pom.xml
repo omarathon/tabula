@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -17,7 +18,7 @@
 
 	<properties>
 		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
-		
+
 		<!-- Override module context -->
 		<tabula.module.context>/</tabula.module.context>
 	</properties>
@@ -43,9 +44,11 @@
 								<configuration>
 									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war">
-											<fileset dir="${project.build.directory}/${project.build.finalName}" />
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
-										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+										<touch
+											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -74,7 +77,8 @@
 								<configuration>
 									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war/static">
-											<fileset dir="${project.build.directory}/${project.build.finalName}/static" />
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}/static" />
 										</sync>
 									</target>
 								</configuration>
@@ -133,10 +137,13 @@
 						<phase>compile</phase>
 						<configuration>
 							<target>
-								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask" classpathref="maven.plugin.classpath" />
+								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
+									classpathref="maven.plugin.classpath" />
 
-								<lesscss todir="${project.build.directory}/${project.build.finalName}/static/css">
-									<fileset dir="${basedir}/src/main/webapp/static/css" includes="*.less" excludes="*.inc.less" />
+								<lesscss
+									todir="${project.build.directory}/${project.build.finalName}/static/css">
+									<fileset dir="${basedir}/src/main/webapp/static/css"
+										includes="*.less" excludes="*.inc.less" />
 								</lesscss>
 							</target>
 						</configuration>
@@ -149,10 +156,15 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<target>
-								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask" classpathref="maven.plugin.classpath" />
+								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
+									classpathref="maven.plugin.classpath" />
 
-								<batchhash propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties" maxhashlength="12" salt="a">
-									<fileset dir="${project.build.directory}/${project.build.finalName}" includes="static/**" excludes="**/*.less" />
+								<batchhash
+									propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
+									maxhashlength="12" salt="a">
+									<fileset
+										dir="${project.build.directory}/${project.build.finalName}"
+										includes="static/**" excludes="**/*.less" />
 								</batchhash>
 							</target>
 						</configuration>
@@ -218,7 +230,7 @@
 								<include>libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js</include>
 								<include>libs/jquery.delayedObserver.js</include>
 								<include>libs/jquery-rating/jquery.rating.pack.js</include>
-								<!--<include>libs/jquery-caret/jquery.caret.1.02.js</include>-->
+								<!--<include>libs/jquery-caret/jquery.caret.1.02.js</include> -->
 								<include>libs/anytime/anytimec.js</include>
 								<include>libs/popup/popup.js</include>
 								<include>libs/bootstrap/js/bootstrap.js</include>
@@ -304,5 +316,10 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.8</version>
+		</dependency>
 	</dependencies>
 </project>

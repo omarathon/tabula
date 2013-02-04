@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 /*
  * A role based on being the person who actually made the submission
  */
-case class Submitter(submission: model.Submission) extends BuiltInRole {
+case class Submitter(submission: model.Submission) extends BuiltInRole(submission) {
 	
 	GrantsPermissionFor(submission, 
 		Submission.Read,

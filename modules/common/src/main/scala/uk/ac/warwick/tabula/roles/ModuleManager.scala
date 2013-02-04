@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 case class DepartmentModuleManager(department: model.Department) extends BaseModuleManager(department)
 case class ModuleManager(module: model.Module) extends BaseModuleManager(module)
 
-abstract class BaseModuleManager (scope: PermissionsTarget) extends BuiltInRole {
+abstract class BaseModuleManager(scope: PermissionsTarget) extends BuiltInRole(scope) {
 	
 	GrantsPermissionFor(scope, 
 		Module.Read,

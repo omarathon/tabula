@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole {
+case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(department) {
 	
 	// Implicitly grants module manager role for all modules in this department
 	GrantsRole(DepartmentModuleManager(department))
