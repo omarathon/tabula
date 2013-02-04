@@ -34,7 +34,7 @@ import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.DownloadFileController
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.ListFilesController
 import org.json.JSONException
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 /**
  * This is a ReadOnly command because it runs in Maintenance mode on the replica
@@ -42,7 +42,7 @@ import uk.ac.warwick.tabula.actions.Sysadmin
 class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadOnly with Logging with HttpResponseHandlers {
 	import SyncReplicaFilesystemCommand._
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ReplicaSyncing)
 	
 	// Back once again
 	var replicaMaster = Wire[String]("${tabula.sync.replica.master}")

@@ -43,7 +43,6 @@ trait WebsignonMethods extends ShouldMatchers {
 						if (pageSource contains ("Signed in as " + details.usercode)) {
 							// NOW we're done
 						} else {
-							System.err.println(pageSource);
 							Assertions.fail("Tried to sign in as " + details.description + " but failed.")
 						}
 					}

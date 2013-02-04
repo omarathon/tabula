@@ -13,12 +13,12 @@ import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleImporter
 import uk.ac.warwick.tabula.scheduling.services.RouteInfo
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	import ImportModulesCommand._
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData)
 
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.beans.factory.annotation.Autowired

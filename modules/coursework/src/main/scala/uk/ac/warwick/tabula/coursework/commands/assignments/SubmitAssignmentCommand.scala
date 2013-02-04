@@ -20,12 +20,13 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.SubmissionState._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.actions.Submit
+import uk.ac.warwick.tabula.permissions._
+import org.springframework.util.Assert
 
 class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionsCheck(Submit(assignment))
+	PermissionCheck(Permissions.Submission.Create, assignment)
 	
 	var service = Wire.auto[AssignmentService]
 	var zipService = Wire.auto[ZipService]
@@ -122,6 +123,12 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 				submissionValue.persist(value)
 				value
 		}.toSet[SavedSubmissionValue]
+		
+		// TAB-413 assert that we have at least one attachment
+		Assert.isTrue(
+			submission.values.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined, 
+			"Submission must have at least one attachment"
+		)
 
 		zipService.invalidateSubmissionZip(assignment)
 		service.saveSubmission(submission)

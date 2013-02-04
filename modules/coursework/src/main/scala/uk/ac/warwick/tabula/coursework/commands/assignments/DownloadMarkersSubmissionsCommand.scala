@@ -3,7 +3,7 @@ import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.actions.DownloadSubmissions
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.CurrentUser
  */
 class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 	mustBeLinked(assignment, module)
-	PermissionsCheck(DownloadSubmissions(assignment))
+	PermissionCheck(Permissions.Submission.Read, assignment)
 	
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

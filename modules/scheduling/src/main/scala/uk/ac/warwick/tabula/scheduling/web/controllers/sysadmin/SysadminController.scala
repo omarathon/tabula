@@ -28,8 +28,9 @@ import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.Department
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -54,7 +55,7 @@ class HomeController extends BaseSysadminController {
 }
 
 class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData)
 	
 	var indexer = Wire.auto[AuditEventIndexService]
 
@@ -69,18 +70,23 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 }
 
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData)
 	
 	var indexer = Wire.auto[ProfileIndexService]
+	var mdService = Wire.auto[ModuleAndDepartmentService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
+	@BeanProperty var deptCode: String = _
 
 	def applyInternal() = {
-		indexer.indexFrom(from)
+		mdService.getDepartmentByCode(deptCode) match {
+			case None => indexer.indexFrom(from)
+			case Some(department) => indexer.indexByDateAndDepartment(from, department)
+		}
 	}
 	
-	def describe(d: Description) = d.property("from" -> from)
+	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
 }
 
 @Controller

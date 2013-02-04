@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 class MemberTest extends TestBase with Mockito {
 	
 	@Test def testAffiliatedDepartments {
-		val member = new Member()
+		val member = new Member
 		member.universityId = "01234567"
 		
 		// create their home department
@@ -56,5 +56,19 @@ class MemberTest extends TestBase with Mockito {
 		
 		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
 		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
+	}
+	
+	@Test def nullUsers {
+		val member = new Member
+		member.fullName should be (None)
+		
+		member.lastName = "Bono"
+		member.fullName should be (Some("Bono"))
+		
+		member.firstName = "Sonny"
+		member.fullName should be (Some("Sonny Bono"))
+		
+		member.lastName = null
+		member.fullName should be (Some("Sonny"))
 	}
 }

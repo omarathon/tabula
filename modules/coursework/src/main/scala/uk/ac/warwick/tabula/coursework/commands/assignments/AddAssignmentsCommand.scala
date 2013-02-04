@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Manage
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
 
@@ -70,7 +70,7 @@ class AssignmentItem(
  */
 class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
 	
-	PermissionsCheck(Manage(department))
+	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var moduleDao = Wire.auto[ModuleDao]
@@ -172,7 +172,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 		if (hasInvalidAssignments) {
 			logger.warn("Rejected request to setup assignments that aren't in this department")
-			throw new PermissionDeniedException(user, Manage(department))
+			throw new PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem, department)
 		}
 	}
 

@@ -13,7 +13,7 @@ import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.actions.Action
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventHandling
@@ -25,15 +25,22 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import org.springframework.web.servlet.view.RedirectView
-import uk.ac.warwick.tabula.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
 	var securityService: SecurityService
 	
 	def restricted[T <: PermissionsChecking](something: => T): Option[T] = 
-		if (something.permissionsChecks forall(securityService.can(user, _))) Some(something)
+		if (something.permissionChecks forall(_ match {
+			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
+			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
+			case _ =>
+				// We're trying to do a permissions check against a non-existent scope - 404
+				logger.warn("Permissions check throwing item not found - this should be caught in check (restricted " + something + ")")
+				throw new ItemNotFoundException()
+		})) Some(something)
 		else None
 		
 	def restrictedBy[T <: PermissionsChecking](fn: => Boolean)(something: => T): Option[T] =

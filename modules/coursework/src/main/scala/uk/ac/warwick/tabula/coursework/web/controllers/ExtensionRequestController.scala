@@ -11,8 +11,8 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
-import uk.ac.warwick.tabula.actions.View
 import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -33,7 +33,7 @@ class ExtensionRequestController extends CourseworkController{
 		val (assignment, module) = (cmd.assignment, cmd.module)
 		
 		if (!module.department.canRequestExtension)
-			throw new PermissionDeniedException(user, View(assignment))
+			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)

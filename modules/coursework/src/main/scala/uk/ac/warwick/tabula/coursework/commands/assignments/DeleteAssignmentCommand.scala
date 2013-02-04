@@ -8,13 +8,13 @@ import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
 import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends Command[Unit] {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Assignment.Delete, assignment)
 
 	@BeanProperty var confirm: JBoolean = false
 

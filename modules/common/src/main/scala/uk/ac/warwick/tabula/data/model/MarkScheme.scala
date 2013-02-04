@@ -5,6 +5,7 @@ import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.SubmissionState._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 /** A MarkScheme defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submssions
@@ -15,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.SubmissionState._
   */
 @Entity
 @AccessType("field")
-class MarkScheme extends GeneratedId {
+class MarkScheme extends GeneratedId with PermissionsTarget {
 
 	def this(dept: Department) = {
 		this()
@@ -29,6 +30,8 @@ class MarkScheme extends GeneratedId {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
+	
+	def permissionsParents = Seq(Option(department)).flatten
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))
@@ -64,5 +67,7 @@ class MarkScheme extends GeneratedId {
 		}
 		else Seq() //TODO - no defined behaviour for default mark schemes yet
 	}
+	
+	override def toString = "MarkScheme(" + id + ")"
 
 }

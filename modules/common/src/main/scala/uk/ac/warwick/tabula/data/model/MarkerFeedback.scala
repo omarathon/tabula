@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
+import scala.reflect.BeanProperty
+
 import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
-import uk.ac.warwick.tabula.actions.{Deleteable, Viewable}
-import reflect.BeanProperty
 import org.joda.time.DateTime
+
+import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ArrayList
 
 @Entity @AccessType("field")
-class MarkerFeedback extends GeneratedId with Viewable with Deleteable {
+class MarkerFeedback extends GeneratedId {
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "feedback_id")

@@ -10,14 +10,13 @@ import collection.JavaConversions._
 import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
 import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.commands.Command
 
 
-class AddModuleCommand extends ModifyModuleCommand with Daoisms with SelfValidating {
+class AddModuleCommand(val department: Department) extends Command[Module] with Daoisms with SelfValidating {
 	
-	PermissionsCheck(Sysadmin())
-
-	@BeanProperty var department: Department = _
+	PermissionCheck(Permissions.Module.Create, department)
 
 	@BeanProperty var code: String = _
 	@BeanProperty var name: String = _

@@ -18,6 +18,7 @@ class PublishFeedbackCommandTest extends TestBase {
 			
 			/* a whole */ new World {
 				assignment.closeDate = closeDateAfter
+				assignment.openEnded = false
 				command.validate(errors)
 				errors.hasGlobalErrors() should be (true)
 				errors.getGlobalError().getCode should be ("feedback.publish.notclosed")
@@ -25,6 +26,13 @@ class PublishFeedbackCommandTest extends TestBase {
 
 			/* a whole */ new World {
 				assignment.closeDate = closeDateBefore
+				assignment.openEnded = false
+				command.validate(errors)
+				errors.hasGlobalErrors() should be (false)
+			}
+			
+			/* Brave */ new World {
+				assignment.openEnded = true
 				command.validate(errors)
 				errors.hasGlobalErrors() should be (false)
 			}

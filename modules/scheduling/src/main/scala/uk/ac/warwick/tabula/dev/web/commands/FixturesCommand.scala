@@ -2,18 +2,17 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import scala.collection.JavaConversions._
 
-import uk.ac.warwick.tabula.permissions.Public
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
-import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.home.commands.departments.AddDeptOwnerCommand
+import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
+import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 
 /**
  * This command is intentionally Public. It only exists on dev and is designed, 

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.springframework.util.FileCopyUtils
-import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.ApplyWithCallback
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.Unaudited
 
 class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
 	
-	PermissionsCheck(View(mandatory(member)))
+	PermissionCheck(Permissions.Profiles.Read, member)
 	
 	private val DefaultPhoto = new DefaultPhoto
 	private var fileFound: Boolean = _

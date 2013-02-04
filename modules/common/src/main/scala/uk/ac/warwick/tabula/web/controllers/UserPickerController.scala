@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions.AllUniversityMembers
+import uk.ac.warwick.tabula.permissions._
 
 @Controller
 class UserPickerController extends BaseController {
@@ -48,7 +48,9 @@ class UserPickerController extends BaseController {
 }
 
 object UserPickerController {
-	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited with AllUniversityMembers {
+	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
+		PermissionCheck(Permissions.UserPicker)
+		
 		var userLookup = Wire.auto[UserLookupService]
 	
 		@BeanProperty var firstName: String = ""

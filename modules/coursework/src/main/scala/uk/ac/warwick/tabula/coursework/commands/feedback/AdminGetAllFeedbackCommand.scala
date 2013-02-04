@@ -7,14 +7,14 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 
 
 class AdminGetAllFeedbackCommand(module: Module, assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(Participate(module))
+	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
 	var zipService = Wire.auto[ZipService]
 

@@ -13,11 +13,11 @@ import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ModuleRegistration
-import uk.ac.warwick.tabula.actions.Sysadmin
+import uk.ac.warwick.tabula.permissions._
 
 class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	
-	PermissionsCheck(Sysadmin())
+	PermissionCheck(Permissions.ImportSystemData)
 
 	var assignmentImporter = Wire.auto[AssignmentImporter]
 	var assignmentService = Wire.auto[AssignmentService]

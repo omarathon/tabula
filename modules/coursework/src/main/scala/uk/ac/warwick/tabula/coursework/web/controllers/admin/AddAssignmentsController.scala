@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentsCommand
 import uk.ac.warwick.tabula
-import uk.ac.warwick.tabula.actions.Manage
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.Department

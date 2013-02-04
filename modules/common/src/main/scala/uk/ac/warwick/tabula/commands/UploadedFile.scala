@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.commands
 
 import java.io.File
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
-import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.helpers.ArrayList
-import uk.ac.warwick.spring.Wire
-import org.springframework.beans.factory.annotation.{Autowired,Value}
-import uk.ac.warwick.tabula.system.BindListener
 
+import org.springframework.web.multipart.MultipartFile
+
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.system.BindListener
 
 /**
  * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -78,17 +80,19 @@ class UploadedFile extends BindListener {
 		}
 		if (hasUploads) {
 			// convert MultipartFiles into FileAttachments
-			val newAttachments = for (item <- permittedUploads) yield {
-				val a = new FileAttachment
-				a.name = new File(item.getOriginalFilename()).getName
-				a.uploadedData = item.getInputStream
-				a.uploadedDataLength = item.getSize
-				fileDao.saveTemporary(a)
-				a
+			transactional() {
+				val newAttachments = for (item <- permittedUploads) yield {
+					val a = new FileAttachment
+					a.name = new File(item.getOriginalFilename()).getName
+					a.uploadedData = item.getInputStream
+					a.uploadedDataLength = item.getSize
+					fileDao.saveTemporary(a)
+					a
+				}
+				// remove converted files from upload to avoid duplicates
+				upload.clear
+				attached.addAll(newAttachments)
 			}
-			// remove converted files from upload to avoid duplicates
-			upload.clear
-			attached.addAll(newAttachments)
 		} else {
 			// sometimes we manually add FileAttachments with uploaded data to persist
 			for (item <- attached if item.uploadedData != null)

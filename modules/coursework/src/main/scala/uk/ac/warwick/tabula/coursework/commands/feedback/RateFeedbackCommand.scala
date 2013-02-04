@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.View
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 
@@ -34,7 +34,7 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 	}
 	
 	mustBeLinked(assignment, module)
-	PermissionsCheck(View(mandatory(feedback)))
+	PermissionCheck(Permissions.Feedback.Rate, feedback)
 	
 	var features = Wire.auto[Features]
 

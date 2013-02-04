@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.actions.Submit
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -102,7 +101,7 @@ class AssignmentController extends CourseworkController {
 		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
 			throw new SubmitPermissionDeniedException(assignment)
 		}
-		
+				
 		/*
 		 * Note the multiple transactions. The submission transaction should commit before the confirmation email
 		 * command runs, to ensure that it has fully committed successfully. So don't wrap this method in an outer transaction

@@ -8,7 +8,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
 import org.springframework.web.method.support.InvocableHandlerMethod
-import uk.ac.warwick.tabula.permissions.PermissionsCheckingDataBinderFactory
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingDataBinderFactory
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
 
 /**

@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
 import scala.reflect.BeanProperty
-import javax.persistence._
-import uk.ac.warwick.tabula.actions.Viewable
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.AcademicYear
+
 import org.springframework.util.StringUtils
+
+import javax.persistence._
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
 
 sealed abstract class AddressType(val dbValue: String)
 case object Home extends AddressType("H")
@@ -26,7 +22,7 @@ object AddressType {
 }
 
 @Entity
-class Address extends GeneratedId with Viewable with ToString {
+class Address extends GeneratedId with ToString {
 	@BeanProperty var line1: String = _
 	@BeanProperty var line2: String = _
 	@BeanProperty var line3: String = _

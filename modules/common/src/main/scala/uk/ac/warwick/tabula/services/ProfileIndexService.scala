@@ -41,6 +41,8 @@ import org.apache.lucene.search.BooleanQuery
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.index.Term
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.Logging
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -55,7 +57,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
-	
+
 	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
 		if (departments.isEmpty && !isGod) Seq()
 		else try {
@@ -68,9 +70,12 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 			if (!isGod) {
 				val deptQuery = new BooleanQuery
-				for (dept <- departments)
+				for (dept <- departments) {
+					// TODO remove this first TermQuery when fully reindexed, as it'll be redundant then
 					deptQuery.add(new TermQuery(new Term("department", dept.code)), Occur.SHOULD)
-
+					deptQuery.add(new TermQuery(new Term("touchedDepartments", dept.code)), Occur.SHOULD)
+				}
+				
 				bq.add(deptQuery, Occur.MUST)
 			}
 			
@@ -105,7 +110,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 }
 
 @Component
-class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods {	
+class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods with Logging {
 	
 	// largest batch of items we'll load in at once.
 	final override val MaxBatchSize = 100000
@@ -131,10 +136,10 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		"touchedDepartments"
 	)
 	
-	override val analyzer = {
+	private def makeAnalyzer(forIndexing: Boolean) = {
 		val defaultAnalyzer = new KeywordAnalyzer()
 		
-		val nameAnalyzer = new ProfileAnalyzer(false)
+		val nameAnalyzer = new ProfileAnalyzer(forIndexing)
 		val nameMappings = nameFields.map(field => (field -> nameAnalyzer))
 		
 		val whitespaceAnalyzer = new WhitespaceAnalyzer(LuceneVersion)
@@ -145,16 +150,8 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		new PerFieldAnalyzerWrapper(defaultAnalyzer, mappings)
 	}
 	
-	override lazy val indexAnalyzer = {
-		val defaultAnalyzer = new KeywordAnalyzer()
-		
-		val nameAnalyzer = new ProfileAnalyzer(true)
-		val nameMappings = nameFields.map(field => (field -> nameAnalyzer))
-		
-		val mappings = (nameMappings).toMap[String, Analyzer].asJava
-		
-		new PerFieldAnalyzerWrapper(defaultAnalyzer, mappings)
-	}
+	override val analyzer = makeAnalyzer(false)	
+	override lazy val indexAnalyzer = makeAnalyzer(true)
 	
 	override val IdField = "universityId"
 	override def getId(item: Member) = item.universityId
@@ -178,7 +175,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "firstName", Option(item.firstName))
 		indexTokenised(doc, "lastName", Option(item.lastName))
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
-		indexTokenised(doc, "fullName", Option(item.fullName))
+		indexTokenised(doc, "fullName", item.fullName)
 		
 		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
 		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
@@ -204,6 +201,11 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 			doc add seqField(fieldName, values)
 	}
 	
+	def indexByDateAndDepartment(startDate: DateTime, dept: Department) = {
+		val deptMembers = dao.listUpdatedSince(startDate, dept, MaxBatchSize)
+		logger.debug("Indexing " + deptMembers.size + " members with home department " + dept.code)
+		indexItems(deptMembers)
+	}
 }
 
 class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {

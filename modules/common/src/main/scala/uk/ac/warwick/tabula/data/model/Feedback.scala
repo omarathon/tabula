@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
-import org.joda.time.DateTime
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
+import org.joda.time.DateTime
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.actions.Deleteable
-import uk.ac.warwick.tabula.actions.Viewable
 import uk.ac.warwick.tabula.helpers.ArrayList
-import scala.Some
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 
 @Entity @AccessType("field")
-class Feedback extends GeneratedId with Viewable with Deleteable {
+class Feedback extends GeneratedId with PermissionsTarget {
 
 	def this(universityId: String) {
 		this()
@@ -23,6 +21,8 @@ class Feedback extends GeneratedId with Viewable with Deleteable {
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@BeanProperty var assignment: Assignment = _
+	
+	def permissionsParents = Seq(Option(assignment)).flatten
 
 	var uploaderId: String = _
 

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.actions.Participate
+import uk.ac.warwick.tabula.permissions._
 
 
 case class UpstreamGroupOption(
@@ -30,8 +30,6 @@ case class UpstreamGroupOption(
  * Common behaviour
  */
 abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment] with SharedAssignmentProperties {
-	
-	PermissionsCheck(Participate(module))
 
 	var service = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]

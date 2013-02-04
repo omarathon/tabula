@@ -37,6 +37,7 @@ abstract class BaseSysadminController extends BaseController {
 class ReindexForm {
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var from: DateTime = _
+	@BeanProperty var deptCode: String = _
 }
 
 @Controller

@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.coursework.commands.feedback.RateFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.actions.View
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.model.Assignment

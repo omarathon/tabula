@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
+import scala.collection.JavaConversions._
 import org.hibernate.SessionFactory
 import model.Module
 import org.hibernate.`type`._
@@ -7,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import model.Department
+import org.hibernate.criterion.Order
 
 trait ModuleDao {
+	def allModules: Seq[Module]
 	def saveOrUpdate(module: Module)
 	def getByCode(code: String): Option[Module]
 	def findByParticipant(userId: String): Seq[Module]
@@ -17,6 +20,11 @@ trait ModuleDao {
 
 @Repository
 class ModuleDaoImpl extends ModuleDao with Daoisms {
+
+	def allModules: Seq[Module] =
+		session.newCriteria[Module]
+			.addOrder(Order.asc("code"))
+			.list
 
 	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
 

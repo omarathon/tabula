@@ -1,15 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.collection.JavaConverters._
 import reflect.BeanProperty
 import javax.persistence._
 import org.hibernate.annotations.AccessType
 import scala.Array
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 
 @Entity @AccessType("field")
-class FeedbackTemplate extends GeneratedId {
+class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 
 	@BeanProperty var name:String = _
 	@BeanProperty var description:String = _
@@ -24,6 +26,12 @@ class FeedbackTemplate extends GeneratedId {
 
 	@OneToMany(mappedBy = "feedbackTemplate", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BeanProperty var assignments: JList[Assignment] = ArrayList()
+	
+	/* For permission parents, we include both the department and any assignments linked to this template */
+	def permissionsParents = Option(assignments) match { 
+		case Some(assignments) => Seq(Option(department)).flatten ++ assignments.asScala
+		case None => Seq(Option(department)).flatten
+	}
 
 	def countLinkedAssignments = Option(assignments) match { case Some(a) => a.size()
 		case None => 0
