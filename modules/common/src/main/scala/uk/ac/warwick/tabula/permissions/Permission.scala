@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.permissions
 
-sealed trait Permission
+sealed trait Permission {
+	def getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
+}
 sealed trait ScopelessPermission extends Permission
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
@@ -24,6 +26,9 @@ object Permissions {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
 		}
 	}
+	
+	def shortName(clazz: Class[_ <: Permission])
+		= clazz.getName.substring(Permissions.getClass.getName.length, clazz.getName.length - 1).replace('$', '.')
 	
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission

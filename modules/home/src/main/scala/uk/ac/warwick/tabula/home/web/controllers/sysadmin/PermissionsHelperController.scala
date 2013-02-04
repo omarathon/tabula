@@ -14,12 +14,16 @@ import scala.collection.JavaConverters._
 @RequestMapping(Array("/sysadmin/permissions-helper"))
 class PermissionsHelperController extends BaseSysadminController {
 	
+	validatesSelf[PermissionsHelperCommand]
+	
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: PermissionsHelperCommand, errors: Errors) =
 		Mav("sysadmin/permissions-helper/form").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid form: PermissionsHelperCommand, errors: Errors) = {
+		println(errors)
+		
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
@@ -32,13 +36,10 @@ class PermissionsHelperController extends BaseSysadminController {
 	val permissionReflections = new Reflections(Permissions.getClass.getPackage.getName)
 	
 	@ModelAttribute("allPermissions") def allPermissions = {
-		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {
-			def shortName(clazz: Class[_ <: Permission])
-				= clazz.getName.substring(Permissions.getClass.getName.length, clazz.getName.length - 1).replace('$', '.')
-			
+		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {			
 			// Remove prefix and strip trailing $, then change $ to .
-			val shortName1 = shortName(clazz1)
-			val shortName2 = shortName(clazz2)
+			val shortName1 = Permissions.shortName(clazz1)
+			val shortName2 = Permissions.shortName(clazz2)
 			
 			// Sort by number of dots, then alphabetically
 			val dots1: Int = shortName1.split('.').length

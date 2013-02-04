@@ -4,13 +4,18 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import scala.annotation.tailrec
+import scala.reflect.BeanProperty
+import scala.collection.mutable.LinkedHashMap
 
-abstract class Role {
+abstract class Role(@BeanProperty val scope: Option[PermissionsTarget]) {
 
-	private var permissions: Map[Permission, Option[PermissionsTarget]] = Map()
+	private var permissions: LinkedHashMap[Permission, Option[PermissionsTarget]] = LinkedHashMap()
 	private var roles: Set[Role] = Set()
 	
+	def getName = getClass.getSimpleName
+	
 	def explicitPermissions = permissions
+	def explicitPermissionsAsList = permissions.toList
 	def subRoles = roles
 		
 	def GrantsPermission(scopelessPermissions: ScopelessPermission*) = grant(None, scopelessPermissions)
@@ -26,4 +31,8 @@ abstract class Role {
 	
 }
 
-abstract class BuiltInRole extends Role {}
+abstract class BuiltInRole(scope: Option[PermissionsTarget]) extends Role(scope) {
+	def this(scope: PermissionsTarget) {
+		this(Option(scope))
+	}
+}

@@ -66,7 +66,7 @@ class SecurityService extends Logging {
 			
 	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = Some(
 		roles exists { role =>
-			checkPermissions(role.explicitPermissions, user, permission, scope) == Allow ||
+			checkPermissions(role.explicitPermissions.toMap, user, permission, scope) == Allow ||
 			checkRoles(role.subRoles, user, permission, scope) == Allow
 		}
 	)
