@@ -118,7 +118,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		// then by student properties
 		val list = session.createQuery("""
 			select
-				distinct sr, m
+				distinct sr
 			from
 				StudentRelationship sr,
 				Member m
@@ -131,12 +131,12 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
-				sr.agent, m.groupName, m.yearOfStudy, m.route, m.lastName
+				sr.agent
 		""")
 			.setEntity("department", department)
 			.setString("relationshipType", relationshipType.dbValue)
-			.list.asInstanceOf[JList[Array[Object]]]
+			.list.asInstanceOf[JList[StudentRelationship]]
 		
-		list map (x => x(0).asInstanceOf[StudentRelationship])
+		list
 	}
 }
