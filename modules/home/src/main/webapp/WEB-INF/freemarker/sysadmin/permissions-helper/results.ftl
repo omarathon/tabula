@@ -1,7 +1,7 @@
 <h1>Permissions helper - results</h1>
 
 <#macro debugPermission permission scope={}>
-	<#assign isTarget=permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || scope == permissionsHelperCommand.scope))>
+	<#assign isTarget=permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == permissionsHelperCommand.scope)))>
 
 	<#if isTarget><strong></#if>
 	

@@ -17,7 +17,7 @@
 			
 			<#if originalException.scope??>
 				<input type="hidden" name="scopeType" value="${originalException.scope.class.name}" />
-				<input type="hidden" name="scope" value="${originalException.scope}" />
+				<input type="hidden" name="scope" value="${originalException.scope.id}" />
 			</#if>
 				
 			<input type="hidden" name="permission" value="${originalException.permission.name}" />

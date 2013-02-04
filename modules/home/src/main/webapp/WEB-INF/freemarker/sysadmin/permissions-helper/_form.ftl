@@ -32,7 +32,7 @@
 						<optgroup label="${group}">
 					</#if>
 						<#list allPermissions[group] as permission>
-							<@f.option value=permission._1 displayValue=permission._2 />
+							<@f.option value="${permission._1}" label=permission._2 />
 						</#list>
 					</optgroup>
 				</#list>

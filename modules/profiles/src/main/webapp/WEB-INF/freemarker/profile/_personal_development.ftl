@@ -10,7 +10,7 @@
 		<#else>
 			<div class="tutor">
 				<div class="photo">
-					<img src="<@routes.photo profile.personalTutor />" />
+					<img src="<@routes.tutorPhoto profile />" />
 				</div>
 				<h5>${profile.personalTutor.fullName}</h5>
 				<#if profile.personalTutor.email??>

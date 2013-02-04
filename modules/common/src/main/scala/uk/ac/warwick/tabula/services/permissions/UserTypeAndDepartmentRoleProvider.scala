@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StudentRole
+import uk.ac.warwick.tabula.roles.UniversityMemberRole
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
@@ -21,12 +22,12 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	def getRolesFor(user: CurrentUser): Seq[Role] = {
 		if (user.realUser.isLoggedIn){
 			profileService.getMemberByUserId(user.apparentId, true) match {
-				case Some(member) => member.userType match {
+				case Some(member) => Seq(UniversityMemberRole(member)) ++ (member.userType match {
 					case Student => member.touchedDepartments map { StudentRole(_) }
 					case Staff => member.affiliatedDepartments map { StaffRole(_) }
 					case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
-					case Other => member.affiliatedDepartments map { UniversityMemberRole(_) }
-				}
+					case Other => Seq()
+				})
 				case None => departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 					case Some(department) =>
 						if (user.isStaff) Seq(StaffRole(department))
@@ -37,7 +38,6 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 			}
 		} else Seq()
 	}
-
 	
 	def rolesProvided = Set(classOf[StudentRole], classOf[StaffRole], classOf[UniversityMemberRole])
 	
