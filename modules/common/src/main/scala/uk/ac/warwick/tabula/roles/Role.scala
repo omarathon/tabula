@@ -13,6 +13,7 @@ abstract class Role(@BeanProperty val scope: Option[PermissionsTarget]) {
 	private var roles: Set[Role] = Set()
 	
 	def getName = getClass.getSimpleName
+	def isScoped = scope.isDefined
 	
 	def explicitPermissions = permissions
 	def explicitPermissionsAsList = permissions.toList

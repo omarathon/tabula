@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.system
+import org.springframework.core.convert.TypeDescriptor
 
 import org.springframework.core.convert.converter.GenericConverter
-import org.springframework.core.convert.TypeDescriptor
-import java.{ util => j }
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair
+
 import com.google.common.collect.Sets._
+
+import java.{ util => j }
 
 /**
  * A Spring GenericConverter that can convert both to and from two types.

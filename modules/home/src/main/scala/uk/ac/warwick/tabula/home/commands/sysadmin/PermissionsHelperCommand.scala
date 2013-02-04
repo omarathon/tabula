@@ -29,17 +29,19 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	
 	var conversionService = Wire.auto[ConversionService]
 	
-	@BeanProperty var user: User = _
-	@BeanProperty var scopeType: Class[_ <: PermissionsTarget] = _
-	@BeanProperty var scope: String = _
-	@BeanProperty var permission: Permission = _
+	@BeanProperty var user: User = null
+	@BeanProperty var scopeType: Class[_ <: PermissionsTarget] = null
+	@BeanProperty var scope: String = null
+	@BeanProperty var permission: Permission = null
 	
 	private def resolveScope() = {
-		if (!conversionService.canConvert(classOf[String], scopeType)) {
+		if (scopeType == null) {
+			None
+		} else if (!conversionService.canConvert(classOf[String], scopeType)) {
 			logger.warn("Couldn't convert to " + scopeType)
 			None
 		} else try {
-			Some(conversionService.convert(scope, scopeType))
+			Option(conversionService.convert(scope, scopeType))
 		} catch {
 			case e: ConversionException => {
 				logger.info("Couldn't convert " + scope + " to " + scopeType)
@@ -55,12 +57,12 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 		
 		if (scopeType != null && !conversionService.canConvert(classOf[String], scopeType)) {
 			errors.rejectValue("scopeType","permissionsHelper.scopeType.invalid")
-		} else if (scopeType != null && StringUtils.hasText(scope) && resolveScope().isEmpty) {
+		} else if (scopeType != null && resolveScope().isEmpty) {
 			// Check that we can resolve the scope
 			errors.rejectValue("scope","permissionsHelper.scope.invalid")
 		}
 		
-		if (permission == null || permission.getName == "Permission") {
+		if (permission != null && permission.getName == "Permission") {
 			errors.rejectValue("permission","permissionsHelper.permission.invalid")
 		}
 	}
@@ -68,15 +70,21 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	def applyInternal() = {
 		val currentUser = new CurrentUser(user, user)
 		
-		val permissions = roleService.getExplicitPermissionsFor(currentUser, null)
-		val roles = roleService.getRolesFor(currentUser, null)
+		val scope = resolveScope() orNull
+		val scopeMissing = scope == null
+		val scopeMismatch = permission != null && (permission.isScoped == scopeMissing)
 		
-		val canDo = securityService.can(currentUser, permission, null)
+		val permissions = roleService.getExplicitPermissionsFor(currentUser, scope)
+		val roles = roleService.getRolesFor(currentUser, scope)
+		
+		val canDo = securityService.can(currentUser, permission, scope)
 		
 		PermissionHelperResult(
 			canDo = canDo,
 			permissions = permissions.toList,
-			roles = roles.toList
+			roles = roles.toList,
+			scopeMismatch = scopeMismatch,
+			scopeMissing = scopeMissing
 		)
 	}
 	
@@ -85,5 +93,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 case class PermissionHelperResult(
 	canDo: Boolean,
 	permissions: List[(Permission, Option[PermissionsTarget])],
-	roles: List[Role]
+	roles: List[Role],
+	scopeMismatch: Boolean,
+	scopeMissing: Boolean
 )

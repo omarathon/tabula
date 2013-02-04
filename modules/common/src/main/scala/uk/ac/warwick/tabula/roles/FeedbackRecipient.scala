@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 /*
  * Allow students to receive their own feedback
  */
-case class FeedbackRecipient(feedback: model.Feedback) extends BuiltInRole {
+case class FeedbackRecipient(feedback: model.Feedback) extends BuiltInRole(feedback) {
 	
 	GrantsPermissionFor(feedback, 
 		Feedback.Read,

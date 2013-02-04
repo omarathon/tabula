@@ -111,6 +111,8 @@ To not bind:
 	<#if status.actualValue??>
 		<#if list && status.actualValue?is_sequence>
 			<#assign ids=status.actualValue />
+		<#elseif (status.actualValue.userId?is_string)!false>
+			<#assign ids=[status.actualValue.userId] />
 		<#elseif status.actualValue?is_string>
 			<#assign ids=[status.actualValue] />
 		</#if>

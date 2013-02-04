@@ -9,6 +9,7 @@
 
 <div class="span8">
 <h2>Normal regular stuff</h2>
+<p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-lock"></i> Permissions helper</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/departments/" />">List all departments in the system</a></p>
 <p><a class="btn" href="<@url page="/admin/masquerade/" />"><i class="icon-eye-open"></i> Masquerade</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/audit/list" />">List audit events</a></p>

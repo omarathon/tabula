@@ -2,8 +2,12 @@ package uk.ac.warwick.tabula.permissions
 
 sealed trait Permission {
 	def getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
+	
+	def isScoped = true
 }
-sealed trait ScopelessPermission extends Permission
+sealed trait ScopelessPermission extends Permission {
+	override def isScoped = false
+}
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
 object Permissions {

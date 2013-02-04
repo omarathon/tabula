@@ -1,18 +1,18 @@
 <@f.form action="${url('/sysadmin/permissions-helper')}" cssClass="form-horizontal" commandName="permissionsHelperCommand">
 	<fieldset>
 		<@form.labelled_row "user" "User ID">
-  			<@form.userpicker name="user" />
+  			<@form.userpicker path="user" />
 		</@form.labelled_row>
 		
 		<@form.labelled_row "scopeType" "Permission scope type">
 			<label class="radio">
-				<input type="radio" name="${status.expression}" value="" <#if !status.value??>checked</#if> /> 
+				<input type="radio" name="${status.expression}" value="" <#if !status.value?? || status.value?is_string>checked</#if> /> 
 				None
 			</label>
 		
 			<#list allPermissionTargets as targetClass>
 				<label class="radio">
-					<input type="radio" name="${status.expression}" value="${targetClass.name}" <#if status.value?? && status.value = targetClass.name>checked</#if> /> 
+					<@f.radiobutton path="scopeType" value="${targetClass.name}" />
 					${targetClass.simpleName}
 				</label>
 			</#list>
@@ -23,7 +23,7 @@
 		</@form.labelled_row>
 		
 		<@form.labelled_row "permission" "Permission">
-			<select name="${status.expression}">
+			<@f.select path="permission">
 				<option value="">Show all</option>
 				<#list allPermissions?keys as group>
 					<#if group == "">
@@ -32,11 +32,11 @@
 						<optgroup label="${group}">
 					</#if>
 						<#list allPermissions[group] as permission>
-							<option value="${permission._1}"<#if status.value.name == permission._1> selected</#if>>${permission._2}</option>
+							<@f.option value=permission._1 displayValue=permission._2 />
 						</#list>
 					</optgroup>
 				</#list>
-			</select>
+			</@f.select>
 		</@form.labelled_row>
 	</fieldset>
 	
