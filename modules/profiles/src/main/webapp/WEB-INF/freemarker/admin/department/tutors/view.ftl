@@ -29,7 +29,7 @@
 								${tutor.fullName}</h4>
 							</#if>
 							
-							<section id="${tuteeKey}" class="collapse">
+							<div id="${tuteeKey}" class="collapse">
 								<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
 									<thead>
 										<tr>
@@ -55,7 +55,7 @@
 										</#list>
 									</tbody>
 								</table>
-							</section>
+							</div>
 						</td>
 					</tr>
 				</tbody>
@@ -73,9 +73,9 @@
 		sortList: [[1,0], [2,0], [3,0]]
 	});
 	
-	$("#tutors").on("hidden", "section", function() {
+	$("#tutors").on("hidden", "div", function() {
 		$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").prop("title", "Expand");
-	}).on("shown", "section", function() {
+	}).on("shown", "div", function() {
 		$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").prop("title", "Collapse");
 	});
 })(jQuery);
