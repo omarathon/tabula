@@ -23,6 +23,7 @@ trait MemberDao {
 	def getByUniversityId(universityId: String): Option[Member]
 	def getBySprCode(sprCode: String): Option[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
+	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
