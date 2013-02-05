@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.permissions._
 import org.reflections.Reflections
 import scala.collection.JavaConverters._
+import org.reflections.vfs.Vfs
+import java.net.URL
+import org.springframework.core.io.VfsUtils
 
 @Controller
 @RequestMapping(Array("/sysadmin/permissions-helper"))
@@ -31,7 +34,8 @@ class PermissionsHelperController extends BaseSysadminController {
 		}
 	}
 	
-	lazy val reflections = Reflections.collect()
+	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType())
+	def reflections = Reflections.collect()
 	
 	@ModelAttribute("allPermissions") def allPermissions = {
 		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {			
@@ -78,4 +82,20 @@ class PermissionsHelperController extends BaseSysadminController {
 			.sortWith(sortFn)
 	}
 
+}
+
+class SillyJbossVfsUrlType extends Vfs.UrlType {
+	val delegates = List(Vfs.DefaultUrlTypes.jarFile, Vfs.DefaultUrlTypes.jarUrl)
+	
+	def cleanUrl(input: URL) = {
+		val url = 
+			if (input.getProtocol.startsWith("vfszip")) input.toString().replace("vfszip:", "file:")
+			else if (input.getProtocol.startsWith("vfsfile")) input.toString().replace("vfsfile:", "file:")
+			else input.toString()
+			
+		new URL(url.replace(".jar/", ".jar!/"))
+	}
+	
+	def matches(url: URL): Boolean = delegates.exists(_.matches(cleanUrl(url)))
+    def createDir(url: URL) = delegates.find(_.matches(cleanUrl(url))) map { _.createDir(cleanUrl(url)) } orNull
 }
