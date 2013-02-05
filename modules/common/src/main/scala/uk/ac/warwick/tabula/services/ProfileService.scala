@@ -26,6 +26,7 @@ trait ProfileService {
 	def save(member: Member)
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, userTypes: Set[MemberUserType]): Seq[Member]
@@ -42,6 +43,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
+	}
+	
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
+		memberDao.getAllByUserId(userId, disableFilter)
 	}
 	
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
