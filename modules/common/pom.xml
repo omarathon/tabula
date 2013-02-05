@@ -44,6 +44,21 @@
 		</testResources>
 
 		<plugins>
+			<!-- Collect reflections information -->
+			<plugin>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections-maven</artifactId>
+				<version>0.9.8</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>reflections</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+		
 			<!-- Scala support in maven -->
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>

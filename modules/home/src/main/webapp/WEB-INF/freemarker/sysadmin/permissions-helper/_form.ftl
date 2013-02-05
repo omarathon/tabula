@@ -1,7 +1,7 @@
 <@f.form action="${url('/sysadmin/permissions-helper')}" cssClass="form-horizontal" commandName="permissionsHelperCommand">
 	<fieldset>
 		<@form.labelled_row "user" "User ID">
-  			<@form.userpicker path="user" />
+  			<@form.userpicker path="user" object=true />
 		</@form.labelled_row>
 		
 		<@form.labelled_row "scopeType" "Permission scope type">

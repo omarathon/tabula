@@ -31,7 +31,7 @@ class PermissionsHelperController extends BaseSysadminController {
 		}
 	}
 	
-	val permissionReflections = new Reflections(Permissions.getClass.getPackage.getName)
+	lazy val reflections = Reflections.collect()
 	
 	@ModelAttribute("allPermissions") def allPermissions = {
 		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {			
@@ -56,7 +56,7 @@ class PermissionsHelperController extends BaseSysadminController {
 			parentName
 		}
 		
-		permissionReflections
+		reflections
 			.getSubTypesOf(classOf[Permission])
 			.asScala.toList
 			.filter {_.getName.substring(Permissions.getClass.getName.length).indexOf('$') != -1}
@@ -67,14 +67,12 @@ class PermissionsHelperController extends BaseSysadminController {
 				p => ((if (key == "") "" else key + ".") + p.toString(), p.toString()) 
 			})}
 	}
-		
-	val permissionTargetReflections = new Reflections("uk.ac.warwick.tabula.data.model")
 	
 	@ModelAttribute("allPermissionTargets") def allPermissionTargets = {
 		def sortFn(clazz1: Class[_ <: PermissionsTarget], clazz2: Class[_ <: PermissionsTarget]) =
 			clazz1.getSimpleName < clazz2.getSimpleName
 		
-		permissionTargetReflections
+		reflections
 			.getSubTypesOf(classOf[PermissionsTarget])
 			.asScala.toList
 			.sortWith(sortFn)
