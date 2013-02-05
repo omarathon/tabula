@@ -28,3 +28,14 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Tree
 		TreeMap(groupedTutorRelationships.toSeq:_*)
 	}
 }
+
+class ViewPersonalTuteesCommand(val currentMember: Member) extends Command[Seq[StudentRelationship]] with Unaudited {
+	
+	PermissionCheck(Permissions.Profiles.Read, currentMember)
+
+	var profileService = Wire.auto[ProfileService]
+	
+	override def applyInternal(): Seq[StudentRelationship] = transactional() {
+		profileService.listStudentRelationshipsWithMember(PersonalTutor, currentMember)
+	}
+}

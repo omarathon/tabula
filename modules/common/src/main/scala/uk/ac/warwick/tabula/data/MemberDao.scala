@@ -31,6 +31,7 @@ trait MemberDao {
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
 }
 
 @Repository
@@ -132,9 +133,34 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
-				sr.agent
+				sr.agent, sr.targetSprCode
 		""")
 			.setEntity("department", department)
+			.setString("relationshipType", relationshipType.dbValue)
+			.list.asInstanceOf[JList[StudentRelationship]]
+		
+		list
+	}
+
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = {
+		val list = session.createQuery("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				Member m
+			where
+				sr.agent = m.universityId
+			and
+				sr.relationshipType = :relationshipType
+			and
+				m = :agent
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.targetSprCode
+		""")
+			.setEntity("agent", agent)
 			.setString("relationshipType", relationshipType.dbValue)
 			.list.asInstanceOf[JList[StudentRelationship]]
 		
