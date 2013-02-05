@@ -123,7 +123,9 @@ Publications: ${r.publicationOverlap}%)
 			<#if assignment.wordCountField??>
 				<th title="Declared word count">Words</th>
 			</#if>
-			<th>First Marker</th>
+			<#if assignment.markScheme??>
+				<th>First Marker</th>
+			</#if>
 			<#if assignment.collectMarks>
 				<th>Mark</th>
 			</#if>
@@ -146,7 +148,7 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
-				<td></td>
+				<#if assignment.markScheme??><td></td></#if>
 				<#if assignment.collectMarks><td></td></#if>
 				<td></td><td></td><td></td><td></td>
 				<#if hasOriginalityReport><td></td></#if>
@@ -203,7 +205,7 @@ Publications: ${r.publicationOverlap}%)
 					</td>
 				</#if>
 				<td>
-					<#if submission.assignment??>${submission.firstMarker!""}</#if>
+					<#if submission.assignment?? && submission.assignment.markScheme??>${submission.firstMarker!""}</#if>
 				</td>
 				 <#if assignment.collectMarks>
 					<td class="mark">

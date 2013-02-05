@@ -21,6 +21,7 @@ trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
@@ -40,8 +41,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	def getByUniversityId(universityId: String) = 
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
-	
-	def getByUserId(userId: String, disableFilter: Boolean = false) = {
+		
+	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter) 
@@ -49,13 +50,19 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				
 			session.newCriteria[Member]
 					.add(is("userId", userId.trim.toLowerCase))
+					.add(disjunction()
+						.add(is("inUseFlag", "Active"))
+						.add(like("inUseFlag", "Inactive - Starts %"))
+					)
 					.addOrder(asc("universityId"))
-					.list.headOption
+					.seq
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
 		}
 	}
+	
+	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
 	
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = 
 		session.newCriteria[Member]

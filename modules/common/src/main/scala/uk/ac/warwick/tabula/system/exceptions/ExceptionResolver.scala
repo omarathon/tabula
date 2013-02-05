@@ -22,6 +22,8 @@ import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
+import uk.ac.warwick.tabula.SubmitPermissionDeniedException
+import uk.ac.warwick.tabula.PermissionsError
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -73,7 +75,10 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		e match {
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request)
-			case permDenied: PermissionDeniedException if !loggedIn => RedirectToSignin()
+			
+			// TAB-411 also redirect to signin for submit permission denied if not logged in
+			case permDenied: PermissionsError if !loggedIn => RedirectToSignin()
+			
 			case exception: Throwable => handle(exception, request)
 			case _ => handleNull
 		}

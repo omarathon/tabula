@@ -4,14 +4,17 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class StaffRole(department: model.Department) extends BuiltInRole {
-	GrantsRole(UniversityMemberRole(department))
+case class StaffRole(department: model.Department) extends BuiltInRole(department) {
+	GrantsPermission(
+		UserPicker
+	)
 	
 	GrantsGlobalPermission(
 		Profiles.Search
 	)
 	
 	GrantsPermissionFor(department,
-		Profiles.Read
+		Profiles.Read,
+		Profiles.PersonalTutor.Read
 	)
 }

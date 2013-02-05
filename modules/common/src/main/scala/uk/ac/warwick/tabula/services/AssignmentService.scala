@@ -30,6 +30,8 @@ trait AssignmentService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission]
 	def getSubmission(id: String): Option[Submission]
+	
+	def getExtensionById(id: String): Option[Extension]
 
 	def delete(submission: Submission): Unit
 
@@ -164,6 +166,8 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		// (i.e. when a student is resubmitting work). [HFC-385#comments]
 		session.flush()
 	}
+	
+	def getExtensionById(id: String) = getById[Extension](id)
 
 	def deleteFormField(field: FormField) {
 		session.delete(field)

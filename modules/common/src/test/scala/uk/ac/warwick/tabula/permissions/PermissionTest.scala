@@ -16,4 +16,10 @@ class PermissionTest extends TestBase {
 		Permissions.of("Spank")
 	}
 	
+	@Test def name {
+		Permissions.Assignment.Archive.getName should be ("Assignment.Archive")
+		Permissions.GodMode.getName should be ("GodMode")
+		Permissions.of("Module.Read").getName should be ("Module.Read")
+	}
+	
 }

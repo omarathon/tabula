@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role]
 	
-	def rolesProvided: Set[Class[R] forSome { type R <: Role }]
+	def rolesProvided: Set[Class[_ <: Role]]
 }
 
 trait ScopelessRoleProvider extends RoleProvider {

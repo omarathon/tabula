@@ -40,6 +40,36 @@ class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile
 
 }
 
+class ViewPersonalTutorPhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
+	
+	PermissionCheck(Permissions.Profiles.Read, member)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member)
+	
+	private val DefaultPhoto = new DefaultPhoto
+	private var fileFound: Boolean = _
+	
+	override def applyInternal() = {
+		val attachment = member.personalTutor match {
+			case member: Member => Option(member.photo) map { a => new Photo(a) } match {
+				case Some(photo) => photo.inputStream match {
+					case null => DefaultPhoto
+					case _ => photo
+				}
+				case None => DefaultPhoto
+			}
+			case _ => DefaultPhoto
+		}
+		
+		if (callback != null) callback(attachment)
+		
+		attachment
+	}
+	
+	override def describe(d: Description) = d.member(member)
+	override def describeResult(d: Description) { d.property("fileFound", fileFound) }
+
+}
+
 class Photo(attachment: FileAttachment) extends RenderableAttachment(attachment: FileAttachment) {
 	override def contentType = "image/jpeg"
 }

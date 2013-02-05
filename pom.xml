@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>26</version>
+	<version>27</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -623,6 +623,25 @@
 										</versionRange>
 										<goals>
 											<goal>compress</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.reflections
+										</groupId>
+										<artifactId>
+											reflections-maven
+										</artifactId>
+										<versionRange>
+											[0.9.8,)
+										</versionRange>
+										<goals>
+											<goal>reflections</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
