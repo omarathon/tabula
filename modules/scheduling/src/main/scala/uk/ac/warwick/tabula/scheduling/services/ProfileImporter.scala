@@ -153,7 +153,8 @@ object ProfileImporter {
 			entry_qual.name as highest_qualification_on_entry,
 			last_institute.name as last_institute,
 			last_school.name as last_school,
-			details.year_commenced_degree as year_commenced_degree
+			details.year_commenced_degree as year_commenced_degree,
+			enrolment_status as enrolment_status
 
 		from member m
 	

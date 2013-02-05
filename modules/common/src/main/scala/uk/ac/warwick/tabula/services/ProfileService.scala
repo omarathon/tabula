@@ -5,7 +5,6 @@ import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
-
 import javax.persistence.Entity
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
@@ -18,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 /**
  * Service providing access to members and profiles.
@@ -34,6 +34,8 @@ trait ProfileService {
 	def findCurrentRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
+	def getTutorName(student: Member): String
+
 }
 
 @Service(value = "profileService")
@@ -78,6 +80,24 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationships(relationshipType, targetSprCode)
+	}
+	
+	def getTutorName(student: Member): String = {
+		val sprCode: String = student.sprCode
+		val currentRelationship = findCurrentRelationship(PersonalTutor, student.sprCode)
+		currentRelationship match {
+			case None => ""
+			case Some(rel) => {
+				getMemberByUniversityId(rel.agent) match {
+					case None => ""
+					case Some(mem) => 
+						mem.fullName match {
+							case None => ""
+							case Some(name) => name
+						}
+				}
+			}
+		}
 	}
 	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {

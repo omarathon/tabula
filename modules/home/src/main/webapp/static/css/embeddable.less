@@ -1042,4 +1042,57 @@ h1.with-settings {
 		
 		form { margin: 0; }
 	}
+	
+	#container .tutor-search {
+		.input-append .btn { margin-top: 1px; }
+		
+		@searchFontSize: @baseFontSize * 1.5;
+		@searchLineHeight: @baseLineHeight * 1.5;
+		
+		.input-append {
+			margin-bottom: 0;
+			position: relative;
+			
+			div.spinner-container {
+				position: absolute;
+				line-height: 40px;
+				height: 40px;
+				width: 40px;
+				top: 1px;
+				left: 330px;
+				z-index: 10;
+			}
+		}
+		
+		input[type="text"] {
+			height: @searchLineHeight;
+			margin-bottom: 0;
+			font-size: @searchFontSize;
+			line-height: @searchLineHeight;
+			width: 356px;
+		}
+		
+		input.btn {
+			font-size: @searchFontSize;
+			line-height: @searchLineHeight;
+		}
+		
+		.dropdown-menu {
+			@import "bootstrap/mixins.less";
+		
+			width: 462px;
+			
+			h2 { margin-bottom: 0; }
+			.photo { max-height: 50px; }
+			span.description { white-space: normal; }
+			
+			.active > a, .active > a:hover {
+				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
+			}
+		}
+		
+		form { margin: 0; }
+	}	
+	
+	
 }

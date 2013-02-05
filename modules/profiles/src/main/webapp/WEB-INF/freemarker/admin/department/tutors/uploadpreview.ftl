@@ -1,5 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
 	<#assign commandName="uploadPersonalTutorsCommand" />
