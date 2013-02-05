@@ -23,11 +23,6 @@ class PermissionsHelperControllerTest extends TestBase {
 		
 		urlType.matches(url) should be (true)
 	}
-	
-	@Test def argh() {		
-		val urlType = new SillyJbossVfsUrlType()
-		urlType.createDir(new URL("vfszip:/opt/jboss-5.1.0-GA/server/tabula/deploy/home.war/WEB-INF/lib/common-27-SNAPSHOT.jar/")) should not be (null)
-	}
 
 }
 
