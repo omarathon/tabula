@@ -10,7 +10,8 @@ class PermissionsHelperControllerTest extends TestBase {
 	@Test def sillyUrlType() = {
 		val urlType = new SillyJbossVfsUrlType()
 		
-		val url = new URL("vfszip", "", -1, "/package/jboss-5.1.0/server/tabula-primary/deploy/home.war/WEB-INF/lib/common-27-SNAPSHOT.jar/", new VfsUrlHandler)
+		val url = new URL("vfszip", "", -1, "/package/jboss-5.1.0/server/tabula-secondary/deploy/home.war/WEB-INF/lib/common-27-SNAPSHOT.jar/", new VfsUrlHandler)
+		url.toString should be ("vfszip:/package/jboss-5.1.0/server/tabula-secondary/deploy/home.war/WEB-INF/lib/common-27-SNAPSHOT.jar/")
 		
 		urlType.matches(url) should be (true)
 	}
