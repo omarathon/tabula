@@ -84,6 +84,17 @@ class PermissionsHelperController extends BaseSysadminController {
 }
 
 class SillyJbossVfsUrlType extends Vfs.UrlType {
-	def matches(url: URL): Boolean = url.getProtocol().equals("vfszip")
-    def createDir(url: URL) = Vfs.DefaultUrlTypes.jarUrl.createDir(url)
+	val delegates = List(Vfs.DefaultUrlTypes.jarFile, Vfs.DefaultUrlTypes.jarUrl)
+	
+	private def cleanUrl(input: URL) = {
+		val url = 
+			if (input.getProtocol.startsWith("vfszip:")) input.toString().replace("vfszip:", "file:")
+			else if (input.getProtocol.startsWith("vfsfile:")) input.toString().replace("vfsfile:", "file:")
+			else input.toString()
+			
+		new URL(url.replace(".jar/", ".jar!/"))		
+	}
+	
+	def matches(url: URL): Boolean = delegates.exists(_.matches(cleanUrl(url)))
+    def createDir(url: URL) = delegates.find(_.matches(cleanUrl(url))) map { _.createDir(cleanUrl(url)) } orNull
 }
