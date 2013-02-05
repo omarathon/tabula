@@ -2,6 +2,12 @@ package uk.ac.warwick.tabula
 
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.exceptions.UserError
+import uk.ac.warwick.tabula.data.model.Assignment
+
+/**
+ * Trait for matching any kind of permissions exception; mostly to force login for users who aren't logged in
+ */
+trait PermissionsError
 
 /**
  * Thrown by security when a user tries to do an action that
@@ -21,4 +27,11 @@ class PermissionDeniedException(
 	val user: CurrentUser,
 	val permission: Permission,
 	val scope: Any,
-	cause: Throwable = null) extends RuntimeException(cause) with UserError
+	cause: Throwable = null) extends RuntimeException(cause) with UserError with PermissionsError
+	
+/**
+ * Specific exception for when a student/person is not allowed to view
+ * the submission/feedback/info page for an assignment. It is just so the
+ * exception resolver can send it off to a specific error page.
+ */
+class SubmitPermissionDeniedException(assignment: Assignment) extends RuntimeException() with UserError with PermissionsError
