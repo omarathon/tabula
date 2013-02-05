@@ -1,5 +1,9 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#function sanitise text>
+	<#return text?lower_case?replace("[^a-z]", "", "r") />
+</#function>
+
 <#escape x as x?html>
 <div id="tutor-view">
 	<h1>View personal tutors for ${department.name}</h1>
@@ -9,44 +13,49 @@
 			<#list tutorRelationships?keys?sort as key>
 				<#assign tutor = tutorRelationships[key]?first.agentParsed />
 				<#assign tutees = tutorRelationships[key] />
+				<#assign tuteeKey = sanitise(key) + "-tutees" />
 				
-				<tbody id="${key}">
+				<tbody>
 					<tr>
 						<td>
+							<span class="h4-aside muted"><@fmt.p tutees?size "tutee" /></span>
+							<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}"><i class="icon-chevron-right" title="Expand"></i> 
 							<#if tutor?is_string>
-								<h4>${tutor}</h4>
+								${tutor}</h4>
 								<#if !tutor?string?starts_with("Not ")>
 									<div class="muted">External to Warwick</div>
 								</#if>
 							<#else>
-								<h4>${tutor.fullName}</h4>
+								${tutor.fullName}</h4>
 							</#if>
 							
-							<table class="tutees table-bordered table-striped table-condensed">
-								<thead>
-									<tr>
-										<th class="tutee-col">Tutee</th>
-										<th class="type-col">Type</th>
-										<th class="year-col">Year</th>
-										<th class="course-col">Course</th>
-									</tr>
-								</thead>
-								
-								<tbody>
-									<#list tutees as tuteeRelationship>
-										<#assign student = tuteeRelationship.studentMember />
-										<tr class="tutee">
-											<td>
-												<h6><a href="<@routes.profile student />">${student.fullName}</a></h6>
-												<span class="muted">${student.universityId}</span>
-											</td>
-											<td>${student.groupName}</td>
-											<td>${student.yearOfStudy}</td>
-											<td>${student.route.name}</td>
+							<section id="${tuteeKey}" class="collapse">
+								<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
+									<thead>
+										<tr>
+											<th class="tutee-col">Tutee</th>
+											<th class="type-col">Type</th>
+											<th class="year-col">Year</th>
+											<th class="course-col">Course</th>
 										</tr>
-									</#list>
-								</tbody>
-							</table>
+									</thead>
+									
+									<tbody>
+										<#list tutees as tuteeRelationship>
+											<#assign student = tuteeRelationship.studentMember />
+											<tr class="tutee">
+												<td>
+													<h6><a href="<@routes.profile student />">${student.fullName}</a></h6>
+													<span class="muted">${student.universityId}</span>
+												</td>
+												<td>${student.groupName}</td>
+												<td>${student.yearOfStudy}</td>
+												<td>${student.route.name}</td>
+											</tr>
+										</#list>
+									</tbody>
+								</table>
+							</section>
 						</td>
 					</tr>
 				</tbody>
@@ -56,4 +65,19 @@
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No personal tutors are currently visible for ${department.name} in Tabula.</p>
 	</#if>
 </div>
+
+<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
+<script type="text/javascript">
+(function($) {
+	$(".tutees").tablesorter({
+		sortList: [[1,0], [2,0], [3,0]]
+	});
+	
+	$("#tutors").on("hidden", "section", function() {
+		$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").prop("title", "Expand");
+	}).on("shown", "section", function() {
+		$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").prop("title", "Collapse");
+	});
+})(jQuery);
+</script>
 </#escape>

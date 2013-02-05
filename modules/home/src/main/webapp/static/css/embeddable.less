@@ -42,8 +42,15 @@ html.iframe {
   cursor: hand;
 }
 
-.tabula-page {
+#container {
+	.collapse-trigger { .cursor-pointer(); }
 	
+	h4.collapse-trigger i { margin-top: 5px; }
+	.h4-aside { margin-top: 5px; float: right; }
+}
+
+.tabula-page {
+
 .span6 > h6 {
 	margin: 12px 0 6px; 
 	color: #333;
@@ -365,6 +372,79 @@ table {
 	input.big-input {
 		width: 80%;
 	}
+
+	table.tablesorter {
+		> thead > tr {
+			th {
+				background-color: lighten(@tabulaGrayLight, 35%);
+				padding-right: 20px;
+				
+				&.header {
+					background-image: url(/static/images/tablesorter/bg.gif);
+					background-repeat: no-repeat;
+					background-position: center right;
+					cursor: pointer;
+				}
+				
+				&.headerSortUp {
+					background-image: url(/static/images/tablesorter/asc.gif);
+				}
+				
+				&.headerSortDown {
+					background-image: url(/static/images/tablesorter/desc.gif);
+				}
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaGrayLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-greenLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaGreenLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaGreenLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-blueLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaBlueLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaBlueLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-orangeLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaOrangeLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaOrangeLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-turquoise {
+			> thead > tr > th {
+				background-color: desaturate(lighten(@tabulaTurquoise, 35%), 20%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: desaturate(lighten(@tabulaTurquoise, 25%), 20%);
+				}
+			}
+		}
+}
 }
 
 #god-notice {
