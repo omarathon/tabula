@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.permissions._
 import org.reflections.Reflections
 import scala.collection.JavaConverters._
+import org.reflections.vfs.Vfs
+import java.net.URL
 
 @Controller
 @RequestMapping(Array("/sysadmin/permissions-helper"))
@@ -31,6 +33,7 @@ class PermissionsHelperController extends BaseSysadminController {
 		}
 	}
 	
+	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType())
 	lazy val reflections = Reflections.collect()
 	
 	@ModelAttribute("allPermissions") def allPermissions = {
@@ -78,4 +81,9 @@ class PermissionsHelperController extends BaseSysadminController {
 			.sortWith(sortFn)
 	}
 
+}
+
+class SillyJbossVfsUrlType extends Vfs.UrlType {
+	def matches(url: URL): Boolean = url.getProtocol().equals("vfszip")
+    def createDir(url: URL) = Vfs.DefaultUrlTypes.jarUrl.createDir(url)
 }
