@@ -54,6 +54,37 @@ Publications: ${r.publicationOverlap}%)
 </#macro>
 
 
+<#macro unSubmitted student extension="">
+	<tr class="itemContainer awaiting-submission">
+		<td></td>
+		<td>
+			<#if module.department.showStudentName>
+				${student.fullName}
+			<#else>
+				${student.warwickId}
+			</#if>
+		</td>
+		<td></td>
+		<td>
+			<#if extension?has_content>
+				<#assign date>
+					<@fmt.date date=extension.expiryDate capitalise=true />
+				</#assign>
+				<span class="label-blue">Unsubmitted</span>
+				<span class="label-blue use-tooltip" title="${date}">Within Extension</span>
+			<#else>
+				<span class="label-blue">Unsubmitted</span>
+			</#if>
+		</td>
+		<#if assignment.wordCountField??><td></td></#if>
+		<#if assignment.markScheme??><td></td></#if>
+		<#if assignment.collectMarks><td></td></#if>
+		<td></td><td></td><td></td><td></td>
+		<#if hasOriginalityReport><td></td></#if>
+	</tr>
+</#macro>
+
+
 <#if students?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 <#else>
@@ -148,11 +179,14 @@ Publications: ${r.publicationOverlap}%)
 				<td></td>
 				<td><span class="label-blue">Unsubmitted</span></td>
 				<#if assignment.wordCountField??><td></td></#if>
-				<#if assignment.markScheme??><td></td></#if>
+				<td></td>
 				<#if assignment.collectMarks><td></td></#if>
 				<td></td><td></td><td></td><td></td>
 				<#if hasOriginalityReport><td></td></#if>
 			</tr>
+		</#list>
+		<#list awaitingSubmission as student>
+			<@unSubmitted student />
 		</#list>
 		<#list students as student>
 			<#assign enhancedSubmission=student.enhancedSubmission>
@@ -204,9 +238,11 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</td>
 				</#if>
-				<td>
-					<#if submission.assignment?? && submission.assignment.markScheme??>${submission.firstMarker!""}</#if>
-				</td>
+				<#if submission.assignment.markScheme??>
+					<td>
+						<#if submission.assignment??>${submission.firstMarker!""}</#if>
+					</td>
+				</#if>
 				 <#if assignment.collectMarks>
 					<td class="mark">
 						${(student.feedback.actualMark)!''}
