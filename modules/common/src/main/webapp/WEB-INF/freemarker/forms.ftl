@@ -102,7 +102,7 @@ To not bind:
 <@userpicker name="paramName" />
 
 -->
-<#macro userpicker path="" name="" list=false multiple=false>
+<#macro userpicker path="" name="" list=false object=false multiple=false>
 <#if name="">
 	<@spring.bind path=path>
 	<#-- This handles whether we're binding to a list or not but I think
@@ -111,7 +111,7 @@ To not bind:
 	<#if status.actualValue??>
 		<#if list && status.actualValue?is_sequence>
 			<#assign ids=status.actualValue />
-		<#elseif (status.actualValue.userId?is_string)!false>
+		<#elseif object>
 			<#assign ids=[status.actualValue.userId] />
 		<#elseif status.actualValue?is_string>
 			<#assign ids=[status.actualValue] />
