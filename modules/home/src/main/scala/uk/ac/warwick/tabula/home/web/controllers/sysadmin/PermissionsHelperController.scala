@@ -12,6 +12,7 @@ import scala.collection.JavaConverters._
 import org.reflections.vfs.Vfs
 import java.net.URL
 import org.springframework.core.io.VfsUtils
+import uk.ac.warwick.tabula.helpers.Logging
 
 @Controller
 @RequestMapping(Array("/sysadmin/permissions-helper"))
@@ -84,10 +85,12 @@ class PermissionsHelperController extends BaseSysadminController {
 
 }
 
-class SillyJbossVfsUrlType extends Vfs.UrlType {
+class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 	val delegates = List(Vfs.DefaultUrlTypes.jarFile, Vfs.DefaultUrlTypes.jarUrl)
 	
 	def cleanUrl(input: URL) = {
+		logger.info("Cleaning URL %s with (protocol=%s, host=%s, port=%d, file=%s)".format(input.toString, input.getProtocol, input.getHost, input.getPort, input.getFile))
+		
 		val url = 
 			if (input.getProtocol.startsWith("vfszip")) input.toString().replace("vfszip:", "file:")
 			else if (input.getProtocol.startsWith("vfsfile")) input.toString().replace("vfsfile:", "file:")
