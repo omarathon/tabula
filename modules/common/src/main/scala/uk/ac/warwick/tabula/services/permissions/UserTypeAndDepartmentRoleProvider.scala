@@ -26,7 +26,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 					case Student => member.touchedDepartments map { StudentRole(_) }
 					case Staff => member.affiliatedDepartments map { StaffRole(_) }
 					case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
-					case Other => Seq()
+					case _ => Seq()
 				})
 				case None => departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 					case Some(department) =>
