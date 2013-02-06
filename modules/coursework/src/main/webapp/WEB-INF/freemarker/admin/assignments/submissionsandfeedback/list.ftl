@@ -171,24 +171,10 @@ Publications: ${r.publicationOverlap}%)
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
-		<#list awaitingSubmission?keys as universityId>
-			<tr class="itemContainer awaiting-submission">
-				<td></td>
-				<td>				
-				<#if module.department.showStudentName>
-					${awaitingSubmission[universityId]}
-				<#else>
-					${universityId}
-				</#if>
-				</td>
-				<td></td>
-				<td><span class="label-blue">Unsubmitted</span></td>
-				<#if assignment.wordCountField??><td></td></#if>
-				<td></td>
-				<#if assignment.collectMarks><td></td></#if>
-				<td></td><td></td><td></td><td></td>
-				<#if hasOriginalityReport><td></td></#if>
-			</tr>
+		<#list awaitingSubmissionExtended as pair>
+			<#assign student=pair._1 />
+			<#assign extension=pair._2 />
+			<@unSubmitted student extension />
 		</#list>
 		<#list awaitingSubmission as student>
 			<@unSubmitted student />
@@ -243,7 +229,7 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</td>
 				</#if>
-				<#if submission.assignment.markScheme??>
+				<#if assignment.markScheme??>
 					<td>
 						<#if submission.assignment??>${submission.firstMarker!""}</#if>
 					</td>
