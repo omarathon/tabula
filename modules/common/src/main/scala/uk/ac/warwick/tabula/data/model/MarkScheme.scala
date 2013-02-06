@@ -61,23 +61,20 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 	def studentsChooseMarker = markingMethod == StudentsChooseMarker
 
 
-	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = {
-		if(studentsChooseMarker) {
-			// if studentsChooseMarker exists then a field will exist too so fetch it
-			assignment.markerSelectField match {
-				case Some(markerField) => {
-					val releasedSubmission = assignment.submissions.filter(_.isReleasedForMarking)
-					releasedSubmission.filter(submission => {
-						submission.getValue(markerField) match {
-							case Some(subValue) => user.getUserId == subValue.value
-							case None => false
-						}
-					})
-				}
-				case None => Seq()
+	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = markingMethod match {
+		case StudentsChooseMarker =>  assignment.markerSelectField match {
+			case Some(markerField) => {
+				val releasedSubmission = assignment.submissions.filter(_.isReleasedForMarking)
+				releasedSubmission.filter(submission => {
+					submission.getValue(markerField) match {
+						case Some(subValue) => user.getUserId == subValue.value
+						case None => false
+					}
+				})
 			}
+			case None => Seq()
 		}
-		else {
+		case SeenSecondMarking => {
 			val isFirstMarker = assignment.isFirstMarker(user)
 			val isSecondMarker = assignment.isSecondMarker(user)
 			val studentUg = Option(assignment.markerMap.get(user.getUserId))
@@ -94,6 +91,7 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 				case None => Seq()
 			}
 		}
+		case _ => Seq()
 	}
 	
 	override def toString = "MarkScheme(" + id + ")"

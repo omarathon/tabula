@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.data.model.{SavedSubmissionValue, FileAttachment}
 import org.mockito.Mockito._
 import org.junit.Before
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
+import org.apache.velocity.tools.config.SkipSetters
+import org.springframework.transaction.annotation.Transactional
 
 
 class DownloadMarkerSubmissionTest extends AppContextTestBase with Mockito with MarkingWorkflowWorld {
@@ -27,7 +29,7 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with Mockito with 
 		}
 	}
 
-	@Test
+	@Transactional @Test
 	def downloadSubmissionsTest {
 		withUser("cuslaj"){
 			val command = new DownloadMarkersSubmissionsCommand(assignment.module, assignment, currentUser)

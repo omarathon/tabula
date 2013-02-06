@@ -5,11 +5,8 @@ import scala.Array
 import java.sql.Types
 
 
-sealed abstract class MarkingState(val name: String, val ts: Set[MarkingState]){
-	lazy val transitionStates = ts
-	
+sealed abstract class MarkingState(val name: String, val transitionStates: Set[MarkingState]){
 	def canTransitionTo(state: MarkingState): Boolean = state == this || transitionStates.contains(state)
-	
 	override def toString = name
 }
 
