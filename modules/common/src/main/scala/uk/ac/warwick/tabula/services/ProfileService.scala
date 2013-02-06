@@ -35,7 +35,7 @@ trait ProfileService {
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getTutorToDisplay(student: Member): String
-
+	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
 }
 
 @Service(value = "profileService")
@@ -132,4 +132,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRelationships(relationshipType, department)
 	}
 
+	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = transactional() {
+		memberDao.getRelationshipsByAgent(relationshipType, agent)
+	}
 }

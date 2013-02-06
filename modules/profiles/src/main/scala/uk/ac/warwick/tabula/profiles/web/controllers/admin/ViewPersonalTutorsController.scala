@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
+import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/tutors"))
@@ -16,6 +17,17 @@ class ViewPersonalTutorsController extends ProfilesController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def view(@PathVariable("department") department: Department, @ModelAttribute cmd: ViewPersonalTutorsCommand): Mav = {
-		Mav("admin/department/tutors/view", "tutorRelationships" -> cmd.apply)
+		Mav("tutors/tutor_view", "tutorRelationships" -> cmd.apply)
+	}
+}
+
+@Controller
+@RequestMapping(value = Array("/tutees"))
+class ViewPersonalTuteesController extends ProfilesController {
+	@ModelAttribute def command = new ViewPersonalTuteesCommand(currentMember)
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def view(@ModelAttribute cmd: ViewPersonalTuteesCommand): Mav = {
+		Mav("tutors/tutee_view", "tutees" -> cmd.apply)
 	}
 }
