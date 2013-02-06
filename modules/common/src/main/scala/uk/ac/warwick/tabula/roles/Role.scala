@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import scala.annotation.tailrec
 import scala.reflect.BeanProperty
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.immutable.ListMap
 
 abstract class Role(@BeanProperty val scope: Option[PermissionsTarget]) {
 
-	private var permissions: LinkedHashMap[Permission, Option[PermissionsTarget]] = LinkedHashMap()
+	private var permissions: Map[Permission, Option[PermissionsTarget]] = ListMap()
 	private var roles: Set[Role] = Set()
 	
 	def getName = getClass.getSimpleName
