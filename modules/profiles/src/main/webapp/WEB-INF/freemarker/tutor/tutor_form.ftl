@@ -1,10 +1,12 @@
 <section class="tutor-search">	
 	<@f.form method="get" action="${url('/tutor/tutor_search')}" commandName="tutorSearchProfilesCommand">
-		Personal Tutor 
-		<div class="input-append">
-			<input id="studentUniId" name="studentUniId" type="hidden" value="${studentUniId}" />
+		Personal tutor 
+		<input id="studentUniId" name="studentUniId" type="hidden" value="${student.universityId}" />
+		<div class="input-box">
 			<@f.input path="query" value="${tutorToDisplay}" />
 		</div>
-		&nbsp;&nbsp;&nbsp;&nbsp;<input class="btn" type="submit" value="Search">
+		<button type="submit" class="btn btn-primary">
+			<i class="icon-search icon-white"></i>
+		</button>
 	</@f.form>
 </section>

@@ -1,5 +1,5 @@
+<h3>Personal Tutee: ${student.firstName} ${student.lastName} (${student.universityId})</h3>
 <#include "tutor_form.ftl" />
-
 <section class="results">
 	<h2>Results</h2>
 	
@@ -13,7 +13,7 @@
 						<img src="<@routes.photo result />" />
 					</div>
 				
-					<h3><a href="<@routes.tutor_edit studentUniId result />"><@fmt.profile_name result /></a></h3>
+					<h3><a href="<@routes.tutor_edit student.universityId result />"><@fmt.profile_name result /></a></h3>
 					<@fmt.profile_description result />
 				</article>
 			</#list>

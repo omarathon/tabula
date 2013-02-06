@@ -1046,10 +1046,10 @@ h1.with-settings {
 	#container .tutor-search {
 		.input-append .btn { margin-top: 1px; }
 		
-		@searchFontSize: @baseFontSize * 1.5;
-		@searchLineHeight: @baseLineHeight * 1.5;
+		@searchFontSize: @baseFontSize * 1.2;
+		@searchLineHeight: @baseLineHeight * 1.2;
 		
-		.input-append {
+		.input-box {
 			margin-bottom: 0;
 			position: relative;
 			
@@ -1067,9 +1067,10 @@ h1.with-settings {
 		input[type="text"] {
 			height: @searchLineHeight;
 			margin-bottom: 0;
+			left: 200px;
 			font-size: @searchFontSize;
 			line-height: @searchLineHeight;
-			width: 356px;
+			width: 400px;
 		}
 		
 		input.btn {
@@ -1077,22 +1078,6 @@ h1.with-settings {
 			line-height: @searchLineHeight;
 		}
 		
-		.dropdown-menu {
-			@import "bootstrap/mixins.less";
-		
-			width: 462px;
-			
-			h2 { margin-bottom: 0; }
-			.photo { max-height: 50px; }
-			span.description { white-space: normal; }
-			
-			.active > a, .active > a:hover {
-				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
-			}
-		}
-		
 		form { margin: 0; }
 	}	
-	
-	
 }

@@ -93,7 +93,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 					case Some(mem) => 
 						mem.fullName match {
 							case None => ""
-							case Some(name) => name + ", " + mem.description
+							//case Some(name) => name + ", " + mem.description
+							case Some(name) => name + " (" + mem.universityId + ")"
 						}
 				}
 			}

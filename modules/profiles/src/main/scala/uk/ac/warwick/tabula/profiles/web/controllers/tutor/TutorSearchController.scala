@@ -21,22 +21,26 @@ import org.springframework.web.bind.annotation.RequestParam
 class TutorSearchController extends TutorProfilesController {
 	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand = new TutorSearchProfilesCommand(user)
-	
+
 	@RequestMapping(value=Array("/tutor/tutor_search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: TutorSearchProfilesCommand) = Mav("tutor/tutor_form")
-	
+
 	@RequestMapping(value=Array("/tutor/tutor_search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors, @RequestParam("studentUniId") studentUniId: String) = {
-		
+
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
+			val student = profileService.getMemberByUniversityId(studentUniId).getOrElse(
+					throw new IllegalStateException("Can't find student " + studentUniId))
+
 			Mav("tutor/tutor_results",
-				"studentUniId" -> studentUniId,
+				"tutorToDisplay" -> profileService.getTutorToDisplay(student),
+				"student" -> student,
 				"results" -> cmd.apply())
 		}
 	}
-	
+
 	@RequestMapping(value=Array("/tutor.json"), params=Array("query"))
 	def submitJson(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors) = {
 		if (errors.hasErrors) {
