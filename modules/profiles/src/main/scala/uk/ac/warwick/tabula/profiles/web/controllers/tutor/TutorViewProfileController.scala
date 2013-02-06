@@ -40,6 +40,7 @@ class TutorViewProfileController extends TutorProfilesController {
 		
 		Mav("tutor/tutor_view", 
 			"studentUniId" -> studentUniId,
-			"tutorName" -> profileService.getTutorName(student))
+			"tutorToDisplay" -> profileService.getTutorToDisplay(student)
+				)
 	}
 }

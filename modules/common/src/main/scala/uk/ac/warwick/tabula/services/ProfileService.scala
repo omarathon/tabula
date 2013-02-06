@@ -34,7 +34,7 @@ trait ProfileService {
 	def findCurrentRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
-	def getTutorName(student: Member): String
+	def getTutorToDisplay(student: Member): String
 
 }
 
@@ -82,7 +82,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRelationships(relationshipType, targetSprCode)
 	}
 	
-	def getTutorName(student: Member): String = {
+	def getTutorToDisplay(student: Member): String = {
 		val sprCode: String = student.sprCode
 		val currentRelationship = findCurrentRelationship(PersonalTutor, student.sprCode)
 		currentRelationship match {
@@ -93,7 +93,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 					case Some(mem) => 
 						mem.fullName match {
 							case None => ""
-							case Some(name) => name
+							case Some(name) => name + ", " + mem.description
 						}
 				}
 			}

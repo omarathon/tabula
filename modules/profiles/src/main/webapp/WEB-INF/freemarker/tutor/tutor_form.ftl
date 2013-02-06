@@ -3,7 +3,7 @@
 		Personal Tutor 
 		<div class="input-append">
 			<input id="studentUniId" name="studentUniId" type="hidden" value="${studentUniId}" />
-			<@f.input path="query" value=tutorName />
+			<@f.input path="query" value="${tutorToDisplay}" />
 		</div>
 		&nbsp;&nbsp;&nbsp;&nbsp;<input class="btn" type="submit" value="Search">
 	</@f.form>
