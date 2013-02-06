@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
@@ -24,6 +25,7 @@ class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) ex
 	
 	var profileService = Wire.auto[ProfileService]
 	var securityService = Wire.auto[SecurityService]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	@BeanProperty var query: String = _
@@ -52,7 +54,8 @@ class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) ex
 		else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
 	
 	private def queryMatches = {
-		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, user.god)
+		val depts = (currentMember.affiliatedDepartments ++ moduleService.departmentsOwnedBy(currentMember.userId)).distinct
+		profileService.findMembersByQuery(query, depts, userTypes, user.god)
 	}
 	
 	override def describe(d: Description) = d.property("query" -> query)
