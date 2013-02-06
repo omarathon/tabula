@@ -1,6 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#assign isShowTutors=adminDepartments?has_content || isAPersonalTutor>
 <#escape x as x?html>
 
 <#if !user.loggedIn>
@@ -9,22 +6,30 @@
 		to see a personalised view.
 	</p>
 <#else>
-	<#include "../profile/search/form.ftl" />
+	<div class="row-fluid">
+		<div class="span6">
+			<#include "../profile/search/form.ftl" />
 	
-	<#if isShowTutors??>
-		<h2>Personal tutors</h2>
-
-		<ul>
+			<#if isAPersonalTutor>
+				<h2>My students</h2>
+			
+				<ul>
+					<li><a href="<@routes.tutees />">Personal tutees</a></li>
+				</ul>
+			</#if>
+		</div>
+		
+		<div id="profile-dept-admin" class="span4 offset2">
 			<#if adminDepartments?has_content>
-				<#list adminDepartments as dept>
-					<li><a href="<@routes.tutors dept />">Personal tutors for ${dept.name}</a></li>
-				</#list>
+				<h4>Departmental admin</h4>
+		
+				<ul>
+					<#list adminDepartments as dept>
+						<li><a href="<@routes.tutors dept />">Personal tutors in ${dept.name}</a></li>
+					</#list>
+				</ul>
 			</#if>
-	
-			<#if isAPersonalTutor??>
-				<li><a href="<@routes.tutees />">My personal tutees</a></li>
-			</#if>
-		</ul>
-	</#if>
+		</div>
+	</div>
 </#if>
 </#escape>

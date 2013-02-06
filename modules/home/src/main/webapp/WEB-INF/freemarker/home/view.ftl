@@ -1,9 +1,9 @@
 <#escape x as x?html>
 
 <#if user.loggedIn && user.firstName??>
-<h1>Hello, ${user.firstName}</h1>
+	<h5>Hello, ${user.firstName}</h5>
 <#else>
-<h1>Hello</h1>
+	<h5>Hello</h5>
 </#if>	
 
 <#if !user.loggedIn>
@@ -12,23 +12,19 @@
 		to see a personalised view.
 	</p>
 <#else>
-	<div class="well">
-		<h5>Where now?</h5>
-		
-		<ul class="lead">
-			<#-- TODO can we guard this, or would it be too expensive to be worth the bother? -->
-			<li><a href="<@url page="/coursework/" />">Coursework Management</a></li>
-		
-			<#if user.staff>
-				<li><a href="<@url page="/profiles/" />">Student Profiles</a></li>
-			<#elseif user.student>
-				<li><a href="<@url page="/profiles/" />">My Student Profile</a></li>
-			</#if>
-		</ul>
-	</div>
+	<ul id="home-list">
+		<#-- TODO can we guard this, or would it be too expensive to be worth the bother? -->
+		<li><h2><a href="<@url page="/coursework/" />">Coursework Management</a></h2></li>
+	
+		<#if user.staff>
+			<li><h2><a href="<@url page="/profiles/" />">Student Profiles</a></h2></li>
+		<#elseif user.student>
+			<li><h2><a href="<@url page="/profiles/" />">My Student Profile</a></h2></li>
+		</#if>
+	</ul>
 </#if>
 
-<p class="muted">
+<p id="what-is-tabula">
 	<i class="icon-info-sign"></i> <span title="Tabula was originated as 'My Department'.">Tabula</span> supports the administration of teaching and learning in academic departments at Warwick.
 </p>
 
