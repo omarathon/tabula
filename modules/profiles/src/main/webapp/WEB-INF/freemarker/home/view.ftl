@@ -1,11 +1,30 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#assign isShowTutors=adminDepartments?has_content || isAPersonalTutor>
 <#escape x as x?html>
 
-<#if features.profiles && user.staff>
-<#include "../profile/search/form.ftl" />
+<#if !user.loggedIn>
+	<p>
+		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+		to see a personalised view.
+	</p>
 <#else>
-<p>Here is where you'd see student profiles.</p>
-</#if>
+	<#include "../profile/search/form.ftl" />
+	
+	<#if isShowTutors??>
+		<h2>Personal tutors</h2>
 
+		<ul>
+			<#if adminDepartments?has_content>
+				<#list adminDepartments as dept>
+					<li><a href="<@routes.tutors dept />">Personal tutors for ${dept.name}</a></li>
+				</#list>
+			</#if>
+	
+			<#if isAPersonalTutor??>
+				<li><a href="<@routes.tutees />">My personal tutees</a></li>
+			</#if>
+		</ul>
+	</#if>
+</#if>
 </#escape>

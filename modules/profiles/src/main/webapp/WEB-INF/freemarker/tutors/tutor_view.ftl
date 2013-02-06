@@ -19,7 +19,7 @@
 					<tr>
 						<td>
 							<span class="h4-aside muted"><@fmt.p tutees?size "tutee" /></span>
-							<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}"><i class="icon-chevron-right" title="Expand"></i> 
+							<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand"><i class="icon-chevron-right"></i> 
 							<#if tutor?is_string>
 								${tutor}</h4>
 								<#if !tutor?string?starts_with("Not ")>
@@ -74,9 +74,9 @@
 	});
 	
 	$("#tutors").on("hidden", "div", function() {
-		$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").prop("title", "Expand");
+		$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").parent().prop("title", "Expand");
 	}).on("shown", "div", function() {
-		$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").prop("title", "Collapse");
+		$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").parent().prop("title", "Collapse");
 	});
 })(jQuery);
 </script>

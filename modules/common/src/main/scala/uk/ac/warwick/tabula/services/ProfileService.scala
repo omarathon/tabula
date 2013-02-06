@@ -5,7 +5,6 @@ import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
-
 import javax.persistence.Entity
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
@@ -18,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.userlookup.User
 
 /**
  * Service providing access to members and profiles.
@@ -35,6 +35,7 @@ trait ProfileService {
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
+	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 }
 
 @Service(value = "profileService")
@@ -78,7 +79,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
-		memberDao.getRelationships(relationshipType, targetSprCode)
+		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
 	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
@@ -110,10 +111,14 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = transactional() {
-		memberDao.getRelationships(relationshipType, department)
+		memberDao.getRelationshipsByDepartment(relationshipType, department)
 	}
 
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = transactional() {
-		memberDao.getRelationshipsByAgent(relationshipType, agent)
+		memberDao.getRelationshipsByAgent(relationshipType, agent.universityId)
+	}
+
+	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional() {
+		memberDao.getRelationshipsByAgent(relationshipType, agentId)
 	}
 }
