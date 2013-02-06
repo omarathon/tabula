@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -117,6 +118,13 @@ class AssignmentController extends CourseworkController {
 				val sendReceipt = new SendSubmissionReceiptCommand(module, assignment, submission, user)
 				sendReceipt.apply()
 			}
+			
+			transactional() {
+ 				val moduleManagers = submission.assignment.module.participants
+ 				val notifyModuleManager = new SendSubmissionNotifyCommand(submission, moduleManagers)
+ 				notifyModuleManager.apply()
+ 			}
+			
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}
