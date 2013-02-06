@@ -54,37 +54,6 @@ Publications: ${r.publicationOverlap}%)
 </#macro>
 
 
-<#macro unSubmitted student extension="">
-	<tr class="itemContainer awaiting-submission">
-		<td></td>
-		<td>
-			<#if module.department.showStudentName>
-				${student.fullName}
-			<#else>
-				${student.warwickId}
-			</#if>
-		</td>
-		<td></td>
-		<td>
-			<#if extension?has_content>
-				<#assign date>
-					<@fmt.date date=extension.expiryDate capitalise=true />
-				</#assign>
-				<span class="label-blue">Unsubmitted</span>
-				<span class="label-blue use-tooltip" title="${date}">Within Extension</span>
-			<#else>
-				<span class="label-blue">Unsubmitted</span>
-			</#if>
-		</td>
-		<#if assignment.wordCountField??><td></td></#if>
-		<#if assignment.markScheme??><td></td></#if>
-		<#if assignment.collectMarks><td></td></#if>
-		<td></td><td></td><td></td><td></td>
-		<#if hasOriginalityReport><td></td></#if>
-	</tr>
-</#macro>
-
-
 <#if students?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 <#else>
@@ -127,12 +96,7 @@ Publications: ${r.publicationOverlap}%)
 			</li>
 			<#if features.markSchemes && mustReleaseForMarking>
 				<li>
-					<a class="use-tooltip form-post"
-					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
-					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
-					   id="release-submissions-button">
-						Release for marking
-					</a>
+					<a class="use-tooltip" title="Release the submissions for marking. First markers will be able to download their submissions from the app." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />" id="release-submissions-button">Release for marking</a>
 				</li>
 			</#if>
 			<li>
@@ -171,13 +135,24 @@ Publications: ${r.publicationOverlap}%)
 			<th>Feedback status</th>
 			<#if hasOriginalityReport><th>Originality report</th></#if>
 		</tr>
-		<#list awaitingSubmissionExtended as pair>
-			<#assign student=pair._1 />
-			<#assign extension=pair._2 />
-			<@unSubmitted student extension />
-		</#list>
-		<#list awaitingSubmission as student>
-			<@unSubmitted student />
+		<#list awaitingSubmission?keys as universityId>
+			<tr class="itemContainer awaiting-submission">
+				<td></td>
+				<td>
+				<#if module.department.showStudentName>
+					${awaitingSubmission[universityId]}
+				<#else>
+					${universityId}
+				</#if>
+				</td>
+				<td></td>
+				<td><span class="label-blue">Unsubmitted</span></td>
+				<#if assignment.wordCountField??><td></td></#if>
+				<#if assignment.markScheme??><td></td></#if>
+				<#if assignment.collectMarks><td></td></#if>
+				<td></td><td></td><td></td><td></td>
+				<#if hasOriginalityReport><td></td></#if>
+			</tr>
 		</#list>
 		<#list students as student>
 			<#assign enhancedSubmission=student.enhancedSubmission>
@@ -230,9 +205,9 @@ Publications: ${r.publicationOverlap}%)
 					</td>
 				</#if>
 				<#if assignment.markScheme??>
-					<td>
-						<#if submission.assignment??>${submission.firstMarker!""}</#if>
-					</td>
+				<td>
+					<#if submission.assignment?? && submission.assignment.markScheme??>${submission.firstMarker!""}</#if>
+				</td>
 				</#if>
 				 <#if assignment.collectMarks>
 					<td class="mark">
