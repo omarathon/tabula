@@ -36,17 +36,20 @@ class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) ex
 		(query.trim().length > MinimumQueryLength) &&
 		(query.split("""\s+""") find {_.length > MinimumTermLength} isDefined)
 	
-	private def singletonByUserType(option: Option[Member]) = 
-		if (option.isDefined) Seq(option.get) filter {userTypes contains _.userType}
-		else Seq()
+	private def singletonByUserType(option: Option[Member]) = option match {
+		case Some(member) => Seq(member) filter {userTypes contains _.userType}
+		case _ => Seq()
+	}
+	
+	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read, member)
 	
 	private def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUserId(query))
+		else singletonByUserType(profileService.getMemberByUserId(query)) filter canRead
 	
 	private def universityIdMatches = 
 		if (!isMaybeUniversityId(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUniversityId(query))
+		else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
 	
 	private def queryMatches = {
 		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, user.god)
