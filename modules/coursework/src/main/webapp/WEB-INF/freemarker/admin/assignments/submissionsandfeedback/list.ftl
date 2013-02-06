@@ -127,7 +127,12 @@ Publications: ${r.publicationOverlap}%)
 			</li>
 			<#if features.markSchemes && mustReleaseForMarking>
 				<li>
-					<a class="use-tooltip" title="Release the submissions for marking. First markers will be able to download their submissions from the app." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />" id="release-submissions-button">Release for marking</a>
+					<a class="use-tooltip form-post"
+					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
+					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
+					   id="release-submissions-button">
+						Release for marking
+					</a>
 				</li>
 			</#if>
 			<li>

@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ PathVariable, RequestMapping }
 import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
 import org.apache.poi.ss.util.WorkbookUtil
@@ -16,6 +15,8 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.spring.Wire
 import org.springframework.web.bind.annotation.ModelAttribute
+import reflect.BeanProperty
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions._
 
 class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
@@ -24,10 +25,10 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
+	@BeanProperty var members:Seq[String] =_
 	var assignmentService = Wire.auto[AssignmentService]
-	
+
 	def applyInternal() = {
-		val members = assignmentService.determineMembershipUsers(assignment)
 
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewMarkSheet(assignment, workbook)
@@ -35,10 +36,10 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 		// populate the mark sheet with ids
 		for ((member, i) <- members.zipWithIndex) {
 			val row = sheet.createRow(i + 1)
-			row.createCell(0).setCellValue(member.getWarwickId)
+			row.createCell(0).setCellValue(member)
 			val marksCell = row.createCell(1)
 			val gradesCell = row.createCell(2)
-			val feedbacks = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
+			val feedbacks = assignmentService.getStudentFeedback(assignment, member)
 			feedbacks.foreach { feedback =>
 			  feedback.actualMark.foreach(marksCell.setCellValue(_))
 			  feedback.actualGrade.foreach(gradesCell.setCellValue(_))
@@ -81,15 +82,35 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
 class MarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
+
+	var assignmentService = Wire.auto[AssignmentService]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand) = {
+		cmd.members = assignmentService.determineMembershipUsers(cmd.assignment).map(_.getWarwickId)
 		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
 	}
+}
 
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
+class MarkerMarksTemplateController extends CourseworkController {
+	import MarksTemplateCommand._
+
+	var assignmentService = Wire.auto[AssignmentService]
+
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+		new GenerateMarksTemplateCommand(module, assignment)
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand, currentUser: CurrentUser) = {
+		cmd.members = cmd.assignment.getMarkersSubmissions(currentUser.apparentUser).map(_.universityId)
+		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
+	}
 }
 
 object MarksTemplateCommand {

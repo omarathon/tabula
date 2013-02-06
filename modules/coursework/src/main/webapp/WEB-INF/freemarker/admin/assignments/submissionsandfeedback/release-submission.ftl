@@ -14,13 +14,13 @@
 		<@form.errors path="students" />
 		<#assign students=status.actualValue />
 
-		<#if releaseForMarkingCommand.invalidSubmissions?has_content>
+		<#if releaseForMarkingCommand.invalidFeedback?has_content>
 			<p>
-				<a href="" class="invalid-submissions"><@fmt.p (releaseForMarkingCommand.invalidSubmissions?size ) "submission" /></a>
+				<a href="" class="invalid-submissions"><@fmt.p (releaseForMarkingCommand.invalidFeedback?size ) "submission" /></a>
 				could not be released for marking. Marked submissions cannot be re-released.
 			</p>
 			<div class="hidden invalid-submissions-list">
-				<ul><#list releaseForMarkingCommand.invalidSubmissions as submission>
+				<ul><#list releaseForMarkingCommand.invalidFeedback as submission>
 					<li>${submission.universityId}</li>
 				</#list></ul>
 			</div>
@@ -35,7 +35,7 @@
 			</script>
 		</#if>
 		<p>
-			Releasing <strong><@fmt.p (students?size - releaseForMarkingCommand.invalidSubmissions?size ) "student" /></strong> submissions to markers.
+			Releasing <strong><@fmt.p (students?size - releaseForMarkingCommand.invalidFeedback?size ) "student" /></strong> submissions to markers.
 		</p>
 		<#list students as uniId>
 			<input type="hidden" name="students" value="${uniId}" />
@@ -55,6 +55,7 @@
 
 	<div class="submit-buttons">
 		<input class="btn btn-warn" type="submit" value="Confirm">
+		<a class="btn" href="<@routes.assignmentsubmissionsandfeedback assignment />">Cancel</a>
 	</div>
 </@f.form>
 </#escape>

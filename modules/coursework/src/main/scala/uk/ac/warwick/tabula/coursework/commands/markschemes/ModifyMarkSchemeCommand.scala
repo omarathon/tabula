@@ -5,8 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkScheme}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
@@ -20,9 +19,8 @@ abstract class ModifyMarkSchemeCommand(
 
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
-
-	//TODO - reinstate when other options become available
-	//@BeanProperty var studentsChooseMarker: Boolean = _
+	@BeanProperty var secondMarkers: JList[String] = ArrayList()
+	@BeanProperty var markingMethod: MarkingMethod = _
 	
 	// Subclasses can provide the "current" markscheme if one applies, for validation.
 	def currentMarkScheme: Option[MarkScheme]
@@ -33,14 +31,32 @@ abstract class ModifyMarkSchemeCommand(
 		contextSpecificValidation(errors)
 
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
-		
+
 		if (department.markSchemes.exists(sameName)) {
 			errors.rejectValue("name", "name.duplicate.markScheme", Array(this.name), null)
 		}
+
+		if (markingMethod == null)
+			errors.rejectValue("markingMethod", "markScheme.markingMethod.none")
 		
-		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers")
+		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers"){
+			override def alreadyHasCode = hasDuplicates(firstMarkers)
+		}
 		firstMarkersValidator.validate(errors)
-		
+		val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
+			override def alreadyHasCode = hasDuplicates(secondMarkers)
+		}
+		secondMarkersValidator.validate(errors)
+
+		// there is a marker in both lists
+		val trimmedFirst = firstMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
+		val trimmedSecond = secondMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
+		if ((trimmedFirst & trimmedSecond).size > 0)
+			errors.reject("markScheme.markers.bothLists")
+	}
+
+	def hasDuplicates(markers:JList[_]):Boolean = {
+		markers.distinct.size != markers.size
 	}
 	
 	// If there's a current markscheme, returns whether "other" is a different
@@ -56,22 +72,23 @@ abstract class ModifyMarkSchemeCommand(
 	// Called manually by controller.
 	def doBind() {
 	  firstMarkers = firstMarkers.filter(StringUtils.hasText)
+		secondMarkers = secondMarkers.filter(StringUtils.hasText)
 	}
 
 	def copyTo(scheme: MarkScheme) {
 		scheme.name = name
 		scheme.firstMarkers.setIncludeUsers(firstMarkers)
-		//TODO - reinstate when other options become available
-		//scheme.studentsChooseMarker = studentsChooseMarker
-		scheme.studentsChooseMarker = true // default until more options are available
+		scheme.secondMarkers.setIncludeUsers(secondMarkers)
+		scheme.markingMethod = markingMethod
 	}
 
 	def copyFrom(scheme: MarkScheme) {
 		name = scheme.name
 		firstMarkers.clear()
 		firstMarkers.addAll(scheme.firstMarkers.includeUsers)
-		//TODO - reinstate when other options become available
-		//studentsChooseMarker = scheme.studentsChooseMarker
+		secondMarkers.clear()
+		secondMarkers.addAll(scheme.secondMarkers.includeUsers)
+		markingMethod = scheme.markingMethod
 	}
 
 }

@@ -37,6 +37,11 @@ object Routes {
 		def modulePermissions(module: Module) = "/admin/module/%s/permissions" format (encoded(module.code))
 
 		object assignment {
+			object markerFeedback {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
+			}
+
+
 			def create(module: Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
 
 			private def assignmentroot(assignment: Assignment) = "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)

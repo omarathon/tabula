@@ -3,14 +3,10 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
-import org.springframework.beans.factory.annotation.Autowired
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.spring.Wire
@@ -28,6 +24,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]
 
+	@BeanProperty var filename: String = _
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
 	@BeanProperty var students: JList[String] = ArrayList()
 
@@ -44,6 +41,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 		if (submissions.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")
 		}
+
 		val zip = zipService.getSomeSubmissionsZip(submissions)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)
