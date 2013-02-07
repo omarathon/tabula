@@ -20,7 +20,9 @@ trait GeneratedId {
 		case str => getClass.hashCode + (41 * str.hashCode)
 	}
 	override def equals(other: Any) = other match {
-		case that: GeneratedId if this.getClass == that.getClass => id == that.id
+		case that: GeneratedId if this.getClass == that.getClass =>
+			if (id == null && that.id == null) this.eq(that) // Reference equality
+			else id == that.id
 		case _ => false
 	}
 }
