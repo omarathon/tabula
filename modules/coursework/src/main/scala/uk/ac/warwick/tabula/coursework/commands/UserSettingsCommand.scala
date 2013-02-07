@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 class UserSettingsCommand(user: CurrentUser, usersettings: UserSettings) extends Command[Unit] with Public with SelfValidating  {
 
+	PermissionCheck(Permissions.UserSettings.Update)
+	
 	var service = Wire.auto[UserSettingsService]
 	@BeanProperty var alertsSubmission : String =_
 	

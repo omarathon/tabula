@@ -45,7 +45,6 @@ class UserSettingsController extends CourseworkController {
 
 	@RequestMapping(method=Array(RequestMethod.POST))
 	def saveSettings(@Valid command:UserSettingsCommand, errors:Errors) = {
-		command.validate(errors)
 		if (errors.hasErrors){
 			viewSettings(user, command, errors)
 		}
