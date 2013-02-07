@@ -24,4 +24,10 @@ All submissions for this assignment can be found here:
 <@url page='/admin/module/${module.code}/assignments/${assignment.id}/list'/>
 
 
+
+To unsubscribe from these emails, go here and select "No alerts".
+
+<@url page='/admin/usersettings#submission-alerts'/>
+
+
 This email was sent from an automated system, and replies to it will not reach a real person.

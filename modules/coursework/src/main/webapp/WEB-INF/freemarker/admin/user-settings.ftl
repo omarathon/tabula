@@ -1,10 +1,9 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 <h1>User settings for ${user.firstName}</h1>
 <@f.form method="post" class="form-horizontal" action="${url('/admin/usersettings')}" commandName="userSettingsCommand">
 	
 	
-	<h2>Submission email alerts</h2>
+	<h2 name="submission-alerts">Submission email alerts</h2>
 	
 	<@form.row>
 		<@form.field>

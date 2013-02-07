@@ -10,19 +10,21 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.services.UserSettingsService
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.permissions.Permissions
 
 
-class UserSettingsCommand(user: CurrentUser, usersettings: UserSettings) extends Command[Unit] with Public {
-	
+class UserSettingsCommand(user: CurrentUser, usersettings: UserSettings) extends Command[Unit] with Public with SelfValidating  {
+
 	var service = Wire.auto[UserSettingsService]
-	
-	@BeanProperty var data : String =_
 	@BeanProperty var alertsSubmission : String =_
 	
+	copySettings()
+		
 	def validate(errors:Errors){
 		
 	}
-
+	
 	def copySettings() {
 		var settingsOpt = service.parseJson(usersettings.data)
 		for(settings <- settingsOpt) {

@@ -20,22 +20,23 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserSettingsService
+import uk.ac.warwick.tabula.system.permissions.Public
 
 class SendSubmissionNotifyCommand (
-		@BeanProperty var submission: Submission, 
-		@BeanProperty var users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails { 
+		@BeanProperty val submission: Submission, 
+		@BeanProperty val users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails with Public { 
 
-	def this() = this(null, null)
+	mandatory(submission)
 	
-	@BeanProperty var assignment: Assignment = Option(submission).map { _.assignment }.orNull
-	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
+	@BeanProperty var assignment: Assignment = submission.assignment
+	@BeanProperty var module: Module = assignment.module
 	
-	var userLookup = Wire.auto[UserLookupService]
-	var userSettings = Wire.auto[UserSettingsService]
+	val userLookup = Wire.auto[UserLookupService]
+	val userSettings = Wire.auto[UserSettingsService]
 	implicit var freemarker = Wire.auto[Configuration]
-	var mailSender = Wire[WarwickMailSender]("studentMailSender")
-	var replyAddress = Wire.property("${mail.noreply.to}")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
+	val mailSender = Wire[WarwickMailSender]("studentMailSender")
+	val replyAddress = Wire.property("${mail.noreply.to}")
+	val fromAddress = Wire.property("${mail.exceptions.to}")
 	
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 	

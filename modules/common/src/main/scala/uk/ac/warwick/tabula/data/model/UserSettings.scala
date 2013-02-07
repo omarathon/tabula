@@ -25,5 +25,5 @@ class UserSettings extends GeneratedId  {
 	
 
 			
-	override def toString = "Data[" + data + "]"
+	override def toString = "UserSettings [" + data + "]"
 }
