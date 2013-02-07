@@ -81,6 +81,7 @@
 							<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
+							&nbsp;
 							<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
@@ -101,6 +102,7 @@
 							<a class="hide modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
+							&nbsp;
 							<a class="hide revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
@@ -124,7 +126,7 @@
 					}
 				}
 
-				// models use ajax to retrieve their contents
+				// modals use ajax to retrieve their contents
 				$('#extension-list').on('click', 'a[data-toggle=modal]', function(e){
 					e.preventDefault();
 					$this = $(this);
@@ -146,18 +148,18 @@
 					}
 				});			
 
-				$('#extension-list').on('click', 'input[type=submit]', function(e){
+				$('#extension-list').on('submit', 'form', function(e){
 					e.preventDefault();
-					var $form = $(this).closest('form');
+					var $form = $(this);
 					$.post($form.attr('action'), $form.serialize(), function(data){
 						if(data.status == "error"){
 							// delete any old errors
-							$(".error").remove();
+							$("span.error").remove();
+							$('.error').removeClass('error');
 							for(error in data.result){
 								addError(error, data.result[error]);
 							}
-						}
-						else {
+						} else {
 							var action = data.action;
 							$.each(data.result, function(){
 								modifyRow(this, action);
