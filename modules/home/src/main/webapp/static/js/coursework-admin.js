@@ -342,5 +342,19 @@ $(function(){
 	})
 });
 
+jQuery.fn.sortableTable = function(settings){
+	var $ = jQuery;
+	var $this = $(this);
+	var headerSettings = {};
+	$('th', $this).each(function(index){
+		var sortable = $(this).hasClass("sortable");
+		if(!sortable){
+			headerSettings[index] = {sorter: false};
+		}
+	});
+	$this.tablesorter({headers: headerSettings});
+	return this;
+};
+
 
 }(jQuery));
