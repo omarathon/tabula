@@ -92,6 +92,16 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				list
 			}
 			case failure => {
+				if (sendEmails) {
+					debug("Sending an email to " + job.user.email)
+					val mime = mailer.createMimeMessage()
+					val email = new MimeMailMessage(mime)
+					email.setFrom(replyAddress)
+					email.setTo(job.user.email)
+					email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
+					email.setText(renderJobFailedEmailText(job.user, assignment))
+					mailer.send(mime)
+				}
 				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
 			}
 		}
@@ -167,6 +177,16 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			if (reports.isEmpty) {
 				logger.error("Waited for complete Turnitin report but didn't get one.")
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
+				if (sendEmails) {
+					debug("Sending an email to " + job.user.email)
+					val mime = mailer.createMimeMessage()
+					val email = new MimeMailMessage(mime)
+					email.setFrom(replyAddress)
+					email.setTo(job.user.email)
+					email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
+					email.setText(renderJobFailedEmailText(job.user, assignment))
+					mailer.send(mime)
+				}
 			} else {
 
 				val attachments = assignment.submissions.flatMap(_.allAttachments)
@@ -205,7 +225,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					email.setFrom(replyAddress)
 					email.setTo(job.user.email)
 					email.setSubject("Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderEmailText(job.user, assignment))
+					email.setText(renderJobDoneEmailText(job.user, assignment))
 					mailer.send(mime)
 				}
 
@@ -255,8 +275,17 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	}
 
-	def renderEmailText(user: CurrentUser, assignment: Assignment) = {
+	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment) = {
 		renderToString("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
+			"assignment" -> assignment,
+			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
+			"user" -> user,
+			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
+		))
+	}
+	
+	def renderJobFailedEmailText(user: CurrentUser, assignment: Assignment) = {
+		renderToString("/WEB-INF/freemarker/emails/turnitinjobfailed.ftl", Map(
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
 			"user" -> user,
