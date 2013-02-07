@@ -151,4 +151,9 @@ object Permissions {
 			case object Delete extends Permission
 		}
 	}
+	
+	object UserSettings {
+		case object Update extends ScopelessPermission
+	}
+	
 }
