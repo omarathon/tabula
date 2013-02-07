@@ -2,6 +2,7 @@
 <h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
 <#assign module=assignment.module />
+<#assign department = module.department />
 
 <#if hasPublishedFeedback>
 	<p>
@@ -122,9 +123,11 @@ Publications: ${r.publicationOverlap}%)
 			<span class="caret"></span>
 		</a>
 		<ul class="dropdown-menu">
-			<li>
-				<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
-			</li>
+			<#if department.plagiarismDetectionEnabled>
+				<li>
+					<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
+				</li>
+			</#if>
 			<#if features.markSchemes && mustReleaseForMarking>
 				<li>
 					<a class="use-tooltip form-post"

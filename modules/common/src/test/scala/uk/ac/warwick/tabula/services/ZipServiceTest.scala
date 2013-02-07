@@ -83,7 +83,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		service.userLookup = userLookup
 		
 		var department = new Department
-		department.showStudentName = true
+		department.showStudentNameLegacy = true
 		
 		val module = new Module(code="ph105", department=department)
 		
@@ -115,7 +115,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		service.userLookup = userLookup
 		
 		var department = new Department
-		department.showStudentName = true
+		department.showStudentNameLegacy = true
 		
 		val module = new Module(code="ph105", department=department)
 		

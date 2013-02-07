@@ -46,6 +46,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty @Column(name="extensionGuidelineLink") var extensionGuidelineLinkLegacy:String = null
 	def getExtensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink, extensionGuidelineLinkLegacy)
 	
+	@BeanProperty @Column(name="showStudentName") var showStudentNameLegacy:JBoolean = false
+	def isShowStudentName = getBooleanSetting(Settings.ShowStudentName, if (showStudentNameLegacy != null) showStudentNameLegacy else false)
+	
 	/** The group of extension managers */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "extension_managers_id")
@@ -63,6 +66,8 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def canRequestExtension = isAllowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
+	
+	def isPlagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
@@ -70,6 +75,18 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	override def postLoad {
 		ensureOwners
 		ensureSettings
+		
+		// Copy legacy settings if they don't exist
+		if (!settings.contains(Settings.CollectFeedbackRatings)) 
+			settings += (Settings.CollectFeedbackRatings -> collectFeedbackRatingsLegacy)
+		if (!settings.contains(Settings.AllowExtensionRequests)) 
+			settings += (Settings.AllowExtensionRequests -> (if (allowExtensionRequestsLegacy != null) allowExtensionRequestsLegacy else false))
+		if (!settings.contains(Settings.ExtensionGuidelineSummary)) 
+			settings += (Settings.ExtensionGuidelineSummary -> extensionGuidelineSummaryLegacy)
+		if (!settings.contains(Settings.ExtensionGuidelineLink)) 
+			settings += (Settings.ExtensionGuidelineLink -> extensionGuidelineLinkLegacy)
+		if (!settings.contains(Settings.ShowStudentName)) 
+			settings += (Settings.ShowStudentName -> (if (showStudentNameLegacy != null) showStudentNameLegacy else false))
 	}
 
 	def ensureOwners = {
@@ -80,8 +97,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def permissionsParents = Seq()
 
 	override def toString = "Department(" + code + ")"
-
-	@BeanProperty var showStudentName:JBoolean = false
 	
 }
 
@@ -92,5 +107,9 @@ object Department {
 		val AllowExtensionRequests = "allowExtensionRequests"
 		val ExtensionGuidelineSummary = "extensionGuidelineSummary"
 		val ExtensionGuidelineLink = "extensionGuidelineLink"
+			
+		val ShowStudentName = "showStudentName"
+			
+		val PlagiarismDetection = "plagiarismDetection"
 	}
 }
