@@ -13,8 +13,9 @@ import scala.reflect.BeanProperty
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 
-class TutorViewProfileCommand(student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
+class TutorViewProfileCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
 	@BeanProperty var studentUniId: String = student.getUniversityId
+	@BeanProperty var tutorUniId: String = null
 }
 
 @Controller
@@ -27,20 +28,22 @@ class TutorViewProfileController extends TutorProfilesController {
 	@ModelAttribute("tutorViewProfileCommand")
 	def tutorViewProfileCommand(@PathVariable("student") student: Member) = new TutorViewProfileCommand(student)
 	
-	@RequestMapping
-	def viewProfile(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
-		val student = cmd.apply
-		val studentUniId = student.universityId
-		
-		// "tutor" will only be defined second time round
-		if (request.getParameterMap().containsKey("tutorUniId")) {
-            val tutorUniId: String = request.getParameter("tutorUniId");
- 			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
-        }
-		
+	@RequestMapping(params=Array("!tutorUniId"))
+	def editTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
 		Mav("tutor/tutor_view", 
-			"studentUniId" -> studentUniId,
-			"tutorToDisplay" -> profileService.getTutorToDisplay(student)
-				)
+			"studentUniId" -> cmd.student.universityId,
+			"tutorToDisplay" -> profileService.getTutorToDisplay(cmd.student)
+		)
 	}
+	
+	@RequestMapping(params=Array("tutorUniId"))
+	def displayPickedTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+		val rel = profileService.saveStudentRelationship(PersonalTutor, cmd.student.sprCode, cmd.tutorUniId)
+
+		Mav("tutor/tutor_view", 
+			"studentUniId" -> cmd.student.universityId,
+			"tutorToDisplay" -> profileService.getTutorToDisplay(cmd.student)
+		)
+	}	
+	
 }

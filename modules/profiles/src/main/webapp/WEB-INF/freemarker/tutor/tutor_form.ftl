@@ -1,12 +1,28 @@
+<br />
 <section class="tutor-search">	
-	<@f.form method="get" action="${url('/tutor/tutor_search')}" commandName="tutorSearchProfilesCommand">
-		Personal tutor 
+	<@f.form method="get" action="${url('/tutor/tutor_search')}" commandName="tutorSearchProfilesCommand" class="form-horizontal">
 		<input id="studentUniId" name="studentUniId" type="hidden" value="${student.universityId}" />
-		<div class="input-box">
-			<@f.input path="query" value="${tutorToDisplay}" />
+		<div class="control-group">
+			<label class="control-label" for="personal-tutor"><b>Personal Tutor</b></label>
+			<div class="controls">
+				<@f.input type="text" id="personal-tutor" name="personal-tutor" path="query" value="${tutorToDisplay}" />
+				<button type="submit" class="btn btn-primary">
+					<i id="tutor-search-icon" class="icon-search icon-white"></i>
+				</button>
+				<a href="<@routes.tutor_edit_no_tutor studentUniId="${student.universityId}" />" class="btn">Reset</a>
+				<!-- <a href="<@routes.tutor_clear studentUniId="${student.universityId}" />" class="btn">Clear</a> -->
 		</div>
-		<button type="submit" class="btn btn-primary">
-			<i class="icon-search icon-white"></i>
-		</button>
+	</div>
 	</@f.form>
+	<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="<@routes.profile studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
 </section>
+
+
+
+<script type="text/javascript">
+	jQuery("#personal-tutor").focus(function() {
+		jQuery("#personal-tutor").val("");		
+	});
+</script>
