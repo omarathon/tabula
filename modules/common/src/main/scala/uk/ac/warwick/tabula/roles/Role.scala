@@ -15,9 +15,9 @@ abstract class Role(@BeanProperty val scope: Option[PermissionsTarget]) {
 	def getName = getClass.getSimpleName
 	def isScoped = scope.isDefined
 	
-	def explicitPermissions = permissions
-	def explicitPermissionsAsList = permissions.toList
-	def subRoles = roles
+	lazy val explicitPermissions = permissions
+	lazy val explicitPermissionsAsList = explicitPermissions.toList
+	lazy val subRoles = roles
 		
 	def GrantsPermission(scopelessPermissions: ScopelessPermission*) = grant(None, scopelessPermissions)
 	def GrantsGlobalPermission(globalPermissions: Permission*) = grant(None, globalPermissions)

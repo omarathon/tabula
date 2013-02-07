@@ -1,12 +1,23 @@
 package uk.ac.warwick.tabula.permissions
 
 sealed trait Permission {
-	def getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
+	val getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
 	
-	def isScoped = true
+	val isScoped = true
+	
+	/* We need to override equals() here because under heavy load, the class loader will 
+	 * (stupidly) return a different instance of the case object, which fails the equality
+	 * check because the default AnyRef implementation of equals is just this eq that.
+	 * 
+	 * The hashCode is computed at compile time, so this is safe. */
+	override def equals(other: Any) = other match {
+		case that: Permission => hashCode() == that.hashCode()
+		case _ => false
+	}
+	override def toString() = getName
 }
 sealed trait ScopelessPermission extends Permission {
-	override def isScoped = false
+	override val isScoped = false
 }
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
