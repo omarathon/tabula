@@ -27,12 +27,12 @@
 							<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId}</a>
 		
 							<#if activity.entity.late>
-								<span class="label-red">Late</span>
+								<span class="label label-important">Late</span>
 							<#elseif activity.entity.authorisedLate>
-								<span class="label-blue">Within Extension</span>
+								<span class="label label-info">Within Extension</span>
 							</#if>
 							<#if activity.entity.suspectPlagiarised>
-								<span class="label-orange">Suspect Plagiarised</span>
+								<span class="label label-warning">Suspect Plagiarised</span>
 							</#if>
 						<#else>
 							<#-- default -->

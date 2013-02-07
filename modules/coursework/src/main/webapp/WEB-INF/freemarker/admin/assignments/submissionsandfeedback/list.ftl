@@ -70,10 +70,10 @@ Publications: ${r.publicationOverlap}%)
 				<#assign date>
 					<@fmt.date date=extension.expiryDate capitalise=true />
 				</#assign>
-				<span class="label-blue">Unsubmitted</span>
-				<span class="label-blue use-tooltip" title="${date}">Within Extension</span>
+				<span class="label label-info">Unsubmitted</span>
+				<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
 			<#else>
-				<span class="label-blue">Unsubmitted</span>
+				<span class="label label-info">Unsubmitted</span>
 			</#if>
 		</td>
 		<#if assignment.wordCountField??><td></td></#if>
@@ -211,18 +211,18 @@ Publications: ${r.publicationOverlap}%)
 					</td>
 					<td class="submission-status">
 						<#if submission.late>
-							<span class="label-red use-tooltip" title="${lateness!''}">Late</span>
+							<span class="label label-important use-tooltip" title="${lateness!''}">Late</span>
 						<#elseif  submission.authorisedLate>
-							<span class="label-blue use-tooltip" title="${lateness!''}">Within Extension</span>
+							<span class="label label-info use-tooltip" title="${lateness!''}">Within Extension</span>
 						</#if>
 						<#if enhancedSubmission.downloaded>
-							<span class="label-green">Downloaded</span>
+							<span class="label label-success">Downloaded</span>
 						</#if>
 						<#if submission.state?? && submission.state.toString == "ReleasedForMarking">
-							<span class="label-green">Markable</span>
+							<span class="label label-success">Markable</span>
 						</#if>
 						<#if submission.suspectPlagiarised>
-							<span class="label-orange">Suspect Plagiarised</span>
+							<span class="label label-warning">Suspect Plagiarised</span>
 						</#if>
 					</td>
 					<#if assignment.wordCountField??>
@@ -271,8 +271,8 @@ Publications: ${r.publicationOverlap}%)
 					<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 					<td class="feedbackReleased">
 						<#if student.feedback??>
-							<#if student.feedback.released>Published
-							<#else>Not yet published
+							<#if student.feedback.released><span class="label label-info">Published</span>
+							<#else><span class="label label-warning">Not yet published</span>
 							</#if>
 						</#if>
 					</td>

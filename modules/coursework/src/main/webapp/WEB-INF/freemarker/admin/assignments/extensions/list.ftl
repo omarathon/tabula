@@ -43,11 +43,11 @@
 						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
-								<span class="label-green">Approved</span>
+								<span class="label label-success">Approved</span>
 							<#elseif extension.rejected>
-								<span class="label-red">Rejected</span>
+								<span class="label label-important">Rejected</span>
 							<#else>
-								<span class="label-blue">Awaiting approval</span><br/>
+								<span class="label label-info">Awaiting approval</span><br/>
 								Requested <@fmt.date date=extension.requestedOn at=true/>
 							</#if>
 						</td>
@@ -68,9 +68,9 @@
 						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
-								<span class="label-green">Approved</span>
+								<span class="label label-success">Approved</span>
 							<#elseif extension.rejected>
-								<span class="label-red">Rejected</span>
+								<span class="label label-important">Rejected</span>
 							</#if>
 						</td>
 						<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
@@ -210,9 +210,9 @@
 					}
 					$('.status').each(function(){
 						if ($(this).html() === "Approved")
-							$(this).html('<span class="label-green">Approved</span>');
+							$(this).html('<span class="label label-success">Approved</span>');
 						else if ($(this).html() === "Rejected")
-							$(this).html('<span class="label-red">Rejected</span>');
+							$(this).html('<span class="label label-important">Rejected</span>');
 					});
 				};
 			});

@@ -67,15 +67,15 @@ Publications: ${r.publicationOverlap}%)
                 </td>
                 <td class="status">
                     <#if submission.late>
-                        <span class="label-red">Late</span>
+                        <span class="label label-important">Late</span>
 					<#elseif  submission.authorisedLate>
-						<span class="label-blue">Within Extension</span>
+						<span class="label label-info">Within Extension</span>
                     </#if>
                     <#if item.downloaded>
-                        <span class="label-green">Downloaded</span>
+                        <span class="label label-success">Downloaded</span>
                     </#if>
                     <#if submission.suspectPlagiarised>
-                    	<span class="label-orange">Suspect Plagiarised</span>
+                    	<span class="label label-warning">Suspect Plagiarised</span>
                     </#if>
                 </td>
 				<#if assignment.wordCountField??>

@@ -49,11 +49,11 @@
 				</#if>
 				<td>
 					<#if item.markerFeedback.state.toString == "ReleasedForMarking">
-						<span class="label-orange">Ready for marking</span>
+						<span class="label label-warning">Ready for marking</span>
 					<#elseif item.markerFeedback.state.toString == "DownloadedByMarker">
-						<span class="label-blue">Downloaded</span>
+						<span class="label label-info">Downloaded</span>
 					<#elseif item.markerFeedback.state.toString == "MarkingCompleted">
-						<span class="label-green">Marking completed</span>
+						<span class="label label-success">Marking completed</span>
 					</#if>
 				</td>
 			</#if>

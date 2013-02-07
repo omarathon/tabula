@@ -146,6 +146,8 @@ ul {
 		display:block-inline;
 		float: left;
 		margin: 1px 10px 5px 0;
+		
+		span { white-space: nowrap; }
 	}
 }
 
@@ -672,38 +674,6 @@ span.press-ctrl-c {
 .comment-field {
   color: #000;
   margin: 1em;
-}
-
-.label-ANY() {
-	padding: 1px 4px;
-	text-transform: uppercase;
-	font-size: 80%;
-	font-weight: bold;
-	border-radius: 4px;
-}
-
-.label-green {
-	background: @green;
-	color: white;
-	.label-ANY();
-}
-
-.label-orange {
-	background: @orange;
-	color: white;
-	.label-ANY();
-}
-
-.label-red {
-	background: @red;
-	color: white;
-	.label-ANY();
-}
-
-.label-blue {
-	background: @blue;
-	color: white;
-	.label-ANY();
 }
 
 .extra-data {
