@@ -47,7 +47,7 @@ jQuery(function($){
 	
 	// reload page when academic field dropdown changes, as it changes the contents of the list.
 	$('#academicYearSelect').change(function(){
-		$form.find('input[name=action]').val('refresh-select');
+		$form.find('input[name=action]').val('change-year');
 		$form.submit();
 	}); 
 

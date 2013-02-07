@@ -45,6 +45,10 @@ class AddAssignmentsController extends CourseworkController {
 		getMav(cmd).addObjects("action" -> "select")
 	}
 
+	// Change the academic year; restarts from scratch
+	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
+	def changeYear(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = selectionForm(cmd, errors)
+
 	// Reloads page 1 with a POST, to show any updated information if necessary.
 	@RequestMapping(method = Array(POST), params = Array("action=refresh-select"))
 	def refreshSelectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
