@@ -5,7 +5,7 @@ import java.util.HashSet
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
-import org.hibernate.annotations.{AccessType, FetchMode, Type}
+import org.hibernate.annotations.{AccessType, Type}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -13,7 +13,6 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.SubmissionState._
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import uk.ac.warwick.tabula.permissions._
 
@@ -56,8 +55,8 @@ class Submission extends GeneratedId with PermissionsTarget {
 	@NotNull
 	@BeanProperty var universityId: String = _
 	
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.SubmissionStateUserType")
-	@BeanProperty var state : SubmissionState = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
+	@BeanProperty var state : MarkingState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BeanProperty var values: JSet[SavedSubmissionValue] = new HashSet
@@ -87,7 +86,8 @@ class Submission extends GeneratedId with PermissionsTarget {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def isReleasedForMarking: Boolean = state == ReleasedForMarking
+	def isReleasedForMarking: JBoolean = assignment.isReleasedForMarking(this)
+	def isReleasedToSecondMarker: JBoolean = assignment.isReleasedToSecondMarker(this)
 }
 
 /**

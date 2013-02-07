@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Feedback, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -18,18 +18,29 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 
 	// list to contain feedback files that are not for a student you should be marking
 	@BeanProperty var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+	// list to contain feedback files that are  for a student that has already been completed
+	@BeanProperty var markedStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+
+	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser)
 
 	def processStudents() {
-		val submissions = assignment.getMarkersSubmissions(submitter.apparentUser).getOrElse(Seq())
+		val markedSubmissions = submissions.filter{ submission =>
+			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, submitter.apparentUser)
+			markerFeedback match {
+				case Some(f) if f.state != MarkingCompleted => true
+				case _ => false
+			}
+		}
 		val universityIds = submissions.map(_.getUniversityId)
-
+		val markedIds = markedSubmissions.map(_.getUniversityId)
 		invalidStudents = items.filter(item => !universityIds.contains(item.uniNumber))
-		items = items.filter(item => universityIds.contains(item.uniNumber))
+		markedStudents = items.filter(item => !markedIds.contains(item.uniNumber))
+		items = (items.toList -- invalidStudents.toList) -- markedStudents.toList
 	}
 
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.findFeedback(uniNumber).getOrElse({
+		val parentFeedback = assignment.feedbacks.find(_.universityId == uniNumber).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = submitter.apparentId
@@ -40,22 +51,8 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 
 		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => {
-				Option(parentFeedback.firstMarkerFeedback).getOrElse({
-					val newMarkerFeedback = new MarkerFeedback
-					newMarkerFeedback.feedback = parentFeedback
-					parentFeedback.firstMarkerFeedback = newMarkerFeedback
-					newMarkerFeedback
-				})
-			}
-			case false => {
-				Option(parentFeedback.secondMarkerFeedback).getOrElse({
-					val newMarkerFeedback = new MarkerFeedback
-					newMarkerFeedback.feedback = parentFeedback
-					parentFeedback.secondMarkerFeedback = newMarkerFeedback
-					newMarkerFeedback
-				})
-			}
+			case true => parentFeedback.retrieveFirstMarkerFeedback
+			case false => parentFeedback.retrieveSecondMarkerFeedback
 			case _ => null
 		}
 

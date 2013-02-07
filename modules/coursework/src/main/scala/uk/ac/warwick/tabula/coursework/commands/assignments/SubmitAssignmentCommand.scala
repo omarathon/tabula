@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.SubmissionState._
+import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.util.Assert
@@ -113,7 +113,6 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 		submission.submittedDate = new DateTime
 		submission.userId = user.apparentUser.getUserId
 		submission.universityId = user.apparentUser.getWarwickId
-		submission.state = Received // initial state
 
 		submission.values = fields.map {
 			case (_, submissionValue) =>

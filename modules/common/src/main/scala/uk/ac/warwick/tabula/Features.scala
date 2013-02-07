@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula
 
-import scala.annotation.target.field
 import scala.reflect.BeanProperty
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
@@ -48,13 +47,14 @@ abstract class Features {
 	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = defaults.combinedForm
 	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = defaults.feedbackTemplates
 	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = defaults.markSchemes
+	@Value("${features.markerFeedback:false}") @BeanProperty var markerFeedback: Boolean = defaults.markerFeedback
 	@Value("${features.profiles:true}") @BeanProperty var profiles: Boolean = defaults.profiles
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
 		val values = new BeanWrapperImpl(message)
 		
-		for (pd <- values.getPropertyDescriptors() if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null) 
+		for (pd <- values.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 		this
 	}
@@ -73,7 +73,7 @@ class FeaturesMessage {
 		val bean = new BeanWrapperImpl(this)
 		val values = new BeanWrapperImpl(features)
 		
-		for (pd <- bean.getPropertyDescriptors() if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
+		for (pd <- bean.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 	}
 	
@@ -88,6 +88,7 @@ class FeaturesMessage {
 	@BeanProperty var combinedForm = true
 	@BeanProperty var feedbackTemplates = true
 	@BeanProperty var markSchemes = true
+	@BeanProperty var markerFeedback = false
 	@BeanProperty var profiles = true
 }
 
@@ -103,7 +104,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
 				}
 		}
 		
-		override def afterPropertiesSet = {
+		override def afterPropertiesSet() {
 				queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
 		}
 	

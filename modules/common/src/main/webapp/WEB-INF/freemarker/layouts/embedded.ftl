@@ -29,7 +29,7 @@
 
 	</head>
 	<body>
-		<div class="tabula-page ${component.bodyClass?default('component-page')">
+		<div class="tabula-page ${component.bodyClass?default('component-page')}">
 		<@tiles.insertAttribute name="body" />
 		</div>
 	</body>

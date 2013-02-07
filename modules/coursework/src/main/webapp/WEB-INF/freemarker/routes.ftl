@@ -21,14 +21,18 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/list"/></#macro>
 <#macro assignmentfeedbacks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/list"/></#macro>
 
+<#macro listmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 <#macro downloadmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/submissions.zip"/></#macro>
+<#macro downloadfirstmarkerfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/firstmarker/feedbacks.zip"/></#macro>
+<#macro uploadmarkerfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback"/></#macro>
+<#macro markeraddmarks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/list"/></#macro>
 
 <#macro feedbackadd assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
 <#macro feedbackdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>
 <#macro markstemplate assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marks-template" /></#macro>
-
+<#macro markermarkstemplate assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks-template" /></#macro>
 <#macro extensionreviewattachment assignment userid filename><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${userid}/supporting-file/${filename}" /></#macro>
 <#macro extensionrequestattachment assignment filename><@url page="/module/${assignment.module.code}/${assignment.id}/extension/supporting-file/${filename}" /></#macro>
 

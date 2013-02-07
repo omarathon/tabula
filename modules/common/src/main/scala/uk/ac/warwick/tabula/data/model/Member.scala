@@ -145,7 +145,7 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 			
 	def personalTutor = userType match {
 		case Student => {
-			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.getAgentParsed) match {
+			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.agentParsed) match {
 				case None => "Not recorded"
 				case Some(name: String) => name
 				case Some(member: Member) => member
@@ -153,6 +153,10 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		}
 		case _ => "Not applicable"
 	}
+	
+	def isStaff = (userType == Staff)
+	def isStudent = (userType == Student)
+	def isAPersonalTutor = (userType == Staff && !profileService.listStudentRelationshipsWithMember(PersonalTutor, this).isEmpty)
 }
 
 trait MemberProperties {
@@ -194,9 +198,6 @@ trait MemberProperties {
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
-	
-	def isStaff = (userType == Staff)
-	def isStudent = (userType == Student)
 }
 
 trait StudentProperties {

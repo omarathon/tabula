@@ -21,9 +21,7 @@ Adding or editing a new markscheme
 <@f.errors cssClass="error form-errors" />
 
 <#--
-
 Common form fields.
-
 -->
 <@form.labelled_row "name" "Name">
 	<@f.input path="name" cssClass="text" />
@@ -36,33 +34,23 @@ Common form fields.
 	<@form.userpicker path="firstMarkers" list=true multiple=true />
 </@form.labelled_row>
 
-<div class="control-group">
-	<label class="control-label">Students must select their marker</label>
-	<div class="controls">
-		<input type="checkbox" checked="checked" disabled="disabled"/>
-		<div class="help-block">
-			When checked, students will choose their marker out of the list of first markers
-			using a drop-down select box on the submission form. You will be able to un-check this option when
-			more mark schemes are released in upcoming versions of the app.
-		</div>
-	</div>
-</div>
-<#-- TODO - replace with block below when more options become available - but disable it if existingSubmissions is true -->
-<#--@form.labelled_row "studentsChooseMarker" "">
-	<label class="checkbox">
-		<@f.checkbox path="studentsChooseMarker" />
-		Students must select their marker
-	</label>
-	<div class="help-block">
-		When checked, students will choose their marker out of the list of first markers
-		using a drop-down select box on the submission form.
-	</div>
-</@form.labelled_row-->
+<@form.labelled_row "secondMarkers" "Second markers">
+	<@form.userpicker path="secondMarkers" list=true multiple=true />
+</@form.labelled_row>
 
+<#-- TODO-RITCHIE disable it if existingSubmissions is true -->
+
+<@form.labelled_row "markingMethod" "Marking Method">
+	<@f.select path="markingMethod">
+		<@f.option />
+		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
+		<@f.option value="SeenSecondMarking" label="Seen second marking" />
+	</@f.select>
+</@form.labelled_row>
 
 <div class="submit-buttons">
 <input type="submit" value="${submit_text}" class="btn btn-primary">
-or <a class="btn" href="<@routes.markschemelist department />">Cancel</a>
+<a class="btn" href="<@routes.markschemelist department />">Cancel</a>
 </div>
 
 </@f.form>

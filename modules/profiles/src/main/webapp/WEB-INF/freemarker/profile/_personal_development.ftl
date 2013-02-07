@@ -12,9 +12,15 @@
 				<div class="photo">
 					<img src="<@routes.tutorPhoto profile />" />
 				</div>
-				<h5>${profile.personalTutor.fullName}</h5>
-				<#if profile.personalTutor.email??>
-					<p><i class="icon-envelope"></i> <a href="mailto:${profile.personalTutor.email}">${profile.personalTutor.email}</a></p>
+				<h5>
+					${profile.personalTutor.fullName}
+				</h5>
+				<#if profile.personalTutor.universityId == viewer.universityId>
+					<span class="muted">(you)</span>
+				<#else>
+					<#if profile.personalTutor.email??>
+						<p><i class="icon-envelope"></i> <a href="mailto:${profile.personalTutor.email}">${profile.personalTutor.email}</a></p>
+					</#if>
 				</#if>
 			</div>
 		</#if>

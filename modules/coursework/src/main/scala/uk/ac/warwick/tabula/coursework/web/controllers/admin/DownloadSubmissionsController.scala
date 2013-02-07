@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
@@ -10,12 +8,9 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackShe
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -51,6 +46,20 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	@RequestMapping
 	def downloadMarkersSubmissions(command: DownloadMarkersSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		val assignment = command.assignment
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+		
+		// do not download submissions where the marker has completed marking
+		val filteredSubmissions = submissions.filter{ submission =>
+			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
+			markerFeedback match {
+				case Some(f) if f.state != MarkingCompleted => true
+				case _ => false
+			}
+		}
+		
+		command.submissions = filteredSubmissions.toList
+			
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -115,9 +124,7 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		val assignment = command.assignment
 
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser).getOrElse(
-			throw new IllegalStateException("Cannot download submissions for assignments with no mark schemes")
-		)
+		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 
 		val users = submissions.map(s => userLookup.getUserByUserId(s.userId))
 		command.members = users

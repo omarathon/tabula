@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>27-SNAPSHOT</version>
+		<version>28-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -44,6 +44,21 @@
 		</testResources>
 
 		<plugins>
+			<!-- Collect reflections information -->
+			<plugin>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections-maven</artifactId>
+				<version>0.9.8</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>reflections</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+		
 			<!-- Scala support in maven -->
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>

@@ -24,9 +24,9 @@
 	<td>${job.status!''}</td>
 	<td>
 		<#if job.started>
-			<span class="label-green">Started</span>
+			<span class="label label-success">Started</span>
 		<#else>
-			<span class="label-orange">Waiting</span>
+			<span class="label label-warning">Waiting</span>
 		</#if>
 		<span class="percent">${job.progress!'?'}%</span>
 	</td>

@@ -21,13 +21,17 @@ trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getBySprCode(sprCode: String): Option[Member]
+	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
-	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 }
 
 @Repository
@@ -41,7 +45,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def getByUniversityId(universityId: String) = 
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
 	
-	def getByUserId(userId: String, disableFilter: Boolean = false) = {
+	def getBySprCode(sprCode: String) = 
+		session.newCriteria[Member].add(is("sprCode", sprCode.trim)).uniqueResult
+	
+	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter) 
@@ -49,13 +56,19 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				
 			session.newCriteria[Member]
 					.add(is("userId", userId.trim.toLowerCase))
+					.add(disjunction()
+						.add(is("inUseFlag", "Active"))
+						.add(like("inUseFlag", "Inactive - Starts %"))
+					)
 					.addOrder(asc("universityId"))
-					.list.headOption
+					.seq
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
 		}
 	}
+	
+	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
 	
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = 
 		session.newCriteria[Member]
@@ -95,11 +108,48 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.uniqueResult
 	}
 	
-	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
-					//.list.asInstanceOf[JList[StudentRelationship]]
 	}	
+	
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
+		// order by agent to separate any named (external) from numeric (member) agents
+		// then by student properties
+		val list = session.createQuery("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				Member m
+			where
+				sr.targetSprCode = m.sprCode
+			and
+				sr.relationshipType = :relationshipType
+			and
+				m.homeDepartment = :department
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.agent, sr.targetSprCode
+		""")
+			.setEntity("department", department)
+			.setString("relationshipType", relationshipType.dbValue)
+			.list.asInstanceOf[JList[StudentRelationship]]
+		
+		list
+	}
+
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.add(is("agent", agentId))
+			.add(is("relationshipType", relationshipType))
+			.add( Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			))
+			.seq
+	}
 }

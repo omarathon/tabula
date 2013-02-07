@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddMarkerFeedbackController extends CourseworkController {
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AddMarkerFeedbackCommand(module, assignment, user, true) //TODO switch flag depending on which marker this is
+		new AddMarkerFeedbackCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
@@ -35,7 +35,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
+	def doUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, @PathVariable assignment: Assignment, errors: Errors): Mav = {
 
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)
@@ -45,7 +45,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 		} else {
 			// do apply, redirect back
 			cmd.apply()
-			Redirect(Routes.admin.module(cmd.module))
+			Redirect(Routes.admin.assignment.markerFeedback(assignment))
 		}
 	}
 

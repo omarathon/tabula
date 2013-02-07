@@ -16,15 +16,24 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller class HomeController extends ProfilesController {
 	
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)) orNull
 
-	@RequestMapping(Array("/")) def home() = 
-		if (user.isStaff) Mav("home/view")
-		else if (optionalCurrentMember.isDefined && currentMember.userType == Student) Redirect(Routes.profile.view(currentMember))
-		else Mav("home/nopermission")
-	
+	@RequestMapping(Array("/")) def home() = {
+		if (user.isStaff) {
+			Mav(
+				"home/view",
+				"isAPersonalTutor" -> currentMember.isAPersonalTutor,
+				"adminDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions)
+			)
+		} else if (optionalCurrentMember.isDefined && currentMember.userType == Student) {
+			Redirect(Routes.profile.view(currentMember))
+		} else Mav("home/nopermission")
+	}
 }

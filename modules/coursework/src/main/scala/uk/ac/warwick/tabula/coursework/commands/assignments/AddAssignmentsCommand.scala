@@ -75,10 +75,10 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	var assignmentService = Wire.auto[AssignmentService]
 	var moduleDao = Wire.auto[ModuleDao]
 
-	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 6
-	// months, which means it will start defaulting to next year from about February (under the assumption that
+	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
+	// months, which means it will start defaulting to next year from about May (under the assumption that
 	// you would've done the current year's import long before then).
-	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(6))
+	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(3))
 
 	// All the possible assignments, prepopulated from SITS.
 	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()

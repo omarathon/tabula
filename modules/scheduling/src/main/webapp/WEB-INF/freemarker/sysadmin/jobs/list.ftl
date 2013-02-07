@@ -35,13 +35,13 @@
 	<td>${job.status!''}</td>
 	<td>
 		<#if job.finished && job.succeeded>
-			<span class="label-green">Succeeded</span>
+			<span class="label label-success">Succeeded</span>
 		<#elseif job.finished>
-			<span class="label-red">Failed</span>
+			<span class="label label-important">Failed</span>
 		<#elseif job.started>
-			<span class="label-blue">Started</span>
+			<span class="label label-info">Started</span>
 		<#else>
-			<span class="label-orange">Waiting</span>
+			<span class="label label-warning">Waiting</span>
 		</#if>
 		<span class="percent">${job.progress!'?'}%</span>
 	</td>

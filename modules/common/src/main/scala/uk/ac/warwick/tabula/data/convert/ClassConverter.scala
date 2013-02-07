@@ -9,7 +9,7 @@ import uk.ac.warwick.util.core.StringUtils
 import org.springframework.format.Formatter
 import java.util.Locale
 
-class ClassConverter extends TwoWayConverter[String, Class[_]] with Formatter[Class[_]] {
+class ClassConverter extends TwoWayConverter[String, Class[_]] {
   	
 	override def convertRight(className: String) = 
 		if (StringUtils.hasText(className)) Class.forName(className)
@@ -19,8 +19,5 @@ class ClassConverter extends TwoWayConverter[String, Class[_]] with Formatter[Cl
 		case Some(clazz) => clazz.getName
 		case None => null
 	}
-
-	override def parse(source: String, locale: Locale) = convertRight(source)
-	override def print(source: Class[_], locale: Locale) = convertLeft(source)
 
 }

@@ -22,14 +22,15 @@ class ViewProfileController extends ProfilesController {
 	
 	@RequestMapping
 	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
-		val member = cmd.apply
+		val profiledMember = cmd.apply
 		
-		val isSelf = (member.universityId == user.universityId)
+		val isSelf = (profiledMember.universityId == user.universityId)
 		
 		Mav("profile/view", 
-		    "profile" -> member,
+		    "profile" -> profiledMember,
+		    "viewer" -> currentMember,
 		    "isSelf" -> isSelf)
-		   .crumbs(Breadcrumbs.Profile(member, isSelf))
+		   .crumbs(Breadcrumbs.Profile(profiledMember, isSelf))
 	}
 
 }

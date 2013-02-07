@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.system
 import org.springframework.core.convert.TypeDescriptor
-
 import org.springframework.core.convert.converter.GenericConverter
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair
-
 import com.google.common.collect.Sets._
-
 import java.{ util => j }
+import org.springframework.format.Formatter
+import java.util.Locale
 
 /**
  * A Spring GenericConverter that can convert both to and from two types.
@@ -25,7 +24,7 @@ import java.{ util => j }
  * If a value is invalid, throw IllegalArgumentException. Spring will pick it up and correctly
  * treat it as a type mismatch.
  */
-abstract class TwoWayConverter[A <: AnyRef: ClassManifest, B <: AnyRef: ClassManifest] extends GenericConverter {
+abstract class TwoWayConverter[A <: String: ClassManifest, B <: AnyRef: ClassManifest] extends GenericConverter with Formatter[B] {
 	// JVM can't normally remember types at runtime, so store them as Manifests here
 	val typeA = classManifest[A]
 	val typeB = classManifest[B]
@@ -39,6 +38,10 @@ abstract class TwoWayConverter[A <: AnyRef: ClassManifest, B <: AnyRef: ClassMan
 	// implement these. throw an IllegalArgumentException if input is invalid - don't just return null!
 	def convertRight(source: A): B
 	def convertLeft(source: B): A
+
+	// Formatter used for generating textual value in template
+	override def parse(string: String, locale: Locale): B = convertRight(string.asInstanceOf[A])
+	override def print(value: B, locale: Locale): A = convertLeft(value)
 
 	// Convert either left or right, depending on the two types.
 	def convert(source: Any, sourceType: TypeDescriptor, targetType: TypeDescriptor) = {

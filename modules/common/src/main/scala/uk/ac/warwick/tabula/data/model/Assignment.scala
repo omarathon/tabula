@@ -4,21 +4,21 @@ import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.reflect.Manifest
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
-import org.joda.time.DateTime
 import javax.persistence._
-import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
-import uk.ac.warwick.spring.Wire
+import javax.persistence.CascadeType._
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 
@@ -137,7 +137,12 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	@BeanProperty var markScheme: MarkScheme = _
-	
+
+	/** Map between markers and the students assigned to them */
+	@OneToMany @JoinTable(name="marker_usergroup")
+	@MapKeyColumn(name="marker_uni_id")
+	var markerMap: JMap[String, UserGroup] = Map[String, UserGroup]()
+
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
 	}
@@ -318,35 +323,82 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		}
 	}
 
-	def isMarker(user: User): Boolean = {
+	def isMarker(user: User) = isFirstMarker(user)|| isSecondMarker(user)
+
+	def isFirstMarker(user: User): Boolean = {
 		if (markScheme != null)
 			markScheme.firstMarkers.includes(user.getUserId)
 		else false
+	}
+
+	def isSecondMarker(user: User): Boolean = {
+		if (markScheme != null)
+			markScheme.secondMarkers.includes(user.getUserId)
+		else false
+	}
+
+	def isReleasedForMarking(submission:Submission) : Boolean =
+		feedbacks.find(_.universityId == submission.universityId) match {
+			case Some(f) => f.firstMarkerFeedback != null
+			case _ => false
+		}
+
+	def isReleasedToSecondMarker(submission:Submission) : Boolean =
+		feedbacks.find(_.universityId == submission.universityId) match {
+			case Some(f) => f.secondMarkerFeedback != null
+			case _ => false
+		}
+
+	/*
+		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first markers feedback item.
+		false returns the second markers item
+	 */
+	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.universityId == uniId)
+		parentFeedback match {
+			case Some(f) => {
+				if(this.isFirstMarker(user))
+					Some(f.retrieveFirstMarkerFeedback)
+				else if(this.isSecondMarker(user))
+					Some(f.retrieveSecondMarkerFeedback)
+				else
+					None
+			}
+			case None => None
+		}
 	}
 
 	/**
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = markerSelectField match {
-		case Some(field) => {
-			submission.getValue(field) match {
-				case Some(sv) => Some(sv.value)
-				case None => None
+	def getStudentsFirstMarker(submission: Submission): Option[String] = markScheme.markingMethod match {
+		case SeenSecondMarking =>  {
+			val mapEntry = markerMap.find{p:(String,UserGroup) => p._2.includes(submission.userId)}
+			mapEntry match {
+				case Some((markerId, students)) => Some(markerId)
+				case _ => None
 			}
 		}
-		case None => None
+		case StudentsChooseMarker => markerSelectField match {
+			case Some(field) => {
+				submission.getValue(field) match {
+					case Some(sv) => Some(sv.value)
+					case None => None
+				}
+			}
+			case None => None
+		}
+		case _ => None
 	}
 
 		/**
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid mark scheme attached
 	 */
-	def getMarkersSubmissions(marker: User): Option[Seq[Submission]] = {
-		if (markScheme != null){
-			Some(markScheme.getSubmissions(this, marker))
-		}
-		else None
+	def getMarkersSubmissions(marker: User): Seq[Submission] = {
+		if (markScheme != null)	markScheme.getSubmissions(this, marker)
+		else Seq()
 	}
 
 	/**

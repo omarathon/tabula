@@ -10,19 +10,19 @@ class MarkerFeedbackTests extends TestBase {
 		val random = new Random
 		val feedback = new Feedback(universityId = idFormat(1))
 
-		val firstMarkerFeedback = new MarkerFeedback()
+		val firstMarkerFeedback = new MarkerFeedback(feedback)
 		val mark1 = random.nextInt(101)
 		firstMarkerFeedback.mark = Some(mark1)
 		firstMarkerFeedback.mark.get should be (mark1)
 
 
-		val secondMarkerFeedback = new MarkerFeedback()
+		val secondMarkerFeedback = new MarkerFeedback(feedback)
 		val mark2 = random.nextInt(101)
 		secondMarkerFeedback.mark = Some(mark2)
 		secondMarkerFeedback.mark.get should be (mark2)
 
-		feedback.addFirstMarkerFeedback(firstMarkerFeedback)
-		feedback.addSecondMarkerFeedback(secondMarkerFeedback)
+		feedback.firstMarkerFeedback = firstMarkerFeedback
+		feedback.secondMarkerFeedback = secondMarkerFeedback
 
 		firstMarkerFeedback.feedback.id should be (feedback.id)
 		secondMarkerFeedback.id should be (feedback.id)
