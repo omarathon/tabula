@@ -12,7 +12,8 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity @AccessType("field")
-class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarget {
+class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
+	import Department._
   
 	@BeanProperty var code:String = null
 	
@@ -24,26 +25,33 @@ class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarg
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="ownersgroup_id")
 	@BeanProperty var owners:UserGroup = new UserGroup
-	
-	@BeanProperty var collectFeedbackRatings:Boolean = false
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 	
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var markSchemes:JList[MarkScheme] = ArrayList()
+	
+	/* Legacy Properties. Remove these once the settings map is completely in use */
+	@BeanProperty @Column(name="collectFeedbackRatings") var collectFeedbackRatingsLegacy:Boolean = false
+	def isCollectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings, collectFeedbackRatingsLegacy)
 
 	// settings for extension requests
-	@BeanProperty var allowExtensionRequests:JBoolean = false
-	@BeanProperty var extensionGuidelineSummary:String = null
-	@BeanProperty var extensionGuidelineLink:String = null
+	@BeanProperty @Column(name="allowExtensionRequests") var allowExtensionRequestsLegacy:JBoolean = false
+	def isAllowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests, if (allowExtensionRequestsLegacy != null) allowExtensionRequestsLegacy else false)
+	
+	@BeanProperty @Column(name="extensionGuidelineSummary") var extensionGuidelineSummaryLegacy:String = null
+	def getExtensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary, extensionGuidelineSummaryLegacy)
+	
+	@BeanProperty @Column(name="extensionGuidelineLink") var extensionGuidelineLinkLegacy:String = null
+	def getExtensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink, extensionGuidelineLinkLegacy)
 	
 	/** The group of extension managers */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "extension_managers_id")
 	@BeanProperty var extensionManagers = new UserGroup()
 
-	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
+	def formattedGuidelineSummary:String = Option(getExtensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
 		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
 		(NodeSeq fromSeq nodes).toString()
@@ -53,7 +61,7 @@ class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarg
 	def addOwner(owner:String) = ensureOwners.addUser(owner)
 	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
 
-	def canRequestExtension = allowExtensionRequests != null && allowExtensionRequests
+	def canRequestExtension = isAllowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
@@ -61,6 +69,7 @@ class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarg
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureOwners
+		ensureSettings
 	}
 
 	def ensureOwners = {
@@ -74,4 +83,14 @@ class Department extends GeneratedId with PostLoadBehaviour with PermissionsTarg
 
 	@BeanProperty var showStudentName:JBoolean = false
 	
+}
+
+object Department {
+	object Settings {
+		val CollectFeedbackRatings = "collectFeedbackRatings"
+			
+		val AllowExtensionRequests = "allowExtensionRequests"
+		val ExtensionGuidelineSummary = "extensionGuidelineSummary"
+		val ExtensionGuidelineLink = "extensionGuidelineLink"
+	}
 }

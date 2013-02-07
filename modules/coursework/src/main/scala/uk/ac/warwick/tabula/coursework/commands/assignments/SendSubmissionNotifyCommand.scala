@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserSettingsService
 import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.data.model.UserSettings
 
 class SendSubmissionNotifyCommand (
 		@BeanProperty val submission: Submission, 
@@ -50,9 +51,9 @@ class SendSubmissionNotifyCommand (
 	
 	def canEmailUser(user: User) : Boolean = {
 		userSettings.getByUserId(user.getUserId) match {
-			case Some(settings) => settings.get("alertsSubmission") orNull match {
-				case "allSubmissions" => true
-				case "lateSubmissions" => submission.isLate || submission.isAuthorisedLate
+			case Some(settings) => settings.getStringSetting(UserSettings.Settings.AlertsSubmission) orNull match {
+				case UserSettings.AlertsAllSubmissions => true
+				case UserSettings.AlertsLateSubmissions => submission.isLate || submission.isAuthorisedLate
 				case _ => false
 			}
 			case None => false

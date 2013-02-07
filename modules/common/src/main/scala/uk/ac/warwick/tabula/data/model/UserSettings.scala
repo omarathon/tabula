@@ -22,3 +22,13 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	def permissionsParents = Seq()
 	
 }
+
+object UserSettings {
+	val AlertsAllSubmissions = "allSubmissions"
+	val AlertsLateSubmissions = "lateSubmissions"
+	val AlertsNoSubmissions = "none"
+	
+	object Settings {
+		val AlertsSubmission = "alertsSubmission"
+	}
+}

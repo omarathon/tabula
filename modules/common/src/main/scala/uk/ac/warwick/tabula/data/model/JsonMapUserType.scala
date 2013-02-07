@@ -11,7 +11,8 @@ import java.sql.Types
   */
 class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] {
 	
-	val json = Wire.auto[ObjectMapper]
+	/** Sad face, Hibernate user types are instantiated in a weird way that make dependency injection hard */
+	lazy val jsonMapper = Wire.auto[ObjectMapper]
 	
 	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
@@ -19,7 +20,7 @@ class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] {
 	val nullValue = null
 	val nullObject = null
 	
-	override def convertToObject(string: String) = json.readValue(string, classOf[Map[String, Any]])
-	override def convertToValue(map: Map[String, Any]) = json.writeValueAsString(map)
+	override def convertToObject(string: String) = jsonMapper.readValue(string, classOf[Map[String, Any]])
+	override def convertToValue(map: Map[String, Any]) = jsonMapper.writeValueAsString(map)
 
 }

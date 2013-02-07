@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
+import uk.ac.warwick.tabula.data.model.Department.Settings
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import reflect.BeanProperty
 import org.springframework.validation.Errors
@@ -42,9 +43,9 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 
 	def copySettings() {
 		if (features.extensions){
-			allowExtensionRequests = department.allowExtensionRequests
-			extensionGuidelineSummary = department.extensionGuidelineSummary
-			extensionGuidelineLink = department.extensionGuidelineLink
+			allowExtensionRequests = department.isAllowExtensionRequests
+			extensionGuidelineSummary = department.getExtensionGuidelineSummary
+			extensionGuidelineLink = department.getExtensionGuidelineLink
 			if (department.extensionManagers != null)
 				extensionManagers.addAll(department.extensionManagers.includeUsers)
 		}
@@ -53,9 +54,12 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	override def applyInternal() {
 		transactional() {
 			if (features.extensions){
-				department.allowExtensionRequests = allowExtensionRequests
-				department.extensionGuidelineSummary = extensionGuidelineSummary
-				department.extensionGuidelineLink = extensionGuidelineLink
+				department ++= (
+					Settings.AllowExtensionRequests -> allowExtensionRequests,
+					Settings.ExtensionGuidelineSummary -> extensionGuidelineSummary,
+					Settings.ExtensionGuidelineLink -> extensionGuidelineLink
+				)
+
 				val managers = Option(department.extensionManagers).getOrElse {
 					// existing departments will have a null value for managers. set it here
 					department.extensionManagers = new UserGroup()

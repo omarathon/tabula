@@ -19,14 +19,41 @@ trait SettingsMap[T <: SettingsMap[T]] { self: T =>
 		self
 	}
 	
+	def ++=(sets: Pair[String, Any]*) = {
+		settings ++= sets
+		self
+	}
+	
 	def ++=(other: T) = {
 		settings ++= other.settings
 		self
 	}
 	
-	def iterator = settings.iterator
-	def get(key: String) = settings.get(key)
-	def getOrElse(key: String, default: => Any) = settings.getOrElse(key, default)
-	def seq = settings.seq
+	def settingsIterator = settings.iterator
+	
+	def getSetting(key: String) = settings.get(key)
+	
+	def getStringSetting(key: String) = settings.get(key) match {
+		case Some(value: String) => Some(value)
+		case _ => None
+	}
+	def getIntSetting(key: String) = settings.get(key) match {
+		case Some(value: Int) => Some(value)
+		case _ => None
+	}
+	def getBooleanSetting(key: String) = settings.get(key) match {
+		case Some(value: Boolean) => Some(value)
+		case _ => None
+	}
+	
+	def getStringSetting(key: String, default: => String): String = getStringSetting(key) getOrElse(default)
+	def getIntSetting(key: String, default: => Int): Int = getIntSetting(key) getOrElse(default)
+	def getBooleanSetting(key: String, default: => Boolean): Boolean = getBooleanSetting(key) getOrElse(default)
+	
+	def settingsSeq = settings.seq
+	
+	def ensureSettings {
+		if (settings == null) settings = Map()
+	}
 
 }
