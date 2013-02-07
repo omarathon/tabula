@@ -49,10 +49,13 @@ class SendSubmissionNotifyCommand (
 	}
 	
 	def canEmailUser(user: User) : Boolean = {
-		userSettings.getSetting(user, "alertsSubmission") match {
-			case "allSubmissions" => true
-			case "lateSubmissions" => submission.isLate || submission.isAuthorisedLate
-			case _ => false
+		userSettings.getByUserId(user.getUserId) match {
+			case Some(settings) => settings.get("alertsSubmission") orNull match {
+				case "allSubmissions" => true
+				case "lateSubmissions" => submission.isLate || submission.isAuthorisedLate
+				case _ => false
+			}
+			case None => false
 		}
 	}
 	

@@ -153,7 +153,7 @@ object Permissions {
 	}
 	
 	object UserSettings {
-		case object Update extends ScopelessPermission
+		case object Update extends Permission
 	}
 	
 }

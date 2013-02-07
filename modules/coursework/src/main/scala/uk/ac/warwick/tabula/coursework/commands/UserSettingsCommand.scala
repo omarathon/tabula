@@ -1,48 +1,39 @@
 package uk.ac.warwick.tabula.coursework.commands
+
 import scala.reflect.BeanProperty
-import uk.ac.warwick.spring.Wire
+
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.{Description, Command}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.UserSettings
+
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.services.UserSettingsService
+import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.UserSettingsService
 
+class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Command[Unit] with SelfValidating  {
 
-class UserSettingsCommand(user: CurrentUser, usersettings: UserSettings) extends Command[Unit] with Public with SelfValidating  {
-
-	PermissionCheck(Permissions.UserSettings.Update)
+	PermissionCheck(Permissions.UserSettings.Update, settings)
 	
 	var service = Wire.auto[UserSettingsService]
-	@BeanProperty var alertsSubmission : String =_
 	
-	copySettings()
+	@BeanProperty var alertsSubmission : String = settings.getOrElse("alertsSubmission", "").toString
 		
-	def validate(errors:Errors){
-		
-	}
-	
-	def copySettings() {
-		var settingsOpt = service.parseJson(usersettings.data)
-		for(settings <- settingsOpt) {
-			alertsSubmission = settings.getOrElse("alertsSubmission", "").toString
-		}
-	}
-
 	override def applyInternal() {
 		transactional() {
-			usersettings.fieldsMap = Map("alertsSubmission" -> alertsSubmission)
-			service.save(user, usersettings)
+			settings += ("alertsSubmission" -> alertsSubmission)
+			service.save(user, settings)
 		}
 	}
 	
-	// describe the thing that's happening.
 	override def describe(d:Description) {
-		//d.properties("department" -> department.code)
+		d.properties("user" -> user.apparentId)
+	}	
+	
+	override def validate(errors:Errors) {
+		
 	}
 }

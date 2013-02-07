@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 
 case class StudentRole(department: model.Department) extends BuiltInRole(department) {
 	GrantsPermission(
-		UserPicker,
-		UserSettings.Update
+		UserPicker
 	)
 }
