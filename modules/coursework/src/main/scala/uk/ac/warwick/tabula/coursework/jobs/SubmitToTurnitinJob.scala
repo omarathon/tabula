@@ -153,6 +153,16 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							debug("Failed to upload document " + attachment.name)
+							if (sendEmails) {
+								debug("Sending an email to " + job.user.email)
+								val mime = mailer.createMimeMessage()
+								val email = new MimeMailMessage(mime)
+								email.setFrom(replyAddress)
+								email.setTo(job.user.email)
+								email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
+								email.setText(renderJobFailedEmailText(job.user, assignment))
+								mailer.send(mime)
+							}
 							throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 						}
 					}
