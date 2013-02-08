@@ -4,8 +4,8 @@
 <#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
 	<@stylesheet "/static/css/concat6.css" />
 	<@stylesheet "/static/css/main.css" />
-	<@stylesheet "/static/libs/anytime/anytimec.css" />
 	<@stylesheet "/static/libs/bootstrap-editable/css/bootstrap-editable.css" />
+	<@stylesheet "/static/libs/bootstrap-datetimepicker/css/datetimepicker.css" />
 	<@stylesheet "/static/libs/popup/popup.css" />
 	<@stylesheet "/static/libs/jquery-rating/jquery.rating.css" />
 <#else>

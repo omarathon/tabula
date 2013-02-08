@@ -138,12 +138,30 @@
 				// any date fields returned by ajax will have datetime pickers bound to them as required
 				$('#extension-list').on('focus', 'input.date-time-picker', function(e){
 					e.preventDefault();
-					var isPickerHidden = (typeof $('#AnyTime--picker0').filter(':visible')[0] === "undefined") ? true : false;
+					var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
 					
 					if(isPickerHidden) {
-						$(this).AnyTime_noPicker().AnyTime_picker({
-							format: "%e-%b-%Y %H:%i:%s",
-							firstDOW: 1
+						$(this).datetimepicker('remove').datetimepicker({
+							format: "d-M-yyyy hh:ii:ss",
+							weekStart: 1,
+							minView: 'day',
+							autoclose: true
+						}).on('show', function(ev){
+							var d = new Date(ev.date.valueOf()),
+								  minutes = d.getUTCMinutes(),
+									seconds = d.getUTCSeconds(),
+									millis = d.getUTCMilliseconds();
+									
+							if (minutes > 0 || seconds > 0 || millis > 0) {
+								d.setUTCMinutes(0);
+								d.setUTCSeconds(0);
+								d.setUTCMilliseconds(0);
+								
+								var DPGlobal = $.fn.datetimepicker.DPGlobal;
+								$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("d-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+								
+								$(this).datetimepicker('update');
+							}
 						});
 					}
 				});			
