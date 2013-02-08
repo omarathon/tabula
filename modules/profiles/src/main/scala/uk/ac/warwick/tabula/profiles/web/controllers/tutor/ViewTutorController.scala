@@ -1,21 +1,25 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
+
+import scala.reflect.BeanProperty
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.spring.Wire
-import scala.reflect.BeanProperty
-import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.tabula.data.model.PersonalTutor
 
-class TutorViewProfileCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
+import javax.servlet.http.HttpServletRequest
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.PersonalTutor
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
+import uk.ac.warwick.tabula.services.ProfileService
+
+class ViewTutorCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
+	@BeanProperty var save: String = null	
 
 	var profileService = Wire.auto[ProfileService]
 	
@@ -29,17 +33,17 @@ class TutorViewProfileCommand(val student: Member) extends ViewViewableCommand(P
 
 @Controller
 @RequestMapping(Array("/tutor/{student}/edit"))
-class TutorViewProfileController extends TutorProfilesController {
+class ViewTutorController extends TutorProfilesController {
 	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand =
 		restricted(new TutorSearchProfilesCommand(user)) orNull
 	
-	@ModelAttribute("tutorViewProfileCommand")
-	def tutorViewProfileCommand(@PathVariable("student") student: Member) = new TutorViewProfileCommand(student)
+	@ModelAttribute("viewTutorCommand")
+	def viewTutorCommand(@PathVariable("student") student: Member) = new ViewTutorCommand(student)
 	
 	// initial form display
 	@RequestMapping(params=Array("!tutorUniId"))
-	def editTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+	def editTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/tutor_view", 
 			"studentUniId" -> cmd.student.universityId,
 			"tutorToDisplay" -> cmd.currentTutorForDisplay
@@ -48,7 +52,7 @@ class TutorViewProfileController extends TutorProfilesController {
 	
 	// now we've got a tutor id to display, but it's not time to save it yet
 	@RequestMapping(params=Array("tutorUniId", "!save"))
-	def displayPickedTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+	def displayPickedTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
 
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
 		
@@ -60,12 +64,15 @@ class TutorViewProfileController extends TutorProfilesController {
 	}	
 
 	@RequestMapping(params=Array("tutorUniId", "save"))
-	def savePickedTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+	def savePickedTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
 		val student = cmd.student
 		val sprCode = student.sprCode
 		
-		val rel = profileService.saveStudentRelationship(PersonalTutor, cmd.student.sprCode, cmd.tutorUniId)
-
+		if (cmd.save.equals("true")) {
+			val rel = profileService.saveStudentRelationship(PersonalTutor, cmd.student.sprCode, cmd.tutorUniId)
+		}
+		else throw new IllegalStateException("form param save not set as expected")
+		
 		Mav("tutor/tutor_view", 
 			"studentUniId" -> cmd.studentUniId, 
 			"tutorToDisplay" -> cmd.currentTutorForDisplay

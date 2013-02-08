@@ -1,20 +1,33 @@
 <#escape x as x?html>
 	<h3>Personal Tutee: ${student.firstName} ${student.lastName} (${student.universityId})</h3>
 
-<#if user.staff>
-	<#include "tutor_form.ftl" />
+	<#if user.staff>
+		<#include "tutor_form.ftl" />
 	
-	<#if pickedTutor??>
-		<hr class="full-width">
-	<br />
-		<div style="text-align:right;margin-right:220px">
-			<a href="<@routes.tutor_save studentUniId="${student.universityId}" tutorUniId="${pickedTutor.universityId}" />" class="btn btn-primary">Save</a>
-		</div>
-		<br />
-		<br />
-		<br />
+		<#if pickedTutor??>
+			<hr class="full-width">
+			<br />
+
+			<@f.form 
+				id="saveTutor"
+				method="post" 
+				action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
+				commandName="searchTutorCommand" 
+				class="form-horizontal">
+				
+				<input id="save" name="save" type="hidden" value="true" />
+
+				<div style="text-align:right;margin-right:220px">
+					<button type="submit" class="btn btn-primary">Save</button
+				</div>
+			</@f.form>
+
+		</#if>
 	</#if>
-</#if>
+	<br />
+	<br />
+	<div style="text-align:left">
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<a href="<@routes.profile studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
+		<a href="<@routes.profile_by_id studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
+	</div>
 </#escape>
