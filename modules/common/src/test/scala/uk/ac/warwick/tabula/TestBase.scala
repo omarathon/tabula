@@ -177,7 +177,7 @@ trait TestHelpers {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
-				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"))
+				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"), Map())
 			}
 		}
 

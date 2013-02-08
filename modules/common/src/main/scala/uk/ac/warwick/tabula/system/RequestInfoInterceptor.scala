@@ -55,6 +55,7 @@ object RequestInfoInterceptor {
 		new RequestInfo(
 			user = getUser(request),
 			requestedUri = getRequestedUri(request),
+			requestParameters = getParameters(request),
 			ajax = isAjax(request),
 			maintenance = isMaintenance)
 	}
@@ -80,4 +81,14 @@ object RequestInfoInterceptor {
 		case string: String => string
 		case _ => request.getRequestURL.toString
 	})
+	
+	private def getParameters(request: HttpServletRequest) = {
+		val params: Map[String, List[String]] = 
+			for ((key, value) <- request.getParameterMap().toMap)
+				yield (key, value) match {
+					case (key: String, values: Array[String]) => (key, values.toList)
+				}
+				
+		params.toMap
+	}
 }
