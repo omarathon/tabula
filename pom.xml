@@ -407,6 +407,12 @@
 					</jvmArgs>
 				</configuration>
 			</plugin>
+			
+			<!-- Scalastyle for build verification -->
+			<plugin>
+				<groupId>org.scalastyle</groupId>
+				<artifactId>scalastyle-maven-plugin</artifactId>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -472,6 +478,27 @@
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>3.1.0</version>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.scalastyle</groupId>
+					<artifactId>scalastyle-maven-plugin</artifactId>
+					<version>0.2.0</version>
+					<configuration>
+						<verbose>false</verbose>
+						<failOnViolation>true</failOnViolation>
+						<failOnWarning>false</failOnWarning>
+						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 
 				<!-- To compress and minify JS files -->
