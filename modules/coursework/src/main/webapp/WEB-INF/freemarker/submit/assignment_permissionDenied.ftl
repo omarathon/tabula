@@ -2,7 +2,19 @@
 	<#compress>
 		<h1>${module.name} (${module.code?upper_case})
 			<br><strong>${assignment.name}</strong></h1>
-
+			
+<#if can.do("Assignment.Update", assignment)>
+	<h2>Assignment page for students</h2>
+	
+	<p>You can give students a link to this page to 
+		<#if assignment.collectSubmissions>submit work and to</#if> 
+		receive their feedback<#if assignment.collectMarks> and/or marks</#if>.</p>
+	
+	<p>If a student isn't in the enrolled list for your assignment, then they will receive a message on this page that
+	   they're not enrolled, and they won't be able to submit until they've been added to the list.</p>
+	   
+	<p><a class="btn" href="<@routes.depthome module/>">Module management - ${assignment.module.code}</a></p>
+<#else>
 		<#assign has_requested_access=RequestParameters.requestedAccess??/>
 		<#if has_requested_access>
 			<div class="alert alert-success">
@@ -29,6 +41,7 @@
 				<button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
 			</form>
 		</#if>
+</#if>
 
 	</#compress>
 </#escape>
