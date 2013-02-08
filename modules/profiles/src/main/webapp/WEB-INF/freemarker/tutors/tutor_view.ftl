@@ -27,10 +27,13 @@
 							<#if tutor?is_string>
 								${tutor}</h4>
 								<#if !tutor?string?starts_with("Not ")>
-									<div class="muted">External to Warwick</div>
+									<div class="tutor-detail">External to Warwick</div>
 								</#if>
 							<#else>
 								${tutor.fullName}</h4>
+								<#if tutor.homeDepartment.code != department.code>
+									<div class="tutor-detail">${tutor.homeDepartment.name}</div>
+								</#if>
 							</#if>
 							
 							<div id="${tuteeKey}" class="collapse">
