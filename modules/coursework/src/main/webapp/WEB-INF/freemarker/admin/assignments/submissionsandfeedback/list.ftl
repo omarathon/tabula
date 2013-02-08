@@ -274,7 +274,10 @@ Publications: ${r.publicationOverlap}%)
 					<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 					<td class="feedbackReleased">
 						<#if student.feedback??>
-							<#if student.feedback.released><span class="label label-info">Published</span>
+							<#if student.feedback.released>
+								<#if whoDownloaded?seq_contains(student.uniId)><span class="label label-success">Downloaded</span>
+								<#else><span class="label label-info">Published</span>
+								</#if>
 							<#else><span class="label label-warning">Not yet published</span>
 							</#if>
 						</#if>

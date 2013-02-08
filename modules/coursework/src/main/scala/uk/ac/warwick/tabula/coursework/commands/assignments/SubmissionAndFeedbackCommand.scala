@@ -24,7 +24,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	@BeanProperty var students:Seq[Item] = _
 	@BeanProperty var awaitingSubmissionExtended:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmission:Seq[User] = _
-	@BeanProperty var whoDownloaded: Seq[String] = _
+	@BeanProperty var whoDownloaded: Seq[User] = _
 	@BeanProperty var stillToDownload: Set[User] =_
 	@BeanProperty var hasPublishedFeedback: Boolean =_
 	@BeanProperty var hasOriginalityReport: Boolean =_
@@ -96,10 +96,10 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		hasPublishedFeedback = students.exists { student =>
 			student.feedback != null && student.feedback.checkedReleased
 		}
-
-		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment)
-		val members =  assignmentService.determineMembershipUsers(assignment).map(_.getUserId)
-		stillToDownload = (members.toSet -- whoDownloaded.toSet).map(userLookup.getUserByUserId(_))
+		
+		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
+		val members =  assignmentService.determineMembershipUsers(assignment)
+		stillToDownload = (members.toSet -- whoDownloaded.toSet)
 	}
 }
 
