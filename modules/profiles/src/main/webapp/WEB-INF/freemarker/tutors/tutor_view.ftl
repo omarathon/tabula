@@ -1,5 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#function sanitise text>
 	<#return text?lower_case?replace("[^a-z]", "", "r") />
 </#function>
@@ -8,7 +6,7 @@
 <div id="tutor-view">
 	<h1>Personal tutors for ${department.name}</h1>
 	
-	<#if can.do("Profiles.PersonalTutor.Create", department)>
+	<#if can.do("Profiles.PersonalTutor.Upload", department)>
 		<p class="pull-right">
 			<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a>
 		</p>

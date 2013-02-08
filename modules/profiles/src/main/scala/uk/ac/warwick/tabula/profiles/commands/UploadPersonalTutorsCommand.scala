@@ -37,7 +37,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Create, department)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
 
 	var userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]

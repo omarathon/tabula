@@ -150,6 +150,8 @@ object Permissions {
 		/* We need more fine grained control over what users can see here, so this could be a long list */
 		
 		object PersonalTutor {
+			case object Upload extends Permission
+			
 			case object Create extends Permission
 			case object Read extends Permission
 			case object Update extends Permission

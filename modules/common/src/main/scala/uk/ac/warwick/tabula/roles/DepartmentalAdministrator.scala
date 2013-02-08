@@ -31,6 +31,7 @@ case class DepartmentalAdministrator(department: model.Department) extends Built
 		Profiles.Read,
 		Profiles.Search,
 		
+		Profiles.PersonalTutor.Upload,
 		Profiles.PersonalTutor.Create,
 		Profiles.PersonalTutor.Read,
 		Profiles.PersonalTutor.Update,
