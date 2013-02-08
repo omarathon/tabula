@@ -32,7 +32,7 @@
 						<optgroup label="${group}">
 					</#if>
 						<#list allPermissions[group] as permission>
-							<option value="${permission._1}"<#if (status.value.name!"") == (permission._1!"")> selected="selected"</#if>>${permission._2}</option>
+							<option value="${permission._1}"<#if status.value?? && (status.value.name!"") == (permission._1!"")> selected="selected"</#if>>${permission._2}</option>
 						</#list>
 					</optgroup>
 				</#list>
