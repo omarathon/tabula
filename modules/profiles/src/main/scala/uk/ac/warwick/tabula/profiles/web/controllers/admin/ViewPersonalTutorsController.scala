@@ -9,25 +9,30 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
+import uk.ac.warwick.tabula.profiles.commands.UploadPersonalTutorsCommand
 
 @Controller
 @RequestMapping(value = Array("/department/{department}/tutors"))
 class ViewPersonalTutorsController extends ProfilesController {
-	@ModelAttribute def command(@PathVariable("department") department: Department) = new ViewPersonalTutorsCommand(department)
+	@ModelAttribute("viewPersonalTutorsCommand") def viewPersonalTutorsCommand(@PathVariable("department") department: Department) =
+		new ViewPersonalTutorsCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@PathVariable("department") department: Department, @ModelAttribute cmd: ViewPersonalTutorsCommand): Mav = {
-		Mav("tutors/tutor_view", "tutorRelationships" -> cmd.apply)
+	def view(@PathVariable("department") department: Department, @ModelAttribute("viewPersonalTutorsCommand") cmd: ViewPersonalTutorsCommand): Mav = {
+		Mav("tutors/tutor_view",
+			"tutorRelationships" -> cmd.apply,
+			"department" -> department
+		)
 	}
 }
 
 @Controller
 @RequestMapping(value = Array("/tutees"))
 class ViewPersonalTuteesController extends ProfilesController {
-	@ModelAttribute def command = new ViewPersonalTuteesCommand(currentMember)
+	@ModelAttribute("cmd") def command = new ViewPersonalTuteesCommand(currentMember)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@ModelAttribute cmd: ViewPersonalTuteesCommand): Mav = {
+	def view(@ModelAttribute("cmd") cmd: ViewPersonalTuteesCommand): Mav = {
 		Mav("tutors/tutee_view", "tutees" -> cmd.apply)
 	}
 }

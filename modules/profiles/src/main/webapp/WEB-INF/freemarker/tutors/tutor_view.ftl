@@ -6,7 +6,13 @@
 
 <#escape x as x?html>
 <div id="tutor-view">
-	<h1>View personal tutors for ${department.name}</h1>
+	<h1>Personal tutors for ${department.name}</h1>
+	
+	<#if can.do("Profiles.PersonalTutor.Create", department)>
+		<p class="pull-right">
+			<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a>
+		</p>
+	</#if>
 	
 	<#if tutorRelationships?has_content>
 		<table id="tutors" class="table table-bordered">
