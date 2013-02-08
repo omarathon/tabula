@@ -201,5 +201,14 @@ class SecurityServiceTest extends TestBase with Mockito {
 	    case _ => fail("Should have matched god mode")
 	  }
 	}
+	
+	/*
+	 * Test that we don't accidentally make permissions of the same
+	 * name equal to each other in future. Sigh 
+	 */
+	@Test def equality {
+		(Permissions.Module.Create == Permissions.Profiles.PersonalTutor.Create) should be (false)
+		(Permissions.Module.Create == Permissions.Module.Create) should be (true)
+	}
 			
 }

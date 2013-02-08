@@ -299,7 +299,6 @@ trait TurnitinMethods { self: Session =>
 		val response = doRequest(GenerateReportFunction, None, 
 			"oid" -> paperId.value,
 			"fcmd" -> "1")
-		println(response)
 		response
 //		val params = calculateParameters(GenerateReportFunction,
 //			"oid" -> paperId.value,

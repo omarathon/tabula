@@ -78,15 +78,12 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 		val roles = roleService.getRolesFor(currentUser, scope)
 		
 		val canDo = securityService.can(currentUser, permission, scope)
-		println(currentUser)
-		println(permission)
-		println(scope)
-		println(canDo)
 		
 		PermissionHelperResult(
 			canDo = canDo,
 			permissions = permissions.toList,
 			roles = roles.toList,
+			resolvedScope = scope,
 			scopeMismatch = scopeMismatch,
 			scopeMissing = scopeMissing
 		)
@@ -98,6 +95,7 @@ case class PermissionHelperResult(
 	canDo: Boolean,
 	permissions: List[(Permission, Option[PermissionsTarget])],
 	roles: List[Role],
+	resolvedScope: PermissionsTarget,
 	scopeMismatch: Boolean,
 	scopeMissing: Boolean
 )

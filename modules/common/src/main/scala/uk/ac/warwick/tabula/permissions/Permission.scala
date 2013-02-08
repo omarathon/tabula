@@ -9,11 +9,16 @@ sealed trait Permission {
 	 * (stupidly) return a different instance of the case object, which fails the equality
 	 * check because the default AnyRef implementation of equals is just this eq that.
 	 * 
-	 * The hashCode is computed at compile time, so this is safe. */
+	 * The hashCode is computed at compile time, so this is safe.
+	 * 
+	 * DISREGARD THAT hashCodes collide because they are generated only based on the name
+	 * of the current case object, so Module.Create.hashCode() == PersonalTutor.Create.hashCode()
+	 */
 	override def equals(other: Any) = other match {
-		case that: Permission => hashCode() == that.hashCode()
+		case that: Permission => getName == that.getName
 		case _ => false
 	}
+	override def hashCode() = getName.hashCode()
 	override def toString() = getName
 }
 sealed trait ScopelessPermission extends Permission {

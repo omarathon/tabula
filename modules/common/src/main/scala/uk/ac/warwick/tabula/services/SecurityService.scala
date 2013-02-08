@@ -51,8 +51,6 @@ class SecurityService extends Logging {
 					// The ID matches, or there exists a parent that matches (recursive)
 					permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
 				
-				println("Checking " + allPermissions + " against " + permission + "(" + scope + ")")
-					
 				allPermissions.get(permission) match {
 					case Some(permissionScope) => permissionScope match {
 						case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
