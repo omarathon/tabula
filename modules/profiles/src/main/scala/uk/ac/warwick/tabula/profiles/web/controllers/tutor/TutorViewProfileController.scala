@@ -16,6 +16,15 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 class TutorViewProfileCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
+
+	var profileService = Wire.auto[ProfileService]
+	
+	def currentTutor = profileService.getPersonalTutor(student)
+	
+	def currentTutorForDisplay = currentTutor match {
+		case None => ""
+		case Some(mem) => profileService.getNameAndNumber(mem)
+	}
 }
 
 @Controller
@@ -28,22 +37,38 @@ class TutorViewProfileController extends TutorProfilesController {
 	@ModelAttribute("tutorViewProfileCommand")
 	def tutorViewProfileCommand(@PathVariable("student") student: Member) = new TutorViewProfileCommand(student)
 	
+	// initial form display
 	@RequestMapping(params=Array("!tutorUniId"))
 	def editTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
 		Mav("tutor/tutor_view", 
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> profileService.getTutorToDisplay(cmd.student)
+			"tutorToDisplay" -> cmd.currentTutorForDisplay
 		)
 	}
 	
-	@RequestMapping(params=Array("tutorUniId"))
+	// now we've got a tutor id to display, but it's not time to save it yet
+	@RequestMapping(params=Array("tutorUniId", "!save"))
 	def displayPickedTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+
+		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
+		
+		Mav("tutor/tutor_view", 
+			"studentUniId" -> cmd.studentUniId,
+			"tutorToDisplay" -> profileService.getNameAndNumber(pickedTutor.getOrElse(throw new IllegalStateException("Can't find member object for new tutor"))),
+			"pickedTutor" -> pickedTutor
+		)
+	}	
+
+	@RequestMapping(params=Array("tutorUniId", "save"))
+	def savePickedTutor(@ModelAttribute("tutorViewProfileCommand") cmd: TutorViewProfileCommand, request: HttpServletRequest ) = {
+		val student = cmd.student
+		val sprCode = student.sprCode
+		
 		val rel = profileService.saveStudentRelationship(PersonalTutor, cmd.student.sprCode, cmd.tutorUniId)
 
 		Mav("tutor/tutor_view", 
-			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> profileService.getTutorToDisplay(cmd.student)
+			"studentUniId" -> cmd.studentUniId, 
+			"tutorToDisplay" -> cmd.currentTutorForDisplay
 		)
-	}	
-	
+	}
 }

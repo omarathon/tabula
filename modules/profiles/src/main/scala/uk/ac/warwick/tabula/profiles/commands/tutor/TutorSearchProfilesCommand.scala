@@ -58,11 +58,6 @@ class TutorSearchProfilesCommand(val user: CurrentUser) extends Command[Seq[Memb
 		profileService.findMembersByQuery(query, deptDao.allDepartments, userTypes, user.god)
 	}
 	
-/*	def getStudentUniId: String = {
-		if (student == null) ""
-		else student.getUniversityId
-	}*/
-	
 	override def describe(d: Description) = d.property("query" -> query)
 
 }

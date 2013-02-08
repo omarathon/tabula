@@ -34,8 +34,11 @@ class TutorSearchController extends TutorProfilesController {
 			val student = profileService.getMemberByUniversityId(studentUniId).getOrElse(
 					throw new IllegalStateException("Can't find student " + studentUniId))
 
+			val currentTutor = profileService.getPersonalTutor(student)
+			val currentTutorToDisplay = profileService.getNameAndNumber(currentTutor.getOrElse(throw new IllegalStateException("Can't find membership record for tutor picked")))
+
 			Mav("tutor/tutor_results",
-				"tutorToDisplay" -> profileService.getTutorToDisplay(student),
+				"tutorToDisplay" -> currentTutorToDisplay,
 				"student" -> student,
 				"results" -> cmd.apply())
 		}

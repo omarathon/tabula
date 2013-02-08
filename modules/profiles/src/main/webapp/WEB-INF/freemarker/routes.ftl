@@ -14,6 +14,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_template department><@url page="/admin/department/${department.code}/tutors/template" /></#macro>
 <#macro tutor_edit studentUniId tutor><@url page="/tutor/${studentUniId}/edit?tutorUniId=${tutor.universityId}" /></#macro>
 <#macro tutor_edit_no_tutor studentUniId><@url page="/tutor/${studentUniId}/edit" /></#macro>
-<!-- <#macro tutor_clear studentUniId><@url page="/tutor/${studentUniId}/edit?tutorUniId=clear" /></#macro> -->
+<#macro tutor_save studentUniId tutorUniId><@url page="/tutor/${studentUniId}/edit?tutorUniId=${tutorUniId}&save=save" /></#macro>
 <#macro profile studentUniId><@url page="/view/${studentUniId}"/></#macro>
 </#compress>
