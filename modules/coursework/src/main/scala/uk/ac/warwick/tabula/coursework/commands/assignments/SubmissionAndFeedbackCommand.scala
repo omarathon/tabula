@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService, Audi
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
+import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
@@ -25,7 +27,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	@BeanProperty var awaitingSubmissionExtended:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmission:Seq[User] = _
 	@BeanProperty var whoDownloaded: Seq[User] = _
-	@BeanProperty var stillToDownload: Set[User] =_
+	@BeanProperty var stillToDownload: Seq[Item] =_
 	@BeanProperty var hasPublishedFeedback: Boolean =_
 	@BeanProperty var hasOriginalityReport: Boolean =_
 	@BeanProperty var mustReleaseForMarking: Boolean =_
@@ -63,6 +65,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
 		// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
 		mustReleaseForMarking = assignment.markScheme != null
+		
+		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
 
 		students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
@@ -87,21 +91,24 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 				throw new IllegalStateException("More than one Feedback for " + uniId)
 			}
 
-			val feedbackForUniId: Feedback = usersFeedback.headOption.orNull
+			val enhancedFeedbackForUniId = usersFeedback.headOption match {
+				case Some(feedback) => new FeedbackListItem(feedback, whoDownloaded exists { _.getWarwickId == feedback.universityId })
+				case _ => null
+			}
 
-			new Item(uniId, enhancedSubmissionForUniId, feedbackForUniId, userFullName)
+			new Item(uniId, enhancedSubmissionForUniId, enhancedFeedbackForUniId, userFullName)
+		}
+		
+		val membersWithPublishedFeedback = students.filter { student => 
+			student.enhancedFeedback != null && student.enhancedFeedback.feedback.checkedReleased
 		}
 
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
-		hasPublishedFeedback = students.exists { student =>
-			student.feedback != null && student.feedback.checkedReleased
-		}
+		hasPublishedFeedback = !membersWithPublishedFeedback.isEmpty
 		
-		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
-		val members =  assignmentService.determineMembershipUsers(assignment)
-		stillToDownload = (members.toSet -- whoDownloaded.toSet)
+		stillToDownload = membersWithPublishedFeedback filter { !_.enhancedFeedback.downloaded }
 	}
 }
 
 // Simple object holder
-class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val feedback: Feedback, val fullName: String)
+class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val enhancedFeedback: FeedbackListItem, val fullName: String)

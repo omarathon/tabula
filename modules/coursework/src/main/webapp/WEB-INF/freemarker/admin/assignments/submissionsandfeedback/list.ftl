@@ -19,7 +19,7 @@
 						<#if module.department.showStudentName>
 							${student.fullName}
 						<#else>
-							${student.warwickId}
+							${student.uniId}
 						</#if>
 					</li>
 				</#list></ul>
@@ -242,7 +242,7 @@ Publications: ${r.publicationOverlap}%)
 					</#if>
 					 <#if assignment.collectMarks>
 						<td class="mark">
-							${(student.feedback.actualMark)!''}
+							${(student.enhancedFeedback.feedback.actualMark)!''}
 						</td>
 					</#if>
 					<td nowrap="nowrap" class="files">
@@ -258,10 +258,10 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</td>
 					<td nowrap="nowrap" class="download">
-						<#if student.feedback??>
-							<#assign attachments=student.feedback.attachments />
+						<#if student.enhancedFeedback??>
+							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
-							<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.feedback.id}/feedback-${student.feedback.universityId}.zip'/>">
+							<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.zip'/>">
 								<i class="icon-download"></i>
 								${attachments?size}
 								<#if attachments?size == 1> file
@@ -271,11 +271,11 @@ Publications: ${r.publicationOverlap}%)
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.feedback??><@fmt.date date=student.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
+					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
 					<td class="feedbackReleased">
-						<#if student.feedback??>
-							<#if student.feedback.released>
-								<#if whoDownloaded?seq_contains(student.uniId)><span class="label label-success">Downloaded</span>
+						<#if student.enhancedFeedback??>
+							<#if student.enhancedFeedback.feedback.released>
+								<#if student.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
 								<#else><span class="label label-info">Published</span>
 								</#if>
 							<#else><span class="label label-warning">Not yet published</span>
