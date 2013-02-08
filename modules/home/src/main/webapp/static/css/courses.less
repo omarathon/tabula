@@ -5,3 +5,66 @@
 #header {
 	background: @header-colour;
 }
+
+#assign-markers{
+	.member-list {
+		font-size: 18px;
+		line-height: 24px;
+		list-style: none outside none;
+		max-height: 330px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding: 5px;
+
+		.marker, .student {
+			border-radius: 5px;
+			border-color: #BBBBBB #BBBBBB #AAAAAA;
+			border-image: none;
+			border-style: solid;
+			border-width: 1px;
+			padding: 5px;
+		}
+
+		i {
+			margin: 4px 0px;
+		}
+
+		span.count {
+			margin: 3px 0px;
+		}
+
+		.student-list {
+			font-size: 14px;
+			line-height: 24px;
+		}
+	}
+
+	.marker {
+		line-height: 55px;
+		width: 250px;
+		font-size: 22px;
+		&.drop-hover{
+			background-color: #DFF0D8;
+			border-color: #C9DCB9;
+		}
+	}
+
+	.student {
+		cursor: move;
+		min-width: 155px;
+	}
+
+	.popover-content {
+		max-height: 300px;
+		overflow-y: auto;
+	}
+}
+
+
+
+
+
+
+
+
+

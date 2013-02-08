@@ -21,7 +21,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
 
 	universityIds.add(universityId)
-	
+
 	mustBeLinked(assignment,module)
 	PermissionCheck(Permissions.Extension.Delete, module)
 

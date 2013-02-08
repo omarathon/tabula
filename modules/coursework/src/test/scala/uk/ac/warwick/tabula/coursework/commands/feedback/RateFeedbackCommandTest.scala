@@ -53,7 +53,7 @@ class RateFeedbackCommandTest extends TestBase with Mockito {
 		feedback.assignment returns assignment
 		assignment.module returns module
 		module.department returns department
-		department.collectFeedbackRatings returns true
+		department.isCollectFeedbackRatings returns true
 		(feedback, assignment, module, department)
 	}
 }

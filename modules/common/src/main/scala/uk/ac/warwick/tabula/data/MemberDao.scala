@@ -29,9 +29,9 @@ trait MemberDao {
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
-	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
-	def getRelationshipsByAgent(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
+	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 }
 
 @Repository
@@ -108,14 +108,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.uniqueResult
 	}
 	
-	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
 	}	
 	
-	def getRelationships(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
 		val list = session.createQuery("""
@@ -142,28 +142,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		list
 	}
 
-	def getRelationshipsByAgent(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = {
-		val list = session.createQuery("""
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				Member m
-			where
-				sr.agent = m.universityId
-			and
-				sr.relationshipType = :relationshipType
-			and
-				m = :agent
-			and
-				(sr.endDate is null or sr.endDate >= SYSDATE)
-			order by
-				sr.targetSprCode
-		""")
-			.setEntity("agent", agent)
-			.setString("relationshipType", relationshipType.dbValue)
-			.list.asInstanceOf[JList[StudentRelationship]]
-		
-		list
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.add(is("agent", agentId))
+			.add(is("relationshipType", relationshipType))
+			.add( Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			))
+			.seq
 	}
 }

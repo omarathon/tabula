@@ -11,11 +11,10 @@ $(function() {
 	$('.profile-search').each(function() {
 		var container = $(this);
 		
-		var target = container.find('form').attr('action') + '.json';
+		var target = container.find('form').prop('action') + '.json';
 		
-		var profilePickerMappings;
 		var xhr = null;
-		container.find('input[name="query"]').attr('autocomplete','off').each(function() {
+		container.find('input[name="query"]').prop('autocomplete','off').each(function() {
 			var $spinner = $('<div class="spinner-container" />');
 			$(this).before($spinner);
 		
@@ -39,55 +38,38 @@ $(function() {
 					xhr = $.get(target, { query : query }, function(data) {
 						$spinner.spin(false);
 									
-						var labels = []; // labels is the list of Strings representing assignments displayed on the screen
-						profilePickerMappings = {};
+						var members = [];
 						
 						$.each(data, function(i, member) {
-							var mapKey = member.name + ";" + member.id + ";" + member.userId;
-							profilePickerMappings[mapKey] = member;
-							labels.push(mapKey);
-						})
+							var item = member.name + "|" + member.id + "|" + member.userId + "|" + member.description;
+							members.push(item);
+						});
 
-						process(labels);
+						process(members);
 					}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
 				},
 				
-				// Disable some typeahead behaviour that we already do in searching
 				matcher: function(item) { return true; },
-				//sorter: function(items) { return items; },
-				//highlighter: function(item) { return item; },
-				
-				updater: function(mapKey) {
-					var member = profilePickerMappings[mapKey];
-					window.location = '/profiles/view/' + member.id;
-					
-					return member.name;
+				sorter: function(items) { return items; }, // use 'as-returned' sort
+				highlighter: function(item) {
+					var member = item.split("|");
+					var html = '<img src="/profiles/view/photo/' + member[1] + '.jpg" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><span class="description">' + member[3] + '</span>';
+					return html;
 				},
-				item: '<li><a href="#"><img class="photo pull-right"><h2 class="name"></h2><span class="description"></a></li>',
+				
+				updater: function(item) {
+					var member = item.split("|");
+					window.location = '/profiles/view/' + member[1];
+					
+					return member[0];
+				},
 				minLength:3
 			});
-			
-			var typeahead = $(this).data('typeahead');
-			typeahead.render = function(items) {			
-				items = $(items).map(function (i, item) {
-					var member = profilePickerMappings[item];
-				
-					i = $(typeahead.options.item).attr('data-value', member.name + ";" + member.id + ";" + member.userId)
-					i.find('.name').html(typeahead.highlighter(member.name))
-					i.find('.description').html(member.description)
-					i.find('img').attr('src', '/profiles/view/photo/' + member.id + '.jpg');
-					return i[0];
-				});
-				
-				items.first().addClass('active');
-				this.$menu.html(items);
-				return typeahead;
-			};
 		});	
 	});
 });
 
-// take anything we've attached to "exports" and add it to the global "Courses"
+// take anything we've attached to "exports" and add it to the global "Profiles"
 // we use extend() to add to any existing variable rather than clobber it
 window.Profiles = jQuery.extend(window.Profiles, exports);
 

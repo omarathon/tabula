@@ -11,6 +11,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SprCode
 
 @Entity
 @AccessType("field")
@@ -72,7 +73,8 @@ class StudentRelationship extends GeneratedId {
 		case Some(m) => m.lastName
 	}
 	
-	def studentMember = memberDao.getBySprCode(targetSprCode)
+	def studentMember = memberDao.getBySprCode(targetSprCode)	
+	def studentId = SprCode.getUniversityId(targetSprCode)
 }
 
 object StudentRelationship {

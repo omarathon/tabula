@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.data.model.Feedback
+import model.{MarkerFeedback, Feedback, Assignment}
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.Assignment
 
 trait FeedbackDao {
 	def getFeedback(id: String): Option[Feedback]
 	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
+	def getMarkerFeedback(id: String): Option[MarkerFeedback]
 	def delete(feedback: Feedback)
 }
 
@@ -16,6 +16,7 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 	private val clazz = classOf[Feedback].getName
 
 	override def getFeedback(id: String) = getById[Feedback](id)
+	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
 
 	override def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback] =
 		session.newCriteria[Feedback]

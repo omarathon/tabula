@@ -23,7 +23,7 @@
 
 		jQuery(function($){
 
-			// models use ajax to retrieve their contents
+			// modals use ajax to retrieve their contents
 			$('#feedback-template-list').on('click', 'a[data-toggle=modal]', function(e){
 				$this = $(this);
 				target = $this.attr('data-url');

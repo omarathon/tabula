@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
 
 @Controller
-@RequestMapping(value = Array("/admin/department/{department}/tutors"))
+@RequestMapping(value = Array("/department/{department}/tutors"))
 class ViewPersonalTutorsController extends ProfilesController {
 	@ModelAttribute def command(@PathVariable("department") department: Department) = new ViewPersonalTutorsCommand(department)
 

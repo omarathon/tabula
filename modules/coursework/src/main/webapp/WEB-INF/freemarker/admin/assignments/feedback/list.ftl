@@ -39,9 +39,9 @@ Download all as ZIP file
 				<td class="uploaded"><@fmt.date feedback.uploadedDate /></td>
 				<td class="status">
 					<#if feedback.checkedReleased>
-						<span class="label-green">Published</span>
+						<span class="label label-success">Published</span>
 					<#else>
-						<span class="label-orange">Not published</span>
+						<span class="label label-warning">Not published</span>
 					</#if>
 				</td>
                 <#if assignment.collectMarks>

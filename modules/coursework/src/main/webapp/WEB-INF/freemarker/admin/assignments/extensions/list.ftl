@@ -43,11 +43,11 @@
 						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
-								<span class="label-green">Approved</span>
+								<span class="label label-success">Approved</span>
 							<#elseif extension.rejected>
-								<span class="label-red">Rejected</span>
+								<span class="label label-important">Rejected</span>
 							<#else>
-								<span class="label-blue">Awaiting approval</span><br/>
+								<span class="label label-info">Awaiting approval</span><br/>
 								Requested <@fmt.date date=extension.requestedOn at=true/>
 							</#if>
 						</td>
@@ -68,9 +68,9 @@
 						<td>${studentNameLookup[extension.universityId]}</td>
 						<td class="status">
 							<#if extension.approved>
-								<span class="label-green">Approved</span>
+								<span class="label label-success">Approved</span>
 							<#elseif extension.rejected>
-								<span class="label-red">Rejected</span>
+								<span class="label label-important">Rejected</span>
 							</#if>
 						</td>
 						<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
@@ -81,6 +81,7 @@
 							<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
+							&nbsp;
 							<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
@@ -101,6 +102,7 @@
 							<a class="hide modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Modify
 							</a>
+							&nbsp;
 							<a class="hide revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-remove icon-white"></i> Revoke
 							</a>
@@ -124,7 +126,7 @@
 					}
 				}
 
-				// models use ajax to retrieve their contents
+				// modals use ajax to retrieve their contents
 				$('#extension-list').on('click', 'a[data-toggle=modal]', function(e){
 					e.preventDefault();
 					$this = $(this);
@@ -146,18 +148,18 @@
 					}
 				});			
 
-				$('#extension-list').on('click', 'input[type=submit]', function(e){
+				$('#extension-list').on('submit', 'form', function(e){
 					e.preventDefault();
-					var $form = $(this).closest('form');
+					var $form = $(this);
 					$.post($form.attr('action'), $form.serialize(), function(data){
 						if(data.status == "error"){
 							// delete any old errors
-							$(".error").remove();
+							$("span.error").remove();
+							$('.error').removeClass('error');
 							for(error in data.result){
 								addError(error, data.result[error]);
 							}
-						}
-						else {
+						} else {
 							var action = data.action;
 							$.each(data.result, function(){
 								modifyRow(this, action);
@@ -210,9 +212,9 @@
 					}
 					$('.status').each(function(){
 						if ($(this).html() === "Approved")
-							$(this).html('<span class="label-green">Approved</span>');
+							$(this).html('<span class="label label-success">Approved</span>');
 						else if ($(this).html() === "Rejected")
-							$(this).html('<span class="label-red">Rejected</span>');
+							$(this).html('<span class="label label-important">Rejected</span>');
 					});
 				};
 			});

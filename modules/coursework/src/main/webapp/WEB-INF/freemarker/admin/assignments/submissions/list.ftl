@@ -1,6 +1,7 @@
 <#escape x as x?html>
 <h1>All submissions for ${assignment.name}</h1>
 <#assign module=assignment.module />
+<#assign department=module.department />
 
 <div>
 <a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/download-zip/submissions.zip'/>"><i class="icon-download"></i>
@@ -14,12 +15,13 @@ XML
 </a>
 <a class="btn btn-danger" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/delete' />" id="delete-selected-button">Delete selected</a>
 
-<#if features.turnitin>
-<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+<#if department.plagiarismDetectionEnabled>
+	<#if features.turnitin>
+		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+	</#if>
+	
+	<a class="btn btn-warn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark selected plagiarised</a>
 </#if>
-
-<a class="btn btn-warn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark selected plagiarised</a>
-
 
 
 
@@ -67,15 +69,15 @@ Publications: ${r.publicationOverlap}%)
                 </td>
                 <td class="status">
                     <#if submission.late>
-                        <span class="label-red">Late</span>
+                        <span class="label label-important">Late</span>
 					<#elseif  submission.authorisedLate>
-						<span class="label-blue">Within Extension</span>
+						<span class="label label-info">Within Extension</span>
                     </#if>
                     <#if item.downloaded>
-                        <span class="label-green">Downloaded</span>
+                        <span class="label label-success">Downloaded</span>
                     </#if>
                     <#if submission.suspectPlagiarised>
-                    	<span class="label-orange">Suspect Plagiarised</span>
+                    	<span class="label label-warning">Suspect Plagiarised</span>
                     </#if>
                 </td>
 				<#if assignment.wordCountField??>

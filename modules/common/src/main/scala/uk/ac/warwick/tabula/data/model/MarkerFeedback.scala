@@ -12,6 +12,11 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId {
 
+	def this(parent:Feedback){
+		this()
+		feedback = parent
+	}
+
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "feedback_id")
 	@BeanProperty var feedback: Feedback = _
@@ -23,8 +28,11 @@ class MarkerFeedback extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.SubmissionStateUserType")
-	@BeanProperty var state : SubmissionState = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var grade: Option[String] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
+	@BeanProperty var state : MarkingState = _
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
 	@Fetch(FetchMode.JOIN)
@@ -37,4 +45,11 @@ class MarkerFeedback extends GeneratedId {
 		attachments.add(attachment)
 	}
 
+	def hasMarkOrGrade = hasMark || hasGrade
+
+	def hasMark: Boolean = mark.isDefined
+
+	def hasGrade: Boolean = grade.isDefined
+
+	def hasFeedback = attachments != null && attachments.size() > 0
 }

@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.userlookup.User
 
 /**
  * Service providing access to members and profiles.
@@ -37,6 +38,7 @@ trait ProfileService {
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
 	def getPersonalTutor(student: Member): Option[Member]
 	def getNameAndNumber(member: Member): String
+	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 }
 
 @Service(value = "profileService")
@@ -80,7 +82,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
-		memberDao.getRelationships(relationshipType, targetSprCode)
+		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
 	
 	def getPersonalTutor(student: Member): Option[Member] = {
@@ -123,11 +125,15 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = transactional() {
-		memberDao.getRelationships(relationshipType, department)
+		memberDao.getRelationshipsByDepartment(relationshipType, department)
 	}
 
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = transactional() {
-		memberDao.getRelationshipsByAgent(relationshipType, agent)
+		memberDao.getRelationshipsByAgent(relationshipType, agent.universityId)
+	}
+
+	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional() {
+		memberDao.getRelationshipsByAgent(relationshipType, agentId)
 	}
   
   def getNameAndNumber(mem: uk.ac.warwick.tabula.data.model.Member): String = mem.firstName + " " + mem.lastName + " (" + mem.universityId + ")"

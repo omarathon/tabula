@@ -56,14 +56,19 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "second_marker_feedback")
 	@BeanProperty var secondMarkerFeedback: MarkerFeedback = _
 
-	def addFirstMarkerFeedback(markerFeedback: MarkerFeedback) {
-		markerFeedback.feedback = this
-		firstMarkerFeedback = markerFeedback
+	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
+	def retrieveFirstMarkerFeedback:MarkerFeedback = {
+		Option(firstMarkerFeedback).getOrElse({
+			firstMarkerFeedback = new MarkerFeedback(this)
+			firstMarkerFeedback
+		})
 	}
 
-	def addSecondMarkerFeedback(markerFeedback: MarkerFeedback) {
-		markerFeedback.feedback = this
-		secondMarkerFeedback = markerFeedback
+	def retrieveSecondMarkerFeedback:MarkerFeedback = {
+		Option(secondMarkerFeedback).getOrElse({
+			secondMarkerFeedback = new MarkerFeedback(this)
+			secondMarkerFeedback
+		})
 	}
 
 	// if the feedback has no marks or attachments then it is a placeholder for marker feedback
@@ -107,7 +112,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	 * Doesn't take into account whether the ratings feature is enabled, so you
 	 * need to check that separately.
 	 */
-	def collectRatings: Boolean = assignment.module.department.collectFeedbackRatings
+	def collectRatings: Boolean = assignment.module.department.isCollectFeedbackRatings
 
 	/**
 	 * Whether marks are being collected for this feedback.

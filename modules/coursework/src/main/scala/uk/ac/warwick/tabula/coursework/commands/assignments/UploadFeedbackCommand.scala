@@ -79,7 +79,7 @@ abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assi
 	var userLookup = Wire.auto[UserLookupService]
 	var fileDao = Wire.auto[FileDao]
 	var assignmentService = Wire.auto[AssignmentService]
-	var submissionService = Wire.auto[SubmissionService]
+	var stateService = Wire.auto[StateService]
 
 	/* for single upload */
 	@BeanProperty var uniNumber: String = _

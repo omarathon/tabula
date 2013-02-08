@@ -8,7 +8,7 @@ import scala.collection.JavaConversions.asScalaBuffer
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Submission}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Feedback, Submission}
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.commons.io.input.BoundedInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
@@ -52,7 +52,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-	def showStudentName(assignment: Assignment): Boolean = assignment.module.department.showStudentName
+	def showStudentName(assignment: Assignment): Boolean = assignment.module.department.isShowStudentName
 
 	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
@@ -69,9 +69,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
 
-	
-	
-	
+	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
+		markerFeedback.attachments.map { (attachment) =>
+			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
+		}
+
+
 	/**
 	 * A zip of feedback with a folder for each student.
 	 */
@@ -120,6 +123,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	*/
 	def getSomeFeedbacksZip(feedbacks: Seq[Feedback]): File =
 		createUnnamedZip(feedbacks flatMap getFeedbackZipItems)
+
+	/**
+	 * Get a zip containing these marker feedbacks.
+	 */
+	def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): File =
+		createUnnamedZip(markerFeedbacks flatMap getMarkerFeedbackZipItems)
 
 	/**
 	 * A zip of submissions with a folder for each student.
