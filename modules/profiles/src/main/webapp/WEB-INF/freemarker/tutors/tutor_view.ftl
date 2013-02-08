@@ -7,7 +7,7 @@
 	<h1>Personal tutors for ${department.name}</h1>
 	
 	<#if can.do("Profiles.PersonalTutor.Upload", department)>
-		<p class="pull-right">
+		<p>
 			<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a>
 		</p>
 	</#if>
@@ -71,6 +71,8 @@
 	<#else>
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No personal tutors are currently visible for ${department.name} in Tabula.</p>
 	</#if>
+	
+	<h4><a href="<@routes.tutors_missing department />">View <@fmt.p missingCount "student" /> with no personal tutor</a></h4>
 </div>
 
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>

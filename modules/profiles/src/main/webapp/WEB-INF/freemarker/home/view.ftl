@@ -21,13 +21,16 @@
 		
 		<div id="profile-dept-admin" class="span4 offset2">
 			<#if adminDepartments?has_content>
-				<h4>Departmental admin</h4>
+				<h4>Departmental administration</h4>
 		
-				<ul>
-					<#list adminDepartments as dept>
-						<li><a href="<@routes.tutors dept />">Personal tutors in ${dept.name}</a></li>
-					</#list>
-				</ul>
+				<#list adminDepartments as dept>
+					<h5>${dept.name}</h5>
+					
+					<ul>
+						<li><a href="<@routes.tutors dept />">Personal tutors</a></li>
+						<li><a href="<@routes.tutors_missing dept />">Students with no personal tutor</a></li>
+					</ul>
+				</#list>
 			</#if>
 		</div>
 	</div>

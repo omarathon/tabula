@@ -32,6 +32,7 @@ trait MemberDao {
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
 }
 
 @Repository
@@ -118,7 +119,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
-		val list = session.createQuery("""
+		session.createQuery("""
 			select
 				distinct sr
 			from
@@ -138,8 +139,6 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			.setEntity("department", department)
 			.setString("relationshipType", relationshipType.dbValue)
 			.list.asInstanceOf[JList[StudentRelationship]]
-		
-		list
 	}
 
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = {
@@ -151,5 +150,23 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				Restrictions.ge("endDate", new DateTime())
 			))
 			.seq
+	}
+
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] = {
+		session.createQuery("""
+			select
+				distinct m
+			from
+				Member m
+			where
+				m.homeDepartment = :department
+			and
+				m.studentStatus = 'Current Student'
+			and
+				m.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+		""")
+			.setEntity("department", department)
+			.setString("relationshipType", relationshipType.dbValue)
+			.list.asInstanceOf[JList[Member]]		
 	}
 }

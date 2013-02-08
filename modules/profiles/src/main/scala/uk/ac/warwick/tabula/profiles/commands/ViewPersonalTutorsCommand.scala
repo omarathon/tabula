@@ -29,6 +29,17 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Tree
 	}
 }
 
+class MissingPersonalTutorsCommand(val department: Department) extends Command[Seq[Member]] with Unaudited {
+	
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
+
+	var profileService = Wire.auto[ProfileService]
+	
+	override def applyInternal(): Seq[Member] = transactional() {
+		profileService.listStudentsWithoutRelationship(PersonalTutor, department)
+	}
+}
+
 class ViewPersonalTuteesCommand(val currentMember: Member) extends Command[Seq[StudentRelationship]] with Unaudited {
 	
 	PermissionCheck(Permissions.Profiles.Read, currentMember)
