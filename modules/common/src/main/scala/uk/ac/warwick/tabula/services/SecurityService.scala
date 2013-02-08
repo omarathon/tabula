@@ -51,11 +51,14 @@ class SecurityService extends Logging {
 					// The ID matches, or there exists a parent that matches (recursive)
 					permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
 				
+				println("Checking " + allPermissions + " against " + permission + "(" + scope + ")")
 					
 				allPermissions.get(permission) match {
 					case Some(permissionScope) => permissionScope match {
 						case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
-						case None => Allow // Global permission
+						case None => 
+							if (scope != null) Allow // Global permission
+							else Continue
 					}
 					case None => Continue
 				}
@@ -68,7 +71,7 @@ class SecurityService extends Logging {
 			
 	// By using Some() here, we ensure that we return Deny if there isn't a role match - this must be the LAST permissions provider
 	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = Some(
-		roles != null && (roles exists { role =>
+		roles != null && (roles exists { role =>			
 			checkPermissions(role.explicitPermissions, user, permission, scope) == Allow ||
 			checkRoles(role.subRoles, user, permission, scope) == Allow
 		})
@@ -78,7 +81,7 @@ class SecurityService extends Logging {
 		checkRoles(roleService.getRolesFor(user, scope), user, permission, scope)
 
 	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
-	def can(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _can(user, permission, Some(scope)) 
+	def can(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
 	private def _can(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]): Boolean = 
 		transactional(readOnly=true) {
@@ -94,7 +97,7 @@ class SecurityService extends Logging {
 		}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
-	def check(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _check(user, permission, Some(scope))
+	def check(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _check(user, permission, Option(scope))
 
 	private def _check(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
 		(permission, scope) match {

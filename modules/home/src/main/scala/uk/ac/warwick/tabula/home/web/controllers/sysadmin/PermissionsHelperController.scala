@@ -77,7 +77,7 @@ class PermissionsHelperController extends BaseSysadminController {
 			.map { clz => clz.newInstance().asInstanceOf[Permission] }
 			.groupBy(groupFn)
 			.map { case (key, value) => (key, value map { 
-				p => ((if (key == "") "" else key + ".") + p.toString(), p.toString()) 
+				p => (p.getName, p.getName) 
 			})}
 	}
 	

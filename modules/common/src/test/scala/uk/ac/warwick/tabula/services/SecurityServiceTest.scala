@@ -26,6 +26,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		
 		securityService.can(currentUser, Permissions.GodMode) should be (true)
 		securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, new Department) should be (true)
+		securityService.can(currentUser, Permissions.Profiles.PersonalTutor.Create, null) should be (true)
 		securityService.can(currentUser, null) should be (true)
 		securityService.can(currentUser, null, null) should be (true)
 	}
@@ -75,6 +76,33 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be (true)
 		// Global perm
 		securityService.can(currentUser, Permissions.Module.Create, department) should be (true)
+		securityService.can(currentUser, Permissions.Profiles.PersonalTutor.Update, null) should be (false)
+	}
+	
+	@Test def globalPermission {
+		val department = new Department
+		val currentUser = new CurrentUser(user, user)
+		
+		val securityService = new SecurityService
+		val permissions: Map[Permission, Option[PermissionsTarget]] = Map(
+				Permissions.Department.DownloadFeedbackReport -> None
+		)
+		
+		securityService.checkPermissions(
+				permissions, currentUser, Permissions.Department.DownloadFeedbackReport, department
+		) should be (securityService.Allow)
+		
+		securityService.checkPermissions(
+				permissions, currentUser, Permissions.Department.DownloadFeedbackReport, new Module
+		) should be (securityService.Allow)
+		
+		securityService.checkPermissions(
+				permissions, currentUser, Permissions.Department.ManageDisplaySettings, department
+		) should be (securityService.Continue)
+		
+		securityService.checkPermissions(
+				permissions, currentUser, Permissions.Department.ManageDisplaySettings, null
+		) should be (securityService.Continue)
 	}
 	
 	@Test def exactScopeMatch {

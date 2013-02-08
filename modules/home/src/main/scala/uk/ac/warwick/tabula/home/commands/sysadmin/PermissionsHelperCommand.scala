@@ -78,6 +78,10 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 		val roles = roleService.getRolesFor(currentUser, scope)
 		
 		val canDo = securityService.can(currentUser, permission, scope)
+		println(currentUser)
+		println(permission)
+		println(scope)
+		println(canDo)
 		
 		PermissionHelperResult(
 			canDo = canDo,
