@@ -720,6 +720,7 @@ input[type=text] {
 
 .originality-report {
   text-align: right;
+  .hyphenate-words();
   img { vertical-align: middle }
 }
 
@@ -744,11 +745,11 @@ input[type=text] {
 .similarity-box(@color) when (lightness(@color) >= 60%) { .similarity-box(@color, black) }
 .similarity-box(@color) when (lightness(@color) < 60%) { .similarity-box(@color, white) }
 
-.similarity-0 { .similarity-box(#4499ee); }
-.similarity-1 { .similarity-box(#66bb11); }
-.similarity-2 { .similarity-box(#ffcc00); }
-.similarity-3 { .similarity-box(#ff6600); }
-.similarity-4 { .similarity-box(#ee3333); }
+.similarity-0 { .similarity-box(@btnSuccessBackgroundHighlight); }
+.similarity-1 { .similarity-box(@btnInfoBackgroundHighlight); }
+.similarity-2 { .similarity-box(@tabulaOrangeLight); }
+.similarity-3 { .similarity-box(@btnWarningBackgroundHighlight); }
+.similarity-4 { .similarity-box(@btnDangerBackgroundHighlight); }
 
 .similarity-subcategories {
   margin-left: 0.5em;

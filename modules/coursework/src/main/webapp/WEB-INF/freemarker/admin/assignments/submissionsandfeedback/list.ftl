@@ -114,7 +114,7 @@ Publications: ${r.publicationOverlap}%)
 	<a class="btn long-running use-tooltip must-have-selected" title="Download the feedback files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 		Download feedback
 	</a>
-	<#if features.turnitin>
+	<#if features.turnitin && department.plagiarismDetectionEnabled>
 		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
 	</#if>
 	<div class="btn-group">
@@ -280,7 +280,7 @@ Publications: ${r.publicationOverlap}%)
 						</#if>
 					</td>
 					<#if hasOriginalityReport>
-						<td>
+						<td class="originality-report">
 							<#list submission.allAttachments as attachment>
 								<!-- Checking originality report for ${attachment.name} ... -->
 								<#if attachment.originalityReport??>

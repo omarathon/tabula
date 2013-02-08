@@ -15,10 +15,14 @@ class DisplaySettingsCommand (val department:Department) extends Command[Unit] w
 	PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
 
 	@BeanProperty var showStudentName:Boolean = department.isShowStudentName
+	@BeanProperty var plagiarismDetection:Boolean = department.isPlagiarismDetectionEnabled
 
 	override def applyInternal() {
 		transactional() {
-			department += (Settings.ShowStudentName -> showStudentName)
+			department ++= (
+				Settings.ShowStudentName -> showStudentName,
+				Settings.PlagiarismDetection -> plagiarismDetection
+			)
 		}
 	}
 
