@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.hibernate.validator.Valid
 
 @Controller
-@RequestMapping(value = Array("/admin/department/{department}/tutors/upload"))
+@RequestMapping(value = Array("/department/{department}/tutors/upload"))
 class UploadPersonalTutorsController extends ProfilesController {
 	// tell @Valid annotation how to validate
 	validatesSelf[UploadPersonalTutorsCommand]
@@ -22,19 +22,19 @@ class UploadPersonalTutorsController extends ProfilesController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@PathVariable("department") department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
-		Mav("tutors/uploadform")
+		Mav("tutors/upload_form")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def confirmBatchUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 		//validate(department, cmd, errors)
-		Mav("tutors/uploadpreview")
+		Mav("tutors/upload_preview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def doUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 		//validate(department, cmd, errors)
 		val tutorCount = cmd.apply().size
-		Mav("tutors/uploadform", "tutorCount" -> tutorCount)
+		Mav("tutors/upload_form", "tutorCount" -> tutorCount)
 	}
 }

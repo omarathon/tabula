@@ -1,14 +1,13 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
 	<#assign commandName="uploadPersonalTutorsCommand" />
+	<#assign formDestination><@routes.tutor_upload department /></#assign> 
 		
 	<@spring.bind path=commandName>
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
 	
-	<@f.form method="post" action="${url('/admin/department/${department.code}/tutors/upload')}" commandName=commandName>	
+	<@f.form method="post" action=formDestination commandName=commandName>	
 		<h1>Preview personal tutor changes for ${department.name}</h1>
 		
 		<@spring.bind path="rawStudentRelationships">
