@@ -42,16 +42,30 @@
 
 <#macro originalityReport attachment>
 <#local r=attachment.originalityReport />
-<div>
-${attachment.name}
-<img src="<@url resource="/static/images/icons/turnitin-16.png"/>">
-<span class="similarity-${r.similarity}">${r.overlap}% similarity</span>
-<span class="similarity-subcategories">
-(Web: ${r.webOverlap}%,
-Student papers: ${r.studentOverlap}%,
-Publications: ${r.publicationOverlap}%)
-</span>
-<div>
+
+			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity}">${r.overlap}% similarity</span>
+      <div id="tip-content-${attachment.id}" class="hide">
+				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+				<p class="similarity-subcategories">
+					Web: ${r.webOverlap}%<br>
+					Student papers: ${r.studentOverlap}%<br>
+					Publications: ${r.publicationOverlap}%)
+				</p>
+				<p>
+					<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+				</p>
+      </div>
+      <script type="text/javascript">
+        jQuery(function($){
+          $("#tool-tip-${attachment.id}").popover({
+            placement: 'right',
+            html: true,
+            content: function(){return $('#tip-content-${attachment.id}').html();},
+            title: 'Turnitin report summary'
+          });
+        });
+      </script>
+
 </#macro>
 
 
@@ -66,6 +80,7 @@ Publications: ${r.publicationOverlap}%)
 			</#if>
 		</td>
 		<td></td>
+		<td></td>
 		<td>
 			<#if extension?has_content>
 				<#assign date>
@@ -79,9 +94,12 @@ Publications: ${r.publicationOverlap}%)
 		</td>
 		<#if assignment.wordCountField??><td></td></#if>
 		<#if assignment.markScheme??><td></td></#if>
-		<#if assignment.collectMarks><td></td></#if>
-		<td></td><td></td><td></td><td></td>
+		
 		<#if hasOriginalityReport><td></td></#if>
+		
+		<td></td><td></td>
+		<#if assignment.collectMarks><td></td></#if>
+		<td></td>
 	</tr>
 </#macro>
 
@@ -115,7 +133,7 @@ Publications: ${r.publicationOverlap}%)
 		Download feedback
 	</a>
 	<#if features.turnitin && department.plagiarismDetectionEnabled>
-		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Submit to Turnitin</a>
+		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Check for Plagiarism</a>
 	</#if>
 	<div class="btn-group">
 		<a id="modify-selected" class="btn dropdown-toggle must-have-selected" data-toggle="dropdown" href="#">
@@ -154,26 +172,84 @@ Publications: ${r.publicationOverlap}%)
 		</a>
 	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
+		<colgroup class="student">
+			<col class="checkbox" />
+			<col class="student-info" />
+		</colgroup>
+		
+		<colgroup class="submission">
+			<col class="files" />
+			<col class="submitted" />
+			<col class="status" />
+			<#assign submissionColspan=3 />
+			
+			<#if assignment.wordCountField??>
+				<#assign submissionColspan=submissionColspan+1 />
+				<col class="word-count" />
+			</#if>
+			<#if assignment.markScheme??>
+				<#assign submissionColspan=submissionColspan+1 />
+				<col class="first-marker" />
+			</#if>
+		</colgroup>
+		
+		<#if hasOriginalityReport>
+			<colgroup class="plagiarism">
+				<col class="report" />
+			</colgroup>
+		</#if>
+		
+		<colgroup class="feedback">
+			<#assign feedbackColspan=3 />
+		
+			<col class="files" />
+			<col class="uploaded" />
+			<#if assignment.collectMarks>
+				<#assign feedbackColspan=feedbackColspan+1 />
+				<col class="mark" />
+			</#if>
+			<col class="status" />
+		</colgroup>	
 		<thead>
 			<tr>
 				<th></th>
 				<th class="sortable">Student</th>
+				
+				<th colspan="${submissionColspan?c}">
+					Submission
+				</th>
+				
+				<#if hasOriginalityReport>
+					<th>Plagiarism</th>
+				</#if>
+				
+				<th colspan="${feedbackColspan?c}">
+					Feedback
+				</th>
+			</tr>
+			<tr>
+				<th colspan="2"></th>
+				
+				<th>Files</th>
 				<th>Submitted</th>
-				<th class="sortable">Submission status</th>
+				<th class="sortable">Status</th>
 				<#if assignment.wordCountField??>
 					<th class="sortable" title="Declared word count">Words</th>
 				</#if>
 				<#if assignment.markScheme??>
 					<th class="sortable">First Marker</th>
 				</#if>
+				
+				<#if hasOriginalityReport>
+					<th class="sortable">Report</th>
+				</#if>
+				
+				<th>Files</th>
+				<th>Uploaded</th>
 				<#if assignment.collectMarks>
 					<th>Mark</th>
 				</#if>
-				<th>Files</th>
-				<th>Feedback</th>
-				<th>Feedback Uploaded</th>
-				<th class="sortable">Feedback status</th>
-				<#if hasOriginalityReport><th class="sortable">Originality report</th></#if>
+				<th class="sortable">Status</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -204,7 +280,18 @@ Publications: ${r.publicationOverlap}%)
 						${student.uniId}
 					</#if>
 					</td>
-					<#-- TODO show student name if allowed by department -->
+					
+					<td nowrap="nowrap" class="files">
+						<#assign attachments=submission.allAttachments />
+						<#if attachments?size gt 0>
+						<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
+							${attachments?size}
+							<#if attachments?size == 1> file
+							<#else> files
+							</#if>
+						</a>
+						</#if>
+					</td>
 					<td class="submitted">
 						<#if submission.submittedDate??>
 							<span class="date use-tooltip" title="${lateness!''}">
@@ -225,7 +312,7 @@ Publications: ${r.publicationOverlap}%)
 							<span class="label label-success">Markable</span>
 						</#if>
 						<#if submission.suspectPlagiarised>
-							<span class="label label-warning">Suspect Plagiarised</span>
+							<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
 						</#if>
 					</td>
 					<#if assignment.wordCountField??>
@@ -240,48 +327,7 @@ Publications: ${r.publicationOverlap}%)
 							<#if submission.assignment??>${submission.firstMarker!""}</#if>
 						</td>
 					</#if>
-					 <#if assignment.collectMarks>
-						<td class="mark">
-							${(student.enhancedFeedback.feedback.actualMark)!''}
-						</td>
-					</#if>
-					<td nowrap="nowrap" class="files">
-						<#assign attachments=submission.allAttachments />
-						<#if attachments?size gt 0>
-						<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
-							<i class="icon-download"></i>
-							${attachments?size}
-							<#if attachments?size == 1> file
-							<#else> files
-							</#if>
-						</a>
-						</#if>
-					</td>
-					<td nowrap="nowrap" class="download">
-						<#if student.enhancedFeedback??>
-							<#assign attachments=student.enhancedFeedback.feedback.attachments />
-							<#if attachments?size gt 0>
-							<a class="btn long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.zip'/>">
-								<i class="icon-download"></i>
-								${attachments?size}
-								<#if attachments?size == 1> file
-								<#else> files
-								</#if>
-							</a>
-							</#if>
-						</#if>
-					</td>
-					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
-					<td class="feedbackReleased">
-						<#if student.enhancedFeedback??>
-							<#if student.enhancedFeedback.feedback.released>
-								<#if student.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
-								<#else><span class="label label-info">Published</span>
-								</#if>
-							<#else><span class="label label-warning">Not yet published</span>
-							</#if>
-						</#if>
-					</td>
+					
 					<#if hasOriginalityReport>
 						<td class="originality-report">
 							<#list submission.allAttachments as attachment>
@@ -293,6 +339,37 @@ Publications: ${r.publicationOverlap}%)
 							</#list>
 						</td>
 					</#if>
+					
+					<td nowrap="nowrap" class="download">
+						<#if student.enhancedFeedback??>
+							<#assign attachments=student.enhancedFeedback.feedback.attachments />
+							<#if attachments?size gt 0>
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.zip'/>">
+								${attachments?size}
+								<#if attachments?size == 1> file
+								<#else> files
+								</#if>
+							</a>
+							</#if>
+						</#if>
+					</td>
+					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
+					
+					 <#if assignment.collectMarks>
+						<td class="mark">
+							${(student.enhancedFeedback.feedback.actualMark)!''}
+						</td>
+					</#if>
+					<td class="feedbackReleased">
+						<#if student.enhancedFeedback??>
+							<#if student.enhancedFeedback.feedback.released>
+								<#if student.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
+								<#else><span class="label label-info">Published</span>
+								</#if>
+							<#else><span class="label label-warning">Not yet published</span>
+							</#if>
+						</#if>
+					</td>
 				</tr>
 			</#list>
 		</tbody>

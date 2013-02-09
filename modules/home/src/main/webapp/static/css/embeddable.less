@@ -153,12 +153,32 @@ ul {
 
 
 #feedback-table, #submission-table {
+	border-collapse: collapse;
+
+		colgroup {
+			&.student    { background-color: #dcdcdd; }
+			&.submission { background-color: #d1d89c; border-left: 2px solid #767575; }
+			&.plagiarism { background-color: #dcdcdd; border-left: 2px solid #767575; }
+			&.feedback   { background-color: #a6d4e5; border-left: 2px solid #767575; }
+		}
+		
+		thead > tr th {
+			background-color: transparent !important;
+			text-align: center;
+			border-left-color: transparent;
+			border-top-color: transparent;
+		}
+
     tbody {
     	tr.selected td {
         	background-color: @errorBackground;
         	&:hover{
 	            background-color: @errorBackground;
     	    }
+    	}
+    	
+    	> tr:nth-child(even) {
+    		td { background-color: white;	}
     	}
     }
     .status span{
