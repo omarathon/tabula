@@ -334,7 +334,6 @@
 								<!-- Checking originality report for ${attachment.name} ... -->
 								<#if attachment.originalityReport??>
 									<@originalityReport attachment />
-									<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View report</a>
 								</#if>
 							</#list>
 						</td>
