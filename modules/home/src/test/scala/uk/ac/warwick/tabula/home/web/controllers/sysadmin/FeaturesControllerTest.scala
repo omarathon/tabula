@@ -24,8 +24,10 @@ class FeaturesControllerTest extends TestBase with MockitoSugar {
 		features.emailStudents = true
 		
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (true)
-		
-		controller.update("emailStudents", false)
+	
+		withUser("cuscav") {	
+			controller.update("emailStudents", false)
+		}
 		
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (false)
 	}
