@@ -335,6 +335,21 @@ $(function(){
 	});
 });
 
+// code for markscheme add/edit
+$(function(){
+	var markingMethod = $('#markingMethod');
+	var secondMarkers = jQuery('.second-markers-container');
+	if($('option:selected', markingMethod).hasClass('uses-second-markers'))
+		secondMarkers.show();
+	jQuery('#markingMethod').on('change', function(){
+		var $this = jQuery(this);
+		var option = jQuery('option:selected', this);
+		if(option.hasClass('uses-second-markers'))
+			secondMarkers.show();
+		else
+			secondMarkers.hide();
+	});
+});
 
 $(function(){
 	$('a.disabled').on('click', function(e){

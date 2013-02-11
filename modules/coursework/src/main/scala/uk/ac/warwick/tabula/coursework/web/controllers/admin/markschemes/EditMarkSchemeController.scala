@@ -28,7 +28,7 @@ class EditMarkSchemeController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: EditMarkSchemeCommand): Mav = {
 		doBind(cmd)
-		Mav("admin/markschemes/edit")
+		Mav("admin/markschemes/edit", "hasSubmissions" -> cmd.hasExistingSubmissions)
 	}
 	
 	@RequestMapping(method=Array(POST))
