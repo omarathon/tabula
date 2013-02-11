@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkScheme}
+import uk.ac.warwick.tabula.data.model.{SeenSecondMarking, MarkingMethod, Department, MarkScheme}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
@@ -43,10 +43,14 @@ abstract class ModifyMarkSchemeCommand(
 			override def alreadyHasCode = hasDuplicates(firstMarkers)
 		}
 		firstMarkersValidator.validate(errors)
-		val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
-			override def alreadyHasCode = hasDuplicates(secondMarkers)
+
+		// validate only when second markers are used
+		if(markingMethod == SeenSecondMarking){
+			val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
+				override def alreadyHasCode = hasDuplicates(secondMarkers)
+			}
+			secondMarkersValidator.validate(errors)
 		}
-		secondMarkersValidator.validate(errors)
 
 		// there is a marker in both lists
 		val trimmedFirst = firstMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
