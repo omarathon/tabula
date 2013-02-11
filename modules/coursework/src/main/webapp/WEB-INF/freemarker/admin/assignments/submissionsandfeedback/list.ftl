@@ -84,7 +84,7 @@
 		<td>
 			<#if extension?has_content>
 				<#assign date>
-					<@fmt.date date=extension.expiryDate capitalise=true />
+					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true split=true />
 				</#assign>
 				<span class="label label-info">Unsubmitted</span>
 				<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
@@ -295,7 +295,7 @@
 					<td class="submitted">
 						<#if submission.submittedDate??>
 							<span class="date use-tooltip" title="${lateness!''}">
-								<@fmt.date date=submission.submittedDate seconds=true capitalise=true />
+								<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 							</span>
 						</#if>
 					</td>
@@ -352,7 +352,7 @@
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true /></#if></td>
+					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
 					
 					 <#if assignment.collectMarks>
 						<td class="mark">
