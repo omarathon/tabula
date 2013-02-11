@@ -13,7 +13,8 @@
 					<img src="<@routes.tutorPhoto profile />" />
 				</div>
 				<h5>
-					${profile.personalTutor.fullName}
+					${profile.personalTutor.fullName} &nbsp;
+					<a id="edit-tutor-link" href="<@routes.tutor_edit studentUniId=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>					
 				</h5>
 				<#if profile.personalTutor.universityId == viewer.universityId>
 					<span class="muted">(you)</span>
@@ -25,3 +26,4 @@
 			</div>
 		</#if>
 </section>
+
