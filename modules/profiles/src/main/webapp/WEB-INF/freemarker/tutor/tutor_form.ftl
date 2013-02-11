@@ -1,6 +1,5 @@
-<br />
 <section class="tutor-search">	
-	<@f.form method="get" action="${url('/tutor/tutor_search')}" commandName="tutorSearchProfilesCommand" class="form-horizontal">
+	<@f.form method="get" action="${url('/tutor/search')}" commandName="tutorSearchProfilesCommand" class="form-horizontal">
 		<input id="studentUniId" name="studentUniId" type="hidden" value="${student.universityId}" />
 		<div class="control-group">
 			<label class="control-label" for="personal-tutor"><b>Personal Tutor</b></label>

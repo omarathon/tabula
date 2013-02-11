@@ -1,23 +1,32 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
 import scala.reflect.BeanProperty
+
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.Filters
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+
+import javax.persistence.Entity
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.PersonalTutor
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
-class ViewTutorCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
+class EditTutorCommand(val student: Member) extends Command[StudentRelationship] {
+
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
+	
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
 	@BeanProperty var save: String = null	
@@ -30,22 +39,28 @@ class ViewTutorCommand(val student: Member) extends ViewViewableCommand(Permissi
 		case None => ""
 		case Some(mem) => profileService.getNameAndNumber(mem)
 	}
+	
+	def applyInternal: StudentRelationship = {
+		profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)	
+	}
+
+	def describe(d: Description) = d.property("studentUniId", studentUniId)
 }
 
 @Controller
 @RequestMapping(Array("/tutor/{student}/edit"))
-class ViewTutorController extends BaseController {
+class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand =
 		restricted(new TutorSearchProfilesCommand(user)) orNull
 	
-	@ModelAttribute("viewTutorCommand")
-	def viewTutorCommand(@PathVariable("student") student: Member) = new ViewTutorCommand(student)
+	@ModelAttribute("editTutorCommand")
+	def editTutorCommand(@PathVariable("student") student: Member) = new EditTutorCommand(student)
 	
 	// initial form display
 	@RequestMapping(params=Array("!tutorUniId"))
-	def editTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
+	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/tutor_view", 
 			"studentUniId" -> cmd.student.universityId,
 			"tutorToDisplay" -> cmd.currentTutorForDisplay
@@ -54,7 +69,7 @@ class ViewTutorController extends BaseController {
 	
 	// now we've got a tutor id to display, but it's not time to save it yet
 	@RequestMapping(params=Array("tutorUniId", "!save"))
-	def displayPickedTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
+	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
 		
@@ -66,12 +81,12 @@ class ViewTutorController extends BaseController {
 	}	
 
 	@RequestMapping(params=Array("tutorUniId", "save=true"), method=Array(POST))
-	def savePickedTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
+	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val student = cmd.student
 		val sprCode = student.sprCode
 		
 		if (cmd.save.equals("true")) {
-			val rel = profileService.saveStudentRelationship(PersonalTutor, cmd.student.sprCode, cmd.tutorUniId)
+			val rel = cmd.apply()
 		}
 		else throw new IllegalStateException("form param save not set as expected")
 		
