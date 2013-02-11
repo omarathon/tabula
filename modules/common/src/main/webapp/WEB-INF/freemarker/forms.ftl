@@ -196,9 +196,11 @@ To not bind:
 	<div class="subtle help-block">
 		<#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
 		<#if types?size &gt; 0>
-			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>
+			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
 		</#if>
-		<span id="multifile-column-description"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
+		<#if max!=1>
+			<span id="multifile-column-description"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
+		</#if>
 	</div>
 	
 	<script><!--
