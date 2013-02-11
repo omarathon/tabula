@@ -35,7 +35,7 @@ trait SharedAssignmentProperties {
 
 	@BeanProperty var openEnded: JBoolean = false
 	@BeanProperty var collectMarks: JBoolean = false
-	@BeanProperty var collectSubmissions: JBoolean = false
+	@BeanProperty var collectSubmissions: JBoolean = true
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
 	@BeanProperty var allowResubmission: JBoolean = false
