@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.util.StringUtils
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
 	extends AddMarksCommand[List[Feedback]](module, assignment, submitter){
@@ -30,7 +31,10 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 			feedback.uploaderId = submitter.apparentId
 			feedback.universityId = universityId
 			feedback.released = false
-			feedback.actualMark = Option(actualMark.toInt)
+			feedback.actualMark = StringUtils.hasText(actualMark) match {
+				case true => Some(actualMark.toInt)
+				case false => None
+			}
 			feedback.actualGrade = Option(actualGrade)
 			session.saveOrUpdate(feedback)
 			feedback

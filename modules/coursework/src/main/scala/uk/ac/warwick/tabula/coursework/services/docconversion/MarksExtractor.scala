@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.coursework.services.docconversion
 
-import java.io.ByteArrayInputStream
 import scala.collection.JavaConversions._
 import org.apache.poi.openxml4j.opc.OPCPackage
-import org.apache.poi.xssf.eventusermodel.XSSFReader
-import org.apache.poi.xssf.model.SharedStringsTable
+import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.springframework.stereotype.Service
 import org.xml.sax.InputSource
-import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ArrayList
-import java.io.FileInputStream
 import java.io.InputStream
 import scala.reflect.BeanProperty
 
@@ -23,10 +19,10 @@ class MarkItem {
 	@BeanProperty var warningMessage: String = _
 
 	def this(universityId: String, actualMark: String, actualGrade: String) = {
-		this();
-		this.universityId = universityId;
-		this.actualMark = actualMark;
-		this.actualGrade = actualGrade;
+		this()
+		this.universityId = universityId
+		this.actualMark = actualMark
+		this.actualGrade = actualGrade
 	}
 }
 
@@ -37,24 +33,19 @@ class MarksExtractor {
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of MarkItems
 	 */
 	def readXSSFExcelFile(file: InputStream): JList[MarkItem] = {
-		val pkg = OPCPackage.open(file);
+		val pkg = OPCPackage.open(file)
+		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
-		val sst = reader.getSharedStringsTable()
+		val styles = reader.getStylesTable
 		val markItems: JList[MarkItem] = ArrayList()
-		val parser = fetchSheetParser(sst, markItems)
+		val sheetHandler = new XslxSheetHandler(styles, sst, markItems)
+		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
-			sheet close
+			sheet.close()
 		}
 		markItems
-	}
-
-	def fetchSheetParser(sst: SharedStringsTable, markItems: JList[MarkItem]) = {
-		val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-		val handler = new XslxSheetHandler(sst, markItems)
-		parser.setContentHandler(handler)
-		parser
 	}
 }
 
