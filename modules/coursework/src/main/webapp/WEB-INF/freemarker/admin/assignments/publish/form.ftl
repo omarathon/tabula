@@ -42,8 +42,8 @@ their feedback published. Those students won't be emailed again.
 </p>
 
 <p>
-Publishing feedback will make it available for students to download. 
-Be sure that you have received all the feedback you need before publishing, and then check the box below.
+Publishing feedback will make all currently uploaded feedback for this assignment available for students to download. 
+If more feedback is added later, it won't be published automatically.
 </p>
 
 <#if features.emailStudents>
