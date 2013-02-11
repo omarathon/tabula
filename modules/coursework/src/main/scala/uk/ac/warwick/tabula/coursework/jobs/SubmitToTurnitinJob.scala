@@ -111,8 +111,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			updateProgress(10) // update the progress bar
 
 			removeDefunctSubmissions()
-			uploadSubmissions()
-			retrieveReport()
+			retrieveReport(uploadSubmissions)
 		}
 
 		def removeDefunctSubmissions() {
@@ -133,8 +132,9 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			}
 		}
 
-		def uploadSubmissions() {
+		def uploadSubmissions(): Int = {
 			var uploadsDone = 0
+			var uploadsFailed = 0
 			val allAttachments = assignment.submissions flatMap { _.allAttachments }
 			val uploadsTotal = allAttachments.size
 
@@ -152,18 +152,9 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 						val submitResponse = session.submitPaper(classId, className, assignmentId, assignmentName, attachment.id, attachment.name, attachment.file, submission.universityId, "Student")
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
-							debug("Failed to upload document " + attachment.name)
-							if (sendEmails) {
-								debug("Sending an email to " + job.user.email)
-								val mime = mailer.createMimeMessage()
-								val email = new MimeMailMessage(mime)
-								email.setFrom(replyAddress)
-								email.setTo(job.user.email)
-								email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-								email.setText(renderJobFailedEmailText(job.user, assignment))
-								mailer.send(mime)
-							}
-							throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
+							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
+							logger.warn("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
+							uploadsFailed += 1
 						}
 					}
 					uploadsDone += 1
@@ -173,11 +164,12 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			}
 
 			debug("Done uploads (" + uploadsDone + ")")
+			uploadsFailed
 		}
 		
 		
 
-		def retrieveReport() {
+		def retrieveReport(failureCount: Int) {
 			// Uploaded all the submissions probably, now we wait til they're all checked
 			updateStatus("Waiting for documents to be checked...")
 
@@ -235,7 +227,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					email.setFrom(replyAddress)
 					email.setTo(job.user.email)
 					email.setSubject("Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderJobDoneEmailText(job.user, assignment))
+					email.setText(renderJobDoneEmailText(job.user, assignment, failureCount))
 					mailer.send(mime)
 				}
 
@@ -285,11 +277,12 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	}
 
-	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment) = {
+	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment, failureCount: Int) = {
 		renderToString("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
 			"user" -> user,
+			"failureCount" -> failureCount,
 			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
 		))
 	}
