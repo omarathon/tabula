@@ -20,13 +20,13 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
 class TutorSearchController extends ProfilesController {
-/*	
+	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand = new TutorSearchProfilesCommand(user)
 
-	@RequestMapping(value=Array("/tutor/tutor_search"), params=Array("!query"))
+	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: TutorSearchProfilesCommand) = Mav("tutor/tutor_form")
 
-	@RequestMapping(value=Array("/tutor/tutor_search"), params=Array("query"))
+	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors, @RequestParam("studentUniId") studentUniId: String) = {
 
 		if (errors.hasErrors) {
@@ -44,8 +44,8 @@ class TutorSearchController extends ProfilesController {
 				"results" -> cmd.apply())
 		}
 	}
-
-	@RequestMapping(value=Array("/tutor.json"), params=Array("query"))
+/*
+	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
 	def submitJson(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
@@ -56,7 +56,7 @@ class TutorSearchController extends ProfilesController {
 		}
 	}
 	
-	def toJson(profiles: Seq[Member]) = {
+	def toJson(tutors: Seq[Member]) = {
 		def memberToJson(member: Member) = Map[String, String](
 			"name" -> {member.fullName match {
 				case None => "[Unknown user]"
@@ -66,6 +66,8 @@ class TutorSearchController extends ProfilesController {
 			"userId" -> member.userId,
 			"description" -> member.description)
 			
-		profiles.map(memberToJson(_))
-	}*/
+		tutors.map(memberToJson(_))
+	}
+	* 
+	*/
 }
