@@ -77,17 +77,23 @@ so that they can be passed around between requests.
 		</@form.row>
 
 		<#if features.assignmentMembership>
+		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>
-				<label class="checkbox">
-					<@f.checkbox path="restrictSubmissions" />
-					Only allow enrolled students to submit
+				<label class="radio">
+					<@f.radiobutton path="restrictSubmissions" value="true" />
+					Only allow students enrolled on this assignment to submit coursework
+				</label>
+				<label class="radio">
+					<@f.radiobutton path="restrictSubmissions" value="false" />
+					Allow anyone with a link to the assignment page to submit coursework
 				</label>
 				<div class="help-block">
-					If you use this option, only students defined above as members will be able to
-					submit, so make sure that the membership is correct to avoid problems.
+					If you restrict submissions to students enrolled on the assignment,
+					students who go to the page without access will be able to request it.
 				</div>
 			</@form.field>
+		</@form.row>
 		</#if>
 
 		<@form.row cssClass="has-close-date">
