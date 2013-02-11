@@ -15,7 +15,7 @@ WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 jQuery(function ($) {
 	
 	$('input.date-time-picker').datetimepicker({
-		format: "d-M-yyyy hh:ii:ss",
+		format: "dd-M-yyyy hh:ii:ss",
 		weekStart: 1,
 		minView: 'day',
 		autoclose: true
@@ -31,7 +31,7 @@ jQuery(function ($) {
 			d.setUTCMilliseconds(0);
 			
 			var DPGlobal = $.fn.datetimepicker.DPGlobal;
-			$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("d-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+			$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
 			
 			$(this).datetimepicker('update');
 		}

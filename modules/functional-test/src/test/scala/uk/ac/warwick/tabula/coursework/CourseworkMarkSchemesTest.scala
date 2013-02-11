@@ -28,14 +28,13 @@ class CourseworkMarkSchemesTest extends BrowserTest with CourseworkFixtures {
 		click on (partialLinkText("Create"))
 		
 		textField("name").value = "Mark Scheme 1"
-
 		singleSel("markingMethod").value = "StudentsChooseMarker"
 
 		textField("firstMarkers").value = P.Marker1.usercode
 		
 		// Ensure that another marker field has magically appeared
 		eventually {
-			findAll(cssSelector(".user-code-picker")).size should be (2)
+			findAll(cssSelector(".user-code-picker")).toList.filter {_.isDisplayed}.size should be (2)
 		}
 		
 		new TextField(findAll(cssSelector(".user-code-picker")).toList(1).underlying).value = P.Marker2.usercode
@@ -50,6 +49,7 @@ class CourseworkMarkSchemesTest extends BrowserTest with CourseworkFixtures {
 		click on (partialLinkText("Create"))
 		
 		textField("name").value = "Mark Scheme 2"
+		singleSel("markingMethod").value = "StudentsChooseMarker"
 		textField("firstMarkers").value = P.Marker3.usercode
 		
 		submit()
