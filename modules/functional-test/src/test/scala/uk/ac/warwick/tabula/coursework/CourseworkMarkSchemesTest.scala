@@ -28,6 +28,9 @@ class CourseworkMarkSchemesTest extends BrowserTest with CourseworkFixtures {
 		click on (partialLinkText("Create"))
 		
 		textField("name").value = "Mark Scheme 1"
+
+		singleSel("markingMethod").value = "StudentsChooseMarker"
+
 		textField("firstMarkers").value = P.Marker1.usercode
 		
 		// Ensure that another marker field has magically appeared
