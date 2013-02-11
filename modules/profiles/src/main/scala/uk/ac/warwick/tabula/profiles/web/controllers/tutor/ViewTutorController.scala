@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
 import scala.reflect.BeanProperty
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
@@ -15,6 +13,9 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 class ViewTutorCommand(val student: Member) extends ViewViewableCommand(Permissions.Profiles.Read, student) {
 	@BeanProperty var studentUniId: String = student.getUniversityId
@@ -33,7 +34,8 @@ class ViewTutorCommand(val student: Member) extends ViewViewableCommand(Permissi
 
 @Controller
 @RequestMapping(Array("/tutor/{student}/edit"))
-class ViewTutorController extends TutorProfilesController {
+class ViewTutorController extends BaseController {
+	var profileService = Wire.auto[ProfileService]
 	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand =
 		restricted(new TutorSearchProfilesCommand(user)) orNull
@@ -63,7 +65,7 @@ class ViewTutorController extends TutorProfilesController {
 		)
 	}	
 
-	@RequestMapping(params=Array("tutorUniId", "save"))
+	@RequestMapping(params=Array("tutorUniId", "save=true"), method=Array(POST))
 	def savePickedTutor(@ModelAttribute("viewTutorCommand") cmd: ViewTutorCommand, request: HttpServletRequest ) = {
 		val student = cmd.student
 		val sprCode = student.sprCode

@@ -16,10 +16,11 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
 import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
-class TutorSearchController extends TutorProfilesController {
-	
+class TutorSearchController extends ProfilesController {
+/*	
 	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand = new TutorSearchProfilesCommand(user)
 
 	@RequestMapping(value=Array("/tutor/tutor_search"), params=Array("!query"))
@@ -66,5 +67,5 @@ class TutorSearchController extends TutorProfilesController {
 			"description" -> member.description)
 			
 		profiles.map(memberToJson(_))
-	}
+	}*/
 }

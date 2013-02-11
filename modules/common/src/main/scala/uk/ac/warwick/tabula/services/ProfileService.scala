@@ -89,12 +89,13 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	def getPersonalTutor(student: Member): Option[Member] = {
 		val sprCode: String = student.sprCode
 		val currentRelationship = findCurrentRelationship(PersonalTutor, student.sprCode)
-		currentRelationship match {
+		currentRelationship.flatMap { rel => getMemberByUniversityId(rel.agent) }
+/*		currentRelationship match {
 			case Some(rel) => {
 				getMemberByUniversityId(rel.agent)
 			}
 			case None => None
-		}
+		}*/
 	}
 	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
