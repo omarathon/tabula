@@ -4,30 +4,32 @@
 	<#if user.staff>
 		<#include "tutor_form.ftl" />
 	
-		<#if pickedTutor??>
-			<hr class="full-width">
-			<br />
+		<section class="tutor-edit">
+			<#if pickedTutor??>
+				<hr class="full-width">
+				<br />
+	
+				<@f.form 
+					id="saveTutor"
+					method="post" 
+					action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
+					commandName="searchTutorCommand" 
+					class="form-horizontal">
+					
+					<input id="save" name="save" type="hidden" value="true" />
+					<div style="text-align:right">
+						<button type="submit" class="btn btn-primary">Save</button
+					</div>
+				</@f.form>
 
-			<@f.form 
-				id="saveTutor"
-				method="post" 
-				action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
-				commandName="searchTutorCommand" 
-				class="form-horizontal">
-				
-				<input id="save" name="save" type="hidden" value="true" />
-
-				<div style="text-align:right;margin-right:220px">
-					<button type="submit" class="btn btn-primary">Save</button
-				</div>
-			</@f.form>
-
-		</#if>
+			</#if>
+		</section>
+		
 	</#if>
 	<br />
 	<br />
-	<div style="text-align:left">
+	<section class="tutor-edit-return">
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="<@routes.profile_by_id studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
-	</div>
+	</section>
 </#escape>
