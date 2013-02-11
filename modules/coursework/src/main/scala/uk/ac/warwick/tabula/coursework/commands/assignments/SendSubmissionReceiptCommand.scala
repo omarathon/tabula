@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.permissions._
 
 /**
  * Send an email confirming the receipt of a submission to the student

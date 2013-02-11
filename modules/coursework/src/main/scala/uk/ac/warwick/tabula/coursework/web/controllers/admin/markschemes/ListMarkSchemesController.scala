@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.markschemes
 
-import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.web.bind.annotation._
 import org.springframework.stereotype.Controller
@@ -48,10 +47,12 @@ object ListMarkSchemesController {
 				.add(Restrictions.eq("department", department))
 				.list
 		  
-			for (markScheme <- markSchemes) yield Map(
-				"markScheme" -> markScheme,
-				"assignmentCount" -> dao.getAssignmentsUsingMarkScheme(markScheme).size
-			)
+			for (markScheme <- markSchemes) yield {
+				val assignments = dao.getAssignmentsUsingMarkScheme(markScheme)
+				Map(
+					"markScheme" -> markScheme,
+					"assignmentCount" -> assignments.size)
+			}
 		}
 	}
 }

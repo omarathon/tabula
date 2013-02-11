@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 import uk.ac.warwick.userlookup.GroupService
 import org.springframework.beans.factory.annotation.{Autowired,Value}
-import uk.ac.warwick.util.core.StringUtils._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import forms.Extension

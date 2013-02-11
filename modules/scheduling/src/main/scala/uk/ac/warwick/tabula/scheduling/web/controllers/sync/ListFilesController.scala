@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils
 
 @Controller
 @RequestMapping(value = Array("/sync/listFiles.json"))
@@ -23,7 +23,7 @@ class ListFilesController extends BaseController {
 		val startDate = new DateTime(startDateMillis)
 		
 		val files = 
-			if (StringUtils.hasText(startingId)) fileDao.getFilesCreatedOn(startDate, MaxResponses, startingId)
+			if (startingId.hasText) fileDao.getFilesCreatedOn(startDate, MaxResponses, startingId)
 			else fileDao.getFilesCreatedSince(startDate, MaxResponses)
 			
 		val lastFileUploadedDate = 

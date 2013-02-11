@@ -9,11 +9,8 @@ import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
-import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StudentRole
-import uk.ac.warwick.tabula.roles.UniversityMemberRole
-import uk.ac.warwick.tabula.roles.UniversityMemberRole
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
@@ -33,7 +30,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 						case _ => Seq()
 					})
 				}
-			} else if (StringUtils.hasText(user.departmentCode)) {
+			} else if (user.departmentCode.hasText) {
 				departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 					case Some(department) =>
 						if (user.isStaff) Seq(StaffRole(department))

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
@@ -77,7 +77,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 		val (id, user) = info
 		if (user.isFoundUser) {
 			val email = user.getEmail
-			if (StringUtils.hasText(email)) {
+			if (email.hasText) {
 				val message = messageFor(user)
 				try {
 					studentMailSender.send(message)

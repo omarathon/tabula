@@ -26,7 +26,9 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
 	val wrapper = new ScalaBeansWrapper
 	wrapper.setMethodsShadowItems(false) // do not lookup method first.
 	wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
-	wrapper.setUseCache(true) //do caching by default.
+	
+	// TAB-351 TAB-469 Don't enable caching	
+	wrapper.setUseCache(false)
 	wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE);
 
 	this.setObjectWrapper(wrapper)

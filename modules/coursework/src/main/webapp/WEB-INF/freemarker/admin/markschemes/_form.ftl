@@ -30,23 +30,32 @@ Common form fields.
 	</div>
 </@form.labelled_row>
 
+<@form.labelled_row "markingMethod" "Marking Method">
+	<@f.select disabled="${hasSubmissions?string}" path="markingMethod">
+		<@f.option />
+		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
+		<@f.option class="uses-second-markers" value="SeenSecondMarking" label="Seen second marking" />
+	</@f.select>
+	<#if hasSubmissions>
+		<div class="help-block">
+			It is not possible to change the marking method as submissions exist.
+		</div>
+	</#if>
+</@form.labelled_row>
+
 <@form.labelled_row "firstMarkers" "First markers">
 	<@form.userpicker path="firstMarkers" list=true multiple=true />
 </@form.labelled_row>
 
+<div class="second-markers-container hide">
 <@form.labelled_row "secondMarkers" "Second markers">
 	<@form.userpicker path="secondMarkers" list=true multiple=true />
 </@form.labelled_row>
+</div>
 
-<#-- TODO-RITCHIE disable it if existingSubmissions is true -->
+<script>
 
-<@form.labelled_row "markingMethod" "Marking Method">
-	<@f.select path="markingMethod">
-		<@f.option />
-		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
-		<@f.option value="SeenSecondMarking" label="Seen second marking" />
-	</@f.select>
-</@form.labelled_row>
+</script>
 
 <div class="submit-buttons">
 <input type="submit" value="${submit_text}" class="btn btn-primary">

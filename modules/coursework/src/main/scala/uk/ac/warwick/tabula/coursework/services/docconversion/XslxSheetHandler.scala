@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var markItems: JList[MarkItem])
 	extends SheetContentsHandler with Logging {
@@ -49,7 +49,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 					currentMarkItem.universityId = formattedValue
 				}
 				case "Mark" => {
-					if(StringUtils.hasText(formattedValue))
+					if(formattedValue.hasText)
 						currentMarkItem.actualMark = formattedValue
 				}
 				case "Grade" => {

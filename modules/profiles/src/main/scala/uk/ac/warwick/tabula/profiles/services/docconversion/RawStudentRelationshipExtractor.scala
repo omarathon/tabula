@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
 import org.apache.poi.ss.util.CellReference
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class RawStudentRelationship {
 
@@ -41,7 +41,7 @@ class RawStudentRelationship {
 	}
 	
 	def getAgentNameIfNonMember(): String = {
-		if (hasText(agentUniversityId)) ""
+		if (agentUniversityId.hasText) ""
 		else agentName
 	}
 }

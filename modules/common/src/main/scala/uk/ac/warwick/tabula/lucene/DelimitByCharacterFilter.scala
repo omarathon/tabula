@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.lucene
 
 import org.apache.lucene.analysis.TokenFilter
 import org.apache.lucene.analysis.TokenStream
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 
 final class DelimitByCharacterFilter(val source: TokenStream, val character: Char) extends TokenFilter(source) {
@@ -22,7 +22,7 @@ final class DelimitByCharacterFilter(val source: TokenStream, val character: Cha
 			remainingText
 		}
 		
-		if (!StringUtils.hasText(text)) return false
+		if (!text.hasText) return false
 		
 		val matchedLength = text.indexOf(character)
 		if (matchedLength != -1) {

@@ -118,6 +118,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 	        </list>
 	    </property>
 	    <property name="formatters">

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -40,9 +41,11 @@
 								<configuration>
 									<target>
 										<sync todir="${deploy.dir}/${project.artifactId}.war">
-											<fileset dir="${project.build.directory}/${project.build.finalName}" />
+											<fileset
+												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
-										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+										<touch
+											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -56,8 +59,64 @@
 		</profile>
 	</profiles>
 
+	<build>
+		<plugins>
+			<!-- Build the war -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-war</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>exploded</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<warName>${project.build.finalName}</warName>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- TODO it's possible to get this out of sync with the definition in the 
+						top level pom, but we need to have this here so that we can overlay Freemarker 
+						from other modules -->
+					<overlays>
+						<overlay>
+							<groupId>uk.ac.warwick.tabula</groupId>
+							<artifactId>common</artifactId>
+							<type>jar</type>
+							<includes>
+								<include>WEB-INF/**/*</include>
+							</includes>
+						</overlay>
+						<overlay>
+							<groupId>uk.ac.warwick.tabula</groupId>
+							<artifactId>home</artifactId>
+							<type>zip</type>
+							<classifier>static-hashes</classifier>
+							<includes>
+								<include>WEB-INF/**/*</include>
+							</includes>
+						</overlay>
+						<overlay>
+							<groupId>uk.ac.warwick.tabula</groupId>
+							<artifactId>courses</artifactId>
+							<type>war</type>
+							<includes>
+								<include>WEB-INF/freemarker/emails/*</include>
+							</includes>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
-		<!-- Project dependencies - need a dependency on any module that runs a job -->
+		<!-- Project dependencies - need a dependency on any module that runs a 
+			job -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>home</artifactId>
@@ -65,7 +124,7 @@
 			<type>zip</type>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>courses</artifactId>
@@ -81,7 +140,14 @@
 			<artifactId>home</artifactId>
 			<classifier>jar</classifier>
 		</dependency>
-		
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>courses</artifactId>
+			<version>${project.version}</version><!--$NO-MVN-MAN-VER$-->
+			<type>war</type>
+			<scope>compile</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-httpclient4</artifactId>
