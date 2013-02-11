@@ -4,7 +4,7 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command
@@ -58,7 +58,7 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 
 		var noErrors = true
 		// validate id
-		if (hasText(mark.universityId)) {
+		if (mark.universityId.hasText) {
 			if (!UniversityId.isValid(mark.universityId)) {
 				errors.rejectValue("universityId", "uniNumber.invalid")
 				noErrors = false
@@ -79,7 +79,7 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 			errors.rejectValue("universityId", "NotEmpty")
 		}
 		// validate mark (must be int between 0 and 100)
-		if (hasText(mark.actualMark)) {
+		if (mark.actualMark.hasText) {
 			try {
 				val asInt = mark.actualMark.toInt
 				if (asInt < 0 || asInt > 100) {
@@ -92,7 +92,7 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 					noErrors = false
 				}
 			}
-		} else if (!hasText(mark.actualGrade)) {
+		} else if (!mark.actualGrade.hasText) {
 			// If a row has no mark or grade, we will quietly ignore it 
 			noErrors = false
 		}

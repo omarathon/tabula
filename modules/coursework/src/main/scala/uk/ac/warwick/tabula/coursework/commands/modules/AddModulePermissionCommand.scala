@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
@@ -52,7 +52,7 @@ class AddModulePermissionCommand(val module: Module) extends Command[Unit] {
 
 	private def alreadyHasCode = usercodes.find { module.participants.includes(_) }.isDefined
 
-	private def usercodesEmpty = usercodes.find { StringUtils.hasText(_) }.isEmpty
+	private def usercodesEmpty = usercodes.find { _.hasText }.isEmpty
 
 	def describe(d: Description) = d.module(module).properties(
 		"usercodes" -> usercodes.mkString(","),

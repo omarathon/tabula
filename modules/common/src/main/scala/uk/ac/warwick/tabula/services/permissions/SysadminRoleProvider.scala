@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.util.core.StringUtils._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Component
 class SysadminRoleProvider extends ScopelessRoleProvider {
@@ -19,7 +19,7 @@ class SysadminRoleProvider extends ScopelessRoleProvider {
 	def groupService = userLookup.getGroupService
 
 	def getRolesFor(user: CurrentUser): Seq[Role] =
-		if (hasText(user.realId) && groupService.isUserInGroup(user.realId, adminGroup)) Seq(Sysadmin())
+		if (user.realId.hasText && groupService.isUserInGroup(user.realId, adminGroup)) Seq(Sysadmin())
 		else Seq()
 		
 	def rolesProvided = Set(classOf[Sysadmin])

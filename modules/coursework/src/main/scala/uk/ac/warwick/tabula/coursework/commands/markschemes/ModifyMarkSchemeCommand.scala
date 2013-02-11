@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkScheme}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.permissions._
 
@@ -71,8 +71,8 @@ abstract class ModifyMarkSchemeCommand(
 		
 	// Called manually by controller.
 	def doBind() {
-	  firstMarkers = firstMarkers.filter(StringUtils.hasText)
-		secondMarkers = secondMarkers.filter(StringUtils.hasText)
+	  firstMarkers = firstMarkers.filter(_.hasText)
+		secondMarkers = secondMarkers.filter(_.hasText)
 	}
 
 	def copyTo(scheme: MarkScheme) {

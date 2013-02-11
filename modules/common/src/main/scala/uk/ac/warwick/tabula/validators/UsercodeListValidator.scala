@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Reusable validator for checking the usual stuff about a list of usercodes on a command:
@@ -18,7 +18,7 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String) {
 	val userLookup = Wire.auto[UserLookupService]
 
 	def validate(errors: Errors) {
-		val trimmedCodes = usercodes.filter(StringUtils.hasText).map(_.trim)
+		val trimmedCodes = usercodes.filter(_.hasText).map(_.trim)
 		if (usercodesEmpty) {
 			errors.rejectValue(pathName, "NotEmpty")
 		} else if (alreadyHasCode) {
@@ -36,5 +36,5 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String) {
 	// can override for custom check for pre-existing usercode.
 	def alreadyHasCode = false
 	
-	private def usercodesEmpty = usercodes.find { StringUtils.hasText }.isEmpty
+	private def usercodesEmpty = usercodes.find { _.hasText }.isEmpty
 }

@@ -28,7 +28,7 @@ import uk.ac.warwick.util.web.UriBuilder
 import java.io.FileOutputStream
 import java.io.FileNotFoundException
 import org.apache.commons.io.IOUtils
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import java.io.FileWriter
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.DownloadFileController
@@ -181,7 +181,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 		
 		val url = new UriBuilder(listFilesUrl).addQueryParameter(StartParam, startDate.getMillis.toString)
 		
-		if (StringUtils.hasText(startFromId)) url.addQueryParameter(StartFromIdParam, startFromId)
+		if (startFromId.hasText) url.addQueryParameter(StartFromIdParam, startFromId)
 		
 		val ex = new SimpleHttpMethodExecutor(Method.post)
 		ex.setUrl(url.toUri)

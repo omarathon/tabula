@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Sends a message to one or more admins to let them know that the current
@@ -35,7 +36,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 		val adminUsers = userLookup.getUsersByUserIds(seqAsJavaList(admins.members))
 		val manageAssignmentUrl = Routes.admin.assignment.edit(assignment)
 
-		for ((usercode, admin) <- adminUsers if admin.isFoundUser) {
+		for ((usercode, admin) <- adminUsers if admin.isFoundUser && admin.getEmail.hasText) {
 			val messageText = renderToString("/WEB-INF/freemarker/emails/requestassignmentaccess.ftl", Map(
 				"assignment" -> assignment,
 				"student" -> user,

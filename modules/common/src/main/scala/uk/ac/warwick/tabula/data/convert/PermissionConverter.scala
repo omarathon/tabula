@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class PermissionConverter extends Converter[String, Permission] {
   
 	override def convert(name: String) = 
-		if (!StringUtils.hasText(name)) null
+		if (!name.hasText) null
 		else Permissions.of(name)
 
 }

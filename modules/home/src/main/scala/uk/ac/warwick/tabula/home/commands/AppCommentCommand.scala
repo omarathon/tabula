@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.util.core.StringUtils._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with Public with InitializingBean {
@@ -52,9 +52,9 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 
 	def prefill = {
 		if (user != null && user.loggedIn) {
-			if (!hasText(usercode)) usercode = user.apparentId
-			if (!hasText(name)) name = user.fullName
-			if (!hasText(email)) email = user.email
+			if (!usercode.hasText) usercode = user.apparentId
+			if (!name.hasText) name = user.fullName
+			if (!email.hasText) email = user.email
 		}
 	}
 

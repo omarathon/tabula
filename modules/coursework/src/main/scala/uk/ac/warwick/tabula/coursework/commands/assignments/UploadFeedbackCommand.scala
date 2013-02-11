@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
@@ -133,7 +133,7 @@ abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assi
 		val uniNumber = item.uniNumber
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		if (hasText(uniNumber)) {
+		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
 			} else {

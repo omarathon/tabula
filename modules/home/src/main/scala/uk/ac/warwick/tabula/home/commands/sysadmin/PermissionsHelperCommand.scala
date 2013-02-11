@@ -17,7 +17,7 @@ import org.springframework.core.convert.ConversionService
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils
 import org.springframework.core.convert.ConversionException
 
 class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unaudited with ReadOnly with SelfValidating {
