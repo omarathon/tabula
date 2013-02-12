@@ -15,7 +15,7 @@
 			<#if itemList?size gt 0>
 				<#if hasErrors>
 					<div class="alert alert-warning alert-block">
-						<h4>Your spreadsheet had one or more problems, highlighted below.</h4>
+						<h4>Your spreadsheet has problems, highlighted below.</h4>
 						<p>You should fix these problems in your spreadsheet and try again.
 						If you choose to confirm <i>without</i> fixing the spreadsheet any rows with errors
 						will be ignored.</p>
@@ -25,63 +25,62 @@
 					Please check and <samp>Confirm</samp> your changes at the bottom of the page.</p>
 				</#if>
 				
-				<table class="tutorTable">
+				<table class="table table-bordered table-condensed">
 					<thead>
-					<tr>
-						<th>Student ID</th>
-						<th>Student Name</th>
-						<th>Tutor ID</th>
-						<th>Tutor Name <span class="muted">derived from tutor ID</span></th>
-						<th>Tutor Name <span class="muted">for non-University members</span></th>
-					</tr>
+						<tr>
+							<th>Student ID</th>
+							<th>Student Name</th>
+							<th>Tutor ID</th>
+							<th>Tutor Name</th>
+						</tr>
 					</thead>
 					<tbody>
 					<#list itemList as item>
 						<@spring.nestedPath path="rawStudentRelationships[${item_index}]">
-							<#if !item.isValid>
-								<#assign errorClass="alert-error" />
-							<#elseif item.warningMessage??>
-								<#assign errorClass="alert" />
-							<#else>
-								<#assign errorClass="alert-success" />
-							</#if>
+							<@f.hidden path="targetUniversityId" />
+							<@f.hidden path="agentUniversityId" />
+							<@f.hidden path="agentName" />
+							<@f.hidden path="isValid" />
 							
-							<tr class="${errorClass}">
-								<@f.hidden path="targetUniversityId" />
-								<@f.hidden path="agentUniversityId" />
-								<@f.hidden path="agentName" />
-								<@f.hidden path="isValid" />
+							<#if !item.isValid>
+								<tr class="error">
+							<#else>
+								<tr class="success">
+							</#if>
 								<td>
 									<@spring.bind path="targetUniversityId">
 										${status.value}
 									</@spring.bind>
-									<@f.errors path="targetUniversityId" cssClass="error" />
 								</td>
 								<td>
 									<@spring.bind path="targetMember.fullName">
-										${status.value}
+										<#if targetMember?has_content>
+											${status.value}
+										</#if>
 									</@spring.bind>
-									<@f.errors path="targetMember.fullName" cssClass="error" />
 								</td>
 								<td>
 									<@spring.bind path="agentUniversityId">
 										${status.value}
 									</@spring.bind>
-									<@f.errors path="agentUniversityId" cssClass="error" />
 								</td>
 								<td>
-									<@spring.bind path="agentMember.fullName">
-										${status.value}
-									</@spring.bind>
-									<@f.errors path="agentMember.fullName" cssClass="error" />
-								</td>
-								<td>
-									<@spring.bind path="agentNameIfNonMember">
-										${status.value}
-									</@spring.bind>
-									<@f.errors path="agentNameIfNonMember" cssClass="error" />
+									<#if agentNameIfNonMember?has_content>
+										<@spring.bind path="agentNameIfNonMember">
+											${status.value}
+										</@spring.bind>
+									<#else>
+										<@spring.bind path="agentMember.fullName">
+											<#if agentMember?has_content>
+												${status.value} <span class="muted">from given ID</span>
+											</#if>
+										</@spring.bind>
+									</#if>
 								</td>
 							</tr>
+							<#if !item.isValid>
+								<tr class="error"><td colspan="4"><i class="icon-warning-sign"></i> <@f.errors path="*" cssClass="" /></td></tr>
+							</#if>
 						</@spring.nestedPath>
 					</#list>
 					</tbody>
@@ -90,7 +89,7 @@
 				<div class="submit-buttons">
 					<input type="hidden" name="confirm" value="true">
 					<input class="btn btn-primary" type="submit" value="Confirm">
-					or <a class="btn" href="<@routes.home />">Cancel</a>
+					or <a class="btn" href="<@routes.tutor_upload department />">Cancel</a>
 				</div>
 			<#else>
 				<div class="alert alert-error alert-block">
