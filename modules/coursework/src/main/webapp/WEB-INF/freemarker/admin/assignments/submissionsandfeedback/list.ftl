@@ -281,7 +281,7 @@
 					</#if>
 					</td>
 					
-					<td nowrap="nowrap" class="files">
+					<td class="files">
 						<#assign attachments=submission.allAttachments />
 						<#if attachments?size gt 0>
 						<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
@@ -339,7 +339,7 @@
 						</td>
 					</#if>
 					
-					<td nowrap="nowrap" class="download">
+					<td class="download">
 						<#if student.enhancedFeedback??>
 							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
