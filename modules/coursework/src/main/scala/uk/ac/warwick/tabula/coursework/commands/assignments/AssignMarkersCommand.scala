@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.permissions.Permissions
 
 
-class AssignMarkersCommand(module: Module, assignment:Assignment) extends Command[Assignment] with Daoisms{
+class AssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] with Daoisms{
 
 	PermissionCheck(Permissions.Assignment.Update, assignment)
 
