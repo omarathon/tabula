@@ -13,8 +13,10 @@
 					<img src="<@routes.tutorPhoto profile />" />
 				</div>
 				<h5>
-					${profile.personalTutor.fullName} &nbsp;
-					<a id="edit-tutor-link" href="<@routes.tutor_edit studentUniId=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>					
+					${profile.personalTutor.fullName}
+					<#if can.do("Profiles.PersonalTutor.Update", profile)>
+						<a id="edit-tutor-link" href="<@routes.tutor_edit studentUniId=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>
+					</#if>
 				</h5>
 				<#if profile.personalTutor.universityId == viewer.universityId>
 					<span class="muted">(you)</span>
