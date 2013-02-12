@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>27</version>
+		<version>28</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -215,8 +215,8 @@
 							<includes>
 								<include>css/concat6.css</include>
 								<include>${project.build.directory}/${project.build.finalName}/static/css/main.css</include>
-								<include>libs/anytime/anytimec.css</include>
 								<include>libs/bootstrap-editable/css/bootstrap-editable.css</include>
+								<include>libs/bootstrap-datetimepicker/css/datetimepicker.css</include>
 								<include>libs/popup/popup.css</include>
 								<include>libs/jquery-rating/jquery.rating.css</include>
 							</includes>
@@ -231,10 +231,10 @@
 								<include>libs/jquery.delayedObserver.js</include>
 								<include>libs/jquery-rating/jquery.rating.pack.js</include>
 								<!--<include>libs/jquery-caret/jquery.caret.1.02.js</include> -->
-								<include>libs/anytime/anytimec.js</include>
 								<include>libs/popup/popup.js</include>
 								<include>libs/bootstrap/js/bootstrap.js</include>
 								<include>libs/bootstrap-editable/js/bootstrap-editable.js</include>
+								<include>libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js</include>
 								<include>libs/spin-js/spin.min.js</include>
 								<include>libs/spin-js/jquery.spin.js</include>
 								<include>js/modernizr.js</include>

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.profiles.commands.TutorTemplateCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
-@RequestMapping(value = Array("/admin/department/{department}/tutors/template"))
+@RequestMapping(value = Array("/department/{department}/tutors/template"))
 class TutorTemplateController extends ProfilesController {
 	@ModelAttribute def command(@PathVariable("department") department: Department) =
 		new TutorTemplateCommand(department)

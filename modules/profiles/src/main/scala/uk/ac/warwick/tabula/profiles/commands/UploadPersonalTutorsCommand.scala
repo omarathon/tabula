@@ -29,7 +29,7 @@ import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationsh
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.mutable.Buffer
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.BindListener
@@ -37,7 +37,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Create, department)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
 
 	var userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
@@ -77,7 +77,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 		var valid: Boolean = true
 		val targetUniId = rawStudentRelationship.targetUniversityId
 
-		if (hasText(rawStudentRelationship.targetUniversityId)) {
+		if (rawStudentRelationship.targetUniversityId.hasText) {
 			if (!UniversityId.isValid(rawStudentRelationship.targetUniversityId)) {
 				errors.rejectValue("targetUniversityId", "uniNumber.invalid")
 				valid = false
@@ -116,7 +116,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	private def setAndValidateAgentMember(rawStudentRelationship: RawStudentRelationship, errors: Errors):Boolean = {
 		var valid: Boolean = true
 		val agentUniId = rawStudentRelationship.agentUniversityId
-		if (hasText(agentUniId)) {
+		if (agentUniId.hasText) {
 			if (!UniversityId.isValid(agentUniId)) {
 					errors.rejectValue("agentUniversityId", "uniNumber.invalid")
 					valid = false
@@ -130,7 +130,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						rawStudentRelationship.agentMember = agentMember
 				}
 			}
-		} else if (!hasText(rawStudentRelationship.agentName)) {
+		} else if (!rawStudentRelationship.agentName.hasText) {
 			// just check for some free text
 			// TODO could look for name-like qualities (> 3 chars etc)
 			errors.rejectValue("agentName", "NotEmpty")
@@ -140,7 +140,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	}	
 	
 	private def getMember(uniId: String): Option[Member] = {
-		if (!hasText(uniId)) 
+		if (!uniId.hasText) 
 			None
 		else {
 			userLookup.getUserByWarwickUniId(uniId) match {
@@ -157,7 +157,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	override def applyInternal(): Seq[StudentRelationship] = transactional() {
 		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship): StudentRelationship = {
 			val agent = 
-			if (hasText(rawStudentRelationship.agentUniversityId))
+			if (rawStudentRelationship.agentUniversityId.hasText)
 				rawStudentRelationship.agentUniversityId
 			else
 				rawStudentRelationship.agentName

@@ -41,10 +41,10 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	@BeanProperty var name: String = _
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var openDate: DateTime = new DateTime().withTime(12, 0, 0, 0)
+	@BeanProperty var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var closeDate: DateTime = openDate.plusWeeks(2)
+	@BeanProperty var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
 
 	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
 

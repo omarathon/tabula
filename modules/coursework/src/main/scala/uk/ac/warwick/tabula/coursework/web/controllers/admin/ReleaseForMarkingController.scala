@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-
-import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import org.springframework.validation.Errors
+import javax.validation.Valid
+import uk.ac.warwick.tabula.CurrentUser
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
@@ -18,10 +17,11 @@ class ReleaseForMarkingController extends CourseworkController {
 
 	@ModelAttribute
 	def command(@PathVariable("module") module: Module,
-				@PathVariable("assignment") assignment: Assignment
-				) = new ReleaseForMarkingCommand(module, assignment)
+				@PathVariable("assignment") assignment: Assignment,
+				user: CurrentUser
+				) = new ReleaseForMarkingCommand(module, assignment, user)
 
-	validatesSelf[MarkPlagiarisedCommand]
+	validatesSelf[ReleaseForMarkingCommand]
 
 	def confirmView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
@@ -43,8 +43,9 @@ class ReleaseForMarkingController extends CourseworkController {
 	def submit(@Valid cmd: ReleaseForMarkingCommand, errors: Errors) = {
 		transactional() {
 			if (errors.hasErrors)
-				confirmView(cmd.assignment)
+				showForm(cmd, errors)
 			else {
+				cmd.preSubmitValidation()
 				cmd.apply()
 				RedirectBack(cmd.assignment)
 			}

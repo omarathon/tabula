@@ -70,7 +70,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 		def assignmentSettings(members: Seq[String]) = {
 			allFeatures(members)
 			
-			checkbox("restrictSubmissions").clear()
+			radioButtonGroup("restrictSubmissions").value = "false"
 		}
 		
 		withAssignment("xxx101", "Fully featured assignment", assignmentSettings) { assignmentId =>

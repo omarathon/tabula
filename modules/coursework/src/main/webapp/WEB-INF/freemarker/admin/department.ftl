@@ -36,8 +36,8 @@
 			<#if features.feedbackTemplates>
 				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
 			</#if>
-			<#if features.markSchemes>
-				<li><a href="markschemes"><i class="icon-inbox"></i> Mark schemes</a></li>
+			<#if features.markingWorkflows>
+				<li><a href="markingworkflows"><i class="icon-inbox"></i> Marking workflows</a></li>
 			</#if>
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display</a></li>
 		</ul>
@@ -110,6 +110,11 @@
 					</#if>
 				</small>
 			</h3>
+			
+			<#if assignment.upstreamAssignment??>
+			  <#assign _upstream=assignment.upstreamAssignment />
+			  <span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
+			</#if>
 
 			</div>
 			<div class="stats">
@@ -201,7 +206,11 @@
 							Archive
 						</#if>
 					</a></li>
-					
+
+					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />">Assign markers <i class="icon-user"></i></a></li>
+					</#if>
+
 					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
 					
 					<#if assignment.collectMarks >

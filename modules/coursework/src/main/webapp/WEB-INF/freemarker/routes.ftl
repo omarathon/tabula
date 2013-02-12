@@ -21,14 +21,18 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/list"/></#macro>
 <#macro assignmentfeedbacks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/list"/></#macro>
 
+<#macro listmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 <#macro downloadmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/submissions.zip"/></#macro>
+<#macro downloadfirstmarkerfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/firstmarker/feedbacks.zip"/></#macro>
+<#macro uploadmarkerfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback"/></#macro>
+<#macro markeraddmarks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/list"/></#macro>
 
 <#macro feedbackadd assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
 <#macro feedbackdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>
 <#macro markstemplate assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marks-template" /></#macro>
-
+<#macro markermarkstemplate assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks-template" /></#macro>
 <#macro extensionreviewattachment assignment userid filename><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${userid}/supporting-file/${filename}" /></#macro>
 <#macro extensionrequestattachment assignment filename><@url page="/module/${assignment.module.code}/${assignment.id}/extension/supporting-file/${filename}" /></#macro>
 
@@ -41,10 +45,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbacktemplatedownload department feedbacktemplate><@url page="/admin/department/${department.code}/settings/feedback-templates/download/${feedbacktemplate.id}/${feedbacktemplate.attachment.name}" /></#macro>
 <#macro feedbacktemplatedelete department feedbacktemplate><@url page="/admin/department/${department.code}/settings/feedback-templates/delete/${feedbacktemplate.id}" /></#macro>
 
-<#macro markschemelist department><@url page="/admin/department/${department.code}/markschemes" /></#macro>
-<#macro markschemeadd department><@markschemelist department />/add</#macro>
-<#macro markschemeedit scheme><@markschemelist scheme.department />/edit/${scheme.id}</#macro>
-<#macro markschemedelete scheme><@markschemelist scheme.department />/delete/${scheme.id}</#macro>
+<#macro markingworkflowlist department><@url page="/admin/department/${department.code}/markingworkflows" /></#macro>
+<#macro markingworkflowadd department><@markingworkflowlist department />/add</#macro>
+<#macro markingworkflowedit scheme><@markingworkflowlist scheme.department />/edit/${scheme.id}</#macro>
+<#macro markingworkflowdelete scheme><@markingworkflowlist scheme.department />/delete/${scheme.id}</#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@url page="/module/${assignment.module.code}/${assignment.id}"/></#macro>

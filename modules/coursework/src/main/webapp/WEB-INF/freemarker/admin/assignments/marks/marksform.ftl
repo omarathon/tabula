@@ -3,7 +3,6 @@
 <#escape x as x?html>
 <div id="batch-feedback-form">
 <h1>Submit marks for ${assignment.name}</h1>
-
 <ul id="marks-tabs" class="nav nav-tabs">
 	<li class="active"><a href="#upload">Upload</a></li>
 	<li><a href="#webform">Web Form</a></li>
@@ -15,7 +14,7 @@
 			The spreadsheet should have two columns in the following order: student ID then mark.
 			You can use this <a href="<@routes.markstemplate assignment=assignment  />" >generated spreadsheet</a> as a template.
 		</p>
-		<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="addMarksCommand">
+		<@f.form method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="adminAddMarksCommand">
 		<input name="isfile" value="true" type="hidden"/>
 		<table role="presentation" class="narrowed-form">
 			<tr>
@@ -30,7 +29,6 @@
 			</td>
 		</tr>
 	</table>
-
 	<div class="submit-buttons">
 		<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
 	</div>
@@ -40,7 +38,6 @@
 <p>
 	Click the add button below to enter marks for a student.
 </p>
-
 <table class="hide">
 	<tbody class="row-markup">
 	<tr class="mark-row">
@@ -55,8 +52,7 @@
 	</tr>
 	</tbody>
 </table>
-
-<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="addMarksCommand">
+<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="adminAddMarksCommand">
 <input name="isfile" value="false" type="hidden"/>
 <table class="marksUploadTable">
 	<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
@@ -73,9 +69,7 @@
 		<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
 	</tr>
 </#list>
-
 </#if>
-
 		</table>
 <br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 <div class="submit-buttons">

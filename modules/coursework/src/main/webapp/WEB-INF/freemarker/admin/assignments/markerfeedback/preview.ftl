@@ -25,20 +25,23 @@
 <p>
 	<#if itemsList?size gt 0>
 		I've ${verbed_your_noun} and I found feedback for ${itemsList?size} students.
-
 		<#if hasErrors>
-		However, there were some problems with its contents, which are shown below.
-		You'll need to correct these problems with the zip and try again.
+			<div class="alert alert-error">
+				However, there were some problems with its contents, which are shown below.
+				You'll need to correct these problems with the zip and try again.
+			</div>
 		</#if>
 	<#else>
-		I've ${verbed_your_noun} but I couldn't find any files that looked like feedback items.
+		<div class="alert alert-error">
+			I've ${verbed_your_noun} but I couldn't find any files that looked like feedback items.
+		</div>
 	</#if>
 
 </p>
 </@spring.bind>
 
 <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
-<div class="alert alert-block">
+<div class="unrecognised-files alert alert-block">
 <div>I didn't understand some of the files uploaded, and these will be ignored:</div>
 <ul class="file-list">
 <#list addMarkerFeedbackCommand.unrecognisedFiles as unrecognisedFile>
@@ -53,7 +56,7 @@
 </#if>
 
 <#if addMarkerFeedbackCommand.invalidFiles?size gt 0>
-<div class="alert alert-block alert-error">
+<div class="invalid-files alert alert-block alert-error">
 <div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
 <ul class="file-list">
 <#list addMarkerFeedbackCommand.invalidFiles as invalidFile>
@@ -68,12 +71,25 @@
 </#if>
 
 <#if addMarkerFeedbackCommand.invalidStudents?size gt 0>
-<div class="invalid-students">
+<div class="invalid-students alert">
 <div>Some of the feedback that you uploaded was for students that you are not assigned to mark. These files will be ignored</div>
 <ul class="file-list">
 	<#list addMarkerFeedbackCommand.invalidStudents as invalidStudent>
 	<li>
 		${invalidStudent.uniNumber}
+	</li>
+</#list>
+</ul>
+</div>
+</#if>
+
+<#if addMarkerFeedbackCommand.markedStudents?size gt 0>
+<div class="invalid-students alert">
+<div>Some of the feedback that you uploaded was for students that you have finished marking. These files will be ignored</div>
+<ul class="file-list">
+	<#list addMarkerFeedbackCommand.markedStudents as markedStudent>
+	<li>
+		${markedStudent.uniNumber}
 	</li>
 </#list>
 </ul>
@@ -111,6 +127,7 @@
 				<li>
 					<@f.hidden path="file.attached[${attached_index}]" />
 					${attached.name}
+					<@f.errors path="file" cssClass="error" />
 					<#if attached.duplicate>
 						<span class="warning">
 							A feedback file with this name already exists for this student. It will be overwritten.

@@ -42,8 +42,33 @@ html.iframe {
   cursor: hand;
 }
 
-.tabula-page {
+#container {
+	.collapse-trigger { .cursor-pointer(); }
 	
+	h4.collapse-trigger i { margin-top: 5px; }
+	.h4-aside { margin-top: 5px; float: right; }
+}
+
+.tabula-page {
+
+#home-list {
+	margin-top: 16px;
+	padding-left: 0;
+
+	list-style-type: none;
+	
+	li { margin-top: 8px; }
+}
+
+#what-is-tabula {
+	margin-top: 36px;
+	color: @grayLight;
+}
+
+#profile-dept-admin {
+	margin-top: 12px;
+}
+
 .span6 > h6 {
 	margin: 12px 0 6px; 
 	color: #333;
@@ -121,17 +146,39 @@ ul {
 		display:block-inline;
 		float: left;
 		margin: 1px 10px 5px 0;
+		
+		span { white-space: nowrap; }
 	}
 }
 
 
 #feedback-table, #submission-table {
+	border-collapse: collapse;
+
+		colgroup {
+			&.student    { background-color: #dcdcdd; }
+			&.submission { background-color: #d1d89c; border-left: 2px solid #767575; }
+			&.plagiarism { background-color: #dcdcdd; border-left: 2px solid #767575; }
+			&.feedback   { background-color: #a6d4e5; border-left: 2px solid #767575; }
+		}
+		
+		thead > tr th {
+			background-color: transparent !important;
+			text-align: center;
+			border-left-color: transparent;
+			border-top-color: transparent;
+		}
+
     tbody {
     	tr.selected td {
         	background-color: @errorBackground;
         	&:hover{
 	            background-color: @errorBackground;
     	    }
+    	}
+    	
+    	> tr:nth-child(even) {
+    		td { background-color: white;	}
     	}
     }
     .status span{
@@ -228,6 +275,10 @@ ul {
 	div.alert {
 	  margin-bottom: 0 !important;
 	}
+}
+
+.marker-btn {
+	float: right;
 }
 
 // assignment deadlines
@@ -345,6 +396,7 @@ table {
 	
 	ul.user-list {
 	  list-style: none;
+	  padding-left: 0;
 	  li {
 	    margin: 0;
 	  }
@@ -365,6 +417,85 @@ table {
 	input.big-input {
 		width: 80%;
 	}
+	
+	// Move over radio buttons in forms
+    input[type="radio"] {
+  		margin-right:6px;
+  		vertical-align:text-bottom;
+  	}
+
+	table.tablesorter {
+		> thead > tr {
+			th {
+				background-color: lighten(@tabulaGrayLight, 35%);
+				padding-right: 20px;
+				
+				&.header {
+					background-image: url(/static/images/tablesorter/bg.gif);
+					background-repeat: no-repeat;
+					background-position: center right;
+					cursor: pointer;
+				}
+				
+				&.headerSortUp {
+					background-image: url(/static/images/tablesorter/asc.gif);
+				}
+				
+				&.headerSortDown {
+					background-image: url(/static/images/tablesorter/desc.gif);
+				}
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaGrayLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-greenLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaGreenLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaGreenLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-blueLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaBlueLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaBlueLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-orangeLight {
+			> thead > tr > th {
+				background-color: lighten(@tabulaOrangeLight, 35%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: lighten(@tabulaOrangeLight, 25%);
+				}
+			}
+		}
+		
+		&.tabula-turquoise {
+			> thead > tr > th {
+				background-color: desaturate(lighten(@tabulaTurquoise, 35%), 20%);
+				
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: desaturate(lighten(@tabulaTurquoise, 25%), 20%);
+				}
+			}
+		}
+}
 }
 
 #god-notice {
@@ -572,38 +703,6 @@ span.press-ctrl-c {
   margin: 1em;
 }
 
-.label-ANY() {
-	padding: 1px 4px;
-	text-transform: uppercase;
-	font-size: 80%;
-	font-weight: bold;
-	border-radius: 4px;
-}
-
-.label-green {
-	background: @green;
-	color: white;
-	.label-ANY();
-}
-
-.label-orange {
-	background: @orange;
-	color: white;
-	.label-ANY();
-}
-
-.label-red {
-	background: @red;
-	color: white;
-	.label-ANY();
-}
-
-.label-blue {
-	background: @blue;
-	color: white;
-	.label-ANY();
-}
-
 .extra-data {
   .very-subtle;
 }
@@ -641,14 +740,9 @@ input[type=text] {
 
 .originality-report {
   text-align: right;
+  .hyphenate-words();
   img { vertical-align: middle }
 }
-
-// fix for the date plugin and models
-.AnyTime-win {
-	z-index: @zindexModal+1;
-}
-
 
 // Colour keys for Turnitin results. Turnitin proper has a little coloured
 // box which academics are used to and will often use as the main decider
@@ -665,11 +759,13 @@ input[type=text] {
 .similarity-box(@color) when (lightness(@color) >= 60%) { .similarity-box(@color, black) }
 .similarity-box(@color) when (lightness(@color) < 60%) { .similarity-box(@color, white) }
 
-.similarity-0 { .similarity-box(#4499ee); }
-.similarity-1 { .similarity-box(#66bb11); }
-.similarity-2 { .similarity-box(#ffcc00); }
-.similarity-3 { .similarity-box(#ff6600); }
-.similarity-4 { .similarity-box(#ee3333); }
+.similarity-0 { .similarity-box(@btnSuccessBackgroundHighlight); }
+.similarity-1 { .similarity-box(@btnInfoBackgroundHighlight); }
+.similarity-2 { .similarity-box(@tabulaOrangeLight); }
+.similarity-3 { .similarity-box(@btnWarningBackgroundHighlight); }
+.similarity-4 { .similarity-box(@btnDangerBackgroundHighlight); }
+
+.similarity-tooltip { cursor: pointer; }
 
 .similarity-subcategories {
   margin-left: 0.5em;
@@ -747,7 +843,7 @@ h1.with-settings {
 	margin-right: 0px;
 }
 
-.dept-settings {
+.dept-settings, .user-settings {
 	display: inline-block;
 	margin: 0px 0px 16px 10px;
 }
@@ -874,23 +970,47 @@ h1.with-settings {
 		}
 	}
 	
-	.profile-search-results {
-		.result {
-			border: 1px solid #888;
-			min-height: 50px;
-			padding: 1em;
+	#container #tutors {
+		.tutor-detail {
+			color: @grayLight;
+			margin: -6px 0 3px 18px;
+		}
+	
+		div.photo {
+			.tabula-photo(50px, 5px);
+		}
+		
+		.tutees {
+			width: 100%;
 			
-			h3 {
-				margin-bottom: 0;
-			}
+			th.tutee-col { width: 35%; }
+			th.type-col { width: 25%; }
+			th.year-col { width: 5%; }
+			th.course-col { width: 35%; }
+
+			h6 { display: inline; }
+		}
+	}
+	
+	#container ul.profile-user-list {
+		margin: 0;
+		padding-left: 0;
+		list-style: none;
+	
+		li {
+			.clearfix();
+			padding: 0.5em 0;
+			border: 0 solid lighten(@grayLight, 25%);
+			border-bottom-width: 1px;
+			
+			h3 { margin-bottom: 0; }
 			
 			.photo {
+				.tabula-photo(50px, 5px);
 				float: right;
-				
-				img {
-					max-height: 50px;
-				}	
 			}
+			
+			&:first-child { border-top-width: 1px; }
 		}
 	}
 	
@@ -945,4 +1065,8 @@ h1.with-settings {
 		
 		form { margin: 0; }
 	}
+}
+
+.datetimepicker {
+	line-height: 20px;
 }

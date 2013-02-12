@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
@@ -24,6 +25,7 @@ class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) ex
 	
 	var profileService = Wire.auto[ProfileService]
 	var securityService = Wire.auto[SecurityService]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	@BeanProperty var query: String = _
@@ -36,20 +38,24 @@ class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) ex
 		(query.trim().length > MinimumQueryLength) &&
 		(query.split("""\s+""") find {_.length > MinimumTermLength} isDefined)
 	
-	private def singletonByUserType(option: Option[Member]) = 
-		if (option.isDefined) Seq(option.get) filter {userTypes contains _.userType}
-		else Seq()
+	private def singletonByUserType(option: Option[Member]) = option match {
+		case Some(member) => Seq(member) filter {userTypes contains _.userType}
+		case _ => Seq()
+	}
+	
+	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read, member)
 	
 	private def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUserId(query))
+		else singletonByUserType(profileService.getMemberByUserId(query)) filter canRead
 	
 	private def universityIdMatches = 
 		if (!isMaybeUniversityId(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUniversityId(query))
+		else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
 	
 	private def queryMatches = {
-		profileService.findMembersByQuery(query, currentMember.affiliatedDepartments, userTypes, user.god)
+		val depts = (currentMember.affiliatedDepartments ++ moduleService.departmentsOwnedBy(currentMember.userId)).distinct
+		profileService.findMembersByQuery(query, depts, userTypes, user.god)
 	}
 	
 	override def describe(d: Description) = d.property("query" -> query)

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.lucene
 import org.apache.lucene.analysis.TokenFilter
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 final class SurnamePunctuationFilter(val source: TokenStream) extends TokenFilter(source) {
 	import SurnamePunctuationFilter._
@@ -31,7 +31,7 @@ final class SurnamePunctuationFilter(val source: TokenStream) extends TokenFilte
 			case StrippingPunctuation => wholeWordText
 		}
 		
-		if (!StringUtils.hasText(text)) return false
+		if (!text.hasText) return false
 		
 		if (state == StrippingPunctuation) {
 			for (c <- Apostrophes) text = text.replace(c.toString, "")

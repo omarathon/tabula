@@ -2,7 +2,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-	<#assign commandName="addMarksCommand" />
+	<#assign commandName="adminAddMarksCommand" />
 	<#assign verbed_your_noun="received your files"/>
 		
 	<@spring.bind path=commandName>

@@ -49,7 +49,7 @@ class SynonymAwareWildcardMultiFieldQueryParser(fields: Traversable[String], ana
 								
 								case None => new WildcardQuery(new Term(term.field, text + "*")) 
 							}
-						case query => query
+						case query: Query => query
 					}, clause.getOccur)
 				
 				bq

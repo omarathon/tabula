@@ -12,6 +12,7 @@ import javax.mail.internet.MimeMessage
 import uk.ac.warwick.tabula.Mockito
 import javax.mail.Session
 import java.util.Properties
+import scala.collection.JavaConverters._
 
 class EmailingExceptionHandlerTest extends TestBase with Mockito {
 
@@ -19,7 +20,10 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 		val user = new User("cusebr")
 		val uri = "https://tabula.warwick.ac.uk/web/power/flight?super=magic"
 	 	val currentUser = new CurrentUser(user, user)
-		val info = new RequestInfo(currentUser, Uri.parse(uri))		
+		
+		val queryParams: Map[String, List[String]] = Uri.parse(uri).getQueryParameters().asScala.toMap.mapValues(_.asScala.toList)
+		
+		val info = new RequestInfo(currentUser, Uri.parse(uri), queryParams)
 		val request = testRequest(uri)
 		request.setMethod("GET")
 		request.setParameter("mode", "powerEgg")

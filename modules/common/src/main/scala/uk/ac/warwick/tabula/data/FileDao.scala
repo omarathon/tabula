@@ -22,10 +22,10 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Projections
 import org.hibernate.`type`.StringType
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
@@ -109,7 +109,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			session.newCriteria[FileAttachment]
 				.add(Is.eq("dateUploaded", createdOn))
 				
-		if (StringUtils.hasText(startingId))
+		if (startingId.hasText)
 			criteria.add(Is.gt("id", startingId))
 				
 		criteria

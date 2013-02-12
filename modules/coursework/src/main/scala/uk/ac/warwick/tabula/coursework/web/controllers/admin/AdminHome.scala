@@ -50,19 +50,18 @@ class AdminHome extends CourseworkController {
 
 }
 
-/**
- * This command has the Public trait, which is semantically wrong - but it does its permissions checking in-line to handle module managers.
- * 
- * If we didn't have the Public trait, we'd throw an assertion error for module managers.
- */
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited with Public {
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
 	
 	var securityService = Wire.auto[SecurityService]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	val modules: JList[Module] = 
-		if (securityService.can(user, Permissions.Module.Read, mandatory(department))) department.modules
-		else {
+		if (securityService.can(user, Permissions.Module.Read, mandatory(department))) {
+			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
+			PermissionCheck(Permissions.Module.Read, department)
+			
+			department.modules
+		} else {
 			val managedModules = moduleService.modulesManagedBy(user.idForPermissions, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway

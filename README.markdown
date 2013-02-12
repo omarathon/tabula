@@ -99,3 +99,35 @@ until you deploy to live, which then explodes.
 
 It is also best to do these before or soon after you've pushed the new code onto the central develop branch, 
 so that a deploy to tabula-test won't cause explosions.
+
+Code style
+----------
+
+The code style for the project has developed as we've worked on it and so there are some bits of code that are in a style 
+that we later decided was not great. We should decide how to do certain things and fix the old code. It's possible that for
+plain Scala style we can just delegate to http://docs.scala-lang.org/style/ but we also have things in our app that are best 
+used in a certain way, or Spring offers multiple ways of doing something and we want to document the one we've settled on.
+
+- Should always use dots to call methods (e.g. `command.validate(errors)` rather than `command validate errors`) unless it's 
+  a DSL (specific example being the test framework where you can write `assignment.name should be ("Jim")`)
+  
+- Methods that have a side-effect should have parentheses. No-paren methods should only be for getters. So `form.onBind()`, not `form.onBind`.
+
+- Preferred method of doing a foreach loop is `for (foo <- fooList)`
+
+- A `map` operation should always use `map` instead of `for (item <- seq) yield item.mappedValue`; for-comprehensions should
+  only be used where there are multiple generators 
+  
+- Some controllers don't have "Controller" at the end of their name but that turned out to be confusing, so they should all end with Controller.
+
+### Validation
+
+- Always add the `@Valid` annotation to the controller method argument.
+
+- Use validation annotations on your commands for simple things if you want.
+
+- For custom code, make the command extend `SelfValidating` and in the controller body do `validatesSelf[DeleteFeedbackCommand]`
+
+### Running code on bind (pre-validation)
+
+- Mixin `BindListener` on your command instead of calling `onBind` from a controller  

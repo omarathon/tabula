@@ -14,6 +14,7 @@ object DateBuilder {
 
 	private val dayAndDateFormat = DateTimeFormat.forPattern("EEE d")
 	private val monthAndYearFormat = DateTimeFormat.forPattern(" MMMM yyyy")
+	private val shortMonthAndYearFormat = DateTimeFormat.forPattern(" MMM yyyy")
 	private val formatterMap = new DateTimeFormatterCache
 
 	private val _relativeWords = Map(
@@ -24,16 +25,24 @@ object DateBuilder {
 		true -> _relativeWords,
 		false -> _relativeWords.mapValues(_.toLowerCase))
 
-	def format(date: DateTime): String = format(date, false, true, false, true, true)
+	def format(date: DateTime): String = 
+		format(date=date, 
+			includeSeconds=false, 
+			includeAt=true, 
+			includeTimezone=false, 
+			capitalise=true, 
+			relative=true,
+			split=false,
+			shortMonth=false)
 
-	def format(date: DateTime, includeSeconds: Boolean, includeAt: Boolean, includeTimezone: Boolean, capitalise: Boolean, relative: Boolean) = {
+	def format(date: DateTime, includeSeconds: Boolean, includeAt: Boolean, includeTimezone: Boolean, capitalise: Boolean, relative: Boolean, split: Boolean, shortMonth: Boolean) = {
 		val pattern = new StringBuilder
 		if (includeAt) pattern.append(" 'at'")
 		pattern.append(" HH:mm")
 		if (includeSeconds) pattern.append(":ss")
 		if (includeTimezone) pattern.append(" (z)")
 
-		datePart(date, capitalise, relative) + (formatterMap(pattern.toString) print date)
+		datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else " ") + (formatterMap(pattern.toString) print date).trim()
 	}
 
 	def ordinal(day: Int) = day % 10 match {
@@ -44,13 +53,14 @@ object DateBuilder {
 		case _ => "th"
 	}
 
-	def datePart(date: DateTime, capitalise: Boolean, relative: Boolean) = {
+	def datePart(date: DateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean) = {
 		val today = new DateTime().toDateMidnight
 		val thatDay = date.toDateMidnight
 
 		lazy val absoluteDate = (dayAndDateFormat print date) +
 			ordinal(date.getDayOfMonth) +
-			(monthAndYearFormat print date)
+			(if (shortMonth) (shortMonthAndYearFormat print date)
+			else (monthAndYearFormat print date))
 
 		if (!relative) absoluteDate
 		else if (today isEqual thatDay) relativeWords(capitalise)('today)
@@ -72,8 +82,15 @@ class DateBuilder extends TemplateMethodModelEx {
 	override def exec(list: java.util.List[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(date: DateTime, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean) =>
-				format(date, secs, at, tz, caps, relative)
+			case Seq(date: DateTime, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean) =>
+				format(date=date, 
+					includeSeconds=secs, 
+					includeAt=at, 
+					includeTimezone=tz, 
+					capitalise=caps, 
+					relative=relative,
+					split=split,
+					shortMonth=shortMonth)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}

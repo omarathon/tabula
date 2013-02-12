@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.util.core.StringUtils.hasText
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
@@ -79,7 +79,7 @@ abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assi
 	var userLookup = Wire.auto[UserLookupService]
 	var fileDao = Wire.auto[FileDao]
 	var assignmentService = Wire.auto[AssignmentService]
-	var submissionService = Wire.auto[SubmissionService]
+	var stateService = Wire.auto[StateService]
 
 	/* for single upload */
 	@BeanProperty var uniNumber: String = _
@@ -133,7 +133,12 @@ abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assi
 		val uniNumber = item.uniNumber
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		if (hasText(uniNumber)) {
+		for(f <- file.attached){
+			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
+				errors.rejectValue("file", "file.url")
+			}
+		}
+		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
 			} else {

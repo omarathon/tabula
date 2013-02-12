@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
+import scala.collection.immutable.ListMap
 
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role]
@@ -20,16 +21,22 @@ trait ScopelessRoleProvider extends RoleProvider {
 	def getRolesFor(user: CurrentUser): Seq[Role]
 }
 
+trait RoleService {
+	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Map[Permission, Option[PermissionsTarget]]
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
+	def hasRole(user: CurrentUser, role: Role, scope: Option[PermissionsTarget]): Boolean
+}
+
 @Service
-class RoleService extends Logging {
+class RoleServiceImpl extends RoleService with Logging {
 	
 	/** Spring should wire in all beans that extend RoleProvider */
 	@Autowired var providers: Array[RoleProvider] = Array()
 	
 	// TAB-19 Not yet implemented
-	def getExplicitPermissionsFor(user: CurrentUser, scope: => PermissionsTarget): Map[Permission, Option[PermissionsTarget]] = Map()
+	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Map[Permission, Option[PermissionsTarget]] = Map()
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget) = {	
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = {	
 		// Split providers into Scopeless and scoped
 		val (scopeless, scoped) = providers.partition(_.isInstanceOf[ScopelessRoleProvider])
 		
@@ -55,7 +62,7 @@ class RoleService extends Logging {
 		scopelessStream #::: streamScoped(scoped.toStream, scope)
 	}
 	
-	def hasRole(user: CurrentUser, role: Role, scope: => Option[PermissionsTarget]) = {
+	def hasRole(user: CurrentUser, role: Role, scope: Option[PermissionsTarget]) = {
 		val targetClass = role.getClass
 		
 		// Go through the list of RoleProviders and get any that provide this role

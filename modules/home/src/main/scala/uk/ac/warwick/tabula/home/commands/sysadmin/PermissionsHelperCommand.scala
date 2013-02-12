@@ -17,7 +17,7 @@ import org.springframework.core.convert.ConversionService
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils
 import org.springframework.core.convert.ConversionException
 
 class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unaudited with ReadOnly with SelfValidating {
@@ -83,6 +83,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 			canDo = canDo,
 			permissions = permissions.toList,
 			roles = roles.toList,
+			resolvedScope = scope,
 			scopeMismatch = scopeMismatch,
 			scopeMissing = scopeMissing
 		)
@@ -94,6 +95,7 @@ case class PermissionHelperResult(
 	canDo: Boolean,
 	permissions: List[(Permission, Option[PermissionsTarget])],
 	roles: List[Role],
+	resolvedScope: PermissionsTarget,
 	scopeMismatch: Boolean,
 	scopeMissing: Boolean
 )

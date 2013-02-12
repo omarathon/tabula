@@ -23,20 +23,20 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
-<#if features.markSchemes && department.markSchemes?has_content>
+<#if features.markingWorkflows && department.markingWorkflows?has_content>
 
-	<#assign disabled = !(canUpdateMarkScheme!true)>
+	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
-	<@form.labelled_row "markScheme" "Mark scheme">
-		<@f.select path="markScheme" disabled="${disabled?string}">
+	<@form.labelled_row "markingWorkflow" "Marking Workflow">
+		<@f.select path="markingWorkflow" disabled="${disabled?string}">
 			<@f.option value="" label="None"/>
-			<#list department.markSchemes as markScheme>
-				<@f.option value="${markScheme.id}" label="${markScheme.name}"/>
+			<#list department.markingWorkflows as markingWorkflow>
+				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name}"/>
 			</#list>
 		</@f.select>
 		<div class="help-block">
 			<#if disabled>
-				<span class="warning">You cannot change the mark scheme for this assignment as it already has submissions.</span>
+				<span class="warning">You cannot change the marking workflow for this assignment as it already has submissions.</span>
 			<#else>
 				Select the way in which this assignment will be marked.
 			</#if>
@@ -77,17 +77,23 @@ so that they can be passed around between requests.
 		</@form.row>
 
 		<#if features.assignmentMembership>
+		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>
-				<label class="checkbox">
-					<@f.checkbox path="restrictSubmissions" />
-					Only allow enrolled students to submit
+				<label class="radio">
+					<@f.radiobutton path="restrictSubmissions" value="true" />
+					Only allow students enrolled on this assignment to submit coursework
+				</label>
+				<label class="radio">
+					<@f.radiobutton path="restrictSubmissions" value="false" />
+					Allow anyone with a link to the assignment page to submit coursework
 				</label>
 				<div class="help-block">
-					If you use this option, only students defined above as members will be able to
-					submit, so make sure that the membership is correct to avoid problems.
+					If you restrict submissions to students enrolled on the assignment,
+					students who go to the page without access will be able to request it.
 				</div>
 			</@form.field>
+		</@form.row>
 		</#if>
 
 		<@form.row cssClass="has-close-date">

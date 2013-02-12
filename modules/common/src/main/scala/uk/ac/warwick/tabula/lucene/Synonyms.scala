@@ -4,6 +4,9 @@ object Synonyms {
 	
 	// TODO this is so very rubbish
 	// Collected from http://search.warwick.ac.uk/search/admin/editNameSynonyms.html 13/12/12
+	
+	// Turn scalastyle off because string literals are ok(-ish) here
+	// scalastyle:off
 	val names = Map(
 		"alan" -> Set("allan"),
 		"allan" -> Set("alan"),

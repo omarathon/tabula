@@ -51,7 +51,11 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 trait ControllerViews {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 	
-	def Redirect(path: String) = Mav("redirect:" + path)
+	def Redirect(path: String) = requestInfo.get.requestParameters.get("returnTo") match {
+		case Some(returnTo :: tail) => Mav("redirect:" + returnTo)
+		case _ => Mav("redirect:" + path) 
+	}
+
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
 
 	private def currentUri = requestInfo.get.requestedUri

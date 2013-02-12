@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AuditEventIndexService
+import uk.ac.warwick.tabula.data.model.Feedback
 
 
 class ListFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Seq[String]] with ReadOnly with Unaudited {
@@ -19,3 +20,5 @@ class ListFeedbackCommand(val module: Module, val assignment: Assignment) extend
 
 	override def describe(d: Description) =	d.assignment(assignment)
 }
+
+case class FeedbackListItem(feedback: Feedback, downloaded: Boolean)

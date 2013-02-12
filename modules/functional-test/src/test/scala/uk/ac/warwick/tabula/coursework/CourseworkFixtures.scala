@@ -3,8 +3,14 @@ package uk.ac.warwick.tabula.coursework
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.openqa.selenium.By
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
+import org.scalatest.selenium.WebBrowser.Element
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.LoginDetails
+import org.joda.time.format.DateTimeFormat
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement
+import org.openqa.selenium.JavascriptExecutor
 
 trait CourseworkFixtures extends BrowserTest {
 	
@@ -79,10 +85,13 @@ trait CourseworkFixtures extends BrowserTest {
 		
 		pageSource contains "Thanks, we've received your submission." should be (true)
 	}
-	
+		
 	def allFeatures(members: Seq[String]) {
 		// Change the open date to yesterday, else this test will fail in the morning
-		textField("openDate").value = DateTime.now.minusDays(1).toString("dd-MMM-yyyy HH:mm:ss")
+		executeScript(
+			"""window.document.getElementsByName('openDate')[0].setAttribute('value', arguments[0]);""", 
+			DateTime.now.minusDays(1).toString("dd-MMM-yyyy HH:mm:ss")
+		)
 		
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
@@ -106,7 +115,7 @@ trait CourseworkFixtures extends BrowserTest {
 		// Turn everything on
 		checkbox("collectMarks").select()
 		checkbox("displayPlagiarismNotice").select()
-		checkbox("restrictSubmissions").select()
+		radioButtonGroup("restrictSubmissions").value = "true"
 		checkbox("allowResubmission").select()
 		checkbox("allowExtensions").select()
 		

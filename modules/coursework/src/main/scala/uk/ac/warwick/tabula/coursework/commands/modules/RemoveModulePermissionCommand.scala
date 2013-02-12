@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
@@ -42,7 +42,7 @@ class RemoveModulePermissionCommand(val module: Module) extends Command[Unit] {
 		}
 	}
 
-	private def usercodesEmpty = usercodes.find { StringUtils.hasText(_) }.isEmpty
+	private def usercodesEmpty = usercodes.find { _.hasText }.isEmpty
 
 	def describe(d: Description) = d.module(module).properties(
 		"usercodes" -> usercodes.mkString(","),

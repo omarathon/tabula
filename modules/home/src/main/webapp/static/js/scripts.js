@@ -13,10 +13,28 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
 jQuery(function ($) {
-
-	$('input.date-time-picker').AnyTime_picker({
-		format: "%e-%b-%Y %H:%i:%s",
-		firstDOW: 1
+	
+	$('input.date-time-picker').datetimepicker({
+		format: "dd-M-yyyy hh:ii:ss",
+		weekStart: 1,
+		minView: 'day',
+		autoclose: true
+	}).on('show', function(ev){
+		var d = new Date(ev.date.valueOf()),
+			  minutes = d.getUTCMinutes(),
+				seconds = d.getUTCSeconds(),
+				millis = d.getUTCMilliseconds();
+				
+		if (minutes > 0 || seconds > 0 || millis > 0) {
+			d.setUTCMinutes(0);
+			d.setUTCSeconds(0);
+			d.setUTCMilliseconds(0);
+			
+			var DPGlobal = $.fn.datetimepicker.DPGlobal;
+			$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+			
+			$(this).datetimepicker('update');
+		}
 	});
 
     /* When a .long-running link is clicked it will be

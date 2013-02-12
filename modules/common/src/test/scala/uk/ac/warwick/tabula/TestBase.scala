@@ -155,21 +155,29 @@ trait TestHelpers {
 	  * withUser("cusebr") { /* ... your code */  }
 	  */
 	def withUser(code: String, universityId: String = null)(fn: => Unit) {
+		val user = if (code == null) {
+			new AnonymousUser()
+		} else {
+			val u = new User(code)
+			u.setIsLoggedIn(true)
+			u.setFoundUser(true)
+			u.setWarwickId(universityId)
+			u
+		}
+		
+		try {
+			currentUser = new CurrentUser(user, user)
+			withCurrentUser(currentUser)(fn)
+		} finally {
+			currentUser = null
+		}
+	}
+	
+	def withCurrentUser(currentUser: CurrentUser)(fn: => Unit) {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
-				val user = if (code == null) {
-					new AnonymousUser()
-				} else {
-					val u = new User(code)
-					u.setIsLoggedIn(true)
-					u.setFoundUser(true)
-					u.setWarwickId(universityId)
-					u
-				}
-				
-				currentUser = new CurrentUser(user, user)
-				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"))
+				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"), Map())
 			}
 		}
 
@@ -177,7 +185,6 @@ trait TestHelpers {
 			RequestInfo.open(requestInfo)
 			fn
 		} finally {
-			currentUser = null
 			RequestInfo.close
 		}
 	}

@@ -27,7 +27,7 @@ import org.apache.lucene.analysis.core.LowerCaseFilter
 import org.apache.lucene.analysis.TokenFilter
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.lucene.DelimitByCharacterFilter
 import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
 import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
@@ -63,7 +63,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 		else try {
 			val bq = new BooleanQuery
 
-			if (StringUtils.hasText(query)) {
+			if (query.hasText) {
 				val q = parser.parse(stripTitles(query))
 				bq.add(q, Occur.MUST)
 			}
@@ -95,7 +95,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	}
 	
 	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
-		if (!StringUtils.hasText(query)) Seq()
+		if (!query.hasText) Seq()
 		else findWithQuery(query, departments, userTypes, isGod)
 	}
 	

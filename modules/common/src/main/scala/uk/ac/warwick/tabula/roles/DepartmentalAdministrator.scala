@@ -23,11 +23,15 @@ case class DepartmentalAdministrator(department: model.Department) extends Built
 		FeedbackTemplate.Update,
 		FeedbackTemplate.Delete,
 		
-		MarkScheme.Create,
-		MarkScheme.Read,
-		MarkScheme.Update,
-		MarkScheme.Delete,
+		MarkingWorkflow.Create,
+		MarkingWorkflow.Read,
+		MarkingWorkflow.Update,
+		MarkingWorkflow.Delete,
 		
+		Profiles.Read,
+		Profiles.Search,
+		
+		Profiles.PersonalTutor.Upload,
 		Profiles.PersonalTutor.Create,
 		Profiles.PersonalTutor.Read,
 		Profiles.PersonalTutor.Update,
