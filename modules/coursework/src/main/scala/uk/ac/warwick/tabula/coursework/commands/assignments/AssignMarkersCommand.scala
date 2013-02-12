@@ -10,9 +10,12 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import java.util.HashMap
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.permissions.Permissions
 
 
 class AssignMarkersCommand(module: Module, assignment:Assignment) extends Command[Assignment] with Daoisms{
+
+	PermissionCheck(Permissions.Assignment.Update, assignment)
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
