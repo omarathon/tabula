@@ -249,7 +249,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		 */
 		@tailrec
 		private def runCheck(retries: Int): Option[Seq[TurnitinSubmissionInfo]] = {
-			// getSubmissions isn't recusive, it just makes the code after it clearer.
+			// getSubmissions isn't recursive, it just makes the code after it clearer.
 			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
 				session.listSubmissions(classId, assignmentId) match {
