@@ -46,7 +46,7 @@ abstract class Features {
 	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = defaults.extensions
 	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = defaults.combinedForm
 	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = defaults.feedbackTemplates
-	@Value("${features.markSchemes:false}") @BeanProperty var markSchemes: Boolean = defaults.markSchemes
+	@Value("${features.markingWorkflows:false}") @BeanProperty var markingWorkflows: Boolean = defaults.markingWorkflows
 	@Value("${features.markerFeedback:false}") @BeanProperty var markerFeedback: Boolean = defaults.markerFeedback
 	@Value("${features.profiles:true}") @BeanProperty var profiles: Boolean = defaults.profiles
 	
@@ -87,7 +87,7 @@ class FeaturesMessage {
 	@BeanProperty var extensions = true
 	@BeanProperty var combinedForm = true
 	@BeanProperty var feedbackTemplates = true
-	@BeanProperty var markSchemes = true
+	@BeanProperty var markingWorkflows = true
 	@BeanProperty var markerFeedback = false
 	@BeanProperty var profiles = true
 }

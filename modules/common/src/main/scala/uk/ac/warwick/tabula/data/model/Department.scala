@@ -30,7 +30,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
 	
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var markSchemes:JList[MarkScheme] = ArrayList()
+	@BeanProperty var markingWorkflows:JList[MarkingWorkflow] = ArrayList()
 	
 	/* Legacy Properties. Remove these once the settings map is completely in use */
 	@BeanProperty @Column(name="collectFeedbackRatings") var collectFeedbackRatingsLegacy:Boolean = false

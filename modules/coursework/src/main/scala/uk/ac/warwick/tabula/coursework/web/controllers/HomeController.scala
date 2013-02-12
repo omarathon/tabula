@@ -77,7 +77,12 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 				else Seq.empty
 				
 			// exclude assignments already included in other lists.
-			val enrolledAssignmentsTrimmed = enrolledAssignments.diff(assignmentsWithFeedback).diff(assignmentsWithSubmission).sortBy(_.closeDate)  
+			val enrolledAssignmentsTrimmed = 
+				enrolledAssignments
+					.diff(assignmentsWithFeedback)
+					.diff(assignmentsWithSubmission)
+					.filter {_.collectSubmissions} // TAB-475
+					.sortBy(_.closeDate)  
 				
 			// adorn the enrolled assignments with extra data.
 			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield {

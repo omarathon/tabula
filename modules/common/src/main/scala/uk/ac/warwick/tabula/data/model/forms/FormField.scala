@@ -22,7 +22,7 @@ import scala.xml.NodeSeq
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.data.model.{MarkScheme, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, FileAttachment}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
@@ -185,8 +185,8 @@ class CheckboxField extends FormField {
 class MarkerSelectField extends FormField with SimpleValue[String] {
 
 	def markers:Seq[User] = {
-		if (assignment.markScheme == null) Seq()
-		else assignment.markScheme.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
+		if (assignment.markingWorkflow == null) Seq()
+		else assignment.markingWorkflow.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
 	}
 
 	override def validate(value: SubmissionValue, errors: Errors) {

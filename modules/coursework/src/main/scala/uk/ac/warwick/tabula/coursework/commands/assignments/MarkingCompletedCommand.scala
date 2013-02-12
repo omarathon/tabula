@@ -51,7 +51,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 			}
 		}
 
-		assignment.markScheme.markingMethod match {
+		assignment.markingWorkflow.markingMethod match {
 			case StudentsChooseMarker => finaliseFeedback()
 			case SeenSecondMarking if firstMarker => createSecondMarkerFeedback()
 			case SeenSecondMarking if !firstMarker => finaliseFeedback()

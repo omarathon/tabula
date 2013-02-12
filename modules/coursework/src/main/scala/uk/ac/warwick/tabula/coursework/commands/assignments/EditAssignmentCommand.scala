@@ -16,9 +16,9 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	this.copyFrom(assignment)
 
-	def canUpdateMarkScheme = {
-		Option(assignment.markScheme) match {
-			// if students can choose the marker and submissions exist then the markScheme cannot be updated
+	def canUpdateMarkingWorkflow = {
+		Option(assignment.markingWorkflow) match {
+			// if students can choose the marker and submissions exist then the markingWorkflow cannot be updated
 			case Some(scheme) if scheme.studentsChooseMarker => (assignment.submissions.size() == 0)
 			case Some(scheme) => true
 			case None => true
@@ -26,8 +26,8 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	}
 
 	override def contextSpecificValidation(errors:Errors){
-		if (!canUpdateMarkScheme && (markScheme == null || assignment.markScheme != markScheme))
-			errors.rejectValue("markScheme", "markScheme.cannotChange")
+		if (!canUpdateMarkingWorkflow && (markingWorkflow == null || assignment.markingWorkflow != markingWorkflow))
+			errors.rejectValue("markingWorkflow", "markingWorkflow.cannotChange")
 	}
 
 	override def applyInternal(): Assignment = transactional() {

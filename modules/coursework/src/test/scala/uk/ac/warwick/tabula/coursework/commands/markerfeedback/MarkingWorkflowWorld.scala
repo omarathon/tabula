@@ -16,12 +16,12 @@ trait MarkingWorkflowWorld extends AppContextTestBase{
 	generateSubmission(assignment, "0672089", "cuscav")
 	addFeedback(assignment)
 
-	val markScheme = new MarkScheme()
-	markScheme.markingMethod = SeenSecondMarking
-	markScheme.department = assignment.module.department
-	markScheme.firstMarkers = makeUserGroup("cuslaj", "cuscav")
-	markScheme.secondMarkers = makeUserGroup("cuslat", "cuday")
-	assignment.markScheme = markScheme
+	val markingWorkflow = new MarkingWorkflow()
+	markingWorkflow.markingMethod = SeenSecondMarking
+	markingWorkflow.department = assignment.module.department
+	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
+	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
+	assignment.markingWorkflow = markingWorkflow
 
 	assignment.markerMap = new HashMap[String, UserGroup]()
 	assignment.markerMap.put("cuslaj", makeUserGroup("cusxad", "cuscao", "curef"))

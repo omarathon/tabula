@@ -41,7 +41,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				for (module <- dept.modules) session.delete(module)
 				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)
-				for (markScheme <- dept.markSchemes) session.delete(markScheme)
+				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
 
 				session.delete(dept)
 			}

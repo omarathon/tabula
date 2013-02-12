@@ -1,6 +1,6 @@
 <#-- 
 
-Adding or editing a new markscheme
+Adding or editing a new marking workflow
 
 -->
 <#if view_type="add">
@@ -14,7 +14,7 @@ Adding or editing a new markscheme
 <#escape x as x?html>
 <#compress>
 
-<h1>Define mark scheme</h1>
+<h1>Define marking workflow</h1>
 <#assign commandName="command" />
 
 <@f.form method="post" action="${form_url}" commandName=commandName cssClass="form-horizontal">
@@ -26,7 +26,7 @@ Common form fields.
 <@form.labelled_row "name" "Name">
 	<@f.input path="name" cssClass="text" />
 	<div class="help-block">
-		A descriptive name that will be used to refer to this mark scheme elsewhere.
+		A descriptive name that will be used to refer to this marking workflow elsewhere.
 	</div>
 </@form.labelled_row>
 
@@ -59,7 +59,7 @@ Common form fields.
 
 <div class="submit-buttons">
 <input type="submit" value="${submit_text}" class="btn btn-primary">
-<a class="btn" href="<@routes.markschemelist department />">Cancel</a>
+<a class="btn" href="<@routes.markingworkflowlist department />">Cancel</a>
 </div>
 
 </@f.form>

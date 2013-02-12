@@ -12,7 +12,6 @@ html.iframe {
 @import "bootstrap/mixins.less";
 
 @grid-size: 16px;
-@warning-color: @red;
 @subtle-text-color: @gray;
 @very-subtle-text-color: @grayLight;
 @very-subtle-font-size: 0.8em;
@@ -84,15 +83,19 @@ table.stream > caption {
 }
 
 .error { 
-	color: crimson;
-	display: block; 
+	color: @errorText;
+	display: block;
 }
 
 .warning {
-	color: @warning-color;
+	color: @warningText;
 	display: block;
 }
-	
+
+tr.error, tr.warning {
+	display: table-row;
+}
+
 .module-info {
 	.box-style;
 	
@@ -252,7 +255,7 @@ ul {
 	  background: url(../images/filetypes/text-x-generic.png) 0 2px no-repeat;
 	}
 	.has-unreleased-feedback {
-	  color: @warning-color;
+	  color: @warningText;
 	}
 	.no-unreleased-feedback {
 	  color: @subtle-text-color;

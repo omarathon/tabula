@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.permissions
 
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.MarkScheme
+import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -55,10 +55,10 @@ abstract trait PermissionsCheckingMethods extends Logging {
 			throw new ItemNotFoundException(feedback)
 		}
 	
-	def mustBeLinked(markScheme: MarkScheme, department: Department) =
-		if (mandatory(markScheme).department.id != mandatory(department.id)) {
-			logger.info("Not displaying mark scheme as it doesn't belong to specified department")
-			throw new ItemNotFoundException(markScheme)
+	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department) =
+		if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
+			logger.info("Not displaying marking workflow as it doesn't belong to specified department")
+			throw new ItemNotFoundException(markingWorkflow)
 		}
 	
 	def mustBeLinked(template: FeedbackTemplate, department: Department) =

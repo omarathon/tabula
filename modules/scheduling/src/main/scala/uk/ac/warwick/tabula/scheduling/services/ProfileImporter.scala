@@ -28,8 +28,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentComma
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
 import uk.ac.warwick.tabula.helpers.Logging
 
-class UserIdAndCategory(val userId: String, val category: String) {
-}
+case class UserIdAndCategory(val userId: String, val category: String)
 
 @Service
 class ProfileImporter extends InitializingBean with Logging {
@@ -243,7 +242,7 @@ object ProfileImporter {
 	  
 	class AllUserIdsAndCategoriesQuery(ds: DataSource) extends MappingSqlQuery[UserIdAndCategory](ds, GetAllUsersAndCategories) {
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new UserIdAndCategory(rs.getString("primary_user_code"), rs.getString("group_ctg"))
+		override def mapRow(rs: ResultSet, rowNumber: Int) = UserIdAndCategory(rs.getString("primary_user_code"), rs.getString("group_ctg"))
 	}
 	  
 	class StudentInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
@@ -320,6 +319,10 @@ object ProfileImporter {
 	}
 	
 	private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
+	private val WholeWordGroup = 1
+	private val FirstLetterGroup = 2
+	private val RemainingLettersGroup = 3
+	private val SeparatorGroup = 4
 	
 	private def formatSurname(name: String, suggested: String = null): String = {
 		if (name.equalsIgnoreCase(suggested)) {
@@ -334,10 +337,10 @@ object ProfileImporter {
 			 */
 		  
 			CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
-				val wholeWord = m.group(1).toUpperCase()
-				val first = m.group(2).toUpperCase()
-				val remainder = m.group(3).toLowerCase()
-				val separator = m.group(4)
+				val wholeWord = m.group(WholeWordGroup).toUpperCase()
+				val first = m.group(FirstLetterGroup).toUpperCase()
+				val remainder = m.group(RemainingLettersGroup).toLowerCase()
+				val separator = m.group(SeparatorGroup)
 				
 				if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
 					// Capitalise the first letter of the remainder

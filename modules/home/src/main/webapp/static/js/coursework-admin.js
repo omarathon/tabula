@@ -335,7 +335,7 @@ $(function(){
 	});
 });
 
-// code for markscheme add/edit
+// code for markingWorkflow add/edit
 $(function(){
 	var markingMethod = $('#markingMethod');
 	var secondMarkers = jQuery('.second-markers-container');

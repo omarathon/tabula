@@ -22,10 +22,10 @@ object Routes {
 		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
 
-		object markscheme {
-			def list(department: Department) = admin.department(department) + "/markschemes"
+		object markingWorkflow {
+			def list(department: Department) = admin.department(department) + "/markingworkflows"
 			def add(department: Department) = list(department) + "/add"
-			def edit(scheme: MarkScheme) = list(scheme.department) + "/edit/" + scheme.id
+			def edit(scheme: MarkingWorkflow) = list(scheme.department) + "/edit/" + scheme.id
 		}
 		
 		object module {

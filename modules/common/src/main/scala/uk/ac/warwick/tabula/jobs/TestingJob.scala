@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 
 object TestingJob {
 	val id = "testing"
+	val DefaultDelay = 500
 	def apply(name: String, sleepTime: Int = 0) = JobPrototype(id, Map(
 		"name" -> name,
 		"sleepTime" -> sleepTime))

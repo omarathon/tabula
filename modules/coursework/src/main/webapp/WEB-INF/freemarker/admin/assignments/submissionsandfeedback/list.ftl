@@ -93,7 +93,7 @@
 			</#if>
 		</td>
 		<#if assignment.wordCountField??><td></td></#if>
-		<#if assignment.markScheme??><td></td></#if>
+		<#if assignment.markingWorkflow??><td></td></#if>
 		
 		<#if hasOriginalityReport><td></td></#if>
 		
@@ -146,7 +146,7 @@
 					<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
 				</li>
 			</#if>
-			<#if features.markSchemes && mustReleaseForMarking>
+			<#if features.markingWorkflows && mustReleaseForMarking>
 				<li>
 					<a class="use-tooltip form-post"
 					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
@@ -187,7 +187,7 @@
 				<#assign submissionColspan=submissionColspan+1 />
 				<col class="word-count" />
 			</#if>
-			<#if assignment.markScheme??>
+			<#if assignment.markingWorkflow??>
 				<#assign submissionColspan=submissionColspan+1 />
 				<col class="first-marker" />
 			</#if>
@@ -236,7 +236,7 @@
 				<#if assignment.wordCountField??>
 					<th class="sortable" title="Declared word count">Words</th>
 				</#if>
-				<#if assignment.markScheme??>
+				<#if assignment.markingWorkflow??>
 					<th class="sortable">First Marker</th>
 				</#if>
 				
@@ -322,7 +322,7 @@
 							</#if>
 						</td>
 					</#if>
-					<#if assignment.markScheme??>
+					<#if assignment.markingWorkflow??>
 						<td>
 							<#if submission.assignment??>${submission.firstMarker!""}</#if>
 						</td>
