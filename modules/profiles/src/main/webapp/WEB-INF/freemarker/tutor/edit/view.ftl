@@ -2,7 +2,7 @@
 	<h3>Personal Tutee: ${student.firstName} ${student.lastName} (${student.universityId})</h3>
 
 	<#if user.staff>
-		<#include "tutor_form.ftl" />
+		<#include "form.ftl" />
 	
 		<section class="tutor-edit">
 			<#if pickedTutor??>

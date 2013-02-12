@@ -2,15 +2,11 @@ package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
 import scala.reflect.BeanProperty
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
-import javax.persistence.Entity
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -19,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.tutor.SearchTutorsCommand
+import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
@@ -52,8 +48,8 @@ class EditTutorCommand(val student: Member) extends Command[StudentRelationship]
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
-	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)) orNull
+	@ModelAttribute("tutorSearchCommand") def tutorSearchCommand =
+		restricted(new TutorSearchCommand(user)) orNull
 	
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = new EditTutorCommand(student)
@@ -61,7 +57,7 @@ class EditTutorController extends BaseController {
 	// initial form display
 	@RequestMapping(params=Array("!tutorUniId"))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
-		Mav("tutor/tutor_view", 
+		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.student.universityId,
 			"tutorToDisplay" -> cmd.currentTutorForDisplay
 		)
@@ -73,7 +69,7 @@ class EditTutorController extends BaseController {
 
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
 		
-		Mav("tutor/tutor_view", 
+		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
 			"tutorToDisplay" -> profileService.getNameAndNumber(pickedTutor.getOrElse(throw new IllegalStateException("Can't find member object for new tutor"))),
 			"pickedTutor" -> pickedTutor
@@ -90,7 +86,7 @@ class EditTutorController extends BaseController {
 		}
 		else throw new IllegalStateException("form param save not set as expected")
 		
-		Mav("tutor/tutor_view", 
+		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 
 			"tutorToDisplay" -> cmd.currentTutorForDisplay
 		)

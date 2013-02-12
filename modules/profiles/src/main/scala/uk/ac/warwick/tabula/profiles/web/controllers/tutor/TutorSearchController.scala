@@ -1,52 +1,45 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.stereotype.Controller
-import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
-import uk.ac.warwick.tabula.data.model.Member
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.profiles.commands.tutor.SearchTutorsCommand
 import org.springframework.web.bind.annotation.RequestParam
+import javax.validation.Valid
+import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.data.model.Member
 
 @Controller
 class TutorSearchController extends ProfilesController {
 	
-	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
+	@ModelAttribute("tutorSearchCommand") def tutorSearchCommand = new TutorSearchCommand(user)
+	
+	@ModelAttribute("student") def student(@RequestParam("studentUniId") studentUniId: String) =
+		profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Can't find student " + studentUniId))
+		
+	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) = {
+		val currentTutor = profileService.getPersonalTutor(student)
+		val currentTutorToDisplay = profileService.getNameAndNumber(currentTutor.getOrElse(throw new IllegalStateException("Can't find membership record for tutor picked")))
+
+		currentTutorToDisplay
+	}
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/tutor_form")
+	def form(@ModelAttribute cmd: TutorSearchCommand) = Mav("tutor/edit/view")
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
-	def submit(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors, @RequestParam("studentUniId") studentUniId: String) = {
-
+	def submit(@Valid @ModelAttribute("tutorSearchCommand") cmd: TutorSearchCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
-			val student = profileService.getMemberByUniversityId(studentUniId).getOrElse(
-					throw new IllegalStateException("Can't find student " + studentUniId))
-
-			val currentTutor = profileService.getPersonalTutor(student)
-			val currentTutorToDisplay = profileService.getNameAndNumber(currentTutor.getOrElse(throw new IllegalStateException("Can't find membership record for tutor picked")))
-
-			Mav("tutor/tutor_results",
-				"tutorToDisplay" -> currentTutorToDisplay,
-				"student" -> student,
+			Mav("tutor/edit/results",
 				"results" -> cmd.apply())
 		}
 	}
 /*
 	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) = {
+	def submitJson(@Valid @ModelAttribute cmd: tutorSearchCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
