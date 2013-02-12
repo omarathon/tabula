@@ -28,14 +28,12 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		click on (partialLinkText("Create"))
 		
 		textField("name").value = "Marking workflow 1"
-
 		singleSel("markingMethod").value = "StudentsChooseMarker"
-
 		textField("firstMarkers").value = P.Marker1.usercode
 		
 		// Ensure that another marker field has magically appeared
 		eventually {
-			findAll(cssSelector(".user-code-picker")).size should be (2)
+			findAll(cssSelector(".user-code-picker")).toList.filter(_.isDisplayed).size should be (2)
 		}
 		
 		new TextField(findAll(cssSelector(".user-code-picker")).toList(1).underlying).value = P.Marker2.usercode
@@ -50,6 +48,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		click on (partialLinkText("Create"))
 		
 		textField("name").value = "Marking workflow 2"
+		singleSel("markingMethod").value = "StudentsChooseMarker"
 		textField("firstMarkers").value = P.Marker3.usercode
 		
 		submit()
@@ -74,7 +73,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		
 		// Delete marking workflow 2
 		{
-			val tbody = className("mark-schemes").webElement.findElement(By.tagName("tbody"))
+			val tbody = className("marking-workflows").webElement.findElement(By.tagName("tbody"))
 			val row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == "Marking workflow 2" })
 			row should be ('defined)
 					

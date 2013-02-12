@@ -22,9 +22,6 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 	
 	PermissionCheck(Permissions.Assignment.Create, module)
 
-	openDate = new DateTime().withTime(12, 0, 0, 0)
-	closeDate = openDate.plusWeeks(2)
-
 	def assignment: Assignment = null
 
 	override def applyInternal(): Assignment = transactional() {

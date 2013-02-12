@@ -11,7 +11,7 @@ No marking workflows have been created yet. Click <strong>Create</strong> below 
 <p><a class="btn" href="<@routes.markingworkflowadd department=command.department />"><i class="icon-plus"></i> Create</a></p>
 
 <#if markingWorkflowInfo?has_content>
-<table class="mark-schemes table table-bordered table-striped">
+<table class="marking-workflows table table-bordered table-striped">
 <thead>
 	<tr>
 		<th>Marking workflow name</th>
