@@ -16,12 +16,12 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
 	
 	PermissionCheck(Permissions.Profiles.Search)
 	
-	final val userTypes: Set[MemberUserType] = Set(Student)
+	final val userTypes = Set(firstUserType) ++ otherUserTypes
 	
 	var profileService = Wire.auto[ProfileService]
 	var securityService = Wire.auto[SecurityService]
