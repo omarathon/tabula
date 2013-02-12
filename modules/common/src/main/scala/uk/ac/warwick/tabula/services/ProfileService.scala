@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.userlookup.User
 
 /**
@@ -35,6 +36,8 @@ trait ProfileService {
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
+	def getPersonalTutor(student: Member): Option[Member]
+	def getNameAndNumber(member: Member): String
 	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member]
 }
@@ -83,6 +86,18 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
 	
+	def getPersonalTutor(student: Member): Option[Member] = {
+		val sprCode: String = student.sprCode
+		val currentRelationship = findCurrentRelationship(PersonalTutor, student.sprCode)
+		currentRelationship.flatMap { rel => getMemberByUniversityId(rel.agent) }
+/*		currentRelationship match {
+			case Some(rel) => {
+				getMemberByUniversityId(rel.agent)
+			}
+			case None => None
+		}*/
+	}
+	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
 		val currentRelationship = this.findCurrentRelationship(PersonalTutor, targetSprCode)
 		currentRelationship match {
@@ -122,9 +137,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional() {
 		memberDao.getRelationshipsByAgent(relationshipType, agentId)
 	}
-
+  def getNameAndNumber(mem: uk.ac.warwick.tabula.data.model.Member): String = mem.firstName + " " + mem.lastName + " (" + mem.universityId + ")"
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member] = transactional() {
 		memberDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department)
 	}
-
 }

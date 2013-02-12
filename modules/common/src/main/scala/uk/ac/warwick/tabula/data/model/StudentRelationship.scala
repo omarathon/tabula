@@ -80,11 +80,11 @@ class StudentRelationship extends GeneratedId {
 object StudentRelationship {
 	def apply(agent: String, relType: RelationshipType, targetSprCode: String) = {
 		
-		val mr = new StudentRelationship
-		mr.agent = agent
-		mr.relationshipType = relType
-		mr.targetSprCode = targetSprCode
-		mr
+		val rel = new StudentRelationship
+		rel.agent = agent
+		rel.relationshipType = relType
+		rel.targetSprCode = targetSprCode
+		rel
 	}
 }
 
