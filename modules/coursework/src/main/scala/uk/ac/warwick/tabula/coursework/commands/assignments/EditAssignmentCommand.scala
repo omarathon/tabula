@@ -26,8 +26,10 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	}
 
 	override def contextSpecificValidation(errors:Errors){
-		if (!canUpdateMarkingWorkflow && (markingWorkflow == null || assignment.markingWorkflow != markingWorkflow))
+		val workflowChanged = assignment.markingWorkflow != markingWorkflow
+		if (!canUpdateMarkingWorkflow && workflowChanged){
 			errors.rejectValue("markingWorkflow", "markingWorkflow.cannotChange")
+		}
 	}
 
 	override def applyInternal(): Assignment = transactional() {
