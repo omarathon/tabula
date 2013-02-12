@@ -136,7 +136,7 @@ object Permissions {
 		case object Delete extends Permission
 	}
 	
-	object MarkScheme {
+	object MarkingWorkflow {
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission

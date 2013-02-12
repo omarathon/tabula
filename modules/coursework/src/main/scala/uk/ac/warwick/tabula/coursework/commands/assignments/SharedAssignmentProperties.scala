@@ -55,7 +55,7 @@ trait SharedAssignmentProperties {
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
 
-	@BeanProperty var markScheme: MarkScheme = _
+	@BeanProperty var markingWorkflow: MarkingWorkflow = _
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
@@ -102,7 +102,7 @@ trait SharedAssignmentProperties {
 		assignment.feedbackTemplate = feedbackTemplate
 		if (assignment.id != null) // this is an edit
 			zipService.invalidateSubmissionZip(assignment)
-		assignment.markScheme = markScheme
+		assignment.markingWorkflow = markingWorkflow
 		manageMarkerField(assignment)
 
 		for (field <- findCommentField(assignment)) field.value = comment
@@ -133,7 +133,7 @@ trait SharedAssignmentProperties {
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
 		feedbackTemplate = assignment.feedbackTemplate
-		markScheme = assignment.markScheme
+		markingWorkflow = assignment.markingWorkflow
 		
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {
@@ -152,7 +152,7 @@ trait SharedAssignmentProperties {
  	 */
 	def manageMarkerField(assignment:Assignment) {
 		val markerField = findMarkerSelectField(assignment)
-		if (markScheme != null && markScheme.studentsChooseMarker){
+		if (markingWorkflow != null && markingWorkflow.studentsChooseMarker){
 			// we now need a marker field for this assignment. create one
 			if (!markerField.isDefined) {
 				val markerSelect = new MarkerSelectField()
@@ -160,7 +160,7 @@ trait SharedAssignmentProperties {
 				assignment.addFields(markerSelect)
 			}
 		} else {
-			// if a mark scheme has been removed or changed we need to remove redundant marker fields
+			// if a marking workflow has been removed or changed we need to remove redundant marker fields
 			if (markerField.isDefined) {
 				assignment.removeField(markerField.get)
 			}

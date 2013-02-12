@@ -177,8 +177,8 @@ abstract class Description {
 		this
 	}
 	
-	def markScheme(scheme: MarkScheme) = {
-		property("markScheme" -> scheme.id)
+	def markingWorkflow(scheme: MarkingWorkflow) = {
+		property("markingWorkflow" -> scheme.id)
 	}
 
 	/**

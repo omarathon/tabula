@@ -13,16 +13,17 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-/** A MarkScheme defines how an assignment will be marked, including who
+/** A MarkingWorkflow defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
   * are distributed.
   *
-  * A MarkScheme is created against a Department and can then be reused by
+  * A MarkingWorkflow is created against a Department and can then be reused by
   * many Assignments within that Department.
   */
 @Entity
+@Table(name="MarkScheme")
 @AccessType("field")
-class MarkScheme extends GeneratedId with PermissionsTarget {
+class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
@@ -47,7 +48,7 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "firstmarkers_id")
 	var firstMarkers = new UserGroup()
 
-	/** The second group of markers. May be unused if the mark scheme
+	/** The second group of markers. May be unused if the marking workflow
 	  * only has one marking stage.
 	  */
 	@OneToOne(cascade = Array(CascadeType.ALL))
@@ -94,7 +95,7 @@ class MarkScheme extends GeneratedId with PermissionsTarget {
 		case _ => Seq()
 	}
 	
-	override def toString = "MarkScheme(" + id + ")"
+	override def toString = "MarkingWorkflow(" + id + ")"
 
 }
 

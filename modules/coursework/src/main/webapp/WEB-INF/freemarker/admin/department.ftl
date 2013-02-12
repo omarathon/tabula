@@ -36,8 +36,8 @@
 			<#if features.feedbackTemplates>
 				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
 			</#if>
-			<#if features.markSchemes>
-				<li><a href="markschemes"><i class="icon-inbox"></i> Mark schemes</a></li>
+			<#if features.markingWorkflows>
+				<li><a href="markingworkflows"><i class="icon-inbox"></i> Marking workflows</a></li>
 			</#if>
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display</a></li>
 		</ul>
@@ -207,7 +207,7 @@
 						</#if>
 					</a></li>
 
-					<#if assignment.markScheme?? && !assignment.markScheme.studentsChooseMarker>
+					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
 						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />">Assign markers <i class="icon-user"></i></a></li>
 					</#if>
 

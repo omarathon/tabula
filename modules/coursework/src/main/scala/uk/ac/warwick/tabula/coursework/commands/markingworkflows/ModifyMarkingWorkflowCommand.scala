@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.coursework.commands.markschemes
+package uk.ac.warwick.tabula.coursework.commands.markingworkflows
 
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.{SeenSecondMarking, MarkingMethod, Department, MarkScheme}
+import uk.ac.warwick.tabula.data.model.{SeenSecondMarking, MarkingMethod, Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
@@ -13,17 +13,17 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.permissions._
 
-/** Abstract base command for either creating or editing a MarkScheme */
-abstract class ModifyMarkSchemeCommand(
-	@BeanProperty val department: Department) extends Command[MarkScheme] with Daoisms with SelfValidating {
+/** Abstract base command for either creating or editing a MarkingWorkflow */
+abstract class ModifyMarkingWorkflowCommand(
+	@BeanProperty val department: Department) extends Command[MarkingWorkflow] with Daoisms with SelfValidating {
 
 	@BeanProperty var name: String = _
 	@BeanProperty var firstMarkers: JList[String] = ArrayList()
 	@BeanProperty var secondMarkers: JList[String] = ArrayList()
 	@BeanProperty var markingMethod: MarkingMethod = _
 	
-	// Subclasses can provide the "current" markscheme if one applies, for validation.
-	def currentMarkScheme: Option[MarkScheme]
+	// Subclasses can provide the "current" markingWorkflow if one applies, for validation.
+	def currentMarkingWorkflow: Option[MarkingWorkflow]
 
 	def contextSpecificValidation(errors: Errors)
 
@@ -32,12 +32,12 @@ abstract class ModifyMarkSchemeCommand(
 
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
 
-		if (department.markSchemes.exists(sameName)) {
-			errors.rejectValue("name", "name.duplicate.markScheme", Array(this.name), null)
+		if (department.markingWorkflows.exists(sameName)) {
+			errors.rejectValue("name", "name.duplicate.markingWorkflow", Array(this.name), null)
 		}
 
 		if (markingMethod == null)
-			errors.rejectValue("markingMethod", "markScheme.markingMethod.none")
+			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.none")
 		
 		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers"){
 			override def alreadyHasCode = hasDuplicates(firstMarkers)
@@ -56,17 +56,17 @@ abstract class ModifyMarkSchemeCommand(
 		val trimmedFirst = firstMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
 		val trimmedSecond = secondMarkers.map{ _.trim }.filterNot{ _.isEmpty }.toSet
 		if ((trimmedFirst & trimmedSecond).size > 0)
-			errors.reject("markScheme.markers.bothLists")
+			errors.reject("markingWorkflow.markers.bothLists")
 	}
 
 	def hasDuplicates(markers:JList[_]):Boolean = {
 		markers.distinct.size != markers.size
 	}
 	
-	// If there's a current markscheme, returns whether "other" is a different
+	// If there's a current markingWorkflow, returns whether "other" is a different
 	// scheme with the same name we're trying to use.
-	// If there's no current markscheme we just check if it's just the same name.
-	def sameName(other: MarkScheme) = currentMarkScheme match {
+	// If there's no current markingWorkflow we just check if it's just the same name.
+	def sameName(other: MarkingWorkflow) = currentMarkingWorkflow match {
 		case Some(existing) => 
 			other.id != existing.id && other.name == name
 		case None => 
@@ -79,14 +79,14 @@ abstract class ModifyMarkSchemeCommand(
 		secondMarkers = secondMarkers.filter(_.hasText)
 	}
 
-	def copyTo(scheme: MarkScheme) {
+	def copyTo(scheme: MarkingWorkflow) {
 		scheme.name = name
 		scheme.firstMarkers.setIncludeUsers(firstMarkers)
 		scheme.secondMarkers.setIncludeUsers(secondMarkers)
 		scheme.markingMethod = markingMethod
 	}
 
-	def copyFrom(scheme: MarkScheme) {
+	def copyFrom(scheme: MarkingWorkflow) {
 		name = scheme.name
 		firstMarkers.clear()
 		firstMarkers.addAll(scheme.firstMarkers.includeUsers)

@@ -136,7 +136,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
-	@BeanProperty var markScheme: MarkScheme = _
+	@BeanProperty var markingWorkflow: MarkingWorkflow = _
 
 	/** Map between markers and the students assigned to them */
 	@OneToMany @JoinTable(name="marker_usergroup")
@@ -326,14 +326,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def isMarker(user: User) = isFirstMarker(user)|| isSecondMarker(user)
 
 	def isFirstMarker(user: User): Boolean = {
-		if (markScheme != null)
-			markScheme.firstMarkers.includes(user.getUserId)
+		if (markingWorkflow != null)
+			markingWorkflow.firstMarkers.includes(user.getUserId)
 		else false
 	}
 
 	def isSecondMarker(user: User): Boolean = {
-		if (markScheme != null)
-			markScheme.secondMarkers.includes(user.getUserId)
+		if (markingWorkflow != null)
+			markingWorkflow.secondMarkers.includes(user.getUserId)
 		else false
 	}
 
@@ -370,9 +370,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	/**
 	 * Optionally returns the first marker for the given submission
-	 * Returns none if this assignment doesn't have a valid mark scheme attached
+	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = markScheme.markingMethod match {
+	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
 		case SeenSecondMarking =>  {
 			val mapEntry = markerMap.find{p:(String,UserGroup) => p._2.includes(submission.userId)}
 			mapEntry match {
@@ -394,10 +394,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 		/**
 	 * Optionally returns the submissions that are to be marked by the given user
-	 * Returns none if this assignment doesn't have a valid mark scheme attached
+	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
 	def getMarkersSubmissions(marker: User): Seq[Submission] = {
-		if (markScheme != null)	markScheme.getSubmissions(this, marker)
+		if (markingWorkflow != null)	markingWorkflow.getSubmissions(this, marker)
 		else Seq()
 	}
 

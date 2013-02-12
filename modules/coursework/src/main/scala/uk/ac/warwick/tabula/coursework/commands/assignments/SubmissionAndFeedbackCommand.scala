@@ -62,9 +62,9 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			case None => Nil
 		}
 
-		// later we may do more complex checks to see if this particular mark scheme workflow requires that feedback is released manually
-		// for now all markschemes will require you to release feedback so if one exists for this assignment - provide it
-		mustReleaseForMarking = assignment.markScheme != null
+		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
+		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
+		mustReleaseForMarking = assignment.markingWorkflow != null
 		
 		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
 

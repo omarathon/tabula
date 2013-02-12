@@ -12,7 +12,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 
 		val assignment = new Assignment
 		assignment.addDefaultFields()
-		assignment.markScheme = newMarkScheme()
+		assignment.markingWorkflow = newMarkingWorkflow()
 
 		val markerSelect = new MarkerSelectField()
 		markerSelect.name = Assignment.defaultMarkerSelectorName
@@ -78,12 +78,12 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 		}
 	}
 
-	def newMarkScheme(): MarkScheme = {
+	def newMarkingWorkflow(): MarkingWorkflow = {
 		val ug = new UserGroup()
 		ug.includeUsers = List ("cuslaj", "cusebr")
 
-		val ms = new MarkScheme()
-		ms.name = "Test mark scheme"
+		val ms = new MarkingWorkflow()
+		ms.name = "Test marking workflow"
 		ms.markingMethod = StudentsChooseMarker
 		ms.firstMarkers = ug
 		ms

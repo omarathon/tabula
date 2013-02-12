@@ -24,8 +24,8 @@ class AssignMarkersCommand(module: Module, assignment:Assignment) extends Comman
 	@BeanProperty var markerMapping: JMap[String, JList[String]] = _
 
 	def onBind() {
-		firstMarkers = assignment.markScheme.firstMarkers.members
-		secondMarkers = assignment.markScheme.secondMarkers.members
+		firstMarkers = assignment.markingWorkflow.firstMarkers.members
+		secondMarkers = assignment.markingWorkflow.secondMarkers.members
 
 		def retrieveMarkers(markerDef:Seq[String]):JMap[String, JList[String]] = {
 			val resultMap = new HashMap[String, JList[String]]()
