@@ -127,6 +127,7 @@
 				<li>
 					<@f.hidden path="file.attached[${attached_index}]" />
 					${attached.name}
+					<@f.errors path="file" cssClass="error" />
 					<#if attached.duplicate>
 						<span class="warning">
 							A feedback file with this name already exists for this student. It will be overwritten.
