@@ -146,7 +146,7 @@
 					<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
 				</li>
 			</#if>
-			<#if features.markingWorkflow && mustReleaseForMarking>
+			<#if features.markingWorkflows && mustReleaseForMarking>
 				<li>
 					<a class="use-tooltip form-post"
 					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
