@@ -22,19 +22,21 @@
 				<tbody>
 					<tr>
 						<td>
-							<span class="h4-aside muted"><@fmt.p tutees?size "tutee" /></span>
-							<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand"><i class="icon-chevron-right"></i> 
-							<#if tutor?is_string>
-								${tutor}</h4>
-								<#if !tutor?string?starts_with("Not ")>
-									<div class="tutor-detail">External to Warwick</div>
+							<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand">
+								<span class="tutor-detail pull-right"><@fmt.p tutees?size "tutee" /></span>
+								<i class="icon-chevron-right"></i> 
+								<#if tutor?is_string>
+									${tutor}
+									<#if !tutor?string?starts_with("Not ")>
+										<span class="tutor-detail">External to Warwick</span>
+									</#if>
+								<#else>
+									${tutor.fullName}
+									<#if tutor.homeDepartment.code != department.code>
+										<span class="tutor-detail">${tutor.homeDepartment.name}</span>
+									</#if>
 								</#if>
-							<#else>
-								${tutor.fullName}</h4>
-								<#if tutor.homeDepartment.code != department.code>
-									<div class="tutor-detail">${tutor.homeDepartment.name}</div>
-								</#if>
-							</#if>
+							</h4>
 							
 							<div id="${tuteeKey}" class="collapse">
 								<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
