@@ -18,8 +18,8 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.data.model.Staff
 import uk.ac.warwick.tabula.CurrentUser
 
-class TutorSearchProfilesCommand(val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
-	import TutorSearchProfilesCommand._
+class SearchTutorsCommand(val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+	import SearchTutorsCommand._
 	
 	PermissionCheck(Permissions.Profiles.Search)
 	
@@ -62,7 +62,7 @@ class TutorSearchProfilesCommand(val user: CurrentUser) extends Command[Seq[Memb
 
 }
 
-object TutorSearchProfilesCommand {
+object SearchTutorsCommand {
 	
 	/** The minimum length of the whole query */
 	val MinimumQueryLength = 3

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
+import uk.ac.warwick.tabula.profiles.commands.tutor.SearchTutorsCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
@@ -44,7 +44,7 @@ class EditTutorCommand(val student: Member) extends Command[StudentRelationship]
 		profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)	
 	}
 
-	def describe(d: Description) = d.property("studentUniId", studentUniId)
+	override def describe(d: Description) = d.property("student ID" -> studentUniId).property("new tutor ID" -> tutorUniId)
 }
 
 @Controller
@@ -52,8 +52,8 @@ class EditTutorCommand(val student: Member) extends Command[StudentRelationship]
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
-	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand =
-		restricted(new TutorSearchProfilesCommand(user)) orNull
+	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
+		restricted(new SearchTutorsCommand(user)) orNull
 	
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = new EditTutorCommand(student)

@@ -14,20 +14,20 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchProfilesCommand
+import uk.ac.warwick.tabula.profiles.commands.tutor.SearchTutorsCommand
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
 class TutorSearchController extends ProfilesController {
 	
-	@ModelAttribute("tutorSearchProfilesCommand") def tutorSearchProfilesCommand = new TutorSearchProfilesCommand(user)
+	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: TutorSearchProfilesCommand) = Mav("tutor/tutor_form")
+	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/tutor_form")
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
-	def submit(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors, @RequestParam("studentUniId") studentUniId: String) = {
+	def submit(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors, @RequestParam("studentUniId") studentUniId: String) = {
 
 		if (errors.hasErrors) {
 			form(cmd)
@@ -46,7 +46,7 @@ class TutorSearchController extends ProfilesController {
 	}
 /*
 	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: TutorSearchProfilesCommand, errors: Errors) = {
+	def submitJson(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
