@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.jobs._
+import java.util.HashMap
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -111,7 +112,8 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			updateProgress(10) // update the progress bar
 
 			removeDefunctSubmissions()
-			retrieveReport(uploadSubmissions)
+			val uploadedSubmissions = uploadSubmissions
+			retrieveReport(uploadedSubmissions._1, uploadedSubmissions._2)
 		}
 
 		def removeDefunctSubmissions() {
@@ -132,9 +134,10 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			}
 		}
 
-		def uploadSubmissions(): Int = {
+		def uploadSubmissions(): (HashMap[String, String], Int) = {
 			var uploadsDone = 0
 			var uploadsFailed = 0
+			var failedUploads = new HashMap[String, String]
 			val allAttachments = assignment.submissions flatMap { _.allAttachments }
 			val uploadsTotal = allAttachments.size
 
@@ -155,6 +158,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 							logger.warn("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 							uploadsFailed += 1
+							failedUploads.put(attachment.name, submitResponse.message)
 						}
 					}
 					uploadsDone += 1
@@ -164,19 +168,19 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			}
 
 			debug("Done uploads (" + uploadsDone + ")")
-			uploadsFailed
+			(failedUploads, uploadsTotal)
 		}
 		
 		
 
-		def retrieveReport(failureCount: Int) {
+		def retrieveReport(failedUploads: HashMap[String, String], uploadsTotal: Int) {
 			// Uploaded all the submissions probably, now we wait til they're all checked
 			updateStatus("Waiting for documents to be checked...")
 
 			// try WaitingRetries times with a WaitingSleep msec sleep inbetween until we get a full Turnitin report.
 			val reports = runCheck(WaitingRetries) getOrElse Nil
 
-			if (reports.isEmpty) {
+			if (reports.isEmpty && failedUploads.size() != uploadsTotal) {
 				logger.error("Waited for complete Turnitin report but didn't get one.")
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
 				if (sendEmails) {
@@ -227,7 +231,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					email.setFrom(replyAddress)
 					email.setTo(job.user.email)
 					email.setSubject("Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderJobDoneEmailText(job.user, assignment, failureCount))
+					email.setText(renderJobDoneEmailText(job.user, assignment, failedUploads))
 					mailer.send(mime)
 				}
 
@@ -277,12 +281,13 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	}
 
-	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment, failureCount: Int) = {
+	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment, failedUploads: HashMap[String, String]) = {
 		renderToString("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
 			"user" -> user,
-			"failureCount" -> failureCount,
+			"failureCount" -> failedUploads.size(),
+			"failedUploads" -> failedUploads,
 			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
 		))
 	}
