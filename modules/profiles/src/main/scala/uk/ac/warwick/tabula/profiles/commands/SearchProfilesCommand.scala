@@ -1,20 +1,22 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import org.hibernate.validator.constraints.NotEmpty
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
 import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.services.ProfileService
+
+import org.hibernate.validator.constraints.NotEmpty
+
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.Student
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.SecurityService
 
 class SearchProfilesCommand(val currentMember: Member, val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
 	import SearchProfilesCommand._
