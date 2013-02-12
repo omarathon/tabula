@@ -133,6 +133,11 @@ abstract class UploadFeedbackCommand[T](val module: Module, val assignment: Assi
 		val uniNumber = item.uniNumber
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
+		for(f <- file.attached){
+			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
+				errors.rejectValue("file", "file.url")
+			}
+		}
 		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
