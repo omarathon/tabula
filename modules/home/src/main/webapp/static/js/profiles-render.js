@@ -53,8 +53,7 @@ $(function() {
 				sorter: function(items) { return items; }, // use 'as-returned' sort
 				highlighter: function(item) {
 					var member = item.split("|");
-					var html = '<img src="/profiles/view/photo/' + member[1] + '.jpg" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><span class="description">' + member[3] + '</span>';
-					return html;
+					return '<img src="/profiles/view/photo/' + member[1] + '.jpg" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
 				},
 				
 				updater: function(item) {
