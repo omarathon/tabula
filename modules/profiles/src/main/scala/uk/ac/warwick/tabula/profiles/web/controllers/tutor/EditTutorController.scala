@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand
+import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
@@ -48,8 +48,8 @@ class EditTutorCommand(val student: Member) extends Command[StudentRelationship]
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
-	@ModelAttribute("tutorSearchCommand") def tutorSearchCommand =
-		restricted(new TutorSearchCommand(user)) orNull
+	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
+		restricted(new SearchTutorsCommand(user)) orNull
 	
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = new EditTutorCommand(student)
