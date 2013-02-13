@@ -6,14 +6,15 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand
-import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.data.model.Staff
 
 @Controller
-class TutorSearchController extends ProfilesController {
+class SearchTutorsController extends ProfilesController {
 	
-	@ModelAttribute("tutorSearchCommand") def tutorSearchCommand = new TutorSearchCommand(user)
+	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
 	
 	@ModelAttribute("student") def student(@RequestParam("studentUniId") studentUniId: String) =
 		profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Can't find student " + studentUniId))
@@ -26,10 +27,10 @@ class TutorSearchController extends ProfilesController {
 	}
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: TutorSearchCommand) = Mav("tutor/edit/view")
+	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view")
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
-	def submit(@Valid @ModelAttribute("tutorSearchCommand") cmd: TutorSearchCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("searchTutorsCommand") cmd: SearchTutorsCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -39,7 +40,7 @@ class TutorSearchController extends ProfilesController {
 	}
 /*
 	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: tutorSearchCommand, errors: Errors) = {
+	def submitJson(@Valid @ModelAttribute cmd: searchTutorsCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
