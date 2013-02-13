@@ -1,6 +1,6 @@
 <#escape x as x?html>
 <div id="tutors">
-	<h1>Students with no personal tutor</h1>
+	<h1>Students in ${department.name} with no personal tutor</h1>
 	
 	<#if students?has_content>
 		<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">

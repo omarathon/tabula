@@ -140,7 +140,7 @@
 		</div>
 			
 		<#if isSelf>
-			<p><span rel="tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></p>
+			<div style="margin-top: 12px;"><span rel="tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></div>
 		</#if>
 	</section>
 

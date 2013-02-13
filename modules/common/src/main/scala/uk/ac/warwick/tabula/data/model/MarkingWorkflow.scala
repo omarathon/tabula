@@ -97,6 +97,16 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	
 	override def toString = "MarkingWorkflow(" + id + ")"
 
+	/**
+	 * Defines equality via the entity's ID.
+	 */
+	override def equals(other: Any) = other match {
+		case o:MarkingWorkflow =>
+			if (o.id != null && this.id != null) o.id == this.id
+			else super.equals(other)
+		case _ => false
+	}
+
 }
 
 

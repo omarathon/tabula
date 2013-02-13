@@ -46,8 +46,8 @@ abstract class Features {
 	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = defaults.extensions
 	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = defaults.combinedForm
 	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = defaults.feedbackTemplates
-	@Value("${features.markingWorkflows:false}") @BeanProperty var markingWorkflows: Boolean = defaults.markingWorkflows
-	@Value("${features.markerFeedback:false}") @BeanProperty var markerFeedback: Boolean = defaults.markerFeedback
+	@Value("${features.markingWorkflows:true}") @BeanProperty var markingWorkflows: Boolean = defaults.markingWorkflows
+	@Value("${features.markerFeedback:true}") @BeanProperty var markerFeedback: Boolean = defaults.markerFeedback
 	@Value("${features.profiles:true}") @BeanProperty var profiles: Boolean = defaults.profiles
 	
 	private val bean = new BeanWrapperImpl(this)
@@ -88,7 +88,7 @@ class FeaturesMessage {
 	@BeanProperty var combinedForm = true
 	@BeanProperty var feedbackTemplates = true
 	@BeanProperty var markingWorkflows = true
-	@BeanProperty var markerFeedback = false
+	@BeanProperty var markerFeedback = true
 	@BeanProperty var profiles = true
 }
 
