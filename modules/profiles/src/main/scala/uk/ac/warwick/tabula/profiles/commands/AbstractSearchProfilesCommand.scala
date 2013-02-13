@@ -4,8 +4,6 @@ import scala.reflect.BeanProperty
 
 import org.hibernate.validator.constraints.NotEmpty
 
-import AbstractSearchProfilesCommand.MinimumQueryLength
-import AbstractSearchProfilesCommand.MinimumTermLength
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
