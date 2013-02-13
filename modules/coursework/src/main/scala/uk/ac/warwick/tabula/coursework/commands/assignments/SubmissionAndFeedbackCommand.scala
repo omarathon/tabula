@@ -43,7 +43,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 		awaitingSubmissionExtended =  Option(moduleMembers) match {
 			case Some(members) => {
-				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getUserId))
+				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
 				val withExtension = unSubmitted.map(member => (member, assignment.findExtension(member.getWarwickId)))
 				val result = withExtension.flatMap(pair => pair match {
 					case (u, Some(extension)) => List(Pair(u, extension))
@@ -54,9 +54,9 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			case None => Nil
 		}
 
-		awaitingSubmission =  Option(moduleMembers) match{
+		awaitingSubmission =  Option(moduleMembers) match {
 			case Some(members) => {
-				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getUserId))
+				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
 				unSubmitted.filterNot(awaitingSubmissionExtended contains)
 			}
 			case None => Nil
