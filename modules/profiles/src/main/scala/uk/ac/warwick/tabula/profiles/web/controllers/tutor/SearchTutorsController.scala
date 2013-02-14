@@ -19,12 +19,7 @@ class SearchTutorsController extends ProfilesController {
 	@ModelAttribute("student") def student(@RequestParam("studentUniId") studentUniId: String) =
 		profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Can't find student " + studentUniId))
 		
-	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) = {
-		val currentTutor = profileService.getPersonalTutor(student)
-		val currentTutorToDisplay = profileService.getNameAndNumber(currentTutor.getOrElse(throw new IllegalStateException("Can't find membership record for tutor picked")))
-
-		currentTutorToDisplay
-	}
+	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) =  profileService.getPersonalTutor(student)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view")

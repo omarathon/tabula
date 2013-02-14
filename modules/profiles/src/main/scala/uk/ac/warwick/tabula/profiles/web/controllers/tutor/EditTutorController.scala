@@ -31,11 +31,6 @@ class EditTutorCommand(val student: Member) extends Command[StudentRelationship]
 	
 	def currentTutor = profileService.getPersonalTutor(student)
 	
-	def currentTutorForDisplay = currentTutor match {
-		case None => ""
-		case Some(mem) => profileService.getNameAndNumber(mem)
-	}
-	
 	def applyInternal: StudentRelationship = {
 		profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)	
 	}
@@ -59,7 +54,7 @@ class EditTutorController extends BaseController {
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> cmd.currentTutorForDisplay
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 	
@@ -71,7 +66,7 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
-			"tutorToDisplay" -> profileService.getNameAndNumber(pickedTutor.getOrElse(throw new IllegalStateException("Can't find member object for new tutor"))),
+			"tutorToDisplay" -> pickedTutor,
 			"pickedTutor" -> pickedTutor
 		)
 	}	
@@ -88,7 +83,7 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 
-			"tutorToDisplay" -> cmd.currentTutorForDisplay
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 }
