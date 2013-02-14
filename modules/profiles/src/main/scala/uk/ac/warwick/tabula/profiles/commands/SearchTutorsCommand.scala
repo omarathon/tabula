@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.DepartmentDao
-import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.Staff
 import uk.ac.warwick.tabula.services.ProfileIndexService
 
@@ -16,6 +15,6 @@ class SearchTutorsCommand(user: CurrentUser) extends AbstractSearchProfilesComma
 		else Seq()
 		
 	private def queryMatches = {
-		profileIndexService.findWithQueryAcrossAllDepartments(query, userTypes, user.god)
+		profileIndexService.findWithQuery(query, Seq(), userTypes, true)
 	}
 }

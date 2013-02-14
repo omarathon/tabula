@@ -58,35 +58,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	// QueryParser isn't thread safe, hence why this is a def
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 
-	/*
-	 * findWithQueryAcrossAllDepartments should only be called where the user has access to the information that's going to be used
-	 * from each profile across all departments - otherwise use findWithQuery in ProfileIndexService
-	 */
-	def findWithQueryAcrossAllDepartments(query: String, userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
-		try {
-			val bq = new BooleanQuery
-
-			if (query.hasText) {
-				val q = parser.parse(stripTitles(query))
-				bq.add(q, Occur.MUST)
-			}
-
-			if (!userTypes.isEmpty) {
-				// Restrict user type
-				val typeQuery = new BooleanQuery
-				for (userType <- userTypes)
-					typeQuery.add(new TermQuery(new Term("userType", userType.dbValue)), Occur.SHOULD)
-
-				bq.add(typeQuery, Occur.MUST)
-			}
-			search(bq) flatMap { toItem(_) }
-		} catch {
-			case e: ParseException => Seq() // Invalid query string
-		}
-	}
-
-	private def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
-		if (departments.isEmpty && !isGod) Seq()
+	def findWithQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAcrossAllDepartments: Boolean): Seq[Member] = {
+		if (departments.isEmpty && !searchAcrossAllDepartments) Seq()
 		else try {
 			val bq = new BooleanQuery
 
@@ -95,7 +68,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 				bq.add(q, Occur.MUST)
 			}
 
-			if (!isGod) {
+			if (!searchAcrossAllDepartments) {
 				val deptQuery = new BooleanQuery
 				for (dept <- departments) {
 					// TODO remove this first TermQuery when fully reindexed, as it'll be redundant then
