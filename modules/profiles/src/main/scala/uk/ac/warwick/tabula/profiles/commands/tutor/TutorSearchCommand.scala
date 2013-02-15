@@ -11,11 +11,10 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.data.model.Student
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.data.model.Staff
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.CurrentUser
 
 class TutorSearchCommand(val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {

@@ -20,7 +20,7 @@ class TwoWayConverterTest extends TestBase {
 		converter.print(Days.FIVE, Locale.getDefault()) should be ("5")
 	}
 
-	private def descriptor[T](implicit m:Manifest[T]) = TypeDescriptor.valueOf(m.erasure)
+	private def descriptor[A](implicit m:Manifest[A]) = TypeDescriptor.valueOf(m.erasure)
 }
 
 

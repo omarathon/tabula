@@ -21,77 +21,63 @@ import uk.ac.warwick.tabula.data.model.NextOfKin
 import uk.ac.warwick.userlookup.User
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
-import uk.ac.warwick.tabula.data.model.Staff
-import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
 import uk.ac.warwick.tabula.helpers.Logging
+import org.springframework.remoting.rmi.RmiProxyFactoryBean
+import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.Department
+import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.data.model.Gender
+import uk.ac.warwick.membership.MembershipInterfaceWrapper
 
-case class UserIdAndCategory(val userId: String, val category: String)
+case class MembershipInformation(val member: MembershipMember, val photo: Option[Array[Byte]])
 
 @Service
-class ProfileImporter extends InitializingBean with Logging {
+class ProfileImporter extends Logging {
 	import ProfileImporter._
 	
 	var ads = Wire[DataSource]("academicDataStore")
+	var sits = Wire[DataSource]("sitsDataSource")
+	var membership = Wire[DataSource]("membershipDataSource")
+	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 	
-	var jdbc: NamedParameterJdbcTemplate = _
+	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
+	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 	
-	override def afterPropertiesSet {
-		jdbc = new NamedParameterJdbcTemplate(ads)
-	}
-	
-	lazy val studentInformationQuery = new StudentInformationQuery(ads)
-	lazy val staffInformationQuery = new StaffInformationQuery(ads)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(ads, member, ssoUser)
+	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
-	def getMemberDetails(userIdsAndCategories: Seq[UserIdAndCategory]): Seq[ImportSingleMemberCommand] = {
-		val commands = for (userIdAndCategory <- userIdsAndCategories) yield {
-			val userId = userIdAndCategory.userId
-			val category = MemberUserType.fromCode(userIdAndCategory.category)
-			logger.debug("Reading data for " + category.description + " member, " + userId)
-			category match {
-				case Student =>	studentInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
-				case Staff =>	staffInformationQuery.executeByNamedParam(Map("usercodes" -> userId)).toSeq
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] = {
+		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
+		
+		membersAndCategories flatMap { mac =>
+			val usercode = mac.member.usercode
+			val ssoUser = users(usercode)
+			
+			mac.member.userType match {
+				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
+				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
 		}
-		commands.flatten
 	}
-	
-	lazy val allUserIdsAndCategoriesQuery = new AllUserIdsAndCategoriesQuery(ads)
-	lazy val userIdsAndCategories: Seq[UserIdAndCategory] = allUserIdsAndCategoriesQuery.execute
-	
-	lazy val nextOfKinQuery = new NextOfKinsQuery(ads)
-	lazy val addressQuery = new AddressesQuery(ads)
-	
-	def getNextOfKins(member: Member): Seq[NextOfKin] = nextOfKinQuery.executeByNamedParam(Map(
-	    "universityId" -> member.universityId))
-	    
-	def getAddresses(member: Member): Seq[Address] = addressQuery.executeByNamedParam(Map(
-	    "universityId" -> member.universityId))
-	
-	def processNames(member: ImportSingleMemberCommand, users: Map[String, User]) = {
-		val ssoUser = users(member.userId)
 		
-		member.title = WordUtils.capitalizeFully(Option(member.title).getOrElse("")).trim()
-		member.firstName = formatForename(Option(member.firstName).getOrElse(""), Option(ssoUser.getFirstName()).getOrElse(""))
-		member.fullFirstName = formatForename(Option(member.fullFirstName).getOrElse(""), Option(ssoUser.getFirstName()).getOrElse(""))
-		member.lastName = formatSurname(Option(member.lastName).getOrElse(""), Option(ssoUser.getLastName()).getOrElse(""))
-	  
-		member
-	}
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = 
+		membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.getCode.toUpperCase)).toSeq map { member =>
+			MembershipInformation(member, Option(membershipInterface.getPhotoById(member.universityId)))
+		}
+	
+	def userIdAndCategory(member: Member) =
+		MembershipInformation(
+			membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).head, 
+			Option(membershipInterface.getPhotoById(member.universityId))
+		)
 }
 
 object ProfileImporter {
-  
-	val GetAllUsersAndCategories = """
-		select primary_user_code, group_ctg from member
-		where primary_user_code is not null
-		and preferred_email_address is not null
-		and preferred_email_address != 'No Email'
-		and in_use_flag = 'Active'
-		"""
   
 	val BasicInformationPrologue = """
 	  	select
@@ -203,167 +189,99 @@ object ProfileImporter {
 	  			on details.last_school = last_school.school_code
 		""" + BasicInformationEpilogue
 		
-	val GetStaffInformation = BasicInformationPrologue + """,
-			m.teaching_staff as teaching_staff
-		from member m
-		""" + BasicInformationEpilogue
-	  
-	val GetNextOfKins = """
-		select 
-	  		forenames, 
-	  		family_name, 
-	  		relationship, 
-	  		address1, 
-	  		address2, 
-	  		address3, 
-	  		address4, 
-	  		address5, 
-	  		postcode, 
-	  		day_telephone,
-	  		evening_telephone,
-	  		email_address
-	  	from next_of_kin
-			where university_id = :universityId
+	val GetStaffInformation = """
+		select
+			prs.prs_udf1 as university_id,
+			prs.prs_ttlc as title,
+			prs.prs_fusd as preferred_forename,
+			trim(prs.prs_fnm1 || ' ' || prs.prs_fnm2 || ' ' || prs.prs_fnm3) as forenames,
+			prs.prs_surn as family_name,
+			prs.prs_gend as gender,
+			case prs.prs_iuse when 'Y' then 'Active' else 'Inactive' end as in_use_flag,
+			prs.prs_dptc as home_department_code,
+			prs.prs_emad as email_address,
+			prs.prs_exid as user_code,
+			prs.prs_dob as date_of_birth,
+			
+			case when prs.prs_psac is null then 'N' else 'Y' end as teaching_staff
+		from ins_prs prs
+			where prs.prs_exid in (:usercodes)
 		"""
 	  
-	val GetAddresses = """
-		select 
-	  		address1,
-	  		address2,
-	  		address3,
-	  		address4,
-	  		address5,
-	  		postcode,
-	  		telephone,
-	  		type
-	  	from address
-			where university_id = :universityId
+	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
+	}
+	
+	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()		
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)
+	}
+	
+	val GetMembershipByUsercodeInformation = """
+		select * from cmsowner.uow_current_members where its_usercode in (:usercodes)
 		"""
 	  
-	class AllUserIdsAndCategoriesQuery(ds: DataSource) extends MappingSqlQuery[UserIdAndCategory](ds, GetAllUsersAndCategories) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = UserIdAndCategory(rs.getString("primary_user_code"), rs.getString("group_ctg"))
-	}
-	  
-	class StudentInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
+	class MembershipByUsercodeQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUsercodeInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		compile()		
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(rs)
-	}
-	
-	class StaffInformationQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		compile()		
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(rs)
-	}
-	
-	class NextOfKinsQuery(ds: DataSource) extends MappingSqlQuery[NextOfKin](ds, GetNextOfKins) {
-		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
-			val kin = new NextOfKin
-			
-			kin.firstName = formatForename(rs.getString("forenames"))
-			kin.lastName = formatSurname(rs.getString("family_name"))
-			kin.relationship = WordUtils.capitalizeFully(Option(rs.getString("relationship")).getOrElse("")).trim()
-			
-			val address = new Address
-			address.line1 = WordUtils.capitalizeFully(Option(rs.getString("address1")).getOrElse("")).trim()
-			address.line2 = WordUtils.capitalizeFully(Option(rs.getString("address2")).getOrElse("")).trim()
-			address.line3 = WordUtils.capitalizeFully(Option(rs.getString("address3")).getOrElse("")).trim()
-			address.line4 = WordUtils.capitalizeFully(Option(rs.getString("address4")).getOrElse("")).trim()
-			address.line5 = WordUtils.capitalizeFully(Option(rs.getString("address5")).getOrElse("")).trim()
-			address.postcode = rs.getString("postcode")
-			address.telephone = rs.getString("day_telephone")
-			
-			if (!address.isEmpty)
-				kin.address = address
-				
-			kin.eveningPhone = rs.getString("evening_telephone")
-			kin.email = rs.getString("email_address")
-			
-			kin
-		}
+		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
 	
-	class AddressesQuery(ds: DataSource) extends MappingSqlQuery[Address](ds, GetAddresses) {
-		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+	val GetMembershipByDepartmentInformation = """
+		select * from cmsowner.uow_current_members where id_dept = :departmentCode
+		"""
+	  
+	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
+		declareParameter(new SqlParameter("departmentCode", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
-			val address = new Address
-			address.line1 = WordUtils.capitalizeFully(Option(rs.getString("address1")).getOrElse("")).trim()
-			address.line2 = WordUtils.capitalizeFully(Option(rs.getString("address2")).getOrElse("")).trim()
-			address.line3 = WordUtils.capitalizeFully(Option(rs.getString("address3")).getOrElse("")).trim()
-			address.line4 = WordUtils.capitalizeFully(Option(rs.getString("address4")).getOrElse("")).trim()
-			address.line5 = WordUtils.capitalizeFully(Option(rs.getString("address5")).getOrElse("")).trim()
-			address.postcode = rs.getString("postcode")
-			address.telephone = rs.getString("telephone")
-			
-			address.addressType = AddressType.fromCode(rs.getString("type"))
-			
-			address
-		}
-	}
-	  
-	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
-	  
-	private def formatForename(name: String, suggested: String = null): String = {
-		if (name.equalsIgnoreCase(suggested)) {
-			// Our suggested capitalisation from SSO was correct
-			suggested
-		} else {
-			CapitaliseForenamePattern.replaceAllIn(name, { m: Regex.Match =>
-				m.group(1).toUpperCase() + m.group(2).toLowerCase() + m.group(3)
-			}).trim()
-		}
+		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
 	
-	private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
-	private val WholeWordGroup = 1
-	private val FirstLetterGroup = 2
-	private val RemainingLettersGroup = 3
-	private val SeparatorGroup = 4
+	private def membershipToMember(rs: ResultSet) =
+		MembershipMember(
+			universityId 			= rs.getString("university_number"),
+			departmentCode			= rs.getString("id_dept"),
+			email					= rs.getString("email"),
+			targetGroup				= rs.getString("desc_target_group"),
+			title					= rs.getString("pref_title"),
+			preferredForenames		= rs.getString("pref_forenames"),
+			preferredSurname		= rs.getString("pref_surname"),
+			position				= rs.getString("desc_position"),
+			dateOfBirth				= rs.getDate("dob"),
+			usercode				= rs.getString("its_usercode"),
+			startDate				= rs.getDate("dt_start"),
+			endDate					= rs.getDate("dt_end"),
+			modified				= rs.getDate("dt_modified"),
+			phoneNumber				= rs.getString("tel_business"),
+			gender					= Gender.fromCode(rs.getString("gender")),
+			alternativeEmailAddress	= rs.getString("external_email"),
+			userType				= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
+		)
 	
-	private def formatSurname(name: String, suggested: String = null): String = {
-		if (name.equalsIgnoreCase(suggested)) {
-			// Our suggested capitalisation from SSO was correct
-			suggested
-		} else {
-			/*
-			 * Conventions:
-			 * 
-			 * von - do not capitalise de La - capitalise second particle O', Mc,
-			 * Mac, M' - always capitalise
-			 */
-		  
-			CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
-				val wholeWord = m.group(WholeWordGroup).toUpperCase()
-				val first = m.group(FirstLetterGroup).toUpperCase()
-				val remainder = m.group(RemainingLettersGroup).toLowerCase()
-				val separator = m.group(SeparatorGroup)
-				
-				if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
-					// Capitalise the first letter of the remainder
-					first +
-						remainder.substring(0, 1) + 
-						remainder.substring(1, 2).toUpperCase() + 
-						remainder.substring(2) +
-						separator
-				} else if (wholeWord.startsWith("MAC") && wholeWord.length() > 3) {
-					// Capitalise the first letter of the remainder
-					first + 
-						remainder.substring(0, 2) + 
-						remainder.substring(2, 3).toUpperCase() + 
-						remainder.substring(3) +
-						separator
-				} else if (wholeWord.equals("VON") || wholeWord.equals("D") || wholeWord.equals("DE") || wholeWord.equals("DI")) {
-					// Special case - lowercase the first word
-					first.toLowerCase() + remainder + separator
-				} else {
-					first + remainder + separator
-				}
-			}).trim()
-		}
-	}
+	private implicit def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
+		Option(date) map { new LocalDate(_) } orNull
 	  
 }
+
+case class MembershipMember(
+	val universityId: String = null,
+	val departmentCode: String = null,
+	val email: String = null,
+	val targetGroup: String = null,
+	val title: String = null,
+	val preferredForenames: String = null,
+	val preferredSurname: String = null,
+	val position: String = null,
+	val dateOfBirth: LocalDate = null,
+	val usercode: String = null,
+	val startDate: LocalDate = null,
+	val endDate: LocalDate = null,
+	val modified: LocalDate = null,
+	val phoneNumber: String = null,
+	val gender: Gender = null,
+	val alternativeEmailAddress: String = null,
+	val userType: MemberUserType
+)

@@ -24,8 +24,7 @@
 		classpath:/default.properties,
 		classpath:/messages.properties,
 		classpath:/tabula.properties,
-		/WEB-INF/build.properties,
-		classpath:/messages.properties
+		/WEB-INF/build.properties
 	" />
 
 	<bean id="features" class="uk.ac.warwick.tabula.FeaturesImpl" />

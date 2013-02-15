@@ -30,9 +30,13 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.userlookup.User
 
-class ImportSingleAlumniCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
-	with Logging with Daoisms with AlumniProperties {
+class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+	with Logging with Daoisms with AlumniProperties with Unaudited {
+	import ImportMemberHelpers._
 	
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
 	

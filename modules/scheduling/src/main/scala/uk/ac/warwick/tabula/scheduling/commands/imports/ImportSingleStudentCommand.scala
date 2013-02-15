@@ -32,13 +32,20 @@ import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.userlookup.User
 
-class ImportSingleStudentCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
-	with Logging with Daoisms with StudentProperties {
+class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+	with Logging with Daoisms with StudentProperties with Unaudited {
+	import ImportMemberHelpers._
 	
 	// A couple of intermediate properties that will be transformed later
 	@BeanProperty var studyDepartmentCode: String = _
 	@BeanProperty var routeCode: String = _
+	
+	this.nationality = rs.getString("nationality")
+	this.mobileNumber = rs.getString("mobile_number")
 	
 	this.sprCode = rs.getString("spr_code")
 	this.sitsCourseCode = rs.getString("sits_course_code")
@@ -97,7 +104,7 @@ class ImportSingleStudentCommand(val rs: ResultSet) extends ImportSingleMemberCo
 		"fundingSource", "programmeOfStudy", "intendedAward", "academicYear", "courseStartYear",
 		"yearCommencedDegree", "courseBaseYear", "courseEndDate", "transferReason", "beginDate",
 		"endDate", "expectedEndDate", "feeStatus", "domicile", "highestQualificationOnEntry",
-		"lastInstitute", "lastSchool"
+		"lastInstitute", "lastSchool", "nationality", "mobileNumber"
 	)
 	
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated

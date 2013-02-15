@@ -56,9 +56,9 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		this.universityId = user.universityId
 		this.email = user.email
 		this.userType = 
-			if (user.isStudent) Student
-			else if (user.isStaff) Staff
-			else Other
+			if (user.isStudent) MemberUserType.Student
+			else if (user.isStaff) MemberUserType.Staff
+			else MemberUserType.Other
 	}
 	
 	def this(id: String) = {
@@ -79,11 +79,13 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 	
 	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
 	@BeanProperty def description = {
-		val userType = Option(groupName).getOrElse("")
+		val userTypeString = 
+			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
+			else Option(groupName).getOrElse("")
 		val courseName = Option(route).map(", " + _.name).getOrElse("")
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 		 
-		userType + courseName + deptName
+		userTypeString + courseName + deptName
 	}
 	
 	/** 
@@ -144,8 +146,8 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 
 			
 	def personalTutor = userType match {
-		case Student => {
-			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.agentParsed) match {
+		case MemberUserType.Student => {
+			profileService.findCurrentRelationship(RelationshipType.PersonalTutor, sprCode) map (rel => rel.agentParsed) match {
 				case None => "Not recorded"
 				case Some(name: String) => name
 				case Some(member: Member) => member
@@ -154,9 +156,9 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		case _ => "Not applicable"
 	}
 	
-	def isStaff = (userType == Staff)
-	def isStudent = (userType == Student)
-	def isAPersonalTutor = (userType == Staff && !profileService.listStudentRelationshipsWithMember(PersonalTutor, this).isEmpty)
+	def isStaff = (userType == MemberUserType.Staff)
+	def isStudent = (userType == MemberUserType.Student)
+	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
 }
 
 trait MemberProperties {
@@ -168,6 +170,8 @@ trait MemberProperties {
 	@BeanProperty var lastName: String = _
 	@BeanProperty var email: String = _
 	
+	@BeanProperty var homeEmail: String = _
+	
 	@BeanProperty var title: String = _
 	@BeanProperty var fullFirstName: String = _
 	
@@ -176,10 +180,6 @@ trait MemberProperties {
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
-	
-	@BeanProperty var nationality: String = _
-	@BeanProperty var homeEmail: String = _
-	@BeanProperty var mobileNumber: String = _
 	
 	@OneToOne
 	@JoinColumn(name="PHOTO_ID")
@@ -198,9 +198,15 @@ trait MemberProperties {
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
+	
+	@BeanProperty var jobTitle: String = _
+	@BeanProperty var phoneNumber: String = _
 }
 
 trait StudentProperties {
+	@BeanProperty var nationality: String = _
+	@BeanProperty var mobileNumber: String = _
+	
 	@BeanProperty var sprCode: String = _
 	@BeanProperty var sitsCourseCode: String = _
 	

@@ -111,6 +111,13 @@
 							</tr>
 						</#if>
 						
+						<#if profile.phoneNumber??>
+							<tr>
+								<th>Phone number</th>
+								<td>${phoneNumberFormatter(profile.phoneNumber)}</td>
+							</tr>
+						</#if>
+						
 						<#if profile.mobileNumber??>
 							<tr>
 								<th>Mobile phone</th>
@@ -160,7 +167,7 @@
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 	
 		<@f.form method="post" action="${url('/sysadmin/import-profiles/' + profile.universityId, '/scheduling')}">
-			<button class="btn btn-large" type="submit">Re-import details from ADS</button>
+			<button class="btn btn-large" type="submit">Re-import details from Membership, SITS and about a billion other systems</button>
 		</@f.form>
 	</div>
 </#if>

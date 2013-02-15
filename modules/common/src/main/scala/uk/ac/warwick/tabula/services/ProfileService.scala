@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.PersonalTutor
+import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging

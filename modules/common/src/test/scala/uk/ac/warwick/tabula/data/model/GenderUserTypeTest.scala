@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.data.model.Gender._
 
 class GenderUserTypeTest extends TestBase {
   

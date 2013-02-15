@@ -32,8 +32,7 @@ import java.lang.Boolean
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.model.Student
-import uk.ac.warwick.tabula.data.model.Staff
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.Fixtures
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorCompletionService

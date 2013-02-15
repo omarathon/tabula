@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions._

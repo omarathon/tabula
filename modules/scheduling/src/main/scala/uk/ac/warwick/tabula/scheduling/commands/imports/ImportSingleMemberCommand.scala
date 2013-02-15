@@ -31,9 +31,17 @@ import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.commands.Unaudited
+import java.io.ByteArrayInputStream
+import java.sql.ResultSetMetaData
+import uk.ac.warwick.userlookup.User
+import org.apache.commons.lang3.text.WordUtils
+import scala.util.matching.Regex
 
 abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
-	with MemberProperties  {
+	with MemberProperties with Unaudited  {
+	import ImportMemberHelpers._
 	
 	PermissionCheck(Permissions.ImportSystemData)
 	
@@ -42,53 +50,44 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]	
 	
 	// A couple of intermediate properties that will be transformed later
-	@BeanProperty var photoBlob: Blob = _
+	@BeanProperty var photoOption: Option[Array[Byte]] = _
 	@BeanProperty var homeDepartmentCode: String = _
 	//@BeanProperty var studyDepartmentCode: String = _
 	
-	def this(rs: ResultSet) {
+	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
 		this()
 		
-		this.universityId = rs.getString("university_id")
-		this.userId = rs.getString("user_code")
-		this.userType = MemberUserType.fromCode(rs.getString("group_ctg"))
+		implicit val resultSet = rs
+		implicit val metadata = rs.getMetaData
 		
-		this.firstName = rs.getString("preferred_forename")
-		this.lastName = rs.getString("family_name")
-		this.email = rs.getString("email_address")
-		this.title = rs.getString("title")
-		this.fullFirstName = rs.getString("forenames")
-		this.gender = Gender.fromCode(rs.getString("gender"))
-		this.nationality = rs.getString("nationality")
-		this.homeEmail = rs.getString("alternative_email_address")
-		this.mobileNumber = rs.getString("mobile_number")
-		this.photoBlob = rs.getBlob("photo")
+		val member = mac.member
+		
+		this.universityId = oneOf(member.universityId, optString("university_id")).get
+		this.userId = member.usercode
+		
+		this.userType = member.userType
+		
+		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
+		this.firstName = oneOf(member.preferredForenames, optString("preferred_forename"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
+		
+		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail) orNull)
+		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")) orNull)
+		
+		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }) orNull)
+		this.photoOption = mac.photo
+		
+		this.jobTitle = member.position
+		this.phoneNumber = member.phoneNumber
 				
 		this.inUseFlag = rs.getString("in_use_flag")
-		this.inactivationDate = toLocalDate(rs.getDate("date_of_inactivation"))
-		this.groupName = rs.getString("group_name")
-			
-		this.homeDepartmentCode = rs.getString("home_department_code")
-		this.dateOfBirth = toLocalDate(rs.getDate("date_of_birth"))
+		this.groupName = member.targetGroup
+		this.inactivationDate = member.endDate
+		
+		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode) orNull)
+		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")) orNull) 
 	}
-	
-	protected def toLocalDate(date: Date) = {
-		if (date == null) {
-			null
-		} else {
-			new LocalDate(date)
-		}
-	}
-	
-	protected def toAcademicYear(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			AcademicYear.parse(code)
-		}
-	}
-	
-	def applyForTesting = applyInternal
 		
 	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
 	protected def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, memberBean: BeanWrapper) = {
@@ -112,20 +111,20 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		changedProperties.foldLeft(false)(_ || _)
 	}
 	
-	private def copyPhoto(property: String, blob: Blob, memberBean: BeanWrapper) = {
+	private def copyPhoto(property: String, photoOption: Option[Array[Byte]], memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
 			case null => null
 			case value: FileAttachment => value
 		}
 		
-		val blobEmpty = (blob == null || blob.length == 0)
+		val blobEmpty = !photoOption.isDefined || photoOption.get.length == 0
 		
-		logger.debug("Property " + property + ": " + oldValue + " -> " + blob)
+		logger.debug("Property " + property + ": " + oldValue + " -> " + photoOption)
 		
 		if (oldValue == null && blobEmpty) false
 		else if (oldValue == null) {
 			// From no photo to having a photo
-			memberBean.setPropertyValue(property, toPhoto(blob))
+			memberBean.setPropertyValue(property, toPhoto(photoOption.get))
 			true
 		} else if (blobEmpty) {
 			// User had a photo but now doesn't
@@ -137,9 +136,9 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 				else closeThis(is) { is => DigestUtils.shaHex(is) }
 			
 			// Need to check whether the existing photo matches the new photo
-			if (shaHash(oldValue.dataStream) == shaHash(blob.getBinaryStream)) false
+			if (shaHash(oldValue.dataStream) == shaHash(new ByteArrayInputStream(photoOption.get))) false
 			else {
-				memberBean.setPropertyValue(property, toPhoto(blob))
+				memberBean.setPropertyValue(property, toPhoto(photoOption.get))
 				true
 			}
 		}
@@ -169,23 +168,21 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	}
 	
 	private val basicMemberProperties = Set(
-		"userId", "firstName", "lastName", "email", "title", "fullFirstName", "userType", "gender",
-		"nationality", "homeEmail", "mobileNumber", "inUseFlag", "inactivationDate", "groupName",
-		"dateOfBirth"
+		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
+		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
 	)
 	
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-		copyPhoto("photo", photoBlob, memberBean) |
+		copyPhoto("photo", photoOption, memberBean) |
 		copyDepartment("homeDepartment", homeDepartmentCode, memberBean)
 	
-
-	private def toPhoto(photoBlob: Blob) = {
+	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment
 		photo.name = universityId + ".jpg"
-		photo.uploadedData = photoBlob.getBinaryStream
-		photo.uploadedDataLength = photoBlob.length
+		photo.uploadedData = new ByteArrayInputStream(bytes)
+		photo.uploadedDataLength = bytes.length
 		fileDao.savePermanent(photo)
 		photo
 	}
@@ -198,6 +195,103 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		}
 	}
 	
-	def describe(d: Description) = d.property("universityId" -> universityId)
+	override def describe(d: Description) = d.property("universityId" -> universityId)
 
+}
+
+object ImportMemberHelpers {
+	implicit def opt[A](value: A) = Option(value)
+
+	def oneOf[A](head: Option[A], tail: Option[A]*) = 
+		((List(head) ++ tail).flatten).headOption
+		
+	def optString(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[String] =
+		if (hasColumn(columnName)) Some(rs.getString(columnName))
+		else None
+		
+	def optLocalDate(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[LocalDate] =
+		if (hasColumn(columnName)) Some(rs.getDate(columnName)) map { new LocalDate(_) }
+		else None
+		
+	def hasColumn(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData) = {
+		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName == metadata.getColumnName(col)
+		cols.exists(b => b)
+	}
+	
+	def toLocalDate(date: Date) = {
+		if (date == null) {
+			null
+		} else {
+			new LocalDate(date)
+		}
+	}
+	
+	def toAcademicYear(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			AcademicYear.parse(code)
+		}
+	}
+		  
+	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
+	  
+	def formatForename(name: String, suggested: String = null): String = {
+		if (name.equalsIgnoreCase(suggested)) {
+			// Our suggested capitalisation from SSO was correct
+			suggested
+		} else {
+			CapitaliseForenamePattern.replaceAllIn(name, { m: Regex.Match =>
+				m.group(1).toUpperCase() + m.group(2).toLowerCase() + m.group(3)
+			}).trim()
+		}
+	}
+	
+	private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
+	private val WholeWordGroup = 1
+	private val FirstLetterGroup = 2
+	private val RemainingLettersGroup = 3
+	private val SeparatorGroup = 4
+	
+	def formatSurname(name: String, suggested: String = null): String = {
+		if (name.equalsIgnoreCase(suggested)) {
+			// Our suggested capitalisation from SSO was correct
+			suggested
+		} else {
+			/*
+			 * Conventions:
+			 * 
+			 * von - do not capitalise de La - capitalise second particle O', Mc,
+			 * Mac, M' - always capitalise
+			 */
+		  
+			CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
+				val wholeWord = m.group(WholeWordGroup).toUpperCase()
+				val first = m.group(FirstLetterGroup).toUpperCase()
+				val remainder = m.group(RemainingLettersGroup).toLowerCase()
+				val separator = m.group(SeparatorGroup)
+				
+				if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
+					// Capitalise the first letter of the remainder
+					first +
+						remainder.substring(0, 1) + 
+						remainder.substring(1, 2).toUpperCase() + 
+						remainder.substring(2) +
+						separator
+				} else if (wholeWord.startsWith("MAC") && wholeWord.length() > 3) {
+					// Capitalise the first letter of the remainder
+					first + 
+						remainder.substring(0, 2) + 
+						remainder.substring(2, 3).toUpperCase() + 
+						remainder.substring(3) +
+						separator
+				} else if (wholeWord.equals("VON") || wholeWord.equals("D") || wholeWord.equals("DE") || wholeWord.equals("DI")) {
+					// Special case - lowercase the first word
+					first.toLowerCase() + remainder + separator
+				} else {
+					first + remainder + separator
+				}
+			}).trim()
+		}
+	}
 }

@@ -12,7 +12,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.PersonalTutor
+import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand

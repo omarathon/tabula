@@ -446,7 +446,7 @@ trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 
 	private def toUser(item: MembershipItem) = item.user
 	private def notExclude(item: MembershipItem) = item.itemType != "exclude"
-	private def notNull[T](any: T) = { any != null }
+	private def notNull[A](any: A) = { any != null }
 }
 
 /** Item in list of members for displaying in view. */

@@ -18,22 +18,22 @@ import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
  * the nullObject and nullValue values to tell it what value to
  * use in the case of null coming from other direction
  */
-abstract class AbstractBasicUserType[T <: Object: ClassManifest, V: ClassManifest] extends UserType {
+abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifest] extends UserType {
 
 	// Store information about what T is.
-	protected val m: ClassManifest[T] = classManifest[T]
-	protected val vm: ClassManifest[V] = classManifest[V]
+	protected val m: ClassManifest[A] = classManifest[A]
+	protected val vm: ClassManifest[B] = classManifest[B]
 
-	val basicType: AbstractSingleColumnStandardBasicType[V]
-	val nullObject: T // what to use when NULL comes out of the DB
-	val nullValue: V // what to put in the DB when saving null
-	def convertToObject(input: V): T
-	def convertToValue(obj: T): V
+	val basicType: AbstractSingleColumnStandardBasicType[B]
+	val nullObject: A // what to use when NULL comes out of the DB
+	val nullValue: B // what to put in the DB when saving null
+	def convertToObject(input: B): A
+	def convertToValue(obj: A): B
 
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
 		basicType.nullSafeGet(resultSet, names(0)) match {
 			case s: Any if s == nullValue => nullObject
-			case s: Any if vm.erasure.isInstance(s) => convertToObject(s.asInstanceOf[V])
+			case s: Any if vm.erasure.isInstance(s) => convertToObject(s.asInstanceOf[B])
 			case null => nullObject
 		}
 	}
@@ -41,8 +41,8 @@ abstract class AbstractBasicUserType[T <: Object: ClassManifest, V: ClassManifes
 	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) =
 		basicType.nullSafeSet(stmt, toValue(value), index)
 
-	private final def toValue(value: Any): V = value match {
-		case obj: Any if m.erasure.isInstance(value) => convertToValue(value.asInstanceOf[T])
+	private final def toValue(value: Any): B = value match {
+		case obj: Any if m.erasure.isInstance(value) => convertToValue(value.asInstanceOf[A])
 		case null => nullValue
 	}
 

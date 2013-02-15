@@ -5,7 +5,7 @@ import uk.ac.warwick.util
 object Stopwatches {
 
 	class EnhancedStopwatch(val stopwatch: util.core.StopWatch) {
-		def record[T](taskName: String)(work: => T): T = {
+		def record[A](taskName: String)(work: => A): A = {
 			try {
 				stopwatch.start(taskName)
 				work

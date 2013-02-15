@@ -1,20 +1,22 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
-
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StaffProperties
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.userlookup.User
 
-class ImportSingleStaffCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
-	with Logging with Daoisms with StaffProperties {
+class ImportSingleStaffCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+	with Logging with Daoisms with StaffProperties with Unaudited {
+	import ImportMemberHelpers._
 		
 	this.teachingStaff = rs.getString("teaching_staff") == "Y"
 		
