@@ -16,25 +16,39 @@ import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
+import uk.ac.warwick.tabula.profiles.helpers.TutorChangeNotifier
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
-class EditTutorCommand(val student: Member) extends Command[StudentRelationship] {
+class EditTutorCommand(val student: Member) extends Command[Option[StudentRelationship]] {
 
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
-	
+
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
-	@BeanProperty var save: String = null	
+	@BeanProperty var save: String = null
+	@BeanProperty var notifyTutee: String = null
+	@BeanProperty var notifyOldTutor: String = null
+	@BeanProperty var notifyNewTutor: String = null
 
 	var profileService = Wire.auto[ProfileService]
-	
-	def currentTutor = profileService.getPersonalTutor(student)
-	
-	def applyInternal: StudentRelationship = {
-		profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)	
-	}
 
+	def currentTutor = profileService.getPersonalTutor(student).getOrElse(
+			throw new IllegalStateException("Can't find database information for current tutor for " + student.universityId))
+
+	def applyInternal = {
+		if (!currentTutor.universityId.equals(tutorUniId)) {
+			// it's a real change
+			val oldTutorUniId = tutorUniId
+			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
+			val tutorChangeNotifier = new TutorChangeNotifier(studentUniId, oldTutorUniId, notifyTutee, notifyOldTutor, notifyNewTutor)
+			tutorChangeNotifier.sendNotifications
+			Some(rel)
+		} else {
+			None
+		}
+	}
+	
 	override def describe(d: Description) = d.property("student ID" -> studentUniId).property("new tutor ID" -> tutorUniId)
 }
 
