@@ -39,7 +39,7 @@ class EditTutorCommand(val student: Member) extends Command[Option[StudentRelati
 	def applyInternal = {
 		if (!currentTutor.universityId.equals(tutorUniId)) {
 			// it's a real change
-			val oldTutorUniId = tutorUniId
+			val oldTutorUniId = currentTutor.universityId
 			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
 			val tutorChangeNotifier = new TutorChangeNotifier(studentUniId, oldTutorUniId, notifyTutee, notifyOldTutor, notifyNewTutor)
 			tutorChangeNotifier.sendNotifications
@@ -76,12 +76,19 @@ class EditTutorController extends BaseController {
 	@RequestMapping(params=Array("tutorUniId", "!save"))
 	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 
+		val displayOptionToSave = 
+				if (cmd.currentTutor.universityId.equals(cmd.tutorUniId)) 
+					null
+				else
+					"true"
+					
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
 			"tutorToDisplay" -> pickedTutor,
-			"pickedTutor" -> pickedTutor
+			"pickedTutor" -> pickedTutor,
+			"displayOptionToSave" -> displayOptionToSave
 		)
 	}	
 

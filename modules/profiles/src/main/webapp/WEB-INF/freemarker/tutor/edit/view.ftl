@@ -5,7 +5,7 @@
 		<#include "form.ftl" />
 	
 		<section class="tutor-edit">
-			<#if pickedTutor??>
+			<#if displayOptionToSave??>
 				<hr class="full-width">
 				<br />
 				<@f.form 
