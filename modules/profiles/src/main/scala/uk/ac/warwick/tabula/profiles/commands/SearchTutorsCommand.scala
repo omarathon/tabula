@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.model.Staff
 import uk.ac.warwick.tabula.services.ProfileIndexService
+import uk.ac.warwick.tabula.profiles.commands.AbstractSearchProfilesCommand
 
 class SearchTutorsCommand(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff) {
 	var deptDao = Wire.auto[DepartmentDao]

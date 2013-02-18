@@ -8,14 +8,17 @@
 			<#if pickedTutor??>
 				<hr class="full-width">
 				<br />
-	
 				<@f.form 
 					id="saveTutor"
 					method="post" 
 					action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
-					commandName="searchTutorCommand" 
+					commandName="editTutorCommand" 
 					class="form-horizontal">
-					
+
+					<@f.checkbox path="notifyTutee" value="true" /> Notify tutee of change
+					<br /><@f.checkbox path="notifyOldTutor" value="true" /> Notify old tutor of change
+					<br /><@f.checkbox path="notifyNewTutor" value="true" /> Notify new tutor of change
+
 					<input id="save" name="save" type="hidden" value="true" />
 					<div style="text-align:right">
 						<button type="submit" class="btn btn-primary">Save</button
@@ -24,7 +27,7 @@
 
 			</#if>
 		</section>
-		
+
 	</#if>
 	<br />
 	<br />
