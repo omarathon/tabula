@@ -11,7 +11,7 @@
 		<h1>Preview personal tutor changes for ${department.name}</h1>
 		
 		<@spring.bind path="rawStudentRelationships">
-			<#assign itemList = status.actualValue /> 
+			<#assign itemList = status.actualValue />
 			<#if itemList?size gt 0>
 				<#if hasErrors>
 					<div class="alert alert-warning alert-block">
@@ -48,33 +48,23 @@
 								<tr class="success">
 							</#if>
 								<td>
-									<@spring.bind path="targetUniversityId">
-										${status.value}
-									</@spring.bind>
+									${item.targetUniversityId}
 								</td>
 								<td>
-									<@spring.bind path="targetMember.fullName">
-										<#if targetMember?has_content>
-											${status.value}
-										</#if>
-									</@spring.bind>
+									<#if item.targetMember?has_content>
+										${item.targetMember.fullName}
+									</#if>
 								</td>
 								<td>
-									<@spring.bind path="agentUniversityId">
-										${status.value}
-									</@spring.bind>
+									${item.agentUniversityId}
 								</td>
 								<td>
-									<#if agentNameIfNonMember?has_content>
-										<@spring.bind path="agentNameIfNonMember">
-											${status.value}
-										</@spring.bind>
+									<#if item.agentName?has_content>
+										${item.agentName} (no ID - assumed external)
 									<#else>
-										<@spring.bind path="agentMember.fullName">
-											<#if agentMember?has_content>
-												${status.value} <span class="muted">from given ID</span>
-											</#if>
-										</@spring.bind>
+										<#if item.agentMember?has_content>
+											${item.agentMember.fullName}
+										</#if>
 									</#if>
 								</td>
 							</tr>
