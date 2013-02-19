@@ -1,8 +1,14 @@
 package uk.ac.warwick.tabula.services
 
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
+import javax.persistence.Entity
+import javax.persistence.NamedQueries
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -34,7 +40,6 @@ trait ProfileService {
 	def getPersonalTutor(student: Member): Option[Member]
 	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member]
-	def getUserEmail(warwickUniId: String): String
 }
 
 @Service(value = "profileService")
@@ -42,7 +47,6 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	var memberDao = Wire.auto[MemberDao]
 	var profileIndexService = Wire.auto[ProfileIndexService]
-	val userLookup = Wire.auto[UserLookupService]
 	
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
@@ -72,10 +76,6 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getRegisteredModules(universityId: String): Seq[Module] = transactional(readOnly = true) {
 		memberDao.getRegisteredModules(universityId)
-	}
-
-	def getUserEmail(warwickUniId: String): String = {
-		userLookup.getUserByWarwickUniId(warwickUniId).getEmail
 	}
 
 	def findCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = transactional() {
