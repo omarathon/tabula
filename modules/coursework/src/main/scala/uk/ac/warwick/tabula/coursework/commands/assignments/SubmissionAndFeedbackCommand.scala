@@ -25,7 +25,11 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 	@BeanProperty var students:Seq[Item] = _
 	@BeanProperty var awaitingSubmissionExtended:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmission:Seq[User] = _
+	@BeanProperty var awaitingSubmissionWithinExtension:Seq[(User, Extension)] = _
+	@BeanProperty var awaitingSubmissionExtensionRequested:Seq[(User, Extension)] = _
+	@BeanProperty var awaitingSubmissionExtensionExpired:Seq[(User, Extension)] = _
+	@BeanProperty var awaitingSubmissionExtensionRejected:Seq[(User, Extension)] = _
+	@BeanProperty var awaitingSubmissionNoExtension:Seq[User] = _
 	@BeanProperty var whoDownloaded: Seq[User] = _
 	@BeanProperty var stillToDownload: Seq[Item] =_
 	@BeanProperty var hasPublishedFeedback: Boolean =_
@@ -40,11 +44,11 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
 		val moduleMembers = assignmentService.determineMembershipUsers(assignment)
-
+		val unSubmitted =  moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
+		val withExtension = unSubmitted.map(member => (member, assignment.findExtension(member.getWarwickId)))
+		
 		awaitingSubmissionExtended =  Option(moduleMembers) match {
 			case Some(members) => {
-				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
-				val withExtension = unSubmitted.map(member => (member, assignment.findExtension(member.getWarwickId)))
 				val result = withExtension.flatMap(pair => pair match {
 					case (u, Some(extension)) => List(Pair(u, extension))
 					case (u, None) => Nil
@@ -53,15 +57,26 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			}
 			case None => Nil
 		}
-
-		awaitingSubmission =  Option(moduleMembers) match {
+		
+		awaitingSubmissionNoExtension =  Option(moduleMembers) match {
 			case Some(members) => {
-				val unSubmitted =  members.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
-				unSubmitted.filterNot(awaitingSubmissionExtended contains)
+				val result = withExtension.flatMap(pair => pair match {
+					case (u, Some(extension)) => Nil
+					case (u, None) => List(u)
+				})
+				result
 			}
 			case None => Nil
 		}
-
+		
+		awaitingSubmissionWithinExtension = awaitingSubmissionExtended.filter(member => assignment.isWithinExtension(member._1.getUserId))
+		
+		awaitingSubmissionExtensionRequested = awaitingSubmissionExtended.filter(member => member._2.isAwaitingApproval)
+		
+		awaitingSubmissionExtensionRejected = awaitingSubmissionExtended.filter(member => member._2.rejected)
+		
+		awaitingSubmissionExtensionExpired = awaitingSubmissionExtended.filterNot(awaitingSubmissionExtensionRequested contains).filterNot(awaitingSubmissionWithinExtension contains).filterNot(awaitingSubmissionExtensionRejected contains)
+		
 		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 		mustReleaseForMarking = assignment.markingWorkflow != null

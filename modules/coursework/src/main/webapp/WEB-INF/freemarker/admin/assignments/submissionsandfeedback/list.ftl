@@ -69,7 +69,7 @@
 </#macro>
 
 
-<#macro unSubmitted student extension="">
+<#macro unSubmitted student extension="" withinExtension=false approved=false rejected=false>
 	<tr class="itemContainer awaiting-submission">
 		<td></td>
 		<td>
@@ -83,11 +83,21 @@
 		<td></td>
 		<td>
 			<#if extension?has_content>
-				<#assign date>
-					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-				</#assign>
 				<span class="label label-info">Unsubmitted</span>
-				<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
+				<#if approved && !rejected>
+					<#assign date>
+						<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+					</#assign>
+				</#if>
+				<#if withinExtension>
+					<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
+				<#elseif rejected>
+					<span class="label label-info use-tooltip" >Extension Rejected</span>
+				<#elseif !approved>
+					<span class="label label-info use-tooltip" >Extension Requested</span>
+				<#else>
+					<span class="label label-info use-tooltip" title="${date}">Extension Expired</span>
+				</#if>
 			<#else>
 				<span class="label label-info">Unsubmitted</span>
 			</#if>
@@ -253,12 +263,27 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list awaitingSubmissionExtended as pair>
+			<#list awaitingSubmissionWithinExtension as pair>
 				<#assign student=pair._1 />
 				<#assign extension=pair._2 />
-				<@unSubmitted student extension />
+				<@unSubmitted student extension true true false/>
 			</#list>
-			<#list awaitingSubmission as student>
+			<#list awaitingSubmissionExtensionExpired as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false/>
+			</#list>
+			<#list awaitingSubmissionExtensionRejected as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false false true/>
+			</#list>
+			<#list awaitingSubmissionExtensionRequested as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false false false/>
+			</#list>
+			<#list awaitingSubmissionNoExtension as student>
 				<@unSubmitted student />
 			</#list>
 			<#list students as student>
