@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.profiles.commands.AbstractSearchProfilesCommand
 class SearchTutorsCommand(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff) {
 	var deptDao = Wire.auto[DepartmentDao]
 	var profileIndexService = Wire.auto[ProfileIndexService]
-	
+
 	override def applyInternal() =
 		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
 		else Seq()

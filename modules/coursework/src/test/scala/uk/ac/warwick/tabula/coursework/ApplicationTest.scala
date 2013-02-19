@@ -28,6 +28,7 @@ import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
+import org.junit.Ignore
 
 class ApplicationTest extends AppContextTestBase {
     
@@ -96,6 +97,10 @@ class ApplicationTest extends AppContextTestBase {
       val modules = session.createCriteria(classOf[Module]).list
       modules.size should be (2)
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
+    }
+    
+    @Ignore @Test def getAllCommands {
+    	allCommandsInSystem("uk.ac.warwick.tabula.coursework").map {clz => println(clz.getName.substring("uk.ac.warwick.tabula.coursework".length))}
     }
     
 }

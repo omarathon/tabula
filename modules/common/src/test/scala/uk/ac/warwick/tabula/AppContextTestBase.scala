@@ -17,12 +17,30 @@ import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.BeanInstantiationException
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy
 import javax.sql.DataSource
+import org.reflections.Reflections
+import uk.ac.warwick.tabula.commands.Command
+import scala.collection.JavaConverters._
+import java.lang.reflect.Modifier
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
-	
+	protected def allCommandsInSystem(packageBase: String) = {
+		val reflections = new Reflections(packageBase)
+
+		reflections
+			.getSubTypesOf(classOf[Command[_]])
+			.asScala.toList
+			.filter { clz => !Modifier.isAbstract(clz.getModifiers) }
+			.sortWith((c1, c2) => {
+				val p1 = c1.getPackage.getName
+				val p2 = c2.getPackage.getName
+				
+				if (p1 == p2) c1.getName < c2.getName
+				else p1 < p2
+			})
+	}
 }
 
 @RunWith(classOf[SpringJUnit4ClassRunner])

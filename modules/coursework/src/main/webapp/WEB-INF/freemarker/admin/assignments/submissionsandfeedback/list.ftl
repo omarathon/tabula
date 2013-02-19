@@ -84,7 +84,7 @@
 		<td>
 			<#if extension?has_content>
 				<#assign date>
-					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true split=true />
+					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
 				</#assign>
 				<span class="label label-info">Unsubmitted</span>
 				<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
