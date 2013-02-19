@@ -307,7 +307,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}
 
 	// returns feedback for a specified student
-	def findFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
+	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
+
+	// returns feedback for a specified student
+	def findFullFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =

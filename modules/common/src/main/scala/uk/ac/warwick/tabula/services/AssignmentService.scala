@@ -328,7 +328,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	}
 
 	def getStudentFeedback(assignment: Assignment, uniId: String) = {
-		assignment.findFeedback(uniId)
+		assignment.findFullFeedback(uniId)
 	}
 
 	private def isInteresting(assignment: UpstreamAssignment) = {
