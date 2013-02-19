@@ -34,6 +34,7 @@ import scala.collection.mutable.Buffer
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
@@ -92,9 +93,9 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 							errors.rejectValue("targetUniversityId", "uniNumber.userNotFound")
 							valid = false
 						}
-						case Some(targetMember) => {
+						case Some(targetMember: StudentMember) => {
 							rawStudentRelationship.targetMember = targetMember
-							if (targetMember.sprCode == null) {
+							if (targetMember.studyDetails.sprCode == null) {
 								errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
 								valid = false
 							}
@@ -102,6 +103,10 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
 								valid = false
 							}
+						}
+						case Some(nonStudentMember) => {
+							errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+							valid = false
 						}
 					}
 				}
@@ -167,7 +172,8 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 			var targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
 				// should never be None as validation has already checked for this
 				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId) 
-				case Some(mem) => mem.sprCode
+				case Some(mem: StudentMember) => mem.studyDetails.sprCode
+				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
 			
 			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 
@@ -38,6 +38,6 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	}
 	
 	final def optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, true)
-	final def currentMember = optionalCurrentMember getOrElse(new Member(user))
+	final def currentMember = optionalCurrentMember getOrElse(new RuntimeMember(user))
 	
 }

@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 class ImportSingleStudentCommandTest extends TestBase with Mockito {
 	
@@ -88,8 +89,6 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.sprCode should be ("0672089/2")
-			member.route should be (route)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -100,7 +99,7 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 	
 	@Test def worksWithExisting {
 		new Environment {
-			val existing = new Member("0672089")
+			val existing = new StudentMember("0672089")
 			
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
@@ -120,9 +119,6 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			
-			member.sprCode should be ("0672089/2") // added ZLJ
-			member.route should be (route)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

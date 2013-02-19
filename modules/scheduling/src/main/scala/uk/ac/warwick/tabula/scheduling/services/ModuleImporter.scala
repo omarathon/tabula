@@ -12,6 +12,7 @@ import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.data.model.DegreeType
 import javax.annotation.Resource
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)
@@ -34,6 +35,7 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 
 	@Resource(name = "academicDataStore") var ads: DataSource = _
+	var sits = Wire[DataSource]("sitsDataSource")
 
 	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(ads)
 	lazy val moduleInfoMappingQuery = new ModuleInfoMappingQuery(ads)

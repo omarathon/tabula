@@ -18,6 +18,8 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.data.model.StaffProperties
 
 class ImportSingleStaffCommandTest extends TestBase with Mockito {
 	
@@ -69,6 +71,8 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			command.fileDao = fileDao
 			
 			val member = command.applyInternal
+			member.isInstanceOf[StaffProperties] should be (true)
+			
 			member.title should be ("Mr")
 			member.universityId should be ("0672089")
 			member.userId should be ("cuscav")
@@ -78,7 +82,7 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.teachingStaff.booleanValue() should be (true)
+			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -89,7 +93,7 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 	
 	@Test def worksWithExisting {
 		new Environment {
-			val existing = new Member("0672089")
+			val existing = new StaffMember("0672089")
 			
 			val fileDao = mock[FileDao]
 			
@@ -101,6 +105,8 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			command.fileDao = fileDao
 			
 			val member = command.applyInternal
+			member.isInstanceOf[StaffProperties] should be (true)
+			
 			member.title should be ("Mr")
 			member.universityId should be ("0672089")
 			member.userId should be ("cuscav")
@@ -110,7 +116,7 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.teachingStaff.booleanValue() should be (true)
+			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

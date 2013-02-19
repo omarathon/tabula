@@ -144,7 +144,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		}
 	}
 	
-	private def copyDepartment(property: String, departmentCode: String, memberBean: BeanWrapper) = {
+	protected def copyDepartment(property: String, departmentCode: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
 			case null => null
 			case value: Department => value

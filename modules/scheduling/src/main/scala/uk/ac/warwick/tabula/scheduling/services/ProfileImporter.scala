@@ -39,15 +39,16 @@ case class MembershipInformation(val member: MembershipMember, val photo: Option
 class ProfileImporter extends Logging {
 	import ProfileImporter._
 	
-	var ads = Wire[DataSource]("academicDataStore")
 	var sits = Wire[DataSource]("sitsDataSource")
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 	
+	lazy val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
+	
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 	
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(ads, member, ssoUser)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(sits, member, ssoUser)
 	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
 	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] = {
@@ -56,9 +57,11 @@ class ProfileImporter extends Logging {
 		membersAndCategories flatMap { mac =>
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
-			
+					
 			mac.member.userType match {
-				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
+				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(
+											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
+										  ).toSeq
 				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
@@ -78,116 +81,51 @@ class ProfileImporter extends Logging {
 }
 
 object ProfileImporter {
-  
-	val BasicInformationPrologue = """
-	  	select
-			m.university_id as university_id,
-			m.title as title,
-			m.preferred_forename as preferred_forename,
-			m.forenames as forenames,
-			m.family_name as family_name,
-			m.gender as gender,
-			nat.name as nationality,
-			photo.photo as photo,
-			m.in_use_flag as in_use_flag,
-			m.date_of_inactivation as date_of_inactivation,
-			m.group_name as group_name,
-			m.department_code as home_department_code,
-			m.preferred_email_address as email_address,
-			m.home_email_address as alternative_email_address,
-			m.mobile_phone_number as mobile_number,
-			m.primary_user_code as user_code,
-			m.date_of_birth as date_of_birth,
-			m.group_ctg as group_ctg
+		
+	val GetStudentInformation = """
+		select
+			stu.stu_code as university_id,
+			stu.stu_titl as title,
+			stu.stu_fusd as preferred_forename,
+			trim(stu.stu_fnm1 || ' ' || stu.stu_fnm2 || ' ' || stu.stu_fnm3) as forenames,
+			stu.stu_surn as family_name,
+			stu.stu_gend as gender,
+			stu.stu_caem as email_address,
+			stu.stu_udf3 as user_code,
+			stu.stu_dob as date_of_birth,
+			case when stu.stu_endd < sysdate then 'Inactive' else 'Active' end as in_use_flag,
+			stu.stu_endd as date_of_inactivation,
+			stu.stu_haem as alternative_email_address,
+			stu.stu_cat3 as mobile_number,
+		
+			nat.nat_name as nationality,
+		
+			crs.crs_code as sits_course_code,
+			
+			spr.spr_code as spr_code,
+			spr.rou_code as route_code,
+			spr.spr_dptc as study_department
+		
+		from intuit.ins_stu stu
+			left outer join intuit.srs_nat nat 
+				on stu.stu_natc = nat.nat_code
+		
+			left outer join intuit.srs_sce sce
+				on stu.stu_code = sce.sce_stuc
+					and sce.sce_ayrc in :year
+		
+			left outer join intuit.srs_crs crs
+				on sce.sce_crsc = crs.crs_code
+		
+			left outer join intuit.srs_scj scj
+				on sce.sce_scjc = scj.scj_code
+		
+			left outer join intuit.ins_spr spr
+				on scj.scj_sprc = spr.spr_code
+		
+			where stu.stu_udf3 in (:usercodes)
+				and (sce.sce_stuc is null or scj.scj_udfa = 'Y')
 		"""
-		
-	val BasicInformationEpilogue = """
-		left outer join member_photo_details photo 
-			on m.university_id = photo.university_id
-
-		left outer join nationality nat 
-			on m.nationality = nat.nationality_code
-		
-		where m.primary_user_code in (:usercodes)
-		"""
-		
-	val GetStudentInformation = BasicInformationPrologue + """,
-			study.spr_code as spr_code,
-			study.sits_course_code as sits_course_code,
-			levl.name as study_level,
-			study.year_of_study as year_of_study,
-			moa.name as mode_of_attendance,
-			funding.name as source_of_funding,
-			student_status.name as student_status,
-			pos.name as programme_of_study,
-			intended_award.name as intended_award,
-			study.route_code as route_code,
-			study.academic_year_code as academic_year_code,
-			study.category as category,
-			study.department as study_department,
-			study.course_start_academic_yr as course_start_year,
-			study.base_course_start_ayr as course_base_start_year,
-			study.course_end_date as course_end_date,
-			transfer.name as transfer_reason,
-			details.next_of_kin as next_of_kin,
-			details.begin_date as begin_date,
-			details.end_date as end_date,
-			details.expected_end_date as expected_end_date,
-			fees.name as fee_status,
-			domicile.name as domicile,
-			entry_qual.name as highest_qualification_on_entry,
-			last_institute.name as last_institute,
-			last_school.name as last_school,
-			details.year_commenced_degree as year_commenced_degree,
-			enrolment_status as enrolment_status
-
-		from member m
-	
-    		left outer join student_current_study_details study 
-      			on m.university_id = study.university_id
-    
-			left outer join transfer_reasons transfer 
-	  			on study.transfer_code_reason = transfer.code
-    
-    		left outer join source_of_funding funding 
-	  			on study.source_of_funding = funding.sof_code
-        
-    		left outer join programme_of_study pos 
-	  			on study.programme_of_study = pos.programme_of_study_code
-    
-    		left outer join student_programme_route programme 
-	  			on study.spr_code = programme.spr_code
-    
-    		left outer join award intended_award 
-	  			on programme.intended_award = intended_award.award_code
-    
-    		left outer join levl levl 
-	  			on study.level_code = levl.level_code
-    
-    		left outer join status student_status 
-	  			on study.student_status = student_status.status_code
-	     
-    		left outer join mode_of_attendance moa 
-	  			on study.mode_of_attendance = moa.moa_code
-    
-    		left outer join student_personal_details details 
-	  			on m.university_id = details.university_id
-    
-    		left outer join fee_status fees 
-	  			on details.fee_status = fees.fee_status_code
-	  
-    		left outer join domicile domicile 
-	  			on details.domicile_code = domicile.domicile_code
-	  
-    		left outer join qualification entry_qual 
-	  			on details.highest_qualification_on_entry = entry_qual.qualification_code
-	  
-    		left outer join institute last_institute 
-	  			on details.last_institute = last_institute.institute_code
-	  
-    		left outer join school last_school 
-	  			on details.last_school = last_school.school_code
-		""" + BasicInformationEpilogue
 		
 	val GetStaffInformation = """
 		select
@@ -204,12 +142,13 @@ object ProfileImporter {
 			prs.prs_dob as date_of_birth,
 			
 			case when prs.prs_psac is null then 'N' else 'Y' end as teaching_staff
-		from ins_prs prs
+		from intuit.ins_prs prs
 			where prs.prs_exid in (:usercodes)
 		"""
 	  
 	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
 	}
@@ -218,6 +157,15 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()		
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)
+	}
+	
+	val GetCurrentAcademicYear = """
+		select UWTABS.GET_AYR() ayr from dual
+		"""
+		
+	class GetCurrentAcademicYearQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetCurrentAcademicYear) {
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("ayr")
 	}
 	
 	val GetMembershipByUsercodeInformation = """

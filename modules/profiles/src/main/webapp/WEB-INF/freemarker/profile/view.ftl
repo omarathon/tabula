@@ -68,14 +68,14 @@
 							</tr>
 						</#if>
 						
-						<#if profile.termtimeAddress??>
+						<#if profile.student && profile.termtimeAddress??>
 							<tr class="address">
 								<th>Term-time address</th>
 								<td><@address profile.termtimeAddress /></td>
 							</tr>
 						</#if>
 						
-						<#if profile.nextOfKins?size gt 0>
+						<#if profile.student && profile.nextOfKins?size gt 0>
 							<tr>
 								<th>Emergency contacts</th>
 								<td>
@@ -135,7 +135,7 @@
 							<td>${profile.userId}</td>
 						</tr>
 						
-						<#if profile.homeAddress??>
+						<#if profile.student && profile.homeAddress??>
 							<tr class="address">
 								<th>Home address</th>
 								<td><@address profile.homeAddress /></td>

@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import java.lang.Boolean
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
@@ -64,7 +64,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		val dept = Fixtures.department("CS", "Computer Science")
 		session.save(dept)
 		
-		val m = new Member
+		val m = new StudentMember
 		m.universityId = "0672089"
 		m.userId = "cuscav"
 		m.firstName = "Mathew"
@@ -100,7 +100,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		
 		val items = for (i <- 1 to 100)
 			yield {
-				val m = new Member
+				val m = new StudentMember
 				m.universityId = i.toString
 				m.userId = i.toString
 				m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0).plusSeconds(i)
@@ -131,7 +131,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.listRecent(0, 100).size should be (100)
 				
 		val moreItems = {
-			val m = new Member
+			val m = new StudentMember
 			m.universityId = "x9000"
 			m.userId = "x9000"
 			m.lastUpdatedDate = new DateTime(2000,1,1,0,0,0).plusSeconds(9000)

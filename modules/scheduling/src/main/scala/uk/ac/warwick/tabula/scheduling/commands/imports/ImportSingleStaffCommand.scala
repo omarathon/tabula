@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.{StaffMember, EmeritusMember}
+import uk.ac.warwick.tabula.data.model.MemberUserType
 
 class ImportSingleStaffCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
 	with Logging with Daoisms with StaffProperties with Unaudited {
@@ -26,12 +28,14 @@ class ImportSingleStaffCommand(member: MembershipInformation, ssoUser: User, rs:
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
 		
 		val isTransient = !memberExisting.isDefined
-		val member = memberExisting getOrElse(new Member(universityId))
+		val member = memberExisting getOrElse {
+			if (this.userType == MemberUserType.Emeritus) new EmeritusMember(universityId)
+			else new StaffMember(universityId)
+		}
 		
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 		
-		// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
 		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStaffProperties(commandBean, memberBean)
 		
