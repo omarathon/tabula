@@ -1,3 +1,4 @@
+drop table auditevent if exists;
 create table auditevent (
 	id integer,
 	eventid varchar(36),
