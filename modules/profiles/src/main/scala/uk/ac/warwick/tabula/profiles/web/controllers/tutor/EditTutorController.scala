@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.tutor.TutorSearchCommand
+import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -30,11 +30,6 @@ class EditTutorCommand(val student: StudentMember) extends Command[StudentRelati
 	
 	def currentTutor = profileService.getPersonalTutor(student)
 	
-	def currentTutorForDisplay = currentTutor match {
-		case None => ""
-		case Some(mem) => profileService.getNameAndNumber(mem)
-	}
-	
 	def applyInternal: StudentRelationship = {
 		profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutorUniId)	
 	}
@@ -47,8 +42,8 @@ class EditTutorCommand(val student: StudentMember) extends Command[StudentRelati
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
-	@ModelAttribute("tutorSearchCommand") def tutorSearchCommand =
-		restricted(new TutorSearchCommand(user)) orNull
+	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
+		restricted(new SearchTutorsCommand(user)) orNull
 	
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: StudentMember) = new EditTutorCommand(student)
@@ -58,7 +53,7 @@ class EditTutorController extends BaseController {
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> cmd.currentTutorForDisplay
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 	
@@ -70,7 +65,7 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
-			"tutorToDisplay" -> profileService.getNameAndNumber(pickedTutor.getOrElse(throw new IllegalStateException("Can't find member object for new tutor"))),
+			"tutorToDisplay" -> pickedTutor,
 			"pickedTutor" -> pickedTutor
 		)
 	}	
@@ -86,7 +81,7 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 
-			"tutorToDisplay" -> cmd.currentTutorForDisplay
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 }

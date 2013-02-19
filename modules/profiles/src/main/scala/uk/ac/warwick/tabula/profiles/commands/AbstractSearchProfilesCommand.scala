@@ -1,67 +1,61 @@
-package uk.ac.warwick.tabula.profiles.commands.tutor
+package uk.ac.warwick.tabula.profiles.commands
 
 import scala.reflect.BeanProperty
+
 import org.hibernate.validator.constraints.NotEmpty
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.CurrentUser
 
-class TutorSearchCommand(val user: CurrentUser) extends Command[Seq[Member]] with ReadOnly with Unaudited {
-	import TutorSearchCommand._
+abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+	import AbstractSearchProfilesCommand._
 	
 	PermissionCheck(Permissions.Profiles.Search)
 	
-	final val userTypes: Set[MemberUserType] = Set(Staff)
+	final val userTypes = Set(firstUserType) ++ otherUserTypes
 	
 	var profileService = Wire.auto[ProfileService]
 	var securityService = Wire.auto[SecurityService]
-	var deptDao = Wire.auto[DepartmentDao]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	@BeanProperty var query: String = _
-	//@BeanProperty var student: Member = _
-	@BeanProperty var studentUniId: String = _
-	
-	override def applyInternal() =
-		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
-		else Seq()
 		
-	private def validQuery = 
+	def validQuery = 
 		(query.trim().length > MinimumQueryLength) &&
 		(query.split("""\s+""") find {_.length > MinimumTermLength} isDefined)
 	
-	private def singletonByUserType(option: Option[Member]) = 
-		if (option.isDefined) Seq(option.get) filter {userTypes contains _.userType}
-		else Seq()
-	
-	private def usercodeMatches =
-		if (!isMaybeUsercode(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUserId(query))
-	
-	private def universityIdMatches = 
-		if (!isMaybeUniversityId(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUniversityId(query))
-	
-	private def queryMatches = {
-		profileService.findMembersByQuery(query, deptDao.allDepartments, userTypes, user.god)
+	private def singletonByUserType(option: Option[Member]) = option match {
+		case Some(member) => Seq(member) filter {userTypes contains _.userType}
+		case _ => Seq()
 	}
+	
+	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read, member)
+	
+	def usercodeMatches =
+		if (!isMaybeUsercode(query)) Seq()
+		else singletonByUserType(profileService.getMemberByUserId(query)) filter canRead
+	
+	def universityIdMatches = 
+		if (!isMaybeUniversityId(query)) Seq()
+		else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
 	
 	override def describe(d: Description) = d.property("query" -> query)
 
 }
 
-object TutorSearchCommand {
+object AbstractSearchProfilesCommand {
 	
 	/** The minimum length of the whole query */
 	val MinimumQueryLength = 3

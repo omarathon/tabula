@@ -22,22 +22,27 @@ import uk.ac.warwick.tabula.PermissionDeniedException
  */
 
 @Controller
-class AdminHome extends CourseworkController {
+@RequestMapping(Array("/admin/"))
+class AdminHomeController extends CourseworkController {
+		@Autowired var moduleService: ModuleAndDepartmentService = _
+	
+		@RequestMapping(method=Array(GET, HEAD))
+		def homeScreen(user: CurrentUser) = {
+		Mav("admin/home",
+			"ownedDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions))
+	}
+}
 
-	@Autowired var moduleService: ModuleAndDepartmentService = _
+@Controller
+@RequestMapping(value=Array("/admin/department/{dept}/"))
+class AdminDepartmentHomeController extends CourseworkController {
 
 	hideDeletedItems
 	
 	@ModelAttribute def command(@PathVariable("dept") dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
-
-	@RequestMapping(Array("/admin/"))
-	def homeScreen(user: CurrentUser) = {
-		Mav("admin/home",
-			"ownedDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions))
-	}
-
-	@RequestMapping(Array("/admin/department/{dept}/"))
+	
+	@RequestMapping(method=Array(GET, HEAD))
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val info = cmd.apply()
 		
@@ -45,9 +50,7 @@ class AdminHome extends CourseworkController {
 			"department" -> cmd.department,
 			"modules" -> info.modules,
 			"notices" -> info.notices)
-
 	}
-
 }
 
 class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
