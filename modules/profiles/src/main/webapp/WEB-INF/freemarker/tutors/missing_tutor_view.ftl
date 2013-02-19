@@ -22,7 +22,7 @@
 						</td>
 						<td>${student.groupName}</td>
 						<td>${student.yearOfStudy}</td>
-						<td>${student.route.name}</td>
+						<td><#if student.route?has_content>${student.route.name}</#if></td>
 					</tr>
 				</#list>
 			</tbody>
