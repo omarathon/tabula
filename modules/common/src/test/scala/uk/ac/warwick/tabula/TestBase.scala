@@ -137,7 +137,7 @@ trait TestHelpers {
 	  * :_* is used to pass varargs from one function to another
 	  * function that also takes varargs.
 	  */
-	def withArg[T](matcher: Matcher[T]*) = `with`(allOf(matcher: _*))
+	def withArg[A](matcher: Matcher[A]*) = `with`(allOf(matcher: _*))
 
 	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
 		try {
@@ -195,7 +195,7 @@ trait TestHelpers {
 	def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
 
 	
-	def containMatching[T](f: (T)=>Boolean) = org.scalatest.matchers.Matcher[Seq[T]] { (v:Seq[T]) =>
+	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[Seq[A]] { (v:Seq[A]) =>
 		org.scalatest.matchers.MatchResult(
     		v exists f,
     		"Contained a matching value",

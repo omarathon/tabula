@@ -10,10 +10,13 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.PersonalTutor
+import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 /**
  * Service providing access to members and profiles.
@@ -81,15 +84,14 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 	
 	def getPersonalTutor(student: Member): Option[Member] = {
-		val sprCode: String = student.sprCode
-		val currentRelationship = findCurrentRelationship(PersonalTutor, student.sprCode)
-		currentRelationship.flatMap { rel => getMemberByUniversityId(rel.agent) }
-/*		currentRelationship match {
-			case Some(rel) => {
-				getMemberByUniversityId(rel.agent)
+		student match {
+			case student: StudentMember => {
+				val sprCode = student.studyDetails.sprCode
+				val currentRelationship = findCurrentRelationship(PersonalTutor, sprCode)
+				currentRelationship.flatMap { rel => getMemberByUniversityId(rel.agent) }
 			}
-			case None => None
-		}*/
+			case _ => None
+		}
 	}
 	
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {

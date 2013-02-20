@@ -25,7 +25,7 @@ trait EventHandling extends Logging {
 	 * after or error. All of them should have the same eventid to
 	 * join them together (though they also have unique primary keys).
 	 */
-	def recordEvent[T](d: Describable[T])(f: => T): T =
+	def recordEvent[A](d: Describable[A])(f: => A): A =
 		d match {
 			case _: Unaudited => f // don't audit unaudited events!
 			case _ => {

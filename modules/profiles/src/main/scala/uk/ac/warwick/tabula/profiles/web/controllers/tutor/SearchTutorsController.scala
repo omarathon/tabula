@@ -9,7 +9,6 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.data.model.Staff
 
 @Controller
 class SearchTutorsController extends ProfilesController {

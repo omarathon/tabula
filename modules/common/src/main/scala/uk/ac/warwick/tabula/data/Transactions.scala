@@ -33,10 +33,10 @@ object Transactions extends TransactionAspectSupport {
 
 	/** Does some code in a transaction.
 	 */
-	def transactional[T](
+	def transactional[A](
 			readOnly: Boolean = false, 
 			propagation: Propagation = Propagation.REQUIRED
-		)(f: => T): T = {
+		)(f: => A): A = {
 
 		if (enabled) {
 				val attribute = new DefaultTransactionAttribute
@@ -52,16 +52,16 @@ object Transactions extends TransactionAspectSupport {
 	/** Similar to transactional but a bit more involved. Provides access
 	  * to the TransactionStatus.
 	  */
-	def useTransaction[T](
+	def useTransaction[A](
 			readOnly: Boolean = false,
 			propagation: Propagation = Propagation.REQUIRED
-		)(f: TransactionStatus => T) = {
+		)(f: TransactionStatus => A) = {
 
 		if (enabled) {
 			val template = new TransactionTemplate(getTransactionManager())
 			template.setReadOnly(readOnly)
 			template.setPropagationBehavior(propagation.value())
-			template.execute(new TransactionCallback[T] {
+			template.execute(new TransactionCallback[A] {
 				override def doInTransaction(status: TransactionStatus) = f(status)
 			})
 		} else {
@@ -70,7 +70,7 @@ object Transactions extends TransactionAspectSupport {
 
 	}
 
-	private def handle[T](f: => T, attribute: TransactionAttribute): T = {
+	private def handle[A](f: => A, attribute: TransactionAttribute): A = {
 		try {
 			createTransactionIfNecessary(getTransactionManager(), attribute, "Transactions.transactional()")
 			val result = f

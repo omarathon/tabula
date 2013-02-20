@@ -5,12 +5,13 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class DegreeType(val dbValue: String, @BeanProperty val description: String)
-case object Undergraduate extends DegreeType("UG", "Undergraduate")
-case object Postgraduate extends DegreeType("PG", "Postgraduate")
-case object InService extends DegreeType("IS", "In-Service")
-case object PGCE extends DegreeType("PGCE", "PGCE")
 
 object DegreeType {
+	case object Undergraduate extends DegreeType("UG", "Undergraduate")
+	case object Postgraduate extends DegreeType("PG", "Postgraduate")
+	case object InService extends DegreeType("IS", "In-Service")
+	case object PGCE extends DegreeType("PGCE", "PGCE")
+
 	def fromCode(code: String) = code match {
 	  	case Undergraduate.dbValue => Undergraduate
 	  	case Postgraduate.dbValue => Postgraduate

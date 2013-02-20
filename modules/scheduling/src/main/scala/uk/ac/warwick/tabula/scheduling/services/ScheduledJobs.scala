@@ -32,9 +32,9 @@ class ScheduledJobs {
 
 	var jobService = Wire.auto[JobService]
 	
-	def maintenanceGuard[T](fn: => T) = if (!maintenanceModeService.enabled) fn
+	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 	
-	def syncGuard[T](fn: => T) = if (fileSyncEnabled) fn
+	def syncGuard[A](fn: => A) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = maintenanceGuard {

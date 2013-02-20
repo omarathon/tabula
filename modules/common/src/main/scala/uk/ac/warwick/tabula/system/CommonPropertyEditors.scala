@@ -8,7 +8,7 @@ class CommonPropertyEditors extends PropertyEditorRegistrar {
 
 	// define a neater `register` method for P.E.R.
 	implicit def cleverRegistry(registry: PropertyEditorRegistry) = new {
-		def register[T](editor: PropertyEditor)(implicit m: Manifest[T]) =
+		def register[A](editor: PropertyEditor)(implicit m: Manifest[A]) =
 			registry.registerCustomEditor(m.erasure, editor)
 	}
 

@@ -12,6 +12,7 @@ import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.data.model.DegreeType
 import javax.annotation.Resource
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)
@@ -33,9 +34,11 @@ trait ModuleImporter {
 class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 
-	@Resource(name = "academicDataStore") var ads: DataSource = _
+	var ads = Wire[DataSource]("academicDataStore")
+	var sits = Wire[DataSource]("sitsDataSource")
+	var membership = Wire[DataSource]("membershipDataSource")
 
-	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(ads)
+	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(membership)
 	lazy val moduleInfoMappingQuery = new ModuleInfoMappingQuery(ads)
 	lazy val routeInfoMappingQuery = new RouteInfoMappingQuery(ads)
 
@@ -46,9 +49,18 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 
 object ModuleImporter {
 
-	final val GetDepartmentsSql = 
-		"""select d.name name, department_code code, f.name faculty from department d
-			join faculty f on f.faculty_code = d.faculty_code"""
+	final val GetDepartmentsSql = """
+		select 
+			d.department_name name, 
+			d.department_code code,
+			f.faculty_name faculty
+  
+		from cmsowner.uow_departments d 
+			join cmsowner.uow_faculties f
+				on d.faculty_code = f.faculty_code
+      
+		where d.department_code is not null
+		"""
 	final val GetModulesSql = 
         """select xcode code, name from (
           select substr(module_code,0,5) as xcode, max(modified_date) maxmod from module x

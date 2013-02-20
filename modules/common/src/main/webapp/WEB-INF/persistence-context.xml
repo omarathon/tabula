@@ -60,6 +60,20 @@
 		    <property name="password" value="${ads.db.password}"/>
 		</bean>
 		
+		<bean id="sitsDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+		    <property name="url" value="${sits.db.url}"/>
+		    <property name="username" value="${sits.db.username}"/>
+		    <property name="password" value="${sits.db.password}"/>
+		</bean>
+		
+		<bean id="membershipDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+		    <property name="url" value="${membership.db.url}"/>
+		    <property name="username" value="${membership.db.username}"/>
+		    <property name="password" value="${membership.db.password}"/>
+		</bean>
+		
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
 	    	<property name="nativeJdbcExtractor">
 	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
@@ -84,6 +98,22 @@
 		
 		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />
 		
+		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper">
+			<property name="membershipInterface">
+				<bean class="org.springframework.remoting.rmi.RmiProxyFactoryBean" autowire-candidate="false">
+					<property name="serviceUrl" value="${membership.rmi.serviceUrl}" />
+					<property name="serviceInterface" value="uk.ac.warwick.membership.MemberInterface" />
+				</bean>	
+			</property>
+			<property name="auth">
+				<bean class="uk.ac.warwick.membership.Auth" autowire-candidate="false">
+					<property name="serviceName" value="${membership.rmi.auth.serviceName}" />
+					<property name="userName" value="${membership.rmi.auth.username}" />
+					<property name="password" value="${membership.rmi.auth.password}" />
+				</bean>		
+			</property>
+		</bean>
+		
 	</beans>
 	
 	<beans profile="dev,production">	
@@ -103,6 +133,14 @@
 		   <property name="jndiName" value="java:/AcademicDS"/>
 	    </bean>
 	    
+	    <bean id="sitsDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		   <property name="jndiName" value="java:/SITSDS"/>
+	    </bean>
+	    
+	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		   <property name="jndiName" value="java:/MembershipDS"/>
+	    </bean>
+	    
 	</beans>
 	
 	<beans profile="test">
@@ -110,9 +148,10 @@
 		
 		<jdbc:embedded-database id="academicDataStore" />
 		
-		<!-- never read or written - just need a DataSource to exist -->
-    	<!-- <bean id="academicDataStore" class="uk.ac.warwick.tabula.system.UnusableDataSource" /> -->
+		<jdbc:embedded-database id="sitsDataSource" />
 		
+		<jdbc:embedded-database id="membershipDataSource" />
+			
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 		
 		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
@@ -126,6 +165,14 @@
 		<bean id="adsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="academicDataStore"
 			p:scripts="ads.sql" />
+			
+		<bean id="sitsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
+			p:dataSource-ref="sitsDataSource"
+			p:scripts="sits.sql" />
+			
+		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
+			p:dataSource-ref="membershipDataSource"
+			p:scripts="membership.sql" />
 		
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
@@ -133,6 +180,8 @@
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
 			<!-- <prop key="hibernate.show_sql">true</prop>  -->
 		</util:properties>
+		
+		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper" />
 		
 	</beans>
 

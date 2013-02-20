@@ -89,9 +89,9 @@ abstract class FormField extends GeneratedId {
 	 * has decided on, so integers come out as java.lang.Integer, and Int
 	 * won't match.
 	 */
-	protected def getProperty[T](name: String, default: T)(implicit m: Manifest[T]) =
+	protected def getProperty[A](name: String, default: A)(implicit m: Manifest[A]) =
 		propertiesMap.get(name) match {
-			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[T]
+			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[A]
 			case _ => default
 		}
 
@@ -114,11 +114,11 @@ abstract class FormField extends GeneratedId {
 
 }
 
-trait SimpleValue[T] { self: FormField =>
-	def value_=(value: T) { propertiesMap += "value" -> value }
-	def setValue(value: T) = value_=(value)
+trait SimpleValue[A] { self: FormField =>
+	def value_=(value: A) { propertiesMap += "value" -> value }
+	def setValue(value: A) = value_=(value)
 
-	def value: T = propertiesMap.getOrElse("value", null).asInstanceOf[T]
+	def value: A = propertiesMap.getOrElse("value", null).asInstanceOf[A]
 	def getValue() = value
 
 	def blankSubmissionValue = new StringSubmissionValue(this)

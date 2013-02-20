@@ -15,7 +15,7 @@ import org.apache.lucene.search.FieldDoc
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
  *  and specifically is only noticing new submission events.
  *  In the future it'll likely make sense to serve events of interest at whichever
- *  depth of Tabula we're looking from, and look directly at typed Activity[T] rather
+ *  depth of Tabula we're looking from, and look directly at typed Activity[A] rather
  *  than just Activity[AuditEvent]
  * */
 @Service

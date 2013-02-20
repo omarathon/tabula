@@ -8,7 +8,7 @@ import collection.JavaConverters._
  * this explicitly - the Daoisms trait adds a newQuery method
  * to Session which will return one of these.
  */
-class ScalaQuery[T](c: org.hibernate.Query) {
+class ScalaQuery[A](c: org.hibernate.Query) {
 	
 	def setString(name: String, value: String) = chainable { c.setString(name, value) }
 	def setEntity(name: String, entity: Any) = chainable { c.setEntity(name, entity) }
@@ -18,10 +18,10 @@ class ScalaQuery[T](c: org.hibernate.Query) {
     @inline private def chainable(fn: => Unit) = { fn; this }
 
     /** Returns a typed Seq of the results. */
-    def seq: Seq[T] = list.asScala
+    def seq: Seq[A] = list.asScala
 
     /** Returns a typed list of the results.*/
-    def list: java.util.List[T] = c.list().asInstanceOf[java.util.List[T]]
+    def list: java.util.List[A] = c.list().asInstanceOf[java.util.List[A]]
 
     def scroll() = c.scroll()
 
@@ -32,5 +32,5 @@ class ScalaQuery[T](c: org.hibernate.Query) {
     def untypedList: java.util.List[_] = c.list()
 
     /** Return Some(result), or None if no row matched. */
-    def uniqueResult: Option[T] = Option(c.uniqueResult().asInstanceOf[T])
+    def uniqueResult: Option[A] = Option(c.uniqueResult().asInstanceOf[A])
 }

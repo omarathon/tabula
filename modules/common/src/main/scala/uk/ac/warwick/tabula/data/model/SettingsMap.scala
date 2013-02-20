@@ -4,7 +4,7 @@ import org.hibernate.annotations.Type
 import javax.persistence._
 import scala.reflect.BeanProperty
 
-trait SettingsMap[T <: SettingsMap[T]] { self: T =>
+trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	@BeanProperty var settings: Map[String, Any] = Map()
@@ -24,7 +24,7 @@ trait SettingsMap[T <: SettingsMap[T]] { self: T =>
 		self
 	}
 	
-	def ++=(other: T) = {
+	def ++=(other: A) = {
 		settings ++= other.settings
 		self
 	}

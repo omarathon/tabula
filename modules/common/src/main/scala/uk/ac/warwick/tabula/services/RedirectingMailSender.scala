@@ -46,8 +46,8 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 		delegate.send(messageToSend)
 	}
 
-	implicit def ArrayOrEmpty[T: Manifest](a: Array[T]) = new {
-		def orEmpty: Array[T] = Option(a).getOrElse(Array.empty)
+	implicit def ArrayOrEmpty[A: Manifest](a: Array[A]) = new {
+		def orEmpty: Array[A] = Option(a).getOrElse(Array.empty)
 	}
 
 	override def send(simpleMessage: SimpleMailMessage): Future[Boolean] = send(createMessage(delegate) { message =>
