@@ -103,7 +103,7 @@
 			</#if>
 		</td>
 		<#if assignment.wordCountField??><td></td></#if>
-		<#if assignment.markingWorkflow??><td></td></#if>
+		<#if assignment.markingWorkflow??><td></td><td></td></#if>
 		
 		<#if hasOriginalityReport><td></td></#if>
 		
@@ -198,8 +198,9 @@
 				<col class="word-count" />
 			</#if>
 			<#if assignment.markingWorkflow??>
-				<#assign submissionColspan=submissionColspan+1 />
+				<#assign submissionColspan=submissionColspan+2 />
 				<col class="first-marker" />
+				<col class="second-marker" />
 			</#if>
 		</colgroup>
 		
@@ -248,6 +249,7 @@
 				</#if>
 				<#if assignment.markingWorkflow??>
 					<th class="sortable">First Marker</th>
+					<th class="sortable">Second Marker</th>
 				</#if>
 				
 				<#if hasOriginalityReport>
@@ -350,6 +352,9 @@
 					<#if assignment.markingWorkflow??>
 						<td>
 							<#if submission.assignment??>${submission.firstMarker!""}</#if>
+						</td>
+						<td>
+							<#if submission.assignment??>${submission.secondMarker!""}</#if>
 						</td>
 					</#if>
 					
