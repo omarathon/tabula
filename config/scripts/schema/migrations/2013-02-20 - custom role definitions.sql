@@ -20,19 +20,19 @@ create table RoleOverride (
 
 create table GrantedRole (
 	id NVARCHAR2(255) NOT NULL,
-	USERID NVARCHAR2(100) NOT NULL,
-	custom_base_role_id NVARCHAR2(255),
-	builtInBaseRoleDefinition NVARCHAR2(255),
+	usergroup_id nvarchar2(255),
+	custom_role_id NVARCHAR2(255),
+	builtInRoleDefinition NVARCHAR2(255),
 	scope_type NVARCHAR2(255) NOT NULL,
 	scope_id NVARCHAR2(255) NOT NULL,
 	CONSTRAINT "GrantedRole_PK" PRIMARY KEY ("ID")
 );
 
-CREATE INDEX "IDX_GrantedRole_USERID" ON GrantedRole("USERID");
+CREATE INDEX IDX_GrantedRole_SCOPE on GrantedRole("SCOPE_TYPE", "SCOPE_ID");
 
 create table GrantedPermission (
 	id NVARCHAR2(255) NOT NULL,
-	USERID NVARCHAR2(100) NOT NULL,
+	usergroup_id nvarchar2(255),
 	permission NVARCHAR2(255) NOT NULL,
 	overrideType NUMBER(1, 0) default 0,
 	scope_type NVARCHAR2(255) NOT NULL,
@@ -40,4 +40,4 @@ create table GrantedPermission (
 	CONSTRAINT "GrantedPermission_PK" PRIMARY KEY ("ID")
 );
 
-CREATE INDEX "IDX_GrantedPermission_USERID" ON GrantedPermission("USERID");
+CREATE INDEX IDX_GrantedPermission_SCOPE on grantedpermission("SCOPE_TYPE", "SCOPE_ID");

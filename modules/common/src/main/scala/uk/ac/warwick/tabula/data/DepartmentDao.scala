@@ -12,6 +12,7 @@ import collection.JavaConverters._
 trait DepartmentDao {
 	def allDepartments: Seq[Department]
 	def getByCode(code: String): Option[Department]
+	def getById(id: String): Option[Department]
 	def save(department: Department)
 	def getByOwner(user: String): Seq[Department]
 }
@@ -26,6 +27,8 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 	// Fetches modules eagerly
 	def getByCode(code: String) = option[Department](
 		session.createQuery("from Department d left join fetch d.modules where d.code = :code").setString("code", code).uniqueResult)
+		
+	def getById(id: String) = getById[Department](id)
 
 	def save(department: Department) = session.saveOrUpdate(department)
 

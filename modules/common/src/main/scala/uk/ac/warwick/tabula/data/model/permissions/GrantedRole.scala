@@ -1,24 +1,25 @@
 package uk.ac.warwick.tabula.data.model.permissions
 import scala.reflect.BeanProperty
-
 import org.hibernate.annotations.Columns
 import org.hibernate.annotations.Type
-
 import javax.persistence._
-
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 @Entity
-class GrantedRole extends GeneratedId {
+class GrantedRole extends GeneratedId with PostLoadBehaviour {
 	
-	@BeanProperty var userId: String = _
+	@OneToOne(cascade=Array(CascadeType.ALL))
+	@JoinColumn(name="usergroup_id")
+	@BeanProperty var users: UserGroup = new UserGroup
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "custom_base_role_id")
+	@JoinColumn(name = "custom_role_id")
 	@BeanProperty var customRoleDefinition: CustomRoleDefinition = _
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType")
@@ -47,6 +48,16 @@ class GrantedRole extends GeneratedId {
 	))
 	@BeanProperty var scope: PermissionsTarget = _
 	
-	def build() = RoleBuilder.build(roleDefinition, Some(scope))
+	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
+	
+	// If hibernate sets users to null, make a new empty usergroup
+	override def postLoad {
+		ensureUsers
+	}
+
+	def ensureUsers = {
+		if (users == null) users = new UserGroup
+		users
+	}
 
 }

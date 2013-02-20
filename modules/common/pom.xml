@@ -472,6 +472,12 @@
 			<artifactId>ehcache-core</artifactId>
 			<version>1.7.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.8</version>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
@@ -490,12 +496,6 @@
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-test-framework</artifactId>
 			<version>${org.apache.lucene.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.8</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

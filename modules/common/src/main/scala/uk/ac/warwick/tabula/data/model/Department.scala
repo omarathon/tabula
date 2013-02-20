@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
@@ -31,6 +32,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var markingWorkflows:JList[MarkingWorkflow] = ArrayList()
+	
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = List()
 	
 	/* Legacy Properties. Remove these once the settings map is completely in use */
 	@BeanProperty @Column(name="collectFeedbackRatings") var collectFeedbackRatingsLegacy:Boolean = false

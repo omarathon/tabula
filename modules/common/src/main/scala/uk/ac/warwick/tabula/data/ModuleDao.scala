@@ -14,6 +14,7 @@ trait ModuleDao {
 	def allModules: Seq[Module]
 	def saveOrUpdate(module: Module)
 	def getByCode(code: String): Option[Module]
+	def getById(id: String): Option[Module]
 	def findByParticipant(userId: String): Seq[Module]
 	def findByParticipant(userId: String, dept: Department): Seq[Module]
 }
@@ -31,6 +32,8 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def getByCode(code: String) = option[Module] {
 		session.createQuery("from Module m where code = :code").setString("code", code).uniqueResult
 	}
+	
+	def getById(id: String) = getById[Module](id)
 
 	def findByParticipant(userId: String): Seq[Module] = {
 		session.createQuery("""select m from Module m 

@@ -42,7 +42,7 @@ trait BuiltInRoleDefinition extends RoleDefinition {
 		(scopelessPermissions map { _ -> None })
 		
 	def subRoles(scope: Option[PermissionsTarget]) =
-		subRoleDefinitions map { RoleBuilder.build(_, scope) }
+		subRoleDefinitions map { defn => RoleBuilder.build(defn, scope, defn.getName) }
 	
 	/* We need to override equals() here because under heavy load, the class loader will 
 	 * (stupidly) return a different instance of the case object, which fails the equality

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.hibernate.HibernateException
 import java.sql.ResultSet
 import java.sql.PreparedStatement
+import uk.ac.warwick.tabula.helpers.ReflectionHelper
 
 /** 
  * Essentially this is a catch-all session lookup. We can give it a 
@@ -47,7 +48,7 @@ class PermissionsTargetUserType extends CompositeUserType {
 			val shortName = StandardBasicTypes.STRING.nullSafeGet(resultSet, names(0))
 			val id = StandardBasicTypes.STRING.nullSafeGet(resultSet, names(1))
 			if (shortName == null || id == null) null
-			else session.internalLoad(shortName, id, false, false)
+			else session.internalLoad(ReflectionHelper.allPermissionTargets.find(_.getSimpleName == shortName).get.getName, id, false, false)
 		}
 	
 	def nullSafeSet(statement: PreparedStatement, value: Object, index: Int, session: SessionImplementor) = value match {

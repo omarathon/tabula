@@ -34,7 +34,7 @@ class CustomRoleDefinition extends RoleDefinition with GeneratedId with Permissi
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType")
 	@BeanProperty var builtInBaseRoleDefinition: BuiltInRoleDefinition = _
 	
-	def baseRoleDefinition = Option(customBaseRoleDefinition) getOrElse builtInBaseRoleDefinition
+	def baseRoleDefinition: RoleDefinition = Option(customBaseRoleDefinition) getOrElse builtInBaseRoleDefinition
 	def baseRoleDefinition_(definition: RoleDefinition) = definition match {
 		case customDefinition: CustomRoleDefinition => {
 			customBaseRoleDefinition = customDefinition
@@ -57,10 +57,16 @@ class CustomRoleDefinition extends RoleDefinition with GeneratedId with Permissi
 	def permissionsParents = 
 		Seq(Option(department)).flatten
 		
-	// TODO
-	def permissions(scope: Option[PermissionsTarget]) = ListMap()
+	def permissions(scope: Option[PermissionsTarget]) = {
+		val basePermissions = baseRoleDefinition.permissions(scope)
 		
-	// TODO
-	def subRoles(scope: Option[PermissionsTarget]) = Set()
+		val (additionOverrides, removalOverrides) = overrides.partition(_.overrideType)
+		val additions = additionOverrides.map { _.permission -> scope }
+		val removals = removalOverrides.map { _.permission }
+		
+		(basePermissions ++ additions) -- removals
+	}
+		
+	def subRoles(scope: Option[PermissionsTarget]) = baseRoleDefinition.subRoles(scope)
 
 }
