@@ -5,14 +5,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.profiles.web.Routes
 
-class TutorChangeNotifier(student: Member, oldTutor: Member, notifyTutee: Boolean, notifyOldTutor: Boolean, notifyNewTutor: Boolean)
+class TutorChangeNotifier(student: Member, oldTutor: Option[Member], notifyTutee: Boolean, notifyOldTutor: Boolean, notifyNewTutor: Boolean)
 		extends UnicodeEmails with Public with FreemarkerRendering {
 
 	implicit var freemarker = Wire.auto[Configuration]
@@ -21,7 +20,6 @@ class TutorChangeNotifier(student: Member, oldTutor: Member, notifyTutee: Boolea
 	val replyAddress = Wire.property("${mail.noreply.to}")
 	val fromAddress = Wire.property("${mail.exceptions.to}")
 	var memberDao = Wire.auto[MemberDao]
-	val userLookup = Wire.auto[UserLookupService]
 	
 	val newTutor = profileService.getPersonalTutor(student).getOrElse(throw new IllegalStateException("Couldn't find database information for new tutor for student " + student.universityId))
 
@@ -40,11 +38,11 @@ class TutorChangeNotifier(student: Member, oldTutor: Member, notifyTutee: Boolea
 					newTutor, 
 					Routes.profile.view(student))
 		}
-		if (notifyOldTutor) {
+		if (notifyOldTutor && oldTutor.isDefined) {
 			logger.debug("Notifying old tutor: " + oldTutor)
 			mailSender send messageFor(
 					"/WEB-INF/freemarker/emails/old_tutor_notification.ftl", 
-					oldTutor.email, 
+					oldTutor.get.email, 
 					student, 
 					oldTutor, 
 					newTutor, 
@@ -62,7 +60,7 @@ class TutorChangeNotifier(student: Member, oldTutor: Member, notifyTutee: Boolea
 		}
 	}
 
-	def messageFor(template: String, toEmail: String, tutee: Member, oldTutor: Member, newTutor: Member, path: String) 
+	def messageFor(template: String, toEmail: String, tutee: Member, oldTutor: Option[Member], newTutor: Member, path: String) 
 			= createMessage(mailSender) { message =>
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
