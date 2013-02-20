@@ -6,6 +6,9 @@
 				<#if !profile.personalTutor?string?starts_with("Not ")>
 					<span class="muted">External to Warwick</span>
 				</#if>
+				<#if can.do("Profiles.PersonalTutor.Update", profile)>
+					<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor studentUniId=profile.universityId />"><i class="icon-edit"></i></a>
+				</#if>
 			</p>
 		<#else>
 			<div class="tutor">
