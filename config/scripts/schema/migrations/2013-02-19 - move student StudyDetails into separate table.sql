@@ -11,3 +11,6 @@ CREATE TABLE STUDYDETAILS (
 );
 
 ALTER TABLE STUDYDETAILS ADD CONSTRAINT "STUDYDETAILS_FK" FOREIGN KEY (UNIVERSITYID) REFERENCES MEMBER(UNIVERSITYID);
+
+insert into studydetails (universityid, sprcode, sitscoursecode, route_id, study_department_id)
+(select universityid, sprcode, sitscoursecode, route_id, study_department_id from member where usertype = 'S');
