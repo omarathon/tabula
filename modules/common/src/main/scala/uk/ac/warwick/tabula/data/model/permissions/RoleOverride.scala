@@ -21,8 +21,8 @@ class RoleOverride extends GeneratedId with PermissionsTarget {
 	@BeanProperty var permission: Permission = _
 	
 	type OverrideType = Boolean
-	val Allow: OverrideType = true
-	val Deny: OverrideType = false
+	@Transient val Allow: OverrideType = true
+	@Transient val Deny: OverrideType = false
 	
 	@BeanProperty var overrideType: OverrideType = _
 	

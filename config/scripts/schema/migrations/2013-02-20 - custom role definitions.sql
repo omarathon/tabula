@@ -13,10 +13,13 @@ create index CustomRoleDefinition_customId on CustomRoleDefinition(custom_base_r
 
 create table RoleOverride (
 	id NVARCHAR2(255) NOT NULL,
+	custom_role_definition_id NVARCHAR2(255),
 	permission NVARCHAR2(255) NOT NULL,
 	overrideType NUMBER(1, 0) default 0,
 	CONSTRAINT "RoleOverride_PK" PRIMARY KEY ("ID")
 );
+
+create index RoleOverride_CustomRole on RoleOverride(custom_role_definition_id);
 
 create table GrantedRole (
 	id NVARCHAR2(255) NOT NULL,
