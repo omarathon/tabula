@@ -41,7 +41,7 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 		if (!currentTutor.isDefined || !currentTutor.get.universityId.equals(tutorUniId)) {
 			// it's a real change
 			val oldTutor = currentTutor
-			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
+			val rel = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutorUniId)
 			val tutorChangeNotifier = new TutorChangeNotifier(student, oldTutor, notifyTutee, notifyOldTutor, notifyNewTutor)
 			tutorChangeNotifier.sendNotifications
 			Some(rel)
