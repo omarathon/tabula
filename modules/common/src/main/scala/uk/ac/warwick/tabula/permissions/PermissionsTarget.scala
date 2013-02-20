@@ -24,6 +24,6 @@ trait PermissionsTarget {
 	 */
 	def permissionsParents: Seq[PermissionsTarget]
 	
-	def id: Any
+	def id: String
 
 }

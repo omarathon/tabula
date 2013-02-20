@@ -1,0 +1,31 @@
+package uk.ac.warwick.tabula.data.model.permissions
+
+import scala.reflect.BeanProperty
+
+import org.hibernate.annotations.Type
+
+import javax.persistence._
+import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
+@Entity
+class RoleOverride extends GeneratedId with PermissionsTarget {
+	
+	// optional link to some CustomRoleDefinition
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "custom_role_definition_id")
+	@BeanProperty var customRoleDefinition: CustomRoleDefinition = _
+	
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionUserType")
+	@BeanProperty var permission: Permission = _
+	
+	type OverrideType = Boolean
+	val Allow: OverrideType = true
+	val Deny: OverrideType = false
+	
+	@BeanProperty var overrideType: OverrideType = _
+	
+	def permissionsParents = Seq(Option(customRoleDefinition)).flatten
+
+}
