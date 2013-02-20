@@ -91,7 +91,5 @@ class SendSubmissionNotifyCommand (
 		d.assignment(assignment)
 		.submission(submission)
 	}
-	
-	
-	
+
 }

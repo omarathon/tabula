@@ -4,8 +4,11 @@ import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+
 import javax.persistence.Entity
+import javax.persistence.NamedQueries
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -77,7 +80,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	def getRegisteredModules(universityId: String): Seq[Module] = transactional(readOnly = true) {
 		memberDao.getRegisteredModules(universityId)
 	}
-	
+
 	def findCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = transactional() {
 		memberDao.getCurrentRelationship(relationshipType, targetSprCode)
 	}

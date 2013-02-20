@@ -14,26 +14,40 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
+import uk.ac.warwick.tabula.profiles.helpers.TutorChangeNotifier
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.StudentMember
 
-class EditTutorCommand(val student: StudentMember) extends Command[StudentRelationship] {
+class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] {
 
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
-	
+
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
-	@BeanProperty var save: String = null	
+	@BeanProperty var save: String = null
+	@BeanProperty var notifyTutee: Boolean = false
+	@BeanProperty var notifyOldTutor: Boolean = false
+	@BeanProperty var notifyNewTutor: Boolean = false
 
 	var profileService = Wire.auto[ProfileService]
-	
-	def currentTutor = profileService.getPersonalTutor(student)
-	
-	def applyInternal: StudentRelationship = {
-		profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutorUniId)	
-	}
 
+	def currentTutor = profileService.getPersonalTutor(student).getOrElse(
+			throw new IllegalStateException("Can't find database information for current tutor for " + student.universityId))
+
+	def applyInternal = {
+		if (!currentTutor.universityId.equals(tutorUniId)) {
+			// it's a real change
+			val oldTutor = currentTutor
+			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
+			val tutorChangeNotifier = new TutorChangeNotifier(student, oldTutor, notifyTutee, notifyOldTutor, notifyNewTutor)
+			tutorChangeNotifier.sendNotifications
+			Some(rel)
+		} else {
+			None
+		}
+	}
+	
 	override def describe(d: Description) = d.property("student ID" -> studentUniId).property("new tutor ID" -> tutorUniId)
 }
 
@@ -53,7 +67,8 @@ class EditTutorController extends BaseController {
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> cmd.currentTutor
+			"tutorToDisplay" -> cmd.currentTutor,
+			"displayOptionToSave" -> false
 		)
 	}
 	
@@ -66,7 +81,8 @@ class EditTutorController extends BaseController {
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
 			"tutorToDisplay" -> pickedTutor,
-			"pickedTutor" -> pickedTutor
+			"pickedTutor" -> pickedTutor,
+			"displayOptionToSave" -> !cmd.currentTutor.universityId.equals(cmd.tutorUniId)
 		)
 	}	
 
@@ -81,7 +97,8 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 
-			"tutorToDisplay" -> cmd.currentTutor
+			"tutorToDisplay" -> cmd.currentTutor,
+			"displayOptionToSave" -> false
 		)
 	}
 }

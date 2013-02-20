@@ -15,6 +15,32 @@
 	<#assign students=status.actualValue />
 	<#assign noMarks = markingCompletedCommand.noMarks />
 	<#assign noFeedback = markingCompletedCommand.noFeedback />
+	<#assign releasedFeedback = markingCompletedCommand.releasedFeedback />
+
+	<#if releasedFeedback?has_content>
+		<div class="alert">
+			<a href="" class="released-feedback"><@fmt.p (releasedFeedback?size ) "submission" /></a>
+			<#if markingCompletedCommand.releasedFeedback?size == 1>
+				has already been marked as completed. This will be ignored.
+			<#else>
+				have already been marked as completed. These will be ignored.
+			</#if>
+			<div class="hidden released-feedback-list">
+				<ul><#list releasedFeedback as markerFeedback>
+					<li>${markerFeedback.feedback.universityId}</li>
+				</#list></ul>
+			</div>
+			<script>
+				var listHtml = jQuery(".released-feedback-list").html();
+				jQuery(".released-feedback").on('click',function(e){e.preventDefault()})
+				jQuery(".released-feedback").tooltip({
+					html: true,
+					placement: 'right',
+					title: listHtml
+				});
+			</script>
+		</div>
+	</#if>
 	<#if (noMarks?size > 0) >
 		<div class="alert">
 			<#if (noMarks?size > 1)>
@@ -36,7 +62,7 @@
 		</div>
 	</#if>
 	<p>
-		<strong><@fmt.p (students?size) "student" /></strong> submissions will be listed as completed. Note that you will not be able
+		<strong><@fmt.p (students?size - releasedFeedback?size) "student" /></strong> submissions will be listed as completed. Note that you will not be able
 		to make any further changes to the marks or feedback associated with these submissions after this point. If there are
 		still changes that have to be made for these submission then click cancel to return to the feedback list.
 	</p>

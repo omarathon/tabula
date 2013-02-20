@@ -5,17 +5,22 @@
 		<#include "form.ftl" />
 	
 		<section class="tutor-edit">
-			<#if pickedTutor??>
+			<#if displayOptionToSave>
 				<hr class="full-width">
-				<br />
-	
 				<@f.form 
 					id="saveTutor"
 					method="post" 
 					action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
-					commandName="searchTutorCommand" 
+					commandName="editTutorCommand" 
 					class="form-horizontal">
-					
+
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<@f.checkbox path="notifyTutee" value="true" /> Notify tutee of change<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<@f.checkbox path="notifyOldTutor" value="true" /> Notify old tutor of change<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<@f.checkbox path="notifyNewTutor" value="true" /> Notify new tutor of change
+					<br />
 					<input id="save" name="save" type="hidden" value="true" />
 					<div style="text-align:right">
 						<button type="submit" class="btn btn-primary">Save</button
@@ -24,12 +29,10 @@
 
 			</#if>
 		</section>
-		
+
 	</#if>
-	<br />
-	<br />
 	<section class="tutor-edit-return">
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="<@routes.profile_by_id studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
 	</section>
 </#escape>

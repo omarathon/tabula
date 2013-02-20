@@ -307,7 +307,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}
 
 	// returns feedback for a specified student
-	def findFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
+	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
+
+	// returns feedback for a specified student
+	def findFullFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
@@ -374,7 +377,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
 		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) => p._2.includes(submission.userId)}
+			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
+			}
 			mapEntry match {
 				case Some((markerId, students)) => Some(markerId)
 				case _ => None
@@ -388,6 +393,19 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 				}
 			}
 			case None => None
+		}
+		case _ => None
+	}
+
+	def getStudentsSecondMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+		case SeenSecondMarking =>  {
+			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+				p._2.includes(submission.userId) && markingWorkflow.secondMarkers.includes(p._1)
+			}
+			mapEntry match {
+				case Some((markerId, students)) => Some(markerId)
+				case _ => None
+			}
 		}
 		case _ => None
 	}
