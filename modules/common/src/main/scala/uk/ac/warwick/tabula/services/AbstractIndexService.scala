@@ -153,7 +153,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 
 		// Reopen the index reader periodically, else it won't notice changes.
 		executor.scheduleAtFixedRate(Runnable {
-			//logger.debug("Trying to reopen index")
+			logger.debug("Trying to reopen index")
 			try reopen catch { case e => logger.error("Index service reopen failed", e) }
 			try prune catch { case e => logger.error("Pruning old searchers failed", e) }
 		}, 20, 20, TimeUnit.SECONDS)
@@ -187,7 +187,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	 * subsequent searches see the results of recent index changes.
 	 */
 	private def reopen = {
-		//logger.debug("Reopening index")
+		logger.debug("Reopening index")
 		
 		initialiseSearching
 		if (searcherManager != null) searcherManager.maybeRefresh
