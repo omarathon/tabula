@@ -7,6 +7,7 @@ case class Marker(assignment: Assignment) extends BuiltInRole(assignment) {
 	
 	GrantsPermissionFor(assignment,
 		Feedback.Create,
+		Marks.Create,
 		Submission.Read
 	)
 

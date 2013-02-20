@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{AppContextTestBase, TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.UserLookupService
+import org.springframework.transaction.annotation.Transactional
 
-class AddMarksCommandTest extends TestBase with Mockito {
+class AddMarksCommandTest extends AppContextTestBase with Mockito {
 
 	EventHandling.enabled = false
 	
@@ -15,7 +14,8 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	 * Check that validation marks an empty mark as an invalid row
 	 * so that the apply method skips it.
 	 */
-	@Test
+
+	@Transactional @Test
 	def emptyMarkField {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
@@ -44,7 +44,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		/**
 	 * Check that validation allows either mark or grade to be non-empty
 	 */
-	@Test
+		@Transactional @Test
 	def gradeButEmptyMarkField {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user

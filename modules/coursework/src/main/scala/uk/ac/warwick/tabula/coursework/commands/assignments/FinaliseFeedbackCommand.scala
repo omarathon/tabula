@@ -34,6 +34,10 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 		val parent = markerFeedback.feedback
 		parent.actualGrade = markerFeedback.grade
 		parent.actualMark = markerFeedback.mark
+
+		// erase any existing attachments - these will be replaced
+		parent.clearAttachments()
+
 		markerFeedback.attachments.foreach(parent.addAttachment(_))
 		parent
 	}
