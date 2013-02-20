@@ -1,14 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
-import javax.persistence.Entity
-import javax.persistence.NamedQueries
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
