@@ -32,11 +32,13 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 
 	var profileService = Wire.auto[ProfileService]
 
-	def currentTutor = profileService.getPersonalTutor(student).getOrElse(
+	def currentTutor = profileService.getPersonalTutor(student)
+	
+/*	def currentTutor = profileService.getPersonalTutor(student).getOrElse(
 			throw new IllegalStateException("Can't find database information for current tutor for " + student.universityId))
-
+*/
 	def applyInternal = {
-		if (!currentTutor.universityId.equals(tutorUniId)) {
+		if (!currentTutor.isDefined || !currentTutor.get.universityId.equals(tutorUniId)) {
 			// it's a real change
 			val oldTutor = currentTutor
 			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
@@ -63,37 +65,32 @@ class EditTutorController extends BaseController {
 	def editTutorCommand(@PathVariable("student") student: StudentMember) = new EditTutorCommand(student)
 	
 	// initial form display
-	@RequestMapping(params=Array("!tutorUniId"))
-	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
-		Mav("tutor/edit/view", 
+	@RequestMapping(params = Array("!tutorUniId"))
+	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
+		Mav("tutor/edit/view",
 			"studentUniId" -> cmd.student.universityId,
 			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false
-		)
+			"displayOptionToSave" -> false)
 	}
-	
+
 	// now we've got a tutor id to display, but it's not time to save it yet
-	@RequestMapping(params=Array("tutorUniId", "!save"))
-	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
+	@RequestMapping(params = Array("tutorUniId", "!save"))
+	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
-		
-		Mav("tutor/edit/view", 
+
+		Mav("tutor/edit/view",
 			"studentUniId" -> cmd.studentUniId,
 			"tutorToDisplay" -> pickedTutor,
 			"pickedTutor" -> pickedTutor,
-			"displayOptionToSave" -> !cmd.currentTutor.universityId.equals(cmd.tutorUniId)
-		)
-	}	
+			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.universityId.equals(cmd.tutorUniId)))
+	}
 
 	@RequestMapping(params=Array("tutorUniId", "save=true"), method=Array(POST))
 	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val student = cmd.student
 		
-		if (cmd.save.equals("true")) {
-			val rel = cmd.apply()
-		}
-		else throw new IllegalStateException("form param save not set as expected")
+		val rel = cmd.apply()
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 

@@ -20,7 +20,7 @@ import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
  */
 abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifest] extends UserType {
 
-	// Store information about what T is.
+	// Store information about what A is.
 	protected val m: ClassManifest[A] = classManifest[A]
 	protected val vm: ClassManifest[B] = classManifest[B]
 
@@ -49,7 +49,7 @@ abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifes
 	override def returnedClass = m.erasure
 
 	override def isMutable = false
-	override def equals(x: Object, y: Object) = if (x == null) false else x.equals(y)
+	override def equals(x: Object, y: Object) = x == y
 	override def hashCode(x: Object) = Option(x).getOrElse("").hashCode
 	override def deepCopy(x: Object) = x
 	override def replace(original: Object, target: Object, owner: Object) = original
