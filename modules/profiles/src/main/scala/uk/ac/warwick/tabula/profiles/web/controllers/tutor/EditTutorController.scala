@@ -27,9 +27,9 @@ class EditTutorCommand(val student: Member) extends Command[Option[StudentRelati
 	@BeanProperty var studentUniId: String = student.getUniversityId
 	@BeanProperty var tutorUniId: String = null
 	@BeanProperty var save: String = null
-	@BeanProperty var notifyTutee: String = null
-	@BeanProperty var notifyOldTutor: String = null
-	@BeanProperty var notifyNewTutor: String = null
+	@BeanProperty var notifyTutee: Boolean = false
+	@BeanProperty var notifyOldTutor: Boolean = false
+	@BeanProperty var notifyNewTutor: Boolean = false
 
 	var profileService = Wire.auto[ProfileService]
 
@@ -39,9 +39,9 @@ class EditTutorCommand(val student: Member) extends Command[Option[StudentRelati
 	def applyInternal = {
 		if (!currentTutor.universityId.equals(tutorUniId)) {
 			// it's a real change
-			val oldTutorUniId = currentTutor.universityId
+			val oldTutor = currentTutor
 			val rel = profileService.saveStudentRelationship(PersonalTutor, student.sprCode, tutorUniId)
-			val tutorChangeNotifier = new TutorChangeNotifier(studentUniId, oldTutorUniId, notifyTutee, notifyOldTutor, notifyNewTutor)
+			val tutorChangeNotifier = new TutorChangeNotifier(student, oldTutor, notifyTutee, notifyOldTutor, notifyNewTutor)
 			tutorChangeNotifier.sendNotifications
 			Some(rel)
 		} else {
@@ -68,7 +68,8 @@ class EditTutorController extends BaseController {
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> cmd.currentTutor
+			"tutorToDisplay" -> cmd.currentTutor,
+			"displayOptionToSave" -> false
 		)
 	}
 	
@@ -76,19 +77,13 @@ class EditTutorController extends BaseController {
 	@RequestMapping(params=Array("tutorUniId", "!save"))
 	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 
-		val displayOptionToSave = 
-				if (cmd.currentTutor.universityId.equals(cmd.tutorUniId)) 
-					null
-				else
-					"true"
-					
 		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId,
 			"tutorToDisplay" -> pickedTutor,
 			"pickedTutor" -> pickedTutor,
-			"displayOptionToSave" -> displayOptionToSave
+			"displayOptionToSave" -> !cmd.currentTutor.universityId.equals(cmd.tutorUniId)
 		)
 	}	
 
@@ -104,7 +99,8 @@ class EditTutorController extends BaseController {
 		
 		Mav("tutor/edit/view", 
 			"studentUniId" -> cmd.studentUniId, 
-			"tutorToDisplay" -> cmd.currentTutor
+			"tutorToDisplay" -> cmd.currentTutor,
+			"displayOptionToSave" -> false
 		)
 	}
 }

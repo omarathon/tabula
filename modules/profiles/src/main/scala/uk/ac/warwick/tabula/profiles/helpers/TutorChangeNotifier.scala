@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 
-class TutorChangeNotifier(studentUniId: String, oldTutorUniId: String, notifyTutee: String, notifyOldTutor: String, notifyNewTutor: String)
+class TutorChangeNotifier(student: Member, oldTutor: Member, notifyTutee: Boolean, notifyOldTutor: Boolean, notifyNewTutor: Boolean)
 		extends UnicodeEmails with Public with FreemarkerRendering {
 
 	implicit var freemarker = Wire.auto[Configuration]
@@ -22,34 +22,32 @@ class TutorChangeNotifier(studentUniId: String, oldTutorUniId: String, notifyTut
 	var memberDao = Wire.auto[MemberDao]
 	val userLookup = Wire.auto[UserLookupService]
 	
-	val student = profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Couldn't find database information for student " + studentUniId))
-	val oldTutor = profileService.getMemberByUniversityId(oldTutorUniId).getOrElse(throw new IllegalStateException("Couldn't find database information for previous tutor for student " + studentUniId))
-	val newTutor = profileService.getPersonalTutor(student).getOrElse(throw new IllegalStateException("Couldn't find database information for new tutor for student " + studentUniId))
+	val newTutor = profileService.getPersonalTutor(student).getOrElse(throw new IllegalStateException("Couldn't find database information for new tutor for student " + student.universityId))
 
 	logger.debug("Old tutor: " + oldTutor)
 	logger.debug("New tutor: " + newTutor)
 	logger.debug("Student: " + student)
 
 	def sendNotifications() = {
-		if (notifyTutee != null && notifyTutee.toBoolean) {
+		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)			
 			mailSender send messageFor(
 					"/WEB-INF/freemarker/emails/tutor_change_tutee_notification.ftl", 
-					getUserEmail(student.universityId), 
+					student.email, 
 					student, oldTutor, newTutor)
 		}
-		if (notifyOldTutor != null && notifyOldTutor.toBoolean) {
+		if (notifyOldTutor) {
 			logger.debug("Notifying old tutor: " + oldTutor)
 			mailSender send messageFor(
 					"/WEB-INF/freemarker/emails/old_tutor_notification.ftl", 
-					getUserEmail(oldTutor.universityId), 
+					oldTutor.email, 
 					student, oldTutor, newTutor)
 		}
-		if (notifyNewTutor != null && notifyNewTutor.toBoolean) {
+		if (notifyNewTutor) {
 			logger.debug("Notifying new tutor: " + newTutor)
 			mailSender send messageFor(
 					"/WEB-INF/freemarker/emails/new_tutor_notification.ftl", 
-					getUserEmail(newTutor.universityId), 
+					newTutor.email, 
 					student, oldTutor, newTutor)
 		}
 	}
@@ -66,8 +64,4 @@ class TutorChangeNotifier(studentUniId: String, oldTutorUniId: String, notifyTut
 			"newTutor" -> newTutor
 		)))
 	}	
-	
-	def getUserEmail(warwickUniId: String): String = {
-		userLookup.getUserByWarwickUniId(warwickUniId).getEmail
-	}
 }
