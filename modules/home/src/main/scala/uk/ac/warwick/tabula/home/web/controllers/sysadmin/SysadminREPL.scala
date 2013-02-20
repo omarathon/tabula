@@ -65,14 +65,14 @@ class SysadminREPL extends BaseController with BeanFactoryAware {
  * Implements a Java Map that only has a working get() method, to allow
  * you to expose some collection of objects as a String-keyed map.
  */
-abstract class MapAccessor[T] extends JMap[String, T] {
-	def fetch(key: String): T
+abstract class MapAccessor[A] extends JMap[String, A] {
+	def fetch(key: String): A
 	override def get(key: Any) = fetch(key.asInstanceOf[String])
-	override def put(key: String, value: T) = throw strop
+	override def put(key: String, value: A) = throw strop
 	override def keySet = throw strop
 	override def entrySet = throw strop
 	override def values = throw strop
-	override def putAll(map: JMap[_ <: String, _ <: T]) = throw strop
+	override def putAll(map: JMap[_ <: String, _ <: A]) = throw strop
 	override def size = 1
 	override def isEmpty = false
 	override def clear = throw strop
@@ -88,7 +88,7 @@ object MapAccessor {
 	 * Creates a MapAccessor that uses the given function to resolve
 	 * the string to an object.
 	 */
-	def apply[T](fn: String => T) = new MapAccessor[T] {
+	def apply[A](fn: String => A) = new MapAccessor[A] {
 		override def fetch(id: String) = fn(id)
 	}
 }

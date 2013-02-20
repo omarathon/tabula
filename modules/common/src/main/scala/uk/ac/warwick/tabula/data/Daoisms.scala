@@ -47,8 +47,8 @@ trait Daoisms {
 	}
 
 	class NiceQueryCreator(session: Session) {
-		def newCriteria[T](implicit m: Manifest[T]) = new ScalaCriteria[T](session.createCriteria(m.erasure))
-		def newQuery[T](sql: String)(implicit m: Manifest[T]) = new ScalaQuery[T](session.createQuery(sql))
+		def newCriteria[A](implicit m: Manifest[A]) = new ScalaCriteria[A](session.createCriteria(m.erasure))
+		def newQuery[A](sql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(sql))
 	}
 
 	/**
@@ -65,8 +65,8 @@ trait Daoisms {
 	 * holds detailed information about the type D which is otherwise missing
 	 * from the JVM bytecode.
 	 */
-	def option[D](obj: Any)(implicit m: Manifest[D]): Option[D] = obj match {
-		case a: Any if m.erasure.isInstance(a) => Some(a.asInstanceOf[D])
+	def option[A](obj: Any)(implicit m: Manifest[A]): Option[A] = obj match {
+		case a: Any if m.erasure.isInstance(a) => Some(a.asInstanceOf[A])
 		case _ => None
 	}
 
@@ -77,10 +77,10 @@ trait Daoisms {
 	 * For CanBeDeleted entities, it also checks if the entity is deleted and
 	 * the notDeleted filter is enabled, in which case it also returns None.
 	 */
-	protected def getById[D](id: String)(implicit m: Manifest[D]): Option[D] =
+	protected def getById[A](id: String)(implicit m: Manifest[A]): Option[A] =
 		session.get(m.erasure.getName(), id) match {
 			case entity: CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
-			case entity: Any if m.erasure.isInstance(entity) => Some(entity.asInstanceOf[D])
+			case entity: Any if m.erasure.isInstance(entity) => Some(entity.asInstanceOf[A])
 			case _ => None
 		}
 

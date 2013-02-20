@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.data.model
-
 import scala.reflect.BeanProperty
-
-import org.hibernate.annotations.{AccessType, FilterDef, FilterDefs, Filter, Filters, Type}
+import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
-
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -17,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -42,7 +39,12 @@ object Member {
 ))
 @Entity
 @AccessType("field")
-class Member extends MemberProperties with StudentProperties with StaffProperties with AlumniProperties with ToString with PermissionsTarget {
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+		name="userType",
+		discriminatorType=DiscriminatorType.STRING
+)
+abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget {
 	
 	@transient 
 	var profileService = Wire.auto[ProfileService]
@@ -56,9 +58,9 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		this.universityId = user.universityId
 		this.email = user.email
 		this.userType = 
-			if (user.isStudent) Student
-			else if (user.isStaff) Staff
-			else Other
+			if (user.isStudent) MemberUserType.Student
+			else if (user.isStaff) MemberUserType.Staff
+			else MemberUserType.Other
 	}
 	
 	def this(id: String) = {
@@ -69,7 +71,7 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@BeanProperty var lastUpdatedDate = DateTime.now
 	
-	@BeanProperty def fullName: Option[String] = {
+	def fullName: Option[String] = {
 		List(Option(firstName), Option(lastName)).flatten match {
 			case Nil => None
 			case names => Some(names.mkString(" "))
@@ -77,27 +79,23 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 	}
 	def getFullName = fullName // need this for a def, as reference to fullName within Spring tag requires a getter
 	
-	@BeanProperty def officialName = title + " " + fullFirstName + " " + lastName
-	@BeanProperty def description = {
-		val userType = Option(groupName).getOrElse("")
-		val courseName = Option(route).map(", " + _.name).getOrElse("")
+	def officialName = title + " " + fullFirstName + " " + lastName
+	def description = {
+		val userTypeString = 
+			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
+			else Option(groupName).getOrElse("")
+		
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 		 
-		userType + courseName + deptName
+		userTypeString + deptName
 	}
 	
 	/** 
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments = {
-		val affDepts = Set(Option(homeDepartment), 
-				Option(studyDepartment), 
-				Option(route).map(x => x.department)
-		)
-		
-		affDepts.flatten.toSeq
-	}
+	def affiliatedDepartments =
+		Set(Option(homeDepartment)).flatten.toSeq
 
 	/** 
 	 * Get all departments that this student touches. This includes their home department, 
@@ -143,21 +141,94 @@ class Member extends MemberProperties with StudentProperties with StaffPropertie
 		"email" -> email)
 
 			
-	def personalTutor = userType match {
-		case Student => {
-			profileService.findCurrentRelationship(PersonalTutor, sprCode) map (rel => rel.agentParsed) match {
-				case None => "Not recorded"
-				case Some(name: String) => name
-				case Some(member: Member) => member
-			}
-		}
-		case _ => "Not applicable"
+	def personalTutor: Any = "Not applicable"
+	
+	def isStaff = (userType == MemberUserType.Staff)
+	def isStudent = (userType == MemberUserType.Student)
+	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+}
+
+@Entity
+@DiscriminatorValue("S")
+class StudentMember extends Member with StudentProperties with PostLoadBehaviour {
+	
+	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
+	var studyDetails: StudyDetails = new StudyDetails
+	studyDetails.student = this
+	
+	def this(id: String) = {
+		this()
+		this.universityId = id
 	}
 	
-	def isStaff = (userType == Staff)
-	def isStudent = (userType == Student)
-	def isAPersonalTutor = (userType == Staff && !profileService.listStudentRelationshipsWithMember(PersonalTutor, this).isEmpty)
+	override def description = {
+		val userTypeString = 
+			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
+			else Option(groupName).getOrElse("")
+		
+		val courseName = Option(studyDetails.route).map(", " + _.name).getOrElse("")
+		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
+		 
+		userTypeString + courseName + deptName
+	}
+	
+	/** 
+	 * Get all departments that this student is affiliated with at a departmental level.
+	 * This includes their home department, and the department running their course.
+	 */
+	override def affiliatedDepartments = {
+		val affDepts = Set(Option(homeDepartment), 
+				Option(studyDetails.studyDepartment),
+				Option(studyDetails.route).map(x => x.department)
+		)
+		
+		affDepts.flatten.toSeq
+	}
+	
+	override def personalTutor = 
+		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
+			case None => "Not recorded"
+			case Some(name: String) => name
+			case Some(member: Member) => member
+		}
+	
+	// If hibernate sets studyDetails to null, make a new empty studyDetails
+	override def postLoad {
+		if (studyDetails == null) {
+			studyDetails = new StudyDetails
+			studyDetails.student = this
+		}
+	}
 }
+
+@Entity
+@DiscriminatorValue("N")
+class StaffMember extends Member with StaffProperties {
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}	
+}
+
+@Entity
+@DiscriminatorValue("A")
+class EmeritusMember extends Member with StaffProperties {
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}	
+}
+
+@Entity
+@DiscriminatorValue("O")
+class OtherMember extends Member with AlumniProperties {
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}	
+}
+
+class RuntimeMember(user: CurrentUser) extends Member(user)
 
 trait MemberProperties {
 	@Id @BeanProperty var universityId: String = _
@@ -168,18 +239,17 @@ trait MemberProperties {
 	@BeanProperty var lastName: String = _
 	@BeanProperty var email: String = _
 	
+	@BeanProperty var homeEmail: String = _
+	
 	@BeanProperty var title: String = _
 	@BeanProperty var fullFirstName: String = _
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MemberUserTypeUserType")
+	@Column(insertable = false, updatable = false)
 	@BeanProperty var userType: MemberUserType = _
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
-	
-	@BeanProperty var nationality: String = _
-	@BeanProperty var homeEmail: String = _
-	@BeanProperty var mobileNumber: String = _
 	
 	@OneToOne
 	@JoinColumn(name="PHOTO_ID")
@@ -198,67 +268,15 @@ trait MemberProperties {
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@BeanProperty var dateOfBirth: LocalDate = _
+	
+	@BeanProperty var jobTitle: String = _
+	@BeanProperty var phoneNumber: String = _
+	
+	@BeanProperty var nationality: String = _
+	@BeanProperty var mobileNumber: String = _
 }
 
 trait StudentProperties {
-	@BeanProperty var sprCode: String = _
-	@BeanProperty var sitsCourseCode: String = _
-	
-	@ManyToOne
-	@JoinColumn(name = "route_id")
-	@BeanProperty var route: Route = _
-	
-	@BeanProperty var yearOfStudy: JInteger = _
-	@BeanProperty var attendanceMode: String = _
-	
-	@BeanProperty var studentStatus: String = _
-	
-	@BeanProperty var fundingSource: String = _
-	@BeanProperty var programmeOfStudy: String = _
-	
-	@BeanProperty var intendedAward: String = _
-	
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@BeanProperty var academicYear: AcademicYear = _
-	
-	@ManyToOne
-	@JoinColumn(name = "study_department_id")
-	@BeanProperty var studyDepartment: Department = _
-	
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@BeanProperty var courseStartYear: AcademicYear = _
-	
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@BeanProperty var yearCommencedDegree: AcademicYear = _
-	
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@BeanProperty var courseBaseYear: AcademicYear = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var courseEndDate: LocalDate = _
-	
-	@BeanProperty var transferReason: String = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var beginDate: LocalDate = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var endDate: LocalDate = _
-	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var expectedEndDate: LocalDate = _
-	
-	@BeanProperty var feeStatus: String = _
-	@BeanProperty var domicile: String = _
-	@BeanProperty var highestQualificationOnEntry: String = _
-	
-	@BeanProperty var lastInstitute: String = _
-	@BeanProperty var lastSchool: String = _	
-	
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@BeanProperty var homeAddress: Address = null

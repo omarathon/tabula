@@ -32,7 +32,7 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 	def user: CurrentUser
 	var securityService: SecurityService
 	
-	def restricted[T <: PermissionsChecking](something: => T): Option[T] = 
+	def restricted[A <: PermissionsChecking](something: => A): Option[A] = 
 		if (something.permissionChecks forall(_ match {
 			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
 			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
@@ -43,7 +43,7 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 		})) Some(something)
 		else None
 		
-	def restrictedBy[T <: PermissionsChecking](fn: => Boolean)(something: => T): Option[T] =
+	def restrictedBy[A <: PermissionsChecking](fn: => Boolean)(something: => A): Option[A] =
 		if (fn) restricted(something)
 		else Some(something)
 }
@@ -161,6 +161,6 @@ abstract class BaseController extends ControllerMethods
 	/**
 	 * Do any custom binding init by overriding this method.
 	 */
-	def binding[T](binder: WebDataBinder, target: T) {}
+	def binding[A](binder: WebDataBinder, target: A) {}
 
 }

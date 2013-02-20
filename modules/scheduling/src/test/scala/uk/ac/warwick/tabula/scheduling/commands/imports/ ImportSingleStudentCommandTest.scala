@@ -12,10 +12,15 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.Male
+import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 class ImportSingleStudentCommandTest extends TestBase with Mockito {
 	
@@ -33,21 +38,33 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 		blob.length() returns (blobBytes.length)
 		
 		val rs = mock[ResultSet]
-		rs.getString("university_id") returns("0672089")
-		rs.getString("title") returns("Mr")
-		rs.getString("preferred_forename") returns("Mathew")
-		rs.getString("family_name") returns("Mannion")
 		rs.getString("gender") returns("M")
-		rs.getString("user_code") returns("cuscav")
-		rs.getString("email_address") returns("M.Mannion@warwick.ac.uk")
 		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
-		rs.getDate("date_of_birth") returns(new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDate().getTime()))
 		rs.getString("spr_code") returns("0672089/2")
 		rs.getString("route_code") returns("C100")
 		
-
-			
+		val mm = MembershipMember(
+			universityId 			= "0672089",
+			departmentCode			= null,
+			email					= "M.Mannion@warwick.ac.uk",
+			targetGroup				= null,
+			title					= "Mr",
+			preferredForenames		= "Mathew",
+			preferredSurname		= "Mannion",
+			position				= null,
+			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode				= "cuscav",
+			startDate				= null,
+			endDate					= null,
+			modified				= null,
+			phoneNumber				= null,
+			gender					= null,
+			alternativeEmailAddress	= null,
+			userType				= Student
+		)
+		
+		val mac = MembershipInformation(mm, None)
 
 	}
 	
@@ -57,7 +74,7 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 						
-			val command = new ImportSingleStudentCommand(rs)
+			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -72,8 +89,6 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.sprCode should be ("0672089/2")
-			member.route should be (route)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -84,12 +99,12 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 	
 	@Test def worksWithExisting {
 		new Environment {
-			val existing = new Member("0672089")
+			val existing = new StudentMember("0672089")
 			
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 			
-			val command = new ImportSingleStudentCommand(rs)
+			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -104,9 +119,6 @@ class ImportSingleStudentCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			
-			member.sprCode should be ("0672089/2") // added ZLJ
-			member.route should be (route)
 			
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

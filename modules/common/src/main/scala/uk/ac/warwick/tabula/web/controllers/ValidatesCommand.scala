@@ -24,7 +24,7 @@ trait ValidatesCommand {
 	 */
 	protected var keepOriginalValidator: Boolean = true
 
-	type ValidatorMethod[T] = (T, Errors) => Unit
+	type ValidatorMethod[A] = (A, Errors) => Unit
 
 	/**
 	 * Defines a validator for the command based on a single method, so
@@ -33,10 +33,10 @@ trait ValidatesCommand {
 	 * If there's an existing globally set validator (such as the annotation
 	 * processor), this validation will run in addition to it.
 	 */
-	def validatesWith[T](fn: ValidatorMethod[T]) {
+	def validatesWith[A](fn: ValidatorMethod[A]) {
 		if (validator != null) throw new IllegalStateException("Already set validator once")
-		validator = new ClassValidator[T] {
-			override def valid(target: T, errors: Errors) = fn(target, errors)
+		validator = new ClassValidator[A] {
+			override def valid(target: A, errors: Errors) = fn(target, errors)
 		}
 	}
 
@@ -44,15 +44,15 @@ trait ValidatesCommand {
 	 * If the command object implements SelfValidating, this will
 	 * run its validation command when a @Valid object is requested.
 	 */
-	def validatesSelf[T <: SelfValidating] {
-		validatesWith[T] { (cmd, errors) => cmd.validate(errors) }
+	def validatesSelf[A <: SelfValidating] {
+		validatesWith[A] { (cmd, errors) => cmd.validate(errors) }
 	}
 
 	/**
 	 * Like validatesWith but replaces the existing set validator (usually
 	 * the annotation processor).
 	 */
-	def onlyValidatesWith[T](fn: ValidatorMethod[T]) {
+	def onlyValidatesWith[A](fn: ValidatorMethod[A]) {
 		keepOriginalValidator = false
 		validatesWith(fn)
 	}

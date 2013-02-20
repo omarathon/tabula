@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 
 
-abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T]
+abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
 	with Daoisms with Logging with BindListener {
 
 	var userLookup = Wire.auto[UserLookupService]

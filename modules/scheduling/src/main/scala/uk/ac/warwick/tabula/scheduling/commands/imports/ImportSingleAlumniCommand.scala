@@ -30,9 +30,14 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.OtherMember
 
-class ImportSingleAlumniCommand(val rs: ResultSet) extends ImportSingleMemberCommand(rs)
-	with Logging with Daoisms with AlumniProperties {
+class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+	with Logging with Daoisms with AlumniProperties with Unaudited {
+	import ImportMemberHelpers._
 	
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
 	
@@ -42,7 +47,7 @@ class ImportSingleAlumniCommand(val rs: ResultSet) extends ImportSingleMemberCom
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
 		
 		val isTransient = !memberExisting.isDefined
-		val member = memberExisting getOrElse(new Member(universityId))
+		val member = memberExisting getOrElse(new OtherMember(universityId))
 		
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)

@@ -274,9 +274,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Find a FormField on the Assignment with the given name and type.
 	 * A field with a matching name but not a matching type is ignored.
 	 */
-	def findFieldOfType[T <: FormField](name: String)(implicit m: Manifest[T]): Option[T] =
+	def findFieldOfType[A <: FormField](name: String)(implicit m: Manifest[A]): Option[A] =
 		findField(name) match {
-			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[T])
+			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[A])
 			case _ => None
 		}
 
@@ -377,7 +377,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
 		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) => p._2.includes(submission.userId)}
+			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
+			}
 			mapEntry match {
 				case Some((markerId, students)) => Some(markerId)
 				case _ => None
@@ -391,6 +393,19 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 				}
 			}
 			case None => None
+		}
+		case _ => None
+	}
+
+	def getStudentsSecondMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+		case SeenSecondMarking =>  {
+			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+				p._2.includes(submission.userId) && markingWorkflow.secondMarkers.includes(p._1)
+			}
+			mapEntry match {
+				case Some((markerId, students)) => Some(markerId)
+				case _ => None
+			}
 		}
 		case _ => None
 	}

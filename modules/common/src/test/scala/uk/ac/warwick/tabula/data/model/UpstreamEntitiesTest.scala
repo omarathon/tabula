@@ -72,14 +72,22 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.academicYear = new AcademicYear(2011)
 			otherGroup.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
 			
-			val member = new Member
+			val member = new StaffMember
 			member.universityId = "0672089"
 			member.userId = "cuscav"					
 			member.firstName = "Mathew"
 			member.lastName = "Mannion"
 			member.email = "M.Mannion@warwick.ac.uk"
+				
+			val student = new StudentMember
+			student.universityId = "0812345"
+			student.userId = "studen"
+			student.firstName = "My"
+			student.lastName = "Student"
+			student.email = "S.Tudent@warwick.ac.uk"
+			student.studyDetails.sprCode = "0812345/1"
 			
-			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member)) 
+			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member, student)) 
 				session.save(entity)
 			session.flush
 			session.clear
@@ -101,7 +109,15 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			
 			session.load(classOf[Member], "0672089") match {
 				case loadedMember:Member => loadedMember.firstName should be ("Mathew")
-				case _ => fail("Department not found")
+				case _ => fail("Member not found")
+			}
+			
+			session.load(classOf[StudentMember], "0812345") match {
+				case loadedMember:StudentMember => {
+					loadedMember.firstName should be ("My")
+					loadedMember.studyDetails.sprCode should be ("0812345/1")
+				}
+				case _ => fail("Student not found")
 			}
 		}
 	}

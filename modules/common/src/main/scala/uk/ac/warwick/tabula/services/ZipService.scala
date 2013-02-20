@@ -180,15 +180,15 @@ object Zips {
 	 * Provides an iterator for ZipEntry items which will be closed when you're done with them.
 	 * The object returned from the function is converted to a list to guarantee that it's evaluated before closing.
 	 */
-	//   def iterator[T](zip:ZipInputStream)(fn: (Iterator[ZipEntry])=>Iterator[T]): List[T] = ensureClose(zip) {
+	//   def iterator[A](zip:ZipInputStream)(fn: (Iterator[ZipEntry])=>Iterator[A]): List[A] = ensureClose(zip) {
 	//	   fn( Iterator.continually{zip.getNextEntry}.takeWhile{_ != null} ).toList
 	//   }
 
-	def iterator[T](zip: ZipArchiveInputStream)(fn: (Iterator[ZipArchiveEntry]) => Iterator[T]): List[T] = ensureClose(zip) {
+	def iterator[A](zip: ZipArchiveInputStream)(fn: (Iterator[ZipArchiveEntry]) => Iterator[A]): List[A] = ensureClose(zip) {
 		fn(Iterator.continually { zip.getNextZipEntry }.takeWhile { _ != null }).toList
 	}
 
-	def map[T](zip: ZipInputStream)(fn: (ZipEntry) => T): Seq[T] = ensureClose(zip) {
+	def map[A](zip: ZipInputStream)(fn: (ZipEntry) => A): Seq[A] = ensureClose(zip) {
 		Iterator.continually { zip.getNextEntry }.takeWhile { _ != null }.map { (item) =>
 			val t = fn(item)
 			zip.closeEntry()

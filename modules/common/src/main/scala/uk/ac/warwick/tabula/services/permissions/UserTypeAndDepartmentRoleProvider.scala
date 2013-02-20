@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
