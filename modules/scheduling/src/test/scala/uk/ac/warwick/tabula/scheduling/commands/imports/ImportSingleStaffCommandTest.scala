@@ -20,18 +20,22 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StaffProperties
+import java.sql.ResultSetMetaData
 
 class ImportSingleStaffCommandTest extends TestBase with Mockito {
 	
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
-		val blob = mock[Blob]
-		blob.getBinaryStream() returns(new ByteArrayInputStream(blobBytes))
-		blob.length() returns (blobBytes.length)
 		
 		val rs = mock[ResultSet]
+		val md = mock[ResultSetMetaData]
+		rs.getMetaData() returns(md)
+		md.getColumnCount() returns(3)
+		md.getColumnName(1) returns("gender")
+		md.getColumnName(2) returns("year_of_study")
+		md.getColumnName(3) returns("teaching_staff")
+		
 		rs.getString("gender") returns("M")
-		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
 		rs.getString("teaching_staff") returns("Y")
 		
@@ -55,7 +59,7 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			userType				= Staff
 		)
 		
-		val mac = MembershipInformation(mm, None)
+		val mac = MembershipInformation(mm, Some(blobBytes))
 	}
 	
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really

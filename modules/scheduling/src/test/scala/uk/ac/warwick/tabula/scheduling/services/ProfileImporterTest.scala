@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentComma
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
+import java.sql.ResultSetMetaData
 
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
@@ -26,13 +27,16 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
   
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
-		val blob = mock[Blob]
-		blob.getBinaryStream() returns(new ByteArrayInputStream(blobBytes))
-		blob.length() returns (blobBytes.length)
 		
 		val rs = mock[ResultSet]
+		val md = mock[ResultSetMetaData]
+		rs.getMetaData() returns(md)
+		md.getColumnCount() returns(3)
+		md.getColumnName(1) returns("gender")
+		md.getColumnName(2) returns("year_of_study")
+		md.getColumnName(3) returns("spr_code")
+		
 		rs.getString("gender") returns("M")
-		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
 		rs.getString("spr_code") returns("0672089/2")
 		
@@ -41,13 +45,13 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			email					= "M.Mannion@warwick.ac.uk",
 			title					= "Mr",
 			preferredForenames		= "Mathew",
-			preferredSurname		= "Mannion",
+			preferredSurname		= "MacIntosh",
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
 			userType				= Staff
 		)
 		
-		val mac = MembershipInformation(mm, None)
+		val mac = MembershipInformation(mm, Some(blobBytes))
 	}
 	
 	// SITS names come uppercased - check that we reformat various names correctly.
@@ -58,6 +62,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
+					universityId = "0672089",
 					preferredForenames = name.toUpperCase,
 					userType = Staff
 				), None)
@@ -78,6 +83,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
+					universityId = "0672089",
 					preferredSurname = name.toUpperCase,
 					userType = Staff
 				), None)
@@ -94,7 +100,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			val importer = new ProfileImporter
 			
 			val user1 = new User()
-			user1.setFirstName("MatHEW James")
+			user1.setFirstName("MatHEW")
 			user1.setLastName("Macintosh")
 			
 			val user2 = new User()
@@ -104,23 +110,25 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			val member1 = new ImportSingleStudentCommand(mac, user1, rs)
 			val member2 = new ImportSingleStudentCommand(mac, user2, rs)
 			  
-			member1.firstName should be ("MatHEW James")
+			member1.firstName should be ("MatHEW")
 			member1.lastName should be ("Macintosh")
 			
-			member2.firstName should be ("Mathew James")
+			member2.firstName should be ("Mathew")
 			member2.lastName should be ("MacIntosh")
 		}
 	}
 	
 	@Test def importStaff {	
 		val blobBytes = Array[Byte](1,2,3,4,5)
-		val blob = mock[Blob]
-		blob.getBinaryStream() returns(new ByteArrayInputStream(blobBytes))
-		blob.length() returns (blobBytes.length)
 		
 		val rs = mock[ResultSet]
+		val md = mock[ResultSetMetaData]
+		rs.getMetaData() returns(md)
+		md.getColumnCount() returns(2)
+		md.getColumnName(1) returns("gender")
+		md.getColumnName(2) returns("year_of_study")
+		
 		rs.getString("gender") returns("M")
-		rs.getBlob("photo") returns(blob)
 		rs.getInt("year_of_study") returns(3)
 		
 		val mac = MembershipInformation(MembershipMember(
@@ -132,7 +140,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
 			userType				= Staff
-		), None)
+		), Some(blobBytes))
 		
 		val importer = new ProfileImporter()
 		val fileDao = mock[FileDao]
