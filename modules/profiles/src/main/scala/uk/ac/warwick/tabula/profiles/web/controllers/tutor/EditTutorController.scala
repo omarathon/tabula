@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
 import scala.reflect.BeanProperty
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -18,7 +20,6 @@ import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.helpers.Promises
 
 class EditTutorCommand(val student: Member) extends Command[Option[StudentRelationship]] with Promises {
 
@@ -27,6 +28,8 @@ class EditTutorCommand(val student: Member) extends Command[Option[StudentRelati
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
 	val newTutor = promise { tutor }
+	
+	//@BeanProperty var storeTutor: Boolean = false
 	
 	var profileService = Wire.auto[ProfileService]
 	
