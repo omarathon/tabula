@@ -18,7 +18,8 @@ case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 		ManageMaintenanceMode,
 		ImportSystemData,
 		ReplicaSyncing,
-		PermissionsHelper
+		PermissionsHelper,
+		ManageAllDepartmentPermissions
 	)
 	
 	GrantsGlobalPermission(

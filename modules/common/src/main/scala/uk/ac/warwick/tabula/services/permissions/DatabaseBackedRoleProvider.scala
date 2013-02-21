@@ -12,15 +12,15 @@ import uk.ac.warwick.tabula.permissions.Permission
 @Component
 class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
-	var dao = Wire.auto[PermissionsDao]
+	var service = Wire.auto[PermissionsService]
 	
 	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = 
-		dao.getGrantedRolesFor(scope) filter { _.users.includes(user.apparentId) } map { _.build() }
+		service.getGrantedRolesFor(user, scope) map { _.build() }
 	
 	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
 	
 	def getPermissionsFor(user: CurrentUser, scope: => PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] =
-		dao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) } map { 
+		service.getGrantedPermissionsFor(user, scope).toStream map { 
 			grantedPermission => (grantedPermission.permission, Some(scope), grantedPermission.overrideType)
 		}
 	

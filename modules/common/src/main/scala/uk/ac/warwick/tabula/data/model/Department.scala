@@ -11,6 +11,10 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
@@ -22,10 +26,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var modules:JList[Module] = List()
-	
-	@OneToOne(cascade=Array(CascadeType.ALL))
-	@JoinColumn(name="ownersgroup_id")
-	@BeanProperty var owners:UserGroup = new UserGroup
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
@@ -36,37 +36,43 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = List()
 	
-	/* Legacy Properties. Remove these once the settings map is completely in use */
-	@BeanProperty @Column(name="collectFeedbackRatings") var collectFeedbackRatingsLegacy:Boolean = false
-	def isCollectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings, collectFeedbackRatingsLegacy)
+	def isCollectFeedbackRatings = collectFeedbackRatings
+	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
+	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
 
 	// settings for extension requests
-	@BeanProperty @Column(name="allowExtensionRequests") var allowExtensionRequestsLegacy:JBoolean = false
-	def isAllowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests, if (allowExtensionRequestsLegacy != null) allowExtensionRequestsLegacy else false)
+	def isAllowExtensionRequests = allowExtensionRequests
+	def allowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse(false)
+	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
 	
-	@BeanProperty @Column(name="extensionGuidelineSummary") var extensionGuidelineSummaryLegacy:String = null
-	def getExtensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary, extensionGuidelineSummaryLegacy)
+	def getExtensionGuidelineSummary = extensionGuidelineSummary
+	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary) orNull
+	def extensionGuidelineSummary_= (summary: String) = settings += (Settings.ExtensionGuidelineSummary -> summary)
 	
-	@BeanProperty @Column(name="extensionGuidelineLink") var extensionGuidelineLinkLegacy:String = null
-	def getExtensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink, extensionGuidelineLinkLegacy)
+	def getExtensionGuidelineLink = extensionGuidelineLink
+	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink) orNull
+	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
 	
-	@BeanProperty @Column(name="showStudentName") var showStudentNameLegacy:JBoolean = false
-	def isShowStudentName = getBooleanSetting(Settings.ShowStudentName, if (showStudentNameLegacy != null) showStudentNameLegacy else false)
-	
-	/** The group of extension managers */
-	@OneToOne(cascade = Array(CascadeType.ALL))
-	@JoinColumn(name = "extension_managers_id")
-	@BeanProperty var extensionManagers = new UserGroup()
+	def isShowStudentName = showStudentName
+	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
+	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
 
 	def formattedGuidelineSummary:String = Option(getExtensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
 		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
 		(NodeSeq fromSeq nodes).toString()
 	} getOrElse("")
+	
+	@transient 
+	var permissionsService = Wire.auto[PermissionsService]
+	@transient 
+	lazy val owners = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
+	@transient 
+	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
 	def isOwnedBy(userId:String) = owners.includes(userId)
-	def addOwner(owner:String) = ensureOwners.addUser(owner)
-	def removeOwner(owner:String) = ensureOwners.removeUser(owner)
+	def addOwner(owner:String) = owners.addUser(owner)
+	def removeOwner(owner:String) = owners.removeUser(owner)
 
 	def canRequestExtension = isAllowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
@@ -77,25 +83,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
-		ensureOwners
 		ensureSettings
-		
-		// Copy legacy settings if they don't exist
-		if (!settings.contains(Settings.CollectFeedbackRatings)) 
-			settings += (Settings.CollectFeedbackRatings -> collectFeedbackRatingsLegacy)
-		if (!settings.contains(Settings.AllowExtensionRequests)) 
-			settings += (Settings.AllowExtensionRequests -> (if (allowExtensionRequestsLegacy != null) allowExtensionRequestsLegacy else false))
-		if (!settings.contains(Settings.ExtensionGuidelineSummary)) 
-			settings += (Settings.ExtensionGuidelineSummary -> extensionGuidelineSummaryLegacy)
-		if (!settings.contains(Settings.ExtensionGuidelineLink)) 
-			settings += (Settings.ExtensionGuidelineLink -> extensionGuidelineLinkLegacy)
-		if (!settings.contains(Settings.ShowStudentName)) 
-			settings += (Settings.ShowStudentName -> (if (showStudentNameLegacy != null) showStudentNameLegacy else false))
-	}
-
-	def ensureOwners = {
-		if (owners == null) owners = new UserGroup
-		owners
 	}
 	
 	def permissionsParents = Seq()

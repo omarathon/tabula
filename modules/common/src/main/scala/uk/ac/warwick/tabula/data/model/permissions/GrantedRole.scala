@@ -27,7 +27,7 @@ class GrantedRole extends GeneratedId with HibernateVersioned with PostLoadBehav
 	@BeanProperty var builtInRoleDefinition: BuiltInRoleDefinition = _
 	
 	def roleDefinition = Option(customRoleDefinition) getOrElse builtInRoleDefinition
-	def roleDefinition_(definition: RoleDefinition) = definition match {
+	def roleDefinition_= (definition: RoleDefinition) = definition match {
 		case customDefinition: CustomRoleDefinition => {
 			customRoleDefinition = customDefinition
 			builtInRoleDefinition = null

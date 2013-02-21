@@ -8,6 +8,8 @@ import org.hibernate.criterion.Order
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 trait DepartmentDao {
 	def allDepartments: Seq[Department]
@@ -33,13 +35,17 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 	def save(department: Department) = session.saveOrUpdate(department)
 
 	/**
-	 * Get all departments owned by a particular usercode.
-	 * Doesn't work with UserGroups that use a webgroup (it's not possible in the UI
-	 * to use a webgroup for the department admins list.)
+	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off DepartmentalAdministrator.
 	 */
-	def getByOwner(user: String): Seq[Department] = {
-		val query = session.createQuery("from Department d where :user in elements(d.owners.includeUsers)")
-		query.setString("user", user)
-		query.list.asInstanceOf[JList[Department]]
-	}
+	def getByOwner(user: String): Seq[Department] =
+		session.createQuery("""
+				from GrantedRole r 
+				where r.scope.type = :type and 
+					r.builtInRoleDefinition = :def and 
+					:user in elements(r.users.includeUsers)
+				""")
+			.setString("type", "Department")
+			.setParameter("def", DepartmentalAdministratorRoleDefinition)
+			.setString("user", user)
+			.list.asInstanceOf[JList[GrantedRole]] map { _.scope.asInstanceOf[Department] }
 }

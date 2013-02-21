@@ -55,6 +55,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	this.sitsCourseCode = rs.getString("sits_course_code")
 	this.routeCode = rs.getString("route_code")
 	this.studyDepartmentCode = rs.getString("study_department")
+	this.studentStatus = rs.getString("student_status")
+	this.yearOfStudy = rs.getInt("year_of_study")
 	
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
@@ -101,7 +103,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 
 	private val basicStudyDetailsProperties = Set(
-		"sprCode", "sitsCourseCode"
+		"sprCode", "sitsCourseCode", "studentStatus", "yearOfStudy"
 	)
 		
 	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) =

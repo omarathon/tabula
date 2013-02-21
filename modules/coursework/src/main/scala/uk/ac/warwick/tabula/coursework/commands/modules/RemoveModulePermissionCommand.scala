@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.permissions._
 class RemoveModulePermissionCommand(val module: Module) extends Command[Unit] {
 	
 	PermissionCheck(Permissions.Module.ManagePermissions, module)
-	module.ensureParticipantsGroup
 
 	@BeanProperty var usercodes: JList[String] = _
 	@BeanProperty val permissionType: String = "Participate"

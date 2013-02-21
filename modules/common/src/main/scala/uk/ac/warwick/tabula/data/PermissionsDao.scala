@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -13,6 +14,9 @@ trait PermissionsDao {
 	
 	def getGrantedRolesFor(scope: => PermissionsTarget): Seq[GrantedRole]
 	def getGrantedPermissionsFor(scope: => PermissionsTarget): Seq[GrantedPermission]
+	
+	def getGrantedRole(scope: => PermissionsTarget, customRoleDefinition: CustomRoleDefinition): Option[GrantedRole]
+	def getGrantedRole(scope: => PermissionsTarget, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole]
 }
 
 @Repository
@@ -33,4 +37,17 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		session.newCriteria[GrantedPermission]
 					 .add(is("scope", scope))
 					 .seq
+					 
+	def getGrantedRole(scope: => PermissionsTarget, customRoleDefinition: CustomRoleDefinition) = 
+		session.newCriteria[GrantedRole]
+					 .add(is("scope", scope))
+					 .add(is("customRoleDefinition", customRoleDefinition))
+					 .seq.headOption
+					 
+	def getGrantedRole(scope: => PermissionsTarget, builtInRoleDefinition: BuiltInRoleDefinition) = 
+		session.newCriteria[GrantedRole]
+					 .add(is("scope", scope))
+					 .add(is("builtInRoleDefinition", builtInRoleDefinition))
+					 .seq.headOption
+					
 }

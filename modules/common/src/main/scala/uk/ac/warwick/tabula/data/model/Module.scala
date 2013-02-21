@@ -7,6 +7,9 @@ import org.hibernate.annotations.AccessType
 import javax.persistence._
 import javax.validation.constraints._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.spring.Wire
 
 @Entity
 @NamedQueries(Array(
@@ -25,20 +28,10 @@ class Module extends GeneratedId with PermissionsTarget {
 
 	// The participants are markers/moderators who upload feedback. 
 	// They can also publish feedback.
-	@OneToOne(cascade = Array(CascadeType.ALL))
-	@JoinColumn(name = "participantsgroup_id")
-	@BeanProperty var participants: UserGroup = new UserGroup
-
-	// return participants, creating an empty one if missing.
-	def ensuredParticipants = {
-		ensureParticipantsGroup
-		participants
-	}
-
-	/** Create an empty participants group if it's null. */
-	def ensureParticipantsGroup {
-		if (participants == null) participants = new UserGroup
-	}
+	@transient 
+	var permissionsService = Wire.auto[PermissionsService]
+	@transient 
+	lazy val participants = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")

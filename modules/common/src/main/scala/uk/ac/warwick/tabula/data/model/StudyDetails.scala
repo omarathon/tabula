@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
+import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 @AccessType("field")
@@ -42,10 +43,10 @@ trait StudyDetailsProperties {
 	@JoinColumn(name = "study_department_id")
 	@BeanProperty var studyDepartment: Department = _
 	
-//	@BeanProperty var yearOfStudy: JInteger = _
+	@BeanProperty var studentStatus: String = _
+	
+	@BeanProperty var yearOfStudy: JInteger = _
 //	@BeanProperty var attendanceMode: String = _
-//	
-//	@BeanProperty var studentStatus: String = _
 //	
 //	@BeanProperty var fundingSource: String = _
 //	@BeanProperty var programmeOfStudy: String = _
