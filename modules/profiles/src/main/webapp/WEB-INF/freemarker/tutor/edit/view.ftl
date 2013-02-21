@@ -10,18 +10,34 @@
 				<@f.form 
 					id="saveTutor"
 					method="post" 
-					action="/profiles/tutor/${studentUniId}/edit?tutorUniId=${pickedTutor.universityId}"
+					action="/profiles/tutor/${studentUniId}/edit"
 					commandName="editTutorCommand" 
 					class="form-horizontal">
 
+					<@spring.bind path="tutorUniId">
+						<input id="tutorUniId" name="${status.expression}" type="hidden" value="${pickedTutor.universityId}" />
+					</@spring.bind>
+					<@spring.bind path="notifyCommand.tutorUniId">
+						<input id="tutorUniId" name="${status.expression}" type="hidden" value="${pickedTutor.universityId}" />
+					</@spring.bind>
+					
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<@f.checkbox path="notifyTutee" value="true" /> Notify tutee of change<br />
+					
+					<@f.checkbox path="notifyCommand.notifyTutee" value="true" /> 
+						
+					Notify tutee of change<br />
+					
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<@f.checkbox path="notifyOldTutor" value="true" /> Notify old tutor of change<br />
+					
+					<@f.checkbox path="notifyCommand.notifyOldTutor" value="true" /> 
+					
+					Notify old tutor of change<br />
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<@f.checkbox path="notifyNewTutor" value="true" /> Notify new tutor of change
-					<br />
-					<input id="save" name="save" type="hidden" value="true" />
+					
+					<@f.checkbox path="notifyCommand.notifyNewTutor" value="true" /> 
+					
+					Notify new tutor of change<br />
+					<input id="storeTutor" name="storeTutor" type="hidden" value="true" />
 					<div style="text-align:right">
 						<button type="submit" class="btn btn-primary">Save</button
 					</div>

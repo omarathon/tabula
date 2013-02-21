@@ -21,7 +21,7 @@ class SearchTutorsController extends ProfilesController {
 	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) =  profileService.getPersonalTutor(student)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view")
+	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view", "displayOptionToSave" -> false)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute("searchTutorsCommand") cmd: SearchTutorsCommand, errors: Errors) = {
