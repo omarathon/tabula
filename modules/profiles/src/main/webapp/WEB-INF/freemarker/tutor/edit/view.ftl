@@ -15,7 +15,6 @@
 					class="form-horizontal">
 
 					<@spring.bind path="tutor">
-
 						<input id="tutor" name="${status.expression}" type="hidden" value="${editTutorCommand.tutor.universityId}" />
 					</@spring.bind>
 					
