@@ -17,28 +17,29 @@ import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.ItemNotFoundException
 
-class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] {
+class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] with Promises {
 
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
-	@BeanProperty var tutorUniId: String = null
-	
-	@BeanProperty var storeTutor: Boolean = false
+	@BeanProperty var tutor: Member = _
+	val newTutor = promise { tutor }
 	
 	var profileService = Wire.auto[ProfileService]
 	
 	def currentTutor = profileService.getPersonalTutor(student)
 	
-	@BeanProperty val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor)
+	@BeanProperty val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
 	
 	def applyInternal = {
-		if (!currentTutor.isDefined || !currentTutor.get.universityId.equals(tutorUniId)) {
+		if (!currentTutor.isDefined || !currentTutor.get.equals(tutor)) {
 			// it's a real change
-			notifyCommand.oldTutor = currentTutor
-			val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutorUniId)
+
+			val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
+
 			notifyCommand.apply()
 			Some(newRelationship)
 		} else {
@@ -46,7 +47,7 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 		}
 	}
 
-	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> tutorUniId)
+	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> tutor.universityId)
 }
 
 @Controller
@@ -64,7 +65,7 @@ class EditTutorController extends BaseController {
 	}
 	
 	// initial form display
-	@RequestMapping(params = Array("!tutorUniId"))
+	@RequestMapping(params = Array("!tutor"))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
 			"studentUniId" -> cmd.student.universityId,
@@ -73,19 +74,15 @@ class EditTutorController extends BaseController {
 	}
 
 	// now we've got a tutor id to display, but it's not time to save it yet
-	@RequestMapping(params = Array("tutorUniId", "!storeTutor"))
+	@RequestMapping(params = Array("tutor", "!storeTutor"))
 	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
-
-		val pickedTutor = profileService.getMemberByUniversityId(cmd.tutorUniId)
-
 		Mav("tutor/edit/view",
 			"studentUniId" -> cmd.student.universityId,
-			"tutorToDisplay" -> pickedTutor,
-			"pickedTutor" -> pickedTutor,
-			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.universityId.equals(cmd.tutorUniId)))
+			"tutorToDisplay" -> cmd.tutor,
+			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.equals(cmd.tutor)))
 	}
 
-	@RequestMapping(params=Array("tutorUniId", "storeTutor"), method=Array(POST))
+	@RequestMapping(params=Array("tutor", "storeTutor"), method=Array(POST))
 	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 		

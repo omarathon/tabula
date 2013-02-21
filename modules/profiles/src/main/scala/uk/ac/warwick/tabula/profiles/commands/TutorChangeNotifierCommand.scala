@@ -13,32 +13,24 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.commands.Command
 import scala.reflect.BeanProperty
+import uk.ac.warwick.util.concurrency.promise.Promise
 
-//class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], notifyTutee: Boolean, notifyOldTutor: Boolean, notifyNewTutor: Boolean)
-class TutorChangeNotifierCommand(student: Member, currentTutor: Option[Member])
-extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
+class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newTutorPromise: Promise[Member])
+	extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
 	
-	@BeanProperty var tutorUniId: String = null
-	@BeanProperty var storeTutor: Boolean = false
 	@BeanProperty var notifyTutee: Boolean = false
 	@BeanProperty var notifyOldTutor: Boolean = false
 	@BeanProperty var notifyNewTutor: Boolean = false
-	
-	@BeanProperty var oldTutor: Option[Member] = None // this is set by the calling command
-	
+		
 	implicit var freemarker = Wire.auto[Configuration]
 	val mailSender = Wire[WarwickMailSender]("studentMailSender")
 	var profileService = Wire.auto[ProfileService]
 	val replyAddress = Wire.property("${mail.noreply.to}")
 	val fromAddress = Wire.property("${mail.exceptions.to}")
 	
-	val newTutor = profileService.getPersonalTutor(student).getOrElse(throw new IllegalStateException("Couldn't find database information for new tutor for student " + student.universityId))
-
-	logger.debug("Old tutor: " + oldTutor)
-	logger.debug("New tutor: " + newTutor)
-	logger.debug("Student: " + student)
-
 	def applyInternal() {
+		val newTutor = newTutorPromise.fulfilPromise
+		
 		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)			
 				mailSender send messageFor(
@@ -85,5 +77,5 @@ extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
 		)))
 	}	
 
-	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> newTutor.universityId)	
+	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> newTutorPromise.fulfilPromise.universityId)	
 }

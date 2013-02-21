@@ -14,11 +14,8 @@
 					commandName="editTutorCommand" 
 					class="form-horizontal">
 
-					<@spring.bind path="tutorUniId">
-						<input id="tutorUniId" name="${status.expression}" type="hidden" value="${pickedTutor.universityId}" />
-					</@spring.bind>
-					<@spring.bind path="notifyCommand.tutorUniId">
-						<input id="tutorUniId" name="${status.expression}" type="hidden" value="${pickedTutor.universityId}" />
+					<@spring.bind path="tutor">
+						<input id="tutor" name="${status.expression}" type="hidden" value="${status.value}" />
 					</@spring.bind>
 					
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
