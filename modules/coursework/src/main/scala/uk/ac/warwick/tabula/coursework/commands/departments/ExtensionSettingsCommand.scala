@@ -20,13 +20,12 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	
 	PermissionCheck(Permissions.Department.ManageExtensionSettings, department)
 
-	@BeanProperty var allowExtensionRequests:Boolean = department.isAllowExtensionRequests
-	@BeanProperty var extensionGuidelineSummary:String = department.getExtensionGuidelineSummary
-	@BeanProperty var extensionGuidelineLink:String = department.getExtensionGuidelineLink
+	@BeanProperty var allowExtensionRequests:Boolean = department.allowExtensionRequests
+	@BeanProperty var extensionGuidelineSummary:String = department.extensionGuidelineSummary
+	@BeanProperty var extensionGuidelineLink:String = department.extensionGuidelineLink
 	@BeanProperty var extensionManagers: JList[String] = ArrayList()
 	
-	if (department.extensionManagers != null)
-		extensionManagers.addAll(department.extensionManagers.includeUsers)
+	extensionManagers.addAll(department.extensionManagers.includeUsers)
 
 	val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
@@ -46,18 +45,11 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	override def applyInternal() {
 		transactional() {
 			if (features.extensions){
-				department ++= (
-					Settings.AllowExtensionRequests -> allowExtensionRequests,
-					Settings.ExtensionGuidelineSummary -> extensionGuidelineSummary,
-					Settings.ExtensionGuidelineLink -> extensionGuidelineLink
-				)
+				department.allowExtensionRequests = allowExtensionRequests
+				department.extensionGuidelineSummary = extensionGuidelineSummary
+				department.extensionGuidelineLink = extensionGuidelineLink
 
-				val managers = Option(department.extensionManagers).getOrElse {
-					// existing departments will have a null value for managers. set it here
-					department.extensionManagers = new UserGroup()
-					department.extensionManagers
-				}
-				managers.setIncludeUsers(extensionManagers)
+				department.extensionManagers.setIncludeUsers(extensionManagers)
 			}
 		}
 	}

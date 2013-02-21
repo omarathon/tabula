@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType

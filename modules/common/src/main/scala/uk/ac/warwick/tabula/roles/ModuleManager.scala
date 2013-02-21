@@ -4,12 +4,12 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-case class DepartmentModuleManager(department: model.Department) extends BaseModuleManager(department)
-case class ModuleManager(module: model.Module) extends BaseModuleManager(module)
+case class DepartmentModuleManager(department: model.Department) extends BuiltInRole(department, ModuleManagerRoleDefinition)
+case class ModuleManager(module: model.Module) extends BuiltInRole(module, ModuleManagerRoleDefinition)
 
-abstract class BaseModuleManager(scope: PermissionsTarget) extends BuiltInRole(scope) {
+case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 	
-	GrantsPermissionFor(scope, 
+	GrantsScopedPermission( 
 		Module.Read,
 		
 		Assignment.Archive,

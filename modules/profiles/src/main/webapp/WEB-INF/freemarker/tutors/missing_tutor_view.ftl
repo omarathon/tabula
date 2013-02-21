@@ -21,8 +21,8 @@
 							<span class="muted">${student.universityId}</span>
 						</td>
 						<td>${student.groupName}</td>
-						<td>${student.yearOfStudy}</td>
-						<td><#if student.route?has_content>${student.route.name}</#if></td>
+						<td>${student.studyDetails.yearOfStudy!""}</td>
+						<td><#if student.studyDetails.route??>${student.studyDetails.route.name}</#if></td>
 					</tr>
 				</#list>
 			</tbody>

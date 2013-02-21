@@ -38,12 +38,12 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(user, user)
 		
 		val roleService = mock[RoleService]
-		roleService.getExplicitPermissionsFor(currentUser, null) returns (Map(
-				Permissions.UserPicker -> None,
-				Permissions.ImportSystemData -> None
+		roleService.getExplicitPermissionsFor(currentUser, null) returns (Stream(
+				(Permissions.UserPicker, None, true),
+				(Permissions.ImportSystemData, None, true)
 		))
-		roleService.getExplicitPermissionsFor(currentUser, department) returns (Map(
-				Permissions.Department.ManageDisplaySettings -> Some(department)
+		roleService.getExplicitPermissionsFor(currentUser, department) returns (Stream(
+				(Permissions.Department.ManageDisplaySettings, Some(department), true)
 		))
 				
 		securityService.roleService = roleService

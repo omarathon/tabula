@@ -42,8 +42,16 @@ class ModuleAndDepartmentService extends Logging {
 		departmentDao.getByCode(code)
 	}
 
+	def getDepartmentById(code: String) = transactional(readOnly = true) {
+		departmentDao.getById(code)
+	}
+
 	def getModuleByCode(code: String) = transactional(readOnly = true) {
 		moduleDao.getByCode(code)
+	}
+
+	def getModuleById(code: String) = transactional(readOnly = true) {
+		moduleDao.getById(code)
 	}
 	
 	def getRouteByCode(code: String) = transactional(readOnly = true) {

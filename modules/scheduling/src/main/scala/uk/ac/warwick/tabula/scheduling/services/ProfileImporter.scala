@@ -104,7 +104,11 @@ object ProfileImporter {
 			
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
-			spr.spr_dptc as study_department
+			spr.spr_dptc as study_department,
+		
+			scj.scj_blok as year_of_study,
+		
+			sts.sta_name as student_status
 		
 		from intuit.ins_stu stu
 			left outer join intuit.srs_nat nat 
@@ -122,6 +126,9 @@ object ProfileImporter {
 		
 			left outer join intuit.ins_spr spr
 				on scj.scj_sprc = spr.spr_code
+		
+			left outer join intuit.srs_sta sts
+				on spr.sts_code = sts.sta_code
 		
 			where stu.stu_udf3 in (:usercodes)
 				and (sce.sce_stuc is null or scj.scj_udfa = 'Y')

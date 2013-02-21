@@ -11,6 +11,7 @@ import org.scalatest.BeforeAndAfterAll
 import java.util.jar.JarFile
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
+import uk.ac.warwick.tabula.helpers.SillyJbossVfsUrlType
 
 class PermissionsHelperControllerTest extends TestBase {
 	

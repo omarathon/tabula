@@ -9,11 +9,14 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import model.Department
 import org.hibernate.criterion.Order
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 trait ModuleDao {
 	def allModules: Seq[Module]
 	def saveOrUpdate(module: Module)
 	def getByCode(code: String): Option[Module]
+	def getById(id: String): Option[Module]
 	def findByParticipant(userId: String): Seq[Module]
 	def findByParticipant(userId: String, dept: Department): Seq[Module]
 }
@@ -31,28 +34,30 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def getByCode(code: String) = option[Module] {
 		session.createQuery("from Module m where code = :code").setString("code", code).uniqueResult
 	}
+	
+	def getById(id: String) = getById[Module](id)
 
-	def findByParticipant(userId: String): Seq[Module] = {
-		session.createQuery("""select m from Module m 
-	 		  left join m.participants as p
-	 		  where :user in elements(p.includeUsers)
-	 		  """)
+	/**
+	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off ModuleManager.
+	 */
+	def findByParticipant(userId: String): Seq[Module] =
+		session.createQuery("""
+				from GrantedRole r 
+				where r.scope.type = :type and 
+					r.builtInRoleDefinition = :def and 
+					:user in elements(r.users.includeUsers)
+				""")
+			.setString("type", "Module")
+			.setParameter("def", ModuleManagerRoleDefinition)
 			.setString("user", userId)
-			.list().asInstanceOf[JList[Module]].asScala.toSeq
-	}
+			.list.asInstanceOf[JList[GrantedRole]] map { _.scope.asInstanceOf[Module] }
 
 	/**
 	 * Find modules managed by this user, in this department.
+	 * 
+	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off ModuleManager.
 	 */
-	def findByParticipant(userId: String, dept: Department): Seq[Module] = {
-		session.createQuery("""select m from Module m 
-	 		  join m.department as d
-	 		  left join m.participants as p
-	 		  where d = :department and :user in elements(p.includeUsers)
-	 		  """)
-			.setString("user", userId)
-			.setEntity("department", dept)
-			.list().asInstanceOf[JList[Module]].asScala.toSeq
-	}
+	def findByParticipant(userId: String, dept: Department): Seq[Module] =
+		findByParticipant(userId) filter { _.department == dept }
 
 }

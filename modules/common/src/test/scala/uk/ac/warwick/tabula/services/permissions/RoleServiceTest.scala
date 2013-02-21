@@ -19,7 +19,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		when(provider2.getRolesFor(currentUser)) thenThrow(classOf[RuntimeException])
 				
 		val service = new RoleServiceImpl()
-		service.providers = Array(provider1, provider2)
+		service.roleProviders = Array(provider1, provider2)
 		
 		val isSysadminRole = service.getRolesFor(currentUser, null) exists { _ == Sysadmin() }
 		

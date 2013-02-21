@@ -64,8 +64,20 @@ class SecurityService extends Logging {
 		}
 	}
 	
-	def checkPermissions(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response =
-			checkPermissions(roleService.getExplicitPermissionsFor(user, scope), user, permission, scope)
+	def checkPermissions(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = {
+		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
+		val (allow, deny) = explicitPermissions.partition(_._3)
+		
+		// Confusingly, we check for an "Allow" for the deny perms and then immediately deny it
+		val denyPerms = deny map { triple => (triple._1 -> triple._2) } toMap
+		
+		if (checkPermissions(denyPerms, user, permission, scope) != Continue) Deny
+		else {
+			val allowPerms = allow map { triple => (triple._1 -> triple._2) } toMap
+		
+			checkPermissions(allowPerms, user, permission, scope)
+		}
+	}
 			
 	// By using Some() here, we ensure that we return Deny if there isn't a role match - this must be the LAST permissions provider
 	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = Some(
