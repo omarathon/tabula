@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import scala.reflect.BeanProperty
+
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
@@ -10,10 +12,8 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.util.mail.WarwickMailSender
-import uk.ac.warwick.tabula.commands.Command
-import scala.reflect.BeanProperty
 import uk.ac.warwick.util.concurrency.promise.Promise
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newTutorPromise: Promise[Member])
 	extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
@@ -21,7 +21,7 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 	@BeanProperty var notifyTutee: Boolean = false
 	@BeanProperty var notifyOldTutor: Boolean = false
 	@BeanProperty var notifyNewTutor: Boolean = false
-		
+
 	implicit var freemarker = Wire.auto[Configuration]
 	val mailSender = Wire[WarwickMailSender]("studentMailSender")
 	var profileService = Wire.auto[ProfileService]
@@ -30,7 +30,7 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 	
 	def applyInternal() {
 		val newTutor = newTutorPromise.fulfilPromise
-		
+
 		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)			
 				mailSender send messageFor(

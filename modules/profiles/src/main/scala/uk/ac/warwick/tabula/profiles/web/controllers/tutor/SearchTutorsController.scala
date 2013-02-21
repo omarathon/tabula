@@ -14,9 +14,6 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 class SearchTutorsController extends ProfilesController {
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
-	
-	@ModelAttribute("student") def student(@RequestParam("studentUniId") studentUniId: String) =
-		profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Can't find student " + studentUniId))
 		
 	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) =  profileService.getPersonalTutor(student)
 
