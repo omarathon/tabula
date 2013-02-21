@@ -338,12 +338,11 @@ $(function(){
 // code for markingWorkflow add/edit
 $(function(){
 	var markingMethod = $('#markingMethod');
-	var secondMarkers = jQuery('.second-markers-container');
+	var secondMarkers = $('.second-markers-container');
 	if($('option:selected', markingMethod).hasClass('uses-second-markers'))
 		secondMarkers.show();
-	jQuery('#markingMethod').on('change', function(){
-		var $this = jQuery(this);
-		var option = jQuery('option:selected', this);
+	$('#markingMethod').on('change', function(){
+		var option = $('option:selected', $(this));
 		if(option.hasClass('uses-second-markers'))
 			secondMarkers.show();
 		else
@@ -354,22 +353,7 @@ $(function(){
 $(function(){
 	$('a.disabled').on('click', function(e){
 		e.preventDefault();
-	})
-});
-
-jQuery.fn.sortableTable = function(settings){
-	var $ = jQuery;
-	var $this = $(this);
-	var headerSettings = {};
-	$('th', $this).each(function(index){
-		var sortable = $(this).hasClass("sortable");
-		if(!sortable){
-			headerSettings[index] = {sorter: false};
-		}
 	});
-	$this.tablesorter({headers: headerSettings});
-	return this;
-};
-
+});
 
 }(jQuery));
