@@ -74,6 +74,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
+	// TAB-114 - vast majority of module codes match this pattern
+	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
 
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
@@ -90,6 +92,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	// use lazy list with factory as spring doesn't know how to dynamically create items
 	@BeanProperty var items: JList[FeedbackItem] = LazyLists.simpleFactory()
 	@BeanProperty var unrecognisedFiles: JList[ProblemFile] = LazyLists.simpleFactory()
+	@BeanProperty var moduleMismatchFiles: JList[ProblemFile] = LazyLists.simpleFactory()
 	@BeanProperty var invalidFiles: JList[ProblemFile] = LazyLists.simpleFactory()
 	@BeanProperty var archive: MultipartFile = _
 	@BeanProperty var batch: Boolean = false
@@ -199,6 +202,17 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					// one 7 digit number, this one might be okay.
 					store(itemMap, numbers.head, filenameOf(filename), file)
 				}
+				
+				// match potential module codes found in file path
+				val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
+				
+				if(!allModuleCodes.isEmpty){
+					// the potential module code doesn't match this assignment's module code
+					if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
+						moduleMismatchFiles.add(new ProblemFile(filename, file))
+					} 
+				}
+				
 			}
 			items = itemMap.values.toList
 		}
