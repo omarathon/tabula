@@ -359,6 +359,7 @@ ul {
 		}
 	}
 }
+
 #page-header {
 	.actions a {
 		.vertical-gradient(#666,#333);
@@ -372,16 +373,31 @@ ul {
 }
 
 table {
-  th,td {
-    vertical-align: top;
-  }
-  th {
-    padding-right: 1em;
-  }
+	th,td {
+		vertical-align: top;
+	}
+	
+	th {
+		padding-right: 1em;
+	}
+}
+
+// wrapper for tables, lists etc that need to be height-limited with scrollbars
+// note that you can't apply to tables directly, they need a container; most other elements work
+.scrollOver(@height) {
+	@media screen {
+		max-height: @height;
+		overflow: auto;
+		margin-bottom: 18px;
+		padding-right: 9px;
+	}
+}
+// default container with default height
+.scrolling-container {
+	.scrollOver(600px);
 }
 
 #main-content {
-
 	ul.file-list {
 	  padding: 0;
 	  margin: 0;
@@ -401,8 +417,6 @@ table {
 	  }
 	}
 
-
-	
 	ul.user-list {
 	  list-style: none;
 	  padding-left: 0;
@@ -632,6 +646,12 @@ table {
 	cursor:pointer;
 }
 
+*[rel=tooltip],
+.use-tooltip {
+	cursor:help;
+	border-bottom: 1px dotted @grayLight;
+}
+	
 #app-comment-message {
   padding: 0.5em;
   height: 5em;
@@ -910,11 +930,6 @@ h1.with-settings {
 	}
 	
 	#container .profile {
-		span[rel="tooltip"] {
-			cursor:help;
-			border-bottom: 1px dotted black;
-		}
-	
 		#personal-details {
 			div.photo {
 				.tabula-photo;
