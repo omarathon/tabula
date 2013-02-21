@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import scala.reflect.BeanProperty
-
 import org.hibernate.annotations.Type
-
 import javax.persistence._
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.HibernateVersioned
 
 @Entity
-class RoleOverride extends GeneratedId with PermissionsTarget {
+class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsTarget {
 	
 	// optional link to some CustomRoleDefinition
 	@ManyToOne(fetch = FetchType.LAZY)

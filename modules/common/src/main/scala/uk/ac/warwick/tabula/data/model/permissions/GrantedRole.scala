@@ -10,9 +10,10 @@ import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.HibernateVersioned
 
 @Entity
-class GrantedRole extends GeneratedId with PostLoadBehaviour {
+class GrantedRole extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")

@@ -23,12 +23,6 @@ class Module extends GeneratedId with PermissionsTarget {
 	@BeanProperty var code: String = _
 	@BeanProperty var name: String = _
 
-	// The members are studying the module.
-	// (moved to Assignment)
-	/*@OneToOne(cascade=Array(CascadeType.ALL))
-	@JoinColumn(name="membersgroup_id")
-	@BeanProperty var members:UserGroup = new UserGroup*/
-
 	// The participants are markers/moderators who upload feedback. 
 	// They can also publish feedback.
 	@OneToOne(cascade = Array(CascadeType.ALL))

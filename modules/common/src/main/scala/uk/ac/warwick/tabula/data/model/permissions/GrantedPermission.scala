@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.data.model.permissions
 import scala.reflect.BeanProperty
-
 import org.hibernate.annotations.Columns
 import org.hibernate.annotations.Type
-
 import javax.persistence._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.HibernateVersioned
 
 @Entity
-class GrantedPermission extends GeneratedId with PostLoadBehaviour {
+class GrantedPermission extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")

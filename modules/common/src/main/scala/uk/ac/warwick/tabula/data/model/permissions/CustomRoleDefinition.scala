@@ -11,9 +11,10 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import scala.collection.immutable.ListMap
+import uk.ac.warwick.tabula.data.model.HibernateVersioned
 
 @Entity
-class CustomRoleDefinition extends RoleDefinition with GeneratedId with PermissionsTarget {
+class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
 
 	// The department which owns this definition - probably want to expand this to include sub-departments later
 	@ManyToOne
