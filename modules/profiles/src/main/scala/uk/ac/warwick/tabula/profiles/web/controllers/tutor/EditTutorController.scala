@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
@@ -21,9 +22,10 @@ import uk.ac.warwick.tabula.helpers.Promises
 
 class EditTutorCommand(val student: Member) extends Command[Option[StudentRelationship]] with Promises {
 
+	@BeanProperty var tutor: Member = _
+	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
-	@BeanProperty var tutor: Member = _
 	val newTutor = promise { tutor }
 	
 	var profileService = Wire.auto[ProfileService]
@@ -31,7 +33,7 @@ class EditTutorCommand(val student: Member) extends Command[Option[StudentRelati
 	def currentTutor = profileService.getPersonalTutor(student)
 	
 	@BeanProperty val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
-	
+
 	def applyInternal = {
 		if (!currentTutor.isDefined || !currentTutor.get.equals(tutor)) {
 			// it's a real change
@@ -53,15 +55,14 @@ class EditTutorController extends BaseController {
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
 		restricted(new SearchTutorsCommand(user)) orNull
-	
+
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = new EditTutorCommand(student)
 
-	// initial form display
 	@RequestMapping(params = Array("!tutor"))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
-			"studentUniId" -> cmd.student.universityId,
+			"student" -> cmd.student,
 			"tutorToDisplay" -> cmd.currentTutor,
 			"displayOptionToSave" -> false)
 	}
@@ -69,11 +70,11 @@ class EditTutorController extends BaseController {
 	// now we've got a tutor id to display, but it's not time to save it yet
 	@RequestMapping(params = Array("tutor", "!storeTutor"))
 	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
+
 		Mav("tutor/edit/view",
-			"studentUniId" -> cmd.student.universityId,
+			"student" -> cmd.student,
 			"tutorToDisplay" -> cmd.tutor,
-			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.equals(cmd.tutor)))
-	}
+			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.equals(cmd.tutor)))	}
 
 	@RequestMapping(params=Array("tutor", "storeTutor"), method=Array(POST))
 	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
@@ -81,7 +82,7 @@ class EditTutorController extends BaseController {
 		val rel = cmd.apply()
 		
 		Mav("tutor/edit/view", 
-			"studentUniId" -> cmd.student.universityId, 
+			"student" -> cmd.student, 
 			"tutorToDisplay" -> cmd.currentTutor,
 			"displayOptionToSave" -> false
 		)

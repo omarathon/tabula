@@ -10,12 +10,13 @@
 				<@f.form 
 					id="saveTutor"
 					method="post" 
-					action="/profiles/tutor/${studentUniId}/edit"
+					action="/profiles/tutor/${student.universityId}/edit"
 					commandName="editTutorCommand" 
 					class="form-horizontal">
 
 					<@spring.bind path="tutor">
-						<input id="tutor" name="${status.expression}" type="hidden" value="${status.value}" />
+
+						<input id="tutor" name="${status.expression}" type="hidden" value="${editTutorCommand.tutor.universityId}" />
 					</@spring.bind>
 					
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -46,6 +47,6 @@
 	</#if>
 	<section class="tutor-edit-return">
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<a href="<@routes.profile_by_id studentUniId="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
+		<a href="<@routes.profile_by_id student="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
 	</section>
 </#escape>

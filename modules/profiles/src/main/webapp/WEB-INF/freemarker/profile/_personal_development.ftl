@@ -7,7 +7,7 @@
 					<span class="muted">External to Warwick</span>
 				</#if>
 				<#if can.do("Profiles.PersonalTutor.Update", profile)>
-					<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor studentUniId=profile.universityId />"><i class="icon-edit"></i></a>
+					<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 				</#if>
 			</p>
 		<#else>
@@ -18,7 +18,7 @@
 				<h5>
 					${profile.personalTutor.fullName}
 					<#if can.do("Profiles.PersonalTutor.Update", profile)>
-						<a id="edit-tutor-link" href="<@routes.tutor_edit studentUniId=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>
+						<a id="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>
 					</#if>
 				</h5>
 				<#if profile.personalTutor.universityId == viewer.universityId>
