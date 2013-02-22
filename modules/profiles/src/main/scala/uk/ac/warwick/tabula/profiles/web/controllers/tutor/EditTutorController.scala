@@ -70,6 +70,7 @@ class EditTutorController extends BaseController {
 		case _ => throw new ItemNotFoundException
 	}
 	
+	// initial form display
 	@RequestMapping(params = Array("!tutor"))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
