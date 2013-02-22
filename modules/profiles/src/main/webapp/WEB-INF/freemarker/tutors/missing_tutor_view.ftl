@@ -28,7 +28,7 @@
 			</tbody>
 		</table>
 	<#else>
-		<p class="alert alert-warning"><i class="icon-warning-sign"></i> All students in Tabula have personal tutors recorded.</p>
+		<p class="alert alert-success"><i class="icon-ok"></i> All students in Tabula have personal tutors recorded.</p>
 	</#if>
 </div>
 

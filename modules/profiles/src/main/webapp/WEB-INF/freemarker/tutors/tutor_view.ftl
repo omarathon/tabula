@@ -74,7 +74,11 @@
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No personal tutors are currently visible for ${department.name} in Tabula.</p>
 	</#if>
 	
-	<h4><a href="<@routes.tutors_missing department />">View <@fmt.p missingCount "student" /> with no personal tutor</a></h4>
+	<#if missingCount == 0>
+		<h4 class="muted"><i class="icon-ok">All students in ${department.name} have personal tutors recorded</i></h4>
+	<#else>
+		<h4><a href="<@routes.tutors_missing department />">View <@fmt.p missingCount "student" /> with no personal tutor</a></h4>
+	</#if>
 </div>
 
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
