@@ -79,7 +79,7 @@
 		  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
 		  <ul class="dropdown-menu">
 		  	<#if can_manage >	
-					<#assign  module_managers_count = ((module.participants.includeUsers)![])?size />
+					<#assign  module_managers_count = ((module.managers.includeUsers)![])?size />
 					<li><a href="<@url page="/admin/module/${module.code}/permissions" />">
 						Edit module managers <span class="badge">${module_managers_count}</span>
 					</a></li>

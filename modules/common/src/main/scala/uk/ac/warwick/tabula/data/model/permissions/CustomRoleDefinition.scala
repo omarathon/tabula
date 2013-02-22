@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.HibernateVersioned
+import uk.ac.warwick.tabula.permissions.Permission
 
 @Entity
 class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
@@ -58,8 +59,14 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	def permissionsParents = 
 		Seq(Option(department)).flatten
 		
+	/**
+	 * This method eagerly resolves sub-roles, which is why we return 
+	 * an empty set of actual sub-roles. It has to resolve now so that 
+	 * we can do the removal accurately - otherwise we won't be able to 
+	 * remove permissions added in sub-roles.
+	 */
 	def permissions(scope: Option[PermissionsTarget]) = {
-		val basePermissions = baseRoleDefinition.permissions(scope)
+		val basePermissions = baseRoleDefinition.allPermissions(scope)
 		
 		val (additionOverrides, removalOverrides) = overrides.partition(_.overrideType)
 		val additions = additionOverrides.map { _.permission -> scope }
@@ -68,6 +75,12 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 		(basePermissions ++ additions) -- removals
 	}
 		
-	def subRoles(scope: Option[PermissionsTarget]) = baseRoleDefinition.subRoles(scope)
+	def subRoles(scope: Option[PermissionsTarget]) = Set()
+	
+	/**
+	 * Return all permissions, resolving sub-roles. This is the behaviour of permissions() anyway
+	 */
+	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
+		permissions(scope)
 
 }

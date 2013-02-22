@@ -17,9 +17,7 @@ case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 		GodMode,
 		ManageMaintenanceMode,
 		ImportSystemData,
-		ReplicaSyncing,
-		PermissionsHelper,
-		ManageAllDepartmentPermissions
+		ReplicaSyncing
 	)
 	
 	GrantsGlobalPermission(
@@ -28,8 +26,11 @@ case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 		Module.Update,
 		Module.Delete,
 		
-		// To add department owners
-		Department.ManagePermissions
+		// To add department owners, but also global-read is for the permissions helper
+		RolesAndPermissions.Create,
+		RolesAndPermissions.Read,
+		RolesAndPermissions.Update,
+		RolesAndPermissions.Delete
 	)
 	
 }
