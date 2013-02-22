@@ -10,6 +10,10 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
+import org.hibernate.annotations.ForeignKey
 
 @Entity
 @NamedQueries(Array(
@@ -43,6 +47,10 @@ class Module extends GeneratedId with PermissionsTarget {
 	@BeanProperty var assignments: java.util.List[Assignment] = List()
 
 	@BeanProperty var active: Boolean = _
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
 
 	override def toString = "Module[" + code + "]"
 }

@@ -42,15 +42,14 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	 */
 	def findByParticipant(userId: String): Seq[Module] =
 		session.createQuery("""
-				from GrantedRole r 
-				where r.scope.type = :type and 
-					r.builtInRoleDefinition = :def and 
-					:user in elements(r.users.includeUsers)
+				from Module m 
+				left join fetch m.grantedRoles r
+				where r.builtInRoleDefinition = :def 
+					and :user in elements(r.users.includeUsers)
 				""")
-			.setString("type", "Module")
 			.setParameter("def", ModuleManagerRoleDefinition)
 			.setString("user", userId)
-			.list.asInstanceOf[JList[GrantedRole]] map { _.scope.asInstanceOf[Module] }
+			.list.asInstanceOf[JList[Module]]
 
 	/**
 	 * Find modules managed by this user, in this department.

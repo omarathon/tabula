@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.xml.NodeSeq
 import org.hibernate.annotations.AccessType
@@ -15,6 +15,12 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
+import org.hibernate.annotations.JoinColumnsOrFormulas
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import org.hibernate.annotations.JoinColumnOrFormula
+import org.hibernate.annotations.JoinFormula
+import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
+import org.hibernate.annotations.ForeignKey
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
@@ -85,6 +91,10 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	override def postLoad {
 		ensureSettings
 	}
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
 	
 	def permissionsParents = Seq()
 
