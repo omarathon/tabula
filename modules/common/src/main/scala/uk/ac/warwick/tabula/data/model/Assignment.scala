@@ -20,6 +20,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
+import org.hibernate.annotations.ForeignKey
 
 
 object Assignment {
@@ -424,6 +426,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * where the lists of students don't match up.
 	 */
 	def submissionsReport = SubmissionsReport(this)
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[AssignmentGrantedRole] = ArrayList()
 
 	def toStringProps = Seq(
 		"id" -> id,
