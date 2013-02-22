@@ -16,9 +16,9 @@ class StringListUserType extends AbstractBasicUserType[Seq[String], String] {
 	override def sqlTypes = Array(Types.VARCHAR)
 
 	val nullValue = null
-	val nullObject = null
+	val nullObject = Nil
 
 	override def convertToObject(string: String) = string.split(separator)
-	override def convertToValue(list: Seq[String]) = list.mkString(separator)
+	override def convertToValue(list: Seq[String]) = if (list.isEmpty) null else list.mkString(separator)
 
 }

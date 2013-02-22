@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.roles.Role
 @Component
 class AssignmentSubmitterRoleProvider extends RoleProvider {
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {		
+	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {
 		scope match {
 			case assignment: Assignment => 
 				if (assignment.canSubmit(user.apparentUser)) Seq(AssignmentSubmitter(assignment))

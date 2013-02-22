@@ -4,8 +4,10 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class StaffRole(department: model.Department) extends BuiltInRole(department) {
-	GrantsPermission(
+case class StaffRole(department: model.Department) extends BuiltInRole(department, StaffRoleDefinition)
+
+case object StaffRoleDefinition extends BuiltInRoleDefinition {
+	GrantsScopelessPermission(
 		UserPicker
 	)
 	
@@ -13,7 +15,7 @@ case class StaffRole(department: model.Department) extends BuiltInRole(departmen
 		Profiles.Search
 	)
 	
-	GrantsPermissionFor(department,
+	GrantsScopedPermission(
 		Profiles.Read,
 		Profiles.PersonalTutor.Read
 	)

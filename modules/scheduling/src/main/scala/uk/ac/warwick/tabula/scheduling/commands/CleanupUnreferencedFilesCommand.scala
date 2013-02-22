@@ -98,7 +98,7 @@ object CleanupUnreferencedFilesCommand {
 	val LastCleanupJobDetailsFilename = "last_replica_filesystem_cleanup_details"
 }
 
-class FunctionalFileFilter[T](fn: => (File => Boolean)) extends FileFilter {
+class FunctionalFileFilter[A](fn: => (File => Boolean)) extends FileFilter {
 	override def accept(file: File) = fn(file)
 }
 

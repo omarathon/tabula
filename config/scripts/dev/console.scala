@@ -15,7 +15,7 @@ object App {
     ctx
   }
 
-  def bean[T](name:String) : T = context.getBean(name).asInstanceOf[T]
+  def bean[A](name:String) : A = context.getBean(name).asInstanceOf[A]
 
   def inSession(f: (Session)=>Unit) = {
     val session = bean[SessionFactory]("sessionFactory").openSession

@@ -47,7 +47,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
 	
 	def getBySprCode(sprCode: String) = 
-		session.newCriteria[Member].add(is("sprCode", sprCode.trim)).uniqueResult
+		session.newCriteria[Member]
+				.createAlias("studyDetails", "studyDetails")
+				.add(is("studyDetails.sprCode", sprCode.trim))
+				.uniqueResult
 	
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
@@ -126,7 +129,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				StudentRelationship sr,
 				Member m
 			where
-				sr.targetSprCode = m.sprCode
+				sr.targetSprCode = m.studyDetails.sprCode
 			and
 				sr.relationshipType = :relationshipType
 			and
@@ -161,9 +164,9 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			where
 				m.homeDepartment = :department
 			and
-				m.studentStatus = 'Current Student'
+				m.studyDetails.studentStatus = 'Current Student'
 			and
-				m.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				m.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 		""")
 			.setEntity("department", department)
 			.setString("relationshipType", relationshipType.dbValue)

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.util.StringUtils
 
 class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
 	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, submitter){
@@ -46,7 +47,10 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 				case _ => null
 			}
 
-			markerFeedback.mark = Option(actualMark.toInt)
+			markerFeedback.mark = StringUtils.hasText(actualMark) match {
+				case true => Some(actualMark.toInt)
+				case false => None
+			}
 			markerFeedback.grade = Option(actualGrade)
 			session.saveOrUpdate(parentFeedback)
 			session.saveOrUpdate(markerFeedback)

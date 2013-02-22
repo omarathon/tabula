@@ -274,9 +274,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Find a FormField on the Assignment with the given name and type.
 	 * A field with a matching name but not a matching type is ignored.
 	 */
-	def findFieldOfType[T <: FormField](name: String)(implicit m: Manifest[T]): Option[T] =
+	def findFieldOfType[A <: FormField](name: String)(implicit m: Manifest[A]): Option[A] =
 		findField(name) match {
-			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[T])
+			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[A])
 			case _ => None
 		}
 

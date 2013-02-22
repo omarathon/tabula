@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService

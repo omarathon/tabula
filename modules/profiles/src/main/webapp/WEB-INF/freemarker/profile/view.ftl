@@ -68,14 +68,14 @@
 							</tr>
 						</#if>
 						
-						<#if profile.termtimeAddress??>
+						<#if profile.student && profile.termtimeAddress??>
 							<tr class="address">
 								<th>Term-time address</th>
 								<td><@address profile.termtimeAddress /></td>
 							</tr>
 						</#if>
 						
-						<#if profile.nextOfKins?size gt 0>
+						<#if profile.student && profile.nextOfKins?size gt 0>
 							<tr>
 								<th>Emergency contacts</th>
 								<td>
@@ -111,6 +111,13 @@
 							</tr>
 						</#if>
 						
+						<#if profile.phoneNumber??>
+							<tr>
+								<th>Phone number</th>
+								<td>${phoneNumberFormatter(profile.phoneNumber)}</td>
+							</tr>
+						</#if>
+						
 						<#if profile.mobileNumber??>
 							<tr>
 								<th>Mobile phone</th>
@@ -128,7 +135,7 @@
 							<td>${profile.userId}</td>
 						</tr>
 						
-						<#if profile.homeAddress??>
+						<#if profile.student && profile.homeAddress??>
 							<tr class="address">
 								<th>Home address</th>
 								<td><@address profile.homeAddress /></td>
@@ -140,7 +147,7 @@
 		</div>
 			
 		<#if isSelf>
-			<div style="margin-top: 12px;"><span rel="tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></div>
+			<div style="margin-top: 12px;"><span class="use-tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></div>
 		</#if>
 	</section>
 
@@ -160,7 +167,7 @@
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 	
 		<@f.form method="post" action="${url('/sysadmin/import-profiles/' + profile.universityId, '/scheduling')}">
-			<button class="btn btn-large" type="submit">Re-import details from ADS</button>
+			<button class="btn btn-large" type="submit">Re-import details from Membership, SITS and about a billion other systems</button>
 		</@f.form>
 	</div>
 </#if>

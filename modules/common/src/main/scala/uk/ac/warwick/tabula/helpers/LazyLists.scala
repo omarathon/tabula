@@ -19,8 +19,8 @@ object LazyLists {
 	 * Creates a lazy list (optionally based on an existing list) that will create
 	 * elements on demand using the default no-arg constructor for the class.
 	 */
-	def simpleFactory[T](list: JList[T] = ArrayList[T]())(implicit m: Manifest[T]): JList[T] =
+	def simpleFactory[A](list: JList[A] = ArrayList[A]())(implicit m: Manifest[A]): JList[A] =
 		LazyList.decorate(list, FactoryUtils.instantiateFactory(m.erasure))
-			.asInstanceOf[JList[T]]
+			.asInstanceOf[JList[A]]
 
 }

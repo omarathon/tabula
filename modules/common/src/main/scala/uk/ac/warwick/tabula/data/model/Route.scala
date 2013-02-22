@@ -24,21 +24,6 @@ class Route extends GeneratedId {
 	@BeanProperty var code: String = _
 	@BeanProperty var name: String = _
 
-	@OneToOne(cascade = Array(CascadeType.ALL))
-	@JoinColumn(name = "participantsgroup_id")
-	@BeanProperty var participants: UserGroup = new UserGroup
-
-	// return participants, creating an empty one if missing.
-	def ensuredParticipants = {
-		ensureParticipantsGroup
-		participants
-	}
-
-	/** Create an empty participants group if it's null. */
-	def ensureParticipantsGroup {
-		if (participants == null) participants = new UserGroup
-	}
-
 	@ManyToOne
 	@JoinColumn(name = "department_id")
 	@BeanProperty var department: Department = _

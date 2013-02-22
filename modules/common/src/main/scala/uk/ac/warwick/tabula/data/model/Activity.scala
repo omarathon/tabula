@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
  *  In future, perhaps we'd extend this to take a collection of entities
  *  for more complex interactions.
  */
-class Activity[T](val title: String, val date: DateTime, val agent: User, val message: String, val entity: T) {
+class Activity[A](val title: String, val date: DateTime, val agent: User, val message: String, val entity: A) {
 
 	// Expose entity type for Freemarker
 	def getEntityType = entity.getClass.getSimpleName

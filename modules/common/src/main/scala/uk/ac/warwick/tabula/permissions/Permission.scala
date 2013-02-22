@@ -41,14 +41,14 @@ object Permissions {
 		try {
 			// Go through the magical heirarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
-			clz.getConstructors()(0).newInstance().asInstanceOf[Permission]
+			clz.getDeclaredField("MODULE$").get(null).asInstanceOf[Permission]
 		} catch {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
 		}
 	}
 	
 	def shortName(clazz: Class[_ <: Permission])
-		= clazz.getName.substring(Permissions.getClass.getName.length, clazz.getName.length - 1).replace('$', '.')
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 	
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission

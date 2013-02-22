@@ -13,7 +13,6 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
 jQuery(function ($) {
-	
 	$('input.date-time-picker').datetimepicker({
 		format: "dd-M-yyyy hh:ii:ss",
 		weekStart: 1,
@@ -85,16 +84,32 @@ jQuery(function ($) {
 		}
 	});
 	
-    $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
-
-    // add .use-tooltip class and title attribute to enable cool looking tooltips.
-    // http://twitter.github.com/bootstrap/javascript.html#tooltips
-    $('.use-tooltip').tooltip();
-    
-    // add .use-popover and optional data- attributes to enable a cool popover. 
-    // http://twitter.github.com/bootstrap/javascript.html#popovers
-    $('.use-popover').popover().click(function(){ return false; });
-
+	$('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
+	
+	// add .use-tooltip class and title attribute to enable cool looking tooltips.
+	// http://twitter.github.com/bootstrap/javascript.html#tooltips
+	$('.use-tooltip').tooltip();
+	
+	// add .use-popover and optional data- attributes to enable a cool popover. 
+	// http://twitter.github.com/bootstrap/javascript.html#popovers
+	$('.use-popover').popover().click(function(){ return false; });
+	
+	// support sortable table
+	jQuery.fn.sortableTable = function(settings){
+		var $ = jQuery;
+		var $this = $(this);
+		if ($this.tablesorter) {
+			var headerSettings = {};
+			$('th', $this).each(function(index){
+				var sortable = $(this).hasClass("sortable");
+				if(!sortable){
+					headerSettings[index] = {sorter: false};
+				}
+			});
+			$this.tablesorter({headers: headerSettings});
+			return this;
+		}
+	};
 }); // end domready
 
 }(jQuery));

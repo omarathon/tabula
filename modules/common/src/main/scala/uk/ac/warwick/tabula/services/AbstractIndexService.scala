@@ -36,12 +36,12 @@ import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 
-trait CommonQueryMethods[T] { self: AbstractIndexService[T] =>
+trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
 
 	/**
 	 * Get recent items.
 	 */
-	def listRecent(start: Int, count: Int): Seq[T] = {
+	def listRecent(start: Int, count: Int): Seq[A] = {
 		val min = new DateTime().minusYears(2)
 		val docs = search(
 			query = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, null, true, true),
@@ -53,7 +53,7 @@ trait CommonQueryMethods[T] { self: AbstractIndexService[T] =>
 	
 }
 
-trait QueryHelpers[T] { self: AbstractIndexService[T] =>
+trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 	private def boolean(occur: Occur, queries: Query*): Query = {
 		val query = new BooleanQuery
 		for (q <- queries) query.add(q, occur)
@@ -74,7 +74,7 @@ class RichSearchResults(seq: Seq[Document]) {
 
 }
 
-abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryHelpers[T] with InitializingBean with Logging with DisposableBean {
+abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryHelpers[A] with InitializingBean with Logging with DisposableBean {
 	
 	final val LuceneVersion = Version.LUCENE_40
 	
@@ -227,7 +227,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		}
 	}
 	
-	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[T]
+	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[A]
 
 	def indexFrom(startDate: DateTime) = transactional() {
 		ifNotIndexing {
@@ -238,11 +238,11 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Seq[T]) = transactional() {
+	def indexItems(items: Seq[A]) = transactional() {
 		ifNotIndexing { doIndexItems(items) }
 	}
 
-	private def doIndexItems(items: Seq[T]) {
+	private def doIndexItems(items: Seq[A]) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
@@ -259,13 +259,13 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	 * If this item is the newest item this service has seen, save the date
 	 * so we know where to start from next time.
 	 */
-	private def updateMostRecent(item: T) {
+	private def updateMostRecent(item: A) {
 		val shouldUpdate = mostRecentIndexedItem.map { _ isBefore getUpdatedDate(item) }.getOrElse { true }
 		if (shouldUpdate)
 			mostRecentIndexedItem = Some(getUpdatedDate(item))
 	}
 	
-	protected def getUpdatedDate(item: T): DateTime
+	protected def getUpdatedDate(item: A): DateTime
 	
 	val UpdatedDateField: String
 
@@ -339,7 +339,7 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 		}
 	}
 
-	private def acquireSearcher[T](work: IndexSearcher => T): T = {
+	private def acquireSearcher[A](work: IndexSearcher => A): A = {
 		val searcher = searcherManager.acquire
 		try work(searcher)
 		finally searcherManager.release(searcher)
@@ -408,17 +408,17 @@ abstract class AbstractIndexService[T] extends CommonQueryMethods[T] with QueryH
 	 * If an existing Document is in the index with this term, it
 	 * will be replaced.
 	 */
-	private def uniqueTerm(item: T) = new Term(IdField, getId(item))
-	protected def getId(item: T): String
+	private def uniqueTerm(item: A) = new Term(IdField, getId(item))
+	protected def getId(item: A): String
 	
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: T): Document
+	protected def toDocument(item: A): Document
 	
 	protected def toId(doc: Document) = documentValue(doc, IdField)
-	protected def toItem(id: String): Option[T]
-	protected def toItem(doc: Document): Option[T] = { toId(doc) flatMap (toItem) }
+	protected def toItem(id: String): Option[A]
+	protected def toItem(doc: Document): Option[A] = { toId(doc) flatMap (toItem) }
 
 	protected def seqField(key: String, ids: Seq[_]) = {
 		new TextField(key, ids.mkString(" "), Store.NO)

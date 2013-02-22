@@ -6,8 +6,6 @@
 var exports = {};
 
 $(function() {
-	$('span[rel="tooltip"]').tooltip();
-
 	$('.profile-search').each(function() {
 		var container = $(this);
 		

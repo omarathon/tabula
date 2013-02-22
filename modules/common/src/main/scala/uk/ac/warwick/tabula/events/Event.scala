@@ -29,9 +29,9 @@ case class EventAndStage(event: Event, stage: String) extends Serializable
 
 object Event {
 	def fromDescribable(describable: Describable[_]) = doFromDescribable(describable, None)
-	def resultFromDescribable[T](describable: Describable[T], result: T, id: String) = doFromDescribable(describable, Some(result), id)
+	def resultFromDescribable[A](describable: Describable[A], result: A, id: String) = doFromDescribable(describable, Some(result), id)
 
-	private def doFromDescribable[T](describable: Describable[T], result: Option[T], id: String = null) = {
+	private def doFromDescribable[A](describable: Describable[A], result: Option[A], id: String = null) = {
 		val description = new DescriptionImpl
 		result.map(r => describable.describeResult(description, r))
 			.getOrElse(describable.describe(description))

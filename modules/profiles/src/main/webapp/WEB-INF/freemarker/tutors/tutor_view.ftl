@@ -58,8 +58,8 @@
 													<span class="muted">${student.universityId}</span>
 												</td>
 												<td>${student.groupName}</td>
-												<td>${student.yearOfStudy}</td>
-												<td>${student.route.name}</td>
+												<td>${student.studyDetails.yearOfStudy!""}</td>
+												<td>${student.studyDetails.route.name!""}</td>
 											</tr>
 										</#list>
 									</tbody>

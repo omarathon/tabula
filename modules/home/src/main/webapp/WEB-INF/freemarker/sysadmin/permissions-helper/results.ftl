@@ -96,6 +96,11 @@
 				<th>Explicit granted permissions<br><small>(relevant to scope)</small></th>
 				<td>
 					<#if results.permissions?size gt 0>
+						<ul>
+							<#list results.permissions as permission>
+								<li><#if permission._3>[ALLOW]<#else>[DENY]</#if> <@debugPermission permission=permission._1 scope=permission._2 /></li>
+							</#list>
+						</ul>
 					<#else>
 						None
 					</#if>

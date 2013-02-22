@@ -20,11 +20,11 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
  * make things more maintainable. assignment() will automatically
  * record its module and department info.
  */
-trait Describable[T] {
+trait Describable[A] {
 	// describe the thing that's happening.
 	def describe(d: Description)
 	// optional extra description after the thing's happened.
-	def describeResult(d: Description, result: T) { describeResult(d) }
+	def describeResult(d: Description, result: A) { describeResult(d) }
 	def describeResult(d: Description) {}
 	val eventName: String
 }
@@ -44,10 +44,10 @@ trait Describable[T] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[R] extends Describable[R] with JavaImports with EventHandling with PermissionsChecking {
+abstract class Command[A] extends Describable[A] with JavaImports with EventHandling with PermissionsChecking {
 	var maintenanceMode = Wire.auto[MaintenanceModeService]
 
-	final def apply(): R = {
+	final def apply(): A = {
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this)) recordEvent(this) { applyInternal() }
 			else throw maintenanceMode.exception()
@@ -64,7 +64,7 @@ abstract class Command[R] extends Describable[R] with JavaImports with EventHand
 		to be publicly visible, so there's little to stop you from calling it.
 		TODO somehow stop this being callable
 	*/
-	protected def applyInternal(): R
+	protected def applyInternal(): A
 
 	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
 
@@ -80,9 +80,9 @@ abstract class Command[R] extends Describable[R] with JavaImports with EventHand
  *
  * It doesn't actually call the callback - you do that in your `apply` implementation.
  */
-trait ApplyWithCallback[R] extends Command[R] {
-	var callback: (R) => Unit = _
-	def apply(fn: (R) => Unit): R = {
+trait ApplyWithCallback[A] extends Command[A] {
+	var callback: (A) => Unit = _
+	def apply(fn: (A) => Unit): A = {
 		callback = fn
 		apply()
 	}

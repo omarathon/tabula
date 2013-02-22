@@ -119,11 +119,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		}
 
 		validateShared(errors)
-
-		if (upstreamAssignment != null && !(upstreamAssignment.departmentCode equalsIgnoreCase module.department.code)) {
-			errors.rejectValue("upstreamAssignment", "upstreamAssignment.notYours")
-		}
-
 	}
 
 	// Called by controller after Spring has done its basic binding, to do more complex

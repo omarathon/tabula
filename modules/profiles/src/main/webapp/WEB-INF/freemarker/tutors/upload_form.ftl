@@ -19,13 +19,22 @@
 			</#if>
 		</#if>
 		
-		<p>
-			The tutor spreadsheet that you upload must be an <tt>.xlsx</tt> spreadsheet (created in Microsoft Office 2007+).
-			The spreadsheet must have two columns headed: <tt>student_id</tt> and <tt>tutor_id</tt>.
-			An optional <tt>tutor_name</tt> column may be added, but should <b>only</b> be set for external tutors
-			who do not have a University number from Warwick. Tabula will ignore any other columns which you may set for your own reference.
-			You can use this <a href="<@routes.tutor_template department />" >generated spreadsheet</a> as a template.
-		</p>
+		<p>You can set personal tutors for many students at once by uploading a spreadsheet. <a href="#" class="use-popover" 
+			data-title="Personal tutor spreadsheet"
+			data-trigger="click"
+			data-placement="bottom"
+			data-html="true"
+			data-content="&lt;p&gt;The spreadsheet must be in .xlsx format (created in Microsoft Office 2007 or later).&lt;p&gt;
+&lt;p&gt;The spreadsheet must contain two columns:&lt;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;student_id&lt;/b&gt; - contains the student's University ID number (also known as the library card number)&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;tutor_id&lt;/b&gt; - contains the tutor's University ID number&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You may need to &lt;a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'&gt;format these columns&lt;/a&gt; as text to avoid Microsoft Excel removing 0s from the start of ID numbers.&lt;/p&gt;
+&lt;p&gt;If there are students in your department with external tutors who do not have a University ID number, you may also add a tutor_name column containing the names of the external tutors. Leave this column blank for tutors who have an ID number.&lt;/p&gt;
+&lt;p&gt;The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).&lt;/p&gt;"><i class="icon-question-sign"></i></a></p>
+		
+		<p><a href="<@routes.tutor_template department />" >Download a template spreadsheet</a></p>
 		
 		<@f.form method="post" enctype="multipart/form-data" action=formDestination commandName="uploadPersonalTutorsCommand">
 			<input name="isfile" value="true" type="hidden"/>

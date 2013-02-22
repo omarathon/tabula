@@ -72,13 +72,13 @@ class ApplicationTest extends AppContextTestBase {
 	}
     
     /*
-     * A post-load event in Department makes sure that a null owners
+     * A post-load event in Department makes sure that a null settings
      * property is replaced with a new empty group on load.
      */
     @Transactional @Test def departmentLoadEvent {
       val dept = new Department
       dept.code = "ch"
-      dept.owners = null
+      dept.settings = null
       session.save(dept)
       
       val id = dept.id
@@ -87,7 +87,7 @@ class ApplicationTest extends AppContextTestBase {
       session.clear
       
       session.load(classOf[Department], id) match {
-        case loadedDepartment:Department => loadedDepartment.owners should not be(null)
+        case loadedDepartment:Department => loadedDepartment.settings should not be(null)
         case _ => fail("Department not found")
       }
       

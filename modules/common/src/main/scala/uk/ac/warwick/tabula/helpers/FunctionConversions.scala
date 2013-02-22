@@ -14,11 +14,11 @@ import org.hibernate.Session
  */
 object FunctionConversions {
 
-	implicit def ToConnectionCallback[T](fn: Connection => T) = new ConnectionCallback[T] {
+	implicit def ToConnectionCallback[A](fn: Connection => A) = new ConnectionCallback[A] {
 		override def doInConnection(connection: Connection) = fn(connection)
 	}
 
-	implicit def ToHibernateCallback[T](fn: Session => T) = new HibernateCallback[T] {
+	implicit def ToHibernateCallback[A](fn: Session => A) = new HibernateCallback[A] {
 		override def doInHibernate(session: Session) = fn(session)
 	}
 

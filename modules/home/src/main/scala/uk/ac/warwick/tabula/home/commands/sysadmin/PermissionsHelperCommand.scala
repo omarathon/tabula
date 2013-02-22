@@ -93,7 +93,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 
 case class PermissionHelperResult(
 	canDo: Boolean,
-	permissions: List[(Permission, Option[PermissionsTarget])],
+	permissions: List[(Permission, Option[PermissionsTarget], Boolean)],
 	roles: List[Role],
 	resolvedScope: PermissionsTarget,
 	scopeMismatch: Boolean,
