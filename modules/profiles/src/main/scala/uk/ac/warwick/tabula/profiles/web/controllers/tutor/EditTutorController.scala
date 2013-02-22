@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.profiles.helpers.TutorChangeNotifier
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] {
 
@@ -62,7 +63,10 @@ class EditTutorController extends BaseController {
 		restricted(new SearchTutorsCommand(user)) orNull
 	
 	@ModelAttribute("editTutorCommand")
-	def editTutorCommand(@PathVariable("student") student: StudentMember) = new EditTutorCommand(student)
+	def editTutorCommand(@PathVariable("student") student: Member) = student match {
+		case student: StudentMember => new EditTutorCommand(student)
+		case _ => throw new ItemNotFoundException
+	}
 	
 	// initial form display
 	@RequestMapping(params = Array("!tutorUniId"))
