@@ -6,7 +6,6 @@
 	
 		<section class="tutor-edit">
 			<#if displayOptionToSave>
-				<hr class="full-width">
 				<@f.form 
 					id="saveTutor"
 					method="post" 
@@ -18,28 +17,26 @@
 						<input id="tutor" name="${status.expression}" type="hidden" value="${editTutorCommand.tutor.universityId}" />
 					</@spring.bind>
 					
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					
-					<@f.checkbox path="notifyCommand.notifyTutee" value="true" /> 
-						
-					Notify tutee of change<br />
-					
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					
-					<@f.checkbox path="notifyCommand.notifyOldTutor" value="true" /> 
-					
-					Notify old tutor of change<br />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					
-					<@f.checkbox path="notifyCommand.notifyNewTutor" value="true" /> 
-					
-					Notify new tutor of change<br />
-					<input id="storeTutor" name="storeTutor" type="hidden" value="true" />
-					<div style="text-align:right">
-						<button type="submit" class="btn btn-primary">Save</button
-					</div>
-				</@f.form>
+					<div class="control-group">
+						<div class="controls">			
+							<label class="checkbox">
+								<@f.checkbox path="notifyCommand.notifyTutee" value="true" /> 
+								Notify tutee of change<br />
+								
+								<@f.checkbox path="notifyCommand.notifyOldTutor" value="true" /> 
+								Notify old tutor of change<br />
+								
+								<@f.checkbox path="notifyCommand.notifyNewTutor" value="true" /> 
+								Notify new tutor of change<br />
+							</label>	
 
+							<input id="storeTutor" name="storeTutor" type="hidden" value="true" />
+							<div style="text-align:right">
+								<button type="submit" class="btn btn-primary">Save</button
+							</div>
+						</div>		
+					</div>			
+				</@f.form>
 			</#if>
 		</section>
 
