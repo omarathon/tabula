@@ -18,6 +18,7 @@ trait DepartmentDao {
 	def save(department: Department)
 	def getByOwner(user: String): Seq[Department]
 }
+
 @Repository
 class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 
@@ -39,13 +40,12 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 	 */
 	def getByOwner(user: String): Seq[Department] =
 		session.createQuery("""
-				from GrantedRole r 
-				where r.scope.type = :type and 
-					r.builtInRoleDefinition = :def and 
-					:user in elements(r.users.includeUsers)
+				from Department d 
+				left join fetch d.grantedRoles r
+				where r.builtInRoleDefinition = :def 
+					and :user in elements(r.users.includeUsers)
 				""")
-			.setString("type", "Department")
 			.setParameter("def", DepartmentalAdministratorRoleDefinition)
 			.setString("user", user)
-			.list.asInstanceOf[JList[GrantedRole]] map { _.scope.asInstanceOf[Department] }
+			.list.asInstanceOf[JList[Department]]
 }

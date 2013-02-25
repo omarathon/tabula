@@ -802,7 +802,7 @@ input[type=text] {
   color: @very-subtle-text-color;
 }
 
-.sits-picker, .membership-picker {
+.ag-picker, .membership-picker {
   border: 1px solid #ccc;
   .border-radius(3px);
   padding: 0.5em;
@@ -929,7 +929,7 @@ h1.with-settings {
 		margin-top: 20px;
 	}
 	
-	#container .profile {
+	#container .profile  {
 		#personal-details {
 			div.photo {
 				.tabula-photo;
@@ -980,6 +980,28 @@ h1.with-settings {
 			}
 		}
 		
+		#course-details {
+			table.course-info {
+				// Reset
+				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+				
+				width: 100%;
+				
+				th { 
+					text-align: right;
+					color: @grayLight;
+					white-space: nowrap;
+					
+					&:after { content: ':'; margin-right: 3px; } 
+				}
+				
+				td {
+					color: #0c0c0c;
+					width: 99%;
+				}
+			}
+		}		
+		
 		.untabbed {
 			margin-top: 12px;
 		}
@@ -1007,10 +1029,13 @@ h1.with-settings {
 		.tutees {
 			width: 100%;
 			
-			th.tutee-col { width: 35%; }
+			th.photo-col { width: 11%; }
+			th.tutee-col { width: 12%; }
+			th.id-col { width: 11%; }
 			th.type-col { width: 25%; }
 			th.year-col { width: 5%; }
 			th.course-col { width: 35%; }
+			th.course-but-photo-col { width: 24%; }
 
 			h6 { display: inline; }
 		}
@@ -1102,6 +1127,7 @@ h1.with-settings {
 	} // .profile-search
 
 	#container .tutor-search {
+		.control-group { margin-top: 54px; }
 		.input-append .btn { margin-top: 1px; }
 		
 		@searchFontSize: @baseFontSize * 1.2;
@@ -1119,6 +1145,11 @@ h1.with-settings {
 		}
 		
 		form { margin: 0; }
+		
+		b { 
+			line-height: 28px; 
+			font-size: @searchFontSize;
+		}
 	} // .tutor-search
 	
 	#container .tutor-edit {
@@ -1126,11 +1157,16 @@ h1.with-settings {
 			text-align: right;
 			margin-right:220px
 			}
-		
-		.tutor-edit-return {
-			text-align: left;
-		}
+
 	} // .tutor-edit
+	
+	#container .tutor-edit-return {
+		a {
+			margin-top: 54px;
+			}
+
+	} // .tutor-edit
+		
 } // .profiles-page
 
 .datetimepicker {

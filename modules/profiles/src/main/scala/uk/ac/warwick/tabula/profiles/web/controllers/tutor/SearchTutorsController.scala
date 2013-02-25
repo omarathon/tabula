@@ -14,14 +14,11 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 class SearchTutorsController extends ProfilesController {
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
-	
-	@ModelAttribute("student") def student(@RequestParam("studentUniId") studentUniId: String) =
-		profileService.getMemberByUniversityId(studentUniId).getOrElse(throw new IllegalStateException("Can't find student " + studentUniId))
 		
 	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) =  profileService.getPersonalTutor(student)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view")
+	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view", "displayOptionToSave" -> false)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
 	def submit(@Valid @ModelAttribute("searchTutorsCommand") cmd: SearchTutorsCommand, errors: Errors) = {

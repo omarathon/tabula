@@ -20,6 +20,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
+import org.hibernate.annotations.ForeignKey
+import javax.persistence._
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
 
 
 object Assignment {
@@ -63,8 +68,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@Column(nullable = false)
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 
-	@BeanProperty var occurrence: String = _
-
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
 	@BeanProperty var fileExtensions: Seq[String] = _
 
@@ -103,9 +106,24 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def permissionsParents = Seq(Option(module)).flatten
 
+//	@ManyToMany(fetch = FetchType.LAZY)
+//	@JoinTable(name="assignment_assessmentgroup",
+//		joinColumns=Array(new JoinColumn(name="assignment_id")),
+//		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
+//	@BeanProperty var assessmentGroups :JList[UpstreamAssessmentGroup] = ArrayList()
+//
+//	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
+
+	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BeanProperty var assessmentGroups: JList[AssessmentGroup] = ArrayList()
+
+
+	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
 	@ManyToOne
 	@JoinColumn(name = "upstream_id")
 	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
+
+	@BeanProperty var occurrence: String = _
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
@@ -207,16 +225,21 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
 
-	def assessmentGroup: Option[UpstreamAssessmentGroup] = {
-		if (upstreamAssignment == null || academicYear == null || occurrence == null) {
-			None
-		} else {
-			val template = new UpstreamAssessmentGroup
-			template.academicYear = academicYear
-			template.assessmentGroup = upstreamAssignment.assessmentGroup
-			template.moduleCode = upstreamAssignment.moduleCode
-			template.occurrence = occurrence
-			assignmentService.getAssessmentGroup(template)
+	// converts the assessmentGroups to upstream assessment groups
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+		if(academicYear == null){
+			Seq()
+		}
+		else {
+			val validGroups = assessmentGroups.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			validGroups.flatMap{group =>
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = academicYear
+				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
+				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.occurrence = group.occurrence
+				assignmentService.getAssessmentGroup(template)
+			}
 		}
 	}
 	
@@ -320,7 +343,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
-			assignmentService.isStudentMember(user, assessmentGroup, Option(members))
+			assignmentService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
 		}
@@ -424,6 +447,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * where the lists of students don't match up.
 	 */
 	def submissionsReport = SubmissionsReport(this)
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[AssignmentGrantedRole] = ArrayList()
 
 	def toStringProps = Seq(
 		"id" -> id,

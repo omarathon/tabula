@@ -58,15 +58,18 @@ object Permissions {
 	case object ManageMaintenanceMode extends ScopelessPermission
 	case object ImportSystemData extends ScopelessPermission
 	case object ReplicaSyncing extends ScopelessPermission
-	case object PermissionsHelper extends ScopelessPermission
-	case object ManageAllDepartmentPermissions extends ScopelessPermission
-
+	
+	object RolesAndPermissions {
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
+	}
 
 	object Department {
 		case object ManageExtensionSettings extends Permission
 		case object ManageDisplaySettings extends Permission
 		case object DownloadFeedbackReport extends Permission
-		case object ManagePermissions extends Permission
 	}
 	
 	object Module {
@@ -74,7 +77,6 @@ object Permissions {
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
-		case object ManagePermissions extends Permission
 	}
 			
 	object Assignment {

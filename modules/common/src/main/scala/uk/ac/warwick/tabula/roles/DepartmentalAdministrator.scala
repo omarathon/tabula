@@ -17,7 +17,11 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
 		
-		Module.ManagePermissions,
+		RolesAndPermissions.Create,
+		RolesAndPermissions.Read,
+		RolesAndPermissions.Update,
+		RolesAndPermissions.Delete,
+		
 		Assignment.ImportFromExternalSystem,
 		
 		FeedbackTemplate.Create,

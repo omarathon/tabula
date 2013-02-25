@@ -32,12 +32,12 @@ class SendSubmissionNotifyCommand (
 	@BeanProperty var assignment: Assignment = submission.assignment
 	@BeanProperty var module: Module = assignment.module
 	
-	val userLookup = Wire.auto[UserLookupService]
-	val userSettings = Wire.auto[UserSettingsService]
+	var userLookup = Wire.auto[UserLookupService]
+	var userSettings = Wire.auto[UserSettingsService]
 	implicit var freemarker = Wire.auto[Configuration]
-	val mailSender = Wire[WarwickMailSender]("studentMailSender")
-	val replyAddress = Wire.property("${mail.noreply.to}")
-	val fromAddress = Wire.property("${mail.exceptions.to}")
+	var mailSender = Wire[WarwickMailSender]("studentMailSender")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
 	
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 	

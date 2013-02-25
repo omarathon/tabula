@@ -15,6 +15,6 @@ class SearchTutorsCommand(user: CurrentUser) extends AbstractSearchProfilesComma
 		else Seq()
 		
 	private def queryMatches = {
-		profileIndexService.findWithQuery(query, Seq(), userTypes, true)
+		profileIndexService.findWithQuery(query, Seq(), false, userTypes, true)
 	}
 }

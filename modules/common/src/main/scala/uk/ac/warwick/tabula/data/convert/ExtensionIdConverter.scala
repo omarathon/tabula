@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.convert
 import org.springframework.beans.factory.annotation.Autowired
 
-import org.springframework.core.convert.converter.Converter
-
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.system.TwoWayConverter
 
-class ExtensionIdConverter extends Converter[String, Extension] {
+class ExtensionIdConverter extends TwoWayConverter[String, Extension] {
 
 	@Autowired var service: AssignmentService = _
 
-	override def convert(id: String) = service.getExtensionById(id).orNull
+	override def convertRight(id: String) = Option(id) flatMap { service.getExtensionById(_) } orNull
+	override def convertLeft(extension: Extension) = Option(extension) map {_.id} orNull
 
 }

@@ -19,7 +19,7 @@ class PermissionsTargetUserTypeTest extends PersistenceTestBase {
 			session.save(department)
 			session.flush
 			
-			val permission = new GrantedPermission
+			val permission = GrantedPermission.init[Department]
 			permission.users.addUser("cuscav")
 			permission.overrideType = permission.Allow
 			permission.scope = department
@@ -28,8 +28,8 @@ class PermissionsTargetUserTypeTest extends PersistenceTestBase {
 			session.flush
 			session.clear
 			
-			session.load(classOf[GrantedPermission], permission.id) match {
-				case permission: GrantedPermission =>
+			session.load(classOf[GrantedPermission[_]], permission.id) match {
+				case permission: GrantedPermission[Department] =>
 					permission.scope should be (department)
 				case _ => fail("What is this!")
 			}

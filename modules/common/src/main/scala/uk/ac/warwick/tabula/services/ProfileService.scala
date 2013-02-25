@@ -28,7 +28,7 @@ trait ProfileService {
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
-	def findMembersByDepartment(department: Department, userTypes: Set[MemberUserType]): Seq[Member]
+	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def findCurrentRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
@@ -61,8 +61,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		profileIndexService.find(query, departments, userTypes, isGod)
 	} 
 	
-	def findMembersByDepartment(department: Department, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
-		profileIndexService.find(department, userTypes)
+	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
+		profileIndexService.find(department, includeTouched, userTypes)
 	} 
 	
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

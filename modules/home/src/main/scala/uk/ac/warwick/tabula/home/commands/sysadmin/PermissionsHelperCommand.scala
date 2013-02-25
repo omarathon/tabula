@@ -22,7 +22,7 @@ import org.springframework.core.convert.ConversionException
 
 class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unaudited with ReadOnly with SelfValidating {
 	
-	PermissionCheck(PermissionsHelper)
+	PermissionCheck(RolesAndPermissions.Read, null)
 	
 	var securityService = Wire.auto[SecurityService]
 	var roleService = Wire.auto[RoleService]

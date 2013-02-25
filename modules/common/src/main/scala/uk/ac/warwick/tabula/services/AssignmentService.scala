@@ -33,6 +33,8 @@ trait AssignmentService {
 	
 	def getExtensionById(id: String): Option[Extension]
 
+	def delete(group: AssessmentGroup): Unit
+
 	def delete(submission: Submission): Unit
 
 	def deleteFormField(field: FormField) : Unit
@@ -57,7 +59,8 @@ trait AssignmentService {
 
 	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
 
-	def getAssessmentGroup(assignment: Assignment): Option[UpstreamAssessmentGroup]
+	def save(group: AssessmentGroup): Unit
+	def getAssessmentGroup(id: String): Option[AssessmentGroup]
 	def getAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 
 	def getUpstreamAssignment(id: String): Option[UpstreamAssignment]
@@ -82,11 +85,11 @@ trait AssignmentService {
 	def save(group: UpstreamAssessmentGroup)
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
-	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem]
-	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem]
+	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
 
-	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean
+	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean
 
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
 }
@@ -124,6 +127,8 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		.add(Restrictions.eq("moduleCode", assignment.moduleCode))
 		.add(Restrictions.eq("sequence", assignment.sequence))
 		.uniqueResult
+
+	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
 
 	def save(assignment: UpstreamAssignment) =
 		find(assignment)
@@ -166,7 +171,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		// (i.e. when a student is resubmitting work). [HFC-385#comments]
 		session.flush()
 	}
-	
+
 	def getExtensionById(id: String) = getById[Extension](id)
 
 	def deleteFormField(field: FormField) {
@@ -187,19 +192,19 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			session.flush()
 		}
 	}
-	
+
 	def saveOriginalityReport(attachment: FileAttachment) {
 		attachment.originalityReport.attachment = attachment
 		session.save(attachment.originalityReport)
 	}
-	
+
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
 		session.createSQLQuery("""
-              select * from 
+              select * from
               (
                 (
                   -- manually included users
-                  select distinct a.* from usergroupinclude ugi 
+                  select distinct a.* from usergroupinclude ugi
                   join assignment a on a.membersgroup_id = ugi.group_id
                   where ugi.usercode = :userId
                   and a.deleted = 0
@@ -210,8 +215,8 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
                   -- sits assessment groups
                   select distinct a.* from assignment a
                   join upstreamassignment ua on a.upstream_id = ua.id
-                  join upstreamassessmentgroup uag 
-                    on uag.modulecode = ua.modulecode 
+                  join upstreamassessmentgroup uag
+                    on uag.modulecode = ua.modulecode
                     and uag.assessmentgroup = ua.assessmentgroup
                     and uag.academicyear = a.academicyear
                     and uag.occurrence = a.occurrence
@@ -224,7 +229,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
               where id not in
               (
                 -- manually excluded users
-                select distinct a.id from usergroupexclude uge 
+                select distinct a.id from usergroupexclude uge
                 join assignment a on a.membersgroup_id = uge.group_id
                 where uge.usercode = :userId
               )
@@ -268,7 +273,7 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.list().asInstanceOf[JList[Assignment]]
 	}
 
-	/* get users whose feedback is not published and who have not submitted work suspected 
+	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */
 	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]] = {
 		//val uniIds = assignment.unreleasedFeedback.map { _.universityId }
@@ -302,13 +307,14 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.list
 	}
 
-	def getAssessmentGroup(assignment: Assignment): Option[UpstreamAssessmentGroup] = {
-		val upstream = assignment.upstreamAssignment
-		if (upstream == null) None
-		else criteria(assignment.academicYear, upstream.moduleCode, upstream.assessmentGroup, assignment.occurrence).uniqueResult
-	}
-
+	def getAssessmentGroup(id:String) = getById[AssessmentGroup](id)
 	def getAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+
+	def delete(group: AssessmentGroup) {
+		group.assignment.assessmentGroups.remove(group)
+		session.delete(group)
+		session.flush()
+	}
 
 	def getUpstreamAssignment(id: String) = getById[UpstreamAssignment](id)
 
@@ -357,13 +363,14 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 
-	def determineMembership(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem] = {
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem] = {
 
-		val sitsUsers = upstream map { upstream =>
+		val sitsUsers = upstream flatMap { upstream =>
 			upstream.members.members map { id =>
 				id -> userLookup.getUserByWarwickUniId(id)
 			}
-		} getOrElse Nil
+		}
+
 		val includes = others map { _.includeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 		val excludes = others map { _.excludeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 
@@ -379,7 +386,7 @@ trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 	/**
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
-	def determineMembershipUsers(upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User] = {
+	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User] = {
 		determineMembership(upstream, others) filter notExclude map toUser filter notNull
 	}
 
@@ -387,15 +394,15 @@ trait AssignmentMembershipMethods { self: AssignmentServiceImpl =>
 	 * Returns a simple list of User objects for students who are enrolled on this assignment. May be empty.
 	 */
 	def determineMembershipUsers(assignment: Assignment): Seq[User] = {
-		determineMembershipUsers(assignment.assessmentGroup, Option(assignment.members))
+		determineMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 	}
 
-	def isStudentMember(user: User, upstream: Option[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean = {
+	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean = {
 		if (others map {_.excludeUsers contains user.getUserId } getOrElse false) false
 		else if (others map { _.includeUsers contains user.getUserId } getOrElse false) true
-		else upstream map {
+		else upstream exists {
 			_.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
-		} getOrElse false // not in any group at all
+		}
 	}
 
 	private def sameUserIdAs(user: User) = (other: Pair[String, User]) => { user.getUserId == other._2.getUserId }

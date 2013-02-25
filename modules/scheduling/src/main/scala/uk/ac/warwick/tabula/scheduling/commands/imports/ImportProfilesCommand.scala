@@ -22,7 +22,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var departmentDao = Wire.auto[DepartmentDao]
+	var madService = Wire.auto[ModuleAndDepartmentService]
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
@@ -40,7 +40,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	def doMemberDetails {
 		benchmark("Import all member details") {
 			for {
-				department <- departmentDao.allDepartments;
+				department <- madService.allDepartments;
 				userIdsAndCategories <- logSize(profileImporter.userIdsAndCategories(department)).grouped(250)
 			} {
 				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")

@@ -13,6 +13,11 @@ trait RoleDefinition {
 	
 	def permissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
 	def subRoles(scope: Option[PermissionsTarget]): Set[Role]
+	
+	/**
+	 * Return all permissions, resolving sub-roles
+	 */
+	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
 }
 
 trait BuiltInRoleDefinition extends RoleDefinition {
@@ -21,7 +26,7 @@ trait BuiltInRoleDefinition extends RoleDefinition {
 	private var scopedPermissions: List[Permission] = List()
 	private var scopelessPermissions: List[ScopelessPermission] = List()
 	private var globalPermissions: List[Permission] = List()
-	private var subRoleDefinitions: Set[RoleDefinition] = Set()
+	private var subRoleDefinitions: Set[BuiltInRoleDefinition] = Set()
 	
 	def GrantsScopelessPermission(perms: ScopelessPermission*) = 
 		for (permission <- perms) scopelessPermissions ::= permission
@@ -32,7 +37,7 @@ trait BuiltInRoleDefinition extends RoleDefinition {
 	def GrantsGlobalPermission(perms: Permission*) =
 		for (permission <- perms) globalPermissions ::= permission
 		
-	def GeneratesSubRole(roles: RoleDefinition*) =
+	def GeneratesSubRole(roles: BuiltInRoleDefinition*) =
 		for (role <- roles) subRoleDefinitions += role
 		
 	def permissions(scope: Option[PermissionsTarget]) = 
@@ -43,6 +48,12 @@ trait BuiltInRoleDefinition extends RoleDefinition {
 		
 	def subRoles(scope: Option[PermissionsTarget]) =
 		subRoleDefinitions map { defn => RoleBuilder.build(defn, scope, defn.getName) }
+	
+	/**
+	 * Return all permissions, resolving sub-roles
+	 */
+	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
+		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
 	
 	/* We need to override equals() here because under heavy load, the class loader will 
 	 * (stupidly) return a different instance of the case object, which fails the equality

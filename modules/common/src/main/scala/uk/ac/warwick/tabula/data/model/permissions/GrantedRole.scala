@@ -1,19 +1,31 @@
 package uk.ac.warwick.tabula.data.model.permissions
 import scala.reflect.BeanProperty
-import org.hibernate.annotations.Columns
+import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import javax.persistence._
+import javax.persistence.CascadeType._
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model.HibernateVersioned
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.data.model.HibernateVersioned
+import org.hibernate.annotations.ForeignKey
 
 @Entity
-class GrantedRole extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
+@AccessType("field")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+		name="scope_type",
+		discriminatorType=DiscriminatorType.STRING
+)
+abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")
@@ -42,12 +54,7 @@ class GrantedRole extends GeneratedId with HibernateVersioned with PostLoadBehav
 		}
 	}
 	
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionsTargetUserType")
-	@Columns(columns=Array(
-			new Column(name="scope_type"),
-			new Column(name="scope_id")
-	))
-	@BeanProperty var scope: PermissionsTarget = _
+	var scope: A
 	
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
 	
@@ -61,4 +68,49 @@ class GrantedRole extends GeneratedId with HibernateVersioned with PostLoadBehav
 		users
 	}
 
+}
+
+object GrantedRole {
+	def init[A <: PermissionsTarget](implicit m: Manifest[A]): GrantedRole[A] =
+		m.erasure match {
+			case _ if m.erasure == classOf[Department] => (new DepartmentGrantedRole).asInstanceOf[GrantedRole[A]]
+			case _ if m.erasure == classOf[Module] => (new ModuleGrantedRole).asInstanceOf[GrantedRole[A]]
+			case _ if m.erasure == classOf[Member] => (new MemberGrantedRole).asInstanceOf[GrantedRole[A]]
+			case _ if m.erasure == classOf[Assignment] => (new AssignmentGrantedRole).asInstanceOf[GrantedRole[A]]
+			case _ => throw new IllegalArgumentException("Cannot define new roles for " + m.erasure)
+		}
+	
+	def canDefineFor[A <: PermissionsTarget : Manifest](scope: => A) = scope match {
+		case _: Department => true
+		case _: Module => true
+		case _: Member => true
+		case _: Assignment => true
+		case _ => false
+	} 
+}
+
+/* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
+@Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	@BeanProperty var scope: Department = _
+}
+@Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	@BeanProperty var scope: Module = _
+}
+@Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	@BeanProperty var scope: Member = _
+}
+@Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	@BeanProperty var scope: Assignment = _
 }

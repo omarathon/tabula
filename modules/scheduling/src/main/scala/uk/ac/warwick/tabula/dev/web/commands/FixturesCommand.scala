@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import scala.collection.JavaConversions._
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.home.commands.departments.AddDeptOwnerCommand
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -27,12 +27,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		// Two department admins
 		val department = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).get
-
-		for (usercode <- Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2)) {
-			val cmd = new AddDeptOwnerCommand(department)
-			cmd.usercode = usercode
-			cmd.apply()
-		}
+		
+		val cmd = new GrantRoleCommand(department)
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
+		cmd.apply()
 	}
 
 	private def setupDepartmentAndModules() {

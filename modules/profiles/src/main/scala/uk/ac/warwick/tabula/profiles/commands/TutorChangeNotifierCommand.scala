@@ -1,36 +1,39 @@
-package uk.ac.warwick.tabula.profiles.helpers
+package uk.ac.warwick.tabula.profiles.commands
+
+import scala.reflect.BeanProperty
 
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.util.concurrency.promise.Promise
 import uk.ac.warwick.util.mail.WarwickMailSender
 
-class TutorChangeNotifier(student: Member, oldTutor: Option[Member], notifyTutee: Boolean, notifyOldTutor: Boolean, notifyNewTutor: Boolean)
-		extends UnicodeEmails with Public with FreemarkerRendering {
+class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newTutorPromise: Promise[Member])
+	extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
+	
+	@BeanProperty var notifyTutee: Boolean = false
+	@BeanProperty var notifyOldTutor: Boolean = false
+	@BeanProperty var notifyNewTutor: Boolean = false
 
 	implicit var freemarker = Wire.auto[Configuration]
 	val mailSender = Wire[WarwickMailSender]("studentMailSender")
 	var profileService = Wire.auto[ProfileService]
 	val replyAddress = Wire.property("${mail.noreply.to}")
 	val fromAddress = Wire.property("${mail.exceptions.to}")
-	var memberDao = Wire.auto[MemberDao]
 	
-	val newTutor = profileService.getPersonalTutor(student).getOrElse(throw new IllegalStateException("Couldn't find database information for new tutor for student " + student.universityId))
+	def applyInternal() {
+		val newTutor = newTutorPromise.fulfilPromise
 
-	logger.debug("Old tutor: " + oldTutor)
-	logger.debug("New tutor: " + newTutor)
-	logger.debug("Student: " + student)
-
-	def sendNotifications() = {
 		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)			
-			mailSender send messageFor(
+				mailSender send messageFor(
 					"/WEB-INF/freemarker/emails/tutor_change_tutee_notification.ftl", 
 					student.email, 
 					student, 
@@ -59,7 +62,7 @@ class TutorChangeNotifier(student: Member, oldTutor: Option[Member], notifyTutee
 					Routes.profile.view(student))
 		}
 	}
-
+	
 	def messageFor(template: String, toEmail: String, tutee: Member, oldTutor: Option[Member], newTutor: Member, path: String) 
 			= createMessage(mailSender) { message =>
 		message.setFrom(fromAddress)
@@ -73,4 +76,6 @@ class TutorChangeNotifier(student: Member, oldTutor: Option[Member], notifyTutee
 			"path" -> path
 		)))
 	}	
+
+	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> newTutorPromise.fulfilPromise.universityId)	
 }

@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
+import org.hibernate.annotations.ForeignKey
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -116,6 +118,10 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def registeredModules = {
 		profileService.getRegisteredModules(getUniversityId)
 	}
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[MemberGrantedRole] = ArrayList()
 	
 	def asSsoUser = {
 		val u = new User
