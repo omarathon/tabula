@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.roles.Submitter
 @Component
 class SubmitterRoleProvider extends RoleProvider {
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {		
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {		
 		scope match {
 			case submission: Submission => 
 				if (submission.universityId == user.universityId) Seq(Submitter(submission))

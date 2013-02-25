@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.data.model.permissions
 import org.reflections.Reflections
-
-
-
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class PermissionsTargetUserTypeTest extends PersistenceTestBase {
 	
@@ -19,10 +17,8 @@ class PermissionsTargetUserTypeTest extends PersistenceTestBase {
 			session.save(department)
 			session.flush
 			
-			val permission = GrantedPermission.init[Department]
+			val permission = GrantedPermission.init(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
 			permission.users.addUser("cuscav")
-			permission.overrideType = permission.Allow
-			permission.scope = department
 			
 			session.save(permission)
 			session.flush

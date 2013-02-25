@@ -80,7 +80,7 @@ object GrantedRole {
 			case _ => throw new IllegalArgumentException("Cannot define new roles for " + m.erasure)
 		}
 	
-	def canDefineFor[A <: PermissionsTarget : Manifest](scope: => A) = scope match {
+	def canDefineFor[A <: PermissionsTarget : Manifest](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Member => true

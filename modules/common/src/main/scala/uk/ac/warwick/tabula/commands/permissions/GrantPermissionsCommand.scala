@@ -36,13 +36,13 @@ class GrantPermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) exten
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 	
 	def applyInternal() = transactional() {
-		val permission = grantedPermission getOrElse GrantedPermission.init[A]
+		val granted = grantedPermission getOrElse GrantedPermission.init(scope, permission, overrideType)
 		
-		for (user <- usercodes) permission.users.addUser(user)
+		for (user <- usercodes) granted.users.addUser(user)
 		
-		permissionsService.saveOrUpdate(permission)
+		permissionsService.saveOrUpdate(granted)
 		
-		permission
+		granted
 	}
 	
 	def validate(errors: Errors) {
