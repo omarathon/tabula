@@ -1,52 +1,52 @@
 package uk.ac.warwick.tabula.data.model
 
+
+import forms.AssessmentGroup
 import scala.collection.JavaConversions.seqAsJavaList
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.junit.runner.RunWith
-import org.junit.Test
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.PersistenceTestBase
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import uk.ac.warwick.tabula.services.AssignmentServiceImpl
+import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
+import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
+import org.junit.Before
 
 class UpstreamEntitiesTest extends PersistenceTestBase {
-	@Test def associations {
+
+	@Test def associations() {
 		transactional { t =>
+
+			val dao = new AssignmentServiceImpl
+			dao.sessionFactory = sessionFactory
+
 			val law = new UpstreamAssignment
 			law.moduleCode = "la155-10"
 			law.assessmentGroup = "A"
 			law.sequence = "A02"
 			law.departmentCode = "la"
 			law.name = "Cool Essay"
-				
+
+			val assessmentGroup2010 = new AssessmentGroup
+			assessmentGroup2010.upstreamAssignment = law
+			assessmentGroup2010.occurrence = "A"
+
+			val assessmentGroup2011 = new AssessmentGroup
+			assessmentGroup2011.upstreamAssignment = law
+			assessmentGroup2011.occurrence = "A"
+
 			val law2010 = new Assignment
+			law2010.assignmentService = dao
 			law2010.name = "Cool Essay!"
 			law2010.academicYear = new AcademicYear(2010)
-			law2010.upstreamAssignment = law
-			law2010.occurrence = "A"
-			
+			law2010.assessmentGroups = List(assessmentGroup2010)
+			assessmentGroup2010.assignment = law2010
+
 			val law2011 = new Assignment
 			law2011.name = "Cool Essay?"
+			law2011.assignmentService = dao
 			law2011.academicYear = new AcademicYear(2011)
-			law2011.upstreamAssignment = law
-			law2011.occurrence = "A"
-				
+			law2011.assessmentGroups = List(assessmentGroup2011)
+			assessmentGroup2011.assignment = law2011
+
 			// Not linked to an upstream assignment
 			val law2012 = new Assignment
+			law2012.assignmentService = dao
 			law2012.name = "Cool Essay?"
 			law2012.academicYear = new AcademicYear(2011)
 			
@@ -89,24 +89,21 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			
 			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member, student)) 
 				session.save(entity)
-			session.flush
-			session.clear
-			
-			val dao = new AssignmentServiceImpl
-			dao.sessionFactory = sessionFactory
-			
-			dao.getAssessmentGroup(law2010).map { group =>
+			session.flush()
+			session.clear()
+
+			law2010.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2010.id)
 				group.members.includes("bib") should be (true)
-			}.orElse(fail)
-			
-			dao.getAssessmentGroup(law2011).map { group =>
+			}
+
+			law2011.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2011.id)
 				group.members.includes("dod") should be (true)
-			}.orElse(fail)
-			
-			dao.getAssessmentGroup(law2012).isDefined should be (false)
-			
+			}
+
+			law2012.upstreamAssessmentGroups.isEmpty should be (true)
+
 			session.load(classOf[Member], "0672089") match {
 				case loadedMember:Member => loadedMember.firstName should be ("Mathew")
 				case _ => fail("Member not found")

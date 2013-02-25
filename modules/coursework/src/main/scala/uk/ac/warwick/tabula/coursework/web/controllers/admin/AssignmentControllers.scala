@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import scala.collection.JavaConversions._
 import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
@@ -67,7 +68,8 @@ class AddAssignment extends CourseworkController {
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module,
-			"assessmentGroup" -> form.assessmentGroup,
+			"upstreamAssessmentGroups" -> form.upstreamAssessmentGroups,
+			"linkedAssessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
@@ -100,7 +102,8 @@ class EditAssignment extends CourseworkController {
 			"module" -> module,
 			"assignment" -> assignment,
 			"canDelete" -> couldDelete,
-			"assessmentGroup" -> form.assessmentGroup,
+			"upstreamAssessmentGroups" -> form.upstreamAssessmentGroups,
+			"linkedAssessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}

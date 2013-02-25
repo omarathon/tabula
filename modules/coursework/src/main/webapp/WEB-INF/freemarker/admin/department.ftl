@@ -110,10 +110,12 @@
 					</#if>
 				</small>
 			</h3>
-			
-			<#if assignment.upstreamAssignment??>
-			  <#assign _upstream=assignment.upstreamAssignment />
-			  <span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
+
+			<#if assignment.assessmentGroups?has_content>
+				<#list assignment.assessmentGroups as group>
+					<#assign _upstream=group.upstreamAssignment />
+					<span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
+				</#list>
 			</#if>
 
 			</div>

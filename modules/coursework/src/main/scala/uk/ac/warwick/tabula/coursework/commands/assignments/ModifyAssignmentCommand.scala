@@ -10,12 +10,14 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Command
 import data.model._
+import forms.AssessmentGroup
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.JavaImports._
 
 
 case class UpstreamGroupOption(
@@ -24,7 +26,8 @@ case class UpstreamGroupOption(
 	cats: Option[String], // TODO joke about cats and string
 	sequence: String,
 	occurrence: String,
-	memberCount: Int)
+	memberCount: Int,
+	isLinked: Boolean)
 
 /**
  * Common behaviour
@@ -58,6 +61,9 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 	/** linked SITS assignment. Optional. */
 	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
+
+	@BeanProperty var assessmentGroups: JList[AssessmentGroup] = ArrayList()
+	@BeanProperty var assessmentGroupItems: JList[AssessmentGroupItem] = ArrayList()
 
 	/**
 	 * If copying from existing Assignment, this must be a DEEP COPY
@@ -172,13 +178,38 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		assignment.closeDate = closeDate
 		assignment.academicYear = academicYear
 		assignment.feedbackTemplate = feedbackTemplate
+
+		if(this.assignment != null){
+			persistAssessmentGroupChanges()
+		}
+
 		assignment.upstreamAssignment = upstreamAssignment
 		assignment.occurrence = occurrence
+
 		copySharedTo(assignment: Assignment)
 
 		if (assignment.members == null) assignment.members = new UserGroup
 		assignment.members copyFrom members
+	}
 
+
+
+	def persistAssessmentGroupChanges() {
+			val removedGroups = assignment.assessmentGroups.filterNot(assessmentGroups.contains(_))
+			for (group <- removedGroups){
+				service.delete(group)
+			}
+
+			val newGroups = assessmentGroupItems.map{item =>
+				val assessmentGroup = new AssessmentGroup
+				assessmentGroup.occurrence =  item.occurrence
+				assessmentGroup.upstreamAssignment =  item.upstreamAssignment
+				assessmentGroup.assignment = assignment
+				service.save(assessmentGroup)
+				assessmentGroup
+			}
+
+			assignment.assessmentGroups = assessmentGroups ++ newGroups
 	}
 
 	def prefillFromRecentAssignment() {
@@ -212,11 +243,13 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		feedbackTemplate = assignment.feedbackTemplate
 		upstreamAssignment = assignment.upstreamAssignment
 		occurrence = assignment.occurrence
+		assessmentGroups = assignment.assessmentGroups
 		if (assignment.members != null) {
 			members copyFrom assignment.members
 		}
 		copyNonspecificFrom(assignment)
 	}
+
 
 	/**
 	 * Retrieve a list of possible upstream assignments and occurrences
@@ -234,7 +267,9 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 					cats = assignment.cats,
 					sequence = assignment.sequence,
 					occurrence = group.occurrence,
-					memberCount = group.members.members.size)
+					memberCount = group.members.members.size,
+					isLinked = assessmentGroups.exists(g =>
+						g.upstreamAssignment.id == assignment.id && g.occurrence == group.occurrence))
 			}
 		}
 	}
@@ -243,24 +278,28 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 * Returns a sequence of MembershipItems
 	 */
 	def membershipDetails =
-		service.determineMembership(assessmentGroup, Option(members))
+		service.determineMembership(upstreamAssessmentGroups, Option(members))
 
-	/**
-	 * If upstream assignment, academic year and occurrence are all set,
-	 * this attempts to return the matching SITS assessment group of people
-	 * who should be studying this assignment.
-	 */
-	def assessmentGroup: Option[UpstreamAssessmentGroup] = {
-		if (upstreamAssignment == null || academicYear == null || occurrence == null) {
-			None
-		} else {
-			val template = new UpstreamAssessmentGroup
-			template.academicYear = academicYear
-			template.assessmentGroup = upstreamAssignment.assessmentGroup
-			template.moduleCode = upstreamAssignment.moduleCode
-			template.occurrence = occurrence
-			service.getAssessmentGroup(template)
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+		if(academicYear == null){
+			Seq()
+		}
+		else {
+			val validAssignments = assessmentGroups.filterNot(group => group.upstreamAssignment == null || group.occurrence == null)
+			val groups = validAssignments.flatMap{group =>
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = academicYear
+				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
+				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.occurrence = group.occurrence
+				service.getAssessmentGroup(template)
+			}
+			groups
 		}
 	}
+}
 
+class AssessmentGroupItem(){
+	@BeanProperty var occurrence: String = _
+	@BeanProperty var upstreamAssignment: UpstreamAssignment =_
 }
