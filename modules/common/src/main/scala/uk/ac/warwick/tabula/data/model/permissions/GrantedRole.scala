@@ -26,7 +26,7 @@ import org.hibernate.annotations.ForeignKey
 		discriminatorType=DiscriminatorType.STRING
 )
 abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
-	
+
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")
 	@BeanProperty var users: UserGroup = new UserGroup
@@ -70,17 +70,17 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 }
 
-object GrantedRole {
-	def init[A <: PermissionsTarget](implicit m: Manifest[A]): GrantedRole[A] =
-		m.erasure match {
-			case _ if m.erasure == classOf[Department] => (new DepartmentGrantedRole).asInstanceOf[GrantedRole[A]]
-			case _ if m.erasure == classOf[Module] => (new ModuleGrantedRole).asInstanceOf[GrantedRole[A]]
-			case _ if m.erasure == classOf[Member] => (new MemberGrantedRole).asInstanceOf[GrantedRole[A]]
-			case _ if m.erasure == classOf[Assignment] => (new AssignmentGrantedRole).asInstanceOf[GrantedRole[A]]
-			case _ => throw new IllegalArgumentException("Cannot define new roles for " + m.erasure)
-		}
+object GrantedRole {	
+	def init[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
+		(scope match {
+			case dept: Department => new DepartmentGrantedRole(dept, definition)
+			case module: Module => new ModuleGrantedRole(module, definition)
+			case member: Member => new MemberGrantedRole(member, definition)
+			case assignment: Assignment => new AssignmentGrantedRole(assignment, definition)
+			case _ => throw new IllegalArgumentException("Cannot define new roles for " + scope)
+		}).asInstanceOf[GrantedRole[A]]
 	
-	def canDefineFor[A <: PermissionsTarget : Manifest](scope: A) = scope match {
+	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Member => true
@@ -91,24 +91,48 @@ object GrantedRole {
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
+	def this(department: Department, definition: RoleDefinition) = {
+		this()
+		this.scope = department
+		this.roleDefinition = definition
+	}
+	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	@BeanProperty var scope: Department = _
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
+	def this(module: Module, definition: RoleDefinition) = {
+		this()
+		this.scope = module
+		this.roleDefinition = definition
+	}
+	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	@BeanProperty var scope: Module = _
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
+	def this(member: Member, definition: RoleDefinition) = {
+		this()
+		this.scope = member
+		this.roleDefinition = definition
+	}
+	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	@BeanProperty var scope: Member = _
 }
 @Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
+	def this(assignment: Assignment, definition: RoleDefinition) = {
+		this()
+		this.scope = assignment
+		this.roleDefinition = definition
+	}
+	
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")

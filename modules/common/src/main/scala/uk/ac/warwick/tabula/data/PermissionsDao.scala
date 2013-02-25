@@ -65,22 +65,22 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 					 .seq.headOption
 	}
 					 
-	private def canDefinePermissionSeq[A <: PermissionsTarget : Manifest](scope: A)(f: => Seq[GrantedPermission[A]]) = {
+	private def canDefinePermissionSeq[A <: PermissionsTarget](scope: A)(f: => Seq[GrantedPermission[A]]) = {
 		if (GrantedPermission.canDefineFor(scope)) f
 		else Seq()
 	}
 					 
-	private def canDefineRoleSeq[A <: PermissionsTarget : Manifest](scope: A)(f: => Seq[GrantedRole[A]]) = {
+	private def canDefineRoleSeq[A <: PermissionsTarget](scope: A)(f: => Seq[GrantedRole[A]]) = {
 		if (GrantedRole.canDefineFor(scope)) f
 		else Seq()
 	}
 					 
-	private def canDefinePermission[A <: PermissionsTarget : Manifest](scope: A)(f: => Option[GrantedPermission[A]]) = {
+	private def canDefinePermission[A <: PermissionsTarget](scope: A)(f: => Option[GrantedPermission[A]]) = {
 		if (GrantedPermission.canDefineFor(scope)) f
 		else None
 	}
 					 
-	private def canDefineRole[A <: PermissionsTarget : Manifest](scope: A)(f: => Option[GrantedRole[A]]) = {
+	private def canDefineRole[A <: PermissionsTarget](scope: A)(f: => Option[GrantedRole[A]]) = {
 		if (GrantedRole.canDefineFor(scope)) f
 		else None
 	}

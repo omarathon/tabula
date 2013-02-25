@@ -38,7 +38,7 @@ class GrantRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends 
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 	
 	def applyInternal() = transactional() {
-		val role = grantedRole getOrElse GrantedRole.init[A]
+		val role = grantedRole getOrElse GrantedRole.init(scope, roleDefinition)
 		
 		for (user <- usercodes) role.users.addUser(user)
 		

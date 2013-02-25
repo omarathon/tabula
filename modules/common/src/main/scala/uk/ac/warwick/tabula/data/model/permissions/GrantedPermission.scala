@@ -67,7 +67,7 @@ object GrantedPermission {
 			case _ => throw new IllegalArgumentException("Cannot define new permissions for " + scope)
 		}).asInstanceOf[GrantedPermission[A]]
 	
-	def canDefineFor[A <: PermissionsTarget : Manifest](scope: A) = scope match {
+	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Member => true
