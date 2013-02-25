@@ -5,42 +5,43 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import org.mockito.Matchers._
+import uk.ac.warwick.tabula.permissions.Permission
 
-class GrantPermissionsCommandTest extends TestBase with Mockito {
+class GrantRoleCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
 	val securityService = mock[SecurityService]
 	
 	private def command[A <: PermissionsTarget : Manifest](scope: A) = {
-		val cmd = new GrantPermissionsCommand(scope)
+		val cmd = new GrantRoleCommand(scope)
 		cmd.permissionsService = permissionsService
 		cmd.securityService = securityService
 		
 		cmd
 	}
 	
-	@Test def itWorksForNewPermission {
+	@Test def itWorksForNewRole {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (None)
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
 				
 		val grantedPerm = cmd.applyInternal()
-		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
+		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedPerm.users.includeUsers.size() should be (2)
 		grantedPerm.users.includes("cuscav") should be (true)
 		grantedPerm.users.includes("cusebr") should be (true)
 		grantedPerm.users.includes("cuscao") should be (false)
-		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (dept)
 	}
 	
@@ -48,25 +49,23 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
 				
 		val grantedPerm = cmd.applyInternal()
 		(grantedPerm.eq(existing)) should be (true)
 		
-		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
+		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedPerm.users.includeUsers.size() should be (3)
 		grantedPerm.users.includes("cuscav") should be (true)
 		grantedPerm.users.includes("cusebr") should be (true)
 		grantedPerm.users.includes("cuscao") should be (true)
-		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (dept)
 	}
 	
@@ -74,13 +73,12 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (None)
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
+		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -92,11 +90,10 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
-		cmd.overrideType = GrantedPermission.Allow
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (None)
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
+		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -111,17 +108,16 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		cmd.usercodes.add("cuscao")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -138,16 +134,15 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val cmd = command(dept)
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		permissionsService.getGrantedPermission(dept, null, true) returns (None)
+		permissionsService.getGrantedRole(dept, null) returns (None)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("permission")
+		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}
 	
@@ -155,20 +150,19 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		cmd.overrideType = GrantedPermission.Allow
 		
-		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (None)
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (false)
+		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
+		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (false)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
 		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("permission")
+		(errors.getErrorCount >= 1) should be (true)
+		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("permissions.cantGiveWhatYouDontHave")
 	}}
 
