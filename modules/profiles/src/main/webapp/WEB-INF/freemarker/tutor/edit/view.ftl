@@ -42,7 +42,6 @@
 
 	</#if>
 	<section class="tutor-edit-return">
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="<@routes.profile_by_id student="${student.universityId}" />" class="btn">Return to ${student.firstName}'s profile page</a>
 	</section>
 </#escape>

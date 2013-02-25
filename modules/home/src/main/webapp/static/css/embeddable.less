@@ -1102,6 +1102,7 @@ h1.with-settings {
 	} // .profile-search
 
 	#container .tutor-search {
+		.control-group { margin-top: 54px; }
 		.input-append .btn { margin-top: 1px; }
 		
 		@searchFontSize: @baseFontSize * 1.2;
@@ -1119,6 +1120,11 @@ h1.with-settings {
 		}
 		
 		form { margin: 0; }
+		
+		b { 
+			line-height: 28px; 
+			font-size: @searchFontSize;
+		}
 	} // .tutor-search
 	
 	#container .tutor-edit {
@@ -1126,11 +1132,16 @@ h1.with-settings {
 			text-align: right;
 			margin-right:220px
 			}
-		
-		.tutor-edit-return {
-			text-align: left;
-		}
+
 	} // .tutor-edit
+	
+	#container .tutor-edit-return {
+		href {
+			margin-top: 36px;
+			}
+
+	} // .tutor-edit
+		
 } // .profiles-page
 
 .datetimepicker {
