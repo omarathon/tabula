@@ -79,6 +79,14 @@ object GrantedRole {
 			case _ if m.erasure == classOf[Assignment] => (new AssignmentGrantedRole).asInstanceOf[GrantedRole[A]]
 			case _ => throw new IllegalArgumentException("Cannot define new roles for " + m.erasure)
 		}
+	
+	def canDefineFor[A <: PermissionsTarget : Manifest](scope: => A) = scope match {
+		case _: Department => true
+		case _: Module => true
+		case _: Member => true
+		case _: Assignment => true
+		case _ => false
+	} 
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
