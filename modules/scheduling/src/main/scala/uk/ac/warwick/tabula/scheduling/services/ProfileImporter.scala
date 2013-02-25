@@ -186,7 +186,7 @@ object ProfileImporter {
 	}
 	
 	val GetMembershipByDepartmentInformation = """
-		select * from cmsowner.uow_current_members where id_dept = :departmentCode
+		select * from cmsowner.uow_current_members where id_dept = :departmentCode and its_usercode is not null
 		"""
 	  
 	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
