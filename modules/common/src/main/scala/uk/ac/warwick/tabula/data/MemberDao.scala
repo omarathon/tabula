@@ -158,15 +158,13 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] = {
 		session.createQuery("""
 			select
-				distinct m
+				distinct sm
 			from
-				Member m
+				StudentMember sm
 			where
-				m.homeDepartment = :department
+				sm.homeDepartment = :department
 			and
-				m.studyDetails.studentStatus = 'Current Student'
-			and
-				m.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 		""")
 			.setEntity("department", department)
 			.setString("relationshipType", relationshipType.dbValue)

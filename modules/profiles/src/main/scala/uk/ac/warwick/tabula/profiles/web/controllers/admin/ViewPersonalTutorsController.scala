@@ -24,9 +24,11 @@ class ViewPersonalTutorsController extends ProfilesController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def view(@PathVariable("department") department: Department, @ModelAttribute("viewPersonalTutorsCommand") rels: ViewPersonalTutorsCommand, @ModelAttribute("missingPersonalTutorsCommand") missing: MissingPersonalTutorsCommand): Mav = {
+		val (studentCount, missingStudents) = missing.apply
 		Mav("tutors/tutor_view",
 			"tutorRelationships" -> rels.apply,
-			"missingCount" -> missing.apply.size,
+			"studentCount" -> studentCount,
+			"missingCount" -> missingStudents.size,
 			"department" -> department
 		)
 	}
@@ -39,9 +41,11 @@ class MissingPersonalTutorsController extends ProfilesController {
 		new MissingPersonalTutorsCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@PathVariable("department") department: Department, @ModelAttribute("missingPersonalTutorsCommand") cmd: MissingPersonalTutorsCommand): Mav = {
+	def view(@PathVariable("department") department: Department, @ModelAttribute("missingPersonalTutorsCommand") missing: MissingPersonalTutorsCommand): Mav = {
+		val (studentCount, missingStudents) = missing.apply
 		Mav("tutors/missing_tutor_view",
-			"students" -> cmd.apply,
+			"studentCount" -> studentCount,
+			"missingStudents" -> missingStudents,
 			"department" -> department
 		)
 	}
