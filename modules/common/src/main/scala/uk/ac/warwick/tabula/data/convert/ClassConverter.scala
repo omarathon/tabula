@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 class ClassConverter extends TwoWayConverter[String, Class[_]] {
   	
 	override def convertRight(className: String) = 
-		if (className.hasText) Class.forName(className)
+		if (className.hasText) try { Class.forName(className) } catch { case e: ClassNotFoundException => null }
 		else null
 		
 	override def convertLeft(clazz: Class[_]) = Option(clazz) match {

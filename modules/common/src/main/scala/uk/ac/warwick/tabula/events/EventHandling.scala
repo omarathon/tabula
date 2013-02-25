@@ -18,7 +18,7 @@ object EventHandling {
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	val listener = Wire.auto[EventListener]
+	var listener = Wire.auto[EventListener]
 
 	/**
 	 * Records the various stages of an event: before, and either

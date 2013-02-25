@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
-
-import org.springframework.core.convert.converter.Converter
 import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.TwoWayConverter
@@ -15,13 +14,11 @@ class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
 
 	override def convertRight(code: String) = {
 		service.getDepartmentByCode(sanitise(code)).getOrElse {
-			service.getDepartmentById(code).getOrElse(throw new IllegalArgumentException)
+			service.getDepartmentById(code) orNull
 		}
 	}
 
-	override def convertLeft(department: Department) = {
-		department.code
-	}
+	override def convertLeft(department: Department) = Option(department) map { _.code } orNull
 
 	def sanitise(code: String) = {
 		if (code == null) throw new IllegalArgumentException
