@@ -9,7 +9,9 @@ case object MarkerRoleDefinition extends BuiltInRoleDefinition {
 	
 	GrantsScopedPermission(
 		Feedback.Create,
+		Feedback.Read,
 		Marks.Create,
+		Marks.Read,
 		Submission.Read
 	)
 
