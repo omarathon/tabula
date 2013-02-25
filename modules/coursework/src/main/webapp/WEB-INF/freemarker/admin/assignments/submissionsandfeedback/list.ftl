@@ -136,6 +136,11 @@
 </div>
 
 <div class="btn-toolbar">
+	<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+		<a class="btn long-running use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"><i class="icon-download"></i>
+			Download feedback templates
+		</a>
+	</#if>
 	<a class="btn long-running use-tooltip must-have-selected" title="Download the submission files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 		Download submissions
 	</a>
