@@ -14,12 +14,12 @@ class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
 	var service = Wire.auto[PermissionsService]
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = 
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = 
 		service.getGrantedRolesFor(user, scope) map { _.build() }
 	
 	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
 	
-	def getPermissionsFor(user: CurrentUser, scope: => PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] =
+	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] =
 		service.getGrantedPermissionsFor(user, scope).toStream map { 
 			grantedPermission => (grantedPermission.permission, Some(scope), grantedPermission.overrideType)
 		}

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Component
 class SettingsOwnerRoleProvider extends RoleProvider {
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] =
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] =
 		scope match {
 			case settings: UserSettings => 
 				if (user.loggedIn && user.apparentId.hasText && settings.userId == user.apparentId) Seq(SettingsOwner(settings))
