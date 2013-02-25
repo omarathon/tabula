@@ -43,7 +43,9 @@
 									<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
 										<thead>
 											<tr>
-												<th class="tutee-col">Tutee</th>
+												<th class="tutee-col">First name</th>
+												<th class="tutee-col">Last name</th>
+												<th class="id-col">ID</th>
 												<th class="type-col">Type</th>
 												<th class="year-col">Year</th>
 												<th class="course-col">Course</th>
@@ -54,10 +56,9 @@
 											<#list tutees as tuteeRelationship>
 												<#assign student = tuteeRelationship.studentMember />
 												<tr class="tutee">
-													<td>
-														<h6><a href="<@routes.profile student />">${student.fullName}</a></h6>
-														<span class="muted">${student.universityId}</span>
-													</td>
+													<td><h6>${student.firstName}</h6></td>
+													<td><h6>${student.lastName}</h6></td>
+													<td><a href="<@routes.profile student />">${student.universityId}</a></td>
 													<td>${student.groupName}</td>
 													<td>${student.studyDetails.yearOfStudy!""}</td>
 													<td>${student.studyDetails.route.name!""}</td>
@@ -89,7 +90,7 @@
 <script type="text/javascript">
 (function($) {
 	$(".tutees").tablesorter({
-		sortList: [[1,0], [2,0], [3,0]]
+		sortList: [[1,0], [3,0], [4,0]]
 	});
 	
 	$("#tutors").on("hidden", "div", function() {

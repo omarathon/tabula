@@ -6,10 +6,13 @@
 		<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
 			<thead>
 				<tr>
-					<th class="tutee-col">Tutee</th>
+					<th class="photo-col">Photo</th>
+					<th class="tutee-col">First name</th>
+					<th class="tutee-col">Last name</th>
+					<th class="id-col">ID</th>
 					<th class="type-col">Type</th>
 					<th class="year-col">Year</th>
-					<th class="course-col">Course</th>
+					<th class="course-but-photo-col">Course</th>
 				</tr>
 			</thead>
 			
@@ -21,9 +24,10 @@
 							<div class="photo">
 								<img src="<@routes.photo student />" />
 							</div>
-							<h6><a href="<@routes.profile student />">${student.fullName}</a></h6>
-							<span class="muted">${student.universityId}</span>
 						</td>
+						<td><h6>${student.firstName}</h6></td>
+						<td><h6>${student.lastName}</h6></td>
+						<td><a href="<@routes.profile student />">${student.universityId}</a></td>
 						<td>${student.groupName}</td>
 						<td>${student.studyDetails.yearOfStudy!""}</td>
 						<td>${student.studyDetails.route.name!""}</td>
@@ -40,7 +44,7 @@
 <script type="text/javascript">
 (function($) {
 	$(".tutees").tablesorter({
-		sortList: [[1,0], [2,0], [3,0]]
+		sortList: [[2,0], [4,0], [5,0]]
 	});
 })(jQuery);
 </script>
