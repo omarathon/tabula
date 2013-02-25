@@ -27,11 +27,14 @@
 			   >What's this?</a>
 		</#macro>
 
-		<#if upstreamAssessmentGroups??>
+		<#if upstreamAssessmentGroups?has_content>
 			<#assign total=0 />
 			<#list upstreamAssessmentGroups as group>
 				<#assign total=total+group.members.members?size />
 			</#list>
+			<#if hasMembers>
+				<#assign total=total+membersGroup.includeUsers?size />
+			</#if>
 
 			${total} students enrolled from SITS <@what_is_this />
 			<#if hasMembers>(with adjustments)</#if>
