@@ -9,6 +9,7 @@ class CurrentUserTest extends TestBase {
 		user("cusaaa", "cusaab", false).toString should be ("User cusaab (really cusaaa)")
 		user("cusaaa", "cusaab", true).toString should be ("User cusaab (really cusaaa) +GodMode")
 		user("cusaaa", "cusaaa", true).toString should be ("User cusaaa +GodMode")
+		NoCurrentUser().toString should be ("Anonymous user")
 	}
 	
 	private def user(code:String, masqCode:String, sysadEnabled:Boolean) = {

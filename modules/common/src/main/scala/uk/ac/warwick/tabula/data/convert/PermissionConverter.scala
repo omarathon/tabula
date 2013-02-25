@@ -10,6 +10,6 @@ class PermissionConverter extends TwoWayConverter[String, Permission] {
   
 	override def convertRight(name: String) = 
 		if (!name.hasText) null
-		else Permissions.of(name)
+		else try { Permissions.of(name) } catch { case e: IllegalArgumentException => null }
 
 }

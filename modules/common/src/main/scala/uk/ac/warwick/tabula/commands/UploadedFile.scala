@@ -32,8 +32,8 @@ import uk.ac.warwick.tabula.system.BindListener
 class UploadedFile extends BindListener {
 	var fileDao = Wire.auto[FileDao]
 
-	def disallowedFilenames: String = Wire.property("${uploads.disallowedFilenames}")
-	def disallowedPrefixes: String = Wire.property("${uploads.disallowedPrefixes}")
+	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
+	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 		
 	// files bound from an upload request, prior to being persisted
 	@BeanProperty var upload: JList[MultipartFile] = ArrayList()

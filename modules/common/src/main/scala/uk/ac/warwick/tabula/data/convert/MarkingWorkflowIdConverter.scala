@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data.convert
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 
 import uk.ac.warwick.tabula.system.TwoWayConverter
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
-import uk.ac.warwick.tabula.data.Daoisms
 
 class MarkingWorkflowIdConverter extends TwoWayConverter[String, MarkingWorkflow] with Daoisms {
 
