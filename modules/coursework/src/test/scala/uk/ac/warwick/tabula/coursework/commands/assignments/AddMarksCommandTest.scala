@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.{AppContextTestBase, TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
@@ -63,10 +64,25 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 			marks1.actualGrade = "EXCELLENT"
 			
 			val marks2 = command.marks.get(1)
-			marks2.universityId = "1235"
-			marks2.actualMark = "5"
-			
+			marks2.universityId = "55555"
+			marks2.actualMark = "65"
+
+			val marks3 = command.marks.get(2)
+			marks3.universityId = "1235"
+			marks3.actualMark = "A"
+
+			val marks4 = command.marks.get(3)
+			marks4.universityId = ""
+			marks4.actualMark = "80"
+			marks4.actualGrade = "EXCELLENT"
+
+			val marks5 = command.marks.get(4)
+			marks5.universityId = "0672088"
+			marks5.actualMark = ""
+			marks5.actualGrade = ""
+
 			command.postExtractValidation(errors)
+			command.marks.filter(_.isValid).size should be (1)
 		
 			try {
 				command.apply()

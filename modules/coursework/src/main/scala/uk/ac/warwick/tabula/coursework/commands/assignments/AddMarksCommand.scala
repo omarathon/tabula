@@ -101,7 +101,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 			// If a row has no mark or grade, we will quietly ignore it 
 			hasErrors = true
 		}
-		hasErrors
+		!hasErrors
 	}
 
 	override def onBind {
