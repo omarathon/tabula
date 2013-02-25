@@ -929,7 +929,7 @@ h1.with-settings {
 		margin-top: 20px;
 	}
 	
-	#container .profile {
+	#container .profile  {
 		#personal-details {
 			div.photo {
 				.tabula-photo;
@@ -979,6 +979,28 @@ h1.with-settings {
 				}
 			}
 		}
+		
+		#course-details {
+			table.course-info {
+				// Reset
+				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+				
+				width: 100%;
+				
+				th { 
+					text-align: right;
+					color: @grayLight;
+					white-space: nowrap;
+					
+					&:after { content: ':'; margin-right: 3px; } 
+				}
+				
+				td {
+					color: #0c0c0c;
+					width: 99%;
+				}
+			}
+		}		
 		
 		.untabbed {
 			margin-top: 12px;

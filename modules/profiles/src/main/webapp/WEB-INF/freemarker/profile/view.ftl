@@ -155,6 +155,9 @@
 		<div class="untabbed">
 			<#include "_personal_development.ftl" />
 		</div>
+		<div class="untabbed">
+			<#include "_course_details.ftl" />
+		</div>
 	</#if>
 </article>
 
