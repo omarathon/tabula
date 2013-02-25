@@ -15,7 +15,7 @@ class PersonalTutorRoleProvider extends RoleProvider {
 	
 	var profileService = Wire.auto[ProfileService]
 
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
 		scope match {
 			case member: model.Member => {
 				val tuteeIds = profileService.listStudentRelationshipsWithUserId(model.RelationshipType.PersonalTutor, user.universityId) map (rel => rel.studentId)

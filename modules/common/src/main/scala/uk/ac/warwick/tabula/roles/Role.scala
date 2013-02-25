@@ -108,7 +108,7 @@ abstract class Role(@BeanProperty val scope: Option[PermissionsTarget]) {
 	lazy val explicitPermissionsAsList = explicitPermissions.toList
 	lazy val subRoles = roles
 			
-	private def grant(scope: => Option[PermissionsTarget], perms: Iterable[Permission]): Unit =
+	private def grant(scope: Option[PermissionsTarget], perms: Iterable[Permission]): Unit =
 		permissions ++= (perms map { _ -> scope })
 		
 	final def applyRoleDefinition(definition: RoleDefinition): Role = {

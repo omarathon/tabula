@@ -30,11 +30,11 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 		check(scopelessPermission, None)
 	}
 	
-	def PermissionCheck(permission: Permission, scope: => PermissionsTarget) {
+	def PermissionCheck(permission: Permission, scope: PermissionsTarget) {
 		check(permission, Some(scope))
 	}
 	
-	private def check(permission: Permission, scope: => Option[PermissionsTarget]) {
+	private def check(permission: Permission, scope: Option[PermissionsTarget]) {
 		permissionChecks += (permission -> scope)
 	}
 	
