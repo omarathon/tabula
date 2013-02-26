@@ -281,7 +281,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		service.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
-		if(academicYear == null){
+		if(academicYear == null || assessmentGroups == null){
 			Seq()
 		}
 		else {
