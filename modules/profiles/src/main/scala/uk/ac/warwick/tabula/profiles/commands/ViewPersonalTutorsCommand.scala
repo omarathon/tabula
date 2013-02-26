@@ -9,10 +9,11 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.PersonalTutor
+import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import scala.collection.SortedMap
 import scala.collection.immutable.TreeMap
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 
 class ViewPersonalTutorsCommand(val department: Department) extends Command[TreeMap[String, Seq[StudentRelationship]]] with Unaudited {
 	
@@ -29,14 +30,18 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Tree
 	}
 }
 
-class MissingPersonalTutorsCommand(val department: Department) extends Command[Seq[Member]] with Unaudited {
+class MissingPersonalTutorsCommand(val department: Department) extends Command[(Int, Seq[Member])] with Unaudited {
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
 
 	var profileService = Wire.auto[ProfileService]
 	
-	override def applyInternal(): Seq[Member] = transactional() {
-		profileService.listStudentsWithoutRelationship(PersonalTutor, department)
+	override def applyInternal(): (Int, Seq[Member]) = transactional() {
+		val ownStudentCount = profileService.findMembersByDepartment(department, false, Set(Student)).size
+		ownStudentCount match {
+			case 0 => (0, Nil)
+			case c => (c, profileService.listStudentsWithoutRelationship(PersonalTutor, department))
+		}
 	}
 }
 

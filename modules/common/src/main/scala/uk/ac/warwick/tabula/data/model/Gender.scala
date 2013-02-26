@@ -5,14 +5,17 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class Gender(val dbValue: String, @BeanProperty val description: String)
-case object Male extends Gender("M", "Male")
-case object Female extends Gender("F", "Female")
-case object Unspecified extends Gender("N", "Not specified")
 
 object Gender {
+	case object Male extends Gender("M", "Male")
+	case object Female extends Gender("F", "Female")
+	case object Other extends Gender("N", "Other")
+	case object Unspecified extends Gender("P", "Prefer not to say")
+
 	def fromCode(code: String) = code match {
 	  	case Male.dbValue => Male
 	  	case Female.dbValue => Female
+	  	case Other.dbValue => Other
 	  	case Unspecified.dbValue => Unspecified
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()

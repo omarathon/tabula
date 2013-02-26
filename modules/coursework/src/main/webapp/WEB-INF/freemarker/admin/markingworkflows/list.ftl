@@ -26,7 +26,7 @@ No marking workflows have been created yet. Click <strong>Create</strong> below 
 	<td>${markingWorkflow.name}</td>
 	<td>
 		<a class="btn btn-mini" href="<@routes.markingworkflowedit markingWorkflow />"><i class="icon-edit"></i> Modify</a>
-		<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.markingworkflowdelete markingWorkflow />" data-toggle="modal" data-target="#marking-workflow-modal"<#if !canDelete> title="You can't delete this marking workflow as it is in use by <@fmt.p info.assignmentCount "assignment" "one" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>
+		<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.markingworkflowdelete markingWorkflow />" data-toggle="modal" data-target="#marking-workflow-modal"<#if !canDelete> title="You can't delete this marking workflow as it is in use by <@fmt.p info.assignmentCount "assignment" "assignments" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>
 	</td>
 </tr>
 </#list>

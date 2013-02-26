@@ -11,7 +11,7 @@
 		<h1>Preview personal tutor changes for ${department.name}</h1>
 		
 		<@spring.bind path="rawStudentRelationships">
-			<#assign itemList = status.actualValue /> 
+			<#assign itemList = status.actualValue />
 			<#if itemList?size gt 0>
 				<#if hasErrors>
 					<div class="alert alert-warning alert-block">
@@ -21,10 +21,16 @@
 						will be ignored.</p>
 					</div>
 				<#else>
-					<p>Your data contains <@fmt.p itemList?size "a tutor" "tutors" 1 0 false /> for the <b><@fmt.p itemList?size "student" /></b> listed below.
-					Please check and <samp>Confirm</samp> your changes at the bottom of the page.</p>
+					<p>You are setting tutors for the <@fmt.p itemList?size "a tutor" "tutors" 1 0 false /> for the <b><@fmt.p itemList?size "student" /></b>
+					listed below.
 				</#if>
 				
+				<div class="submit-buttons">
+					<input type="hidden" name="confirm" value="true">
+					<input class="btn btn-primary" type="submit" value="Confirm">
+					<a class="btn" href="<@routes.tutor_upload department />">Cancel</a>
+				</div>
+
 				<table class="table table-bordered table-condensed">
 					<thead>
 						<tr>
@@ -48,33 +54,23 @@
 								<tr class="success">
 							</#if>
 								<td>
-									<@spring.bind path="targetUniversityId">
-										${status.value}
-									</@spring.bind>
+									${item.targetUniversityId}
 								</td>
 								<td>
-									<@spring.bind path="targetMember.fullName">
-										<#if targetMember?has_content>
-											${status.value}
-										</#if>
-									</@spring.bind>
+									<#if item.targetMember?has_content>
+										${item.targetMember.fullName}
+									</#if>
 								</td>
 								<td>
-									<@spring.bind path="agentUniversityId">
-										${status.value}
-									</@spring.bind>
+									${item.agentUniversityId}
 								</td>
 								<td>
-									<#if agentNameIfNonMember?has_content>
-										<@spring.bind path="agentNameIfNonMember">
-											${status.value}
-										</@spring.bind>
+									<#if item.agentName?has_content>
+										${item.agentName} (no ID - assumed external)
 									<#else>
-										<@spring.bind path="agentMember.fullName">
-											<#if agentMember?has_content>
-												${status.value} <span class="muted">from given ID</span>
-											</#if>
-										</@spring.bind>
+										<#if item.agentMember?has_content>
+											${item.agentMember.fullName}
+										</#if>
 									</#if>
 								</td>
 							</tr>
@@ -85,12 +81,6 @@
 					</#list>
 					</tbody>
 				</table>
-				
-				<div class="submit-buttons">
-					<input type="hidden" name="confirm" value="true">
-					<input class="btn btn-primary" type="submit" value="Confirm">
-					or <a class="btn" href="<@routes.tutor_upload department />">Cancel</a>
-				</div>
 			<#else>
 				<div class="alert alert-error alert-block">
 					<h4>I couldn't find any valid data.</h4>

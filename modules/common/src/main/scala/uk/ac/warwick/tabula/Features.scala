@@ -88,7 +88,7 @@ class FeaturesMessage {
 	@BeanProperty var combinedForm = true
 	@BeanProperty var feedbackTemplates = true
 	@BeanProperty var markingWorkflows = true
-	@BeanProperty var markerFeedback = false
+	@BeanProperty var markerFeedback = true
 	@BeanProperty var profiles = true
 }
 

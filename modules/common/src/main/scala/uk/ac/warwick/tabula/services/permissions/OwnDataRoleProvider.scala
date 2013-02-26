@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.Member
 @Component
 class OwnDataRoleProvider extends RoleProvider {
 
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {		
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {		
 		scope match {
 			// You can view your own submission			
 			case submission: Submission => 

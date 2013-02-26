@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 class MemberTest extends TestBase with Mockito {
 	
 	@Test def testAffiliatedDepartments {
-		val member = new Member
+		val member = new StudentMember
 		member.universityId = "01234567"
 		
 		// create their home department
@@ -36,7 +36,7 @@ class MemberTest extends TestBase with Mockito {
 		val studyDept = new Department
 		studyDept.code = "pq"
 			
-		member.studyDepartment = studyDept
+		member.studyDetails.studyDepartment = studyDept
 		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
 		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
 		
@@ -45,21 +45,21 @@ class MemberTest extends TestBase with Mockito {
 		routeDept.code = "ch"
 		val route = new Route
 		route.department = routeDept
-		member.route = route
+		member.studyDetails.route = route
 		
 		member.affiliatedDepartments should be (Seq(homeDept, studyDept, routeDept))
 		member.touchedDepartments should be (Seq(homeDept, studyDept, routeDept, extDept))
 		
 		// reset route to home, and check it appears only once
 		route.department = homeDept
-		member.route = route
+		member.studyDetails.route = route
 		
 		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
 		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
 	}
 	
 	@Test def nullUsers {
-		val member = new Member
+		val member = new StaffMember
 		member.fullName should be (None)
 		
 		member.lastName = "Bono"

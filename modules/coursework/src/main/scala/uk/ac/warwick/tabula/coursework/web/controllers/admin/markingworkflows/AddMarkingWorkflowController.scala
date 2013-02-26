@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.markingworkflows
 
 import javax.validation.Valid
-
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
@@ -26,8 +24,11 @@ class AddMarkingWorkflowController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: AddMarkingWorkflowCommand): Mav = {
 		doBind(cmd)
-		Mav("admin/markingworkflows/add", "hasSubmissions" -> false)
+		Mav("admin/markingworkflows/add",
+			"hasSubmissions" -> false)
+			.crumbs(Breadcrumbs.Department(cmd.department))
 	}
+
 	
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: AddMarkingWorkflowCommand, errors: Errors): Mav = {
@@ -41,6 +42,6 @@ class AddMarkingWorkflowController extends CourseworkController {
 	}
 	
 	// do extra property processing on the form.
-	def doBind(cmd: AddMarkingWorkflowCommand) = cmd.doBind()
+	def doBind(cmd: AddMarkingWorkflowCommand){cmd.doBind()}
 	
 }

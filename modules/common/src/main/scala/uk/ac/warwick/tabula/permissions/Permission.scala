@@ -41,14 +41,14 @@ object Permissions {
 		try {
 			// Go through the magical heirarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
-			clz.getConstructors()(0).newInstance().asInstanceOf[Permission]
+			clz.getDeclaredField("MODULE$").get(null).asInstanceOf[Permission]
 		} catch {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
 		}
 	}
 	
 	def shortName(clazz: Class[_ <: Permission])
-		= clazz.getName.substring(Permissions.getClass.getName.length, clazz.getName.length - 1).replace('$', '.')
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 	
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission
@@ -58,15 +58,18 @@ object Permissions {
 	case object ManageMaintenanceMode extends ScopelessPermission
 	case object ImportSystemData extends ScopelessPermission
 	case object ReplicaSyncing extends ScopelessPermission
-	case object PermissionsHelper extends ScopelessPermission
-	case object ManageAllDepartmentPermissions extends ScopelessPermission
-
+	
+	object RolesAndPermissions {
+		case object Create extends Permission
+		case object Read extends Permission
+		case object Update extends Permission
+		case object Delete extends Permission
+	}
 
 	object Department {
 		case object ManageExtensionSettings extends Permission
 		case object ManageDisplaySettings extends Permission
 		case object DownloadFeedbackReport extends Permission
-		case object ManagePermissions extends Permission
 	}
 	
 	object Module {
@@ -74,7 +77,6 @@ object Permissions {
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
-		case object ManagePermissions extends Permission
 	}
 			
 	object Assignment {

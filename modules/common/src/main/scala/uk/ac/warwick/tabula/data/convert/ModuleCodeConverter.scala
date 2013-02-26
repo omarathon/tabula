@@ -1,15 +1,24 @@
 package uk.ac.warwick.tabula.data.convert
-
-import org.springframework.core.convert.converter.Converter
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.data.model.Module
 
-class ModuleCodeConverter extends Converter[String, Module] {
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.system.TwoWayConverter
+
+class ModuleCodeConverter extends TwoWayConverter[String, Module] {
 
 	@Autowired var service: ModuleAndDepartmentService = _
 
-	override def convert(code: String) = service.getModuleByCode(code.toLowerCase).getOrElse(throw new IllegalArgumentException)
+	override def convertRight(code: String) = 
+		service.getModuleByCode(sanitise(code)).getOrElse {
+			service.getModuleById(code) orNull
+		}
+	
+	override def convertLeft(module: Module) = Option(module) map { _.code } orNull
+
+	def sanitise(code: String) = {
+		if (code == null) throw new IllegalArgumentException
+		else code.toLowerCase
+	}
 
 }

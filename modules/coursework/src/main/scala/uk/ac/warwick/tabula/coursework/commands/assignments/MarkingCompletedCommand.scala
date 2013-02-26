@@ -10,7 +10,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.StateService
-import uk.ac.warwick.tabula.permissions.Permissions.Feedback
 import uk.ac.warwick.tabula.permissions.Permissions
 
 class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
@@ -23,6 +22,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 	@BeanProperty var noMarks: JList[MarkerFeedback] = ArrayList()
 	@BeanProperty var noFeedback: JList[MarkerFeedback] = ArrayList()
+	@BeanProperty var releasedFeedback: JList[MarkerFeedback] = ArrayList()
 
 	@BeanProperty var confirm: Boolean = false
 
@@ -35,15 +35,17 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	}
 
 	def applyInternal() {
-		markerFeedbacks.foreach(stateService.updateState(_, MarkingCompleted))
+		// do not update previously released feedback
+		val feedbackForRelease = markerFeedbacks -- releasedFeedback
+		feedbackForRelease.foreach(stateService.updateState(_, MarkingCompleted))
 
 		def finaliseFeedback(){
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, markerFeedbacks)
+			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
 			finaliseFeedbackCommand.apply()
 		}
 
 		def createSecondMarkerFeedback(){
-			markerFeedbacks.foreach{ mf =>
+			feedbackForRelease.foreach{ mf =>
 				val parentFeedback = mf.feedback
 				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
 				stateService.updateState(secondMarkerFeedback, ReleasedForMarking)
@@ -72,6 +74,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	def preSubmitValidation() {
 		noMarks = markerFeedbacks.filter(!_.hasMark)
 		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
+		releasedFeedback = markerFeedbacks.filter(_.state == MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {

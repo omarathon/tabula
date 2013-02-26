@@ -29,7 +29,7 @@ class StudentRelationship extends GeneratedId {
 	
 	@Column(name="relationship_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType")
-	@BeanProperty var relationshipType: RelationshipType = PersonalTutor
+	@BeanProperty var relationshipType: RelationshipType = RelationshipType.PersonalTutor
 	
 	@Column(name="target_sprcode")
 	@BeanProperty var targetSprCode: String = new String("")
@@ -80,19 +80,20 @@ class StudentRelationship extends GeneratedId {
 object StudentRelationship {
 	def apply(agent: String, relType: RelationshipType, targetSprCode: String) = {
 		
-		val mr = new StudentRelationship
-		mr.agent = agent
-		mr.relationshipType = relType
-		mr.targetSprCode = targetSprCode
-		mr
+		val rel = new StudentRelationship
+		rel.agent = agent
+		rel.relationshipType = relType
+		rel.targetSprCode = targetSprCode
+		rel
 	}
 }
 
 
 sealed abstract class RelationshipType(val dbValue: String, @BeanProperty val description: String)
-case object PersonalTutor extends RelationshipType("personalTutor", "Personal Tutor")
 
 object RelationshipType {
+	case object PersonalTutor extends RelationshipType("personalTutor", "Personal Tutor")
+	
 	def fromCode(code: String) = code match {
 	  	case PersonalTutor.dbValue => PersonalTutor
 	  	case null => null

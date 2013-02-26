@@ -30,11 +30,11 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 		check(scopelessPermission, None)
 	}
 	
-	def PermissionCheck(permission: Permission, scope: => PermissionsTarget) {
+	def PermissionCheck(permission: Permission, scope: PermissionsTarget) {
 		check(permission, Some(scope))
 	}
 	
-	private def check(permission: Permission, scope: => Option[PermissionsTarget]) {
+	private def check(permission: Permission, scope: Option[PermissionsTarget]) {
 		permissionChecks += (permission -> scope)
 	}
 	
@@ -78,20 +78,20 @@ abstract trait PermissionsCheckingMethods extends Logging {
 	 * it throws an ItemNotFoundException, which should get picked
 	 * up by an exception handler to display a 404 page.
 	 */
-	def mandatory[T](something: T)(implicit m: Manifest[T]): T = something match {
-		case thing: Any if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+	def mandatory[A](something: A)(implicit m: Manifest[A]): A = something match {
+		case thing: Any if m.erasure.isInstance(thing) => thing.asInstanceOf[A]
 		case _ => throw new ItemNotFoundException()
 	}
 	/**
 	 * Pass in an Option and receive either the actual value, or
 	 * an ItemNotFoundException is thrown.
 	 */
-	def mandatory[T](option: Option[T])(implicit m: Manifest[T]): T = option match {
-		case Some(thing: Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[T]
+	def mandatory[A](option: Option[A])(implicit m: Manifest[A]): A = option match {
+		case Some(thing: Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[A]
 		case _ => throw new ItemNotFoundException()
 	}
 
-	def notDeleted[T <: CanBeDeleted](entity: T): T =
+	def notDeleted[A <: CanBeDeleted](entity: A): A =
 		if (entity.deleted) throw new ItemNotFoundException()
 		else entity
 }

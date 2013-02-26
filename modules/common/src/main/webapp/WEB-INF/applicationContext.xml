@@ -108,8 +108,9 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
+							<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
@@ -118,15 +119,17 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
 	    	<list>
-	    		<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+	    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
 	        </list>
 	    </property>
 	</bean>

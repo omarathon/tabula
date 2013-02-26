@@ -5,17 +5,23 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(department) {
+case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(department, DepartmentalAdministratorRoleDefinition)
+
+case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinition {
 	
 	// Implicitly grants module manager role for all modules in this department
-	GrantsRole(DepartmentModuleManager(department))
+	GeneratesSubRole(ModuleManagerRoleDefinition)
 		
-	GrantsPermissionFor(department, 
+	GrantsScopedPermission( 
 		Department.ManageExtensionSettings,
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
 		
-		Module.ManagePermissions,
+		RolesAndPermissions.Create,
+		RolesAndPermissions.Read,
+		RolesAndPermissions.Update,
+		RolesAndPermissions.Delete,
+		
 		Assignment.ImportFromExternalSystem,
 		
 		FeedbackTemplate.Create,

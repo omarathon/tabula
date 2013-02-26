@@ -5,27 +5,17 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.validation.Valid
+import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
+import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.home.commands.departments.AddDeptOwnerCommand
-import uk.ac.warwick.tabula.home.commands.departments.RemoveDeptOwnerCommand
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.web.Mav
-
-abstract class BaseDeptOwnerController extends BaseSysadminController {
-
-	def redirectToDeptOwners(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/owners/")
-
-	def viewDepartmentOwners(@PathVariable("dept") dept: Department): Mav =
-		Mav("sysadmin/departments/owners",
-			"department" -> dept,
-			"owners" -> dept.owners)
-	
-}
+import uk.ac.warwick.tabula.web.Breadcrumbs
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments/"))
-class DeptOwnerController extends BaseDeptOwnerController {
+class DeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping
 	def departments = Mav("sysadmin/departments/list",
@@ -36,61 +26,60 @@ class DeptOwnerController extends BaseDeptOwnerController {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
 	}
-
-	@RequestMapping(value = Array("/{dept}/owners/"), method = Array(GET))
-	def departmentOwners(@PathVariable("dept") dept: Department) = viewDepartmentOwners(dept)
 	
 }
 
-@Controller
-@RequestMapping(Array("/sysadmin/departments/{dept}/owners/delete"))
-class RemoveDeptOwnerController extends BaseDeptOwnerController {
-	@ModelAttribute("removeOwner") def addOwnerForm(@PathVariable("dept") dept: Department) = {
-		new RemoveDeptOwnerCommand(dept)
-	}
+trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 
-	@RequestMapping(method = Array(POST))
-	def addDeptOwner(@PathVariable("dept") dept: Department, @Valid @ModelAttribute("removeOwner") form: RemoveDeptOwnerCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			viewDepartmentOwners(dept)
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department) = new GrantRoleCommand(department, DepartmentalAdministratorRoleDefinition)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) = new RevokeRoleCommand(department, DepartmentalAdministratorRoleDefinition)
+	
+	def form(@PathVariable("department") department: Department): Mav = {
+		Mav("sysadmin/departments/permissions/form", "department" -> department)
+	}
+	
+	def redirectToDeptPermissions(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/permissions")
+}
+
+@Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
+class DepartmentPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+	@RequestMapping
+	def permissionsForm(@PathVariable("department") department: Department): Mav =
+		form(department)
+}
+
+@Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
+class DepartmentAddPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+
+	validatesSelf[GrantRoleCommand[_]]
+	
+	@RequestMapping(method = Array(POST), params = Array("_command=add"))
+	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Department], errors: Errors): Mav = {
+		val department = command.scope
+		if (errors.hasErrors()) {
+			form(department)
 		} else {
-			logger.info("Passed validation, removing owner")
-			form.apply()
-			redirectToDeptOwners(dept.code)
+			command.apply()
+			redirectToDeptPermissions(department.code)
 		}
+
 	}
 }
 
-@Controller
-@RequestMapping(Array("/sysadmin/departments/{dept}/owners/add"))
-class AddDeptOwnerController extends BaseDeptOwnerController {
-
-	validatesWith { (cmd: AddDeptOwnerCommand, errors: Errors) =>
-		if (cmd.getUsercodes.contains(cmd.usercode)) {
-			errors.rejectValue("usercode", "userId.duplicate")
-		} else if (!userLookup.getUserByUserId(cmd.usercode).isFoundUser) {
-			errors.rejectValue("usercode", "userId.notfound")
-		}
-	}
-
-	@ModelAttribute("addOwner") def addOwnerForm(@PathVariable("dept") dept: Department) = {
-		new AddDeptOwnerCommand(dept)
-	}
-
-	@RequestMapping(method = Array(GET))
-	def showForm(@PathVariable("dept") dept: Department, @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
-		Mav("sysadmin/departments/owners/add",
-			"department" -> dept)
-	}
-
-	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable("dept") dept: Department, @Valid @ModelAttribute("addOwner") form: AddDeptOwnerCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			showForm(dept, form, errors)
+@Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
+class DepartmentRemovePermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+	
+	validatesSelf[RevokeRoleCommand[_]]
+	
+	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
+	def addPermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand[Department], errors: Errors): Mav = {
+		val department = command.scope
+		if (errors.hasErrors()) {
+			form(department)
 		} else {
-			logger.info("Passed validation, saving owner")
-			form.apply()
-			redirectToDeptOwners(dept.code)
+			command.apply()
+			redirectToDeptPermissions(department.code)
 		}
+
 	}
 }

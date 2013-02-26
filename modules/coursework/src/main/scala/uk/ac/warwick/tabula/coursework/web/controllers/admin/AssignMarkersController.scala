@@ -21,6 +21,7 @@ class AssignMarkersController extends CourseworkController {
 	def form(user: CurrentUser, @PathVariable assignment: Assignment, cmd: AssignMarkersCommand, errors: Errors) = {
 		cmd.onBind()
 		Mav("admin/assignments/assignmarkers/form")
+			.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
 	@RequestMapping(method = Array(POST))

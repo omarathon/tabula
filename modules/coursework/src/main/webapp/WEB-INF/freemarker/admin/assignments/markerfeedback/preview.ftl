@@ -55,6 +55,21 @@
 </div>
 </#if>
 
+<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
+<div class="invalid-files alert alert-error">
+<div>There were some files with problem names, which look as if they may belong to another module. Please check these before confirming.</div>
+<ul class="file-list">
+<#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
+<li>
+	<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].path" />
+	<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].file" />
+	${moduleMismatchFile.path}
+</li>
+</#list>
+</ul>
+</div>
+</#if>
+
 <#if addMarkerFeedbackCommand.invalidFiles?size gt 0>
 <div class="invalid-files alert alert-block alert-error">
 <div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>

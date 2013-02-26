@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>28</version>
+	<version>29</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -31,7 +31,7 @@
 		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130115-1437</warwickutils.version>
+		<warwickutils.version>20130221</warwickutils.version>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -73,7 +73,7 @@
 		<profile>
 			<id>all</id>
 		</profile>
-		
+
 		<profile>
 			<id>functional-test</id>
 			<modules>
@@ -267,7 +267,7 @@
 							</execution>
 						</executions>
 					</plugin>
-					
+
 					<!-- Also make a JAR file for use in other components -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -312,7 +312,7 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin> 
+					</plugin>
 				</plugins>
 			</build>
 
@@ -378,6 +378,18 @@
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.1.0</version>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>
 
@@ -407,7 +419,7 @@
 					</jvmArgs>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Scalastyle for build verification -->
 			<plugin>
 				<groupId>org.scalastyle</groupId>
@@ -479,7 +491,7 @@
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
-				
+
 				<plugin>
 					<groupId>org.scalastyle</groupId>
 					<artifactId>scalastyle-maven-plugin</artifactId>
@@ -829,7 +841,7 @@
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>courses</artifactId>

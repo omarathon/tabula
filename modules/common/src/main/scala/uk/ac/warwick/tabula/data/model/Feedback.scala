@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
@@ -105,6 +106,13 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		attachment.temporary = false
 		attachment.feedback = this
 		attachments.add(attachment)
+	}
+
+	def clearAttachments() {
+		for(attachment <- attachments){
+			attachment.feedback = null
+		}
+		attachments = ArrayList()
 	}
 
 	/**

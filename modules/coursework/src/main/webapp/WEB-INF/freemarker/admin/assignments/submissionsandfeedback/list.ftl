@@ -69,7 +69,7 @@
 </#macro>
 
 
-<#macro unSubmitted student extension="">
+<#macro unSubmitted student extension="" withinExtension=false approved=false rejected=false>
 	<tr class="itemContainer awaiting-submission">
 		<td></td>
 		<td>
@@ -83,17 +83,27 @@
 		<td></td>
 		<td>
 			<#if extension?has_content>
-				<#assign date>
-					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true split=true />
-				</#assign>
 				<span class="label label-info">Unsubmitted</span>
-				<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
+				<#if approved && !rejected>
+					<#assign date>
+						<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+					</#assign>
+				</#if>
+				<#if withinExtension>
+					<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
+				<#elseif rejected>
+					<span class="label label-info use-tooltip" >Extension Rejected</span>
+				<#elseif !approved>
+					<span class="label label-info use-tooltip" >Extension Requested</span>
+				<#else>
+					<span class="label label-info use-tooltip" title="${date}">Extension Expired</span>
+				</#if>
 			<#else>
 				<span class="label label-info">Unsubmitted</span>
 			</#if>
 		</td>
 		<#if assignment.wordCountField??><td></td></#if>
-		<#if assignment.markingWorkflow??><td></td></#if>
+		<#if assignment.markingWorkflow??><td></td><td></td></#if>
 		
 		<#if hasOriginalityReport><td></td></#if>
 		
@@ -126,6 +136,11 @@
 </div>
 
 <div class="btn-toolbar">
+	<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+		<a class="btn long-running use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"><i class="icon-download"></i>
+			Download feedback templates
+		</a>
+	</#if>
 	<a class="btn long-running use-tooltip must-have-selected" title="Download the submission files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
 		Download submissions
 	</a>
@@ -188,8 +203,9 @@
 				<col class="word-count" />
 			</#if>
 			<#if assignment.markingWorkflow??>
-				<#assign submissionColspan=submissionColspan+1 />
+				<#assign submissionColspan=submissionColspan+2 />
 				<col class="first-marker" />
+				<col class="second-marker" />
 			</#if>
 		</colgroup>
 		
@@ -238,6 +254,7 @@
 				</#if>
 				<#if assignment.markingWorkflow??>
 					<th class="sortable">First Marker</th>
+					<th class="sortable">Second Marker</th>
 				</#if>
 				
 				<#if hasOriginalityReport>
@@ -253,12 +270,27 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list awaitingSubmissionExtended as pair>
+			<#list awaitingSubmissionWithinExtension as pair>
 				<#assign student=pair._1 />
 				<#assign extension=pair._2 />
-				<@unSubmitted student extension />
+				<@unSubmitted student extension true true false/>
 			</#list>
-			<#list awaitingSubmission as student>
+			<#list awaitingSubmissionExtensionExpired as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false/>
+			</#list>
+			<#list awaitingSubmissionExtensionRejected as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false false true/>
+			</#list>
+			<#list awaitingSubmissionExtensionRequested as pair>
+				<#assign student=pair._1 />
+				<#assign extension=pair._2 />
+				<@unSubmitted student extension false false false/>
+			</#list>
+			<#list awaitingSubmissionNoExtension as student>
 				<@unSubmitted student />
 			</#list>
 			<#list students as student>
@@ -281,7 +313,7 @@
 					</#if>
 					</td>
 					
-					<td nowrap="nowrap" class="files">
+					<td class="files">
 						<#assign attachments=submission.allAttachments />
 						<#if attachments?size gt 0>
 						<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
@@ -326,6 +358,9 @@
 						<td>
 							<#if submission.assignment??>${submission.firstMarker!""}</#if>
 						</td>
+						<td>
+							<#if submission.assignment??>${submission.secondMarker!""}</#if>
+						</td>
 					</#if>
 					
 					<#if hasOriginalityReport>
@@ -339,7 +374,7 @@
 						</td>
 					</#if>
 					
-					<td nowrap="nowrap" class="download">
+					<td class="download">
 						<#if student.enhancedFeedback??>
 							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>

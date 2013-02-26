@@ -64,8 +64,8 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 		}
 	}
 	
-	private def isA[T : Manifest] = { 
-		org.mockito.Matchers.isA[T](manifest[T].erasure.asInstanceOf[Class[T]])
+	private def isA[A : Manifest] = { 
+		org.mockito.Matchers.isA[A](manifest[A].erasure.asInstanceOf[Class[A]])
 	}
 
 }

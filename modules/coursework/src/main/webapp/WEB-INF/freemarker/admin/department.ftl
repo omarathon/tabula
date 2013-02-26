@@ -79,7 +79,7 @@
 		  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
 		  <ul class="dropdown-menu">
 		  	<#if can_manage >	
-					<#assign  module_managers_count = ((module.participants.includeUsers)![])?size />
+					<#assign  module_managers_count = ((module.managers.includeUsers)![])?size />
 					<li><a href="<@url page="/admin/module/${module.code}/permissions" />">
 						Edit module managers <span class="badge">${module_managers_count}</span>
 					</a></li>
@@ -110,10 +110,12 @@
 					</#if>
 				</small>
 			</h3>
-			
-			<#if assignment.upstreamAssignment??>
-			  <#assign _upstream=assignment.upstreamAssignment />
-			  <span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
+
+			<#if assignment.assessmentGroups?has_content>
+				<#list assignment.assessmentGroups as group>
+					<#assign _upstream=group.upstreamAssignment />
+					<span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
+				</#list>
 			</#if>
 
 			</div>
@@ -186,7 +188,7 @@
 				<#if assignment.anyReleasedFeedback || features.submissions>
 				<p class="feedback-published">
 					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
-					<a class="copyable-url" rel="tooltip" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Click to copy it to the clipboard and then paste it into an email or page.">
+					<a class="copyable-url use-tooltip" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Click to copy it to the clipboard and then paste it into an email or page.">
 						URL for students
 					</a>
 				</p>

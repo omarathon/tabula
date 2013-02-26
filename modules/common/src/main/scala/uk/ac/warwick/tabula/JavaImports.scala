@@ -19,13 +19,13 @@ import collection.mutable
 
 trait JavaImports {
 	type JBoolean = java.lang.Boolean
-	type JList[V] = java.util.List[V]
+	type JList[A] = java.util.List[A]
 	type JMap[K, V] = java.util.Map[K, V]
-	type JSet[V] = java.util.Set[V]
+	type JSet[A] = java.util.Set[A]
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
 	
-	def JSet[T](items: T*) = mutable.Set(items: _*).asJava
+	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting

@@ -18,14 +18,14 @@ object EventHandling {
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	val listener = Wire.auto[EventListener]
+	var listener = Wire.auto[EventListener]
 
 	/**
 	 * Records the various stages of an event: before, and either
 	 * after or error. All of them should have the same eventid to
 	 * join them together (though they also have unique primary keys).
 	 */
-	def recordEvent[T](d: Describable[T])(f: => T): T =
+	def recordEvent[A](d: Describable[A])(f: => A): A =
 		d match {
 			case _: Unaudited => f // don't audit unaudited events!
 			case _ => {

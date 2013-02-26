@@ -66,7 +66,9 @@ class Submission extends GeneratedId with PermissionsTarget {
 	}
 
 	def firstMarker:String = assignment.getStudentsFirstMarker(this).getOrElse("")
-	
+
+	def secondMarker:String = assignment.getStudentsSecondMarker(this).getOrElse("")
+
 	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
 
 	def valuesWithAttachments = values.filter(_.hasAttachments)

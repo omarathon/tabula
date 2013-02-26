@@ -27,7 +27,6 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	var userLookup = Wire.auto[UserLookupService]
 	implicit var freemarker = Wire.auto[Configuration]
 	var mailSender = Wire[WarwickMailSender]("mailSender")
-	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	override def applyInternal() {
@@ -45,7 +44,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 			val message = createMessage(mailSender) { message => 
 				val moduleCode = module.code.toUpperCase
 				message.setFrom(fromAddress)
-				message.setReplyTo(replyAddress)
+				message.setReplyTo(user.email)
 				message.setTo(admin.getEmail)
 				message.setSubject(encodeSubject(moduleCode + ": Access request"))
 				message.setText(messageText)

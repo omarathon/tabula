@@ -9,10 +9,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 
 sealed abstract class AddressType(val dbValue: String)
-case object Home extends AddressType("H")
-case object TermTime extends AddressType("C")
 
 object AddressType {
+	case object Home extends AddressType("H")
+	case object TermTime extends AddressType("C")
+
 	def fromCode(code: String) = code match {
 	  	case Home.dbValue => Home
 	  	case TermTime.dbValue => TermTime

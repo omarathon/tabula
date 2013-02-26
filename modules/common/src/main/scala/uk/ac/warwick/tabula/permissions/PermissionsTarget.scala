@@ -1,4 +1,8 @@
 package uk.ac.warwick.tabula.permissions
+import scala.collection.JavaConversions._
+
+import javax.persistence._
+import uk.ac.warwick.tabula.JavaImports._
 
 /** 
  * Applying this trait to an object signifies that it fulfils a contract for 
@@ -24,6 +28,6 @@ trait PermissionsTarget {
 	 */
 	def permissionsParents: Seq[PermissionsTarget]
 	
-	def id: Any
+	def id: String
 
 }

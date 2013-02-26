@@ -2,7 +2,7 @@
 
 <h1>${department.name}</h1>
 
-<p><a href="owners/">View department admins</a></p>
+<p><a href="permissions/">View department admins</a></p>
 
 ${department.modules?size} modules
 

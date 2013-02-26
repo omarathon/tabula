@@ -7,8 +7,10 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.ItemNotFoundException
 
-class ViewProfileCommand(member: Member) extends ViewViewableCommand(Permissions.Profiles.Read, member)
+class ViewProfileCommand(studentMember: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read, studentMember)
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
@@ -18,19 +20,23 @@ class ViewProfileController extends ProfilesController {
 		restricted(new SearchProfilesCommand(currentMember, user)) orNull
 	
 	@ModelAttribute("viewProfileCommand")
-	def viewProfileCommand(@PathVariable("member") member: Member) = new ViewProfileCommand(member)
-	
-	@RequestMapping
-	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
-		val profiledMember = cmd.apply
-		
-		val isSelf = (profiledMember.universityId == user.universityId)
-		
-		Mav("profile/view", 
-		    "profile" -> profiledMember,
-		    "viewer" -> currentMember,
-		    "isSelf" -> isSelf)
-		   .crumbs(Breadcrumbs.Profile(profiledMember, isSelf))
+	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
+		case student: StudentMember => new ViewProfileCommand(student)
+		case _ => throw new ItemNotFoundException
 	}
 
+
+	@RequestMapping
+	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
+		val profiledStudentMember = cmd.apply
+		
+		val isSelf = (profiledStudentMember.universityId == user.universityId)
+		
+		Mav("profile/view", 
+		    "profile" -> profiledStudentMember,
+		    "viewer" -> currentMember,
+		    "isSelf" -> isSelf)
+		   .crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+	}
 }
+

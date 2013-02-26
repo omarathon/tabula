@@ -34,10 +34,10 @@
 		</form>
 	</#macro>
 	
-	<#if module.participants.includeUsers?size gt 0>
+	<#if module.managers.includeUsers?size gt 0>
 	
 		<table class="permission-list">
-		<@userlookup ids=module.participants.includeUsers>
+		<@userlookup ids=module.managers.includeUsers>
 		<#list missing_ids as missing_id>
 			<tr class="anon-user">
 				<td>${missing_id}</td>
@@ -47,7 +47,7 @@
 				</td>
 			</tr>
 		</#list>
-		<#list module.participants.includeUsers as id>
+		<#list module.managers.includeUsers as id>
 			<#if returned_users[id].foundUser>
 			<#assign u=returned_users[id] />
 			<tr>

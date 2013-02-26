@@ -27,9 +27,16 @@
 			   >What's this?</a>
 		</#macro>
 
-		<#if assessmentGroup??>
+		<#if upstreamAssessmentGroups?has_content>
+			<#assign total=0 />
+			<#list upstreamAssessmentGroups as group>
+				<#assign total=total+group.members.members?size />
+			</#list>
+			<#if hasMembers>
+				<#assign total=total+membersGroup.includeUsers?size />
+			</#if>
 
-			${assessmentGroup.members.members?size} students enrolled from SITS <@what_is_this />
+			${total} students enrolled from SITS <@what_is_this />
 			<#if hasMembers>(with adjustments)</#if>
 			<a class="btn" id="show-sits-picker">Change link</a> or <a class="btn" id="show-membership-picker">Adjust membership</a>
 
@@ -49,37 +56,56 @@
 		<div class="span8">
 
 		<!-- Picker to select an upstream assessment group (upstreamassignment+occurrence) -->
-		<div class="sits-picker">
-			<a class="close" data-dismiss="sits-picker">&times;</a>
-			Assessment groups for ${command.academicYear.label}
-			<#assign upstreamGroupOptions = command.upstreamGroupOptions />
-
-			<#if assessmentGroup??>
-			  <a href="#" class="btn sits-picker-option" data-id="" data-occurrence="">Unlink</a>
-			</#if>
-
-			<#if upstreamGroupOptions?? && upstreamGroupOptions?size gt 0>
-			<#assign showOccurrence=true>
-			<table>
-				<tr>
-					<th>Name</th>
-					<th>Members</th>
-					<th>CATS</th>
-					<#if showOccurrence><th>Cohort</th></#if>
-				</tr>
-				<#list upstreamGroupOptions as option>
-				<tr>
-					<td><a href="#" class="sits-picker-option" data-id="${option.assignmentId}" data-occurrence="${option.occurrence}">${option.name}</a></td>
-					<td>${option.memberCount}</td>
-					<td>${option.cats!'-'}</td>
-					<#if showOccurrence><td>${option.occurrence}</td></#if>
-				</tr>
+		<div class="ag-picker">
+			<a class="close" data-dismiss="ag-picker">&times;</a>
+			<#if linkedAssessmentGroups?has_content>
+				<#list linkedAssessmentGroups as group>
+					<input class="linked-group"
+						   type="hidden"
+						   name="assessmentGroups"
+						   value="${group.id}"
+						   data-id = "${group.upstreamAssignment.id}"
+						   data-occurrence = "${group.occurrence}" />
 				</#list>
-			</table>
 			<#else>
-			No SITS options available.
+				<@f.hidden class="group-id" name="assessmentGroups" value="" />
+			</#if>
+			Assessment groups for ${command.academicYear.label}
+			<#if command.upstreamGroupOptions?has_content>
+				<#assign showOccurrence=true>
+				<table>
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Members</th>
+							<th>CATS</th>
+							<th>Cohort</th>
+							<th>Sequence</th>
+						</tr>
+					</thead>
+					<tbody><#list command.upstreamGroupOptions as option>
+						<#assign isLinked = option.linked/>
+						<tr class="${isLinked?string('linked', '')}">
+							<td>
+								<a href="#"
+								   class="ag-picker-option"
+								   data-id="${option.assignmentId}"
+								   data-occurrence="${option.occurrence}">
+									${option.name}
+								</a>
+							</td>
+							<td>${option.memberCount}</td>
+							<td>${option.cats!'-'}</td>
+							<td>${option.occurrence}</td>
+							<td>${option.sequence}</td>
+						</tr>
+					</#list></tbody>
+				</table>
+			<#else>
+				No SITS options available.
 			</#if>
 		</div>
+
 
 		<div class="membership-picker">
 			<a class="close" data-dismiss="membership-picker">&times;</a>
@@ -116,7 +142,7 @@
 								<a href="#"
 										class="btn disabled hide-checked-users has-tooltip"
 										id="membership-remove-selected"
-										<#if assessmentGroup??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+										<#if upstreamAssessmentGroups??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 										>
 									Remove selected
 								</a>
@@ -201,26 +227,64 @@
 
 		<script>
 		jQuery(function($){
-			var $sitsPicker = $('.sits-picker');
-			var $membershipPicker = $('.membership-picker');
-			var $form = $sitsPicker.closest('form');
 
-			$sitsPicker.hide();
+			var $assignmentGroupPicker = $('.ag-picker');
+
+			var redoIndices = function(){
+				$('.assessment-group-assignment').each(function(index){
+					$(this).attr('name', 'assessmentGroupItems['+index+'].upstreamAssignment')
+				});
+				$('.assessment-group-occurrence').each(function(index){
+					$(this).attr('name', 'assessmentGroupItems['+index+'].occurrence')
+				});
+			};
+
+			// need to put this empty element in the form when all have been removed
+			var emptyAssessmentGroups = '<input type="hidden"  value="" name="assessmentGroups">';
+
+			// remove linked groups
+			$assignmentGroupPicker.on('click', 'tr.linked a', function(e){
+				e.preventDefault();
+				var $parentRow = $(this).closest("tr");
+				var $parentCell = $(this).closest("td");
+				var assignmentID = $(this).data("id");
+				var occurrence = $(this).data("occurrence");
+				$parentRow.removeClass("linked");
+				// remove the linked group if one exists
+				$('.linked-group[data-id='+assignmentID+'][data-occurrence='+occurrence+']').remove();
+				if($('.linked-group').length == 0){
+					$assignmentGroupPicker.append($(emptyAssessmentGroups));
+				}
+				// remove any pending new groups
+				$('input', $parentRow).remove();
+				redoIndices();
+			});
+
+			// add un-linked groups
+			$assignmentGroupPicker.on('click', 'tr:not(.linked) a', function(e){
+				e.preventDefault();
+				var $parentRow = $(this).closest("tr");
+				var $parentCell = $(this).closest("td");
+				var index = $('.assessment-group-assignment').length
+				var assignmentID = $(this).data("id");
+				var occurrence = $(this).data("occurrence");
+				var $assignmentElement = $('<input class="assessment-group-assignment" type="hidden" name="assessmentGroupItems['+index+'].upstreamAssignment" value="'+assignmentID+'"/>');
+				var $occurrenceElement = $('<input class="assessment-group-occurrence" type="hidden" name="assessmentGroupItems['+index+'].occurrence" value="'+occurrence+'"/>');
+				$parentRow.addClass("linked");
+				$parentCell.append($assignmentElement);
+				$parentCell.append($occurrenceElement);
+			});
+
+			var $membershipPicker = $('.membership-picker');
+			var $form = $assignmentGroupPicker.closest('form');
+
+			$assignmentGroupPicker.hide();
 			$membershipPicker.hide();
 
 			//close buttons on pickers
-			$('.sits-picker, .membership-picker').find('.close').click(function(){
+			$('.ag-picker, .membership-picker').find('.close').click(function(){
 				var $close = $(this);
 				$('.' + $close.data('dismiss')).hide();
-			});
-
-			$sitsPicker.find('.sits-picker-option').click(function(e){
-				e.preventDefault();
-				$('#upstreamAssignment').val( $(e.target).data('id') );
-				$('#occurrence').val( $(e.target).data('occurrence') );
-				$('#action-input').val('refresh');
-				$('#focusOn').val('member-list');
-				$form.submit();
 			});
 
 			$('#add-members, #membership-remove-selected').click(function(e){
@@ -277,10 +341,10 @@
 
 			$('#show-sits-picker').click(function(){
 				$('.membership-picker').hide();
-				$('.sits-picker').toggle();
+				$('.ag-picker').toggle();
 			});
 			$('#show-membership-picker').click(function(){
-				$('.sits-picker').hide();
+				$('.ag-picker').hide();
 				var $membershipPicker = $('.membership-picker');
 				$membershipPicker.toggle();
 				// switch straight to "Add more" tab if the group is empty
@@ -300,9 +364,8 @@
 			<#assign focusOn=RequestParameters.focusOn!'' />
 			<#if focusOn='member-list'>
 				// focusOn=member-list
-        $('#show-membership-picker').click();
+        		$('#show-membership-picker').click();
 			</#if>
-
 			});
 		</script>
 

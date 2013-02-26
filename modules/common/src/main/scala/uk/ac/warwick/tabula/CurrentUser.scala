@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Represents... surprise, the current user.
@@ -59,15 +60,18 @@ class CurrentUser(
 	def isMember = isStudent || isStaff
 
 	override def toString = {
-		val builder = new StringBuilder("User ")
-		builder append idForPermissions
-		if (masquerading) {
-			builder append " (really "
-			builder append realUser.getUserId
-			builder append ")"
+		if (!idForPermissions.hasText) "Anonymous user" 
+		else {
+			val builder = new StringBuilder("User ")
+			builder append idForPermissions
+			if (masquerading) {
+				builder append " (really "
+				builder append realUser.getUserId
+				builder append ")"
+			}
+			if (god) builder append " +GodMode"
+			builder.toString
 		}
-		if (god) builder append " +GodMode"
-		builder.toString
 	}
 }
 

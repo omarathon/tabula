@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.roles.Role
 @Component
 class MarkerRoleProvider extends RoleProvider {
 	
-	def getRolesFor(user: CurrentUser, scope: => PermissionsTarget): Seq[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
 		def getRoles(assignments: Seq[Assignment]) = assignments filter { _.isMarker(user.apparentUser) } map {Marker(_)} 
 		
 		scope match {

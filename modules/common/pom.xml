@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>28</version>
+		<version>29</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -471,6 +471,18 @@
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>
 			<version>1.7.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.8</version>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.ac.warwick.membership</groupId>
+			<artifactId>membership-rmi</artifactId>
+			<version>2.7</version>
 		</dependency>
 
 		<!-- Test dependencies -->

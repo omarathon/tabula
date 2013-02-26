@@ -4,46 +4,24 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-case class DepartmentModuleManager(department: model.Department) extends BaseModuleManager(department)
-case class ModuleManager(module: model.Module) extends BaseModuleManager(module)
+case class DepartmentModuleManager(department: model.Department) extends BuiltInRole(department, ModuleManagerRoleDefinition)
+case class ModuleManager(module: model.Module) extends BuiltInRole(module, ModuleManagerRoleDefinition)
 
-abstract class BaseModuleManager(scope: PermissionsTarget) extends BuiltInRole(scope) {
+case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 	
-	GrantsPermissionFor(scope, 
-		Module.Read,
-		
+	GeneratesSubRole(ModuleAssistantRoleDefinition)
+	
+	GrantsScopedPermission( 	
 		Assignment.Archive,
-		Assignment.Create,
-		Assignment.Read,
-		Assignment.Update,
 		Assignment.Delete,
 		
-		Submission.ViewPlagiarismStatus,
-		Submission.ManagePlagiarismStatus,
-		Submission.CheckForPlagiarism,
-		Submission.ReleaseForMarking,
-		// No Submission.Create() here for obvious reasons!		
-		Submission.Read,
-		Submission.Update,
+		RolesAndPermissions.Create,
+		RolesAndPermissions.Update,
+		RolesAndPermissions.Delete,
+		
 		Submission.Delete,
 		
-		Marks.DownloadTemplate,
-		Marks.Create,
-		Marks.Read,
-		Marks.Update,
-		Marks.Delete,
-		
-		Extension.ReviewRequest,
-		Extension.Create,
-		Extension.Read,
-		Extension.Update,
-		Extension.Delete,
-		
-		Feedback.Publish,
-		Feedback.Create,
-		Feedback.Read,
-		Feedback.Update,
-		Feedback.Delete
+		Feedback.Publish
 	)
 
 }

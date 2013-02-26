@@ -1,22 +1,18 @@
 package uk.ac.warwick.tabula.data.convert
-
-import org.springframework.core.convert.converter.Converter
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentService
-import org.springframework.format.Formatter
-import java.util.Locale
+import uk.ac.warwick.tabula.system.TwoWayConverter
 
-class UpstreamAssignmentIdConverter extends Converter[String, UpstreamAssignment] with Formatter[UpstreamAssignment] {
+class UpstreamAssignmentIdConverter extends TwoWayConverter[String, UpstreamAssignment] {
 
 	@Autowired var service: AssignmentService = _
 
 	// Converter used for binding request
-	override def convert(id: String) = service.getUpstreamAssignment(id).orNull
-
+	override def convertRight(id: String) = service.getUpstreamAssignment(id).orNull
+	
 	// Formatter used for generating textual value in template
-	override def parse(id: String, locale: Locale): UpstreamAssignment = convert(id)
-	override def print(assignment: UpstreamAssignment, locale: Locale): String = assignment.id
+	override def convertLeft(assignment: UpstreamAssignment) = Option(assignment) map { _.id } orNull
 
 }

@@ -28,7 +28,7 @@ class SecurityService extends Logging {
 	var roleService = Wire.auto[RoleService]
 
 	type Response = Option[Boolean]
-	type PermissionChecker = (CurrentUser, Permission, => PermissionsTarget) => Response
+	type PermissionChecker = (CurrentUser, Permission, PermissionsTarget) => Response
 
 	// The possible response types for a permissions check.
 	// Continue means continue to the next check, otherwise it will stop and use the returned value.
@@ -40,14 +40,14 @@ class SecurityService extends Logging {
 
 	val checks: Seq[PermissionChecker] = List(checkGod _, checkPermissions _, checkRoles _)
 
-	def checkGod(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = if (user.god) Allow else Continue
+	def checkGod(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = if (user.god) Allow else Continue
 	
-	def checkPermissions(allPermissions: Map[Permission, Option[PermissionsTarget]], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = {
+	def checkPermissions(allPermissions: Map[Permission, Option[PermissionsTarget]], user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
 		if (allPermissions == null || allPermissions.isEmpty) Continue
 		else permission match {
 			case permission: ScopelessPermission => if (allPermissions.contains(permission)) Allow else Continue
 			case permission => {
-				def scopeMatches(permissionScope: => PermissionsTarget, targetScope: => PermissionsTarget): Boolean =
+				def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
 					// The ID matches, or there exists a parent that matches (recursive)
 					permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
 				
@@ -64,24 +64,39 @@ class SecurityService extends Logging {
 		}
 	}
 	
-	def checkPermissions(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response =
-			checkPermissions(roleService.getExplicitPermissionsFor(user, scope), user, permission, scope)
+	def checkPermissions(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
+		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
+		if (explicitPermissions == null) Continue
+		else {
+			val (allow, deny) = explicitPermissions.partition(_._3)
+			
+			// Confusingly, we check for an "Allow" for the deny perms and then immediately deny it
+			val denyPerms = deny map { triple => (triple._1 -> triple._2) } toMap
+			
+			if (checkPermissions(denyPerms, user, permission, scope) != Continue) Deny
+			else {
+				val allowPerms = allow map { triple => (triple._1 -> triple._2) } toMap
+			
+				checkPermissions(allowPerms, user, permission, scope)
+			}
+		}
+	}
 			
 	// By using Some() here, we ensure that we return Deny if there isn't a role match - this must be the LAST permissions provider
-	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response = Some(
+	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = Some(
 		roles != null && (roles exists { role =>			
 			checkPermissions(role.explicitPermissions, user, permission, scope) == Allow ||
 			checkRoles(role.subRoles, user, permission, scope) == Allow
 		})
 	)
 	
-	def checkRoles(user: CurrentUser, permission: Permission, scope: => PermissionsTarget): Response =
+	def checkRoles(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response =
 		checkRoles(roleService.getRolesFor(user, scope), user, permission, scope)
 
 	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
-	def can(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _can(user, permission, Option(scope)) 
+	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
-	private def _can(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]): Boolean = 
+	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = 
 		transactional(readOnly=true) {
 			// loop through checks, seeing if any of them return Allow or Deny
 			for (check <- checks) {
@@ -95,9 +110,9 @@ class SecurityService extends Logging {
 		}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
-	def check(user: CurrentUser, permission: Permission, scope: => PermissionsTarget) = _check(user, permission, Option(scope))
+	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
 
-	private def _check(user: CurrentUser, permission: Permission, scope: => Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
+	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
 		(permission, scope) match {
 			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
 			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)

@@ -1,4 +1,42 @@
 @import "bootstrap/variables.less";
+@import "bootstrap/mixins.less";
+
+ul#navbar {
+	li { margin: 0; }
+	
+	.icon-chevron-right {
+		float: right;
+		.opacity(25);
+		margin: -1px -6px 0 0;
+	}
+	
+	&.affix {
+		#grid .core .span(3);
+		top: 12px;
+		
+		@media (max-width:720px) {
+			position: static;
+			width: auto;
+			top: 0;
+		}
+	}
+	
+	a {
+		display: block;
+		margin: 0 0 -1px;
+		padding: 8px 14px;
+		border: 1px solid #e5e5e5;
+		text-decoration: none;
+	}
+}
+
+.example {
+	display: inline-block;
+	width: 200px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+}
 
 .tabula {
 	&-turquoise { background-color: @tabulaTurquoise; }

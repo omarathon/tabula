@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 
 
-abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[T]
+abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
 	with Daoisms with Logging with BindListener {
 
 	var userLookup = Wire.auto[UserLookupService]
@@ -38,13 +38,17 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
-	def postExtractValidation(errors: Errors) = {
+	def postExtractValidation(errors: Errors) {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (marks != null && !marks.isEmpty()) {
 			for (i <- 0 until marks.length) {
 				val mark = marks.get(i)
-				val newPerson = uniIdsSoFar.add(mark.universityId)
+				val newPerson = if (mark.universityId != null){
+					uniIdsSoFar.add(mark.universityId)
+				} else {
+					false
+				}
 				errors.pushNestedPath("marks[" + i + "]")
 				mark.isValid = validateMarkItem(mark, errors, newPerson)
 				errors.popNestedPath()
@@ -56,27 +60,28 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 
 	def validateMarkItem(mark: MarkItem, errors: Errors, newPerson: Boolean) = {
 
-		var noErrors = true
+		var hasErrors = false
 		// validate id
 		if (mark.universityId.hasText) {
 			if (!UniversityId.isValid(mark.universityId)) {
 				errors.rejectValue("universityId", "uniNumber.invalid")
-				noErrors = false
+				hasErrors = true
 			} else if (!newPerson) {
 				errors.rejectValue("universityId", "uniNumber.duplicate.mark")
-				noErrors = false
+				hasErrors = true
 			} else {
 				userLookup.getUserByWarwickUniId(mark.universityId) match {
 					case FoundUser(u) =>
 					case NoUser(u) => {
 						errors.rejectValue("universityId", "uniNumber.userNotFound", Array(mark.universityId), "")
-						noErrors = false
+						hasErrors = true
 					}
 				}
 				checkIfDuplicate(mark: MarkItem)
 			}
 		} else {
 			errors.rejectValue("universityId", "NotEmpty")
+			hasErrors = true
 		}
 		// validate mark (must be int between 0 and 100)
 		if (mark.actualMark.hasText) {
@@ -84,19 +89,19 @@ abstract class AddMarksCommand[T](val module: Module, val assignment: Assignment
 				val asInt = mark.actualMark.toInt
 				if (asInt < 0 || asInt > 100) {
 					errors.rejectValue("actualMark", "actualMark.range")
-					noErrors = false
+					hasErrors = true
 				}
 			} catch {
 				case _ => {
 					errors.rejectValue("actualMark", "actualMark.format")
-					noErrors = false
+					hasErrors = true
 				}
 			}
 		} else if (!mark.actualGrade.hasText) {
 			// If a row has no mark or grade, we will quietly ignore it 
-			noErrors = false
+			hasErrors = true
 		}
-		noErrors
+		!hasErrors
 	}
 
 	override def onBind {

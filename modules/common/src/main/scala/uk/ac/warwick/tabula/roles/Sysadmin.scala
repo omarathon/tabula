@@ -2,7 +2,9 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class Sysadmin extends BuiltInRole(None) {
+case class Sysadmin extends BuiltInRole(None, SysadminRoleDefinition)
+
+case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 	
 	/*
 	 * IMPORTANT
@@ -10,13 +12,12 @@ case class Sysadmin extends BuiltInRole(None) {
 	 * A Sysadmin does *NOT* gain any additional permissions past the sysadmin-actions by default; that's what god mode is for  
 	 */
 	
-	GrantsPermission(
+	GrantsScopelessPermission(
 		Masquerade,
 		GodMode,
 		ManageMaintenanceMode,
 		ImportSystemData,
-		ReplicaSyncing,
-		PermissionsHelper
+		ReplicaSyncing
 	)
 	
 	GrantsGlobalPermission(
@@ -25,8 +26,11 @@ case class Sysadmin extends BuiltInRole(None) {
 		Module.Update,
 		Module.Delete,
 		
-		// To add department owners
-		Department.ManagePermissions
+		// To add department owners, but also global-read is for the permissions helper
+		RolesAndPermissions.Create,
+		RolesAndPermissions.Read,
+		RolesAndPermissions.Update,
+		RolesAndPermissions.Delete
 	)
 	
 }

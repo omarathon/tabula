@@ -28,6 +28,7 @@ import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
+import org.junit.Ignore
 
 class ApplicationTest extends AppContextTestBase {
     
@@ -71,13 +72,13 @@ class ApplicationTest extends AppContextTestBase {
 	}
     
     /*
-     * A post-load event in Department makes sure that a null owners
+     * A post-load event in Department makes sure that a null settings
      * property is replaced with a new empty group on load.
      */
     @Transactional @Test def departmentLoadEvent {
       val dept = new Department
       dept.code = "ch"
-      dept.owners = null
+      dept.settings = null
       session.save(dept)
       
       val id = dept.id
@@ -86,7 +87,7 @@ class ApplicationTest extends AppContextTestBase {
       session.clear
       
       session.load(classOf[Department], id) match {
-        case loadedDepartment:Department => loadedDepartment.owners should not be(null)
+        case loadedDepartment:Department => loadedDepartment.settings should not be(null)
         case _ => fail("Department not found")
       }
       
@@ -96,6 +97,10 @@ class ApplicationTest extends AppContextTestBase {
       val modules = session.createCriteria(classOf[Module]).list
       modules.size should be (2)
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
+    }
+    
+    @Ignore @Test def getAllCommands {
+    	allCommandsInSystem("uk.ac.warwick.tabula.coursework").map {clz => println(clz.getName.substring("uk.ac.warwick.tabula.coursework".length))}
     }
     
 }

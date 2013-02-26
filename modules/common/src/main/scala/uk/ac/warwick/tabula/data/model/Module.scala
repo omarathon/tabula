@@ -7,6 +7,14 @@ import org.hibernate.annotations.AccessType
 import javax.persistence._
 import javax.validation.constraints._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
+import org.hibernate.annotations.ForeignKey
+import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
 
 @Entity
 @NamedQueries(Array(
@@ -23,28 +31,15 @@ class Module extends GeneratedId with PermissionsTarget {
 	@BeanProperty var code: String = _
 	@BeanProperty var name: String = _
 
-	// The members are studying the module.
-	// (moved to Assignment)
-	/*@OneToOne(cascade=Array(CascadeType.ALL))
-	@JoinColumn(name="membersgroup_id")
-	@BeanProperty var members:UserGroup = new UserGroup*/
-
-	// The participants are markers/moderators who upload feedback. 
+	// The managers are markers/moderators who upload feedback. 
 	// They can also publish feedback.
-	@OneToOne(cascade = Array(CascadeType.ALL))
-	@JoinColumn(name = "participantsgroup_id")
-	@BeanProperty var participants: UserGroup = new UserGroup
-
-	// return participants, creating an empty one if missing.
-	def ensuredParticipants = {
-		ensureParticipantsGroup
-		participants
-	}
-
-	/** Create an empty participants group if it's null. */
-	def ensureParticipantsGroup {
-		if (participants == null) participants = new UserGroup
-	}
+	// Module assistants can't publish feedback
+	@transient 
+	var permissionsService = Wire.auto[PermissionsService]
+	@transient 
+	lazy val managers = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
+	@transient 
+	lazy val assistants = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
@@ -56,6 +51,10 @@ class Module extends GeneratedId with PermissionsTarget {
 	@BeanProperty var assignments: java.util.List[Assignment] = List()
 
 	@BeanProperty var active: Boolean = _
+	
+	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@ForeignKey(name="none")
+	@BeanProperty var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
 
 	override def toString = "Module[" + code + "]"
 }

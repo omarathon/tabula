@@ -120,7 +120,7 @@ class AssignmentController extends CourseworkController {
 			}
 			
 			transactional() {
- 				val moduleManagers = submission.assignment.module.participants
+ 				val moduleManagers = submission.assignment.module.managers
  				val notifyModuleManager = new SendSubmissionNotifyCommand(submission, moduleManagers)
  				notifyModuleManager.apply()
  			}
