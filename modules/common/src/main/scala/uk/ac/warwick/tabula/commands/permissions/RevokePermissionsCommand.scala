@@ -51,7 +51,7 @@ class RevokePermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) exte
 			}
 		}
 		
-		if (permission == null) errors.rejectValue("roleDefinition", "NotEmpty")
+		if (permission == null) errors.rejectValue("permission", "NotEmpty")
 	}
 
 	def describe(d: Description) = d.properties(
