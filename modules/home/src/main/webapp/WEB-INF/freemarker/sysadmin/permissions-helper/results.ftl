@@ -98,7 +98,7 @@
 					<#if results.permissions?size gt 0>
 						<ul>
 							<#list results.permissions as permission>
-								<li><#if permission._3>[ALLOW]<#else>[DENY]</#if> <@debugPermission permission=permission._1 scope=permission._2 /></li>
+								<li><#if permission.permissionType>[ALLOW]<#else>[DENY]</#if> <@debugPermission permission=permission.permission scope=permission.scope /></li>
 							</#list>
 						</ul>
 					<#else>

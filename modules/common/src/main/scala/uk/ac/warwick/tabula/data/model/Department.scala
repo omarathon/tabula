@@ -31,7 +31,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var name:String = null
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var modules:JList[Module] = List()
+	@BeanProperty var modules:JList[Module] = ArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
@@ -40,7 +40,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var markingWorkflows:JList[MarkingWorkflow] = ArrayList()
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = List()
+	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = ArrayList()
 	
 	def isCollectFeedbackRatings = collectFeedbackRatings
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)

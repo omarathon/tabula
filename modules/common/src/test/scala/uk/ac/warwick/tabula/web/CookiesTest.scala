@@ -21,6 +21,21 @@ class CookiesTest extends TestBase {
 		cookies.getBoolean("isNasty", false) should be (false)
 		cookies.getBoolean("isNonsense", false) should be (false)
 	}
+	
+	@Test
+	def magicCookie {
+		val httpCookie = new http.Cookie("name", "Billy")
+		val magicCookie = new Cookie(httpCookie)
+		
+		magicCookie.path should be (null)
+		magicCookie.value should be ("Billy")
+		
+		magicCookie.path = "/path"
+		magicCookie.value = "myvalue"
+			
+		httpCookie.getPath() should be ("/path")
+		httpCookie.getValue() should be ("myvalue")
+	}
 
 	/* Request can have a null array of cookies if the user agent sends no header */
 	@Test

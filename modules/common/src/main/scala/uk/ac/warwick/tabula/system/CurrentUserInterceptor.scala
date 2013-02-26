@@ -22,9 +22,9 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	type MasqueradeUserCheck = (User, Boolean) => User
 
 	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = {
-		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin(), None)
+		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin())
 		val god = sysadmin && godModeEnabled
-		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader(), None)
+		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader())
 		val canMasquerade =  sysadmin || masquerader
 		new CurrentUser(
 			realUser = user,

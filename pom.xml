@@ -398,6 +398,9 @@
 	<!-- ====================================================================== -->
 	<build>
 		<defaultGoal>install</defaultGoal>
+		
+		<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+		<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 
 		<plugins>
 			<!-- Scala support in maven -->

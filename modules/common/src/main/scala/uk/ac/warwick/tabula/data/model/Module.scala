@@ -48,7 +48,7 @@ class Module extends GeneratedId with PermissionsTarget {
 	def permissionsParents = Seq(Option(department)).flatten
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BeanProperty var assignments: java.util.List[Assignment] = List()
+	@BeanProperty var assignments: java.util.List[Assignment] = ArrayList()
 
 	@BeanProperty var active: Boolean = _
 	

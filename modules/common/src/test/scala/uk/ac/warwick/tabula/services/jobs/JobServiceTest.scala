@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.services.jobs
+import org.springframework.beans.factory.annotation.Autowired
+
+
 
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.jobs.TestingJob
 
-class JobServiceTest extends AppContextTestBase with HasJobDao {
+class JobServiceTest extends AppContextTestBase {
 	
 	@Autowired var service: JobService = _
 	

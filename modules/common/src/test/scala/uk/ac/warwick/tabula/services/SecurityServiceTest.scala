@@ -12,6 +12,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
 class SecurityServiceTest extends TestBase with Mockito {
 	
@@ -39,11 +40,11 @@ class SecurityServiceTest extends TestBase with Mockito {
 		
 		val roleService = mock[RoleService]
 		roleService.getExplicitPermissionsFor(currentUser, null) returns (Stream(
-				(Permissions.UserPicker, None, true),
-				(Permissions.ImportSystemData, None, true)
+				PermissionDefinition(Permissions.UserPicker, None, true),
+				PermissionDefinition(Permissions.ImportSystemData, None, true)
 		))
 		roleService.getExplicitPermissionsFor(currentUser, department) returns (Stream(
-				(Permissions.Department.ManageDisplaySettings, Some(department), true)
+				PermissionDefinition(Permissions.Department.ManageDisplaySettings, Some(department), true)
 		))
 				
 		securityService.roleService = roleService

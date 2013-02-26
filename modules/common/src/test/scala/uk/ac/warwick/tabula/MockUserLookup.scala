@@ -98,6 +98,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 class MockGroupService extends GroupService {
 	val DoItYourselfKevin = "Not implemented - add to mock object if you need it"
 	var groupMap: Map[String, Group] = Map()
+	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue(false)
 	
 	override def getGroupByName(groupName: String) = groupMap.get(groupName).getOrElse {
 		throw new GroupNotFoundException(groupName)
@@ -131,7 +132,7 @@ class MockGroupService extends GroupService {
         }
     }
 
-    override def isUserInGroup(user: String, group: String) = false
+    override def isUserInGroup(user: String, group: String) = usersInGroup((user, group))
 
     override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
 
