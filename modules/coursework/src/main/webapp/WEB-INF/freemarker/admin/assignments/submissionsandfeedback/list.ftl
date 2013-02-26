@@ -108,7 +108,7 @@
 		<#if hasOriginalityReport><td></td></#if>
 		
 		<td></td><td></td>
-		<#if assignment.collectMarks><td></td></#if>
+		<#if assignment.collectMarks><td></td><td></td></#if>
 		<td></td>
 	</tr>
 </#macro>
@@ -221,8 +221,9 @@
 			<col class="files" />
 			<col class="uploaded" />
 			<#if assignment.collectMarks>
-				<#assign feedbackColspan=feedbackColspan+1 />
+				<#assign feedbackColspan=feedbackColspan+2 />
 				<col class="mark" />
+				<col class="grade" />
 			</#if>
 			<col class="status" />
 		</colgroup>	
@@ -265,6 +266,7 @@
 				<th>Uploaded</th>
 				<#if assignment.collectMarks>
 					<th>Mark</th>
+					<th>Grade</th>
 				</#if>
 				<th class="sortable">Status</th>
 			</tr>
@@ -392,6 +394,9 @@
 					 <#if assignment.collectMarks>
 						<td class="mark">
 							${(student.enhancedFeedback.feedback.actualMark)!''}
+						</td>
+						<td class="grade">
+							${(student.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
 					<td class="feedbackReleased">
