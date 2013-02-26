@@ -1,0 +1,147 @@
+package uk.ac.warwick.tabula.services.fileserver
+
+import uk.ac.warwick.tabula.TestBase
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockHttpServletRequest
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.FileDao
+import org.mockito.Matchers._
+import java.io.File
+import org.springframework.util.FileCopyUtils
+
+class FileServerTest extends TestBase with Mockito {
+	
+	val server = new FileServer
+	
+	val content = "file content"
+	
+	val tmpFile = File.createTempFile("fileservertest", ".txt")
+	FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
+	
+	@Test def streamEmptyAttachment {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = new MockHttpServletResponse
+		
+		val dao = mock[FileDao]
+		dao.getData(anyString()) returns (None)
+		
+		val a = new FileAttachment
+		a.fileDao = dao
+		
+		val file = new RenderableAttachment(a)
+		
+		server.stream(file)
+		
+		res.getContentLength() should be (0)
+		res.getContentType() should be ("application/octet-stream")
+		res.getContentAsByteArray().length should be (0)
+	}
+	
+	@Test def streamAttachment {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = new MockHttpServletResponse
+		
+		val dao = mock[FileDao]
+		dao.getData(anyString()) returns (Some(tmpFile))
+		
+		val a = new FileAttachment
+		a.fileDao = dao
+		
+		val file = new RenderableAttachment(a)
+		
+		server.stream(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/octet-stream")
+		res.getHeader("Content-Disposition") should be (null)
+		res.getContentAsString() should be (content)
+	}
+	
+	@Test def streamZip {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = new MockHttpServletResponse
+		
+		val file = new RenderableZip(tmpFile)
+		
+		server.stream(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/zip")
+		res.getHeader("Content-Disposition") should be (null)
+		res.getContentAsString() should be (content)
+	}
+	
+	@Test def serveAttachment {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = new MockHttpServletResponse
+		
+		val dao = mock[FileDao]
+		dao.getData(anyString()) returns (Some(tmpFile))
+		
+		val a = new FileAttachment
+		a.fileDao = dao
+		
+		val file = new RenderableAttachment(a)
+		
+		server.serve(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/octet-stream")
+		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getContentAsString() should be (content)
+	}
+	
+	@Test def serveZip {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = new MockHttpServletResponse
+		
+		val file = new RenderableZip(tmpFile)
+		
+		server.serve(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/zip")
+		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getContentAsString() should be (content)
+	}
+	
+	@Test def streamHead {
+		implicit val req = new MockHttpServletRequest
+		req.setMethod("HEAD")
+		
+		implicit val res = new MockHttpServletResponse
+		
+		val file = new RenderableZip(tmpFile)
+		
+		server.stream(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/zip")
+		res.getHeader("Content-Disposition") should be (null)
+		res.getContentAsByteArray().length should be (0)
+	}
+	
+	@Test def serveHead {
+		implicit val req = new MockHttpServletRequest
+		req.setMethod("HEAD")
+		
+		implicit val res = new MockHttpServletResponse
+		
+		val file = new RenderableZip(tmpFile)
+		
+		server.serve(file)
+		
+		res.getContentLength() should be (content.length)
+		res.getHeader("Content-Length") should be (content.length.toString)
+		res.getContentType() should be ("application/zip")
+		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getContentAsByteArray().length should be (0)
+	}
+
+}

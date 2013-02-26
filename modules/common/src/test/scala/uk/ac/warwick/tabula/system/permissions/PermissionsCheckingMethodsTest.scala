@@ -69,5 +69,66 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
+	
+	@Test def linkedSubmissionToAssignment {
+		val ass1 = Fixtures.assignment("my assignment")
+		ass1.id = "ass1"
+			
+		val ass2 = Fixtures.assignment("my assignment2")
+		ass2.id = "ass2"
+		
+		val submission = Fixtures.submission()
+			
+		submission.assignment = ass1
+		
+		mustBeLinked(submission, ass1)
+		
+		submission.assignment = ass2
+		
+		try {
+			mustBeLinked(submission, ass1)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
+	
+	@Test def linkedMarkingWorkflowToDepartment {
+		val markingWorkflow = Fixtures.markingWorkflow("my workflow")
+		markingWorkflow.department = dept
+		
+		mustBeLinked(markingWorkflow, dept)
+		
+		val dept2 = Fixtures.department("xx", "dept 2")
+		dept2.id = "dept2"
+		
+		markingWorkflow.department = dept2
+		
+		try {
+			mustBeLinked(markingWorkflow, dept)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
+	
+	@Test def linkedFeedbackTemplateToDepartment {
+		val template = Fixtures.feedbackTemplate("my template")
+		template.department = dept
+		
+		mustBeLinked(template, dept)
+		
+		val dept2 = Fixtures.department("xx", "dept 2")
+		dept2.id = "dept2"
+		
+		template.department = dept2
+		
+		try {
+			mustBeLinked(template, dept)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
 
 }

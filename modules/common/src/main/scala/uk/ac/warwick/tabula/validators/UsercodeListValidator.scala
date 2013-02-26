@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  */
 class UsercodeListValidator(usercodes: JList[String], pathName: String) {
 	
-	val userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	def validate(errors: Errors) {
 		val trimmedCodes = usercodes.filter(_.hasText).map(_.trim)

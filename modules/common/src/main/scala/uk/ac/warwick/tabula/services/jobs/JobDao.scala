@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
  */
 trait JobDao {
 	def findOutstandingInstances(max: Int): Seq[JobInstance]
-	def saveJob(instance: JobInstance): String
+	def saveJob(instance: JobInstance): JobInstance
 	def getById(id: String): Option[JobInstance]
 	def unfinishedInstances: Seq[JobInstance]
 	def listRecent(start: Int, count: Int): Seq[JobInstance]
@@ -41,7 +41,7 @@ class JobDaoImpl extends JobDao with Daoisms {
 		instance match {
 			case instance: JobInstanceImpl => {
 				session.save(instance)
-				instance.id
+				instance
 			}
 			case _ => throw new IllegalArgumentException("JobDaoImpl only accepts JobInstanceImpls")
 		}

@@ -13,13 +13,14 @@ import collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 
 /**
  * Creates a job that submits the assignment to Turnitin.
  *
  * Returns the job instance ID for status tracking.
  */
-class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[String] {
+class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance] {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)

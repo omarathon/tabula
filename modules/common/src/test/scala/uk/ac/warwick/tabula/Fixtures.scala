@@ -60,5 +60,17 @@ object Fixtures {
 		))
 		group
 	}
+	
+	def markingWorkflow(name: String) = {
+		val workflow = new MarkingWorkflow
+		workflow.name = name
+		workflow
+	}
+	
+	def feedbackTemplate(name: String) = {
+		val template = new FeedbackTemplate
+		template.name = name
+		template
+	}
 		
 }

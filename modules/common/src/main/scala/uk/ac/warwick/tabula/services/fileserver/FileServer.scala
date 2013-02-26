@@ -9,12 +9,15 @@ import javax.servlet.http.HttpServletRequest
 class FileServer {
 	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
 		val inStream = file.inputStream
+		
+		out.addHeader("Content-Type", file.contentType)
+		
 		file.contentLength.map { length =>
 			out.addHeader("Content-Length", length.toString)
 		}
 		
 		if (request.getMethod.toUpperCase != "HEAD")
-			FileCopyUtils.copy(inStream, out.getOutputStream)
+			Option(inStream) map { FileCopyUtils.copy(_, out.getOutputStream) }
 	}
 	
 	/**

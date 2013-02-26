@@ -57,10 +57,10 @@ object UserPickerController {
 		@BeanProperty var lastName: String = ""
 			
 		def applyInternal() = {
-			var users = userLookup.findUsersWithFilter(filter)
-			if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards)
+			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq
+			if (users.size < 10) users ++= (userLookup.findUsersWithFilter(filterBackwards).asScala.toSeq filter { !users.contains(_) })
 			
-			users.asScala.toSeq
+			users
 		}
 
 		/**

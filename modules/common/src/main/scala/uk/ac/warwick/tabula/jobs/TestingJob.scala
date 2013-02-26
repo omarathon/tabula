@@ -23,7 +23,7 @@ class TestingJob extends Job {
 		updateStatus("Running the job with name %s." format (name))
 		for (i <- 1 to 50) {
 			updateProgress(i*2)
-			if (sleepTime != 0) Thread.sleep(50)
+			if (sleepTime != 0) Thread.sleep(10)
 		}
 		job.succeeded = true
 		updateStatus("Finished the job!")
