@@ -12,6 +12,12 @@ object Fixtures {
 		s
 	}
 	
+	def feedback() = {
+		val f = new Feedback
+		f.universityId = "0123456"
+		f
+	}
+	
 	def department(code:String, name:String) = {
 		val d = new Department
 		d.code = code
@@ -24,6 +30,11 @@ object Fixtures {
 		m.code = code.toLowerCase
 		m.name = Option(name).getOrElse("Module " + code)
 		m
+	}
+	
+	def assignment(name:String) = {
+		val a = new Assignment
+		a
 	}
 	
 	def upstreamAssignment(departmentCode:String, number:Int) = {
