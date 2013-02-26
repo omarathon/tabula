@@ -358,13 +358,17 @@
 					</#if>
 					<#if assignment.markingWorkflow??>
 						<td>
-							<#if submission.assignment??>${submission.firstMarker!""}</#if>
+							<#if submission.assignment?? && submission.firstMarker?has_content>
+								${submission.firstMarker.fullName}
+							</#if>
 						</td>
 						<td>
-							<#if submission.assignment??>${submission.secondMarker!""}</#if>
+							<#if submission.assignment?? && submission.secondMarker?has_content>
+								${submission.secondMarker.fullName}
+							</#if>
 						</td>
 					</#if>
-					
+
 					<#if hasOriginalityReport>
 						<td class="originality-report">
 							<#list submission.allAttachments as attachment>
