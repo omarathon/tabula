@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkerFeedback
 import uk.ac.warwick.tabula.Mockito
 import org.hibernate.classic.Session
+import uk.ac.warwick.tabula.data.model.MarkingState._
 
 class StateServiceTest extends TestBase with Mockito {
 	

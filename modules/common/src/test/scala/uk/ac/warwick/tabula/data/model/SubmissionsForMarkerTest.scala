@@ -73,7 +73,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 			newFeedback.universityId = s.universityId
 			newFeedback.released = false
 			val markerFeedback = newFeedback.retrieveFirstMarkerFeedback
-			markerFeedback.state = ReleasedForMarking
+			markerFeedback.state = MarkingState.ReleasedForMarking
 			assignment.feedbacks.add(newFeedback)
 		}
 	}

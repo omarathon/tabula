@@ -37,8 +37,8 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null), firstMarkerFeedback)
 		}
 
-		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingCompleted)
-		markerFeedbacks.filterNot(_.markerFeedback.state == MarkingCompleted)
+		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingState.MarkingCompleted)
+		markerFeedbacks.filterNot(_.markerFeedback.state == MarkingState.MarkingCompleted)
 
 	}
 }

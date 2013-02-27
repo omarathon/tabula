@@ -15,11 +15,11 @@ trait GeneratedId {
 	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 	var id: String = null
 	
-	override def hashCode = id match {
+	override final def hashCode = id match {
 		case null => super.hashCode
 		case str => getClass.hashCode + (41 * str.hashCode)
 	}
-	override def equals(other: Any) = other match {
+	override final def equals(other: Any) = other match {
 		case that: GeneratedId if this.getClass == that.getClass =>
 			if (id == null && that.id == null) this.eq(that) // Reference equality
 			else id == that.id

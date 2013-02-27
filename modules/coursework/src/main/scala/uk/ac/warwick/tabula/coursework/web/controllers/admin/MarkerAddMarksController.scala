@@ -4,7 +4,8 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, MarkerFeedback, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav

@@ -37,7 +37,7 @@ trait MarkingWorkflowWorld extends AppContextTestBase{
 			newFeedback.universityId = s.universityId
 			newFeedback.released = false
 			val fmFeedback = newFeedback.retrieveFirstMarkerFeedback
-			fmFeedback.state = ReleasedForMarking
+			fmFeedback.state = MarkingState.ReleasedForMarking
 			newFeedback
 		}
 		assignment.feedbacks = feedback

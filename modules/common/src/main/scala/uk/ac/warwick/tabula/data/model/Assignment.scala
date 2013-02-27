@@ -467,22 +467,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
         
         idsWithSubmissionOrFeedback
     }   
-		
-	/**
-	 * Defines equality via the entity's ID. 
-	 */
-	override def equals(other: Any) = other match {
-		case o:Assignment => 
-			if (o.id != null && this.id != null) o.id == this.id
-			else super.equals(other)
-		case _ => false
-	}
-	
-	override def hashCode() =
-		if (id != null) 
-			id.hashCode()
-		else 
-			super.hashCode()
 			
 }
 

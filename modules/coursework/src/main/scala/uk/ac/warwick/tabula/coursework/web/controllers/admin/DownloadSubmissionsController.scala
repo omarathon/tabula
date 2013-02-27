@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute

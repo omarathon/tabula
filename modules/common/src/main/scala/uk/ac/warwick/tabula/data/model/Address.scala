@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.reflect.BeanProperty
-
 import org.springframework.util.StringUtils
-
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
+import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
 
 sealed abstract class AddressType(val dbValue: String)
 
@@ -47,5 +47,19 @@ class Address extends GeneratedId with ToString {
 		"line4" -> line4,
 		"line5" -> line5,
 		"postcode" -> postcode)
+
+}
+
+class AddressTypeUserType extends AbstractBasicUserType[AddressType, String] {
+
+	val basicType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.VARCHAR)
+
+	val nullValue = null
+	val nullObject = null
+
+	override def convertToObject(string: String) = AddressType.fromCode(string)
+	
+	override def convertToValue(addressType: AddressType) = addressType.dbValue
 
 }

@@ -8,6 +8,7 @@ import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.junit.Test
+import org.joda.time.DateTimeConstants
 
 class AssignmentTest extends TestBase {
 	@Test def academicYear {
@@ -111,6 +112,72 @@ class AssignmentTest extends TestBase {
 		assignment.openEnded = false
 		assignment.closeDate = new DateTime().minusDays(1)
 		assignment.canPublishFeedback should be (true)
+	}
+	
+	@Test def inBetweenDays {
+		val assignment = new Assignment
+		assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13)
+		assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30)
+		assignment.openEnded = false
+		
+		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
+		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
+		
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (false)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (true)
+		
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (false)
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10)) {
+			assignment.isOpened should be (false)
+			assignment.isClosed should be (false)
+			assignment.isBetweenDates() should be (false)
+		}
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20)) {
+			assignment.isOpened should be (true)
+			assignment.isClosed should be (false)
+			assignment.isBetweenDates() should be (true)
+		}
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31)) {
+			assignment.isOpened should be (true)
+			assignment.isClosed should be (true)
+			assignment.isBetweenDates() should be (false)
+		}
+		
+		assignment.openEnded = true
+		
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (false)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (false)
+		
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (true)
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10)) {
+			assignment.isOpened should be (false)
+			assignment.isClosed should be (false)
+			assignment.isBetweenDates() should be (false)
+		}
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20)) {
+			assignment.isOpened should be (true)
+			assignment.isClosed should be (false)
+			assignment.isBetweenDates() should be (true)
+		}
+		
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31)) {
+			assignment.isOpened should be (true)
+			assignment.isClosed should be (false)
+			assignment.isBetweenDates() should be (true)
+		}
+	}
+	
+	@Test def isLate {
+		
 	}
 	
 	/** Zero-pad integer to a 7 digit string */
