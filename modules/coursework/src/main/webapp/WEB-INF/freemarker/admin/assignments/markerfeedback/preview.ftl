@@ -6,6 +6,7 @@
 
 <@spring.bind path=commandName>
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
+<#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
 <@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
@@ -39,6 +40,10 @@
 
 </p>
 </@spring.bind>
+
+<#if hasGlobalErrors>
+	<div class="alert alert-error"><@f.errors path="" cssClass="error"/></div>
+<#else>
 
 <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
 <div class="unrecognised-files alert alert-block">
@@ -160,6 +165,7 @@
 </#if>
 </@spring.bind>
 </table>
+</#if>
 
 <div class="submit-buttons">
 <#if hasErrors>
