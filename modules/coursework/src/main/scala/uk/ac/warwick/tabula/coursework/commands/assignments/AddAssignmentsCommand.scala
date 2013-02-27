@@ -52,10 +52,8 @@ class AssignmentItem(
 	// can share the same set of options without having to post many copies separately.
 	@BeanProperty var optionsId: String = _
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var openDate: DateTime = _
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate: DateTime = _
 	
 	@BeanProperty var openEnded: JBoolean = false
