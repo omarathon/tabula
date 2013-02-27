@@ -9,6 +9,7 @@ import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.junit.Test
 import org.joda.time.DateTimeConstants
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 class AssignmentTest extends TestBase {
 	@Test def academicYear {
@@ -116,33 +117,33 @@ class AssignmentTest extends TestBase {
 	
 	@Test def inBetweenDays {
 		val assignment = new Assignment
-		assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13)
-		assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30)
+		assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
+		assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 0, 0, 0, 0)
 		assignment.openEnded = false
 		
-		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
-		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
+		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)) should be (false)
+		assignment.isOpened(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) should be (true)
 		
-		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (false)
-		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (true)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) should be (false)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) should be (true)
 		
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (false)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)) should be (false)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) should be (true)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) should be (false)
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)) {
 			assignment.isOpened should be (false)
 			assignment.isClosed should be (false)
 			assignment.isBetweenDates() should be (false)
 		}
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) {
 			assignment.isOpened should be (true)
 			assignment.isClosed should be (false)
 			assignment.isBetweenDates() should be (true)
 		}
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) {
 			assignment.isOpened should be (true)
 			assignment.isClosed should be (true)
 			assignment.isBetweenDates() should be (false)
@@ -150,26 +151,26 @@ class AssignmentTest extends TestBase {
 		
 		assignment.openEnded = true
 		
-		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (false)
-		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (false)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) should be (false)
+		assignment.isClosed(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) should be (false)
 		
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10)) should be (false)
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20)) should be (true)
-		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31)) should be (true)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)) should be (false)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) should be (true)
+		assignment.isBetweenDates(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) should be (true)
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)) {
 			assignment.isOpened should be (false)
 			assignment.isClosed should be (false)
 			assignment.isBetweenDates() should be (false)
 		}
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)) {
 			assignment.isOpened should be (true)
 			assignment.isClosed should be (false)
 			assignment.isBetweenDates() should be (true)
 		}
 		
-		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31)) {
+		withFakeTime(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)) {
 			assignment.isOpened should be (true)
 			assignment.isClosed should be (false)
 			assignment.isBetweenDates() should be (true)
@@ -177,7 +178,48 @@ class AssignmentTest extends TestBase {
 	}
 	
 	@Test def isLate {
+		val assignment = new Assignment
+		assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
+		assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 0, 0, 0, 0)
+		assignment.openEnded = false
 		
+		val submission = new Submission
+		submission.userId = "cuscav"
+		
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
+		
+		assignment.isLate(submission) should be (false)
+		assignment.isAuthorisedLate(submission) should be (false)
+		
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 20, 0, 0, 0, 0)
+		
+		assignment.isLate(submission) should be (false)
+		assignment.isAuthorisedLate(submission) should be (false)
+		
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0)
+		
+		assignment.isLate(submission) should be (true)
+		assignment.isAuthorisedLate(submission) should be (false)
+		
+		val extension = new Extension
+		extension.userId = "cuscav"
+		extension.approved = true
+		extension.expiryDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 12, 0, 0, 0)
+		
+		assignment.extensions.add(extension)
+		
+		assignment.isLate(submission) should be (false)
+		assignment.isAuthorisedLate(submission) should be (true)
+		
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 0, 0, 0, 0)
+		
+		assignment.isLate(submission) should be (true)
+		assignment.isAuthorisedLate(submission) should be (false)
+		
+		assignment.openEnded = true
+		
+		assignment.isLate(submission) should be (false)
+		assignment.isAuthorisedLate(submission) should be (false)
 	}
 	
 	/** Zero-pad integer to a 7 digit string */

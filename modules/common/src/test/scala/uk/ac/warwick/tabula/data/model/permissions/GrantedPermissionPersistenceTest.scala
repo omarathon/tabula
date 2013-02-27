@@ -26,7 +26,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase {
 			
 			session.load(classOf[GrantedPermission[_]], permission.id) match {
 				case permission: GrantedPermission[Department] =>
-					permission.scope should be (department)
+					permission.scope.code should be ("IN")
 				case _ => fail("What is this!")
 			}
 		}
