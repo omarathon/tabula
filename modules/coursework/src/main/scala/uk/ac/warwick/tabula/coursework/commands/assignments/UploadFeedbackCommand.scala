@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FileAttachment}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
