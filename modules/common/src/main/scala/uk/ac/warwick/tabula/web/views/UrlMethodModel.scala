@@ -29,7 +29,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 	private def rewrite(path: String, contextOverridden: Option[String]) = {
 		val contextNoRoot = contextOverridden.getOrElse(context) match {
 			case "/" => ""
-		  	case context => context
+		  case context => context
 		}
 		
 		contextNoRoot + path

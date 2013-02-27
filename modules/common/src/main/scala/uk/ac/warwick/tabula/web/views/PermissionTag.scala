@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 /**
  * Freemarker directive to show the contents of the tag
  */
-class PermissionTag /*[A <: Action[_] : ClassManifest]*/ extends TemplateDirectiveModel with Logging {
+class PermissionTag extends TemplateDirectiveModel with Logging {
 
 	@Autowired var securityService: SecurityService = _
 

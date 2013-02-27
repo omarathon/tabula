@@ -47,14 +47,8 @@ import uk.ac.warwick.tabula.services.UserLookupService
 @DiscriminatorColumn(name = "fieldtype")
 abstract class FormField extends GeneratedId {
 
-	def this(a: Assignment) = {
-		this()
-		assignment = a
-	}
-
 	@transient var json = Wire.auto[ObjectMapper]
 	@transient var userLookup = Wire.auto[UserLookupService]
-	//	var fieldType:String =_
 
 	@BeanProperty
 	@ManyToOne
@@ -194,7 +188,8 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 			case v: StringSubmissionValue => {
 				Option(v.value) match {
 					case None => errors.rejectValue("value", "marker.missing")
-					case Some(v) if (v == "") => errors.rejectValue("value", "marker.missing")
+					case Some(v) if v == "" => errors.rejectValue("value", "marker.missing")
+					case Some(v) if !markers.exists { _.getUserId == v } => errors.rejectValue("value", "marker.invalid")
 					case _ =>
 				}
 			}
