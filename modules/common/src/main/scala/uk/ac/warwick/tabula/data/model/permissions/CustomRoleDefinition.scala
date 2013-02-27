@@ -38,7 +38,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	@BeanProperty var builtInBaseRoleDefinition: BuiltInRoleDefinition = _
 	
 	def baseRoleDefinition: RoleDefinition = Option(customBaseRoleDefinition) getOrElse builtInBaseRoleDefinition
-	def baseRoleDefinition_(definition: RoleDefinition) = definition match {
+	def baseRoleDefinition_=(definition: RoleDefinition) = definition match {
 		case customDefinition: CustomRoleDefinition => {
 			customBaseRoleDefinition = customDefinition
 			builtInBaseRoleDefinition = null
