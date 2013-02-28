@@ -5,6 +5,8 @@
 			<div class="col1">
 				<table class="course-info">
 					<tbody>
+					
+					<!-- about the course -->
 					<tr>
 						<th>Route</th>
 						<td>
@@ -21,14 +23,8 @@
 							</#if>
 						</td>
 					</tr>
-					<#if profile.studyDetails.studentStatus??>
-						<tr>
-							<th>Status</th>
-							<td>${profile.studyDetails.studentStatus}</td>
-						</tr>
-					</#if>
 					<tr>
-						<th>Study department</th>
+						<th>Department</th>
 						<td>
 							<#if profile.studyDetails.studyDepartment??>		
 								${profile.studyDetails.studyDepartment.name} (${profile.studyDetails.studyDepartment.code?upper_case})
@@ -39,15 +35,76 @@
 							</#if>
 						</td
 					</tr>
-					<#if profile.studyDetails.yearOfStudy??>
-						<tr>
-							<th>Year of study</th>
-							<td>${profile.studyDetails.yearOfStudy}</td>
-						</tr>
-					</#if>
+					<tr>
+						<th>Intended Award</th>
+						<td>
+							<#if profile.studyDetails.intendedAward??>
+								${profile.studyDetails.intendedAward}
+							</#if>
+						</td>
+					</tr>										
+					
+
+					<!-- about time -->
+					<tr>
+						<th>Year of study</th>
+						<td>
+							<#if profile.studyDetails.yearOfStudy??>
+								${profile.studyDetails.yearOfStudy}
+							</#if>
+						</td>
+					</tr>
+					<tr>
+						<th>Length of course</th>
+						<td>
+							<#if profile.studyDetails.courseYearLength??>
+								${profile.studyDetails.courseYearLength}
+							</#if>
+						</td>
+					</tr>
+					<tr>
+						<th>Start date</th>
+						<td>
+							<#if profile.studyDetails.beginDate??>
+								${profile.studyDetails.beginDate}
+							</#if>
+						</td>
+					</tr>					
+					<tr>
+						<th>End date</th>
+						<td>
+							<#if profile.studyDetails.endDate??>
+								${profile.studyDetails.endDate}
+							<#else>
+								${profile.studyDetails.expectedEndDate} (expected)
+							</#if>
+						</td>
+					</tr>					
+					
+					<!-- about the student -->
 					<tr>
 						<th>Group</th>
-						<td>${profile.groupName}</td>
+						<td>
+							<#if profile.groupName??>						
+								${profile.groupName}
+							</#if>
+						</td>
+					</tr>
+					<tr>
+						<th>Source of funding</th>
+						<td>
+							<#if profile.studyDetails.fundingSource??>						
+								${profile.studyDetails.fundingSource}
+							</#if>
+						</td>
+					</tr>
+					<tr>
+						<th>Status</th>
+						<td>
+							<#if profile.studyDetails.studentStatus??>
+								${profile.studyDetails.studentStatus}
+							</#if>
+						</td>
 					</tr>
 			</table>
 		</p>

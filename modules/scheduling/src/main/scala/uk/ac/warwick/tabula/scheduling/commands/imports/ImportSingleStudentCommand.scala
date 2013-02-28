@@ -61,6 +61,15 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
 	
+	this.intendedAward = rs.getString("award_code")
+	this.beginDate = new LocalDate(rs.getDate("begin_date"))
+	this.endDate = new LocalDate(rs.getDate("end_date"))
+	this.expectedEndDate = new LocalDate(rs.getDate("expected_end_date"))
+	this.fundingSource = rs.getString("funding_source")
+	this.courseYearLength = rs.getString("course_year_length")
+	this.sprStatusCode = rs.getString("spr_status_code")
+	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
+	
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
 		
@@ -103,7 +112,18 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 
 	private val basicStudyDetailsProperties = Set(
-		"sprCode", "sitsCourseCode", "studentStatus", "yearOfStudy"
+		"sprCode", 
+		"sitsCourseCode", 
+		"studentStatus", 
+		"yearOfStudy",
+		"intendedAward",
+		"beginDate",
+		"endDate",
+		"expectedEndDate",
+		"fundingSource",
+		"courseYearLength",
+		"sprStatusCode",
+		"enrolmentStatusCode"
 	)
 		
 	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) =

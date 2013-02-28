@@ -9,12 +9,17 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.spring.Wire
 
 class ViewProfileCommand(studentMember: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read, studentMember)
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
+
+	var memb_userName = Wire.property("${membership.rmi.auth.username}")
+	var memb_pwd = Wire.property("${membership.rmi.auth.password}")
+	var memb_service = Wire.property("${membership.rmi.auth.serviceName}")
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)) orNull

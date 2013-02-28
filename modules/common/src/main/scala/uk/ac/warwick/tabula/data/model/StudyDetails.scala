@@ -9,6 +9,7 @@ import scala.reflect.BeanProperty
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
 import uk.ac.warwick.tabula.JavaImports._
+import org.joda.time.LocalDate
 
 @Entity
 @AccessType("field")
@@ -46,12 +47,28 @@ trait StudyDetailsProperties {
 	@BeanProperty var studentStatus: String = _
 	
 	@BeanProperty var yearOfStudy: JInteger = _
+
+	@BeanProperty var fundingSource: String = _
+	
+	@BeanProperty var intendedAward: String = _
+
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var beginDate: LocalDate = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var endDate: LocalDate = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var expectedEndDate: LocalDate = _
+	
+	@BeanProperty var courseYearLength: String = _	
+
+	@BeanProperty var sprStatusCode: String = _
+	@BeanProperty var enrolmentStatusCode: String = _
+	
 //	@BeanProperty var attendanceMode: String = _
 //	
-//	@BeanProperty var fundingSource: String = _
-//	@BeanProperty var programmeOfStudy: String = _
-//	
-//	@BeanProperty var intendedAward: String = _
+//	@BeanProperty var programmeOfStudy: String = _	
 //	
 //	@Basic
 //	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
@@ -71,17 +88,9 @@ trait StudyDetailsProperties {
 //	
 //	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 //	@BeanProperty var courseEndDate: LocalDate = _
-//	
+	
 //	@BeanProperty var transferReason: String = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var beginDate: LocalDate = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var endDate: LocalDate = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var expectedEndDate: LocalDate = _
+
 //	
 //	@BeanProperty var feeStatus: String = _
 //	@BeanProperty var domicile: String = _
