@@ -1,44 +1,37 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.AlumniProperties
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.MemberProperties
-import uk.ac.warwick.tabula.data.model.StaffProperties
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import java.sql.ResultSet
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import java.sql.Blob
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.Transactions._
 import java.sql.Date
+import java.sql.ResultSet
+
 import scala.reflect.BeanProperty
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.MemberDao
-import org.springframework.beans.BeanWrapperImpl
-import org.springframework.beans.BeanWrapper
+
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.Closeables._
-import java.io.InputStream
-import org.apache.commons.codec.digest.DigestUtils
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import org.joda.time.LocalDate
+import org.springframework.beans.BeanWrapper
+import org.springframework.beans.BeanWrapperImpl
+
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.AlumniProperties
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.MemberProperties
+import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.StaffProperties
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
+import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
+import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
+import uk.ac.warwick.tabula.helpers.Closeables._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.userlookup.User
 
 class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms with StudentProperties with StudyDetailsProperties with Unaudited {
@@ -62,9 +55,11 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	this.mobileNumber = rs.getString("mobile_number")
 	
 	this.intendedAward = rs.getString("award_code")
-	this.beginDate = new LocalDate(rs.getDate("begin_date"))
-	this.endDate = new LocalDate(rs.getDate("end_date"))
-	this.expectedEndDate = new LocalDate(rs.getDate("expected_end_date"))
+	this.beginDate = sqlDateToJodaDate(rs.getDate("begin_date"))
+	this.endDate = sqlDateToJodaDate(rs.getDate("end_date"))
+	
+	this.expectedEndDate = sqlDateToJodaDate(rs.getDate("expected_end_date"))
+	
 	this.fundingSource = rs.getString("funding_source")
 	this.courseYearLength = rs.getString("course_year_length")
 	this.sprStatusCode = rs.getString("spr_status_code")
@@ -152,6 +147,11 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			memberBean.setPropertyValue(property, toRoute(routeCode))
 			true
 		}
+	}
+	
+	private def sqlDateToJodaDate(dbDate: java.sql.Date): org.joda.time.LocalDate = {
+		if (dbDate == null) null
+		else new LocalDate(dbDate)
 	}
 	
 	private def toRoute(routeCode: String) = {

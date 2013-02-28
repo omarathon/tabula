@@ -225,7 +225,10 @@ object ProfileImporter {
 			dateOfBirth				= rs.getDate("dob"),
 			usercode				= rs.getString("its_usercode"),
 			startDate				= rs.getDate("dt_start"),
-			endDate					= rs.getDate("dt_end"),
+			endDate					= {
+				val endDateInDb = rs.getDate("dt_end")
+				endDateInDb
+			},
 			modified				= rs.getDate("dt_modified"),
 			phoneNumber				= rs.getString("tel_business"),
 			gender					= Gender.fromCode(rs.getString("gender")),
