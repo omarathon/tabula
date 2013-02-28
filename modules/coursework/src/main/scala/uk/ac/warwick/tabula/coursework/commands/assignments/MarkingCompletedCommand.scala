@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire

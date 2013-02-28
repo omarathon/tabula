@@ -17,7 +17,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 	
 	listener.auditEventService = auditEventService
 	listener.maintenanceModeService = maintenanceModeService
-	listener.auditDirectory = new File(new File(System.getProperty("java.io.tmpdir")), UUID.randomUUID() + "audit")
+	listener.auditDirectory = createTemporaryDirectory
 	listener.auditDirectory.deleteOnExit()
 	listener.createMissingDirs = true
 	

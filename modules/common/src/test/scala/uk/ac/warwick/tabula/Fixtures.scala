@@ -18,6 +18,10 @@ object Fixtures {
 		f
 	}
 	
+	def markerFeedback(parent: Feedback) = {
+		new MarkerFeedback(parent)
+	}
+	
 	def department(code:String, name:String = null) = {
 		val d = new Department
 		d.code = code
@@ -30,6 +34,13 @@ object Fixtures {
 		m.code = code.toLowerCase
 		m.name = Option(name).getOrElse("Module " + code)
 		m
+	}
+	
+	def route(code:String, name: String = null) = {
+		val r = new Route
+		r.code = code.toLowerCase
+		r.name = Option(name).getOrElse("Route " + code)
+		r
 	}
 	
 	def assignment(name:String) = {
@@ -90,10 +101,13 @@ object Fixtures {
 		member.userId = userId
 		member.userType = userType
 		member.homeDepartment = department
+		member.inUseFlag = "Active"
 		member
 	}
 	
-	def staff(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) = member(MemberUserType.Staff, universityId, userId, department)
+	def staff(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) = 
+		member(MemberUserType.Staff, universityId, userId, department).asInstanceOf[StaffMember]
+	
 	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, studyDepartment: Department = null)	= { 
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 		m.studyDetails.studyDepartment = studyDepartment

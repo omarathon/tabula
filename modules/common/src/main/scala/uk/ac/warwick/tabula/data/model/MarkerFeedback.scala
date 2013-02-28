@@ -17,7 +17,7 @@ class MarkerFeedback extends GeneratedId {
 		feedback = parent
 	}
 
-	@OneToOne(fetch = FetchType.LAZY, optional = false)
+	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
 	@BeanProperty var feedback: Feedback = _
 

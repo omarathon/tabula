@@ -93,5 +93,20 @@ class PermissionsServiceTest extends AppContextTestBase {
 		service.ensureUserGroupFor(dept1, DepartmentalAdministratorRoleDefinition) should be (gr1.users)
 		service.ensureUserGroupFor(dept2, DepartmentalAdministratorRoleDefinition).id should not be (null)
 	}
+	
+	@Test def guards = transactional { t => withUser("cuscav") {
+		// Make sure we don't throw an exception with a permissions type we don't know how to set roles/permissions for
+		val scope = Fixtures.userSettings("cuscav")
+		
+		service.getGrantedRolesFor(currentUser, scope) should be ('empty)
+		service.getGrantedPermissionsFor(currentUser, scope) should be ('empty)
+		
+		val crd = new CustomRoleDefinition
+		session.save(crd)
+		
+		service.getGrantedRole(scope, DepartmentalAdministratorRoleDefinition) should be ('empty)
+		service.getGrantedRole(scope, crd) should be ('empty)
+		service.getGrantedPermission(scope, Permissions.Module.Create, true) should be ('empty)
+	}}
 
 }

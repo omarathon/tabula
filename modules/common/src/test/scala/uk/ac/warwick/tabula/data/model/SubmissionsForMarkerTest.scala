@@ -84,7 +84,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 
 		val ms = new MarkingWorkflow()
 		ms.name = "Test marking workflow"
-		ms.markingMethod = StudentsChooseMarker
+		ms.markingMethod = MarkingMethod.StudentsChooseMarker
 		ms.firstMarkers = ug
 		ms
 	}

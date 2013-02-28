@@ -134,8 +134,10 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			case Some(name) => name
 		})
 		u.setEmail(email)
-		u.setDepartment(homeDepartment.name)
-		u.setDepartmentCode(homeDepartment.code)
+		Option(homeDepartment) map { dept => 
+			u.setDepartment(dept.name)
+			u.setDepartmentCode(dept.code)
+		}
 		u.setFoundUser(true)
 		u
 	}
@@ -157,6 +159,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 @Entity
 @DiscriminatorValue("S")
 class StudentMember extends Member with StudentProperties with PostLoadBehaviour {
+	this.userType = MemberUserType.Student
 	
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
 	var studyDetails: StudyDetails = new StudyDetails
@@ -168,9 +171,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	}
 	
 	override def description = {
-		val userTypeString = 
-			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
-			else Option(groupName).getOrElse("")
+		val userTypeString = Option(groupName).getOrElse("")
 		
 		val courseName = Option(studyDetails.route).map(", " + _.name).getOrElse("")
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
@@ -210,6 +211,8 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 @Entity
 @DiscriminatorValue("N")
 class StaffMember extends Member with StaffProperties {
+	this.userType = MemberUserType.Staff
+		
 	def this(id: String) = {
 		this()
 		this.universityId = id
@@ -219,6 +222,8 @@ class StaffMember extends Member with StaffProperties {
 @Entity
 @DiscriminatorValue("A")
 class EmeritusMember extends Member with StaffProperties {
+	this.userType = MemberUserType.Emeritus
+		
 	def this(id: String) = {
 		this()
 		this.universityId = id
@@ -228,6 +233,8 @@ class EmeritusMember extends Member with StaffProperties {
 @Entity
 @DiscriminatorValue("O")
 class OtherMember extends Member with AlumniProperties {
+	this.userType = MemberUserType.Other
+		
 	def this(id: String) = {
 		this()
 		this.universityId = id

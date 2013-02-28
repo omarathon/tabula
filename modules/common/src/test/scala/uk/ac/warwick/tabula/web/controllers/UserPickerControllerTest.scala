@@ -32,5 +32,25 @@ class UserPickerControllerTest extends TestBase {
 		users(0).get("value") should be ("cuscav")
 		users(1).get("value") should be ("cusebr")
 	}
+	
+	@Test def setQuery {
+		val cmd = new UserPickerController.UserPickerCommand()
+		
+		cmd.query = "billy"
+		cmd.query should be ("billy")
+		cmd.firstName should be ("")
+		cmd.lastName should be ("billy")
+		
+		cmd.query = "billy bob"
+		cmd.query should be ("billy bob")
+		cmd.firstName should be ("billy")
+		cmd.lastName should be ("bob")
+		
+		// TODO is this actually the right behaviour?
+		cmd.query = "billy bob thornton"
+		cmd.query should be ("billy bob")
+		cmd.firstName should be ("billy")
+		cmd.lastName should be ("bob")
+	}
 
 }

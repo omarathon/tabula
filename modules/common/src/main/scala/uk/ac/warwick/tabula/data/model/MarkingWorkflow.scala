@@ -24,7 +24,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 @Table(name="MarkScheme")
 @AccessType("field")
 class MarkingWorkflow extends GeneratedId with PermissionsTarget {
-
+	import MarkingMethod._
+	
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
 
@@ -77,7 +78,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 		}
 		case SeenSecondMarking => {
 			val isFirstMarker = assignment.isFirstMarker(user)
-			val isSecondMarker = assignment.isSecondMarker(user)
+			val isSecondMarker = assignment.isSecondMarker(user)		
 			val studentUg = Option(assignment.markerMap.get(user.getUserId))
 			studentUg match {
 				case Some(ug) => {
@@ -108,10 +109,10 @@ sealed abstract class MarkingMethod(val name: String){
 	override def toString = name
 }
 
-case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
-case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
-
 object MarkingMethod {
+	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
+	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
+
 	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking)
 
 	def fromCode(code: String): MarkingMethod =

@@ -241,19 +241,19 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 	}
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
-		session.createQuery("""select distinct a from Assignment a
+		session.newQuery[Assignment]("""select distinct a from Assignment a
 				join a.feedbacks as f
 				where f.universityId = :universityId
 				and f.released=true""")
 			.setString("universityId", universityId)
-			.list.asInstanceOf[JList[Assignment]]
+			.seq
 
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
-		session.createQuery("""select distinct a from Assignment a
+		session.newQuery[Assignment]("""select distinct a from Assignment a
 				join a.submissions as f
 				where f.universityId = :universityId""")
 			.setString("universityId", universityId)
-			.list.asInstanceOf[JList[Assignment]]
+			.seq
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
 		session.createSQLQuery("""select distinct a.* from Assignment a
@@ -265,13 +265,12 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		.setString("userId", user.getUserId())
 		.list.asInstanceOf[JList[Assignment]]
 
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) = {
-		session.createQuery("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
+	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
+		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
-			.list().asInstanceOf[JList[Assignment]]
-	}
+			.seq
 
 	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */

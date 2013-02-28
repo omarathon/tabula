@@ -26,6 +26,7 @@ trait JavaImports {
 	type JLong = java.lang.Long
 	
 	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
+	def JMap[K, V]() = mutable.Map[K, V]().asJava
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting

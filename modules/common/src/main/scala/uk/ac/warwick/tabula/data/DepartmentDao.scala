@@ -28,8 +28,10 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 			.list
 
 	// Fetches modules eagerly
-	def getByCode(code: String) = option[Department](
-		session.createQuery("from Department d left join fetch d.modules where d.code = :code").setString("code", code).uniqueResult)
+	def getByCode(code: String) = 
+		session.newQuery[Department]("from Department d left join fetch d.modules where d.code = :code")
+			.setString("code", code)
+			.uniqueResult
 		
 	def getById(id: String) = getById[Department](id)
 
@@ -39,7 +41,7 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off DepartmentalAdministrator.
 	 */
 	def getByOwner(user: String): Seq[Department] =
-		session.createQuery("""
+		session.newQuery[Department]("""
 				from Department d 
 				left join fetch d.grantedRoles r
 				where r.builtInRoleDefinition = :def 
@@ -47,5 +49,5 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 				""")
 			.setParameter("def", DepartmentalAdministratorRoleDefinition)
 			.setString("user", user)
-			.list.asInstanceOf[JList[Department]]
+			.seq
 }

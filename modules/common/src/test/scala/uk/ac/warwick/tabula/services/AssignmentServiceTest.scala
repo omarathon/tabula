@@ -80,7 +80,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 	}
 	
 	@Transactional @Test def getAssignmentsByNameTest {    
-	    val compSciDept = modAndDeptService.getDepartmentByCode("CS")
+	    val compSciDept = modAndDeptService.getDepartmentByCode("cs")
 	    compSciDept should be ('defined)
 	    
 	    compSciDept.foreach(dept => {    

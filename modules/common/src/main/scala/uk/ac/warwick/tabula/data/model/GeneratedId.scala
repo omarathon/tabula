@@ -25,4 +25,6 @@ trait GeneratedId {
 			else id == that.id
 		case _ => false
 	}
+	
+	override def toString = getClass.getSimpleName + "[" + (if (id != null) id else "(transient " + hashCode + ")") + "]"
 }

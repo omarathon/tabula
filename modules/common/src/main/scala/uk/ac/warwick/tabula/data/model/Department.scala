@@ -62,6 +62,10 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def isShowStudentName = showStudentName
 	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
 	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
+	
+	def isPlagiarismDetectionEnabled = plagiarismDetectionEnabled
+	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
+	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
 
 	def formattedGuidelineSummary:String = Option(getExtensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
@@ -82,8 +86,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def canRequestExtension = isAllowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
-	
-	def isPlagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 

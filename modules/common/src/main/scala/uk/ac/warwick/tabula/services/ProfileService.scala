@@ -27,6 +27,7 @@ trait ProfileService {
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
+	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
@@ -55,6 +56,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUserId(userId, disableFilter)
+	}
+	
+	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
+		memberDao.getBySprCode(sprCode)
 	}
 	
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
