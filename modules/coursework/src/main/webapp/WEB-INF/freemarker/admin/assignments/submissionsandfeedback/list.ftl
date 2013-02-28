@@ -318,12 +318,17 @@
 					<td class="files">
 						<#assign attachments=submission.allAttachments />
 						<#if attachments?size gt 0>
-						<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
-							${attachments?size}
-							<#if attachments?size == 1> file
-							<#else> files
+							<#if attachments?size == 1> 
+								<#assign filename = "${attachments[0].name}">
+							<#else>
+								<#assign filename = "submission-${submission.universityId}.zip">
 							</#if>
-						</a>
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
+								${attachments?size}
+								<#if attachments?size == 1> file
+								<#else> files
+								</#if>
+							</a>
 						</#if>
 					</td>
 					<td class="submitted">
@@ -384,7 +389,12 @@
 						<#if student.enhancedFeedback??>
 							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.zip'/>">
+							<#if attachments?size == 1> 
+								<#assign attachmentExt = "txt">
+							<#else>
+								<#assign attachmentExt = "zip">
+							</#if>
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExt}'/>">
 								${attachments?size}
 								<#if attachments?size == 1> file
 								<#else> files
