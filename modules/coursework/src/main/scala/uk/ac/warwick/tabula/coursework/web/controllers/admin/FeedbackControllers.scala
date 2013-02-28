@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.fileserver.FileServer
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
 class DownloadSelectedFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
@@ -32,6 +32,26 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 		fileServer.serve(cmd.apply())
 	}
 }
+
+
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+class DownloadSelectedFeedbackFileController extends CourseworkController {
+	var feedbackDao = Wire.auto[FeedbackDao]
+	var fileServer = Wire.auto[FileServer]
+	
+	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
+		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
+
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		//fileServer.serve(cmd.apply())
+		cmd.callback = { (renderable) => fileServer.serve(renderable) }
+		cmd.apply().orElse { throw new ItemNotFoundException() }
+	}
+}
+
+
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
