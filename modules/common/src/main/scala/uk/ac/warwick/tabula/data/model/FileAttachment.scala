@@ -82,6 +82,14 @@ class FileAttachment extends GeneratedId {
 
 	def length: Option[Long] = Option(file) map { _.length }
 
+	def fileExt: String = {
+		if(name.lastIndexOf('.') > -1) {
+			name.substring(name.lastIndexOf('.')+ 1)
+		} else {
+			""
+		}
+	}
+	
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
