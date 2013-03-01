@@ -158,6 +158,7 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 		notDeleted(assignment)
 		
 		try {
+			assignment.deleted = true
 			notDeleted(assignment)
 			fail("expected exception")
 		} catch {
