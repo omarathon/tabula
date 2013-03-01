@@ -66,14 +66,6 @@ object DurationFormatter {
 		period
 	}
 
-	private def toPeriod(interval: ReadableInterval): ReadablePeriod = {
-		val duration = interval.toDuration
-		var period = interval.toPeriod(periodType)
-		period = stripSeconds(period, duration)
-		period = stripMinutes(period, duration)
-		period
-	}
-
 	/**
 	 * If more than an hour, set seconds to 0 so they aren't printed.
 	 * Returns the updated Period or the same one if no change.

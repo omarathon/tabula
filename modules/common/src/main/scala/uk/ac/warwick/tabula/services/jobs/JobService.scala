@@ -75,6 +75,8 @@ class JobService extends HasJobDao with Logging {
 			instance.apparentUser = u.apparentId
 		}
 		jobDao.saveJob(instance)
+		
+		instance
 	}
 
 	def run(instance: JobInstance, job: Job) {
