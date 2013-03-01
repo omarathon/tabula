@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.services
+
 import org.apache.lucene.search.FieldDoc
-import org.hamcrest.BaseMatcher
 import org.joda.time.DateTime
-import org.specs.mock.JMocker.`with`
+import org.mockito.Matchers._
+
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import org.mockito.Matchers._
 
 class ActivityServiceTest extends TestBase with Mockito {
 	

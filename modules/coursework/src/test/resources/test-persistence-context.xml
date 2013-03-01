@@ -22,6 +22,4 @@
 
 	<bean id="assignmentService" class="uk.ac.warwick.tabula.services.AssignmentServiceImpl" />
 	
-	<bean class="uk.ac.warwick.tabula.services.MaintenanceUserLookup" />
-
 </beans>
