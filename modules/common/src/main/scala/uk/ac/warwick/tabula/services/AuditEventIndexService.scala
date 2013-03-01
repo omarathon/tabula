@@ -47,13 +47,18 @@ case class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Op
 	}
 }
 
+trait AuditEventNoteworthySubmissionsService {
+	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents
+	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents
+}
+
 /**
  * Methods for querying stuff out of the index. Separated out from
  * the main index service into this trait so they're easier to find.
  * Possibly the indexer and the index querier should be separate classes
  * altogether.
  */
-trait AuditEventQueryMethods { self: AuditEventIndexService =>
+trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { self: AuditEventIndexService =>
 
 	def student(user: User) = search(termQuery("students", user.getWarwickId))
 

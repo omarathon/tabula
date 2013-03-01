@@ -25,11 +25,11 @@ class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebReq
 		excludeString = excludePath.substring(0, excludePath.length - 2)
 	}
 
-	def req(request: WebRequest) = request.asInstanceOf[ServletWebRequest].getRequest
-	def path(request: HttpServletRequest): String = request.getRequestURI.substring(request.getContextPath.length)
-	def path(request: WebRequest): String = path(req(request))
+	private def req(request: WebRequest) = request.asInstanceOf[ServletWebRequest].getRequest
+	private def path(request: HttpServletRequest): String = request.getRequestURI.substring(request.getContextPath.length)
+	private def path(request: WebRequest): String = path(req(request))
 
-	def included(request: WebRequest) = !(path(request).startsWith(excludeString))
+	private def included(request: WebRequest) = !(path(request).startsWith(excludeString))
 
 	override def preHandle(request: WebRequest) =
 		if (included(request)) delegate.preHandle(request)

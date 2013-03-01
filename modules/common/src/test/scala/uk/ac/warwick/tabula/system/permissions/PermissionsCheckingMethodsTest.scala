@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model.Department
 
 class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 	
@@ -125,6 +126,39 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 		
 		try {
 			mustBeLinked(template, dept)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
+	
+	@Test def mandatory {
+		val assignment = Fixtures.assignment("my assignment")
+		mandatory(assignment) should be (assignment)
+		
+		try {
+			mandatory(null)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+		
+		mandatory(Some("yes")) should be ("yes")
+		
+		try {
+			mandatory(None)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
+	
+	@Test def notDeleted {
+		val assignment = Fixtures.assignment("my assignment")
+		notDeleted(assignment)
+		
+		try {
+			notDeleted(assignment)
 			fail("expected exception")
 		} catch {
 			case e: ItemNotFoundException =>

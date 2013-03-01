@@ -4,6 +4,7 @@ import org.junit.Test
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
 import uk.ac.warwick.tabula.events.Log4JEventListener
+import uk.ac.warwick.tabula.Fixtures
 
 
 class CommandTest extends TestBase {
@@ -61,6 +62,62 @@ class CommandTest extends TestBase {
 		cmd.listener = new Log4JEventListener
 		
 		cmd.apply() should be (true)
+	}
+	
+	@Test def description {
+		val description = new DescriptionImpl
+		description.properties(("yes" -> "no"), ("steve" -> Seq("tom", "jerry")))
+		description.properties(Map("queen" -> "sheeba", "nine" -> 9))
+		
+		val department = Fixtures.department("in", "IT Services")
+		val module = Fixtures.module("in101", "Introduction to Web Develoment")
+		module.id = "moduleId"
+		module.department = department
+		
+		val assignment = Fixtures.assignment("my assignment")
+		assignment.id = "assignmentId"
+		assignment.module = module
+		
+		val submission1 = Fixtures.submission("0000001")
+		submission1.id = "submission1Id"
+		submission1.assignment = assignment
+		
+		val submission2 = Fixtures.submission("0000002")
+		submission2.id = "submission2Id"
+		submission2.assignment = assignment
+		
+		val feedback = Fixtures.feedback("0000001")
+		feedback.id = "feedbackId"
+		feedback.assignment = assignment
+				
+		val workflow = Fixtures.markingWorkflow("my workflow")
+		workflow.id = "workflowId"
+		workflow.department = department
+		
+		val staff = Fixtures.staff("1010101")
+		
+		description.feedback(feedback)
+							 .submission(submission1)
+							 .studentIds(Seq("0000001", "0000002"))
+							 .submissions(Seq(submission1, submission2))
+							 .markingWorkflow(workflow)
+							 .member(staff)
+		
+	  description.allProperties should be (Map(
+ 		  "yes" -> "no", 
+ 		  "steve" -> Seq("tom", "jerry"), 
+ 		  "queen" -> "sheeba", 
+ 		  "nine" -> 9,
+ 		  "feedback" -> "feedbackId", 
+ 		  "submission" -> "submission1Id", 
+ 		  "assignment" -> "assignmentId", 
+ 		  "module" -> "moduleId", 
+ 		  "department" -> "in", 
+ 		  "submissions" -> Seq("submission1Id", "submission2Id"), 
+ 		  "students" -> List("0000001", "0000002"), 
+ 		  "markingWorkflow" -> "workflowId", 
+ 		  "member" -> "1010101" 
+	  ))
 	}
 	
 }
