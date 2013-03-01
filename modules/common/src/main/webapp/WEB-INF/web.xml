@@ -6,8 +6,8 @@
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener> 
   <context-param>
-	<param-name>contextInitializerClasses</param-name>
-	<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer</param-value>
+		<param-name>contextInitializerClasses</param-name>
+		<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer</param-value>
   </context-param>
    
   <!-- Servlet will latch on to the context loaded above, and serve requests -->
