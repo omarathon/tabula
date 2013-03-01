@@ -85,14 +85,6 @@
 						</#if>
 					</td>
 				</tr>
-				<#if profile.studyDetails.fundingSource??>	
-					<tr>
-						<th>Source of funding</th>
-						<td>
-								${profile.studyDetails.fundingSource}
-						</td>
-					</tr>
-				</#if>
 				<tr>
 					<th>Status</th>
 					<td>
@@ -101,7 +93,7 @@
 						</#if>
 					</td>
 				</tr>
-			</div>
+			</tbody>
 		</table>
 	</p>
 	</#if>
