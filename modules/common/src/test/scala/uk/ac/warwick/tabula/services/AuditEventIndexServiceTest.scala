@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Department
+import org.apache.commons.io.FileUtils
+import uk.ac.warwick.tabula.Fixtures
 
 
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
@@ -44,6 +46,12 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
 		indexer.afterPropertiesSet
+	}
+	
+	@After def tearDown {
+		session.createSQLQuery("delete from auditevent").executeUpdate()
+		
+		FileUtils.deleteDirectory(TEMP_DIR)
 	}
 
 	/**
@@ -296,6 +304,45 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		// check pager for noteworthy submissions
 		val paged2 = indexer.noteworthySubmissionsForModules(Seq(module), None, None, 100)
 		paged2.docs.length should be (70)
+		
+		// Find by user ID
+		indexer.findByUserId("bob").length should be (140)
+		indexer.findByUserId("fred").length should be (0)
+
+		val beforeFeedbackJsonData = json.writeValueAsString(Map(
+					"assignment" -> assignment.id,
+					"module" -> module.id,
+					"department" -> dept.code
+				))
+
+		val afterFeedbackJsonData = json.writeValueAsString(Map(
+					"assignment" -> assignment.id,
+					"module" -> module.id,
+					"department" -> dept.code,
+					"feedback" -> "94624c3b-adda-0dd0-b0b0-REPLACE-THIS"
+				))
+		
+		val feedbackBefore = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="ontime"+i, eventType="PublishFeedback", eventStage="before", userId="bob",
+				eventDate=new DateTime(2008,12,1,0,0,0).plusSeconds(i),
+				data=beforeFeedbackJsonData
+			)
+		
+		val feedbackAfter = for (i <- 1 to 70)
+			yield AuditEvent( 
+				eventId="ontime"+i, eventType="PublishFeedback", eventStage="after", userId="bob",
+				eventDate=new DateTime(2008,12,1,0,0,0).plusSeconds(i),
+				data=afterFeedbackJsonData.replace("REPLACE-THIS", "%012d".format(i))
+			)
+		
+		val fevents = feedbackBefore ++ feedbackAfter
+		fevents.foreach { event =>
+			service.save(addParsedData(event))
+		}
+		
+		indexer.findPublishFeedbackEvents(dept).length should be (0)
+		indexer.findPublishFeedbackEvents(Fixtures.department("in")).length should be (0)
 	}
 
 }

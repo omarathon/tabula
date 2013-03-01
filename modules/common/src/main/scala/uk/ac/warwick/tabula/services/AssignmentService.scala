@@ -81,7 +81,7 @@ trait AssignmentService {
 	 */
 	def getAssessmentGroups(upstreamAssignment: UpstreamAssignment, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
-	def save(assignment: UpstreamAssignment)
+	def save(assignment: UpstreamAssignment): UpstreamAssignment
 	def save(group: UpstreamAssessmentGroup)
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
@@ -130,15 +130,17 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
 
-	def save(assignment: UpstreamAssignment) =
+	def save(assignment: UpstreamAssignment): UpstreamAssignment =
 		find(assignment)
 			.map { existing =>
 				if (existing needsUpdatingFrom assignment) {
 					existing.copyFrom(assignment)
 					session.update(existing)
 				}
+				
+				existing
 			}
-			.getOrElse { session.save(assignment) }
+			.getOrElse { session.save(assignment); assignment }
 
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = session.newCriteria[UpstreamAssessmentGroup]
 		.add(Restrictions.eq("assessmentGroup", group.assessmentGroup))
@@ -198,47 +200,22 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 		session.save(attachment.originalityReport)
 	}
 
-	def getEnrolledAssignments(user: User): Seq[Assignment] = {
-		session.createSQLQuery("""
-              select * from
-              (
-                (
-                  -- manually included users
-                  select distinct a.* from usergroupinclude ugi
-                  join assignment a on a.membersgroup_id = ugi.group_id
-                  where ugi.usercode = :userId
-                  and a.deleted = 0
-                  and a.archived = 0
-                )
-                union
-                (
-                  -- sits assessment groups
-                  select distinct a.* from assignment a
-                  join upstreamassignment ua on a.upstream_id = ua.id
-                  join upstreamassessmentgroup uag
-                    on uag.modulecode = ua.modulecode
-                    and uag.assessmentgroup = ua.assessmentgroup
-                    and uag.academicyear = a.academicyear
-                    and uag.occurrence = a.occurrence
-                  join usergroupstatic ugs on uag.membersgroup_id = ugs.group_id
-                  where ugs.usercode = :universityId
-                  and a.deleted = 0
-                  and a.archived = 0
-                )
-              )
-              where id not in
-              (
-                -- manually excluded users
-                select distinct a.id from usergroupexclude uge
-                join assignment a on a.membersgroup_id = uge.group_id
-                where uge.usercode = :userId
-              )
-		""")
-		    .addEntity(classOf[Assignment])
-            .setString("universityId", user.getWarwickId())
-            .setString("userId", user.getUserId())
-            .list.asInstanceOf[JList[Assignment]]
-	}
+	def getEnrolledAssignments(user: User): Seq[Assignment] =
+		session.newQuery[Assignment]("""select distinct a 
+				from Assignment a 
+				left join fetch a.assessmentGroups ag
+				where 
+					(1 = (
+						select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+						where uag.moduleCode = ag.upstreamAssignment.moduleCode
+							and uag.assessmentGroup = ag.upstreamAssignment.assessmentGroup
+							and uag.academicYear = a.academicYear
+							and uag.occurrence = ag.occurrence
+							and :universityId in elements(uag.members.staticIncludeUsers)
+					) or :userId in elements(a.members.includeUsers))
+					and :userId not in elements(a.members.excludeUsers)
+					and a.deleted = false and a.archived = false
+		""").setString("universityId", user.getWarwickId()).setString("userId", user.getUserId()).seq
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select distinct a from Assignment a
@@ -256,14 +233,12 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.seq
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
-		session.createSQLQuery("""select distinct a.* from Assignment a
-			join MarkScheme m on a.markscheme_id = m.id
-			join UserGroupInclude u on m.firstmarkers_id = u.group_id or m.secondmarkers_id = u.group_id
-			where u.usercode = :userId
-			and a.deleted = 0 and a.archived = 0""")
-		.addEntity(classOf[Assignment])
-		.setString("userId", user.getUserId())
-		.list.asInstanceOf[JList[Assignment]]
+		session.newQuery[Assignment]("""select distinct a 
+				from Assignment a
+				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
+					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
+					and a.deleted = false and a.archived = false
+		""").setString("userId", user.getUserId()).seq
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
@@ -347,13 +322,6 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 			.add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup))
 			.list
 	}
-
-	private def criteria(academicYear: AcademicYear, moduleCode: String, assessmentGroup: String, occurrence: String) =
-		session.newCriteria[UpstreamAssessmentGroup]
-			.add(Restrictions.eq("academicYear", academicYear))
-			.add(Restrictions.eq("moduleCode", moduleCode))
-			.add(Restrictions.eq("assessmentGroup", assessmentGroup))
-			.add(Restrictions.eq("occurrence", occurrence))
 
 	private def debugReplace(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toText))

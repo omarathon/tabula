@@ -36,6 +36,17 @@ import org.apache.lucene.analysis.miscellaneous._
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.spring.Wire
 
+case class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
+	// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
+	// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
+	// pass a specific subclass of FieldDoc.
+	def last: Option[FieldDoc] = lastscore match {
+		case None => None
+		case Some(f:FieldDoc) => Some(f)
+		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
+	}
+}
+
 /**
  * Methods for querying stuff out of the index. Separated out from
  * the main index service into this trait so they're easier to find.
@@ -47,17 +58,6 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 	def student(user: User) = search(termQuery("students", user.getWarwickId))
 
 	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
-	
-	class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
-		// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
-		// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
-		// pass a specific subclass of FieldDoc.
-		def last: Option[FieldDoc] = lastscore match {
-			case None => None
-			case Some(f:FieldDoc) => Some(f)
-			case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
-		}
-	}
 	
 	def findPublishFeedbackEvents(dept: Department) = {
 		val searchResults = search(all(

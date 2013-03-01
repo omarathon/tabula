@@ -48,7 +48,8 @@ trait Daoisms {
 
 	class NiceQueryCreator(session: Session) {
 		def newCriteria[A](implicit m: Manifest[A]) = new ScalaCriteria[A](session.createCriteria(m.erasure))
-		def newQuery[A](sql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(sql))
+		def newQuery[A](hql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(hql))
+		def newSQLQuery[A](sql: String)(implicit m: Manifest[A]) = new ScalaSQLQuery[A](session.createSQLQuery(sql))
 	}
 
 	/**
