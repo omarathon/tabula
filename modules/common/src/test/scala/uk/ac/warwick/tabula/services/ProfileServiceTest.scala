@@ -78,8 +78,8 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (2)
 		
-		profileService.listStudentRelationshipsWithUserId(PersonalTutor, "1234567").size should be (0)
-		profileService.listStudentRelationshipsWithUserId(PersonalTutor, "7654321").size should be (1)
-		profileService.listStudentRelationshipsWithUserId(PersonalTutor, "7654321").head.targetSprCode should be ("1250148/1")
+		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "1234567").size should be (0)
+		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").size should be (1)
+		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").head.targetSprCode should be ("1250148/1")
 	}
 }

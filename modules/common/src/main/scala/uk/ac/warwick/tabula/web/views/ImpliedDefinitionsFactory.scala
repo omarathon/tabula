@@ -30,7 +30,6 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
    */
 	override def getDefinition(name: String, ctx: TilesRequestContext) = {
 		if (debugEnabled) logger.debug("Rendering " + name)
-		val request = ctx.getRequestScope()
 		val name2 = name // TODO figure out why using name directly ends up null
 		super.getDefinition(name, ctx) match {
 			case definition: Any => definition

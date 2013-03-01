@@ -12,6 +12,8 @@ class ScalaQuery[A](c: org.hibernate.Query) {
 	
 	def setString(name: String, value: String) = chainable { c.setString(name, value) }
 	def setEntity(name: String, entity: Any) = chainable { c.setEntity(name, entity) }
+	def setParameter(name: String, value: Any) = chainable { c.setParameter(name, value) }
+	def setParameterList(name: String, list: Seq[_]) = chainable { c.setParameterList(name, list.toList.asJava) }
 	// TODO add other methods on demand
 	
 	// Helper to neaten up the above chainable methods - returns this instead of plain Query
@@ -33,4 +35,6 @@ class ScalaQuery[A](c: org.hibernate.Query) {
 
     /** Return Some(result), or None if no row matched. */
     def uniqueResult: Option[A] = Option(c.uniqueResult().asInstanceOf[A])
+    
+    def run(): Int = c.executeUpdate()
 }

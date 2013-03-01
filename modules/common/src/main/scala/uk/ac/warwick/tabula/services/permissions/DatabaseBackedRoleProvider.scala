@@ -19,9 +19,9 @@ class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
 	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
 	
-	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] =
+	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] =
 		service.getGrantedPermissionsFor(user, scope).toStream map { 
-			grantedPermission => (grantedPermission.permission, Some(scope), grantedPermission.overrideType)
+			grantedPermission => PermissionDefinition(grantedPermission.permission, Some(scope), grantedPermission.overrideType)
 		}
 	
 	// This role provider is intended to be exhaustive; continue to iterate up the permissions hierarchy

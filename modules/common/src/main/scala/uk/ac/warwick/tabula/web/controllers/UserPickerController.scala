@@ -57,10 +57,10 @@ object UserPickerController {
 		@BeanProperty var lastName: String = ""
 			
 		def applyInternal() = {
-			var users = userLookup.findUsersWithFilter(filter)
-			if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards)
+			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq
+			if (users.size < 10) users ++= (userLookup.findUsersWithFilter(filterBackwards).asScala.toSeq filter { !users.contains(_) })
 			
-			users.asScala.toSeq
+			users
 		}
 
 		/**
@@ -77,7 +77,8 @@ object UserPickerController {
 				case first :: second :: _ => firstName = first; lastName = second
 			}
 		}
-		def query_=(q: String): Unit = setQuery(q)
+		def query = if (firstName == "") lastName else firstName + " " + lastName
+		def query_=(q: String) = setQuery(q)
 
 		def filter: Map[String, String] = {
 			item("givenName", firstName) ++ item("sn", lastName)

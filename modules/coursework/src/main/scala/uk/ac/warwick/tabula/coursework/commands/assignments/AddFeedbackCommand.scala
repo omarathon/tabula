@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 

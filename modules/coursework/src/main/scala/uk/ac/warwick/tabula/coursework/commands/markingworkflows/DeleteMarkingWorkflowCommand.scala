@@ -25,7 +25,7 @@ class DeleteMarkingWorkflowCommand(val department: Department, val markingWorkfl
 	
 	def validate(errors: Errors) {
 		// can't delete a markingWorkflow that's being referenced by assignments.
-		if (!dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).isEmpty()) {
+		if (!dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).isEmpty) {
 			errors.reject("markingWorkflow.inuse")
 		}
 	}

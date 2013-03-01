@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils
 import org.springframework.core.convert.ConversionException
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
 class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unaudited with ReadOnly with SelfValidating {
 	
@@ -93,7 +94,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 
 case class PermissionHelperResult(
 	canDo: Boolean,
-	permissions: List[(Permission, Option[PermissionsTarget], Boolean)],
+	permissions: List[PermissionDefinition],
 	roles: List[Role],
 	resolvedScope: PermissionsTarget,
 	scopeMismatch: Boolean,

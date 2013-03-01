@@ -17,7 +17,7 @@ trait MarkingWorkflowWorld extends AppContextTestBase{
 	addFeedback(assignment)
 
 	val markingWorkflow = new MarkingWorkflow()
-	markingWorkflow.markingMethod = SeenSecondMarking
+	markingWorkflow.markingMethod = MarkingMethod.SeenSecondMarking
 	markingWorkflow.department = assignment.module.department
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
@@ -37,7 +37,7 @@ trait MarkingWorkflowWorld extends AppContextTestBase{
 			newFeedback.universityId = s.universityId
 			newFeedback.released = false
 			val fmFeedback = newFeedback.retrieveFirstMarkerFeedback
-			fmFeedback.state = ReleasedForMarking
+			fmFeedback.state = MarkingState.ReleasedForMarking
 			newFeedback
 		}
 		assignment.feedbacks = feedback

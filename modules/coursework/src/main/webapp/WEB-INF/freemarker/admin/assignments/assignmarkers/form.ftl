@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
-<#macro assignStudents studentList markerList markerMapping class name>
+<#macro assignStudents studentList markerList class name>
 	<div class="btn-toolbar">
 		<a class="random btn btn-mini"
 		   href="#" >
@@ -19,8 +19,10 @@
 				<ul class="member-list">
 					<#list studentList as student>
 						<li>
-							<div class="student" data-student-id="${student}">
-								<i class="icon-user"></i> ${student}
+							<div class="student"
+								 data-student-display="${student.displayValue}"
+								 data-student-id="${student.userCode}">
+								<i class="icon-user"></i> ${student.displayValue}
 							</div>
 						</li>
 					</#list>
@@ -31,41 +33,45 @@
 			<h3>${name}</h3>
 			<ul class="member-list">
 				<#list markerList as marker>
-					<#assign existingStudents = markerMapping[marker] />
+					<#assign existingStudents = marker.students />
 					<li>
-						<div class="marker" data-marker-id="${marker}">
-							<span>${marker}</span>
+						<div class="marker" data-marker-id="${marker.userCode}">
+							<span>${marker.fullName}</span>
 							<span class="count badge badge-info">${existingStudents?size}</span>
-							<div id="container-${marker}" class="student-container hidden">
+							<div id="container-${marker.userCode}" class="student-container hidden">
 								<ul class="student-list">
 									<#list existingStudents as student>
 										<li>
-											${student}
+											${student.displayValue}
 											<a class="remove-student btn btn-mini"
-												href="#" data-marker-id="${marker}"
-												data-student-id="${student}">
+												href="#" data-marker-id="${marker.userCode}"
+												data-student-id="${student.userCode}"
+												data-student-display="${student.displayValue}">
 												<i class="icon-remove"></i> Remove
 											</a>
 										</li>
 									</#list>
 								</ul>
 								<#list existingStudents as student>
-									<input type="hidden" name="markerMapping[${marker}][${student_index}]" value="${student}">
+									<input type="hidden"
+										   name="markerMapping[${marker.userCode}][${student_index}]"
+										   value="${student.userCode}"
+										   data-student-display="${student.displayValue}">
 								</#list>
 							</div>
-							<a id="tool-tip-${marker}" class="btn btn-mini" data-toggle="button" href="#">
+							<a id="tool-tip-${marker.userCode}" class="btn btn-mini" data-toggle="button" href="#">
 								<i class="icon-list"></i>
 								List
 							</a>
 							<script type="text/javascript">
 								jQuery(function($){
-									$("#tool-tip-${marker}").popover({
+									$("#tool-tip-${marker.userCode}").popover({
 										placement: 'right',
 										html: true,
 										content: function(){
-											return $('<div />').append($('#container-${marker} .student-list').clone()).html();
+											return $('<div />').append($('#container-${marker.userCode} .student-list').clone()).html();
 										},
-										title: 'Students to be marked by ${marker}'
+										title: 'Students to be marked by ${marker.fullName}'
 									});
 								});
 							</script>
@@ -85,30 +91,28 @@
 		<ul class="nav nav-tabs">
 			<li class="active">
 				<a href="#first-markers">
-					First markers  <!-- ${assignMarkersCommand.firstMarkerStudents?size} students unassigned -->
+					First markers
 				</a>
 			</li>
 			<li>
 				<a href="#second-markers">
-					Second markers  <!-- ${assignMarkersCommand.secondMarkerStudents?size} students unassigned -->
+					Second markers
 				</a>
 			</li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="first-markers">
 				<@assignStudents
-					assignMarkersCommand.firstMarkerStudents
+					assignMarkersCommand.firstMarkerUnassignedStudents
 					assignMarkersCommand.firstMarkers
-					assignMarkersCommand.markerMapping
 					"first-markers"
 					"First Markers"
 				/>
 			</div>
 			<div class="tab-pane" id="second-markers">
 				<@assignStudents
-					assignMarkersCommand.secondMarkerStudents
+					assignMarkersCommand.secondMarkerUnassignedStudents
 					assignMarkersCommand.secondMarkers
-					assignMarkersCommand.markerMapping
 					"second-markers"
 					"Second Markers"
 				/>

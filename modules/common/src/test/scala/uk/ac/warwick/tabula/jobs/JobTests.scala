@@ -25,7 +25,7 @@ class JobTests extends TestBase with Mockito with JobTestHelp {
 	@Test def testingJobTest {
 		Transactions.disable {
 			dao.findOutstandingInstances(10).size should be (0)
-			val id = service.add(Some(currentUser), TestingJob("Magic"))
+			val id = service.add(Some(currentUser), TestingJob("Magic")).id
 			dao.findOutstandingInstances(10).size should be (1)
 			val myInstance = service.getInstance(id).get
 			myInstance.started should be (false)

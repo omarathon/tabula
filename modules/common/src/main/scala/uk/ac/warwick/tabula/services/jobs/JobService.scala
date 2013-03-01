@@ -65,7 +65,7 @@ class JobService extends HasJobDao with Logging {
 	def findJob(identifier: String) =
 		jobs.find(identifier == _.identifier)
 
-	def add(user: Option[CurrentUser], prototype: JobPrototype): String = {
+	def add(user: Option[CurrentUser], prototype: JobPrototype): JobInstance = {
 		if (findJob(prototype.identifier).isEmpty) {
 			throw new IllegalArgumentException("No Job found to handle '%s'" format (prototype.identifier))
 		}

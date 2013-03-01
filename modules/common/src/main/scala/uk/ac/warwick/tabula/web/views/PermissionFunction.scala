@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 /**
  * Freemarker directive to show the contents of the tag
  */
-class PermissionFunction /*[A <: Action[_] : ClassManifest]*/ extends TemplateMethodModelEx with Logging {
+class PermissionFunction extends TemplateMethodModelEx with Logging {
 
 	@Autowired var securityService: SecurityService = _
 

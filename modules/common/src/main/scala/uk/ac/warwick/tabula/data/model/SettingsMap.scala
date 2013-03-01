@@ -50,7 +50,7 @@ trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 	protected def getIntSetting(key: String, default: => Int): Int = getIntSetting(key) getOrElse(default)
 	protected def getBooleanSetting(key: String, default: => Boolean): Boolean = getBooleanSetting(key) getOrElse(default)
 	
-	protected def settingsSeq = settings.seq
+	protected def settingsSeq = settings.toSeq
 	
 	protected def ensureSettings {
 		if (settings == null) settings = Map()

@@ -29,7 +29,7 @@ class JobContextTests extends AppContextTestBase {
 	}
 	
 	@Test def load {
-		val id = jobService.add(None, TestingJob("anything really"))
+		val id = jobService.add(None, TestingJob("anything really")).id
 		jobService.getInstance(id) map { instance =>
 			jobService.run
 		} orElse fail()

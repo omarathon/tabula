@@ -15,9 +15,15 @@ import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with PermissionsTarget {
+
+	@transient
+	var userLookup = Wire[UserLookupService]("userLookup")
 
 	def this(universityId: String = null) {
 		this()
@@ -65,9 +71,9 @@ class Submission extends GeneratedId with PermissionsTarget {
 		values.find( _.name == field.name )
 	}
 
-	def firstMarker:String = assignment.getStudentsFirstMarker(this).getOrElse("")
+	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(this).map(userLookup.getUserByUserId(_))
 
-	def secondMarker:String = assignment.getStudentsSecondMarker(this).getOrElse("")
+	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(userLookup.getUserByUserId(_))
 
 	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
 

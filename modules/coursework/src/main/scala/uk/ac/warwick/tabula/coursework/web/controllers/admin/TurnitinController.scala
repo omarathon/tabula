@@ -31,7 +31,7 @@ class TurnitinController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
 	def submit(command: SubmitToTurnitinCommand) = {
-		val jobId = command.apply()
+		val jobId = command.apply().id
 		Redirect(Routes.admin.assignment.turnitin.status(command.assignment) + "?jobId=" + jobId)
 	}
 

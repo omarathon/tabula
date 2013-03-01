@@ -13,12 +13,15 @@ import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.{BindWithResultsListener, BindListener}
 import uk.ac.warwick.tabula.ItemNotFoundException
 
-class PermissionsCheckingDataBinder(val target: Any, val objectName: String) extends ExtendedServletRequestDataBinder(target, objectName) with Logging {
+class PermissionsCheckingDataBinder(val target: Any, val objectName: String, val securityService: SecurityService) extends ExtendedServletRequestDataBinder(target, objectName) with Logging {
 	
-	var securityService: SecurityService = Wire.auto[SecurityService]
+	// Autowired third parameter. Done in a skewiff way for testing purposes
+	def this(target: Any, objectName: String) = {
+		this(target, objectName, Wire.auto[SecurityService])
+	}
 	
 	def requestInfo = RequestInfo.fromThread
 	def user = requestInfo.get.user
@@ -45,6 +48,9 @@ class PermissionsCheckingDataBinder(val target: Any, val objectName: String) ext
 		// Custom onBind methods
 		if (target.isInstanceOf[BindListener])
 			target.asInstanceOf[BindListener].onBind
+
+		if (target.isInstanceOf[BindWithResultsListener])
+			target.asInstanceOf[BindWithResultsListener].onBind(super.getBindingResult)
 	}
 	
 }

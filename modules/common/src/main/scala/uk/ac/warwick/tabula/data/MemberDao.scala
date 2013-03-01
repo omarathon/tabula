@@ -16,15 +16,16 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import org.hibernate.criterion._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
-	def getBySprCode(sprCode: String): Option[Member]
+	def getBySprCode(sprCode: String): Option[StudentMember]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
-	def findByQuery(query: String): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
@@ -47,7 +48,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
 	
 	def getBySprCode(sprCode: String) = 
-		session.newCriteria[Member]
+		session.newCriteria[StudentMember]
 				.createAlias("studyDetails", "studyDetails")
 				.add(is("studyDetails.sprCode", sprCode.trim))
 				.uniqueResult
@@ -85,21 +86,15 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def listUpdatedSince(startDate: DateTime, max: Int) = 
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
 	
-	//TODO
-	def findByQuery(query: String) = Seq()
-	
-	def getRegisteredModules(universityId: String): Seq[Module] = {
-		session.createQuery("""
+	def getRegisteredModules(universityId: String): Seq[Module] =		
+		session.newQuery[Module]("""
 				 select distinct m from Module m where code in 
 				(select distinct substring(lower(uag.moduleCode),1,5)
-					from UpstreamAssessmentGroup as uag
-				join uag.members as usergroup
-				join usergroup.staticIncludeUsers as uniId
-				where uniId = :universityId)
+					from UpstreamAssessmentGroup uag
+				  where :universityId in elements(uag.members.staticIncludeUsers))
 				""")
 					.setString("universityId", universityId)
-					.list.asInstanceOf[JList[Module]]
-	}
+					.seq
 	
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
@@ -119,10 +114,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.seq
 	}	
 	
-	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
-		session.createQuery("""
+		session.newQuery[StudentRelationship]("""
 			select
 				distinct sr
 			from
@@ -140,11 +135,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				sr.agent, sr.targetSprCode
 		""")
 			.setEntity("department", department)
-			.setString("relationshipType", relationshipType.dbValue)
-			.list.asInstanceOf[JList[StudentRelationship]]
-	}
+			.setParameter("relationshipType", relationshipType)
+			.seq
 
-	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = {
+	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]
 			.add(is("agent", agentId))
 			.add(is("relationshipType", relationshipType))
@@ -153,10 +147,10 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				Restrictions.ge("endDate", new DateTime())
 			))
 			.seq
-	}
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] = {
-		session.createQuery("""
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] =
+		if (relationshipType == null) Seq()
+		else session.newQuery[Member]("""
 			select
 				distinct sm
 			from
@@ -167,7 +161,6 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 		""")
 			.setEntity("department", department)
-			.setString("relationshipType", relationshipType.dbValue)
-			.list.asInstanceOf[JList[Member]]		
-	}
+			.setParameter("relationshipType", relationshipType)
+			.seq
 }

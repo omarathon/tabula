@@ -15,7 +15,7 @@ class MockJobDao extends JobDao {
 	def saveJob(instance: JobInstance) = {
 		instance.id = UUID.randomUUID.toString
 		instances += instance
-		instance.id
+		instance
 	}
 	
 	def unfinishedInstances = instances.toSeq.filterNot( _.finished )

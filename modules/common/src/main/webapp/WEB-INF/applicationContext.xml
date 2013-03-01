@@ -125,7 +125,8 @@
 	    </property>
 	    <property name="formatters">
 	    	<list>
-	    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
+   				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>

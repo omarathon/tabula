@@ -31,9 +31,8 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 
 	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
 
-	def getByCode(code: String) = option[Module] {
-		session.createQuery("from Module m where code = :code").setString("code", code).uniqueResult
-	}
+	def getByCode(code: String) = 
+		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 	
 	def getById(id: String) = getById[Module](id)
 
@@ -41,7 +40,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off ModuleManager.
 	 */
 	def findByParticipant(userId: String): Seq[Module] =
-		session.createQuery("""
+		session.newQuery[Module]("""
 				from Module m 
 				left join fetch m.grantedRoles r
 				where r.builtInRoleDefinition = :def 
@@ -49,7 +48,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 				""")
 			.setParameter("def", ModuleManagerRoleDefinition)
 			.setString("user", userId)
-			.list.asInstanceOf[JList[Module]]
+			.seq
 
 	/**
 	 * Find modules managed by this user, in this department.

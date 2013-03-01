@@ -31,7 +31,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var name:String = null
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var modules:JList[Module] = List()
+	@BeanProperty var modules:JList[Module] = ArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
@@ -40,7 +40,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var markingWorkflows:JList[MarkingWorkflow] = ArrayList()
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = List()
+	@BeanProperty var customRoleDefinitions:JList[CustomRoleDefinition] = ArrayList()
 	
 	def isCollectFeedbackRatings = collectFeedbackRatings
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
@@ -62,6 +62,10 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def isShowStudentName = showStudentName
 	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
 	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
+	
+	def isPlagiarismDetectionEnabled = plagiarismDetectionEnabled
+	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
+	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
 
 	def formattedGuidelineSummary:String = Option(getExtensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
@@ -82,8 +86,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def canRequestExtension = isAllowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
-	
-	def isPlagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 

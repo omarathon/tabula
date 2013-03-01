@@ -64,9 +64,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 		getGrantedRole(scope, roleDefinition) match {
 			case Some(role) => role.users
 			case _ => {
-				val role = GrantedRole.init[A]
-				role.scope = scope
-				role.roleDefinition = roleDefinition
+				val role = GrantedRole.init(scope, roleDefinition)
 				
 				dao.saveOrUpdate(role)
 				role.users

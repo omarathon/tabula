@@ -120,14 +120,14 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
 		val criteria = 
-			session.createCriteria(classOf[FileAttachment])
+			session.newCriteria[FileAttachment]
 				.setProjection(Projections.id())
 				
 		createdBefore.map { date =>
 			criteria.add(Is.lt("dateUploaded", date))
 		}
 		
-		criteria.list.asInstanceOf[java.util.List[String]].toSet[String]
+		criteria.untypedList.asInstanceOf[java.util.List[String]].toSet[String]
 	}
 
 	/**
@@ -165,9 +165,9 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				logger.error("%d fileAttachments are temporary but are attached to another entity! I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size)
 			}
 
-			session.createQuery("delete FileAttachment f where f.id in :ids")
+			session.newQuery[FileAttachment]("delete FileAttachment f where f.id in :ids")
 				.setParameterList("ids", okayToDelete.map(_.id))
-				.executeUpdate()
+				.run()
 			for (attachment <- files; file <- getData(attachment.id)) {
 				file.delete()
 			}

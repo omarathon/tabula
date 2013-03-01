@@ -17,13 +17,16 @@ class AssignMarkersTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 		command.firstMarkers.size should be (2)
 		command.secondMarkers.size should be (2)
-		command.markerMapping.get("cuslaj").size should  be (3)
-		command.markerMapping.get("cuscav").size should  be (2)
-		command.markerMapping.get("cuslat").size should  be (3)
-		command.markerMapping.get("cuday").size should  be (2)
+
+		command.firstMarkers.find(_.userCode == "cuslaj").get.students.size should  be (3)
+		command.firstMarkers.find(_.userCode == "cuscav").get.students.size should  be (2)
+		command.secondMarkers.find(_.userCode == "cuslat").get.students.size should  be (3)
+		command.secondMarkers.find(_.userCode == "cuday").get.students.size should  be (2)
+
+
 		// students without a marker should be empty
-		command.firstMarkerStudents should be ('empty)
-		command.secondMarkerStudents should be ('empty)
+		command.firstMarkerUnassignedStudents should be ('empty)
+		command.secondMarkerUnassignedStudents should be ('empty)
 
 		command.markerMapping = new HashMap[String, JList[String]]()
 		command.markerMapping.put("cuslaj", List("cusebr", "cuscav"))

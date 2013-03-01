@@ -60,7 +60,7 @@ class FileAttachment extends GeneratedId {
 	@BeanProperty var dateUploaded: DateTime = new DateTime
 
 	@transient private var _file: File = null
-	def file = {
+	def file = {		
 		if (_file == null) _file = fileDao.getData(id).orNull
 		_file
 	}

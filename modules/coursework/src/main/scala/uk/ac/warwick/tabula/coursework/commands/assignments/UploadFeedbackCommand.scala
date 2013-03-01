@@ -4,7 +4,7 @@ import java.util.ArrayList
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import scala.util.matching.Regex
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Assignment, Feedback, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FileAttachment}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
@@ -25,7 +25,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import scala.Some
-import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.{BindWithResultsListener, BindListener}
 import uk.ac.warwick.tabula.data.model.Module
 
 class FeedbackItem {
@@ -69,7 +69,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * remove all the code in here that handles it, to simplify it a little.
  */
 abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser)
-	extends Command[A] with Daoisms with Logging with BindListener {
+	extends Command[A] with Daoisms with Logging with BindWithResultsListener {
 	
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
@@ -172,7 +172,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		item.duplicateFileNames = attachedFiles & feedbackFiles
 	}
 
-	override def onBind = transactional() {
+	override def onBind(result:BindingResult) = transactional() {
 		file.onBind
 
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
@@ -250,7 +250,15 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			}
 
 			if (items != null) {
-				for (item <- items if item.file != null) item.file.onBind
+				for (item <- items if item.file != null) {
+					try{
+						item.file.onBind
+					} catch {
+						case e:IllegalStateException => {
+							result.reject("binding.reSubmission")
+						}
+					}
+				}
 			}
 		}
 

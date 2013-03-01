@@ -6,10 +6,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
 import uk.ac.warwick.tabula.JavaImports.JList
 
-
-
 import org.joda.time.DateTime
-
 
 class ExtensionTest extends TestBase {
 
@@ -61,4 +58,20 @@ class ExtensionTest extends TestBase {
 
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i:Int) = "%07d" format i
+  
+  @Test def flags {
+	  val extension = new Extension
+	  
+	  extension.isManual should be (true)
+	  extension.isAwaitingApproval should be (false)
+	   
+	  extension.requestedOn = DateTime.now
+	  
+	  extension.isManual should be (false)
+	  extension.isAwaitingApproval should be (true)
+	   
+	  extension.approved = true
+	  
+	  extension.isAwaitingApproval should be (false)
+  }
 }

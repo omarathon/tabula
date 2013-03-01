@@ -27,7 +27,7 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 			command.noMarks.size should be (3)
 
 			command.apply()
-			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingCompleted)
+			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 		}
 	}
@@ -47,7 +47,7 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 
 			command.apply()
 			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
-			val releasedFeedback = secondFeedback.filter(_.state == MarkingCompleted)
+			val releasedFeedback = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (2)
 		}
 	}

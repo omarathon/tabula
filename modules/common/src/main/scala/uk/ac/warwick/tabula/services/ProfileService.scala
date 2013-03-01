@@ -27,6 +27,7 @@ trait ProfileService {
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
+	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
@@ -35,7 +36,7 @@ trait ProfileService {
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
 	def getPersonalTutor(student: Member): Option[Member]
-	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
+	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member]
 }
 
@@ -55,6 +56,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUserId(userId, disableFilter)
+	}
+	
+	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
+		memberDao.getBySprCode(sprCode)
 	}
 	
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
@@ -130,7 +135,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 	}
 
-	def listStudentRelationshipsWithUserId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional() {
+	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional() {
 		memberDao.getRelationshipsByAgent(relationshipType, agentId)
 	}
 

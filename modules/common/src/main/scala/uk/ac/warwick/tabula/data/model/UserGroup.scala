@@ -37,7 +37,7 @@ import uk.ac.warwick.spring.Wire
 @Entity
 class UserGroup extends GeneratedId {
 
-	@transient private lazy val userLookup = Wire.auto[UserLookupService]
+	@transient var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
 	@BeanProperty var baseWebgroup: String = _
@@ -98,6 +98,7 @@ class UserGroup extends GeneratedId {
 
 	def copyFrom(other: UserGroup) {
 		baseWebgroup = other.baseWebgroup
+		universityIds = other.universityIds
 		includeUsers.clear()
 		excludeUsers.clear()
 		staticIncludeUsers.clear()

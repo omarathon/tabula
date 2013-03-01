@@ -27,11 +27,14 @@
 			   >What's this?</a>
 		</#macro>
 
-		<#if upstreamAssessmentGroups??>
+		<#if upstreamAssessmentGroups?has_content>
 			<#assign total=0 />
 			<#list upstreamAssessmentGroups as group>
 				<#assign total=total+group.members.members?size />
 			</#list>
+			<#if hasMembers>
+				<#assign total=total+membersGroup.includeUsers?size />
+			</#if>
 
 			${total} students enrolled from SITS <@what_is_this />
 			<#if hasMembers>(with adjustments)</#if>
@@ -65,7 +68,7 @@
 						   data-occurrence = "${group.occurrence}" />
 				</#list>
 			<#else>
-				<@f.hidden class="group-id" name="assessmentGroups" value="" />
+				<@f.hidden class="empty-group group-id" name="assessmentGroups" value="" />
 			</#if>
 			Assessment groups for ${command.academicYear.label}
 			<#if command.upstreamGroupOptions?has_content>
@@ -237,7 +240,7 @@
 			};
 
 			// need to put this empty element in the form when all have been removed
-			var emptyAssessmentGroups = '<input type="hidden"  value="" name="assessmentGroups">';
+			var emptyAssessmentGroups = '<input class="empty-group" type="hidden"  value="" name="assessmentGroups">';
 
 			// remove linked groups
 			$assignmentGroupPicker.on('click', 'tr.linked a', function(e){
@@ -249,17 +252,22 @@
 				$parentRow.removeClass("linked");
 				// remove the linked group if one exists
 				$('.linked-group[data-id='+assignmentID+'][data-occurrence='+occurrence+']').remove();
-				if($('.linked-group').length == 0){
-					$assignmentGroupPicker.append($(emptyAssessmentGroups));
-				}
 				// remove any pending new groups
 				$('input', $parentRow).remove();
+				// add the empty group element
+				if($('.assessment-group-assignment,.linked-group').length == 0){
+					$assignmentGroupPicker.append($(emptyAssessmentGroups));
+				}
 				redoIndices();
 			});
 
 			// add un-linked groups
 			$assignmentGroupPicker.on('click', 'tr:not(.linked) a', function(e){
 				e.preventDefault();
+
+				// remove the empty group as one was added
+				$('.empty-group').remove();
+
 				var $parentRow = $(this).closest("tr");
 				var $parentCell = $(this).closest("td");
 				var index = $('.assessment-group-assignment').length

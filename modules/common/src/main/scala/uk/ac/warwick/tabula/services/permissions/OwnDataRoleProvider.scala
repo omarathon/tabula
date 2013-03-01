@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.roles.FeedbackRecipient
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.roles.SettingsOwner
+import uk.ac.warwick.tabula.data.model.UserSettings
 
 /**
  * A special multi-purpose role provider that provides users access to their own data, generally this isn't an explicit permission.
@@ -16,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.Member
 @Component
 class OwnDataRoleProvider extends RoleProvider {
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {		
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
 		scope match {
 			// You can view your own submission			
 			case submission: Submission => 
@@ -27,11 +30,16 @@ class OwnDataRoleProvider extends RoleProvider {
 			case feedback: Feedback => 
 				if (feedback.universityId == user.universityId && feedback.released) Seq(FeedbackRecipient(feedback))
 				else Seq()
+				
+			// You can change your own user settings
+			case settings: UserSettings => 
+				if (user.apparentId.hasText && settings.userId == user.apparentId) Seq(SettingsOwner(settings))
+				else Seq()
 			
 			case _ => Seq()
 		}
 	}
 	
-	def rolesProvided = Set(classOf[Submitter], classOf[FeedbackRecipient])
+	def rolesProvided = Set(classOf[Submitter], classOf[FeedbackRecipient], classOf[SettingsOwner])
 
 }

@@ -7,54 +7,74 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.ArrayList
-import java.util.HashMap
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.userlookup.User
 
 
 class AssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] with Daoisms{
+
+	case class Marker(fullName:String, userCode:String, var students:JList[Student])
+	case class Student(displayValue: String, userCode: String)
 
 	PermissionCheck(Permissions.Assignment.Update, assignment)
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
+	var userLookup = Wire.auto[UserLookupService]
 
-	@BeanProperty var firstMarkerStudents: JList[String] = _
-	@BeanProperty var secondMarkerStudents: JList[String] = _
-	@BeanProperty var firstMarkers: JList[String] = _
-	@BeanProperty var secondMarkers: JList[String] = _
+	@BeanProperty var firstMarkerUnassignedStudents: JList[Student] = _
+	@BeanProperty var secondMarkerUnassignedStudents: JList[Student] = _
+	@BeanProperty var firstMarkers: JList[Marker] = _
+	@BeanProperty var secondMarkers: JList[Marker] = _
 	@BeanProperty var markerMapping: JMap[String, JList[String]] = _
 
 	def onBind() {
-		firstMarkers = assignment.markingWorkflow.firstMarkers.members
-		secondMarkers = assignment.markingWorkflow.secondMarkers.members
 
-		def retrieveMarkers(markerDef:Seq[String]):JMap[String, JList[String]] = {
-			val resultMap = new HashMap[String, JList[String]]()
-			markerDef.foreach{marker =>
-				val students:JList[String] = assignment.markerMap.toMap.get(marker) match {
-					case Some(userGroup:UserGroup) => userGroup.includeUsers
-					case None => ArrayList()
+		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
+			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
+				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>
+					val user:User = userLookup.getUserByUserId(student)
+					val displayValue = module.department.showStudentName match {
+						case true => user.getFullName
+						case false => user.getWarwickId
+					}
+					new Student(displayValue, student)
 				}
-				resultMap.put(marker, students)
+				case None => ArrayList()
 			}
-			resultMap
+			val user = Option(userLookup.getUserByUserId(marker))
+			val fullName = user match{
+				case Some(u) => u.getFullName
+				case None => ""
+			}
+
+			new Marker(fullName, marker, students)
 		}
 
-		val members = assignmentService.determineMembershipUsers(assignment).map(_.getUserId)
+		firstMarkers = retrieveMarkers(assignment.markingWorkflow.firstMarkers.members)
+		secondMarkers = retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
+		val members = assignmentService.determineMembershipUsers(assignment).map{s =>
+			val displayValue = module.department.showStudentName match {
+				case true => s.getFullName
+				case false => s.getWarwickId
+			}
+			new Student(displayValue, s.getUserId)
+		}
 
-		val firstMarkerMap = retrieveMarkers(firstMarkers)
-		val secondMarkerMap = retrieveMarkers(secondMarkers)
-		markerMapping = firstMarkerMap ++ secondMarkerMap.toList
+		firstMarkerUnassignedStudents = members.toList filterNot firstMarkers.map(_.students).flatten.contains
+		secondMarkerUnassignedStudents = members.toList filterNot secondMarkers.map(_.students).flatten.contains
 
-		firstMarkerStudents = members.toList filterNot firstMarkerMap.values.flatten.toList.contains
-		secondMarkerStudents = members.toList filterNot secondMarkerMap.values.flatten.toList.contains
+		markerMapping = new java.util.HashMap[String, JList[String]]()
+		for (marker <- (firstMarkers.toList ++ secondMarkers.toList)){
+			markerMapping.put(marker.userCode, marker.students.map(_.userCode))
+		}
 	}
 
 	def applyInternal() = {
 		transactional(){
-			assignment.markerMap = new HashMap[String, UserGroup]()
+			assignment.markerMap = new java.util.HashMap[String, UserGroup]()
 			if(Option(markerMapping).isDefined){
 				markerMapping.foreach{case(marker, studentList) =>
 					val group = new UserGroup()
@@ -71,5 +91,4 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 	def describe(d: Description) {
 		d.assignment(assignment)
 	}
-
 }

@@ -32,7 +32,7 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 			assignment.feedbacks.size should be (3)
 			val firstMarkerFeedback = assignment.feedbacks.map(_.firstMarkerFeedback)
 			firstMarkerFeedback.size should be (3)
-			firstMarkerFeedback.filter(_.state == ReleasedForMarking).size should be (3)
+			firstMarkerFeedback.filter(_.state == MarkingState.ReleasedForMarking).size should be (3)
 		}
 	}
 

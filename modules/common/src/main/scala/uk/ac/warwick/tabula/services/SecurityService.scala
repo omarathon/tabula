@@ -68,14 +68,14 @@ class SecurityService extends Logging {
 		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
 		if (explicitPermissions == null) Continue
 		else {
-			val (allow, deny) = explicitPermissions.partition(_._3)
+			val (allow, deny) = explicitPermissions.partition(_.permissionType)
 			
 			// Confusingly, we check for an "Allow" for the deny perms and then immediately deny it
-			val denyPerms = deny map { triple => (triple._1 -> triple._2) } toMap
+			val denyPerms = deny map { defn => (defn.permission -> defn.scope) } toMap
 			
 			if (checkPermissions(denyPerms, user, permission, scope) != Continue) Deny
 			else {
-				val allowPerms = allow map { triple => (triple._1 -> triple._2) } toMap
+				val allowPerms = allow map { defn => (defn.permission -> defn.scope) } toMap
 			
 				checkPermissions(allowPerms, user, permission, scope)
 			}

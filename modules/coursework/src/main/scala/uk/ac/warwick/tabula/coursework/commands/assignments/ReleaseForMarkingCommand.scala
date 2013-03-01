@@ -44,7 +44,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 		}
 
 		val feedbackToUpdate:Seq[Feedback] = feedbacks -- invalidFeedback
-		feedbackToUpdate foreach (f => stateService.updateState(f.retrieveFirstMarkerFeedback, ReleasedForMarking))
+		feedbackToUpdate foreach (f => stateService.updateState(f.retrieveFirstMarkerFeedback, MarkingState.ReleasedForMarking))
 		feedbacksUpdated = feedbackToUpdate.size
 		feedbackToUpdate.toList
 	}

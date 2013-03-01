@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.SprCode
  */
 class StudentRelationship extends GeneratedId {
 	
-	@transient lazy val memberDao = Wire.auto[MemberDao]
+	@transient var profileService = Wire.auto[ProfileService]
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	@BeanProperty var agent: String = _
@@ -49,13 +49,9 @@ class StudentRelationship extends GeneratedId {
 	// assume that all-numeric value is a member (not proven though)
 	def isAgentMember: Boolean = agent.forall(_.isDigit)
 	
-	def agentMember: Option[Member] = {
-			val profileService = Wire.auto[ProfileService]
-			
-			isAgentMember match {
-				case true => profileService.getMemberByUniversityId(agent)
-				case false => None
-			}
+	def agentMember: Option[Member] = isAgentMember match {
+		case true => profileService.getMemberByUniversityId(agent)
+		case false => None
 	}
 	
 	def agentParsed = agentMember match {
@@ -73,7 +69,7 @@ class StudentRelationship extends GeneratedId {
 		case Some(m) => m.lastName
 	}
 	
-	def studentMember = memberDao.getBySprCode(targetSprCode)	
+	def studentMember = profileService.getStudentBySprCode(targetSprCode)	
 	def studentId = SprCode.getUniversityId(targetSprCode)
 }
 
