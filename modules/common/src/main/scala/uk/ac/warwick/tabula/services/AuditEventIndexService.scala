@@ -119,12 +119,17 @@ trait AuditEventQueryMethods { self: AuditEventIndexService =>
 				assignment.submissions.filter { _.submittedDate isBefore latestDate }
 			}
 
-		// find events where individual submissions were downloaded
+		// find events where selected submissions were downloaded
 		val someDownloaded = parsedAuditEvents(search(
 			all(assignmentTerm, termQuery("eventType", "DownloadSubmissions"))))
 		val submissions2 = someDownloaded.flatMap(_.submissionIds).flatMap(id => assignment.submissions.find(_.id == id))
 
-		(submissions1 ++ submissions2).distinct
+		// find events where individual submissions were downloaded
+		val individualDownloads = parsedAuditEvents(
+				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
+		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find((_.id == id)))
+					
+		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 
 	def whoDownloadedFeedback(assignment: Assignment) =

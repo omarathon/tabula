@@ -85,6 +85,40 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
 		indexer.index
 		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
+		
+	}
+	
+	@Transactional 
+	@Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
+		val assignment = {
+			val a = newDeepAssignment()
+			a.id = "54321"
+			val s1 = new Submission
+			s1.id = "321"
+			s1.assignment = a
+			s1.submittedDate = new DateTime().minusHours(5)
+			a.submissions add s1
+			a
+		}
+		
+		val command = new NullCommand {
+			override lazy val eventName = "AdminGetSingleSubmission"
+				
+			override def describe(d: Description) = {
+				def submission = assignment.submissions.head
+				
+				d.submission(submission).properties(
+						"studentId" -> submission.universityId,
+						"attachmentCount" -> submission.allAttachments.size)
+			}
+					
+		}
+		
+		val auditEvent = recordAudit(command)
+		
+		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
+		indexer.index
+		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
 	}
 	
 	def recordAudit(command:Command[_]) = {
