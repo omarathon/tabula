@@ -27,7 +27,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val provider1 = mock[ScopelessRoleProvider]
 		val provider2 = mock[ScopelessRoleProvider]
 			
-		when(scopedProvider.getRolesFor(isEq(currentUser), isA(classOf[PermissionsTarget]))) thenThrow(classOf[RuntimeException])
+		when(scopedProvider.getRolesFor(isEq(currentUser), isA[PermissionsTarget])) thenThrow(classOf[RuntimeException])
 		when(provider1.getRolesFor(currentUser)) thenReturn(Seq(Sysadmin()))
 		when(provider2.getRolesFor(currentUser)) thenThrow(classOf[RuntimeException])
 				

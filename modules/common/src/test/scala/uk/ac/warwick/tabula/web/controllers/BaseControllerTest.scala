@@ -30,7 +30,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		
@@ -57,7 +57,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		controller._binding(binder)
@@ -90,7 +90,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		controller._binding(binder)

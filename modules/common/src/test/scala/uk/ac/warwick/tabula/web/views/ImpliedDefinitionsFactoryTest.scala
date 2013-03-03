@@ -19,7 +19,7 @@ class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 	factory.setDefinitionDAO(defDao)
 	factory.setLocaleResolver(localeResolver)
 	
-	localeResolver.resolveLocale(isA(classOf[TilesRequestContext])) returns (Locale.ENGLISH)
+	localeResolver.resolveLocale(isA[TilesRequestContext]) returns (Locale.ENGLISH)
 	
 	@Test def matchesDefinition {
 		val definition = mock[Definition]

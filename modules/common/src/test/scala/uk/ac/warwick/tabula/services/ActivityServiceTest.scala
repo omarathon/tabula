@@ -119,7 +119,7 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val fieldDoc = new FieldDoc(100, 0.5f, Array())
 		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(fieldDoc), 20, 30)
 		
-		auditIndexService.noteworthySubmissionsForModules(isEq(Seq(om1, om2, am1, am2)), isA(classOf[Option[FieldDoc]]), isEq(Some(30)), isEq(8)) returns(pae)
+		auditIndexService.noteworthySubmissionsForModules(isEq(Seq(om1, om2, am1, am2)), isA[Option[FieldDoc]], isEq(Some(30)), isEq(8)) returns(pae)
 		
 		val activities = service.getNoteworthySubmissions(currentUser, 10, 20, 30)
 		activities.activities.size should be (2)

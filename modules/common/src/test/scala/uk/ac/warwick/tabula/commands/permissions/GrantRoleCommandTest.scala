@@ -78,7 +78,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
+		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -93,7 +93,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
+		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -117,7 +117,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
-		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (true)
+		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -155,7 +155,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA(classOf[Permission]), isEq(dept)) returns (false)
+		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (false)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
