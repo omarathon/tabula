@@ -2,36 +2,29 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions.mapAsJavaMap
-import scala.util.matching.Regex
-import org.apache.commons.lang3.text.WordUtils
-import org.springframework.beans.factory.InitializingBean
+
+import scala.collection.JavaConversions._
+
+import org.joda.time.LocalDate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
+
 import javax.sql.DataSource
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.Address
-import uk.ac.warwick.tabula.data.model.AddressType
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.NextOfKin
-import uk.ac.warwick.userlookup.User
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
-import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
-import uk.ac.warwick.tabula.helpers.Logging
-import org.springframework.remoting.rmi.RmiProxyFactoryBean
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.Department
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.membership.MembershipInterfaceWrapper
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.Gender
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
+import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
+import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.userlookup.User
 
 case class MembershipInformation(val member: MembershipMember, val photo: Option[Array[Byte]])
 
@@ -226,10 +219,7 @@ object ProfileImporter {
 			dateOfBirth				= rs.getDate("dob"),
 			usercode				= rs.getString("its_usercode"),
 			startDate				= rs.getDate("dt_start"),
-			endDate					= {
-				val endDateInDb = rs.getDate("dt_end")
-				endDateInDb
-			},
+			endDate					= rs.getDate("dt_end"),
 			modified				= rs.getDate("dt_modified"),
 			phoneNumber				= rs.getString("tel_business"),
 			gender					= Gender.fromCode(rs.getString("gender")),

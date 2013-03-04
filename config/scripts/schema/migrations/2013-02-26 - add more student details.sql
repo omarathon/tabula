@@ -15,7 +15,6 @@ alter table studydetails add (
 	
 );
 
-alter table studydetails drop (studentstatus);
+-- TAB-308 post-deploy:
 
-
-
+alter table studydetails set unused column studentstatus;

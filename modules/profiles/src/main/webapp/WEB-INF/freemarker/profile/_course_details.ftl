@@ -108,6 +108,5 @@
 				</tr>
 			</tbody>
 		</table>
-	</p>
 	</#if>
 </section>

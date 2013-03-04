@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
