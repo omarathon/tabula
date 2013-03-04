@@ -390,11 +390,11 @@
 							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
 							<#if attachments?size == 1> 
-								<#assign attachmentExt = "txt">
+								<#assign attachmentExtension = student.enhancedFeedback.feedback.attachments[0].fileExt>
 							<#else>
-								<#assign attachmentExt = "zip">
+								<#assign attachmentExtension = "zip">
 							</#if>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExt}'/>">
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
 								${attachments?size}
 								<#if attachments?size == 1> file
 								<#else> files

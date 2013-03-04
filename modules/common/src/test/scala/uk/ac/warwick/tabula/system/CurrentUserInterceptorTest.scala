@@ -74,7 +74,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val masque = new User("cusebr")
 		masque.setFoundUser(true)
 		
-		roleService.hasRole(isA(classOf[CurrentUser]), isEq(Masquerader())) returns (true)
+		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (true)
 		userLookup.users += ("cusebr" -> masque)
 		
 		val req = new MockHttpServletRequest
@@ -102,7 +102,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val masque = new User("cusebr")
 		masque.setFoundUser(true)
 		
-		roleService.hasRole(isA(classOf[CurrentUser]), isEq(Masquerader())) returns (false)
+		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (false)
 		userLookup.users += ("cusebr" -> masque)
 		
 		val req = new MockHttpServletRequest
@@ -127,7 +127,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
 		
-		roleService.hasRole(isA(classOf[CurrentUser]), isEq(Sysadmin())) returns (true)
+		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (true)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
@@ -150,7 +150,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
 		
-		roleService.hasRole(isA(classOf[CurrentUser]), isEq(Sysadmin())) returns (true)
+		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (true)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
@@ -174,7 +174,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
 		
-		roleService.hasRole(isA(classOf[CurrentUser]), isEq(Sysadmin())) returns (false)
+		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (false)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)

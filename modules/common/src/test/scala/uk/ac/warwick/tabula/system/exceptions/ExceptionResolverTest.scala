@@ -1,11 +1,16 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConversions._
-
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.system.CurrentUserInterceptor
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import uk.ac.warwick.tabula.system.RequestInfoInterceptor
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockHttpServletRequest
 
 class ExceptionResolverTest extends TestBase {
 	
@@ -65,6 +70,37 @@ class ExceptionResolverTest extends TestBase {
 		withUser("cusebr") {
 			val modelAndView = resolver.doResolve(new ItemNotFoundException(), None)
 			modelAndView.viewName should be ("could-not-find")
+		}
+	}
+	
+	@Test def callInterceptors {
+		var handled = 0
+		
+		resolver.userInterceptor = new CurrentUserInterceptor {
+			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+				handled += 7
+				true
+			}
+		}
+		
+		resolver.infoInterceptor = new RequestInfoInterceptor {
+			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+				handled += 13
+				true
+			}
+		}
+		
+		withUser("cusebr") {
+			val request = new MockHttpServletRequest
+			val response = new MockHttpServletResponse
+			
+			val requestInfo = RequestInfo.fromThread.get
+			val user = requestInfo.user
+			val exception = new PermissionDeniedException(user, null, null, null)
+			val modelAndView = resolver.resolveException(request, response, handled, exception)
+			modelAndView.getViewName should be (resolver.defaultView)
+			
+			handled should be (20)
 		}
 	}
 

@@ -20,9 +20,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 
-case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None) {
-	def getHasRequest = request.isDefined
-}
+case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None)
 
 object ExceptionHandler {
 	def renderStackTrace(exception: Throwable) = {
@@ -74,7 +72,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 		}
 	}
 
-	def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
+	private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
 		val info = RequestInfo.fromThread
 		message.setTo(recipient)
 		message.setSubject("[HFCX] %s %s" format (userId(info), context.token))

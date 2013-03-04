@@ -94,22 +94,7 @@ jQuery(function ($) {
 	// http://twitter.github.com/bootstrap/javascript.html#popovers
 	$('.use-popover').popover().click(function(){ return false; });
 	
-	// support sortable table
-	jQuery.fn.sortableTable = function(settings){
-		var $ = jQuery;
-		var $this = $(this);
-		if ($this.tablesorter) {
-			var headerSettings = {};
-			$('th', $this).each(function(index){
-				var sortable = $(this).hasClass("sortable");
-				if(!sortable){
-					headerSettings[index] = {sorter: false};
-				}
-			});
-			$this.tablesorter({headers: headerSettings});
-			return this;
-		}
-	};
+	
 }); // end domready
 
 }(jQuery));

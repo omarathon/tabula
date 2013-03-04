@@ -5,7 +5,7 @@ package uk.ac.warwick.tabula.helpers
  * as Tuple2 (which is what you get when you do (a -> b) and is
  * the type of each entry in a Map).
  */
-object Products {
+trait Products {
 	/** Is the first value of this Product2 null? */
 	def nullKey[A,B](p:Product2[A,B]) = p._1 == null
 	
@@ -19,3 +19,5 @@ object Products {
 	def toKey[A,B](p: Product2[A,B]) = p._1
 	def toValue[A,B](p: Product2[A,B]) = p._2
 }
+
+object Products extends Products

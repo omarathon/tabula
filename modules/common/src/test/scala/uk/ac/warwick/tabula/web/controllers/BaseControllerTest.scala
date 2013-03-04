@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.validators.CompositeValidator
 import uk.ac.warwick.tabula.validators.ClassValidator
+import org.hibernate.SessionFactory
+import org.hibernate.classic.Session
 
 class BaseControllerTest extends TestBase with Mockito {
 	
@@ -28,7 +30,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		
@@ -55,7 +57,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		controller._binding(binder)
@@ -88,7 +90,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val binder = new WebDataBinder(new Object)
 		
 		val validator = mock[Validator]
-		validator.supports(isA(classOf[Class[_]])) returns (true)
+		validator.supports(isA[Class[_]]) returns (true)
 		
 		binder.setValidator(validator)
 		controller._binding(binder)
@@ -107,6 +109,21 @@ class BaseControllerTest extends TestBase with Mockito {
 		controller._binding(binder)
 		
 		binder.getDisallowedFields() should be (Array("steve", "yes"))
+	}
+	
+	@Test def enableFilters {
+		val mockSession = mock[Session]
+		val controller = new BaseController {
+			override protected def session = mockSession
+		}
+		
+		controller.showDeletedItems
+		controller.preRequest
+		there was no(mockSession).enableFilter("notDeleted")
+		
+		controller.hideDeletedItems
+		controller.preRequest
+		there was one(mockSession).enableFilter("notDeleted")
 	}
 
 }

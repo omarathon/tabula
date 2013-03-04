@@ -11,7 +11,7 @@ insert into usergroupinclude (group_id, usercode) values ('1', 'cusebr');
 insert into usergroupinclude (group_id, usercode) values ('1', 'cusfal');
 
 insert into department (id,code,name) values ('1','cs','Computer Science');
-insert into grantedrole (id,usergroup_id,builtInRoleDefinition,scope_type,scope_id) values ('1','1','DepartmentalAdministratorRoleDefinition','Department','1');
+insert into grantedrole (id,hib_version,usergroup_id,builtInRoleDefinition,scope_type,scope_id) values ('1',0,'1','DepartmentalAdministratorRoleDefinition','Department','1');
 
 insert into department (id,code,name) values ('2','ch','Chemistry');
 

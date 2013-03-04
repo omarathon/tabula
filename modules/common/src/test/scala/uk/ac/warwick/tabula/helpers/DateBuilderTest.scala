@@ -20,6 +20,9 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 			val tomorrow = new DateTime().plusDays(1)
 			val today = new DateTime()
 			
+			// Test default settings
+			format(anotherDay) should be ("Sat 10th March 2012 at 12:13")
+			
 			format(anotherDay, false, false, false, true, true, false, false) should be ("Sat 10th March 2012 12:13")
 			format(anotherDay, true, true, true, true, true, false, false) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
 			

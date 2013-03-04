@@ -20,13 +20,13 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.mail.WarwickMailSender
 
-class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with Public with InitializingBean {
+class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with SelfValidating with Public {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
 	var adminMailAddress = Wire.property("${mail.admin.to}")
 	var freemarker = Wire.auto[Configuration]
 	
-	var template: Template = _
+	lazy val template: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 
 	@BeanProperty var message: String = _
 	//	@BeanProperty var pleaseRespond:Boolean =_
@@ -38,6 +38,12 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 	@BeanProperty var os: String = _
 	@BeanProperty var resolution: String = _
 	@BeanProperty var ipAddress: String = _
+	
+	if (user != null && user.loggedIn) {
+		if (!usercode.hasText) usercode = user.apparentId
+		if (!name.hasText) name = user.fullName
+		if (!email.hasText) email = user.email
+	}
 
 	def applyInternal() = {
 		val mail = createMessage(mailSender) { mail => 
@@ -50,21 +56,9 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 		mailSender send mail
 	}
 
-	def prefill = {
-		if (user != null && user.loggedIn) {
-			if (!usercode.hasText) usercode = user.apparentId
-			if (!name.hasText) name = user.fullName
-			if (!email.hasText) email = user.email
-		}
-	}
-
 	def generateText = renderToString(template, Map(
 		"user" -> user,
 		"info" -> this))
-
-	def afterPropertiesSet {
-		template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
-	}
 
 	def validate(errors: Errors) {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "message", "NotEmpty")

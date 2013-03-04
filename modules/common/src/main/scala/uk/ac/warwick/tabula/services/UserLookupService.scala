@@ -56,34 +56,3 @@ abstract class UserLookupServiceAdapter(@BeanProperty var delegate: UserLookupSe
 	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
 
 }
-
-@BeanInfo
-class MaintenanceUserLookup extends UserLookupService {
-
-	def getUsersInDepartment(arg0: String): List[User] = Nil
-
-	def getUsersInDepartmentCode(arg0: String): List[User] = Nil
-
-	def getUserByToken(arg0: String): User = new AnonymousUser()
-
-	def getUsersByUserIds(arg0: List[String]): Map[String, User] = immutable.Map.empty[String, User]
-
-	def getUserByWarwickUniId(arg0: String): User = new AnonymousUser()
-
-	def getUserByWarwickUniId(arg0: String, arg1: Boolean): User = new AnonymousUser()
-
-	def findUsersWithFilter(arg0: Map[String, String]): List[User] = Nil
-
-	def findUsersWithFilter(arg0: Map[String, String], arg1: Boolean): List[User] = Nil
-
-	// FIXME return an implementation
-	def getGroupService(): GroupService = null
-	// FIXME return an implementation
-	def getOnCampusService(): OnCampusService = null
-
-	def getUserByIdAndPassNonLoggingIn(arg0: String, arg1: String): User = new AnonymousUser()
-
-	def getUserByUserId(arg0: String): User = new AnonymousUser()
-
-	def clearCaches() {}
-}

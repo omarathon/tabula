@@ -41,5 +41,18 @@ class JobInstanceTest extends TestBase with Mockito {
 		instance.user.realId should be ("cuscav")
 		instance.json("steve") should be ("yes")
 	}
+	
+	@Test def strings {
+		val instance = new JobInstanceImpl
+		instance.jsonMapper = jsonMapper
+		
+		instance.setString("steve", "yes")
+		instance.setStrings("bob", Seq("no", "maybe"))
+		
+		instance.getString("steve") should be ("yes")
+		instance.getStrings("bob") should be (Seq("no", "maybe"))
+		
+		instance.data should be ("""{"steve":"yes","bob":["no","maybe"]}""")
+	}
 
 }

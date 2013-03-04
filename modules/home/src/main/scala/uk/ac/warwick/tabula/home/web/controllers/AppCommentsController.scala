@@ -6,11 +6,11 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod._
-
 import uk.ac.warwick.tabula.home.commands.AppCommentCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import javax.validation.Valid
 
 /**
  * App to receive comments/feedback about the app.
@@ -20,22 +20,21 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 class AppCommentsController extends BaseController {
 
 	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
+	
+	validatesSelf[AppCommentCommand]
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(command: AppCommentCommand, errors: Errors): Mav = {
-		command.prefill
+	def form(@ModelAttribute command: AppCommentCommand, errors: Errors): Mav = {
 		formView
 	}
 
 	def formView = chooseLayout(Mav("app/comments/form"))
 
 	@RequestMapping(method = Array(POST))
-	def submit(command: AppCommentCommand, errors: Errors): Mav = {
-		command validate errors
+	def submit(@Valid @ModelAttribute command: AppCommentCommand, errors: Errors): Mav = {
 		if (errors hasErrors) {
 			formView
 		} else {
-			command.afterPropertiesSet()
 			command.apply()
 			chooseLayout(Mav("app/comments/success"))
 		}
