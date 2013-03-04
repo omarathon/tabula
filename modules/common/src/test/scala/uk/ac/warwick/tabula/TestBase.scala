@@ -172,26 +172,23 @@ trait TestHelpers extends TestFixtures {
 			u
 		}
 		
-		try {
-			currentUser = new CurrentUser(user, user)
-			withCurrentUser(currentUser)(fn)
-		} finally {
-			currentUser = null
-		}
+		withCurrentUser(new CurrentUser(user, user))(fn)
 	}
 	
-	def withCurrentUser(currentUser: CurrentUser)(fn: => Unit) {
+	def withCurrentUser(user: CurrentUser)(fn: => Unit) {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
-				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"), Map())
+				new RequestInfo(user, Uri.parse("http://www.example.com/page"), Map())
 			}
 		}
 
 		try {
+			currentUser = user
 			RequestInfo.open(requestInfo)
 			fn
 		} finally {
+			currentUser = user
 			RequestInfo.close
 		}
 	}

@@ -36,7 +36,7 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	
 	override def validate(errors:Errors) {
 		if (!user.exists){
-			errors.rejectValue("","user.mustBeLoggedIn")
+			errors.reject("user.mustBeLoggedIn")
 		}
 	}
 }

@@ -57,7 +57,8 @@ object ReflectionHelper {
 	
 	lazy val groupedPermissions = {
 		def groupFn(p: Permission) = {
-			val simpleName = p.getClass.getSimpleName.substring(Permissions.getClass.getSimpleName.length, p.getClass.getSimpleName.length -1).replace('$', '.')
+			val simpleName = p.getClass.getName.substring(Permissions.getClass.getName.length, p.getClass.getName.length -1).replace('$', '.')
+			 
 			val parentName = 
 				if (simpleName.indexOf('.') == -1) ""
 				else simpleName.substring(0, simpleName.lastIndexOf('.'))
