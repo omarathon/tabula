@@ -1,8 +1,8 @@
 <#escape x as x?html>
 <h1>User settings for ${user.firstName}</h1>
-<@f.form method="post" class="form-horizontal" action="${url('/admin/usersettings')}" commandName="userSettingsCommand">
+<@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
 	
-	
+
 	<h2 name="submission-alerts">Submission email alerts</h2>
 	
 	<@form.row>
@@ -14,10 +14,9 @@
 	</@form.row>
 	
 	
-	
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
-	or <a class="btn" href="${url('/')}">Cancel</a>
+	<a class="btn" href="${url('/')}">Cancel</a>
 </div>
 </@f.form>
 </#escape>

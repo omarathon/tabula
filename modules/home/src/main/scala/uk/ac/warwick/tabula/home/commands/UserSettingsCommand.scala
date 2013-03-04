@@ -1,19 +1,17 @@
-package uk.ac.warwick.tabula.coursework.commands
+package uk.ac.warwick.tabula.home.commands
 
 import scala.reflect.BeanProperty
-
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
-import uk.ac.warwick.tabula.data.model.UserSettings.Settings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserSettingsService
+import scala.reflect.BeanProperty
 
 class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Command[Unit] with SelfValidating  {
 
