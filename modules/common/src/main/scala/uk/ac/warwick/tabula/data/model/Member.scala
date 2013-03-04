@@ -170,6 +170,8 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		this.universityId = id
 	}
 	
+	def statusString = profileService.getStatusString(this)
+	
 	override def description = {
 		val userTypeString = Option(groupName).getOrElse("")
 		

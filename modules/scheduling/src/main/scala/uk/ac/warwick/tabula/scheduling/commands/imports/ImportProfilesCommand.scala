@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.DepartmentDao
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	
@@ -26,16 +27,30 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
+	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	
 	var features = Wire.auto[Features]
 
 	def applyInternal() {
 		if (features.profiles) {
 			benchmark("ImportMembers") {
+				importSitsStatuses
 				doMemberDetails
 			}
 		}
 	}
 
+	def importSitsStatuses {
+		logger.info("Importing SITS statuses")
+
+		transactional() {
+			sitsStatusesImporter.getSitsStatuses() map { _.apply }
+
+			session.flush
+			session.clear
+		}		
+	}
+	
 	/** Import basic info about all members in ADS, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 	def doMemberDetails {
 		benchmark("Import all member details") {

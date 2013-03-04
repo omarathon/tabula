@@ -18,6 +18,7 @@ import org.hibernate.criterion._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.SitsStatus
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -34,6 +35,7 @@ trait MemberDao {
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
+	def getStatusString(studentMember: StudentMember): String
 }
 
 @Repository
@@ -163,4 +165,18 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)
 			.seq
+			
+	def getStatusString(studentMember: StudentMember): String = {
+
+			val sprStatus = session.newCriteria[SitsStatus]
+					.add(is("code", studentMember.studyDetails.sprStatusCode))
+					.uniqueResult			
+			
+			val sceStatus = session.newCriteria[SitsStatus]
+					.add(is("code", studentMember.studyDetails.enrolmentStatusCode))
+					.uniqueResult		
+					
+			sprStatus.getOrElse("") + " (" + sceStatus.getOrElse("") + ")"
+							
+		}
 }

@@ -53,7 +53,12 @@
 					<th>Length of course</th>
 					<td>
 						<#if profile.studyDetails.courseYearLength??>
-							${profile.studyDetails.courseYearLength}
+							${profile.studyDetails.courseYearLength} years
+						</#if>
+						<#if profile.studyDetails.modeOfAttendance??>
+							<#if profile.studyDetails.modeOfAttendance = "part-time">
+								&nbsp; (full-time equivalent)
+							</#if>
 						</#if>
 					</td>
 				</tr>
@@ -70,7 +75,7 @@
 					<td>
 						<#if profile.studyDetails.endDate??>
 							${profile.studyDetails.endDate}
-						<#else>
+						<#elseif profile.studyDetails.expectedEndDate??>
 							${profile.studyDetails.expectedEndDate} (expected)
 						</#if>
 					</td>
@@ -78,18 +83,26 @@
 			</tbody>
 			<tbody>
 				<tr>
-					<th>Group</th>
+					<th>UG/PG</th>
 					<td>
-						<#if profile.groupName??>						
-							${profile.groupName}
+						<#if profile.studyDetails.ugPg??>						
+							${profile.studyDetails.ugPg}
+						</#if>
+					</td>
+				</tr>
+				<tr>
+					<th>Attendance</th>
+					<td>
+						<#if profile.studyDetails.modeOfAttendance??>						
+							${profile.studyDetails.modeOfAttendance}
 						</#if>
 					</td>
 				</tr>
 				<tr>
 					<th>Status</th>
 					<td>
-						<#if profile.studyDetails.studentStatus??>
-							${profile.studyDetails.studentStatus}
+						<#if profile.statusString??>
+							${profile.statusString}
 						</#if>
 					</td>
 				</tr>

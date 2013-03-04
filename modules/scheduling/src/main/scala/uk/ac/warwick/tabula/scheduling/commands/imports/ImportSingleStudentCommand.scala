@@ -48,22 +48,23 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	this.sitsCourseCode = rs.getString("sits_course_code")
 	this.routeCode = rs.getString("route_code")
 	this.studyDepartmentCode = rs.getString("study_department")
-	this.studentStatus = rs.getString("student_status")
 	this.yearOfStudy = rs.getInt("year_of_study")
 	
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
 	
 	this.intendedAward = rs.getString("award_code")
-	this.beginDate = sqlDateToJodaDate(rs.getDate("begin_date"))
-	this.endDate = sqlDateToJodaDate(rs.getDate("end_date"))
+	this.beginDate = toLocalDate(rs.getDate("begin_date"))
+	this.endDate = toLocalDate(rs.getDate("end_date"))
 	
-	this.expectedEndDate = sqlDateToJodaDate(rs.getDate("expected_end_date"))
+	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	
 	this.fundingSource = rs.getString("funding_source")
 	this.courseYearLength = rs.getString("course_year_length")
 	this.sprStatusCode = rs.getString("spr_status_code")
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
+	this.modeOfAttendance = rs.getString("mode_of_attendance")
+	this.ugPg = rs.getString("ug_pg")
 	
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
@@ -109,7 +110,6 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	private val basicStudyDetailsProperties = Set(
 		"sprCode", 
 		"sitsCourseCode", 
-		"studentStatus", 
 		"yearOfStudy",
 		"intendedAward",
 		"beginDate",
@@ -118,7 +118,12 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		"fundingSource",
 		"courseYearLength",
 		"sprStatusCode",
-		"enrolmentStatusCode"
+		"enrolmentStatusCode",
+		"modeOfAttendance",
+		"ugPg"
+		//,
+		//"levelCode"
+		
 	)
 		
 	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) =
@@ -147,11 +152,6 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			memberBean.setPropertyValue(property, toRoute(routeCode))
 			true
 		}
-	}
-	
-	private def sqlDateToJodaDate(dbDate: java.sql.Date): org.joda.time.LocalDate = {
-		if (dbDate == null) null
-		else new LocalDate(dbDate)
 	}
 	
 	private def toRoute(routeCode: String) = {

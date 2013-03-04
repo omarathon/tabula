@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
@@ -12,11 +13,9 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.RelationshipType
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.StudentMember
 
 /**
  * Service providing access to members and profiles.
@@ -38,6 +37,7 @@ trait ProfileService {
 	def getPersonalTutor(student: Member): Option[Member]
 	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member]
+	def getStatusString(student: StudentMember): String
 }
 
 @Service(value = "profileService")
@@ -87,6 +87,8 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
+	
+	def getStatusString(studentMember: StudentMember) = memberDao.getStatusString(studentMember)
 	
 	def getPersonalTutor(student: Member): Option[Member] = {
 		student match {

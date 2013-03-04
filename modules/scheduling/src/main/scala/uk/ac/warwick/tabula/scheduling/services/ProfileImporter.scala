@@ -102,12 +102,14 @@ object ProfileImporter {
 		
 			crs.crs_code as sits_course_code,
 			crs.crs_ylen as course_year_length, 
+			decode(crs.crs_schc,'UW PG', 'postgraduate', 'undergraduate') as ug_pg,
 			
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
 			spr.spr_dptc as study_department,
 			spr.awd_code as award_code, 
 			spr.sts_code as spr_status_code, 
+			--spr.spr_levc as level_code,
 		
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
@@ -116,8 +118,7 @@ object ProfileImporter {
 			sce.sce_sfcc as funding_source, 
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
-		
-			sts.sta_name as student_status
+			decode(sce.sce_moac, 'F', 'full-time','P','part-time', sce.sce_moac) as mode_of_attendance
 
 		from intuit.ins_stu stu
 

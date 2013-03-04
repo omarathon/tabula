@@ -16,10 +16,6 @@ class ViewProfileCommand(studentMember: StudentMember) extends ViewViewableComma
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
-
-	var memb_userName = Wire.property("${membership.rmi.auth.username}")
-	var memb_pwd = Wire.property("${membership.rmi.auth.password}")
-	var memb_service = Wire.property("${membership.rmi.auth.serviceName}")
 	
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)) orNull

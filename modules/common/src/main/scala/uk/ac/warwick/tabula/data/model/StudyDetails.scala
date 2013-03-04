@@ -44,8 +44,6 @@ trait StudyDetailsProperties {
 	@JoinColumn(name = "study_department_id")
 	@BeanProperty var studyDepartment: Department = _
 	
-	@BeanProperty var studentStatus: String = _
-	
 	@BeanProperty var yearOfStudy: JInteger = _
 
 	@BeanProperty var fundingSource: String = _
@@ -65,6 +63,10 @@ trait StudyDetailsProperties {
 
 	@BeanProperty var sprStatusCode: String = _
 	@BeanProperty var enrolmentStatusCode: String = _
+	
+	//@BeanProperty var levelCode: String = _
+	@BeanProperty var modeOfAttendance: String = _
+	@BeanProperty var ugPg: String = _
 	
 //	@BeanProperty var attendanceMode: String = _
 //	
