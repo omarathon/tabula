@@ -60,7 +60,7 @@
 </div>
 </#if>
 
-<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
+<#if addMarkerFeedbackCommand.moduleMismatchFiles?size gt 0>
 <div class="invalid-files alert alert-error">
 <div>There were some files with problem names, which look as if they may belong to another module. Please check these before confirming.</div>
 <ul class="file-list">
