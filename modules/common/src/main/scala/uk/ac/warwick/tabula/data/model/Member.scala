@@ -169,9 +169,16 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		this()
 		this.universityId = id
 	}
-	
-	def statusString = profileService.getStatusString(this)
-	
+
+	def statusString: String = {
+		var statusString = ""
+		if (studyDetails != null && studyDetails.sprStatus!= null)
+			statusString = studyDetails.sprStatus.fullName.toLowerCase()
+		if (studyDetails != null && studyDetails.enrolmentStatus != null)
+			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
+		statusString
+	}
+
 	override def description = {
 		val userTypeString = Option(groupName).getOrElse("")
 		

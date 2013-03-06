@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
-import javax.persistence._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.reflect.BeanProperty
+import org.hibernate.annotations.{AccessType, Type}
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
-import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.LocalDate
+import javax.persistence._
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
 
 @Entity
 @AccessType("field")
@@ -61,9 +61,17 @@ trait StudyDetailsProperties {
 	
 	@BeanProperty var courseYearLength: String = _	
 
-	@BeanProperty var sprStatusCode: String = _
-	@BeanProperty var enrolmentStatusCode: String = _
+	//@BeanProperty var sprStatusCode: String = _
+	@ManyToOne
+	@JoinColumn(name="sprStatusCode", referencedColumnName="code")
+	@BeanProperty var sprStatus: SitsStatus = _
 	
+	//@BeanProperty var enrolmentStatusCode: String = _
+	@ManyToOne
+	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
+	@BeanProperty var enrolmentStatus: SitsStatus = _
+	
+
 	//@BeanProperty var levelCode: String = _
 	@BeanProperty var modeOfAttendance: String = _
 	@BeanProperty var ugPg: String = _
