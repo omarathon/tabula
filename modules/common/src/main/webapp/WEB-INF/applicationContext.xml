@@ -281,9 +281,10 @@
 		<property name="sharedVariables">
 			<map>
 				<entry key="url" value-ref="urlMethodModel" />
-				<entry key="rootUrl" value="${toplevel.url}${module.context}" />				
+				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
+				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.tabula.web.views.TheYear" /></entry>
 				<entry key="features" value-ref="features" />
 				<entry key="appBuildDate">

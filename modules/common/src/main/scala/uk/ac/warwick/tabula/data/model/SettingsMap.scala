@@ -44,10 +44,15 @@ trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 		case Some(value: Boolean) => Some(value)
 		case _ => None
 	}
+	protected def getStringSeqSetting(key: String) = settings.get(key) match {
+		case Some(value: Seq[String]) => Some(value)
+		case _ => None
+	}
 	
 	protected def getStringSetting(key: String, default: => String): String = getStringSetting(key) getOrElse(default)
 	protected def getIntSetting(key: String, default: => Int): Int = getIntSetting(key) getOrElse(default)
 	protected def getBooleanSetting(key: String, default: => Boolean): Boolean = getBooleanSetting(key) getOrElse(default)
+	protected def getStringSeqSetting(key: String, default: => Seq[String]): Seq[String] = getStringSeqSetting(key) getOrElse(default)
 	
 	protected def settingsSeq = settings.toSeq
 	

@@ -15,6 +15,10 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	def getAlertsSubmission = alertsSubmission
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull
 	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
+	
+	def getHiddenIntros = hiddenIntros
+	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros).orNull
+	def hiddenIntros_= (hiddenIntro: String) = settings += (Settings.HiddenIntros -> hiddenIntro)
 		
 	def this(userId: String) = {
 		this()
@@ -24,7 +28,6 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	override def toString = "UserSettings [" + settings + "]"
 	
 	def permissionsParents = Seq()
-	
 }
 
 object UserSettings {
@@ -34,5 +37,6 @@ object UserSettings {
 	
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
+		val HiddenIntros = "hiddenIntros"
 	}
 }

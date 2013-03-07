@@ -2,27 +2,35 @@
 
 <h1>${department.name}</h1>
 
-<p><a href="permissions/">View department admins</a></p>
-
 <#if department.parent??>
-<p>Parent department: <a href='<@url page="/sysadmin/departments/${department.parent.code}/" />'>${department.parent.name}</a></p>
+	<h6>
+		<span class="muted">Parent department</span>
+		<a href='<@url page="/sysadmin/departments/${department.parent.code}/" />'>${department.parent.name}</a>
+	</h6>
 </#if>
+
+<h4>Actions</h4>
+
+<ul>
+	<li><a href="permissions/">View department admins</a></li>
+	<li><a href="/profiles/department/${department.code}/tutors/upload">Upload personal tutors</a></li>
+</ul>
 
 <#if department.children?size gt 0>
-<p>Sub-departments:</p>
-<ul>
-<#list department.children as child>
-	<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a></li>
-</#list>
-</ul>
+	<h4>Sub-departments</h4>
+	
+	<ul>
+		<#list department.children as child>
+			<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a></li>
+		</#list>
+	</ul>
 </#if>
 
-${department.modules?size} modules
+<h4>${department.modules?size} modules</h4>
 
 <ul>
-<#list department.modules as module>
-<li>${module.code} - ${module.name!"Unknown"}</li>
-</#list>
+	<#list department.modules as module>
+		<li>${module.code} - ${module.name!"Unknown"}</li>
+	</#list>
 </ul>
-
 </#escape>

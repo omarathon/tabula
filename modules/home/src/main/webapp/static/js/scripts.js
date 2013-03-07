@@ -163,7 +163,7 @@
 		$('input.date-time-picker').tabulaDateTimePicker();	
 		$('input.date-picker').tabulaDatePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
-
+		
 		// prepare spinnable elements
 		$('body').tabulaPrepareSpinners();
 				
@@ -205,6 +205,28 @@
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
 		$('.use-popover').popover().click(function(){ return false; });
 			
+		// add .use-introductory for custom popover.
+		// https://github.com/twitter/bootstrap/issues/2234
+		$('.use-introductory').popover({
+			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
+		});
+		
+		// auto-show introductory popover on load, based on class
+		$('.use-introductory.auto').popover('show');
+
+		// make introductory popovers closable
+		$('#container').on('click', '.introductory .close', function(e) {
+			$(e.target).parents('.introductory').prev().popover('hide');
+		});
+
+		// persist introductory popover auto-show state
+		$('#container').on('change', '.introductory .footer input', function(e) {
+			// If intro text is changed to reflect new features, change its id to ensure end users see the new version
+			var id = $(e.target).parents('.introductory').prev().prop('id');
+			// TODO use this hook to persist showOnLoad state with some ajax shizzle
+			// console.log('save for id: ' + id + ", with value: " + $(this).is(':checked'));
+		});
+
 		// apply details/summary polyfill
 		// https://github.com/mathiasbynens/jquery-details
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
