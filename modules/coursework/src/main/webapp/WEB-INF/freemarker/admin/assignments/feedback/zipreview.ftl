@@ -42,7 +42,51 @@
 	<div class="alert alert-error"><@f.errors path="" cssClass="error"/></div>
 <#else>
 
+<#if addFeedbackCommand.unrecognisedFiles?size gt 0>
+<div class="alert alert-block">
+<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
+<ul class="file-list">
+<#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
+<li>
+	<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].path" />
+	<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].file" />
+	${unrecognisedFile.path}
+</li>
+</#list>
+</ul>
+</div>
+</#if>
 
+<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
+<div class="invalid-files alert alert-error">
+<div>There were some files which, from their names, look as if they may belong to another module. Please check these before confirming.</div>
+<ul class="file-list">
+<#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
+<li>
+	<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].path" />
+	<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].file" />
+	${moduleMismatchFile.path}
+</li>
+</#list>
+</ul>
+</div>
+</#if>
+
+<#if addFeedbackCommand.invalidFiles?size gt 0>
+<div class="alert alert-block alert-error">
+<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
+<ul class="file-list">
+<#list addFeedbackCommand.invalidFiles as invalidFile>
+<li>
+	<@f.hidden path="invalidFiles[${invalidFile_index}].path" />
+	<@f.hidden path="invalidFiles[${invalidFile_index}].file" />
+	${invalidFile.path}
+</li>
+</#list>
+</ul>
+</div>
+</#if>
+	
 <@spring.bind path="items">
 <#assign itemList=status.actualValue />
 <#if itemList?size gt 0>

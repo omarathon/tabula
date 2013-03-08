@@ -1,29 +1,28 @@
-package uk.ac.warwick.tabula.coursework.web.controllers.admin
+package uk.ac.warwick.tabula.home.web.controllers
 
 import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.Features
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
-import scala.Array
-import uk.ac.warwick.tabula.coursework.commands.departments.DisplaySettingsCommand
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.UserSettingsCommand
+import uk.ac.warwick.tabula.home.commands.UserSettingsCommand
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.services.UserSettingsService
 import javax.validation.Valid
+import javax.validation.Valid
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.RequestMethod._
+import uk.ac.warwick.tabula.data.ModuleDao
+import org.springframework.beans.factory.annotation.Autowired
 
 @Controller
-@RequestMapping(Array("/admin/usersettings"))
-class UserSettingsController extends CourseworkController {
+@RequestMapping(Array("/settings"))
+class UserSettingsController extends HomeController {
 
 	validatesSelf[UserSettingsCommand]
 	
 	var userSettingsService = Wire.auto[UserSettingsService]
+	var moduleDao = Wire.auto[ModuleDao]
 	
 	private def getUserSettings(user: CurrentUser) = 
 		userSettingsService.getByUserId(user.apparentId) 
@@ -38,19 +37,19 @@ class UserSettingsController extends CourseworkController {
 	}
 
 	
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(method=Array(GET, HEAD))
 	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {		
-		 Mav("admin/user-settings")	 
+		 Mav("usersettings/form", "moduleRoles" -> moduleDao.findByParticipant(user.apparentId))	 		 
 	}
 
-	@RequestMapping(method=Array(RequestMethod.POST))
+	@RequestMapping(method=Array(POST))
 	def saveSettings(@Valid command:UserSettingsCommand, errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(user, command, errors)
 		}
 		else{
 			command.apply()
-			Redirect("/../coursework")
+			Redirect("/home")
 		}
 	}
 }
