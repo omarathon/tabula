@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.concurrency.promise.Promise
@@ -23,10 +22,9 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 	@BeanProperty var notifyNewTutor: Boolean = false
 
 	implicit var freemarker = Wire.auto[Configuration]
-	val mailSender = Wire[WarwickMailSender]("studentMailSender")
-	var profileService = Wire.auto[ProfileService]
-	val replyAddress = Wire.property("${mail.noreply.to}")
-	val fromAddress = Wire.property("${mail.exceptions.to}")
+	var mailSender = Wire[WarwickMailSender]("studentMailSender")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
 	
 	def applyInternal() {
 		val newTutor = newTutorPromise.fulfilPromise

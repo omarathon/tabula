@@ -9,6 +9,8 @@ import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.JavaImports._
+import org.joda.time.LocalTime
+import org.joda.time.LocalDate
 
 object DateBuilder {
 
@@ -25,6 +27,7 @@ object DateBuilder {
 		true -> _relativeWords,
 		false -> _relativeWords.mapValues(_.toLowerCase))
 
+	/* called with just a DateTime - use the default arguments */
 	def format(date: DateTime): String = 
 		format(date=date, 
 			includeSeconds=false, 
@@ -33,16 +36,30 @@ object DateBuilder {
 			capitalise=true, 
 			relative=true,
 			split=false,
-			shortMonth=false)
+			shortMonth=false,
+			includeTime=true)
 
-	def format(date: DateTime, includeSeconds: Boolean, includeAt: Boolean, includeTimezone: Boolean, capitalise: Boolean, relative: Boolean, split: Boolean, shortMonth: Boolean) = {
-		val pattern = new StringBuilder
-		if (includeAt) pattern.append(" 'at'")
-		pattern.append(" HH:mm")
-		if (includeSeconds) pattern.append(":ss")
-		if (includeTimezone) pattern.append(" (z)")
-
-		datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else " ") + (formatterMap(pattern.toString) print date).trim()
+	/* everything is specified, including whether minutes should be included */
+	def format(date: DateTime, 
+			includeSeconds: Boolean, 
+			includeAt: Boolean, 
+			includeTimezone: Boolean, 
+			capitalise: Boolean, 
+			relative: Boolean, 
+			split: Boolean, 
+			shortMonth: Boolean,
+			includeTime: Boolean) = {
+				if (includeTime) {
+					val pattern = new StringBuilder
+					if (includeAt) pattern.append(" 'at'")
+					pattern.append(" HH:mm")
+					if (includeSeconds) pattern.append(":ss")
+					if (includeTimezone) pattern.append(" (z)")
+					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else " ") + (formatterMap(pattern.toString) print date).trim()					
+				}
+				else {
+					datePart(date, capitalise, relative, shortMonth)
+				}
 	}
 
 	def ordinal(day: Int) = day % 10 match {
@@ -69,7 +86,6 @@ object DateBuilder {
 		else absoluteDate
 	}
 
-
 	class DateTimeFormatterCache extends mutable.HashMap[String, DateTimeFormatter] {
 		override def default(pattern: String) = DateTimeFormat.forPattern(pattern)
 	}
@@ -82,7 +98,17 @@ class DateBuilder extends TemplateMethodModelEx {
 	override def exec(list: java.util.List[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(date: DateTime, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean) =>
+			case Seq(date: LocalDate, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
+				format(date=date.toDateTimeAtStartOfDay(), 
+					includeSeconds=secs, 
+					includeAt=at, 
+					includeTimezone=tz, 
+					capitalise=caps, 
+					relative=relative,
+					split=split,
+					shortMonth=shortMonth,
+					includeTime=includeTime)
+			case Seq(date: DateTime, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
 				format(date=date, 
 					includeSeconds=secs, 
 					includeAt=at, 
@@ -90,7 +116,8 @@ class DateBuilder extends TemplateMethodModelEx {
 					capitalise=caps, 
 					relative=relative,
 					split=split,
-					shortMonth=shortMonth)
+					shortMonth=shortMonth,
+					includeTime=includeTime)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
