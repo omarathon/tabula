@@ -1,5 +1,5 @@
 <section id="course-details">
-	<#if profile.studyDetails??>
+	<#if can.do("Profiles.Read.StudyDetails", profile) &&  profile.studyDetails??>
 		<h4>Course details</h4>
 		<table class="course-info">
 			<tbody>

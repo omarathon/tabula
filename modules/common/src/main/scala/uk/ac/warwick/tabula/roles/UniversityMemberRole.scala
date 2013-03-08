@@ -8,8 +8,17 @@ case class UniversityMemberRole(member: model.Member) extends BuiltInRole(member
 
 case object UniversityMemberRoleDefinition extends BuiltInRoleDefinition {
 	GrantsScopedPermission( 
-		Profiles.Read,
-		Profiles.PersonalTutor.Read
+		Profiles.Read.Core,
+		Profiles.Read.UniversityId,
+		Profiles.Read.NextOfKin,
+		Profiles.Read.HomeAddress,
+		Profiles.Read.TermTimeAddress,
+		Profiles.Read.TelephoneNumber,
+		Profiles.Read.MobileNumber,
+		Profiles.Read.Usercode,
+		Profiles.PersonalTutor.Read,
+		Profiles.Read.PersonalTutees,
+		Profiles.Read.StudyDetails
 	)
 	
 	GrantsScopelessPermission(

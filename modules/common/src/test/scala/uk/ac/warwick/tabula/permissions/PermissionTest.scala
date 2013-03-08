@@ -16,6 +16,11 @@ class PermissionTest extends TestBase {
 		Permissions.of("Spank")
 	}
 	
+	@Test(expected=classOf[IllegalArgumentException]) def obsoleteProfilesRead {
+		// this perm made obsolete (as leaf node) in TAB-564
+		Permissions.of("Profiles.Read")
+	}
+	
 	@Test def name {
 		Permissions.Assignment.Archive.getName should be ("Assignment.Archive")
 		Permissions.GodMode.getName should be ("GodMode")
