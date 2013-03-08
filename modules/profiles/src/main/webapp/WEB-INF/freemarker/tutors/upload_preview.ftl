@@ -62,7 +62,9 @@
 									</#if>
 								</td>
 								<td>
-									${item.agentUniversityId}
+									<#if item.agentUniversityId?has_content>
+										${item.agentUniversityId}
+									</#if>
 								</td>
 								<td>
 									<#if item.agentName?has_content>

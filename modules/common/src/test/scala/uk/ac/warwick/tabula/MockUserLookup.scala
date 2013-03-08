@@ -1,23 +1,26 @@
 package uk.ac.warwick.tabula
+import scala.collection.JavaConversions._
 
 import org.apache.commons.lang3.StringUtils._
-import uk.ac.warwick.userlookup.UserLookupAdapter
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.userlookup.GroupService
+
+import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.Group
+import uk.ac.warwick.userlookup.GroupService
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.UserLookupAdapter
 import uk.ac.warwick.userlookup.WebServiceTimeoutConfig
 import uk.ac.warwick.userlookup.webgroups.GroupInfo
 import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
-import scala.collection.JavaConversions._
-import uk.ac.warwick.userlookup.AnonymousUser
 
-class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(null) {
-	def this() {
+class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(null) with UserLookupService with JavaImports {
+	def this() = {
 		this(false)
 	}
   
-	val users: Map[String, User] = Map()
-	val filterUserResult: List[User] = List()
+	var users: Map[String, User] = Map()
+	var filterUserResult: JList[User] = ArrayList()
 	
 	var findUsersEnabled: Boolean = false
 	
@@ -25,8 +28,8 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 	
 	override def getGroupService() = groupService
 
-    def addFindUsersWithFilterResult(userId: User) {
-        filterUserResult.add(userId);
+    def addFindUsersWithFilterResult(user: User) {
+        filterUserResult += user
     }
 
     override def getUserByUserId(theUserId: String) = {
@@ -56,20 +59,20 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
     
     override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean) = getUserByWarwickUniId(warwickId)
 
-    def findUsersWithFilter(filterValues: Map[String, String]) = {
+    override def findUsersWithFilter(filterValues: JMap[String, String]) = {
         if (findUsersEnabled) {
-            filterUserResult
+            val list: JList[User] = ArrayList()
+            list.addAll(filterUserResult)
+            list
         } else {
             throw new UnsupportedOperationException()
         }
     }
 
-    def getUsersByUserIds(userIds: List[String]) = {
-    	val users: Map[String, User] = Map()
-    	for (id <- userIds) {
-    		users.put(id, getUserByUserId(id))
-    	}
-    	users
+    override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
+    	val map: Map[String, User] = userIds.toList map { id => (id -> getUserByUserId(id) )} toMap
+    	
+    	map
     }
 
     /**
@@ -86,7 +89,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
             user.setShortDepartment("Dept of " + capitalize(id));
             user.setDepartmentCode("D" + capitalize(id.substring(0, 1)));
             user.setEmail(id + "@example.com");
-            users.put(id, user);
+            users += (id -> user)
         }
     }
 
@@ -95,6 +98,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 class MockGroupService extends GroupService {
 	val DoItYourselfKevin = "Not implemented - add to mock object if you need it"
 	var groupMap: Map[String, Group] = Map()
+	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue(false)
 	
 	override def getGroupByName(groupName: String) = groupMap.get(groupName).getOrElse {
 		throw new GroupNotFoundException(groupName)
@@ -128,7 +132,7 @@ class MockGroupService extends GroupService {
         }
     }
 
-    override def isUserInGroup(user: String, group: String) = false
+    override def isUserInGroup(user: String, group: String) = usersInGroup((user, group))
 
     override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
 

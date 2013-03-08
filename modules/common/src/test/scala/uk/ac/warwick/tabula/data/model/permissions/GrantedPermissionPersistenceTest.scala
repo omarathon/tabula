@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
 
-class PermissionsTargetUserTypeTest extends PersistenceTestBase {
+class GrantedPermissionPersistenceTest extends PersistenceTestBase {
 	
 	new Reflections("uk.ac.warwick.tabula").save(getClass.getResource("/").getFile() + "META-INF/reflections/all-reflections.xml")
 	
@@ -26,7 +26,7 @@ class PermissionsTargetUserTypeTest extends PersistenceTestBase {
 			
 			session.load(classOf[GrantedPermission[_]], permission.id) match {
 				case permission: GrantedPermission[Department] =>
-					permission.scope should be (department)
+					permission.scope.code should be ("IN")
 				case _ => fail("What is this!")
 			}
 		}

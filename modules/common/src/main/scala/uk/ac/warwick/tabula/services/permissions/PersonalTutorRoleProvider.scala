@@ -18,7 +18,7 @@ class PersonalTutorRoleProvider extends RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
 		scope match {
 			case member: model.Member => {
-				val tuteeIds = profileService.listStudentRelationshipsWithUserId(model.RelationshipType.PersonalTutor, user.universityId) map (rel => rel.studentId)
+				val tuteeIds = profileService.listStudentRelationshipsWithUniversityId(model.RelationshipType.PersonalTutor, user.universityId) map (rel => rel.studentId)
 				if (tuteeIds.contains(member.universityId))
 					Seq(PersonalTutor(member))
 				else

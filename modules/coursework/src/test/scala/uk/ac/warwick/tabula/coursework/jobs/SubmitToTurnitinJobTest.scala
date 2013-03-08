@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.coursework.jobs
 
 import org.junit.Test
+
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.services.jobs.JobInstanceImpl
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.jobs._
+import uk.ac.warwick.tabula.services._
 
 class SubmitToTurnitinJobTest extends TestBase with Mockito with JobTestHelp {
 	

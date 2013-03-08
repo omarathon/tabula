@@ -25,7 +25,7 @@ import org.hibernate.annotations.ForeignKey
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -159,7 +159,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	/** Map between markers and the students assigned to them */
 	@OneToMany @JoinTable(name="marker_usergroup")
 	@MapKeyColumn(name="marker_uni_id")
-	var markerMap: JMap[String, UserGroup] = Map[String, UserGroup]()
+	var markerMap: JMap[String, UserGroup] = JMap[String, UserGroup]()
 
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
@@ -467,22 +467,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
         
         idsWithSubmissionOrFeedback
     }   
-		
-	/**
-	 * Defines equality via the entity's ID. 
-	 */
-	override def equals(other: Any) = other match {
-		case o:Assignment => 
-			if (o.id != null && this.id != null) o.id == this.id
-			else super.equals(other)
-		case _ => false
-	}
-	
-	override def hashCode() =
-		if (id != null) 
-			id.hashCode()
-		else 
-			super.hashCode()
 			
 }
 

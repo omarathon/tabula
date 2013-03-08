@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import javax.persistence.CascadeType
 
 
 @Entity @AccessType("field")
@@ -49,11 +50,11 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
 	@BeanProperty var firstMarkerFeedback: MarkerFeedback = _
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "second_marker_feedback")
 	@BeanProperty var secondMarkerFeedback: MarkerFeedback = _
 

@@ -6,6 +6,7 @@
 
 <@spring.bind path=commandName>
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
+<#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
 <@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch')}" commandName=commandName cssClass="submission-form double-submit-protection">
@@ -37,6 +38,10 @@
 </p>
 </@spring.bind>
 
+<#if hasGlobalErrors>
+	<div class="alert alert-error"><@f.errors path="" cssClass="error"/></div>
+<#else>
+
 <#if addFeedbackCommand.unrecognisedFiles?size gt 0>
 <div class="alert alert-block">
 <div>I didn't understand some of the files uploaded, and these will be ignored:</div>
@@ -67,7 +72,6 @@
 </div>
 </#if>
 
-
 <#if addFeedbackCommand.invalidFiles?size gt 0>
 <div class="alert alert-block alert-error">
 <div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
@@ -82,8 +86,6 @@
 </ul>
 </div>
 </#if>
-
-
 	
 <@spring.bind path="items">
 <#assign itemList=status.actualValue />
@@ -133,6 +135,7 @@
 </#if>
 </@spring.bind>
 </table>
+</#if>
 
 <div class="submit-buttons">
 <#if hasErrors>

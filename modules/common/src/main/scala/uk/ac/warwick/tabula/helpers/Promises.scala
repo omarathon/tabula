@@ -14,17 +14,31 @@ trait Promises {
 	
 }
 
+object Promises extends Promises
+
 private class FunctionalPromise[A](fn: => A) extends Promise[A] {
 	
-	def fulfilPromise = fn
+	private var result: A = _
+	
+	def fulfilPromise = {
+		if (result == null) result = fn
+		
+		result
+	}
 	
 }
 
 private class OptionalPromise[A](fn: => Option[A]) extends Promise[A] {
 	
-	def fulfilPromise = fn match {
-		case Some(value) => value
-		case _ => throw new UnfulfilledPromiseException("Fulfilled promise on Option(None)")
+	private var result: A = _
+	
+	def fulfilPromise = {
+		if (result == null) result = fn match {
+			case Some(value) => value
+			case _ => throw new UnfulfilledPromiseException("Fulfilled promise on Option(None)")
+		}
+		
+		result
 	}
 	
 }

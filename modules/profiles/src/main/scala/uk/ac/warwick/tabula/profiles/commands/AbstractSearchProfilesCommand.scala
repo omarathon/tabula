@@ -41,7 +41,7 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 		case _ => Seq()
 	}
 	
-	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read, member)
+	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read.Core, member)
 	
 	def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()

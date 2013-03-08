@@ -9,7 +9,7 @@
 	<#if studentCount gt 0>
 		<#if can.do("Profiles.PersonalTutor.Upload", department)>
 			<p>
-				<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a>
+<!--				<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a> -->
 			</p>
 		</#if>
 		

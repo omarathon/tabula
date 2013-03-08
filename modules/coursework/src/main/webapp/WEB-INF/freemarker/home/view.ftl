@@ -8,14 +8,6 @@
 
 <#if user.loggedIn && user.firstName??>
 	<h1 class="with-settings">Hello, ${user.firstName}</h1>
-	
-	<div class="btn-group user-settings">
-		<a class="btn btn-mini" href="admin/usersettings">
-			<i class="icon-cog"></i>
-			Your settings
-		</a>
-	</div>
-	
 <#else>
 	<h1 class="with-settings">Hello</h1>
 </#if>	

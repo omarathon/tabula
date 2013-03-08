@@ -5,7 +5,8 @@ import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.{SeenSecondMarking, MarkingMethod, Department, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
@@ -37,7 +38,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	def applyInternal() {
 		// do not update previously released feedback
 		val feedbackForRelease = markerFeedbacks -- releasedFeedback
-		feedbackForRelease.foreach(stateService.updateState(_, MarkingCompleted))
+		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
 
 		def finaliseFeedback(){
 			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
@@ -48,7 +49,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 			feedbackForRelease.foreach{ mf =>
 				val parentFeedback = mf.feedback
 				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
-				stateService.updateState(secondMarkerFeedback, ReleasedForMarking)
+				stateService.updateState(secondMarkerFeedback, MarkingState.ReleasedForMarking)
 				session.saveOrUpdate(parentFeedback)
 			}
 		}
@@ -74,7 +75,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	def preSubmitValidation() {
 		noMarks = markerFeedbacks.filter(!_.hasMark)
 		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
-		releasedFeedback = markerFeedbacks.filter(_.state == MarkingCompleted)
+		releasedFeedback = markerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {

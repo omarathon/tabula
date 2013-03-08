@@ -1,14 +1,16 @@
 package uk.ac.warwick.tabula.data.model
-
-import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
-import javax.persistence._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.reflect.BeanProperty
+
+import scala.reflect.BeanProperty
+import org.hibernate.annotations.{AccessType, Type}
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
+import org.joda.time.LocalDate
+import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
 
 @Entity
 @AccessType("field")
@@ -27,7 +29,6 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 	def toStringProps = Seq("student" -> student)
 	
 	def permissionsParents = Seq(Option(student)).flatten
-
 }
 
 trait StudyDetailsProperties {
@@ -43,15 +44,45 @@ trait StudyDetailsProperties {
 	@JoinColumn(name = "study_department_id")
 	@BeanProperty var studyDepartment: Department = _
 	
-	@BeanProperty var studentStatus: String = _
-	
 	@BeanProperty var yearOfStudy: JInteger = _
+
+	@BeanProperty var fundingSource: String = _
+	
+	@BeanProperty var intendedAward: String = _
+
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var beginDate: LocalDate = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var endDate: LocalDate = _
+	
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@BeanProperty var expectedEndDate: LocalDate = _
+	
+	@BeanProperty var courseYearLength: String = _	
+
+	//@BeanProperty var sprStatusCode: String = _
+	@ManyToOne
+	@JoinColumn(name="sprStatusCode", referencedColumnName="code")
+	@BeanProperty var sprStatus: SitsStatus = _
+	
+	//@BeanProperty var enrolmentStatusCode: String = _
+	@ManyToOne
+	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
+	@BeanProperty var enrolmentStatus: SitsStatus = _
+	
+
+	//@BeanProperty var levelCode: String = _
+	
+	@ManyToOne
+	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")	
+	@BeanProperty var modeOfAttendance: ModeOfAttendance = _
+	
+	@BeanProperty var ugPg: String = _
+	
 //	@BeanProperty var attendanceMode: String = _
 //	
-//	@BeanProperty var fundingSource: String = _
-//	@BeanProperty var programmeOfStudy: String = _
-//	
-//	@BeanProperty var intendedAward: String = _
+//	@BeanProperty var programmeOfStudy: String = _	
 //	
 //	@Basic
 //	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
@@ -71,17 +102,9 @@ trait StudyDetailsProperties {
 //	
 //	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 //	@BeanProperty var courseEndDate: LocalDate = _
-//	
+	
 //	@BeanProperty var transferReason: String = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var beginDate: LocalDate = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var endDate: LocalDate = _
-//	
-//	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var expectedEndDate: LocalDate = _
+
 //	
 //	@BeanProperty var feeStatus: String = _
 //	@BeanProperty var domicile: String = _

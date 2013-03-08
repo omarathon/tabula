@@ -108,7 +108,7 @@
 		<#if hasOriginalityReport><td></td></#if>
 		
 		<td></td><td></td>
-		<#if assignment.collectMarks><td></td></#if>
+		<#if assignment.collectMarks><td></td><td></td></#if>
 		<td></td>
 	</tr>
 </#macro>
@@ -221,8 +221,9 @@
 			<col class="files" />
 			<col class="uploaded" />
 			<#if assignment.collectMarks>
-				<#assign feedbackColspan=feedbackColspan+1 />
+				<#assign feedbackColspan=feedbackColspan+2 />
 				<col class="mark" />
+				<col class="grade" />
 			</#if>
 			<col class="status" />
 		</colgroup>	
@@ -265,6 +266,7 @@
 				<th>Uploaded</th>
 				<#if assignment.collectMarks>
 					<th>Mark</th>
+					<th>Grade</th>
 				</#if>
 				<th class="sortable">Status</th>
 			</tr>
@@ -316,12 +318,17 @@
 					<td class="files">
 						<#assign attachments=submission.allAttachments />
 						<#if attachments?size gt 0>
-						<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>">
-							${attachments?size}
-							<#if attachments?size == 1> file
-							<#else> files
+							<#if attachments?size == 1> 
+								<#assign filename = "${attachments[0].name}">
+							<#else>
+								<#assign filename = "submission-${submission.universityId}.zip">
 							</#if>
-						</a>
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
+								${attachments?size}
+								<#if attachments?size == 1> file
+								<#else> files
+								</#if>
+							</a>
 						</#if>
 					</td>
 					<td class="submitted">
@@ -356,13 +363,17 @@
 					</#if>
 					<#if assignment.markingWorkflow??>
 						<td>
-							<#if submission.assignment??>${submission.firstMarker!""}</#if>
+							<#if submission.assignment?? && submission.firstMarker?has_content>
+								${submission.firstMarker.fullName}
+							</#if>
 						</td>
 						<td>
-							<#if submission.assignment??>${submission.secondMarker!""}</#if>
+							<#if submission.assignment?? && submission.secondMarker?has_content>
+								${submission.secondMarker.fullName}
+							</#if>
 						</td>
 					</#if>
-					
+
 					<#if hasOriginalityReport>
 						<td class="originality-report">
 							<#list submission.allAttachments as attachment>
@@ -378,7 +389,12 @@
 						<#if student.enhancedFeedback??>
 							<#assign attachments=student.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.zip'/>">
+							<#if attachments?size == 1> 
+								<#assign attachmentExtension = student.enhancedFeedback.feedback.attachments[0].fileExt>
+							<#else>
+								<#assign attachmentExtension = "zip">
+							</#if>
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
 								${attachments?size}
 								<#if attachments?size == 1> file
 								<#else> files
@@ -392,6 +408,9 @@
 					 <#if assignment.collectMarks>
 						<td class="mark">
 							${(student.enhancedFeedback.feedback.actualMark)!''}
+						</td>
+						<td class="grade">
+							${(student.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
 					<td class="feedbackReleased">

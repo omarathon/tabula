@@ -24465,4 +24465,23 @@ jQuery(function($) {
 	if ($(document.body).hasClass('is-smallscreen')) {
 		addAnchorLinks(null, true);
 	}
+
 });
+
+	// support sortable table
+	jQuery.fn.sortableTable = function(settings){
+		var $ = jQuery;
+		var $this = $(this);
+		if ($this.tablesorter) {
+			var headerSettings = {};
+			$('th', $this).each(function(index){
+				var sortable = $(this).hasClass("sortable");
+				if(!sortable){
+					headerSettings[index] = {sorter: false};
+				}
+			});
+			$this.tablesorter({headers: headerSettings});
+			return this;
+		}
+	};	
+

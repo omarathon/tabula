@@ -1,37 +1,35 @@
 package uk.ac.warwick.tabula
 
 import java.io.File
-import java.util.Properties
-import org.hamcrest.Matchers.allOf
+import java.io.StringReader
+
+import scala.collection.JavaConversions._
+
+import org.apache.commons.configuration.PropertiesConfiguration
 import org.hamcrest.Matcher
+import org.hamcrest.Matchers.allOf
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
 import org.junit.After
+import org.junit.Before
 import org.scalatest.junit.JUnitSuite
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.specs.mock.JMocker._
-import org.specs.mock.JMocker.{ expect => expecting }
 import org.specs.mock.JMocker.`with`
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.util.FileCopyUtils
-import collection.JavaConversions._
+
 import freemarker.cache.ClassTemplateLoader
-import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
+import freemarker.cache.MultiTemplateLoader
+import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
+import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
-import freemarker.cache.MultiTemplateLoader
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.junit.Before
-import java.io.StringWriter
-import java.io.StringReader
-import org.aspectj.lang.{NoAspectBoundException, Aspects}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.util.web.Uri
 
 /** Base class for tests which boringly uses the JUnit support of
@@ -77,9 +75,18 @@ trait TestFixtures {
 
 	/** Returns midnight on the first day of this year and month. */
 	def dateTime(year: Int, month: Int) = new DateTime(year, month, 1, 0, 0, 0)
+	
+	def newSSOConfiguration = {
+		val config = new PropertiesConfiguration()
+    config.addProperty("origin.login.location", "https://xebsignon.warwick.ac.uk/origin/hs")
+    config.addProperty("shire.location", "https://xabula.warwick.ac.uk/tabula/shire")
+    config.addProperty("shire.providerid", "tabula:service")
+    
+    new SSOConfiguration(config)
+	}
 }
 
-trait TestHelpers {
+trait TestHelpers extends TestFixtures {
 	lazy val json = new JsonObjectMapperFactory().createInstance
 
 	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[java.util.Map[String, Any]]).toMap
@@ -165,27 +172,33 @@ trait TestHelpers {
 			u
 		}
 		
-		try {
-			currentUser = new CurrentUser(user, user)
-			withCurrentUser(currentUser)(fn)
-		} finally {
-			currentUser = null
-		}
+		withCurrentUser(new CurrentUser(user, user))(fn)
 	}
 	
-	def withCurrentUser(currentUser: CurrentUser)(fn: => Unit) {
+	def withCurrentUser(user: CurrentUser)(fn: => Unit) {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
 			case None => {
-				new RequestInfo(currentUser, Uri.parse("http://www.example.com/page"), Map())
+				new RequestInfo(user, Uri.parse("http://www.example.com/page"), Map())
 			}
 		}
 
 		try {
+			currentUser = user
 			RequestInfo.open(requestInfo)
 			fn
 		} finally {
+			currentUser = user
 			RequestInfo.close
+		}
+	}
+	
+	def withSSOConfig(ssoConfig: SSOConfiguration = newSSOConfiguration)(fn: => Unit) {
+		try {
+			SSOConfiguration.setConfig(ssoConfig)
+			fn
+		} finally {
+			SSOConfiguration.setConfig(null)
 		}
 	}
 

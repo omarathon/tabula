@@ -10,12 +10,15 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
@@ -86,7 +89,7 @@ class DownloadAllSubmissionsController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}.zip"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -101,6 +104,28 @@ class DownloadSingleSubmissionController extends CourseworkController {
     }
 	
 }
+
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
+class DownloadSingleSubmissionFileController extends CourseworkController {
+
+	var fileServer = Wire.auto[FileServer]
+	var assignmentService = Wire.auto[AssignmentService]
+	
+	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
+		new DownloadAttachmentCommand(module, assignment, mandatory(assignmentService.getSubmission(submissionId)))
+
+	@RequestMapping
+    def downloadSingle(cmd: DownloadAttachmentCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+		cmd.callback = { (renderable) => fileServer.serve(renderable) }
+		cmd.apply().orElse { throw new ItemNotFoundException() }
+    }
+	
+}
+
+
+
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}"))

@@ -5,31 +5,42 @@ import scala.collection.JavaConversions._
 
 object Fixtures {
 	
-	def submission() = {
+	def submission(universityId: String = "0123456", userId: String = "cuspxp") = {
 		val s = new Submission
-		s.universityId = "0123456"
-		s.userId = "cuspxp"
+		s.universityId = universityId
+		s.userId = userId
 		s
 	}
 	
-	def feedback() = {
+	def feedback(universityId: String = "0123456") = {
 		val f = new Feedback
-		f.universityId = "0123456"
+		f.universityId = universityId
 		f
 	}
 	
-	def department(code:String, name:String) = {
+	def markerFeedback(parent: Feedback) = {
+		new MarkerFeedback(parent)
+	}
+	
+	def department(code:String, name:String = null) = {
 		val d = new Department
 		d.code = code
-		d.name = name
+		d.name = Option(name).getOrElse("Department " + code)
 		d
 	}
 	
-	def module(code:String, name: String=null) = {
+	def module(code:String, name: String = null) = {
 		val m = new Module
 		m.code = code.toLowerCase
 		m.name = Option(name).getOrElse("Module " + code)
 		m
+	}
+	
+	def route(code:String, name: String = null) = {
+		val r = new Route
+		r.code = code.toLowerCase
+		r.name = Option(name).getOrElse("Route " + code)
+		r
 	}
 	
 	def assignment(name:String) = {
@@ -59,6 +70,48 @@ object Fixtures {
 			"0123458"
 		))
 		group
+	}
+	
+	def markingWorkflow(name: String) = {
+		val workflow = new MarkingWorkflow
+		workflow.name = name
+		workflow
+	}
+	
+	def feedbackTemplate(name: String) = {
+		val template = new FeedbackTemplate
+		template.name = name
+		template
+	}
+	
+	def userSettings(userId: String = "cuspxp") = {
+		val settings = new UserSettings
+		settings.userId = userId
+		settings
+	}
+	
+	def member(userType: MemberUserType, universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) = {
+		val member = userType match {
+			case MemberUserType.Student => new StudentMember
+			case MemberUserType.Emeritus => new EmeritusMember
+			case MemberUserType.Staff => new StaffMember
+			case MemberUserType.Other => new OtherMember
+		}
+		member.universityId = universityId
+		member.userId = userId
+		member.userType = userType
+		member.homeDepartment = department
+		member.inUseFlag = "Active"
+		member
+	}
+	
+	def staff(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) = 
+		member(MemberUserType.Staff, universityId, userId, department).asInstanceOf[StaffMember]
+	
+	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, studyDepartment: Department = null)	= { 
+		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
+		m.studyDetails.studyDepartment = studyDepartment
+		m
 	}
 		
 }

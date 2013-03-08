@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, Feedback, Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._

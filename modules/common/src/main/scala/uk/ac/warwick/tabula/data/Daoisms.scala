@@ -48,7 +48,7 @@ trait Daoisms {
 
 	class NiceQueryCreator(session: Session) {
 		def newCriteria[A](implicit m: Manifest[A]) = new ScalaCriteria[A](session.createCriteria(m.erasure))
-		def newQuery[A](sql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(sql))
+		def newQuery[A](hql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(hql))
 	}
 
 	/**
@@ -56,19 +56,6 @@ trait Daoisms {
 	 * better with Scala's generics support.
 	 */
 	implicit def niceCriteriaCreator(session: Session) = new NiceQueryCreator(session)
-
-	/**
-	 * Returns Some(obj) if it matches the expected type, otherwise None.
-	 * Useful for converting the value from .uniqueResult into a typed Option.
-	 *
-	 * An implicit Manifest object is supplied by the Scala compiler, which
-	 * holds detailed information about the type D which is otherwise missing
-	 * from the JVM bytecode.
-	 */
-	def option[A](obj: Any)(implicit m: Manifest[A]): Option[A] = obj match {
-		case a: Any if m.erasure.isInstance(a) => Some(a.asInstanceOf[A])
-		case _ => None
-	}
 
 	/**
 	 * type-safe session.get. returns an Option object, which will match None if

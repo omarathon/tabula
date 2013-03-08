@@ -6,6 +6,7 @@
 
 <@spring.bind path=commandName>
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
+<#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
 <@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
@@ -40,6 +41,10 @@
 </p>
 </@spring.bind>
 
+<#if hasGlobalErrors>
+	<div class="alert alert-error"><@f.errors path="" cssClass="error"/></div>
+<#else>
+
 <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
 <div class="unrecognised-files alert alert-block">
 <div>I didn't understand some of the files uploaded, and these will be ignored:</div>
@@ -55,7 +60,7 @@
 </div>
 </#if>
 
-<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
+<#if addMarkerFeedbackCommand.moduleMismatchFiles?size gt 0>
 <div class="invalid-files alert alert-error">
 <div>There were some files with problem names, which look as if they may belong to another module. Please check these before confirming.</div>
 <ul class="file-list">
@@ -160,6 +165,7 @@
 </#if>
 </@spring.bind>
 </table>
+</#if>
 
 <div class="submit-buttons">
 <#if hasErrors>

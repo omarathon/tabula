@@ -25,7 +25,7 @@ class ActivityService {
 	
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
-	var auditIndexService = Wire.auto[AuditEventIndexService]
+	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
 
 	/** wrapper class to turn ScoreDoc plus searcher id token into a
 	 *  tuple of simple values ready to pass as parameters

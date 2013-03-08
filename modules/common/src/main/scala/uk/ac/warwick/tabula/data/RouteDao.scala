@@ -19,8 +19,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def saveOrUpdate(route: Route) = session.saveOrUpdate(route)
 
-	def getByCode(code: String) = option[Route] {
-		session.createQuery("from Route r where code = :code").setString("code", code).uniqueResult
-	}
+	def getByCode(code: String) = 
+		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
 
 }

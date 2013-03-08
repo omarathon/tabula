@@ -13,6 +13,9 @@ import uk.ac.warwick.tabula.Mockito
 import javax.mail.Session
 import java.util.Properties
 import scala.collection.JavaConverters._
+import org.hamcrest.Matcher
+import org.hamcrest.BaseMatcher
+import org.hamcrest.Description
 
 class EmailingExceptionHandlerTest extends TestBase with Mockito {
 
@@ -44,8 +47,11 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 			handler.recipient = "exceptions@warwick.ac.uk"
 			handler.afterPropertiesSet
 			
-			val message = handler.makeEmail(context)
-			val text = message.getContent match {
+			handler.exception(context)
+			
+			there was one(mailSender).send(mimeMessage)
+			
+			val text = mimeMessage.getContent match {
 				case string: String => string
 				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 			}

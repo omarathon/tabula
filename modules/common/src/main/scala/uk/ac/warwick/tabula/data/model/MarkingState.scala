@@ -10,17 +10,18 @@ sealed abstract class MarkingState(val name: String, val transitionStates: Set[M
 	override def toString = name
 }
 
-// TODO - remove state from submission and delete the received state as it is now redundant
-case object Received extends MarkingState("Received", Set ())
-
-// initial state - ready to be distributed to markers
-case object ReleasedForMarking extends MarkingState("ReleasedForMarking", Set(DownloadedByMarker, MarkingCompleted))
-// has been downloaded by the marker and is being marked
-case object DownloadedByMarker extends MarkingState("DownloadedByMarker", Set(MarkingCompleted))
-// submission has been marked and feedback has been uploaded
-case object MarkingCompleted extends MarkingState("MarkingCompleted", Set())
-
 object MarkingState {
+	// TODO - remove state from submission and delete the received state as it is now redundant
+	case object Received extends MarkingState("Received", Set ())
+	
+	// initial state - ready to be distributed to markers
+	case object ReleasedForMarking extends MarkingState("ReleasedForMarking", Set(DownloadedByMarker, MarkingCompleted))
+	// has been downloaded by the marker and is being marked
+	case object DownloadedByMarker extends MarkingState("DownloadedByMarker", Set(MarkingCompleted))
+	// submission has been marked and feedback has been uploaded
+	case object MarkingCompleted extends MarkingState("MarkingCompleted", Set())
+	
+	
 	val values: Set[MarkingState] = Set(Received, ReleasedForMarking, DownloadedByMarker, MarkingCompleted)
 
 	def fromCode(code: String): MarkingState =

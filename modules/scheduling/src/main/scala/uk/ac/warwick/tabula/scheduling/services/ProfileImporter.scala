@@ -2,36 +2,29 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions.mapAsJavaMap
-import scala.util.matching.Regex
-import org.apache.commons.lang3.text.WordUtils
-import org.springframework.beans.factory.InitializingBean
+
+import scala.collection.JavaConversions._
+
+import org.joda.time.LocalDate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
+
 import javax.sql.DataSource
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.Address
-import uk.ac.warwick.tabula.data.model.AddressType
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.NextOfKin
-import uk.ac.warwick.userlookup.User
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
-import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
-import uk.ac.warwick.tabula.helpers.Logging
-import org.springframework.remoting.rmi.RmiProxyFactoryBean
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.Department
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.membership.MembershipInterfaceWrapper
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.Gender
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
+import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
+import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.userlookup.User
 
 case class MembershipInformation(val member: MembershipMember, val photo: Option[Array[Byte]])
 
@@ -101,37 +94,55 @@ object ProfileImporter {
 			nat.nat_name as nationality,
 		
 			crs.crs_code as sits_course_code,
+			crs.crs_ylen as course_year_length, 
+			decode(crs.crs_schc,'UW PG', 'postgraduate', 'undergraduate') as ug_pg,
 			
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
 			spr.spr_dptc as study_department,
+			spr.awd_code as award_code, 
+			spr.sts_code as spr_status_code, 
+			--spr.spr_levc as level_code,
 		
-			scj.scj_blok as year_of_study,
+			scj.scj_begd as begin_date,
+			scj.scj_endd as end_date,
+			scj.scj_eend as expected_end_date,
 		
-			sts.sta_name as student_status
-		
+			sce.sce_sfcc as funding_source, 
+			sce.sce_stac as enrolment_status_code,
+			sce.sce_blok as year_of_study,
+			sce.sce_moac as mode_of_attendance_code
+
 		from intuit.ins_stu stu
-			left outer join intuit.srs_nat nat 
-				on stu.stu_natc = nat.nat_code
-		
-			left outer join intuit.srs_sce sce
-				on stu.stu_code = sce.sce_stuc
-					and sce.sce_ayrc in :year
+
+			join intuit.ins_spr spr
+				on stu.stu_code = spr_stuc
+
+			join intuit.srs_scj scj
+				on spr.spr_code = scj.scj_sprc
+				and scj.scj_udfa = 'Y'
+
+			join intuit.srs_sce sce
+				on scj.scj_code = sce.sce_scjc
+				and sce.sce_ayrc in (:year)
+				and sce.sce_seq2 = 
+					(
+						select max(sce2.sce_seq2) 
+							from srs_sce sce2 
+								where sce.sce_scjc = sce2.sce_scjc 
+								and sce2.sce_ayrc = sce.sce_ayrc
+					)
 		
 			left outer join intuit.srs_crs crs
 				on sce.sce_crsc = crs.crs_code
-		
-			left outer join intuit.srs_scj scj
-				on sce.sce_scjc = scj.scj_code
-		
-			left outer join intuit.ins_spr spr
-				on scj.scj_sprc = spr.spr_code
-		
+        
+			left outer join intuit.srs_nat nat 
+				on stu.stu_natc = nat.nat_code
+
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
 		
 			where stu.stu_udf3 in (:usercodes)
-				and (sce.sce_stuc is null or scj.scj_udfa = 'Y')
 		"""
 		
 	val GetStaffInformation = """

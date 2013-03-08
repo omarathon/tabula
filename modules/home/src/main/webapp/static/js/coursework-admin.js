@@ -235,22 +235,25 @@ $(function(){
 	var addStudent = function(student, marker){
 		var markerId = marker.data("marker-id");
 		var studentId = student.data("student-id");
+		var studentDisplay = student.data("student-display");
 		var studentIndex = jQuery('.student-container input', marker).length;
 		var formElement = jQuery('<input type="hidden" />');
 		formElement.attr('name', 'markerMapping['+markerId+']['+studentIndex+']');
 		formElement.attr('value', studentId);
 		jQuery('.student-container', marker).append(formElement);
-		var studentElement = jQuery('<li>'+studentId+' </li>');
+		var studentElement = jQuery('<li>'+studentDisplay+' </li>');
 		var button = jQuery('<a href="#" class="remove-student btn btn-mini"><i class="icon-remove"></i> Remove</a>');
 		button.attr("data-marker-id", markerId);
 		button.attr("data-student-id", studentId);
+		button.attr("data-student-display", studentDisplay);
 		studentElement.append(button);
 		jQuery('.student-list', marker).append(studentElement);
 	}
 
-	var removeStudent = function(studentId, tab){
-		var studentElement = jQuery('<div class="student ui-draggable"><i class="icon-user"></i> '+studentId+'</div>');
+	var removeStudent = function(studentDisplay, studentId, tab){
+		var studentElement = jQuery('<div class="student ui-draggable"><i class="icon-user"></i> '+studentDisplay+'</div>');
 		studentElement.attr('data-student-id', studentId);
+		studentElement.attr('data-student-display', studentDisplay);
 		var listElement = jQuery('<li class="hide"></li>') ;
 		listElement.append(studentElement);
 		$('.students .member-list', tab).append(listElement);
@@ -275,16 +278,17 @@ $(function(){
 
 	$("#assign-markers .first-markers, #assign-markers .second-markers").on("click", ".remove-student", function(e){
 		var studentId = $(this).data("student-id");
+		var studentDisplay = $(this).data("student-display");
 		var markerId = $(this).data("marker-id");
 		var marker = jQuery('#container-'+markerId).closest('.marker');
 
-		jQuery('li:contains('+studentId+')', marker).remove();
+		jQuery('li:contains('+studentDisplay+')', marker).remove();
 		jQuery('input[value="'+studentId+'"]', marker).remove();
 
 		var countBadge = marker.find(".count");
 		countBadge.html(parseInt(countBadge.html()) - 1);
 		var tab =marker.closest(".tab-pane");
-		removeStudent(studentId, tab).show('scale', {percent: 100}, 250);;
+		removeStudent(studentDisplay, studentId, tab).show('scale', {percent: 100}, 250);
 
 		e.preventDefault();
 		return false;
@@ -324,8 +328,9 @@ $(function(){
 		var tab = $(this).closest(".tab-pane");
 		$('.student-container input',tab).each(function(){
 			var studentId = $(this).val();
+			var studentDisplay = $(this).data("student-display");
 			$(this).remove();
-			removeStudent(studentId, tab).show();
+			removeStudent(studentDisplay, studentId, tab).show();
 		});
 		$('.student-container .student-list',tab).html("");
 		$('.count',tab).html("0");

@@ -33,7 +33,7 @@ class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorl
 	def secondMarkerTest {
 		assignment.feedbacks.foreach{feedback =>
 			val smFeedback = feedback.retrieveSecondMarkerFeedback
-			smFeedback.state = ReleasedForMarking
+			smFeedback.state = MarkingState.ReleasedForMarking
 		}
 
 		withUser("cuslat") {

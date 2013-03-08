@@ -4,7 +4,9 @@ import org.junit.Test
 import uk.ac.warwick.tabula._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.helpers.ArrayList
-
+import collection.JavaConverters._
+import uk.ac.warwick.userlookup.Group
+import uk.ac.warwick.userlookup.GroupImpl
 
 class UserGroupTest extends PersistenceTestBase {
 
@@ -45,5 +47,46 @@ class UserGroupTest extends PersistenceTestBase {
 			group.members.size should be (3)
 		}
 	} 
+	
+	@Test def withWebgroup {
+		val userLookup = new MockUserLookup
+		
+		val group = new UserGroup
+		group.userLookup = userLookup
+		
+		group.addUser("cuscav")
+		group.addUser("curef")
+		group.excludeUser("cusmab") // we don't like Steve
+		group.staticIncludeUsers.add("sb_systemtest")
+		group.baseWebgroup = "in-elab"
+			
+		val webgroup = new GroupImpl
+		webgroup.setUserCodes(List("cuscav", "cusmab", "cusebr").asJava)
+		
+		userLookup.groupService.groupMap += ("in-elab" -> webgroup)
+			
+		group.members should be (Seq("cuscav", "curef", "sb_systemtest", "cuscav", "cusebr"))
+	}
+	
+	@Test def copy {
+		val group = new UserGroup
+		group.addUser("cuscav")
+		group.addUser("curef")
+		group.excludeUser("cusmab") // we don't like Steve
+		group.staticIncludeUsers.add("sb_systemtest")
+		group.baseWebgroup = "in-elab"
+		group.universityIds = true
+			
+		val group2 = new UserGroup
+		group2.copyFrom(group)
+		
+		group.eq(group2) should be (false)
+		
+		group2.includeUsers.asScala.toSeq should be (group.includeUsers.asScala.toSeq)
+		group2.excludeUsers.asScala.toSeq should be (group.excludeUsers.asScala.toSeq)
+		group2.staticIncludeUsers.asScala.toSeq should be (group.staticIncludeUsers.asScala.toSeq)
+		group2.baseWebgroup should be (group.baseWebgroup)
+		group2.universityIds should be (group.universityIds)
+	}
 	
 }

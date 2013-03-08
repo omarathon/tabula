@@ -6,7 +6,8 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.{DownloadedByMarker, Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.CurrentUser

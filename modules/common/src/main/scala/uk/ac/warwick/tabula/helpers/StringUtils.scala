@@ -15,10 +15,6 @@ trait StringUtils {
 		def textOrEmpty: String = maybeText.getOrElse("")
 	}
 
-	object HasText {
-		def unapply(s: String): Option[String] = if (Utils hasText s) Some(s) else None
-	}
-
 	implicit def StringToSuperString(string: String) = new SuperString(string)
 }
 

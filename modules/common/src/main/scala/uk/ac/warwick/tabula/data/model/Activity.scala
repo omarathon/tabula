@@ -53,9 +53,9 @@ object Activity {
 		}
 	}
 	
-	private def splitCamelCase(src: String): String = src.replaceAll(
-		String.format("%s|%s|%s",
-			"(?<=[A-Z])(?=[A-Z][a-z])",
-			"(?<=[^A-Z])(?=[A-Z])",
-			"(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
+//	private def splitCamelCase(src: String): String = src.replaceAll(
+//		String.format("%s|%s|%s",
+//			"(?<=[A-Z])(?=[A-Z][a-z])",
+//			"(?<=[^A-Z])(?=[A-Z])",
+//			"(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
 }

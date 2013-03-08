@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.{MarkingCompleted, ReleasedForMarking, FileAttachment}
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.mockito.Mockito._
 import java.io.{FileInputStream, ByteArrayInputStream}
 import uk.ac.warwick.tabula.coursework.commands.feedback.{DownloadFirstMarkersFeedbackCommand, AdminGetSingleMarkerFeedbackCommand}

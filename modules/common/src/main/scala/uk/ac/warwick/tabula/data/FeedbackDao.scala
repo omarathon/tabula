@@ -13,8 +13,6 @@ trait FeedbackDao {
 @Repository
 class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 
-	private val clazz = classOf[Feedback].getName
-
 	override def getFeedback(id: String) = getById[Feedback](id)
 	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
 
@@ -24,6 +22,12 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 			.add(is("assignment", assignment))
 			.uniqueResult
 
-	override def delete(feedback: Feedback) = session.delete(feedback)
+	override def delete(feedback: Feedback) = {
+		// We need to delete any markerfeedback first
+		Option(feedback.firstMarkerFeedback) map { session.delete(_) }
+		Option(feedback.secondMarkerFeedback) map { session.delete(_) }
+		
+		session.delete(feedback)
+	}
 
 }

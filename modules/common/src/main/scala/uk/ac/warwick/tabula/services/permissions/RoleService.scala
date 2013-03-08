@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.immutable.ListMap
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role]
@@ -26,8 +27,10 @@ trait ScopelessRoleProvider extends RoleProvider {
 	def getRolesFor(user: CurrentUser): Seq[Role]
 }
 
+case class PermissionDefinition(permission: Permission, scope: Option[PermissionsTarget], permissionType: GrantedPermission.OverrideType)
+
 trait PermissionsProvider {
-	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)]
+	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
 	
 	/**
 	 * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
@@ -36,9 +39,9 @@ trait PermissionsProvider {
 }
 
 trait RoleService {
-	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)]
+	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
-	def hasRole(user: CurrentUser, role: Role, scope: Option[PermissionsTarget]): Boolean
+	def hasRole(user: CurrentUser, role: Role): Boolean
 }
 
 @Service
@@ -50,9 +53,8 @@ class RoleServiceImpl extends RoleService with Logging {
 	/** Spring should wire in all beans that extend PermissionsProvider */
 	@Autowired var permissionsProviders: Array[PermissionsProvider] = Array()
 	
-	// TAB-19 Not yet implemented
-	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] = {
-		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[(Permission, Option[PermissionsTarget], Boolean)] = {
+	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = {
+		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {
 			if (scope == null) Stream.empty
 			else {
 				val results = providers.toStream map { provider => (provider, provider.getPermissionsFor(user, scope)) }
@@ -96,13 +98,14 @@ class RoleServiceImpl extends RoleService with Logging {
 		scopelessStream #::: streamScoped(scoped.toStream, scope)
 	}
 	
-	def hasRole(user: CurrentUser, role: Role, scope: Option[PermissionsTarget]) = {
+	def hasRole(user: CurrentUser, role: Role) = {
 		val targetClass = role.getClass
 		
 		// Go through the list of RoleProviders and get any that provide this role
 		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap { _ match {
 			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user)
-			case provider => provider.getRolesFor(user, scope.get)
+			case provider if role.scope.isDefined => provider.getRolesFor(user, role.scope.get)
+			case _ => Seq()
 		}}
 		
 		allRoles contains(role)

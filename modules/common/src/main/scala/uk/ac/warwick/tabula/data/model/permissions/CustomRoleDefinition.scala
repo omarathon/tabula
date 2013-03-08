@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.HibernateVersioned
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.helpers.ArrayList
 
 @Entity
 class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
@@ -37,7 +38,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	@BeanProperty var builtInBaseRoleDefinition: BuiltInRoleDefinition = _
 	
 	def baseRoleDefinition: RoleDefinition = Option(customBaseRoleDefinition) getOrElse builtInBaseRoleDefinition
-	def baseRoleDefinition_(definition: RoleDefinition) = definition match {
+	def baseRoleDefinition_=(definition: RoleDefinition) = definition match {
 		case customDefinition: CustomRoleDefinition => {
 			customBaseRoleDefinition = customDefinition
 			builtInBaseRoleDefinition = null
@@ -54,7 +55,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	
 	// A set of role overrides
 	@OneToMany(mappedBy="customRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BeanProperty var overrides:JList[RoleOverride] = List()
+	@BeanProperty var overrides:JList[RoleOverride] = ArrayList()
 	
 	def permissionsParents = 
 		Seq(Option(department)).flatten

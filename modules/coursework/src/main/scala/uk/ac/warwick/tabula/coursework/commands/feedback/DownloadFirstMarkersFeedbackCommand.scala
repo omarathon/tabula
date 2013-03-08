@@ -21,7 +21,7 @@ class DownloadFirstMarkersFeedbackCommand(val module: Module, val assignment: As
 		val markersSubs = assignment.getMarkersSubmissions(currentUser.apparentUser)
 		val feedbacks = assignment.feedbacks.filter(f => markersSubs.exists(_.universityId == f.universityId))
 		val firstMarkerFeedbacks = feedbacks.map(f => f.firstMarkerFeedback)
-		val releasedFeedback = firstMarkerFeedbacks.filter(_.state == MarkingCompleted)
+		val releasedFeedback = firstMarkerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
 		val zip = zipService.getSomeMarkerFeedbacksZip(releasedFeedback)
 		val renderable = new RenderableZip(zip)
 		if (callback != null) callback(renderable)

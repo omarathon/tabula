@@ -25,7 +25,7 @@ trait Logging {
 	 * to break out into a variable.
 	 */
 	def logSize[A](seq: Seq[A], level: Priority = Info)(implicit m: Manifest[A]) = {
-		logger.log(level, "Collection of " + m.erasure.getClass.getSimpleName + "s: " + seq.size)
+		logger.log(level, "Collection of " + m.erasure.getSimpleName + "s: " + seq.size)
 		seq
 	}
 

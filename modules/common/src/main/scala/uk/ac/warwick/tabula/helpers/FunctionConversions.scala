@@ -12,7 +12,7 @@ import org.hibernate.Session
  * These aren't really related so it's a bit lazy to bung them all in one class - but it's
  * not doing much harm.
  */
-object FunctionConversions {
+trait FunctionConversions {
 
 	implicit def ToConnectionCallback[A](fn: Connection => A) = new ConnectionCallback[A] {
 		override def doInConnection(connection: Connection) = fn(connection)
@@ -23,3 +23,5 @@ object FunctionConversions {
 	}
 
 }
+
+object FunctionConversions extends FunctionConversions

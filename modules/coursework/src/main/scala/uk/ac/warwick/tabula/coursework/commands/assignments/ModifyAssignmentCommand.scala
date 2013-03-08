@@ -5,7 +5,6 @@ import scala.collection.JavaConversions._
 import org.hibernate.validator.constraints.Length
 import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Command
@@ -43,10 +42,8 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	@NotEmpty(message = "{NotEmpty.assignmentName}")
 	@BeanProperty var name: String = _
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
 
 	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
