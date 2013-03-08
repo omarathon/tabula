@@ -9,10 +9,9 @@ sealed trait Permission {
 	 * (stupidly) return a different instance of the case object, which fails the equality
 	 * check because the default AnyRef implementation of equals is just this eq that.
 	 * 
-	 * The hashCode is computed at compile time, so this is safe.
-	 * 
-	 * DISREGARD THAT hashCodes collide because they are generated only based on the name
-	 * of the current case object, so Module.Create.hashCode() == PersonalTutor.Create.hashCode()
+	 * We also have to override hashCodes because their default is computed at compile time,
+	 * based only on the (unqualified) name of the current case object, so,
+	 * before override, Module.Create.hashCode() == PersonalTutor.Create.hashCode()
 	 */
 	override def equals(other: Any) = other match {
 		case that: Permission => getName == that.getName
@@ -39,11 +38,12 @@ object Permissions {
 	 */
 	def of(name: String): Permission = {
 		try {
-			// Go through the magical heirarchy
+			// Go through the magical hierarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
 			clz.getDeclaredField("MODULE$").get(null).asInstanceOf[Permission]
 		} catch {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
+			case e: ClassCastException => throw new IllegalArgumentException("Permission " + name + " is not an endpoint of the hierarchy")
 		}
 	}
 	
@@ -147,10 +147,26 @@ object Permissions {
 	
 	object Profiles {
 		case object Search extends ScopelessPermission
-		case object Read extends Permission
+				
+		object Read {
+			case object Core extends Permission // Photo, name, course, Warwick email, job title
+			case object UniversityId extends Permission // University number
+			case object DateOfBirth extends Permission
+			case object Nationality extends Permission
+			case object Gender extends Permission
+			case object NextOfKin extends Permission
+			case object HomeAddress extends Permission
+			case object TermTimeAddress extends Permission
+			case object TelephoneNumber extends Permission
+			case object MobileNumber extends Permission
+			case object HomeEmail extends Permission
+			case object Usercode extends Permission
+			case object PersonalTutees extends Permission // Person's tutees ('downward' relationship)
+			
+			case object StudyDetails extends Permission
+		}
 		
-		/* We need more fine grained control over what users can see here, so this could be a long list */
-		
+		// Person's own tutor ('upward' relationship)
 		object PersonalTutor {
 			case object Upload extends Permission
 			

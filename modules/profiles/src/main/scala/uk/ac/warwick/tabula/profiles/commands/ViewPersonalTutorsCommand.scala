@@ -47,7 +47,7 @@ class MissingPersonalTutorsCommand(val department: Department) extends Command[(
 
 class ViewPersonalTuteesCommand(val currentMember: Member) extends Command[Seq[StudentRelationship]] with Unaudited {
 	
-	PermissionCheck(Permissions.Profiles.Read, currentMember)
+	PermissionCheck(Permissions.Profiles.Read.PersonalTutees, currentMember)
 
 	var profileService = Wire.auto[ProfileService]
 	

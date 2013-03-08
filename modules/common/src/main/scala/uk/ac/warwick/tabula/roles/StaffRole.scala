@@ -16,7 +16,8 @@ case object StaffRoleDefinition extends BuiltInRoleDefinition {
 	)
 	
 	GrantsScopedPermission(
-		Profiles.Read,
+		Profiles.Read.Core,
+		Profiles.Read.StudyDetails,
 		Profiles.PersonalTutor.Read
 	)
 }
