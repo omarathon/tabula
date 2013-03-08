@@ -57,7 +57,7 @@
 						</#if>
 						<#if profile.studyDetails.modeOfAttendance??>
 							<#if profile.studyDetails.modeOfAttendance.code != "F">
-								&nbsp; (full-time equivalent)
+								(full-time equivalent)
 							</#if>
 						</#if>
 					</td>
