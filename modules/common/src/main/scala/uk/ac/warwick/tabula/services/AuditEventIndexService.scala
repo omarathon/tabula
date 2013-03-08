@@ -137,6 +137,17 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 
+	def feedbackDownloads(assignment: Assignment) = {
+		search(all(
+			termQuery("eventType", "DownloadFeedback"),
+			termQuery("assignment", assignment.id)))
+			.flatMap { toItem(_) }
+			.filterNot { _.hadError }
+			.map( whoDownloaded => {
+				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
+			})
+	}
+			
 	def whoDownloadedFeedback(assignment: Assignment) =
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),

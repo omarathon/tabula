@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
+import org.joda.time.DateTime
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
@@ -30,7 +31,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	@BeanProperty var awaitingSubmissionExtensionExpired:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmissionExtensionRejected:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmissionNoExtension:Seq[User] = _
-	@BeanProperty var whoDownloaded: Seq[User] = _
+	@BeanProperty var whoDownloaded: Seq[(User, DateTime)] = _
 	@BeanProperty var stillToDownload: Seq[Item] =_
 	@BeanProperty var hasPublishedFeedback: Boolean =_
 	@BeanProperty var hasOriginalityReport: Boolean =_
@@ -81,8 +82,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 		mustReleaseForMarking = assignment.markingWorkflow != null
 		
-		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
-
+		whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
+		
 		students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
 			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
@@ -107,7 +108,10 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			}
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption match {
-				case Some(feedback) => new FeedbackListItem(feedback, whoDownloaded exists { _.getWarwickId == feedback.universityId })
+				case Some(feedback) => {
+					new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+							x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+				}
 				case _ => null
 			}
 
