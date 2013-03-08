@@ -18,6 +18,7 @@ import org.hibernate.criterion._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.SitsStatus
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)

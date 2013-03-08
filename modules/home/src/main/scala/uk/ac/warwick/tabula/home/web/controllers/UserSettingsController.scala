@@ -12,6 +12,8 @@ import javax.validation.Valid
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod._
+import uk.ac.warwick.tabula.data.ModuleDao
+import org.springframework.beans.factory.annotation.Autowired
 
 @Controller
 @RequestMapping(Array("/settings"))
@@ -20,6 +22,7 @@ class UserSettingsController extends HomeController {
 	validatesSelf[UserSettingsCommand]
 	
 	var userSettingsService = Wire.auto[UserSettingsService]
+	var moduleDao = Wire.auto[ModuleDao]
 	
 	private def getUserSettings(user: CurrentUser) = 
 		userSettingsService.getByUserId(user.apparentId) 
@@ -36,7 +39,7 @@ class UserSettingsController extends HomeController {
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {		
-		 Mav("usersettings/form")	 		 
+		 Mav("usersettings/form", "moduleRoles" -> moduleDao.findByParticipant(user.apparentId))	 		 
 	}
 
 	@RequestMapping(method=Array(POST))

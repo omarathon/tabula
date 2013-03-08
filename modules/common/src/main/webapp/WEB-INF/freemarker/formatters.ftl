@@ -23,8 +23,8 @@
 	</a>
 </#macro>
 
-<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false><#--
--->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth)}<#--
+<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
+-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime)}<#--
 --></#macro>
 
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--

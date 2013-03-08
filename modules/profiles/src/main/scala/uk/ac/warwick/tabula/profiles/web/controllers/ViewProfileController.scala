@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.spring.Wire
 
 class ViewProfileCommand(studentMember: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read, studentMember)
 
