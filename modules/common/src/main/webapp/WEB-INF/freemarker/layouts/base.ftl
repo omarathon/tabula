@@ -43,7 +43,9 @@
 								<li>
 								<#if user?? && user.loggedIn>
 									Signed in as ${user.fullName}
+									<#if user.staff>
 									| <a href="/settings">Settings</a> 
+									</#if>
 									| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 								<#else>
 								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
