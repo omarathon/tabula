@@ -56,7 +56,7 @@
 							${profile.studyDetails.courseYearLength} years
 						</#if>
 						<#if profile.studyDetails.modeOfAttendance??>
-							<#if profile.studyDetails.modeOfAttendance = "part-time">
+							<#if profile.studyDetails.modeOfAttendance.code != "F">
 								&nbsp; (full-time equivalent)
 							</#if>
 						</#if>
@@ -66,7 +66,7 @@
 					<th>Start date</th>
 					<td>
 						<#if profile.studyDetails.beginDate??>
-							${profile.studyDetails.beginDate}
+							<@fmt.date date=profile.studyDetails.beginDate includeTime=false />
 						</#if>
 					</td>
 				</tr>					
@@ -74,9 +74,10 @@
 					<th>End date</th>
 					<td>
 						<#if profile.studyDetails.endDate??>
-							${profile.studyDetails.endDate}
+							<@fmt.date date=profile.studyDetails.endDate includeTime=false />
+
 						<#elseif profile.studyDetails.expectedEndDate??>
-							${profile.studyDetails.expectedEndDate} (expected)
+							<@fmt.date date=profile.studyDetails.expectedEndDate includeTime=false/> (expected)
 						</#if>
 					</td>
 				</tr>	
@@ -94,7 +95,7 @@
 					<th>Attendance</th>
 					<td>
 						<#if profile.studyDetails.modeOfAttendance??>						
-							${profile.studyDetails.modeOfAttendance}
+							${profile.studyDetails.modeOfAttendance.fullNameToDisplay}
 						</#if>
 					</td>
 				</tr>

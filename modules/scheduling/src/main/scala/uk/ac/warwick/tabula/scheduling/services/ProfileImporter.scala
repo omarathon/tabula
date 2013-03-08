@@ -111,7 +111,7 @@ object ProfileImporter {
 			sce.sce_sfcc as funding_source, 
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
-			decode(sce.sce_moac, 'F', 'full-time','P','part-time', sce.sce_moac) as mode_of_attendance
+			sce.sce_moac as mode_of_attendance_code
 
 		from intuit.ins_stu stu
 

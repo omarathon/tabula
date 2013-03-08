@@ -9,7 +9,7 @@ alter table studydetails add (
 	courseyearlength number(2),
 	sprstatuscode nvarchar2(6);
 	enrolmentstatuscode nvarchar2(6),
-	modeofattendance nvarchar2(10),
+	modeofattendancecode nvarchar2(10),
 	--level nvarchar2(6),
 	ugpg nvarchar2(15)
 	

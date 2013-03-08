@@ -33,6 +33,8 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 
 class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms with StudentProperties with StudyDetailsProperties with Unaudited {
@@ -42,12 +44,14 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	implicit val metadata = rs.getMetaData
 	
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
 	// A few intermediate properties that will be transformed later
 	@BeanProperty var studyDepartmentCode: String = _
 	@BeanProperty var routeCode: String = _
 	@BeanProperty var sprStatusCode: String = _
 	@BeanProperty var enrolmentStatusCode: String = _
+	@BeanProperty var modeOfAttendanceCode: String = _
 	
 	this.sprCode = rs.getString("spr_code")
 	this.sitsCourseCode = rs.getString("sits_course_code")
@@ -69,8 +73,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	
 	this.sprStatusCode = rs.getString("spr_status_code")
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
+	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
 	
-	this.modeOfAttendance = rs.getString("mode_of_attendance")
 	this.ugPg = rs.getString("ug_pg")
 	
 	override def applyInternal(): Member = transactional() {
@@ -136,7 +140,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		copyDepartment("studyDepartment", homeDepartmentCode, studyDetailsBean) |
 		copyRoute("route", routeCode, studyDetailsBean) |
 		copyStatus("sprStatus", sprStatusCode, studyDetailsBean) |
-		copyStatus("enrolmentStatus", enrolmentStatusCode, studyDetailsBean)
+		copyStatus("enrolmentStatus", enrolmentStatusCode, studyDetailsBean) |
+		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studyDetailsBean)
 
 	private def copyStatus(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
@@ -160,6 +165,30 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			true
 		}
 	}
+	
+	private def copyModeOfAttendance(property: String, code: String, memberBean: BeanWrapper) = {
+		val oldValue = memberBean.getPropertyValue(property) match {
+			case null => null
+			case value: ModeOfAttendance => value
+		}
+
+		if (oldValue == null && code == null) false
+		else if (oldValue == null) {
+			// From no MOA to having an MOA
+			memberBean.setPropertyValue(property, toModeOfAttendance(code))
+			true
+		} else if (code == null) {
+			// User had an SPR status code but now doesn't
+			memberBean.setPropertyValue(property, null)
+			true
+		} else if (oldValue.code == code.toLowerCase) {
+			false
+		}	else {
+			memberBean.setPropertyValue(property, toModeOfAttendance(code))
+			true
+		}
+	}	
+	
 
 	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
@@ -199,6 +228,14 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			sitsStatusesImporter.sitsStatusMap.get(code).getOrElse(null)
 		}
 	}
+
+	private def toModeOfAttendance(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			modeOfAttendanceImporter.modeOfAttendanceMap.get(code).getOrElse(null)
+		}
+	}	
 	
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "student")
 }

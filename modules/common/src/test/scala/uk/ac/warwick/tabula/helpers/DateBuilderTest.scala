@@ -23,8 +23,8 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 			// Test default settings
 			format(anotherDay) should be ("Sat 10th March 2012 at 12:13")
 			
-			format(anotherDay, false, false, false, true, true, false, false) should be ("Sat 10th March 2012 12:13")
-			format(anotherDay, true, true, true, true, true, false, false) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
+			format(anotherDay, false, false, false, true, true, false, false, false) should be ("Sat 10th March 2012 12:13")
+			format(anotherDay, true, true, true, true, true, false, false, false) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
 			
 			format(yesterday, false, true, false, true, true, false, false) should be ("Yesterday at 13:36")
 			format(tomorrow, true, true, false, false, true, false, false) should be ("tomorrow at 13:36:00")

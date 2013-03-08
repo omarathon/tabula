@@ -1,23 +1,20 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
+import scala.collection.JavaConversions._
 
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.data.Transactions._
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.SprCode
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.DepartmentDao
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	
@@ -28,6 +25,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
 	var features = Wire.auto[Features]
 
@@ -35,6 +33,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		if (features.profiles) {
 			benchmark("ImportMembers") {
 				importSitsStatuses
+				importModeOfAttendances
 				doMemberDetails
 			}
 		}
@@ -50,6 +49,17 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			session.clear
 		}		
 	}
+	
+	def importModeOfAttendances {
+		logger.info("Importing Modes of Attendance")
+
+		transactional() {
+			modeOfAttendanceImporter.getModeOfAttendances() map { _.apply }
+
+			session.flush
+			session.clear
+		}		
+	}	
 	
 	/** Import basic info about all members in ADS, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 	def doMemberDetails {

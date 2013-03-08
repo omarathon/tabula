@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.data.model
+import scala.reflect.BeanProperty
 
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.{AccessType, Type}
@@ -28,7 +29,6 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 	def toStringProps = Seq("student" -> student)
 	
 	def permissionsParents = Seq(Option(student)).flatten
-
 }
 
 trait StudyDetailsProperties {
@@ -73,7 +73,11 @@ trait StudyDetailsProperties {
 	
 
 	//@BeanProperty var levelCode: String = _
-	@BeanProperty var modeOfAttendance: String = _
+	
+	@ManyToOne
+	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")	
+	@BeanProperty var modeOfAttendance: ModeOfAttendance = _
+	
 	@BeanProperty var ugPg: String = _
 	
 //	@BeanProperty var attendanceMode: String = _
