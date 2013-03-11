@@ -7,7 +7,7 @@ alter table studydetails add (
 	expectedenddate date,
 	fundingsource nvarchar2(6),
 	courseyearlength number(2),
-	sprstatuscode nvarchar2(6);
+	sprstatuscode nvarchar2(6),
 	enrolmentstatuscode nvarchar2(6),
 	modeofattendancecode nvarchar2(10),
 	--level nvarchar2(6),
