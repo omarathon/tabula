@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import org.springframework.util.FileCopyUtils
-import java.io.File
-import uk.ac.warwick.spring.Wire
+import java.io.{File, FileReader, FileWriter, IOException}
+
 import org.joda.time.DateTime
-import java.io.FileReader
+import org.springframework.util.FileCopyUtils
+
+import uk.ac.warwick.spring.Wire
+
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.FileDao
-import java.io.IOException
-import java.io.FileWriter
-import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions._
 
 /**
@@ -32,7 +31,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	
 	lazy val lastSanityCheckJobDetailsFile = new File(new File(dataDir), LastSanityCheckJobDetailsFilename)
 	
-	override def applyInternal() {
+	override def applyInternal() = transactional(readOnly = true) {
 		val startTime = DateTime.now
 		
 		timed("Sanity check filesystem") { timer =>
