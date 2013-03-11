@@ -52,6 +52,8 @@ class LoggingExceptionHandler extends ExceptionHandler with Logging {
 class EmailingExceptionHandler extends ExceptionHandler with Logging with InitializingBean with FreemarkerRendering with UnicodeEmails {
 	@Resource(name = "mailSender") var mailSender: WarwickMailSender = _
 	@Value("${mail.exceptions.to}") var recipient: String = _
+	@Value("${environment.production}") var production: Boolean = _
+	@Value("${environment.standby}") var standby: Boolean = _
 	@Autowired var freemarker: FreemarkerConfiguration = _
 	var template: Template = _
 
@@ -74,15 +76,20 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 
 	private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
 		val info = RequestInfo.fromThread
+		
+		val env = if (production) "PROD" else "TEST"
+		
 		message.setTo(recipient)
-		message.setSubject("[HFCX] %s %s" format (userId(info), context.token))
+		message.setSubject("[HFCX] (%s) %s %s" format (env, userId(info), context.token))
 		message.setText(renderToString(template, Map(
 			"token" -> context.token,
 			"exception" -> context.exception,
 			"exceptionStack" -> ExceptionHandler.renderStackTrace(context.exception),
 			"requestInfo" -> info,
 			"time" -> new DateTime,
-			"request" -> context.request)))
+			"request" -> context.request,
+			"environment" -> env,
+			"standby" -> standby)))
 	}
 
 	private def userId(info: Option[RequestInfo]) = info.map { _.user }.map { _.realId }.getOrElse("ANON")
