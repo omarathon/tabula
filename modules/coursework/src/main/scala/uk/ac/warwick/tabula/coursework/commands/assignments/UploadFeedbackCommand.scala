@@ -149,28 +149,16 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					case FoundUser(u) =>
 					case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
 				}
-
-				// warn if feedback for this student is already uploaded
-				assignment.feedbacks.find { feedback => feedback.universityId == uniNumber && feedback.hasAttachments } match {
-					case Some(feedback) => {
-						// set warning flag for existing feedback and check if any existing files will be overwritten
-						item.submissionExists = true
-						checkForDuplicateFiles(item, feedback)
-					}
-					case None => {}
-				}
+				
+				validateExisting(item, errors)
 
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
 		}
 	}
-
-	private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback){
-		val attachedFiles = item.file.attachedFileNames.toSet
-		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
-		item.duplicateFileNames = attachedFiles & feedbackFiles
-	}
+	
+	def validateExisting(item: FeedbackItem, errors: Errors)
 
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)
