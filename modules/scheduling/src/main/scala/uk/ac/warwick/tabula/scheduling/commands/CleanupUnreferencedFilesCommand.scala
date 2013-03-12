@@ -82,7 +82,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 		val stats = (files.size - deleted.size, deleted.size)
 		
 		// Sub-buckets
-		val buckets = directory.listFiles(filter { _.isDirectory })
+		val buckets = directory.listFiles(filter { _.isDirectory }).toSeq
 		
 		val otherStats = for (bucket <- buckets) 
 			yield checkBucket(bucket, prefix.concat(bucket.getName))

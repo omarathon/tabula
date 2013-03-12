@@ -25,7 +25,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	
 	PermissionCheck(Permissions.ReplicaSyncing)
 	
-	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
+	var fileSyncEnabled = Option(Wire.property("${environment.standby}")) map { _.toBoolean } getOrElse (false)
 	var dataDir = Wire[String]("${base.data.dir}")
 	var fileDao = Wire.auto[FileDao]
 	
@@ -35,9 +35,10 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 		val startTime = DateTime.now
 		
 		timed("Sanity check filesystem") { timer =>
-			val allIds = fileDao.getAllFileIds(lastSyncDate)
+			// TAB-593 we convert allIds to a Seq here, otherwise the for-comprehension will yield a Set
+			val allIds = fileDao.getAllFileIds(lastSyncDate).toSeq
 			
-			val (successful, unsuccessful) = ((for (id <- allIds) yield fileDao.getData(id) match {
+			val checks = for (id <- allIds) yield fileDao.getData(id) match {
 				case Some(file) => (1, 0)
 				case None =>
 					// Check whether the file has since been cleaned up
@@ -46,7 +47,9 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 						logger.error("*** File didn't exist for: " + id)
 						(0, 1)
 					}
-			}).foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)})
+			}
+			
+			val (successful, unsuccessful) = checks.foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)}
 			
 			val logString = "successfulFiles," + successful + ",failedFiles," + unsuccessful + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
 			logger.info(logString)

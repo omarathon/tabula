@@ -38,9 +38,10 @@ import java.sql.ResultSetMetaData
 import uk.ac.warwick.userlookup.User
 import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
+import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 
 abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
-	with MemberProperties with Unaudited  {
+	with MemberProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 	
 	PermissionCheck(Permissions.ImportSystemData)
@@ -87,28 +88,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		
 		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode) orNull)
 		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")) orNull) 
-	}
-		
-	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
-	protected def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, memberBean: BeanWrapper) = {
-		// Transform the set of properties to a set of booleans saying whether the value has changed
-		val changedProperties = for (property <- properties) yield {
-			val oldValue = memberBean.getPropertyValue(property)
-			val newValue = commandBean.getPropertyValue(property)
-			
-			logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
-			
-			// null == null in Scala so this is safe for unset values
-			if (oldValue != newValue) {
-				logger.debug("Detected property change; setting value")
-				
-				memberBean.setPropertyValue(property, newValue)
-				true
-			} else false
-		}
-		
-		// Fold the set of booleans left with an || of false; this uses foldLeft rather than reduceLeft to handle the empty set
-		changedProperties.foldLeft(false)(_ || _)
 	}
 	
 	private def copyPhoto(property: String, photoOption: Option[Array[Byte]], memberBean: BeanWrapper) = {

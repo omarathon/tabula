@@ -50,7 +50,7 @@ class ImportSingleModeOfAttendanceCommand(resultSet: ResultSet) extends Command[
 		val commandBean = new BeanWrapperImpl(this)
 		val modeOfAttendanceBean = new BeanWrapperImpl(modeOfAttendance)
 		
-		val hasChanged = copyBasicProperties(properties, commandBean, modeOfAttendanceBean, logger)
+		val hasChanged = copyBasicProperties(properties, commandBean, modeOfAttendanceBean)
 			
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + modeOfAttendance)
