@@ -35,6 +35,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.StudentMember
+import org.springframework.validation.BindingResult
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
@@ -189,9 +190,9 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 		}
 	}
 
-	def onBind {
+	def onBind(result:BindingResult) {
 		transactional() {
-			file.onBind
+			file.onBind(result)
 			if (!file.attached.isEmpty()) {
 				processFiles(file.attached)
 			}

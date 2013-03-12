@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.SelfValidating
+import org.springframework.validation.BindingResult
 
 
 class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
@@ -57,8 +58,8 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 		modified = true
 	}
 
-	override def onBind = transactional() {
-		file.onBind
+	override def onBind(result:BindingResult) = transactional() {
+		file.onBind(result)
 	}
 
 	override def applyInternal() = transactional() {

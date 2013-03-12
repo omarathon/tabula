@@ -14,6 +14,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
 
 /**
  * Base object for binding an individual submitted field from an assignment
@@ -25,7 +26,7 @@ import uk.ac.warwick.tabula.system.BindListener
  */
 abstract class SubmissionValue extends BindListener {
 	val field: FormField
-	override def onBind {}
+	override def onBind(result: BindingResult) {}
 	def persist(value: SavedSubmissionValue)
 }
 
@@ -43,7 +44,7 @@ class FileSubmissionValue(val field: FormField) extends SubmissionValue {
 	@BeanProperty var file: UploadedFile = new UploadedFile
 
 	lazy val fileDao = Wire.auto[FileDao]
-	override def onBind { file.onBind }
+	override def onBind(result: BindingResult) { file.onBind(result) }
 	def persist(ssv: SavedSubmissionValue) {
 		val savedAttachments = for (attachment <- file.attached) yield {
 			attachment.temporary = false

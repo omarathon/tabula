@@ -1,13 +1,10 @@
 package uk.ac.warwick.tabula.commands
 
 import java.io.File
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
-
 import org.springframework.web.multipart.MultipartFile
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
@@ -15,6 +12,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
 
 /**
  * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -71,13 +69,18 @@ class UploadedFile extends BindListener {
 	 * FileAttachments are marked as "temporary" until persisted by whatever
 	 * command needs them. This method will throw an exception
 	 */
-	override def onBind {
+	override def onBind(result: BindingResult) {
 		
-		for (item <- attached) {
+		val bindResult = for (item <- attached) yield {
 			if (item != null && !item.temporary) {
-				throw new IllegalStateException("Non temporary file used")
-			}
+				result.reject("binding.reSubmission")
+				false
+			} else true
 		}
+		
+		// Early exit if we've failed binding
+		if (bindResult.find(_ == false).isDefined) return
+		
 		if (hasUploads) {
 			// convert MultipartFiles into FileAttachments
 			transactional() {

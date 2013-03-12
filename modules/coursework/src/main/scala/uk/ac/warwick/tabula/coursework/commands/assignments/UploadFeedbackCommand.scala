@@ -25,7 +25,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import scala.Some
-import uk.ac.warwick.tabula.system.{BindWithResultsListener, BindListener}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 
 class FeedbackItem {
@@ -69,7 +69,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * remove all the code in here that handles it, to simplify it a little.
  */
 abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser)
-	extends Command[A] with Daoisms with Logging with BindWithResultsListener {
+	extends Command[A] with Daoisms with Logging with BindListener {
 	
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
@@ -173,7 +173,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	}
 
 	override def onBind(result:BindingResult) = transactional() {
-		file.onBind
+		file.onBind(result)
 
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
@@ -251,13 +251,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 			if (items != null) {
 				for (item <- items if item.file != null) {
-					try{
-						item.file.onBind
-					} catch {
-						case e:IllegalStateException => {
-							result.reject("binding.reSubmission")
-						}
-					}
+					item.file.onBind(result)
 				}
 			}
 		}

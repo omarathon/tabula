@@ -14,15 +14,16 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
+import org.springframework.validation.BindingResult
 
 abstract class FeedbackTemplateCommand(val department:Department)
 	extends Command[Unit] with Daoisms with BindListener {
 
 	@BeanProperty var file:UploadedFile = new UploadedFile
 
-	override def onBind {
+	override def onBind(result:BindingResult) {
 		transactional() {
-			file.onBind
+			file.onBind(result)
 		}
 	}
 

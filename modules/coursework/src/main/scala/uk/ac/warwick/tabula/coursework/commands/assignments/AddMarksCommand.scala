@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
+import org.springframework.validation.BindingResult
 
 
 abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
@@ -104,9 +105,9 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 		!hasErrors
 	}
 
-	override def onBind {
+	override def onBind(result:BindingResult) {
 		transactional() {
-			file.onBind
+			file.onBind(result)
 			if (!file.attached.isEmpty()) {
 				processFiles(file.attached)
 			}
