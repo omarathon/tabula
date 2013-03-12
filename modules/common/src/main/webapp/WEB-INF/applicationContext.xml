@@ -64,6 +64,7 @@
 				<entry key="uk.ac.warwick.tabula.PermissionDeniedException" value="errors/permissionDenied" />
 				<entry key="uk.ac.warwick.tabula.ItemNotFoundException" value="errors/404" />
 				<entry key="uk.ac.warwick.tabula.services.MaintenanceModeEnabledException" value="errors/maintenance" />
+				<entry key="uk.ac.warwick.tabula.system.exceptions.FileUploadException" value="errors/fileUpload" />
 			</map>
 		</property>
 	</bean> 
