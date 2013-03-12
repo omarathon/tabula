@@ -31,7 +31,7 @@ class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignm
 			errors.reject("assignment.delete.deleted")
 		} else if (!assignment.submissions.isEmpty) {
 			errors.reject("assignment.delete.hasSubmissions")
-		} else if (assignment.anyReleasedFeedback) {
+		} else if (assignment.hasReleasedFeedback) {
 			errors.reject("assignment.delete.hasFeedback")
 		}
 	}

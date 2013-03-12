@@ -305,6 +305,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
 	def fullFeedback = feedbacks.filterNot(_.isPlaceholder)
+	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
+	def countFullFeedback = assignmentService.countFullFeedback(this)
+	def hasFullFeedback = countFullFeedback > 0
 
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.
@@ -312,11 +315,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * assumes all feedback has already been published.
 	 */
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
+	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
+	def countReleasedFeedback  = assignmentService.countPublishedFeedback(this)
+	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
+	def hasReleasedFeedback = countReleasedFeedback > 0
+	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
 
-	def anyReleasedFeedback = fullFeedback.exists(_.released == true)
 
-	def anyUnreleasedFeedback = fullFeedback.exists(_.released != true) // should catch false and null
-	
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: Feedback) {

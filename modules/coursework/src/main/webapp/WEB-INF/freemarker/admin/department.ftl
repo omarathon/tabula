@@ -99,7 +99,7 @@
 	<div class="module-info-contents">
 		<#list module.assignments as assignment>
 		<#if !assignment.deleted>
-		<#assign has_feedback = assignment.fullFeedback?size gt 0 >
+		<#assign has_feedback = assignment.hasFullFeedback >
 		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
 			<h3 class="name">
@@ -153,11 +153,11 @@
 				<#if !features.combinedForm>
 					<div class="feedback-count">
 					<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-					${assignment.fullFeedback?size} feedback<#if has_feedback></a></#if>
-					<#assign unreleasedFeedback=assignment.unreleasedFeedback />
-					<#if unreleasedFeedback?size gt 0>
+					${assignment.countFullFeedback} feedback<#if has_feedback></a></#if>
+					<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
+					<#if countUnreleasedFeedback gt 0>
 						<span class="has-unreleased-feedback">
-						(${unreleasedFeedback?size} to publish)
+						(${countUnreleasedFeedback} to publish)
 						</span>
 					<#elseif has_feedback>
 						<span class="no-unreleased-feedback">
@@ -170,12 +170,12 @@
 					<div class="submission-and-feedback-count">							
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" />
-							<#if has_feedback> and ${assignment.fullFeedback?size} feedback</#if>
+							<#if has_feedback> and ${assignment.countFullFeedback} feedback</#if>
 						</a>
-						<#assign unreleasedFeedback=assignment.unreleasedFeedback />
-						<#if unreleasedFeedback?size gt 0>
+						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
+						<#if countUnreleasedFeedback gt 0>
 							<span class="has-unreleased-feedback">
-							(${unreleasedFeedback?size} feedback to publish)
+							(${countUnreleasedFeedback} feedback to publish)
 							</span>
 						<#elseif has_feedback>
 							<span class="no-unreleased-feedback">
@@ -185,7 +185,7 @@
 					</div>	
 				</#if>			
 				
-				<#if assignment.anyReleasedFeedback || features.submissions>
+				<#if assignment.hasReleasedFeedback || features.submissions>
 				<p class="feedback-published">
 					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
 					<a class="copyable-url use-tooltip" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Click to copy it to the clipboard and then paste it into an email or page.">

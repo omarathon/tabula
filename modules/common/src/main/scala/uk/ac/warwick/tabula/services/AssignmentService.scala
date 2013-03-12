@@ -13,8 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.{Projections, Restrictions, Order}
 import uk.ac.warwick.tabula.helpers.{ FoundUser, Logging }
 import uk.ac.warwick.tabula.services._
 
@@ -92,6 +91,8 @@ trait AssignmentService {
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean
 
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
+	def countPublishedFeedback(assignment: Assignment): Int
+	def countFullFeedback(assignment: Assignment): Int
 }
 
 @Service(value = "assignmentService")
@@ -309,6 +310,22 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentMembershipM
 
 	def getStudentFeedback(assignment: Assignment, uniId: String) = {
 		assignment.findFullFeedback(uniId)
+	}
+
+	def countPublishedFeedback(assignment: Assignment): Int = {
+		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
+			.setString("assignmentId", assignment.id)
+			.uniqueResult
+			.asInstanceOf[Number].intValue
+	}
+
+	def countFullFeedback(assignment: Assignment): Int = {
+		session.createQuery("""select count(*) from Feedback f join f.attachments a
+			where f.assignment = :assignment
+			and not (actualMark is null and actualGrade is null and f.attachments is empty)""")
+			.setEntity("assignment", assignment)
+			.uniqueResult
+			.asInstanceOf[Number].intValue
 	}
 
 	private def isInteresting(assignment: UpstreamAssignment) = {
