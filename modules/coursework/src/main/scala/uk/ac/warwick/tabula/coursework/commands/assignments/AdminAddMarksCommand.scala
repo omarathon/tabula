@@ -26,11 +26,14 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 
 	override def applyInternal(): List[Feedback] = transactional() {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
-			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
-			feedback.assignment = assignment
-			feedback.uploaderId = submitter.apparentId
-			feedback.universityId = universityId
-			feedback.released = false
+			val feedback = assignment.findFeedback(universityId).getOrElse({
+				val newFeedback = new Feedback
+				newFeedback.assignment = assignment
+				newFeedback.uploaderId = submitter.apparentId
+				newFeedback.universityId = universityId
+				newFeedback.released = false
+				newFeedback
+			})
 			feedback.actualMark = StringUtils.hasText(actualMark) match {
 				case true => Some(actualMark.toInt)
 				case false => None

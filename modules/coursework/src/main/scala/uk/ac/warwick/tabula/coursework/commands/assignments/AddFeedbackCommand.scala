@@ -17,11 +17,14 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 
 	override def applyInternal(): List[Feedback] = transactional() {
 		def saveFeedback(uniNumber: String, file: UploadedFile) = {
-			val feedback = assignment.findFeedback(uniNumber).getOrElse(new Feedback)
-			feedback.assignment = assignment
-			feedback.uploaderId = submitter.apparentId
-			feedback.universityId = uniNumber
-			feedback.released = false
+			val feedback = assignment.findFeedback(uniNumber).getOrElse({
+				val newFeedback = new Feedback
+				newFeedback.assignment = assignment
+				newFeedback.uploaderId = submitter.apparentId
+				newFeedback.universityId = uniNumber
+				newFeedback.released = false
+				newFeedback
+			})
 			for (attachment <- file.attached) {
 				// if an attachment with the same name as this one exists then delete it
 				val duplicateAttachment = feedback.attachments.find(_.name == attachment.name)
