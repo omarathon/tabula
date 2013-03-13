@@ -105,7 +105,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	def preExtractValidation(errors: Errors) {
 		if (batch) {
 			if (archive != null && !archive.isEmpty()) {
-				logger.info("file name is " + archive.getOriginalFilename())
+				logger.debug("file name is " + archive.getOriginalFilename())
 				if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 					errors.rejectValue("archive", "archive.notazip")
 				}
@@ -134,11 +134,15 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
 		val file = item.file
 		val uniNumber = item.uniNumber
-
+		
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		for(f <- file.attached){
+		for((f, i) <- file.attached.zipWithIndex){
+			if (f.uploadedDataLength == 0) {
+				errors.rejectValue("file.attached[" + i + "]", "file.empty")
+			}
+			
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
-				errors.rejectValue("file", "file.url")
+				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
 		if (uniNumber.hasText) {

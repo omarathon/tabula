@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import org.springframework.mock.web.MockMultipartFile
+import uk.ac.warwick.tabula.data.FileDao
 
 class AddFeedbackCommandTest extends TestBase with Mockito {
 	
@@ -30,6 +32,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.uploadedDataLength = 300
 		file.attached.add(a)
 		
 		val item = new FeedbackItem("1010101")

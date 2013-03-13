@@ -33,6 +33,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.uploadedDataLength = 300
 		file.attached.add(a)
 		
 		val item = new FeedbackItem("1010101")
@@ -65,6 +66,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.uploadedDataLength = 300
 		file.attached.add(a)
 		
 		val item = new FeedbackItem("1010101")
