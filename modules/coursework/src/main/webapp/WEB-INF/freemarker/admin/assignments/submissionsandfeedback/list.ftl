@@ -158,7 +158,7 @@
 		<ul class="dropdown-menu">
 			<#if department.plagiarismDetectionEnabled>
 				<li>
-					<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
+					<a class="use-tooltip" data-html="true" title="Toggle whether the selected students'<br>submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
 				</li>
 			</#if>
 			<#if features.markingWorkflows && mustReleaseForMarking>
