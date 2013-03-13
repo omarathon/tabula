@@ -253,6 +253,26 @@ class AssignmentMembershipServiceImpl
 			.list filter isInteresting
 	}
 
+	def getStudentFeedback(assignment: Assignment, uniId: String) = {
+		assignment.findFullFeedback(uniId)
+	}
+
+	def countPublishedFeedback(assignment: Assignment): Int = {
+		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
+			.setString("assignmentId", assignment.id)
+			.uniqueResult
+			.asInstanceOf[Number].intValue
+	}
+
+	def countFullFeedback(assignment: Assignment): Int = {  //join f.attachments a
+		session.createQuery("""select count(*) from Feedback f
+			where f.assignment = :assignment
+			and not (actualMark is null and actualGrade is null and f.attachments is empty)""")
+			.setEntity("assignment", assignment)
+			.uniqueResult
+			.asInstanceOf[Number].intValue
+	}
+
 	private def isInteresting(assignment: UpstreamAssignment) = {
 		!(assignment.name contains "NOT IN USE")
 	}
