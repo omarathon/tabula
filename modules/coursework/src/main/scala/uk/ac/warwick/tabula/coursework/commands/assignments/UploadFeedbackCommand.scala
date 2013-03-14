@@ -137,7 +137,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
 		for((f, i) <- file.attached.zipWithIndex){
-			if (f.uploadedDataLength == 0) {
+			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
 			

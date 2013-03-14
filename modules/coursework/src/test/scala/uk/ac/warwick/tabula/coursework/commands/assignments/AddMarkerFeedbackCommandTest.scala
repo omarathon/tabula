@@ -8,9 +8,14 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.data.FileDao
 
 class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
-	
+
+	var dao: FileDao = mock[FileDao]
+	dao.getData(null) returns (None)
+
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
@@ -33,6 +38,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.fileDao = dao
 		a.uploadedDataLength = 300
 		file.attached.add(a)
 		
@@ -66,6 +72,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.fileDao = dao
 		a.uploadedDataLength = 300
 		file.attached.add(a)
 		
