@@ -30,5 +30,15 @@
 				</#if>
 			</div>
 		</#if>
+		
+		<#if profile.hasAPersonalTutor>
+			<#if can.do("Profiles.MeetingRecord.Create", profile)>
+				<a href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			</#if>
+			
+			<#if can.do("Profiles.MeetingRecord.Read", profile)>
+				<p class="alert">Here's where you'll see meeting records (TAB-356, TAB-357).</p>
+			</#if>
+		</#if>
 </section>
 
