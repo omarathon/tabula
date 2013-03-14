@@ -53,16 +53,21 @@ $(function(){
             $(this).css('opacity',1)
                 .find('.module-info-contents').show().end();
         })
-        .hide()
-        .first().before(
-            $('<p>').html('Modules with no assignments are hidden. ').append(
-                $('<a>').addClass('btn btn-info').attr('href','#').html("Show all modules").click(function(event){
-                    event.preventDefault();
-                    $(this.parentNode).remove();
-                    $('.module-info.empty').show();
-                })
-            )
-        );
+        .hide();
+        
+    $('.dept-show').click(function(event){
+    	event.preventDefault();
+    	//$(this.parentNode).remove();
+        $('.module-info.empty').toggle('fast', function() {
+        	if($('.module-info.empty').is(":visible")) {
+        		$('.dept-show a').html('<i class="icon-eye-close"></i> Hide');
+        	} else { 
+        		$('.dept-show a').html('<i class="icon-eye-open"></i> Show');
+        	}
+        });
+        
+    });
+            
     
     // code for tabs
     $('.nav.nav-tabs a').click(function (e) {

@@ -109,7 +109,8 @@ tr.error, tr.warning {
 	.module-manage-button { 
 		display: inline-block;
 		margin-left: 8px;
-		top: -8px;
+		top: 3px;
+		float:right
 	}
 
 	// fade out glypicons a bit, too dark
@@ -227,22 +228,25 @@ ul {
 	&.alt-row { background-color: #f5f5f5; }
 	
 	.column1 {
-		width: 24em;
+		width: 15.5em;
 		float:left;
 	}
 	.stats {
 		font-size: 0.85em;
-		width: 32em;
+		width: 44em;
 		float:left;
 	}
 	.assignment-buttons {
 		float: right;
-		text-align: right;
 		width: 11em;
+		
+		.btn-group {
+			float:right;
+		}
+		
 		a {
 			display: block;
-			margin: 1px 0;
-			text-align: right;
+			margin: 1px 0;	
 		}
 		
 		.btn-toolbar {
@@ -252,19 +256,21 @@ ul {
 	}
 	.feedback-published {
 		line-height: 1.4em;
+		font-size:13px;
 	}
 	span.label-like {
 		color: @subtle-text-color;
 	}
 	.submission-count, .feedback-count, .submission-and-feedback-count {
-	  padding-left: 20px;
-	  background: url(../images/filetypes/text-x-generic.png) 0 2px no-repeat;
+	  
 	}
-	.has-unreleased-feedback {
+	.has-unreleased-feedback, .has-unapproved-extensions {
 	  color: @warningText;
+	  display:block;
 	}
 	.no-unreleased-feedback {
 	  color: @subtle-text-color;
+	  display:block;
 	}
 	
 	&.archived {
@@ -704,7 +710,7 @@ input.copyable-url {
   width: 100%;
   &, &[readonly] { cursor: pointer !important; }
   }
-span.copyable-url-container { position: relative; }
+span.copyable-url-container { display:block; position: relative; }
 span.press-ctrl-c {
   position:absolute;   
   top: 1.7em;
@@ -872,9 +878,14 @@ h1.with-settings {
 	margin-right: 0px;
 }
 
-.dept-settings, .user-settings {
+.dept-settings, .user-settings, .dept-show {
 	display: inline-block;
-	margin: 0px 0px 16px 10px;
+	
+}
+
+.dept-toolbar {
+	display: inline-block;
+	float:right
 }
 
 #container .feedback-report {
@@ -888,6 +899,18 @@ h1.with-settings {
 	width: @modal-width;
 	margin-left: -(@modal-width/2);
 }
+
+// fix for disabled dropdown menu items icon flicker to white when hovering
+.tabula-page .dropdown-menu > li.disabled > a:hover > [class^="icon-"], #container .dropdown-menu > li.disabled > a:hover > [class^="icon-"] {
+	background-image: url("../libs/bootstrap/img/glyphicons-halflings.png");
+}
+
+// grey out disabled icons 
+.tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
+    opacity:.3;
+    filter: alpha(opacity=30);
+}
+
 
 // Fix popovers to be on top of modals
 .popover {
@@ -1127,6 +1150,12 @@ h1.with-settings {
 			.active > a, .active > a:hover {
 				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
 			}
+			
+			.pull-right a {
+				text-align: left;
+			}
+		
+			
 		}
 	} // .profile-search
 
