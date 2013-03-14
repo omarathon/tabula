@@ -14,7 +14,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
 
-	override def checkIfDuplicate(mark: MarkItem) {
+	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) => {
