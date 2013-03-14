@@ -9,17 +9,18 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[ExtensionInformation] with ReadOnly with Unaudited {
 	
 	mustBeLinked(assignment,module)
 	PermissionCheck(Permissions.Extension.Read, assignment)
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 	
 	def applyInternal() = {
-		val assignmentUsers = assignmentService.determineMembershipUsers(assignment)
+		val assignmentUsers = assignmentMembershipService.determineMembershipUsers(assignment)
 		
 		val assignmentMembership = Map() ++ (
 			for(assignmentUser <- assignmentUsers)  

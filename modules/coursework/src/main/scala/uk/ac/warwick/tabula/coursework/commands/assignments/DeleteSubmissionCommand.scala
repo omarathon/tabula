@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.SubmissionService
 
 
 class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
@@ -26,14 +27,14 @@ class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) ex
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
 	@BeanProperty var confirm: Boolean = false
 
 	def applyInternal() = {
-		for (submission <- submissions) assignmentService.delete(submission)
+		for (submission <- submissions) submissionService.delete(submission)
 		zipService.invalidateSubmissionZip(assignment)
 	}
 

@@ -26,6 +26,8 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.FeedbackService
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -55,6 +57,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
+	
+	@transient
+	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
+	
+	@transient
+	var feedbackService = Wire[FeedbackService]("feedbackService")
+	
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
 
@@ -238,7 +247,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
-				assignmentService.getAssessmentGroup(template)
+				assignmentMembershipService.getAssessmentGroup(template)
 			}
 		}
 	}
@@ -306,7 +315,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
 	def fullFeedback = feedbacks.filterNot(_.isPlaceholder)
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
-	def countFullFeedback = assignmentService.countFullFeedback(this)
+	def countFullFeedback = feedbackService.countFullFeedback(this)
 	def hasFullFeedback = countFullFeedback > 0
 
 	/**
@@ -316,7 +325,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
-	def countReleasedFeedback  = assignmentService.countPublishedFeedback(this)
+	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)
 	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
 	def hasReleasedFeedback = countReleasedFeedback > 0
 	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
@@ -348,7 +357,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
-			assignmentService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+			assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
 		}

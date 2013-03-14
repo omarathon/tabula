@@ -26,6 +26,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 
 /**
@@ -71,6 +72,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
 
 	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var moduleDao = Wire.auto[ModuleDao]
 
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
@@ -222,7 +224,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	def afterBind() {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
 		for (item <- assignmentItems if item.assessmentGroup == null) {
-			item.assessmentGroup = assignmentService.getAssessmentGroup(new UpstreamAssessmentGroup {
+			item.assessmentGroup = assignmentMembershipService.getAssessmentGroup(new UpstreamAssessmentGroup {
 				this.academicYear = academicYear
 				this.occurrence = item.occurrence
 				this.moduleCode = item.upstreamAssignment.moduleCode
@@ -233,8 +235,8 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
-			upstreamAssignment <- assignmentService.getUpstreamAssignments(department);
-			assessmentGroup <- assignmentService.getAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
+			upstreamAssignment <- assignmentMembershipService.getUpstreamAssignments(department);
+			assessmentGroup <- assignmentMembershipService.getAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(
 				include = shouldIncludeByDefault(upstreamAssignment),

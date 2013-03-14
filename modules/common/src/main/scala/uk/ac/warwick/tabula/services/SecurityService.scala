@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles.Role
+import scala.annotation.tailrec
 
 /**
  * Checks permissions.
@@ -42,27 +43,38 @@ class SecurityService extends Logging {
 
 	def checkGod(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = if (user.god) Allow else Continue
 	
-	def checkPermissions(allPermissions: Map[Permission, Option[PermissionsTarget]], user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
-		if (allPermissions == null || allPermissions.isEmpty) Continue
-		else permission match {
-			case permission: ScopelessPermission => if (allPermissions.contains(permission)) Allow else Continue
-			case permission => {
-				def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
-					// The ID matches, or there exists a parent that matches (recursive)
-					permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
-				
-				allPermissions.get(permission) match {
-					case Some(permissionScope) => permissionScope match {
-						case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
-						case None => 
-							if (scope != null) Allow // Global permission
-							else Continue
-					}
-					case None => Continue
-				}
+	private def checkScopedPermission(
+		allPermissions: Map[Permission, Option[PermissionsTarget]], 
+		user: CurrentUser, 
+		permission: Permission, 
+		scope: PermissionsTarget
+	): Response = {
+		def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
+			// The ID matches, or there exists a parent that matches (recursive)
+			permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
+		
+		allPermissions.get(permission) match {
+			case Some(permissionScope) => permissionScope match {
+				case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
+				case None => 
+					if (scope != null) Allow // Global permission
+					else Continue
 			}
+			case None => Continue
 		}
 	}
+	
+	def checkPermissions(
+		allPermissions: Map[Permission, Option[PermissionsTarget]], 
+		user: CurrentUser, 
+		permission: Permission, 
+		scope: PermissionsTarget
+	): Response =
+		if (allPermissions == null || allPermissions.isEmpty) Continue
+		else permission match {
+			case _: ScopelessPermission => if (allPermissions.contains(permission)) Allow else Continue
+			case _ => checkScopedPermission(allPermissions, user, permission, scope)
+		}
 	
 	def checkPermissions(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
 		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
@@ -96,18 +108,23 @@ class SecurityService extends Logging {
 	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
-	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = 
-		transactional(readOnly=true) {
-			// loop through checks, seeing if any of them return Allow or Deny
-			for (check <- checks) {
-				val response = check(user, permission, scope orNull)
-				response map { canDo =>
+	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
+		// loop through checks, seeing if any of them return Allow or Deny
+	
+		@tailrec
+		def _can(head: Option[PermissionChecker], tail: Seq[PermissionChecker]): Boolean = head match {
+			case Some(check) => check(user, permission, scope orNull) match {
+				case Some(canDo) => {
 					if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
-					return canDo
+					canDo
 				}
+				case _ => _can(tail.headOption, tail.tail)
 			}
-			throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
+			case None => throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
 		}
+		
+		_can(checks.headOption, checks.tail)
+	}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
 	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))

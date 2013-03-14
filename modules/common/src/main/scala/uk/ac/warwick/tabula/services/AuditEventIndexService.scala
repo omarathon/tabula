@@ -48,8 +48,10 @@ case class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Op
 }
 
 trait AuditEventNoteworthySubmissionsService {
-	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents
-	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents
+	final val DefaultMaxEvents = 50
+	
+	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents
+	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents
 }
 
 /**
@@ -68,14 +70,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		val searchResults = search(all(
 			termQuery("eventType", "PublishFeedback"),
 			termQuery("department", dept.code)))
-			.flatMap{ toParsedAuditEvent(_) }
+			.transform{ toParsedAuditEvent(_) }
 			.filterNot { _.hadError }
 		
 		searchResults
 	}
 		
 	
-	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
+	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
 		val searchResults = search(
@@ -90,7 +92,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
 
-	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = 50): PagedAuditEvents = {
+	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 		
 		val searchResults = search(
@@ -141,7 +143,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
 			termQuery("assignment", assignment.id)))
-			.flatMap { toItem(_) }
+			.transform { toItem(_) }
 			.filterNot { _.hadError }
 			.map( whoDownloaded => {
 				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
@@ -152,14 +154,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
 			termQuery("assignment", assignment.id)))
-			.flatMap { toItem(_) }
+			.transform { toItem(_) }
 			.filterNot { _.hadError }
 			.map { _.masqueradeUserId }
 			.filterNot { _ == null }
 			.distinct
 
-	def mapToAssignments(seq: Seq[Document]) = seq
-		.flatMap(toParsedAuditEvent)
+	def mapToAssignments(results: RichSearchResults) = 
+		results.transform(toParsedAuditEvent)
 		.flatMap(_.assignmentId)
 		.flatMap(assignmentService.getAssignmentById)
 
@@ -184,7 +186,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 
 	def getAssignmentCreatedDate(assignment: Assignment): Option[DateTime] = {
 		search(all(term("eventType" -> "AddAssignment"), term("assignment" -> assignment.id)))
-			.flatMap { doc: Document =>
+			.transform { doc: Document =>
 				doc.getField("eventDate") match {
 					case field: StoredField if field.numericValue() != null => {
 						Some(new DateTime(field.numericValue()))
@@ -269,8 +271,8 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		event
 	}
 
-	protected def auditEvents(docs: Seq[Document]) = docs.flatMap(toItem(_))
-	protected def parsedAuditEvents(docs: Seq[Document]) = docs.flatMap(toParsedAuditEvent(_))
+	protected def auditEvents(results: RichSearchResults) = results.transform(toItem(_))
+	protected def parsedAuditEvents(results: RichSearchResults) = results.transform(toParsedAuditEvent(_))
 
 	/**
 	 * TODO reuse one Document and set of Fields for all items
@@ -311,31 +313,32 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 			sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
 			offset = start,
 			max = count)
-		docs flatMap toId map (_.toLong) flatMap service.getById
+		docs transform toId map (_.toLong) flatMap service.getById
+	}
+	
+	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
+		case Some(value: String) => {
+			doc add plainStringField(field, value, isStored = false)
+		}
+		case Some(value: Boolean) => {
+			doc add plainStringField(field, value.toString, isStored = false)
+		}
+		case _ => // missing or not a string
+	}
+	
+	private def addSequenceToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field).collect {
+		case ids: JList[_] => doc add seqField(field, ids.asScala)
+		case ids: Seq[_] => doc add seqField(field, ids)
+		case ids: Array[String] => doc add seqField(field, ids)
+		case other: AnyRef => logger.warn("Collection field " + field + " was unexpected type: " + other.getClass.getName)
+		case _ =>
 	}
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {
-		for (key <- Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")) {
-			data.get(key) match {
-				case Some(value: String) => {
-					doc add plainStringField(key, value, isStored = false)
-				}
-				case Some(value: Boolean) => {
-					doc add plainStringField(key, value.toString, isStored = false)
-				}
-				case _ => // missing or not a string
-			}
-		}
+		Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy").foreach(addFieldToDoc(_, data, doc))
+		
 		// sequence-type fields
-		for (key <- Seq("students")) {
-			data.get(key).collect {
-				case ids: JList[_] => doc add seqField(key, ids.asScala)
-				case ids: Seq[_] => doc add seqField(key, ids)
-				case ids: Array[String] => doc add seqField(key, ids)
-				case other: AnyRef => logger.warn("Collection field " + key + " was unexpected type: " + other.getClass.getName)
-				case _ =>
-			}
-		}
+		Seq("students").foreach(addSequenceToDoc(_, data, doc))
 	}
 }

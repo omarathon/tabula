@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.SubmissionService
 
 /** Class to expose bean properties via constructor.
  * 
@@ -25,13 +25,13 @@ class Activity[A](val title: String, val date: DateTime, val agent: User, val me
  */
 object Activity {
 	var userLookup = Wire.auto[UserLookupService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	// given an AuditEvent...
 	def apply(event: AuditEvent): Option[Activity[Any]] = {
 		event.eventType match {
 			case "SubmitAssignment" if (event.hasProperty("submission")) => {
-				val submission = assignmentService.getSubmission(event.submissionId getOrElse "")
+				val submission = submissionService.getSubmission(event.submissionId getOrElse "")
 				
 				if (submission.isDefined) {
 					val title = "New submission"

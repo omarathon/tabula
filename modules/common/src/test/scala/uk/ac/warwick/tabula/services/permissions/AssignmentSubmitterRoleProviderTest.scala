@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	val provider = new AssignmentSubmitterRoleProvider
-	val assignmentService = mock[AssignmentService]
+	val assignmentMembershipService = mock[AssignmentMembershipService]
 	
 	@Test def unrestrictedAssignment = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
@@ -24,10 +25,10 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	@Test def canSubmit = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
-		assignment.assignmentService = assignmentService
+		assignment.assignmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 		
-		assignmentService.isStudentMember(
+		assignmentMembershipService.isStudentMember(
 				isEq(currentUser.apparentUser), 
 				isA[Seq[UpstreamAssessmentGroup]], 
 				isA[Option[UserGroup]]) returns (true)
@@ -37,10 +38,10 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	@Test def cannotSubmit = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
-		assignment.assignmentService = assignmentService
+		assignment.assignmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 		
-		assignmentService.isStudentMember(
+		assignmentMembershipService.isStudentMember(
 				isEq(currentUser.apparentUser), 
 				isA[Seq[UpstreamAssessmentGroup]], 
 				isA[Option[UserGroup]]) returns (false)

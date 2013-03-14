@@ -89,7 +89,9 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 class CompositePropertySource(name: String) extends PropertySource[Unit](name, null) {
 	val mutableSources = new MutablePropertySources
 
-	def addRequiredSource(src: Option[PropertySource[_]]) = mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
+	def addRequiredSource(src: Option[PropertySource[_]]) = 
+		mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
+		
 	def addOptionalSource(src: Option[PropertySource[_]]) = src match {
 		case Some(src) => mutableSources.addLast(src)
 		case None =>
@@ -100,17 +102,13 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, n
 		case "false" => false
 		case _ => default
 	}
+	
 	def getString(prop: String): Object = getProperty(prop) match {
 		case value: Any => value.toString
 		case _ => null
 	}
-	override def getProperty(prop: String): Object = {
-		for (src <- mutableSources) {
-			src.getProperty(prop) match {
-				case value: Any => return value
-				case _ => return null
-			}
-		}
-		return null
-	}
+	
+	override def getProperty(prop: String): Object =
+		mutableSources.find { _.containsProperty(prop) } map { _.getProperty(prop) } orNull
+	
 }

@@ -23,11 +23,17 @@ import uk.ac.warwick.tabula.Fixtures
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
-	@Autowired var service:AssignmentServiceImpl =_
-    @Autowired var modAndDeptService:ModuleAndDepartmentService =_
-    var userLookup:MockUserLookup = _
+	@Autowired var assignmentService:AssignmentServiceImpl =_
+	@Autowired var assignmentMembershipService:AssignmentMembershipServiceImpl =_
+	@Autowired var feedbackService:FeedbackServiceImpl =_
+	@Autowired var submissionService:SubmissionServiceImpl =_
+	@Autowired var originalityReportService:OriginalityReportServiceImpl =_
+	@Autowired var extensionService:ExtensionServiceImpl =_
+	
+  @Autowired var modAndDeptService:ModuleAndDepartmentService =_
+  var userLookup:MockUserLookup = _
     
-    @Before def getUserLookup {
+  @Before def getUserLookup {
 		// We can't just Autowire this because it has autowire-candidate="false"
 		userLookup = beans.getBean("userLookupDelegate").asInstanceOf[MockUserLookup]
 		userLookup.defaultFoundUser = true
@@ -39,9 +45,9 @@ class AssignmentServiceTest extends AppContextTestBase {
 
 		session.save(department)
 		session.save(assignment.module)
-		service.save(assignment)
+		assignmentService.save(assignment)
 
-		service.recentAssignment(department).get should be (assignment)
+		assignmentService.recentAssignment(department).get should be (assignment)
 	}
 
 	/**
@@ -56,34 +62,34 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignment.academicYear = new AcademicYear(2009)
 		assignment.markDeleted()
 		assignment.addDefaultFields
-		service.save(assignment)
+		assignmentService.save(assignment)
 		
 		assignment.fields.get(1)
 		
-		service.isFilterEnabled("notDeleted") should be (false)
-		service.getAssignmentById(assignment.id) should be (Some(assignment))
+		assignmentService.isFilterEnabled("notDeleted") should be (false)
+		assignmentService.getAssignmentById(assignment.id) should be (Some(assignment))
 		session.enableFilter("notDeleted")
-		service.getAssignmentById(assignment.id) should be (None)
+		assignmentService.getAssignmentById(assignment.id) should be (None)
 		
-		service.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be ('empty)
 	}
 	
 	@Transactional @Test def findDuplicateAssignmentNames {
 		val module = new Module
 		session.save(module)
 		
-		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('empty)
 		
 		val assignment = new Assignment
 		assignment.name = "Essay"
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2009)
-		service.save(assignment)
+		assignmentService.save(assignment)
 		session.flush()
 		
-		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
-		service.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
-		service.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
 	
 	@Transactional @Test def getAssignmentsByNameTest {    
@@ -91,10 +97,10 @@ class AssignmentServiceTest extends AppContextTestBase {
 	    compSciDept should be ('defined)
 	    
 	    compSciDept.foreach(dept => {    
-	        service.getAssignmentsByName("Test", dept) should have size(2)
-            service.getAssignmentsByName("Computing", dept) should have size(1)	        
-	        service.getAssignmentsByName("Assignment", dept) should have size(3) 
-            service.getAssignmentsByName("xxxx", dept) should have size(0)	        
+	        assignmentService.getAssignmentsByName("Test", dept) should have size(2)
+            assignmentService.getAssignmentsByName("Computing", dept) should have size(1)	        
+	        assignmentService.getAssignmentsByName("Assignment", dept) should have size(3) 
+            assignmentService.getAssignmentsByName("xxxx", dept) should have size(0)	        
 	    })
     }
 
@@ -104,7 +110,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 	 *     2. have a submission associated with that assignment which is not suspected plagiarised.
 	 */
 	@Transactional @Test def getUsersForFeedbackTest {
-		val assignment = service.getAssignmentById("1");
+		val assignment = assignmentService.getAssignmentById("1");
 		assignment should be('defined)
 
 		assignment.foreach { assmt =>
@@ -123,10 +129,10 @@ class AssignmentServiceTest extends AppContextTestBase {
 			submission.userId = "abcdef"
 			submission.suspectPlagiarised = false
 			assmt.addSubmission(submission)
-			service.saveSubmission(submission)
+			submissionService.saveSubmission(submission)
 			
 			// now check one user who needs to get feedback for this assignment is returned
-			val userPairs = service.getUsersForFeedback(assmt)
+			val userPairs = feedbackService.getUsersForFeedback(assmt)
 			userPairs.size should be (1)
 
 			// and check it's the right one
@@ -140,17 +146,17 @@ class AssignmentServiceTest extends AppContextTestBase {
 			
 			// suppose the feedback was already released - would expect to get no users back
 			feedback.released = true
-			val userPairs2 = service.getUsersForFeedback(assmt)
+			val userPairs2 = feedbackService.getUsersForFeedback(assmt)
 			userPairs2.size should be (0)
 
 			// feedback was not released - expect 1
 			feedback.released = false
-			val userPairs3 = service.getUsersForFeedback(assmt)
+			val userPairs3 = feedbackService.getUsersForFeedback(assmt)
 			userPairs3.size should be (1)
 			
 			// the only person was suspected of plagiarism - expect 0
 			submission.suspectPlagiarised = true
-			val userPairs4 = service.getUsersForFeedback(assmt)
+			val userPairs4 = feedbackService.getUsersForFeedback(assmt)
 			userPairs4.size should be (0)					
 		}
 		
@@ -164,7 +170,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		upstream.assessmentGroup = "A"
 		upstream.name = "Egg plants"
 		
-		service.save(upstream)
+		assignmentMembershipService.save(upstream)
 		
 		val upstream2 = new UpstreamAssignment
         upstream2.departmentCode = "ch"
@@ -173,7 +179,7 @@ class AssignmentServiceTest extends AppContextTestBase {
         upstream2.assessmentGroup = "A"
         upstream2.name = "Greg's plants"
 		
-        service.save(upstream2)
+        assignmentMembershipService.save(upstream2)
 	}
 	
 	@Transactional @Test def findAssignmentsWithFeedback {
@@ -205,9 +211,9 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignment2.addFeedback(unreleasedFeedback)
 		assignment3.addFeedback(deletedFeedback)
 		
-		service.save(assignment1)
-		service.save(assignment2)
-		service.save(assignment3)
+		assignmentService.save(assignment1)
+		assignmentService.save(assignment2)
+		assignmentService.save(assignment3)
 		
 		session.save(myFeedback)
 		session.save(otherFeedback)
@@ -216,7 +222,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		session.enableFilter("notDeleted")
 		
-		val assignments = service.getAssignmentsWithFeedback(ThisUser)
+		val assignments = assignmentService.getAssignmentsWithFeedback(ThisUser)
 		assignments.size should be (1)
 		assignments(0) should be (assignment1)
 	}
@@ -246,17 +252,17 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignment1.addSubmission(otherSubmission)
 		assignment3.addSubmission(deletedSubmission)
 		
-		service.save(assignment1)
-		service.save(assignment2)
-		service.save(assignment3)
+		assignmentService.save(assignment1)
+		assignmentService.save(assignment2)
+		assignmentService.save(assignment3)
 		
-		session.save(mySubmission)
-		session.save(otherSubmission)
-		session.save(deletedSubmission)
+		submissionService.saveSubmission(mySubmission)
+		submissionService.saveSubmission(otherSubmission)
+		submissionService.saveSubmission(deletedSubmission)
 		
 		session.enableFilter("notDeleted")
 		
-		val assignments = service.getAssignmentsWithSubmission(ThisUser)
+		val assignments = assignmentService.getAssignmentsWithSubmission(ThisUser)
 		assignments.size should be (1)
 		assignments(0) should be (assignment1)
 	}
@@ -269,7 +275,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		group.academicYear = new AcademicYear(2010)
 		group.members.staticIncludeUsers.addAll(Seq("rob","kev","bib").asJava)
 		
-		service.save(group)
+		assignmentMembershipService.save(group)
 		session.flush
 		
 		val ua = new UpstreamAssignment
@@ -279,26 +285,26 @@ class AssignmentServiceTest extends AppContextTestBase {
 		ua.assessmentGroup = "A"
 		ua.name = "Egg plants"
 		
-		service.save(ua) should be (ua)
+		assignmentMembershipService.save(ua) should be (ua)
 		
-		service.getAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
-		service.getAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
-		service.getAssessmentGroups(new UpstreamAssignment, new AcademicYear(2010)) should be (Seq())
+		assignmentMembershipService.getAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
+		assignmentMembershipService.getAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
+		assignmentMembershipService.getAssessmentGroups(new UpstreamAssignment, new AcademicYear(2010)) should be (Seq())
 		
 		session.clear
 		
-		val foundGroup = service.find(group)
+		val foundGroup = assignmentMembershipService.find(group)
 		foundGroup should be ('defined)
 		foundGroup.eq(group) should be (false)
 		
 		foundGroup.get.occurrence = "B"
 			
-		service.save(foundGroup.get)
+		assignmentMembershipService.save(foundGroup.get)
 		session.flush
 		session.clear
 		
-		service.find(group) should be ('empty)
-		service.find(foundGroup.get) should be ('defined)
+		assignmentMembershipService.find(group) should be ('empty)
+		assignmentMembershipService.find(foundGroup.get) should be ('defined)
 	}
 	
 	@Test def upstreamAssignments = transactional { tx =>
@@ -330,24 +336,24 @@ class AssignmentServiceTest extends AppContextTestBase {
 		ua4.assessmentGroup = "A"
 		ua4.name = "Egg plants NOT IN USE"
 		
-		service.save(ua1) should be (ua1)
-		service.save(ua2) should be (ua2)
-		service.save(ua3) should be (ua3)
-		service.save(ua4) should be (ua4)
+		assignmentMembershipService.save(ua1) should be (ua1)
+		assignmentMembershipService.save(ua2) should be (ua2)
+		assignmentMembershipService.save(ua3) should be (ua3)
+		assignmentMembershipService.save(ua4) should be (ua4)
 		
 		session.flush
 		
-		service.getUpstreamAssignment(ua1.id) should be (Some(ua1))
-		service.getUpstreamAssignment(ua4.id) should be (Some(ua4))
-		service.getUpstreamAssignment("wibble") should be (None)
+		assignmentMembershipService.getUpstreamAssignment(ua1.id) should be (Some(ua1))
+		assignmentMembershipService.getUpstreamAssignment(ua4.id) should be (Some(ua4))
+		assignmentMembershipService.getUpstreamAssignment("wibble") should be (None)
 		
-		service.getUpstreamAssignments(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
-		service.getUpstreamAssignments(Fixtures.module("la101")) should be (Seq(ua3))
-		service.getUpstreamAssignments(Fixtures.module("cs101")) should be (Seq())
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("la101")) should be (Seq(ua3))
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("cs101")) should be (Seq())
 		
-		service.getUpstreamAssignments(Fixtures.department("ch")) should be (Seq(ua1, ua2))
-		service.getUpstreamAssignments(Fixtures.department("la")) should be (Seq(ua3))
-		service.getUpstreamAssignments(Fixtures.department("cs")) should be (Seq())
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("ch")) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("la")) should be (Seq(ua3))
+		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("cs")) should be (Seq())
 	}
 	
 	@Test def assessmentGroups = transactional { tx =>
@@ -358,7 +364,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		upstreamGroup.academicYear = new AcademicYear(2010)
 		upstreamGroup.members.staticIncludeUsers.addAll(Seq("rob","kev","bib").asJava)
 		
-		service.save(upstreamGroup)
+		assignmentMembershipService.save(upstreamGroup)
 		
 		val upstreamAssignment = new UpstreamAssignment
 		upstreamAssignment.departmentCode = "ch"
@@ -367,14 +373,14 @@ class AssignmentServiceTest extends AppContextTestBase {
 		upstreamAssignment.assessmentGroup = "A"
 		upstreamAssignment.name = "Egg plants"
 		
-		service.save(upstreamAssignment) should be (upstreamAssignment)
+		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 		
 		val assignment = newDeepAssignment("ch101")
 		val department = assignment.module.department
 
 		session.save(department)
 		session.save(assignment.module)
-		service.save(assignment)
+		assignmentService.save(assignment)
 		
 		val group = new AssessmentGroup
 		group.assignment = assignment
@@ -385,10 +391,10 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		session.flush
 		
-		service.getAssessmentGroup(group.id) should be (Some(group))
+		assignmentMembershipService.getAssessmentGroup(group.id) should be (Some(group))
 		
-		service.getAssessmentGroup(group.id) map { service.delete(_) }
-		service.getAssessmentGroup(group.id) should be ('empty)
+		assignmentMembershipService.getAssessmentGroup(group.id) map { assignmentMembershipService.delete(_) }
+		assignmentMembershipService.getAssessmentGroup(group.id) should be ('empty)
 	}
 	
 	@Test def submissions = transactional { tx =>
@@ -397,30 +403,30 @@ class AssignmentServiceTest extends AppContextTestBase {
 
 		session.save(department)
 		session.save(assignment.module)
-		service.save(assignment)
+		assignmentService.save(assignment)
 		
 		val submission = new Submission
 		submission.universityId = "0070790"
 		submission.userId = "abcdef"
 		submission.suspectPlagiarised = false
 		assignment.addSubmission(submission)
-		service.saveSubmission(submission)
+		submissionService.saveSubmission(submission)
 		
 		session.flush
 		session.clear
 		
-		service.getSubmission(submission.id) should be ('defined)
-		service.getSubmission(submission.id).eq(submission) should be (false)
+		submissionService.getSubmission(submission.id) should be ('defined)
+		submissionService.getSubmission(submission.id).eq(submission) should be (false)
 		
-		service.getSubmissionByUniId(assignment, "0070790") should be ('defined)
-		service.getSubmissionByUniId(assignment, "0070790").eq(submission) should be (false)
+		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('defined)
+		submissionService.getSubmissionByUniId(assignment, "0070790").eq(submission) should be (false)
 		
-		service.getSubmissionByUniId(assignment, "0070790") map { service.delete(_) }
+		submissionService.getSubmissionByUniId(assignment, "0070790") map { submissionService.delete(_) }
 		
 		session.flush
 		session.clear
 		
-		service.getSubmissionByUniId(assignment, "0070790") should be ('empty)
+		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('empty)
 	}
 	
 	@Test def extensions = transactional { tx =>
@@ -429,7 +435,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 
 		session.save(department)
 		session.save(assignment.module)
-		service.save(assignment)
+		assignmentService.save(assignment)
 		
 		val extension = new Extension
 		extension.universityId = "0070790"
@@ -441,15 +447,15 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.flush
 		session.clear
 		
-		service.getExtensionById(extension.id) should be ('defined)
-		service.getExtensionById(extension.id).eq(extension) should be (false)
+		extensionService.getExtensionById(extension.id) should be ('defined)
+		extensionService.getExtensionById(extension.id).eq(extension) should be (false)
 		
-		service.getExtensionById(extension.id) map { session.delete(_) }
+		extensionService.getExtensionById(extension.id) map { session.delete(_) }
 		
 		session.flush
 		session.clear
 		
-		service.getExtensionById(extension.id) should be ('empty)
+		extensionService.getExtensionById(extension.id) should be ('empty)
 	}
 	
 	@Test def getEnrolledAssignments = transactional { tx =>
@@ -462,7 +468,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 
 		session.save(department1)
 		session.save(assignment1.module)
-		service.save(assignment1)
+		assignmentService.save(assignment1)
 		
 		val assignment2 = newDeepAssignment("ch101")
 		assignment2.academicYear = year
@@ -471,7 +477,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 
 		session.save(department2)
 		session.save(assignment2.module)
-		service.save(assignment2)
+		assignmentService.save(assignment2)
 		
 		val up1 = new UpstreamAssignment
 		up1.departmentCode = "ch"
@@ -480,7 +486,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		up1.assessmentGroup = "A"
 		up1.name = "Egg plants"
 		
-		val upstream1 = service.save(up1)
+		val upstream1 = assignmentMembershipService.save(up1)
 		
 		val up2 = new UpstreamAssignment
         up2.departmentCode = "ch"
@@ -489,7 +495,7 @@ class AssignmentServiceTest extends AppContextTestBase {
         up2.assessmentGroup = "B"
         up2.name = "Greg's plants"
 		
-    val upstream2 = service.save(up2)
+    val upstream2 = assignmentMembershipService.save(up2)
 		
 		val up3 = new UpstreamAssignment
         up3.departmentCode = "ch"
@@ -498,7 +504,7 @@ class AssignmentServiceTest extends AppContextTestBase {
         up3.assessmentGroup = "C"
         up3.name = "Steg's plants"
 		
-    val upstream3 = service.save(up3)
+    val upstream3 = assignmentMembershipService.save(up3)
     
     session.flush
     
@@ -532,9 +538,9 @@ class AssignmentServiceTest extends AppContextTestBase {
 		upstreamAg3.members.staticIncludeUsers.add("0000004")
 		upstreamAg3.members.staticIncludeUsers.add("0000005")
 		
-		service.save(upstreamAg1)
-		service.save(upstreamAg2)
-		service.save(upstreamAg3)
+		assignmentMembershipService.save(upstreamAg1)
+		assignmentMembershipService.save(upstreamAg2)
+		assignmentMembershipService.save(upstreamAg3)
 		
 		assignment1.members.addUser("manual1")
 		assignment1.members.addUser("manual2")
@@ -571,21 +577,21 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		assignment2.assessmentGroups.add(ag2)
 		
-		service.save(assignment1)
-		service.save(assignment2)
+		assignmentService.save(assignment1)
+		assignmentService.save(assignment2)
 		
 		session.flush
 		
-		withUser("manual1", "0000006") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-		withUser("manual2", "0000007") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("manual3", "0000008") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("manual4", "0000009") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("manual1", "0000006") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
+		withUser("manual2", "0000007") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("manual3", "0000008") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("manual4", "0000009") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
 		
-		withUser("student1", "0000001") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("student2", "0000002") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("student3", "0000003") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student4", "0000004") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student5", "0000005") { service.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("student1", "0000001") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("student2", "0000002") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("student3", "0000003") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+		withUser("student4", "0000004") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+		withUser("student5", "0000005") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
 	}
 	
 	@Test def getAssignmentWhereMarker = transactional { tx =>
@@ -623,15 +629,15 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.save(workflow1)
 		session.save(workflow2)
 		
-		service.save(assignment1)
-		service.save(assignment2)
-		service.save(assignment3)
+		assignmentService.save(assignment1)
+		assignmentService.save(assignment2)
+		assignmentService.save(assignment3)
 		
-		withUser("cuscav") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("cusebr") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("cuscao") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-		withUser("curef") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("cusfal") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("cusmab") { service.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq().toSet) }
+		withUser("cuscav") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("cusebr") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("cuscao") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
+		withUser("curef") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("cusfal") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("cusmab") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq().toSet) }
 	}
 }

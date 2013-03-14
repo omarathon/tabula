@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import org.junit.Test
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.{AssignmentServiceImpl, AssignmentService}
+import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
 
 
 import uk.ac.warwick.userlookup.User
@@ -29,7 +29,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		user
 	}
 
-  var assignmentService: AssignmentService = _
+  var assignmentMembershipService: AssignmentMembershipService = _
 	var userLookup: UserLookupService = _
 	val nobody = new UserGroup
 
@@ -41,26 +41,26 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
 		}
-    assignmentService = {
-      val s = new AssignmentServiceImpl
+    assignmentMembershipService = {
+      val s = new AssignmentMembershipServiceImpl
       s.userLookup = userLookup
       s
     }
 	}
 	
 	@Test def empty {
-		val membership = assignmentService.determineMembership(Nil, Option(nobody))
+		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody))
 		membership.size should be (0)
 	}
 	
 	@Test def emptyWithNone {
-		val membership = assignmentService.determineMembership(Nil, None)
+		val membership = assignmentMembershipService.determineMembership(Nil, None)
 		membership.size should be (0)
 	}
 	
 	@Test def plainSits {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val membership = assignmentService.determineMembership(Seq(upstream), Option(nobody))
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(nobody))
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
@@ -68,7 +68,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	
 	@Test def plainSitsWithNone {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val membership = assignmentService.determineMembership(Seq(upstream), None)
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), None)
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
@@ -79,7 +79,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		val others = new UserGroup
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
-		val membership = assignmentService.determineMembership(Seq(upstream), Option(others))
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others))
 		membership.size should be (3)
 		
 		membership(0).user.getFullName should be ("Roger Aaaaa")
@@ -96,7 +96,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
     // test the simpler methods that return a list of Users
 
-    val users = assignmentService.determineMembershipUsers(Seq(upstream), Option(others))
+    val users = assignmentMembershipService.determineMembershipUsers(Seq(upstream), Option(others))
     users.size should be (2)
     users(0).getFullName should be ("Roger Aaaaa")
     users(1).getFullName should be ("Roger Aaaag")
@@ -112,7 +112,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         val others = new UserGroup
         others.includeUsers.add("aaaaf")
         others.excludeUsers.add("aaaah")
-        val membership = assignmentService.determineMembership(Seq(upstream), Option(others))
+        val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others))
         membership.size should be (3)
         
         membership(0).user.getFullName should be ("Roger Aaaaf")

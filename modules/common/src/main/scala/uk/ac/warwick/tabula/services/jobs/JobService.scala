@@ -16,12 +16,15 @@ import uk.ac.warwick.tabula.jobs.FailedJobException
 @Service
 class JobService extends HasJobDao with Logging {
 	import Transactions._
+	
+	// How many jobs to load and run each time
+	val RunBatchSize = 10
 
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
 
 	def run {
-		jobDao.findOutstandingInstances(10) foreach processInstance
+		jobDao.findOutstandingInstances(RunBatchSize) foreach processInstance
 	}
 
 	def getInstance(id: String) = jobDao.getById(id)

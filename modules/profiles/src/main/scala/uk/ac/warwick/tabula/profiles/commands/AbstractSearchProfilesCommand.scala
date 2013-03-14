@@ -18,7 +18,10 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 
-abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*) extends Command[Seq[Member]] with ReadOnly with Unaudited {
+abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*) 
+	extends Command[Seq[Member]] 
+		with ReadOnly 
+		with Unaudited {
 	import AbstractSearchProfilesCommand._
 	
 	PermissionCheck(Permissions.Profiles.Search)

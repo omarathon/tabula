@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.FeedbackService
 
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
@@ -30,7 +31,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 	PermissionCheck(Permissions.Feedback.Publish, assignment)
 	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
-	var assignmentService = Wire.auto[AssignmentService]
+	var feedbackService = Wire.auto[FeedbackService]
 	var userLookup = Wire.auto[UserLookupService]
 	implicit var freemarker = Wire.auto[Configuration]
 
@@ -92,7 +93,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 		}
 	}
 	
-	def getUsersForFeedback = assignmentService.getUsersForFeedback(assignment)
+	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
 
 	private def messageFor(user: User) = createMessage(studentMailSender) { message =>
 		val moduleCode = assignment.module.code.toUpperCase

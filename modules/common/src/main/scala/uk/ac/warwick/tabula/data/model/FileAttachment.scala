@@ -83,8 +83,8 @@ class FileAttachment extends GeneratedId {
 	def length: Option[Long] = Option(file) map { _.length }
 
 	def fileExt: String = {
-		if(name.lastIndexOf('.') > -1) {
-			name.substring(name.lastIndexOf('.')+ 1)
+		if (name.lastIndexOf('.') > -1) {
+			name.substring(name.lastIndexOf('.') + 1)
 		} else {
 			""
 		}

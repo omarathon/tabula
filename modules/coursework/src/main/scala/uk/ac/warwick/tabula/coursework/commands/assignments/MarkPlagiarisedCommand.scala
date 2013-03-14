@@ -20,13 +20,14 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.SubmissionService
 
 class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ManagePlagiarismStatus, assignment)
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	//@BeanProperty var submissions: JList[Submission] = ArrayList()
     @BeanProperty var students: JList[String] = ArrayList()
@@ -37,9 +38,9 @@ class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) ext
 
 	def applyInternal() {
     	    for (uniId <- students;
-             submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
+             submission <- submissionService.getSubmissionByUniId(assignment, uniId)) {
                     submission.suspectPlagiarised = markPlagiarised
-                    assignmentService.saveSubmission(submission)
+                    submissionService.saveSubmission(submission)
                     submissionsUpdated = submissionsUpdated + 1
             }
 	}

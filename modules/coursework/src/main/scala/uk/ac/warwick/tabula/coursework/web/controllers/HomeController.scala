@@ -16,10 +16,12 @@ import uk.ac.warwick.tabula.services.ActivityService
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var activityService = Wire.auto[ActivityService]
 
 	var userLookup = Wire.auto[UserLookupService]
@@ -70,7 +72,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 
 			val enrolledAssignments = 
-				if (features.assignmentMembership) assignmentService.getEnrolledAssignments(user.apparentUser)
+				if (features.assignmentMembership) assignmentMembershipService.getEnrolledAssignments(user.apparentUser)
 				else Seq.empty
 			val assignmentsWithSubmission =
 				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)

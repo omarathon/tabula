@@ -13,19 +13,20 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.services.SubmissionService
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/resend-receipt"))
 class ResendSubmissionEmail extends CourseworkController {
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	hideDeletedItems
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
 		new SendSubmissionReceiptCommand(
 			module, assignment, 
-			mandatory(assignmentService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)), 
+			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)), 
 			user)
 
 	@RequestMapping(method = Array(GET, HEAD))

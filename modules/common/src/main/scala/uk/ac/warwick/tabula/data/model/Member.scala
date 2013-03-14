@@ -315,6 +315,4 @@ trait StaffProperties {
 	@BeanProperty var teachingStaff: JBoolean = _
 }
 
-trait AlumniProperties {
-	
-}
+trait AlumniProperties
