@@ -47,7 +47,10 @@ class StudentRelationship extends GeneratedId {
 	var endDate: DateTime = _
 	
 	// assume that all-numeric value is a member (not proven though)
-	def isAgentMember: Boolean = agent.forall(_.isDigit)
+	def isAgentMember: Boolean = agent match {
+		case null => false
+		case a => a.forall(_.isDigit)
+	}
 	
 	def agentMember: Option[Member] = isAgentMember match {
 		case true => profileService.getMemberByUniversityId(agent)

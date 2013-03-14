@@ -175,6 +175,13 @@ object Permissions {
 			case object Update extends Permission
 			case object Delete extends Permission
 		}
+		
+		object MeetingRecord {
+			case object Create extends Permission
+			case object Read extends Permission
+			case object Update extends Permission
+			case object Delete extends Permission
+		}
 	}
 	
 	object UserSettings {
