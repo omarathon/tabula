@@ -34,7 +34,7 @@ jQuery(function ($) {
 			
 			$(this).datetimepicker('update');
 		}
-	});
+	}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 
     /* When a .long-running link is clicked it will be
      * replaced with "Please wait" text, to tell the user to expect to
