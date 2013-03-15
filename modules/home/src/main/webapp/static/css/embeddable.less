@@ -110,7 +110,8 @@ tr.error, tr.warning {
 		display: inline-block;
 		margin-left: 8px;
 		top: 3px;
-		float:right
+		float:right;
+		i { .opacity-one(1); }
 	}
 
 	// fade out glypicons a bit, too dark
@@ -244,6 +245,11 @@ ul {
 			float:right;
 		}
 		
+		// darken the icons a bit
+		i {
+			opacity:1
+		}
+				
 		a {
 			display: block;
 			margin: 1px 0;	
@@ -278,6 +284,18 @@ ul {
 	}
 	
 }
+
+// fix for icon folder sitting a bit low on the line
+#container {
+ .assignment-buttons, .module-manage-button 
+ 	{
+ 		i.icon-folder-close {
+			background-position-y: -121px;
+		}
+	}
+}
+
+
 
 // small assignment items as used on home page. Used to be same
 // as assignment-info on department page, but no more.

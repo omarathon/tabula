@@ -56,18 +56,22 @@ $(function(){
         .hide();
         
     $('.dept-show').click(function(event){
-    	event.preventDefault();
-    	//$(this.parentNode).remove();
+    	event.preventDefault();   	
+    	var hideButton = $(this).find("a");
+    	
         $('.module-info.empty').toggle('fast', function() {
         	if($('.module-info.empty').is(":visible")) {
-        		$('.dept-show a').html('<i class="icon-eye-close"></i> Hide');
+        		hideButton.html('<i class="icon-eye-close"></i> Hide');
+        		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
+        		
         	} else { 
-        		$('.dept-show a').html('<i class="icon-eye-open"></i> Show');
+        		hideButton.html('<i class="icon-eye-open"></i> Open');
+        		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
         	}
         });
-        
+
     });
-            
+        
     
     // code for tabs
     $('.nav.nav-tabs a').click(function (e) {
