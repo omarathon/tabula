@@ -128,7 +128,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 
 	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")
 	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
 
@@ -144,7 +144,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
 	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
 

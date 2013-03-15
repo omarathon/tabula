@@ -35,7 +35,7 @@ class FileAttachment extends GeneratedId {
 	@JoinColumn(name="extension_id")
 	@BeanProperty var extension:Extension =_
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
 		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
 		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
