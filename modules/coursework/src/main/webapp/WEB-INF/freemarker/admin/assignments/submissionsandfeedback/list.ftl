@@ -163,7 +163,7 @@
 			</#if>
 			<#if features.markingWorkflows && mustReleaseForMarking>
 				<li>
-					<a class="use-tooltip form-post"
+					<a class="use-tooltip form-post" data-container="body" 
 					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
 					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
 					   id="release-submissions-button">
