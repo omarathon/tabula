@@ -48,7 +48,7 @@
 	</div>
 	
 	<div class="btn-group dept-show">
-		<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules.">
+		<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
 			<i class="icon-eye-open"></i>
 			Show
 		</a>
@@ -59,18 +59,6 @@
 	
 <#else>
 	<h1>${department.name}</h1>
-</#if>
-
-<#if notices.unpublishedAssignments?has_content>
-<!-- <div class="alert alert-error">
-	Some assigments have feedback that hasn't been published to students yet.
-	<#list notices.unpublishedAssignments as a>
-		<div>
-			<a href="#${module_anchor(a.module)}">${a.name}</a>
-		</div>
-	</#list>
-</div>
--->
 </#if>
 
 <#list modules as module>
@@ -124,10 +112,8 @@
 			<#if assignment.hasReleasedFeedback || features.submissions>
 				<p class="feedback-published">
 					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
-					<a href="${urlforstudents}">
-						Link for students 
-					</a>
-					<a class="use-popover" data-original-title="Link for students" data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i class="icon-question-sign"></i></a>
+					<a href="${urlforstudents}">Link for students</a>
+					<a class="use-popover" id="studentsPopover" data-html="true" data-original-title="<span class='text-info'><strong>Link for students</strong></span> <button type='button' onclick=&quot;jQuery('#studentsPopover').popover('hide')&quot; class='close'>&times;</button></span>" data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i class="icon-question-sign"></i></a>
 				</p>
 			</#if>
 
@@ -140,15 +126,6 @@
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
 						</#if>
-						
-						<#if assignment.assessmentGroups?has_content>
-						<#list assignment.assessmentGroups as group>
-						<#assign _upstream=group.upstreamAssignment />
-						<span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
-						</#list>
-						</#if>
-				
-				
 					</div>
 				<#else>
 					<div class="dates">
@@ -159,13 +136,7 @@
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
 						</#if>
-						
-						<#if assignment.assessmentGroups?has_content>
-						<#list assignment.assessmentGroups as group>
-						<#assign _upstream=group.upstreamAssignment />
-						<span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
-						</#list>
-						</#if>						
+											
 					</div>
 				</#if>
 
@@ -203,10 +174,9 @@
 				</#if>
 				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
 					<div class="submission-and-feedback-count">							
+						<i class="icon-file"></i> 
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
-							<i class="icon-file"></i>
 							<@fmt.p assignment.submissions?size "submission" />
-
 							<#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if>
 						</a>
 						
