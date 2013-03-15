@@ -482,7 +482,7 @@ table {
 					background-image: url(/static/images/tablesorter/bg.gif);
 					background-repeat: no-repeat;
 					background-position: center right;
-					cursor: pointer;
+					.cursor-pointer();
 				}
 				
 				&.headerSortUp {
@@ -648,8 +648,7 @@ table {
   td.user-id {
     white-space: nowrap; 
   	width: 5%; 
-  	cursor: hand;
-  	cursor: pointer;
+  	.cursor-pointer();
   	font-weight: bold;
   	color: darkblue;
   }
@@ -663,12 +662,8 @@ table {
   display: block !important; 
 }
 
-// 1px out of alignment on all browsers for some reason.
-.user-code-picker { margin-top: -1px; }
-
 .clickable-cursor {
-	cursor:hand;
-	cursor:pointer;
+	.cursor-pointer();
 }
 
 *[rel=tooltip],
@@ -691,8 +686,7 @@ table {
     width: 36px;
     height: 155px;
     background: url(../images/app-feedback.png) no-repeat;
-    cursor: hand;
-    cursor: pointer;
+    .cursor-pointer();
     a { display: none; }
   }
 }
@@ -786,12 +780,6 @@ a.btn { text-decoration: none; }
 // Icons + ID6 require some adjustment
 [class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
 
-// Some fields not quite aligning with adjacent things like .add-on 
-input[type=text] {
-  position: relative;
-  top: 1px;
-}
-
 .originality-report {
   text-align: right;
   .hyphenate-words();
@@ -819,7 +807,7 @@ input[type=text] {
 .similarity-3 { .similarity-box(@btnWarningBackgroundHighlight); }
 .similarity-4 { .similarity-box(@btnDangerBackgroundHighlight); }
 
-.similarity-tooltip { cursor: pointer; }
+.similarity-tooltip { .cursor-pointer(); }
 
 .similarity-subcategories {
   margin-left: 0.5em;

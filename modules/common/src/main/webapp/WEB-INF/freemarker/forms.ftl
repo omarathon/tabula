@@ -33,11 +33,14 @@ Include by default as "form", e.g.
 	<#else>
 		<#assign baseClass="control-group " + cssClass />
 	</#if>
+	<#if status.error>
+		<#assign baseClass=baseClass + " error" />
+	</#if>
 	<#if path="">
 		<div class="${baseClass}"><#nested/></div>
 	<#else>
 		<@spring.bind path=path>
-			<div class="${baseClass}<#if status.error> error</#if>"><#nested/></div>
+			<div class="${baseClass}"><#nested/></div>
 		</@spring.bind>
 	</#if>
 </#macro>

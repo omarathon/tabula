@@ -49,9 +49,8 @@ class MeetingRecordController extends ProfilesController {
 	
 	// submit
 	@RequestMapping(method = Array(POST), params = Array("submit"))
-	def saveMeetingRecord(@Valid @ModelAttribute("command") command: CreateMeetingRecordCommand, @PathVariable("student") student: Member, errors: Errors) = {
+	def saveMeetingRecord(@Valid @ModelAttribute("command") command: CreateMeetingRecordCommand, errors: Errors, @PathVariable("student") student: Member) = {
 		transactional() {
-			//command.validate(errors)
 			if (errors.hasErrors) {
 				showForm(command, student)
 			} else {
