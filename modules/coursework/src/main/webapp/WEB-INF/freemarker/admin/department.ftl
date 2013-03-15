@@ -280,7 +280,7 @@
 						<li class="disabled"><a><i class="icon-check"></i> Add marks</a></li>
 					</#if>
 					
-					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-comment"></i> Create feedback</a>
+					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
 									
 										
 					<#if assignment.canPublishFeedback>
