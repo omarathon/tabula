@@ -61,7 +61,7 @@
 					<@spring.nestedPath path="marks[${item_index}]">
 						<#if !item.isValid>
 							<#assign errorClass="alert-error" />
-						<#elseif item.warningMessage??>
+						<#elseif item.isModified>
 							<#assign errorClass="alert" />
 						<#else>
 							<#assign errorClass="alert-success" />
@@ -77,11 +77,10 @@
 									${status.value}
 								</@spring.bind>
 								<@f.errors path="universityId" cssClass="error" />
-								
-								<#if item.warningMessage??>
-								     <div class="warning">
-								     	${item.warningMessage}
-								     </div>
+								<#if item.isModified>
+									 <div class="warning">
+										 Mark for this student already uploaded - previous mark will be overwritten when you click Confirm.
+									 </div>
 								</#if>
 							</td>
 							<td>

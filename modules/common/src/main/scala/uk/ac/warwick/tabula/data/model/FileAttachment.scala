@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import java.io._
+import com.google.common.io.Files
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
@@ -13,6 +12,9 @@ import forms.Extension
 import scala.util.matching.Regex
 import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
+import scala.Some
+import java.util
+import scala.collection.JavaConversions._
 
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
@@ -107,6 +109,23 @@ class FileAttachment extends GeneratedId {
 	@transient @BeanProperty var uploadedData: InputStream = null
 	@transient @BeanProperty var uploadedDataLength: Long = 0
 
+	def isDataEqual(other: Any) = other match {
+		case that: FileAttachment => {
+			if (this.actualDataLength != that.actualDataLength) false
+			else{
+				val thisBytes:Array[Byte] = Option(this.file) match {
+					case Some(file) => Files.toByteArray(this.file)
+					case None => Array()
+				}
+				val thatBytes:Array[Byte] = Option(that.file) match {
+					case Some(file) => Files.toByteArray(this.file)
+					case None => Array()
+				}
+				util.Arrays.equals(thisBytes, thatBytes)
+			}
+		}
+		case _ => false
+	}
 }
 
 object FileAttachment {

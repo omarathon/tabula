@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.userlookup.User
 
-class MarkModifiedNotificationCommand(val module: Module, val assignment: Assignment, val recipient: User)
+class FeedbackChangeNotifyCommand(val module: Module, val assignment: Assignment, val recipient: User)
 	extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {
 
 	mustBeLinked(assignment, module)
@@ -40,8 +40,8 @@ class MarkModifiedNotificationCommand(val module: Module, val assignment: Assign
 		message.setFrom(fromAddress)
 		message.setReplyTo(replyAddress)
 		message.setTo(user.getEmail)
-		message.setSubject(encodeSubject(moduleCode + ": Mark updated"))
-		message.setText(renderToString("/WEB-INF/freemarker/emails/markchanged.ftl", Map(
+		message.setSubject(encodeSubject(moduleCode + ": Feedback updated"))
+		message.setText(renderToString("/WEB-INF/freemarker/emails/feedbackchanged.ftl", Map(
 			"assignment" -> assignment,
 			"module" -> module,
 			"path" -> Routes.assignment.receipt(assignment)

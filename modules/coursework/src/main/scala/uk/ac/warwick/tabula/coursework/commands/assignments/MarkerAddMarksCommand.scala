@@ -19,9 +19,9 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) => {
 				if (assignment.isFirstMarker(submitter.apparentUser) && feedback.firstMarkerFeedback != null && (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade))
-					mark.warningMessage = markWarning
+					mark.isModified = true
 				else if (assignment.isSecondMarker(submitter.apparentUser) && feedback.secondMarkerFeedback != null && (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade))
-					mark.warningMessage = markWarning
+					mark.isModified = true
 			}
 			case None =>
 		}

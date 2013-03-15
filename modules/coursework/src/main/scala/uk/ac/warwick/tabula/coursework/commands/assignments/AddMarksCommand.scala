@@ -31,9 +31,6 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
-
-	var markWarning = Wire.property("${mark.exists.warning}")
-	var publishedWarning = Wire.property("${mark.published.warning}")
   
 	@BeanProperty var file: UploadedFile = new UploadedFile
 	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()

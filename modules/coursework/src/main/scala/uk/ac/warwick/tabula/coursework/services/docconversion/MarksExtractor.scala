@@ -17,7 +17,7 @@ class MarkItem {
 	@BeanProperty var actualGrade: String = _
 	@BeanProperty var isValid = true
 	@BeanProperty var isModified = false
-	@BeanProperty var warningMessage: String = _
+	@BeanProperty var isPublished = false
 
 	def this(universityId: String, actualMark: String, actualGrade: String) = {
 		this()

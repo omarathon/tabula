@@ -40,14 +40,28 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		a.uploadedDataLength = 300
 		a.fileDao = dao
 		file.attached.add(a)
-		
+
+		val b = new FileAttachment
+		b.name = "file2.txt"
+		b.uploadedDataLength = 300
+		b.fileDao = dao
+		file.attached.add(b)
+
 		val item = new FeedbackItem("1010101")
 		item.file = file
 		cmd.items.add(item)
 		
-		// Add an existing feedback with the same name
+		// Add an existing feedback with the same name and content - will be ignored
 		val feedback = Fixtures.feedback("1010101")
 		feedback.addAttachment(a)
+
+		// Add an existing feedback with the same name but different content - will be overwritten
+		val b2 = new FileAttachment
+		b2.name = "file2.txt"
+		b2.uploadedDataLength = 305
+		b2.fileDao = dao
+		feedback.addAttachment(b2)
+
 		assignment.feedbacks.add(feedback)
 		
 		item.submissionExists should be (false)
@@ -58,7 +72,8 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 		
 		item.submissionExists should be (true)
-		item.duplicateFileNames should be (Set("file.txt"))
+		item.ignoredFileNames should be (Set("file.txt"))
+		item.duplicateFileNames should be (Set("file2.txt"))
 	}
 
 }

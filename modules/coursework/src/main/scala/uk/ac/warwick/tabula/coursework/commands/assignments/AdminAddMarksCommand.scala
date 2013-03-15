@@ -28,9 +28,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 				}
 				if (markChanged || gradeChanged){
 					mark.isModified = true
-					mark.warningMessage = markWarning
-					if (feedback.released)
-						mark.warningMessage = mark.warningMessage + publishedWarning
+					mark.isPublished = feedback.released
 				}
 			}
 			case None => {}
@@ -57,7 +55,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 			if (feedback.released && isModified){
 				transactional() {
 					val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-					val notifyMarkChanged = new MarkModifiedNotificationCommand(module, assignment, student)
+					val notifyMarkChanged = new FeedbackChangeNotifyCommand(module, assignment, student)
 					notifyMarkChanged.apply()
 				}
 			}

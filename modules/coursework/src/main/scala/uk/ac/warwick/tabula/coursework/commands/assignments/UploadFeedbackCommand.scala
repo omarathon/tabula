@@ -24,7 +24,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
-import scala.Some
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 
@@ -32,17 +31,25 @@ class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
 	@BeanProperty var file: UploadedFile = new UploadedFile
 
-	@BeanProperty var submissionExists: Boolean = false
+	@BeanProperty var submissionExists = false
+	@BeanProperty var isPublished = false
+	// true when at least one non-ignored file is uploaded
+	@BeanProperty var isModified = true
 	@BeanProperty var duplicateFileNames: Set[String] = Set()
+	@BeanProperty var ignoredFileNames: Set[String] = Set()
 
-	def listAttachments() = file.attached.map(f => new AttachmentItem(f.name, duplicateFileNames.contains(f.name)))
+	def listAttachments() = file.attached.map(f => {
+		val duplicate = duplicateFileNames.contains(f.name)
+		val ignore = ignoredFileNames.contains(f.name)
+		new AttachmentItem(f.name, duplicate, ignore)
+	})
 
 	def this(uniNumber: String) = {
 		this()
 		this.uniNumber = uniNumber
 	}
 
-	class AttachmentItem(val name: String, val duplicate: Boolean){}
+	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean){}
 }
 
 // Purely for storing in command to display on the model.
