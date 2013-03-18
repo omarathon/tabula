@@ -113,7 +113,9 @@
 				<p class="feedback-published">
 					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
 					<a href="${urlforstudents}">Link for students</a>
-					<a class="use-popover" id="studentsPopover" data-html="true" data-original-title="<span class='text-info'><strong>Link for students</strong></span> <button type='button' onclick=&quot;jQuery('#studentsPopover').popover('hide')&quot; class='close'>&times;</button></span>" data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i class="icon-question-sign"></i></a>
+					<a class="use-popover" id="popover-${assignment.id}" data-html="true" 
+						data-original-title="<span class='text-info'><strong>Link for students</strong></span> <button type='button' onclick=&quot;jQuery('#popover-${assignment.id}').popover('hide')&quot; class='close'>&times;</button></span>" 
+						data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i class="icon-question-sign"></i></a>
 				</p>
 			</#if>
 
