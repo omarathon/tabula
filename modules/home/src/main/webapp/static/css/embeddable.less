@@ -285,14 +285,23 @@ ul {
 	
 }
 
-// fix for icon folder sitting a bit low on the line
+// fix for icons sitting a bit off the baseline
 #container {
- .assignment-buttons, .module-manage-button 
- 	{
- 		i.icon-folder-close {
-			background-position-y: -121px;
+ .assignment-buttons, .module-manage-button {
+		i.icon-folder-close {
+			background-position: -384px -121px;
 		}
 	}
+	
+  .assignment-info {
+  		.icon-question-sign {
+			background-position: -96px -95px !important; /// override Bootstrap
+		}
+		
+		.icon-info-sign {
+			background-position: -120px -95px !important; // override Bootstrap
+		}	
+  }
 }
 
 
