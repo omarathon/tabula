@@ -31,31 +31,32 @@ trait CourseworkFixtures extends BrowserTest {
 			settings: Seq[String] => Unit = allFeatures,
 			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit) = as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
-		click on linkText("Show all modules")
+		click on linkText("Show")
 		
 		// Add a module manager for moduleCode
 		val info = getModuleInfo(moduleCode)
+
+		click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
 		
-		click on (info.findElement(By.partialLinkText("Manage")))
 		val addAssignment = info.findElement(By.partialLinkText("Add assignment"))
 		eventually {
 			addAssignment.isDisplayed should be (true)
 		}
+
 		click on (addAssignment)
 		
 		textField("name").value = assignmentName
-		
 		settings(members)
-		
+
 		submit
-		
+
 		// Ensure that we've been redirected back
 		currentUrl should endWith ("/department/xxx/#module-" + moduleCode.toLowerCase)
 		
 		// NOTE: This assumes no duplicate assignment names!
 		val assignmentInfo = getAssignmentInfo(moduleCode, assignmentName)
 		
-		val copyableUrl = new TextField(assignmentInfo.findElement(By.className("copyable-url"))).value
+		val copyableUrl = assignmentInfo.findElement(By.className("linkForStudents")).getAttribute("href")
 		val assignmentId = copyableUrl.substring(copyableUrl.lastIndexOf('/') + 1)
 			
 		callback(assignmentId)

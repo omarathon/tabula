@@ -65,7 +65,7 @@ $(function(){
         		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
         		
         	} else { 
-        		hideButton.html('<i class="icon-eye-open"></i> Open');
+        		hideButton.html('<i class="icon-eye-open"></i> Show');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
         	}
         });
