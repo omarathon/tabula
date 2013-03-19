@@ -109,21 +109,17 @@ class SecurityService extends Logging {
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
-		// loop through checks, seeing if any of them return Allow or Deny
-	
-		@tailrec
-		def _can(head: Option[PermissionChecker], tail: Seq[PermissionChecker]): Boolean = head match {
-			case Some(check) => check(user, permission, scope orNull) match {
-				case Some(canDo) => {
-					if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
-					canDo
-				}
-				case _ => _can(tail.headOption, tail.tail)
-			}
-			case None => throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
-		}
 		
-		_can(checks.headOption, checks.tail)
+		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
+		val result: Response = checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+
+		result.map { canDo =>
+			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
+			canDo
+		} getOrElse {
+			throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
+		}
+
 	}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
