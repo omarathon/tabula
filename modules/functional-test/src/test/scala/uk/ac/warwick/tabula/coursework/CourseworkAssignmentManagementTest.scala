@@ -25,7 +25,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			// Ensure the edit properties page has been created successfully
 			{
 				val info = getAssignmentInfo("xxx101", "Fully featured assignment")
-				click on (info.findElement(By.partialLinkText("Manage")))
+				click on (info.findElement(By.partialLinkText("Actions")))
 				val editAssignment = info.findElement(By.partialLinkText("Edit properties"))
 				eventually {
 					editAssignment.isDisplayed should be (true)
@@ -46,8 +46,8 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 		withAssignment("xxx101", "Fully featured assignment") { assignmentId =>
 			val info = getAssignmentInfo("xxx101", "Fully featured assignment")
 			
-			click on (info.findElement(By.partialLinkText("Manage")))
-			val archiveAssignment = info.findElement(By.partialLinkText("Archive"))
+			click on (info.findElement(By.partialLinkText("Actions")))
+			val archiveAssignment = info.findElement(By.partialLinkText("Archive assignment"))
 			eventually {
 				archiveAssignment.isDisplayed should be (true)
 			}
