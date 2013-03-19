@@ -37,8 +37,8 @@ class ViewProfileController extends ProfilesController {
 		Mav("profile/view", 
 		    "profile" -> profiledStudentMember,
 		    "viewer" -> currentMember,
-		    "isSelf" -> isSelf)
+		    "isSelf" -> isSelf,
+		    "hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment)
 		   .crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
-
