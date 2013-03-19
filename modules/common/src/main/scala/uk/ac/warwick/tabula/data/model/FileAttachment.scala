@@ -113,15 +113,7 @@ class FileAttachment extends GeneratedId {
 		case that: FileAttachment => {
 			if (this.actualDataLength != that.actualDataLength) false
 			else{
-				val thisBytes:Array[Byte] = Option(this.file) match {
-					case Some(file) => Files.toByteArray(this.file)
-					case None => Array()
-				}
-				val thatBytes:Array[Byte] = Option(that.file) match {
-					case Some(file) => Files.toByteArray(this.file)
-					case None => Array()
-				}
-				util.Arrays.equals(thisBytes, thatBytes)
+				Files.equal(this.file, that.file)
 			}
 		}
 		case _ => false
