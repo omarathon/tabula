@@ -12,7 +12,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures {
 	def withModuleManagers[T](moduleCode: String, managers: Seq[String] = Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode))(fn: => T) = 
 		as(P.Admin1) {
 			click on linkText("Go to the Test Services admin page")
-			click on linkText("Show all modules")
+			click on linkText("Show")
 			
 			findAll(className("module-info")).size should be (3)
 			
@@ -20,7 +20,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures {
 			val info = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX101").next.underlying
 			
 			click on (info.findElement(By.partialLinkText("Manage")))
-			val managersLink = info.findElement(By.partialLinkText("Edit module managers"))
+			val managersLink = info.findElement(By.partialLinkText("Edit module permissions"))
 			eventually {
 				managersLink.isDisplayed should be (true)
 			}
@@ -58,10 +58,11 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures {
 	
 	"Module manager" should "be able to see only modules they can manage" in {
 		withModuleManagers("xxx101") { as(P.ModuleManager1) {
+			// the "show" modules with no assignments link is only visible to dept admins, so can't be clicked
 			click on linkText("Go to the Test Services admin page")
-			click on linkText("Show all modules")
 			
 			findAll(className("module-info")).size should be (1)
+			
 		} }
 	}
 	

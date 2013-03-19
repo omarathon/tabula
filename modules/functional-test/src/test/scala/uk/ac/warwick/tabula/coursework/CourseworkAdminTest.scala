@@ -19,7 +19,7 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 		for (info <- findAll(className("module-info")))
 			info.isDisplayed should be (false)
 		
-		click on (linkText("Show all modules"))
+		click on (linkText("Show"))
 		
 		// Now all modules should be displayed
 		for (info <- findAll(className("module-info")))
