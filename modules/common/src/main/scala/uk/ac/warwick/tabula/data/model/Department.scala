@@ -30,6 +30,12 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	
 	@BeanProperty var name:String = null
 	
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BeanProperty var children:JList[Department] = ArrayList();
+	
+	@ManyToOne(fetch = FetchType.LAZY, optional=true)
+	@BeanProperty var parent:Department = null;
+	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BeanProperty var modules:JList[Module] = ArrayList()
 
