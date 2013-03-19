@@ -124,7 +124,7 @@ class Mav() {
 	
 	override def toString = {
 		val v = if (view != null) view else viewName
-		"Mav("+v+", "+map+")"
+		"Mav(" + v + ", " + map + ")"
 	}
 }
 

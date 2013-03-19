@@ -31,7 +31,7 @@
 		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130221</warwickutils.version>
+		<warwickutils.version>20130314</warwickutils.version>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -526,7 +526,7 @@
 				<plugin>
 					<groupId>org.lesscss</groupId>
 					<artifactId>lesscss-maven-plugin</artifactId>
-					<version>1.3.0</version>
+					<version>1.3.3</version>
 				</plugin>
 
 				<plugin>

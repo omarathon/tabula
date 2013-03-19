@@ -16,12 +16,13 @@ class ActivityServiceTest extends TestBase with Mockito {
 	val service = new ActivityService
 	
 	val moduleService = mock[ModuleAndDepartmentService]
+	val submissionService = mock[SubmissionService]
 	val assignmentService = mock[AssignmentService]
 	val auditIndexService = mock[AuditEventNoteworthySubmissionsService]
 	val userLookup = new MockUserLookup
 	userLookup.registerUsers("cuscav")
 	
-	Activity.assignmentService = assignmentService
+	Activity.submissionService = submissionService
 	Activity.userLookup = userLookup
 	
 	service.moduleService = moduleService
@@ -56,8 +57,8 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val submission1 = Fixtures.submission()
 		val submission2 = Fixtures.submission()
 		
-		assignmentService.getSubmission("submissionId1") returns (Some(submission1))
-		assignmentService.getSubmission("submissionId2") returns (Some(submission2))
+		submissionService.getSubmission("submissionId1") returns (Some(submission1))
+		submissionService.getSubmission("submissionId2") returns (Some(submission2))
 		
 		val fieldDoc = new FieldDoc(100, 0.5f, Array())
 		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(fieldDoc), 20, 30)
@@ -113,8 +114,8 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val submission1 = Fixtures.submission()
 		val submission2 = Fixtures.submission()
 		
-		assignmentService.getSubmission("submissionId1") returns (Some(submission1))
-		assignmentService.getSubmission("submissionId2") returns (Some(submission2))
+		submissionService.getSubmission("submissionId1") returns (Some(submission1))
+		submissionService.getSubmission("submissionId2") returns (Some(submission2))
 		
 		val fieldDoc = new FieldDoc(100, 0.5f, Array())
 		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(fieldDoc), 20, 30)

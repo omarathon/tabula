@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.FeedbackService
 
 abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
 case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
@@ -42,11 +43,11 @@ class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignme
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var feedbackService = Wire.auto[FeedbackService]
 
 	override def applyInternal() = {
 		val items: Seq[RecipientReportItem] =
-			for ((id, user) <- assignmentService.getUsersForFeedback(assignment))
+			for ((id, user) <- feedbackService.getUsersForFeedback(assignment))
 				yield resolve(id, user)
 		RecipientCheckReport(items.toList)
 	}

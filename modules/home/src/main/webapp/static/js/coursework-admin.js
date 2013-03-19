@@ -53,16 +53,25 @@ $(function(){
             $(this).css('opacity',1)
                 .find('.module-info-contents').show().end();
         })
-        .hide()
-        .first().before(
-            $('<p>').html('Modules with no assignments are hidden. ').append(
-                $('<a>').addClass('btn btn-info').attr('href','#').html("Show all modules").click(function(event){
-                    event.preventDefault();
-                    $(this.parentNode).remove();
-                    $('.module-info.empty').show();
-                })
-            )
-        );
+        .hide();
+        
+    $('.dept-show').click(function(event){
+    	event.preventDefault();   	
+    	var hideButton = $(this).find("a");
+    	
+        $('.module-info.empty').toggle('fast', function() {
+        	if($('.module-info.empty').is(":visible")) {
+        		hideButton.html('<i class="icon-eye-close"></i> Hide');
+        		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
+        		
+        	} else { 
+        		hideButton.html('<i class="icon-eye-open"></i> Open');
+        		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
+        	}
+        });
+
+    });
+        
     
     // code for tabs
     $('.nav.nav-tabs a').click(function (e) {

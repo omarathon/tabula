@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.data.convert
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.Mockito
 
 class UpstreamAssignmentIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new UpstreamAssignmentIdConverter
-	val service = mock[AssignmentService]
+	val service = mock[AssignmentMembershipService]
 	converter.service = service
 	
 	@Test def validInput {

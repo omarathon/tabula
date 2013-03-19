@@ -22,8 +22,8 @@ case class AcademicYear(val startYear: Int) {
 	def previous = new AcademicYear(startYear - 1)
 	def next = new AcademicYear(startYear + 1)
 
-	def -(i: Int) = new AcademicYear(startYear - i)
-	def +(i: Int) = new AcademicYear(startYear + i)
+	def - (i: Int) = new AcademicYear(startYear - i)
+	def + (i: Int) = new AcademicYear(startYear + i)
 
 	/**
 	 * Returns a sequence of AcademicYears, in order, starting

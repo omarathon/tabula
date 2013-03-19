@@ -17,15 +17,16 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.SubmissionService
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
 class DownloadAttachmentController extends CourseworkController {
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) 
-		= new DownloadAttachmentCommand(module, assignment, mandatory(assignmentService.getSubmissionByUniId(assignment, user.universityId)))
+		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)))
 
 	@Autowired var fileServer: FileServer = _
 

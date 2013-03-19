@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.services.SubmissionService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
@@ -93,10 +94,10 @@ class DownloadAllSubmissionsController extends CourseworkController {
 class DownloadSingleSubmissionController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
-		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(assignmentService.getSubmission(submissionId)))
+		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
 
 	@RequestMapping
     def downloadSingle(cmd: AdminGetSingleSubmissionCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
@@ -111,10 +112,10 @@ class DownloadSingleSubmissionController extends CourseworkController {
 class DownloadSingleSubmissionFileController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
-		new DownloadAttachmentCommand(module, assignment, mandatory(assignmentService.getSubmission(submissionId)))
+		new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
 
 	@RequestMapping
     def downloadSingle(cmd: DownloadAttachmentCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {

@@ -18,18 +18,18 @@ import uk.ac.warwick.tabula.JavaImports._
 object IntervalFormatter {
 
 	private val hourFormat = DateTimeFormat.forPattern("Ka")
-	private val hourMinuteFormat = DateTimeFormat.forPattern("K:mma")
+	private val hourMinuteFormat = DateTimeFormat.forPattern("HH:mm")
 	private val dayAndDateFormat = DateTimeFormat.forPattern("EE d")
 	private val monthFormat = DateTimeFormat.forPattern(" MMM")
 	private val monthAndYearFormat = DateTimeFormat.forPattern(" MMM yyyy")
 
 	/** Print date range in this format:
 	  *
-	  *     9am Wed 10th Oct - 12 noon Mon 5th Nov 2012
+	  *     09:00 Wed 10th Oct - 12:00 Mon 5th Nov 2012
 	  *
 	  * or this format if the years differ:
 	  *
-	  *     9am Wed 10th Oct 2012 - 12 noon Mon 5th Nov 2013
+	  *     09:00 Wed 10th Oct 2012 - 12:00 Mon 5th Nov 2013
 	  *
 	  * Seconds are never printed.
 	  */
@@ -47,21 +47,15 @@ object IntervalFormatter {
 
 	private def doFormat(date: DateTime, includeYear: Boolean) = {
 		
-		// e.g. 9am, 9:15am, 12 noon, 12 midnight
+		// TAB-546 : This was previously in a 12-hour format, e.g. 9am, 9:15am, 12 noon, 12 midnight
+		// now 24 hour format
 		def timePart(date: DateTime) = {
-			date.getMinuteOfHour match {
-				case 0 => date.getHourOfDay match {
-					case 0 => "12 midnight"
-					case 12 => "12 noon"
-					case _ => hourFormat.print(date).toLowerCase
-				}
-				case _ => hourMinuteFormat.print(date).toLowerCase
-			}
+			hourMinuteFormat.print(date).toLowerCase
 		}
 
 		// e.g. Mon 5th Nov
 		def dayPart(date: DateTime) = {
-			dayAndDateFormat.print(date) + DateBuilder.ordinal(date.getDayOfMonth)
+			dayAndDateFormat.print(date) + "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
 		}
 
 		// e.g. Jan 2012, Nov 2012, Mar, Apr

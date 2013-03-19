@@ -43,6 +43,15 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 	private val baseSelect = """select 
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
 		from auditevent a"""
+		
+	private val DateIndex = 0
+	private val StageIndex = 1
+	private val TypeIndex = 2
+	private val MasqueradeIdIndex = 3
+	private val RealIdIndex = 4
+	private val DataIndex = 5
+	private val EventIdIndex = 6
+	private val IdIndex = 7
 
 	private val idSql = baseSelect + " where id = :id"
 
@@ -71,14 +80,14 @@ class AuditEventServiceImpl extends Daoisms with AuditEventService {
 			null
 		} else {
 			val a = new AuditEvent
-			a.eventDate = new DateTime(array(0))
-			a.eventStage = array(1).toString
-			a.eventType = array(2).toString
-			a.masqueradeUserId = array(3).asInstanceOf[String]
-			a.userId = array(4).asInstanceOf[String]
-			a.data = unclob(array(5))
-			a.eventId = array(6).asInstanceOf[String]
-			a.id = toIdType(array(7))
+			a.eventDate = new DateTime(array(DateIndex))
+			a.eventStage = array(StageIndex).toString
+			a.eventType = array(TypeIndex).toString
+			a.masqueradeUserId = array(MasqueradeIdIndex).asInstanceOf[String]
+			a.userId = array(RealIdIndex).asInstanceOf[String]
+			a.data = unclob(array(DataIndex))
+			a.eventId = array(EventIdIndex).asInstanceOf[String]
+			a.id = toIdType(array(IdIndex))
 			a
 		}
 	}

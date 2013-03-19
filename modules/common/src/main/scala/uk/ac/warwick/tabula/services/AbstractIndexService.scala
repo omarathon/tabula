@@ -35,6 +35,7 @@ import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
+import scala.collection.GenTraversableOnce
 
 trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
 
@@ -48,7 +49,7 @@ trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
 			sort = reverseDateSort,
 			offset = start,
 			max = count)			
-		docs flatMap { toItem(_) }
+		docs transform { toItem(_) }
 	}
 	
 }
@@ -71,10 +72,26 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 }
 
 class RichSearchResults(seq: Seq[Document]) {
-
+	def first = seq.headOption	
+	def transform[A](f: Document => GenTraversableOnce[A]) = seq.flatMap(f)
+	def size = seq.size
 }
 
-abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryHelpers[A] with InitializingBean with Logging with DisposableBean {
+trait RichSearchResultsCreator {
+	implicit def toRichSearchResults(seq: Seq[Document]) = new RichSearchResults(seq)
+}
+
+object RichSearchResultsCreator extends RichSearchResultsCreator
+
+abstract class AbstractIndexService[A] 
+		extends CommonQueryMethods[A] 
+			with QueryHelpers[A]
+			with SearchHelpers[A]
+			with FieldGenerators
+			with RichSearchResultsCreator
+			with InitializingBean 
+			with Logging 
+			with DisposableBean {
 	
 	final val LuceneVersion = Version.LUCENE_40
 	
@@ -85,34 +102,17 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 	val IncrementalBatchSize: Int
 		
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
-	var indexPath: File
 	
 	// Are we indexing now?
 	var indexing: Boolean = false
+	
+	var indexPath: File
 
 	var lastIndexTime: Option[DateTime] = None
 	var lastIndexDuration: Option[Duration] = None
 
 	// HFC-189 Reopen index every 2 minutes, even if not the indexing instance.
 	val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-	
-	implicit def toRichSearchResults(seq: Seq[Document]) = new RichSearchResults(seq)
-
-	/**
-	 * SearcherManager handles returning a fresh IndexSearcher for each search,
-	 * and managing old IndexSearcher instances that might still be in use. Use
-	 * acquire() and release() to get IndexSearchers, and call maybeReopen() when
-	 * the index has changed (i.e. after an index)
-	 */
-	var searcherManager: SearcherManager = _
-	
-	/**
-	 * SearcherLifetimeManager allows a specific IndexSearcher state to be
-	 * retrieved later by passing a token. This allows stateful search context
-	 * per-user. If you don't have a token, use the regular SearcherManager
-	 * to do the initial creation.
-	 */
-	var searcherLifetimeManager: SearcherLifetimeManager = _
 
 	/**
 	 * Wrapper around the indexing code so that it is only running once.
@@ -138,6 +138,8 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 	 * so we know where to check from next time.
 	 */
 	var mostRecentIndexedItem: Option[DateTime] = None
+	
+	final val IndexReopenPeriodInSeconds = 20
 
 	override def afterPropertiesSet {
 		if (!indexPath.exists) {
@@ -154,52 +156,13 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 		// Reopen the index reader periodically, else it won't notice changes.
 		executor.scheduleAtFixedRate(Runnable {
 			//logger.debug("Trying to reopen index")
-			try reopen catch { case e => logger.error("Index service reopen failed", e) }
-			try prune catch { case e => logger.error("Pruning old searchers failed", e) }
-		}, 20, 20, TimeUnit.SECONDS)
+			try reopen catch { case e: Throwable => logger.error("Index service reopen failed", e) }
+			try prune catch { case e: Throwable => logger.error("Pruning old searchers failed", e) }
+		}, IndexReopenPeriodInSeconds, IndexReopenPeriodInSeconds, TimeUnit.SECONDS)
 	}
 
 	override def destroy {
 		executor.shutdown()
-	}
-
-	private def initialiseSearching = {	
-		if (searcherManager == null) {
-			try {
-				logger.debug("Opening a new searcher manager at " + indexPath)
-				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null)
-			} catch {
-				case e: IndexNotFoundException => logger.warn("No index found.")
-			}
-		}
-		if (searcherLifetimeManager == null) {
-			try {
-				logger.debug("Opening a new searcher lifetime manager at " + indexPath)
-				searcherLifetimeManager = new SearcherLifetimeManager
-			} catch {
-				case e: IllegalStateException => logger.warn("Could not create SearcherLifetimeManager.")
-			}
-		}
-	}
-
-	/**
-	 * Sets up a new IndexSearcher with a refreshed IndexReader so that
-	 * subsequent searches see the results of recent index changes.
-	 */
-	private def reopen = {
-		//logger.debug("Reopening index")
-		
-		initialiseSearching
-		if (searcherManager != null) searcherManager.maybeRefresh
-	}
-
-	/**
-	 * Remove saved searchers over 20 minutes old
-	 */
-	private def prune = {
-		val ageInSeconds = 20*60
-		initialiseSearching
-		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
 	/**
@@ -295,6 +258,44 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 	def documentValue(doc: Option[Document], key: String): Option[String] = doc.flatMap { _.getValues(key).headOption }
 	def documentValue(doc: Document, key: String): Option[String] = doc.getValues(key).headOption
 
+	val IdField: String
+
+	/**
+	 * If an existing Document is in the index with this term, it
+	 * will be replaced.
+	 */
+	private def uniqueTerm(item: A) = new Term(IdField, getId(item))
+	protected def getId(item: A): String
+	
+	/**
+	 * TODO reuse one Document and set of Fields for all items
+	 */
+	protected def toDocument(item: A): Document
+	
+	protected def toId(doc: Document) = documentValue(doc, IdField)
+	protected def toItem(id: String): Option[A]
+	protected def toItem(doc: Document): Option[A] = { toId(doc) flatMap (toItem) }
+
+}
+
+trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: AbstractIndexService[A] =>
+
+	/**
+	 * SearcherManager handles returning a fresh IndexSearcher for each search,
+	 * and managing old IndexSearcher instances that might still be in use. Use
+	 * acquire() and release() to get IndexSearchers, and call maybeReopen() when
+	 * the index has changed (i.e. after an index)
+	 */
+	var searcherManager: SearcherManager = _
+	
+	/**
+	 * SearcherLifetimeManager allows a specific IndexSearcher state to be
+	 * retrieved later by passing a token. This allows stateful search context
+	 * per-user. If you don't have a token, use the regular SearcherManager
+	 * to do the initial creation.
+	 */
+	var searcherLifetimeManager: SearcherLifetimeManager = _
+
 	/**
 	 * Find the newest item that was indexed, by searching by
 	 * UpdatedDateField and sorting in descending date order.
@@ -312,23 +313,61 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 				query = NumericRangeQuery.newLongRange(UpdatedDateField, min.orNull, null, true, true),
 				sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
 				max = 1)
-			docs.headOption // Some(firstResult) or None if empty
+			docs.first // Some(firstResult) or None if empty
 		}
 	}
 
-	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): Seq[Document] = doSearch(query, Some(max), sort, offset)
-	def search(query: Query): Seq[Document] = doSearch(query, None, null, 0)
-	def search(query: Query, sort: Sort): Seq[Document] = doSearch(query, None, sort, 0)
-	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = doPagingSearch(query, Option(max), Option(sort), last, token)
+	protected def initialiseSearching = {	
+		if (searcherManager == null) {
+			try {
+				logger.debug("Opening a new searcher manager at " + indexPath)
+				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null)
+			} catch {
+				case e: IndexNotFoundException => logger.warn("No index found.")
+			}
+		}
+		if (searcherLifetimeManager == null) {
+			try {
+				logger.debug("Opening a new searcher lifetime manager at " + indexPath)
+				searcherLifetimeManager = new SearcherLifetimeManager
+			} catch {
+				case e: IllegalStateException => logger.warn("Could not create SearcherLifetimeManager.")
+			}
+		}
+	}
 
-	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): Seq[Document] = {
+	/**
+	 * Sets up a new IndexSearcher with a refreshed IndexReader so that
+	 * subsequent searches see the results of recent index changes.
+	 */
+	protected def reopen = {
+		//logger.debug("Reopening index")
+		
+		initialiseSearching
+		if (searcherManager != null) searcherManager.maybeRefresh
+	}
+
+	/**
+	 * Remove saved searchers over 20 minutes old
+	 */
+	protected def prune = {
+		val ageInSeconds = 20*60
+		initialiseSearching
+		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
+	}
+	
+	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
+	def search(query: Query): RichSearchResults = doSearch(query, None, null, 0)
+	def search(query: Query, sort: Sort): RichSearchResults = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = 
+		doPagingSearch(query, Option(max), Option(sort), last, token)
+
+	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
 		initialiseSearching
 		if (searcherManager == null) {
 			logger.warn("Tried to search but no searcher manager is available")
-			return Seq.empty
-		}
-		
-		acquireSearcher { searcher =>
+			Seq.empty
+		} else acquireSearcher { searcher =>
 			logger.debug("Running search for query: " + query)
 			
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
@@ -350,9 +389,9 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
 	
-	class pagingSearchResult(val results: Seq[Document], val last: Option[ScoreDoc], val token: Long, val total: Int) {}
+	case class PagingSearchResult(val results: RichSearchResults, val last: Option[ScoreDoc], val token: Long, val total: Int)
 	
-	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): pagingSearchResult = {
+	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = {
 		// guard
 		initialiseSearching
 		
@@ -374,10 +413,10 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 			val hits = results.scoreDocs
 			val totalHits = results.totalHits
 			hits match {
-				case Array() => new pagingSearchResult(Nil, None, newToken, 0)
+				case Array() => PagingSearchResult(Nil, None, newToken, 0)
 				case _ => {
 					val hitsOnThisPage = hits.length
-					new pagingSearchResult(hits.toStream.map (hit => searcher.doc(hit.doc)).toList, Option(hits(hitsOnThisPage-1)), newToken, totalHits)
+					PagingSearchResult(hits.toStream.map (hit => searcher.doc(hit.doc)).toList, Option(hits(hitsOnThisPage-1)), newToken, totalHits)
 				}
 			}
 		}
@@ -401,25 +440,9 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 		
 		(newToken, searcher)
 	}
+}
 
-	val IdField: String
-
-	/**
-	 * If an existing Document is in the index with this term, it
-	 * will be replaced.
-	 */
-	private def uniqueTerm(item: A) = new Term(IdField, getId(item))
-	protected def getId(item: A): String
-	
-	/**
-	 * TODO reuse one Document and set of Fields for all items
-	 */
-	protected def toDocument(item: A): Document
-	
-	protected def toId(doc: Document) = documentValue(doc, IdField)
-	protected def toItem(id: String): Option[A]
-	protected def toItem(doc: Document): Option[A] = { toId(doc) flatMap (toItem) }
-
+trait FieldGenerators {
 	protected def seqField(key: String, ids: Seq[_]) = {
 		new TextField(key, ids.mkString(" "), Store.NO)
 	}
@@ -435,5 +458,4 @@ abstract class AbstractIndexService[A] extends CommonQueryMethods[A] with QueryH
 	}
 
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
-
 }

@@ -35,10 +35,12 @@
   }
 }
 
-// Hover state, but only for links
+// Hover/focus state, but only for links
 a {
   &.label:hover,
-  &.badge:hover {
+  &.label:focus,
+  &.badge:hover,
+  &.badge:focus {
     color: @white;
     text-decoration: none;
     cursor: pointer;
@@ -50,17 +52,17 @@ a {
 .label,
 .badge {
   // Important (red)
-  &-important         { background-color: @btnDangerBackgroundHighlight; }
-  &-important[href]   { background-color: darken(@btnDangerBackgroundHighlight, 10%); }
+  &-important         { background-color: @errorText; }
+  &-important[href]   { background-color: darken(@errorText, 10%); }
   // Warnings (orange)
-  &-warning           { background-color: @btnWarningBackgroundHighlight; }
-  &-warning[href]     { background-color: darken(@btnWarningBackgroundHighlight, 10%); }
+  &-warning           { background-color: @orange; }
+  &-warning[href]     { background-color: darken(@orange, 10%); }
   // Success (green)
-  &-success           { background-color: @btnSuccessBackgroundHighlight; }
-  &-success[href]     { background-color: darken(@btnSuccessBackgroundHighlight, 10%); }
+  &-success           { background-color: @successText; }
+  &-success[href]     { background-color: darken(@successText, 10%); }
   // Info (turquoise)
-  &-info              { background-color: @btnInfoBackgroundHighlight; }
-  &-info[href]        { background-color: darken(@btnInfoBackgroundHighlight, 10%); }
+  &-info              { background-color: @infoText; }
+  &-info[href]        { background-color: darken(@infoText, 10%); }
   // Inverse (black)
   &-inverse           { background-color: @grayDark; }
   &-inverse[href]     { background-color: darken(@grayDark, 10%); }

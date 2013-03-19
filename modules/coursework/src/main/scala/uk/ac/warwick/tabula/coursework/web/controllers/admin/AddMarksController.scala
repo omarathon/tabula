@@ -17,12 +17,15 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.FeedbackService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks"))
 class AddMarksController extends CourseworkController {
 
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var feedbackService: FeedbackService = _
+	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AdminAddMarksCommand(module, assignment, user)
@@ -32,10 +35,10 @@ class AddMarksController extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AdminAddMarksCommand): Mav = {
-		val members = assignmentService.determineMembershipUsers(cmd.assignment)
+		val members = assignmentMembershipService.determineMembershipUsers(cmd.assignment)
 
 		val marksToDisplay = members.map { member =>
-			val feedback = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
+			val feedback = feedbackService.getStudentFeedback(assignment, member.getWarwickId)
 			noteMarkItem(member, feedback)
 		}
 

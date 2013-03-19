@@ -340,8 +340,8 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		paged2.docs.length should be (70)
 		
 		// Find by user ID
-		indexer.findByUserId("bob").length should be (140)
-		indexer.findByUserId("fred").length should be (0)
+		indexer.findByUserId("bob").size should be (140)
+		indexer.findByUserId("fred").size should be (0)
 
 		val beforeFeedbackJsonData = json.writeValueAsString(Map(
 					"assignment" -> assignment.id,

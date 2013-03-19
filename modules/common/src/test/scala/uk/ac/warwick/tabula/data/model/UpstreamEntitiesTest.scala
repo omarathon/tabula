@@ -6,14 +6,18 @@ import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
 import org.junit.Before
+import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
 
 class UpstreamEntitiesTest extends PersistenceTestBase {
 
 	@Test def associations() {
 		transactional { t =>
 
-			val dao = new AssignmentServiceImpl
-			dao.sessionFactory = sessionFactory
+			val assignmentService = new AssignmentServiceImpl
+			assignmentService.sessionFactory = sessionFactory
+			
+			val assignmentMembershipService = new AssignmentMembershipServiceImpl
+			assignmentMembershipService.sessionFactory = sessionFactory
 
 			val law = new UpstreamAssignment
 			law.moduleCode = "la155-10"
@@ -31,7 +35,8 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			assessmentGroup2011.occurrence = "A"
 
 			val law2010 = new Assignment
-			law2010.assignmentService = dao
+			law2010.assignmentService = assignmentService
+			law2010.assignmentMembershipService = assignmentMembershipService
 			law2010.name = "Cool Essay!"
 			law2010.academicYear = new AcademicYear(2010)
 			law2010.assessmentGroups = List(assessmentGroup2010)
@@ -39,14 +44,16 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			val law2011 = new Assignment
 			law2011.name = "Cool Essay?"
-			law2011.assignmentService = dao
+			law2011.assignmentService = assignmentService
+			law2011.assignmentMembershipService = assignmentMembershipService
 			law2011.academicYear = new AcademicYear(2011)
 			law2011.assessmentGroups = List(assessmentGroup2011)
 			assessmentGroup2011.assignment = law2011
 
 			// Not linked to an upstream assignment
 			val law2012 = new Assignment
-			law2012.assignmentService = dao
+			law2012.assignmentService = assignmentService
+			law2012.assignmentMembershipService = assignmentMembershipService
 			law2012.name = "Cool Essay?"
 			law2012.academicYear = new AcademicYear(2011)
 			

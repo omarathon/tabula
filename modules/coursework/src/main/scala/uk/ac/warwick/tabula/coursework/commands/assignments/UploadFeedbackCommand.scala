@@ -24,7 +24,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
-import scala.Some
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 
@@ -32,17 +31,25 @@ class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
 	@BeanProperty var file: UploadedFile = new UploadedFile
 
-	@BeanProperty var submissionExists: Boolean = false
+	@BeanProperty var submissionExists = false
+	@BeanProperty var isPublished = false
+	// true when at least one non-ignored file is uploaded
+	@BeanProperty var isModified = true
 	@BeanProperty var duplicateFileNames: Set[String] = Set()
+	@BeanProperty var ignoredFileNames: Set[String] = Set()
 
-	def listAttachments() = file.attached.map(f => new AttachmentItem(f.name, duplicateFileNames.contains(f.name)))
+	def listAttachments() = file.attached.map(f => {
+		val duplicate = duplicateFileNames.contains(f.name)
+		val ignore = ignoredFileNames.contains(f.name)
+		new AttachmentItem(f.name, duplicate, ignore)
+	})
 
 	def this(uniNumber: String) = {
 		this()
 		this.uniNumber = uniNumber
 	}
 
-	class AttachmentItem(val name: String, val duplicate: Boolean){}
+	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean){}
 }
 
 // Purely for storing in command to display on the model.
@@ -105,7 +112,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	def preExtractValidation(errors: Errors) {
 		if (batch) {
 			if (archive != null && !archive.isEmpty()) {
-				logger.info("file name is " + archive.getOriginalFilename())
+				logger.debug("file name is " + archive.getOriginalFilename())
 				if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 					errors.rejectValue("archive", "archive.notazip")
 				}
@@ -134,11 +141,15 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
 		val file = item.file
 		val uniNumber = item.uniNumber
-
+		
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		for(f <- file.attached){
+		for((f, i) <- file.attached.zipWithIndex){
+			if (f.actualDataLength == 0) {
+				errors.rejectValue("file.attached[" + i + "]", "file.empty")
+			}
+			
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
-				errors.rejectValue("file", "file.url")
+				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
 		if (uniNumber.hasText) {

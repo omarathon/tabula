@@ -1,16 +1,23 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import org.springframework.mock.web.MockMultipartFile
+import uk.ac.warwick.tabula.data.FileDao
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.Mockito
 
 class AddFeedbackCommandTest extends TestBase with Mockito {
-	
+
+	var dao: FileDao = mock[FileDao]
+	dao.getData(null) returns (None)
+
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
@@ -24,21 +31,37 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	@Test def duplicateFileNames = withUser("cuscav") {
 		val cmd = new AddFeedbackCommand(module, assignment, currentUser)
 		cmd.userLookup = userLookup
-		
+		cmd.fileDao = dao
 		cmd.uniNumber = "1010101"
 			
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
+		a.uploadedDataLength = 300
+		a.fileDao = dao
 		file.attached.add(a)
-		
+
+		val b = new FileAttachment
+		b.name = "file2.txt"
+		b.uploadedDataLength = 300
+		b.fileDao = dao
+		file.attached.add(b)
+
 		val item = new FeedbackItem("1010101")
 		item.file = file
 		cmd.items.add(item)
 		
-		// Add an existing feedback with the same name
+		// Add an existing feedback with the same name and content - will be ignored
 		val feedback = Fixtures.feedback("1010101")
 		feedback.addAttachment(a)
+
+		// Add an existing feedback with the same name but different content - will be overwritten
+		val b2 = new FileAttachment
+		b2.name = "file2.txt"
+		b2.uploadedDataLength = 305
+		b2.fileDao = dao
+		feedback.addAttachment(b2)
+
 		assignment.feedbacks.add(feedback)
 		
 		item.submissionExists should be (false)
@@ -49,7 +72,8 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 		
 		item.submissionExists should be (true)
-		item.duplicateFileNames should be (Set("file.txt"))
+		item.ignoredFileNames should be (Set("file.txt"))
+		item.duplicateFileNames should be (Set("file2.txt"))
 	}
 
 }

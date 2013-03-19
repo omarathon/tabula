@@ -4,17 +4,17 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.Fixtures
 
 class ActivityTest extends TestBase with Mockito {
 	
-	val assignmentService = mock[AssignmentService]
+	val submissionService = mock[SubmissionService]
 	val userLookup = new MockUserLookup
 	userLookup.registerUsers("cuscav")
 	
-	Activity.assignmentService = assignmentService
+	Activity.submissionService = submissionService
 	Activity.userLookup = userLookup
 		
 	@Test def fromEventNotSubmission {
@@ -30,7 +30,7 @@ class ActivityTest extends TestBase with Mockito {
 	
 	@Test def fromSubmission {
 		val submission = Fixtures.submission()
-		assignmentService.getSubmission("submissionId") returns Some(submission)
+		submissionService.getSubmission("submissionId") returns Some(submission)
 		
 		val event = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,
@@ -50,7 +50,7 @@ class ActivityTest extends TestBase with Mockito {
 	}
 	
 	@Test def fromSubmissionNotFound {
-		assignmentService.getSubmission("submissionId") returns None
+		submissionService.getSubmission("submissionId") returns None
 		
 		val event = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,

@@ -23,43 +23,42 @@
 	<h1 class="with-settings">
 		${department.name}
 	</h1>
+	
+	<div class="btn-toolbar dept-toolbar">
+	
 	<div class="btn-group dept-settings">
-		<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
 			<i class="icon-wrench"></i>
-			Department settings
+			Manage
 			<span class="caret"></span>
 		</a>
-		<ul class="dropdown-menu">
+		<ul class="dropdown-menu pull-right">
 			<#if features.extensions>
 				<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
 			</#if>
 			<#if features.feedbackTemplates>
-				<li><a href="settings/feedback-templates"><i class="icon-file"></i> Feedback templates</a></li>
+				<li><a href="settings/feedback-templates"><i class="icon-comment"></i> Feedback templates</a></li>
 			</#if>
 			<#if features.markingWorkflows>
-				<li><a href="markingworkflows"><i class="icon-inbox"></i> Marking workflows</a></li>
+				<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
 			</#if>
-			<li><a href="settings/display"><i class="icon-list-alt"></i> Display</a></li>
+			<li><a href="reports/feedback"><i class="icon-book"></i> Feedback report</a></li>
+			<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
 		</ul>
 	</div>
-	<a class="btn btn-mini feedback-report" href="reports/feedback">
-		<i class="icon-download"></i>
-		Download feedback report
-	</a>
+	
+	<div class="btn-group dept-show">
+		<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
+			<i class="icon-eye-open"></i>
+			Show
+		</a>
+	</div>
+	
+	</div>
+	
 	
 <#else>
 	<h1>${department.name}</h1>
-</#if>
-
-<#if notices.unpublishedAssignments?has_content>
-<div class="alert alert-error">
-	Some assigments have feedback that hasn't been published to students yet.
-	<#list notices.unpublishedAssignments as a>
-		<div>
-			<a href="#${module_anchor(a.module)}">${a.name}</a>
-		</div>
-	</#list>
-</div>
 </#if>
 
 <#list modules as module>
@@ -76,20 +75,17 @@
 	<div class="clearfix">
 		<h2 class="module-title"><@fmt.module_name module /></h2>
 		<div class="btn-group module-manage-button">
-		  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
-		  <ul class="dropdown-menu">
+		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+		  <ul class="dropdown-menu pull-right">
 		  	<#if can_manage >	
 					<#assign  module_managers_count = ((module.managers.includeUsers)![])?size />
 					<li><a href="<@url page="/admin/module/${module.code}/permissions" />">
-						Edit module managers <span class="badge">${module_managers_count}</span>
+						<i class="icon-user"></i> Edit module permissions <!--<span class="badge">${module_managers_count}</span>-->
 					</a></li>
 				</#if>
 				
-				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> Add assignment</a></li>
+				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-folder-close"></i> Add assignment</a></li>
 				
-				<#if has_archived_assignments>
-					<li><a class="show-archived-assignments" href="#">Show archived assignments</a></li>
-				</#if>
 		  </ul>
 		</div>
 	</div>
@@ -109,13 +105,18 @@
 						(Archived)
 					</#if>
 				</small>
+				
+				
 			</h3>
 
-			<#if assignment.assessmentGroups?has_content>
-				<#list assignment.assessmentGroups as group>
-					<#assign _upstream=group.upstreamAssignment />
-					<span class="label label-info">SITS: ${_upstream.moduleCode?upper_case}/${_upstream.sequence}</span>
-				</#list>
+			<#if assignment.hasReleasedFeedback || features.submissions>
+				<p class="feedback-published">
+					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
+					<a href="${urlforstudents}">Link for students</a>
+					<a class="use-popover" id="popover-${assignment.id}" data-html="true" 
+						data-original-title="<span class='text-info'><strong>Link for students</strong></span> <button type='button' onclick=&quot;jQuery('#popover-${assignment.id}').popover('hide')&quot; class='close'>&times;</button></span>" 
+						data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i class="icon-question-sign"></i></a>
+				</p>
 			</#if>
 
 			</div>
@@ -137,8 +138,11 @@
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
 						</#if>
+											
 					</div>
 				</#if>
+
+				
 				<#if features.submissions && assignment.collectSubmissions && !features.combinedForm>
 					<div class="submission-count">
 						<#if assignment.submissions?size gt 0>
@@ -152,84 +156,111 @@
 				</#if>
 				<#if !features.combinedForm>
 					<div class="feedback-count">
-					<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-					${assignment.countFullFeedback} feedback<#if has_feedback></a></#if>
-					<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
-					<#if countUnreleasedFeedback gt 0>
-						<span class="has-unreleased-feedback">
-						(${countUnreleasedFeedback} to publish)
-						</span>
-					<#elseif has_feedback>
-						<span class="no-unreleased-feedback">
-						(all published)
-						</span>
-					</#if>
+						<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
+
+						${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> feedback<#if has_feedback></a></#if>
+						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
+												
+						<#if countUnreleasedFeedback gt 0>
+							<span class="has-unreleased-feedback">
+								${countUnreleasedFeedback} 
+								<#if countUnreleasedFeedback gt 1>
+								items of feedback need publishing
+								<#else>
+								item of feedback needs publishing
+								</#if>
+							</span>					
+						</#if>
 					</div>
+					
 				</#if>
 				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
 					<div class="submission-and-feedback-count">							
+						<i class="icon-file"></i> 
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" />
-							<#if has_feedback> and ${assignment.countFullFeedback} feedback</#if>
+							<#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if>
 						</a>
+						
+						
+						<#assign unapprovedExtensions = assignment.extensions />
+						<#if unapprovedExtensions?size gt 0>
+							<span class="has-unapproved-extensions">
+								<i class="icon-info-sign"></i>
+								<#if unapprovedExtensions?size gt 1>
+									${unapprovedExtensions?size} extensions need granting
+								<#else>
+								1 extension needs granting
+								</#if>
+							</span>
+						</#if>
+							
 						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
 						<#if countUnreleasedFeedback gt 0>
 							<span class="has-unreleased-feedback">
-							(${countUnreleasedFeedback} feedback to publish)
-							</span>
-						<#elseif has_feedback>
-							<span class="no-unreleased-feedback">
-							(all feedback published)
-							</span>
+								<i class="icon-info-sign"></i>
+								${countUnreleasedFeedback} 
+								<#if countUnreleasedFeedback gt 1>
+									items of feedback need publishing
+								<#else>
+									item of feedback needs publishing
+								</#if>
+							</span>	
 						</#if>
+						
 					</div>	
 				</#if>			
 				
-				<#if assignment.hasReleasedFeedback || features.submissions>
-				<p class="feedback-published">
-					<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
-					<a class="copyable-url use-tooltip" href="${urlforstudents}" title="This is the link you can freely give out to students or publish on your module web page. Click to copy it to the clipboard and then paste it into an email or page.">
-						URL for students
-					</a>
-				</p>
-				</#if>
 				
 			</div>
 			<div class="assignment-buttons">
 				<div class="btn-toolbar">
 				<div class="btn-group">
-				  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">Manage <i class="icon-cog"></i><span class="caret"></span></a>
+				  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
 				  <ul class="dropdown-menu pull-right">
-					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />">Edit properties</a></li>
+					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />"><i class="icon-wrench"></i> Edit properties</a></li>
 					<li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">
+						<i class="icon-folder-close"></i>
 						<#if assignment.archived>
-							Unarchive
-						<#else>
-							Archive
+							Unarchive assignment
+						<#else> 
+							Archive assignment
 						</#if>
 					</a></li>
 
-					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />">Assign markers <i class="icon-user"></i></a></li>
+
+					<li class="divider"></li>
+					
+					<#if assignment.allowExtensions>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />"><i class="icon-calendar"></i> Grant extensions </a></li>
+					<#else>
+						<li class="disabled"><a><i class="icon-calendar"></i> Grant extensions </a></li>
 					</#if>
 
-					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />">Add feedback <i class="icon-plus"></i></a>
+					<li class="divider"></li>
+					
+					
+					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />"><i class="icon-user"></i> Assign markers </a></li>
+					<#else> 
+						<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
+					</#if>
 					
 					<#if assignment.collectMarks >
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />">Add marks <i class="icon-plus"></i></a></li>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />"><i class="icon-check"></i> Add marks</a></li>
+					<#else>
+						<li class="disabled"><a><i class="icon-check"></i> Add marks</a></li>
 					</#if>
 					
-					<#if has_feedback>
-						<#-- contained in the combined submissions and feedback list now 
-						<a class="btn btn-block list-feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/list" />">List feedback <i class="icon-list-alt"></i></a>
-						-->
-						<#if assignment.canPublishFeedback>
-							<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />">Publish feedback <i class="icon-envelope"></i></a></li>
-						</#if>
+					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
+									
+										
+					<#if assignment.canPublishFeedback>
+						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />"><i class="icon-envelope"></i> Publish feedback </a></li>
+					<#else>			
+						<li class="disabled"><a><i class="icon-envelope"></i> Publish feedback </a></li>
 					</#if>
-					<#if assignment.allowExtensions >
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />">List extensions <i class="icon-calendar"></i></a></li>
-					</#if>
+					
 					
 				  </ul>
 				</div>

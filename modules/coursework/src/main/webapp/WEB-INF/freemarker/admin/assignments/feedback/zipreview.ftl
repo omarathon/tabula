@@ -25,7 +25,7 @@
 <#assign itemsList=status.actualValue /> 
 <p>
 	<#if itemsList?size gt 0>
-		I've ${verbed_your_noun} and I found feedback for ${itemsList?size} students.
+		I've ${verbed_your_noun} and I found feedback for <@fmt.p itemsList?size "student"/>.
 		
 		<#if hasErrors>
 		However, there were some problems with its contents, which are shown below.
@@ -104,8 +104,14 @@
 				${status.value}
 			</@spring.bind>
 			<@f.errors path="uniNumber" cssClass="error" />
-			<#if item.submissionExists>
-				<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+			<#-- If there is nothing to upload hide these errors -->
+			<#if item.isModified>
+				<#if item.submissionExists>
+					<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+				</#if>
+				<#if item.isPublished>
+					<span class="warning">Feedback for this student has already been published. They will be notified that their feedback has changed.</span>
+				</#if>
 			</#if>
 		</td>
 		<#noescape>
@@ -117,10 +123,15 @@
 				<li>
 					<@f.hidden path="file.attached[${attached_index}]" />
 					${attached.name}
-					<@f.errors path="file" cssClass="error" />
+					<@f.errors path="file.attached[${attached_index}]" cssClass="error" />
 					<#if attached.duplicate>
 						<span class="warning">
 							A feedback file with this name already exists for this student. It will be overwritten.
+						</span>
+					</#if>
+					<#if attached.ignore>
+						<span class="warning">
+							This feedback file has already been uploaded. It will be ignored.
 						</span>
 					</#if>
 				</li>
