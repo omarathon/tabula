@@ -284,8 +284,8 @@ trait MemberProperties {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
 	
-	@OneToOne
-	@JoinColumn(name="PHOTO_ID")
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PHOTO_ID")
 	@BeanProperty var photo: FileAttachment = _
 	
 	@BeanProperty var inUseFlag: String = _
