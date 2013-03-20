@@ -54,7 +54,7 @@
 		</a>
 	</div>
 
-<div>
+</div>
 	
 <#else>
 	<h1>${department.name}</h1>
