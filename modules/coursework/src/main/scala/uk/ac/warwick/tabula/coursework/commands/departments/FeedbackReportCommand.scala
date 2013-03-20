@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.AuditEventIndexService
@@ -16,6 +16,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.util.workingdays.WorkingDaysHelper
 
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited { 
@@ -24,11 +25,13 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditIndexService = Wire.auto[AuditEventIndexService]
+
+	var workingDaysHelper = Wire.auto[WorkingDaysHelper]
 	
 	val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
 	
 	def applyInternal() = {
-		val events = auditIndexService.findPublishFeedbackEvents(department)	
+		val events = auditIndexService.findPublishFeedbackEvents(department)
 		
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(department, workbook) 
@@ -61,8 +64,22 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		header.createCell(5).setCellValue("Notes")
 		sheet
 	}
-	
-	
+
+	def getFeedbackCounts(assignment: Assignment) = {
+		val results = auditIndexService.submissionsForAssignment(assignment)
+		results.partition{audit =>
+
+			// was feedback returned within 20 working days?
+			val isLate = if(audit.eventDate.isAfter(assignment.closeDate)){
+				workingDaysHelper.getNumWorkingDays(audit.eventDate.toLocalDate , )
+			} else {
+
+			}
+			false
+		}
+	}
+
+
 	def formatWorksheet(sheet: XSSFSheet) = {
 	    (0 to 5) map (sheet.autoSizeColumn(_))
 	    sheet.setColumnWidth(5, 40)
