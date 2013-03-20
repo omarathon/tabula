@@ -65,20 +65,6 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		sheet
 	}
 
-	def getFeedbackCounts(assignment: Assignment) = {
-		val results = auditIndexService.submissionsForAssignment(assignment)
-		results.partition{audit =>
-
-			// was feedback returned within 20 working days?
-			val isLate = if(audit.eventDate.isAfter(assignment.closeDate)){
-				workingDaysHelper.getNumWorkingDays(audit.eventDate.toLocalDate , )
-			} else {
-
-			}
-			false
-		}
-	}
-
 
 	def formatWorksheet(sheet: XSSFSheet) = {
 	    (0 to 5) map (sheet.autoSizeColumn(_))
