@@ -104,7 +104,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@ForeignKey(name="none")
 	@BeanProperty var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
 	
-	def permissionsParents = Seq()
+	def permissionsParents = Option(parent).toSeq
 
 	override def toString = "Department(" + code + ")"
 	
