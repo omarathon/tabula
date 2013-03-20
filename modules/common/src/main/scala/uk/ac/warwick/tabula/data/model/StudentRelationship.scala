@@ -74,6 +74,8 @@ class StudentRelationship extends GeneratedId {
 }
 
 object StudentRelationship {
+	@transient var profileService = Wire.auto[ProfileService]
+
 	def apply(agent: String, relType: RelationshipType, targetSprCode: String) = {
 		
 		val rel = new StudentRelationship
@@ -82,7 +84,19 @@ object StudentRelationship {
 		rel.targetSprCode = targetSprCode
 		rel
 	}
+	
+	def getLastNameFromAgent(agent: String) = {
+		if (agent.forall(_.isDigit)) {
+			profileService.getMemberByUniversityId(agent) match {
+				case None => agent
+				case Some(member) => member.lastName
+			}
+		} else {
+			agent
+		}
+	}
 }
+
 
 
 sealed abstract class RelationshipType(val dbValue: String, @BeanProperty val description: String)
@@ -96,6 +110,7 @@ object RelationshipType {
 	  	case _ => throw new IllegalArgumentException()
 	}
 }
+
 
 class RelationshipUserType extends AbstractBasicUserType[RelationshipType, String] {
 
