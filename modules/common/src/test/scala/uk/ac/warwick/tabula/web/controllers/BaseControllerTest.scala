@@ -11,9 +11,6 @@ import uk.ac.warwick.tabula.validators.CompositeValidator
 import uk.ac.warwick.tabula.validators.ClassValidator
 import org.hibernate.SessionFactory
 import org.hibernate.classic.Session
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.SelfValidating
 
 class BaseControllerTest extends TestBase with Mockito {
 	

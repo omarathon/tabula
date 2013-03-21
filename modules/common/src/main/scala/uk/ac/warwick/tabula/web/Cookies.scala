@@ -35,8 +35,7 @@ class Cookies(val _cookies: Array[http.Cookie]) {
 		case Some(cookie) => try {
 			cookie.value.toBoolean
 		} catch {
-			case _: NumberFormatException => default
-			case _: IllegalArgumentException => default
+			case _ @ (_: NumberFormatException | _: IllegalArgumentException) => default
 		}
 		case None => default
 	}
