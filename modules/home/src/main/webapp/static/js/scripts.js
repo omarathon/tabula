@@ -93,8 +93,26 @@ jQuery(function ($) {
 	// add .use-popover and optional data- attributes to enable a cool popover. 
 	// http://twitter.github.com/bootstrap/javascript.html#popovers
 	$('.use-popover').popover().click(function(){ return false; });
+		
+	// apply details/summary polyfill
+	// https://github.com/mathiasbynens/jquery-details
+	$('html').addClass($.fn.details.support ? 'details' : 'no-details');
+	$('details').details();
 	
-	
+	// togglers
+	$(".open-all-details").on("click", function() {
+		$("html.no-details details:not(.open) summary").click();
+		$("html.details details:not([open]) summary").click();
+		$(".open-all-details").hide();
+		$(".close-all-details").show();
+	});
+	$(".close-all-details").on("click", function() {
+		$("html.no-details details.open summary").click();
+		$("html.details details[open] summary").click();
+		$(".close-all-details").hide();
+		$(".open-all-details").show();
+	});
+
 }); // end domready
 
 }(jQuery));

@@ -41,6 +41,36 @@ html.iframe {
   cursor: hand;
 }
 
+// details polyfill support
+details, summary { display: block; }
+
+// The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
+// However, we’re still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
+// Remember: by default (and probably most of the time), the contents of the <details> element are hidden.
+
+// Hide all direct descendants of every <details> element
+// Note that IE6 doesn’t support the child selector; we’ll work around that using jQuery later
+.no-details details > * { display: none; }
+
+// Make sure summary remains visible
+.no-details details summary { display: block; }
+
+// Apply a pointer cursor upon hover to indicate it’s a clickable element. These styles can be applied regardless of whether the fallback is needed
+summary { cursor: pointer; }
+
+// polyfill disclosure triangle
+.no-details details summary:before {
+	content: '\25b6\00a0';
+	font-size: 11px;
+	padding-left: 3px;
+	margin-right: 4px;
+}
+.no-details details.open summary:before {
+	content: '\25bc\00a0';
+	font-size: 12px;
+	padding-left: 0;
+}
+
 #container {
 	.collapse-trigger { .cursor-pointer(); }
 	
@@ -1044,7 +1074,27 @@ h1.with-settings {
 			div.photo {
 				.tabula-photo(50px, 5px);
 			}
-		}
+			
+			section.meetings {
+				margin: 12px 0;
+				
+				summary {
+					margin-top: 9px;
+					font-weight: bold;
+					border-bottom: dotted 1px lighten(@grayLight, 35%);
+				}
+			
+				.new, .toggle-all-details {
+					margin: -20px 0 0 10px;
+					float: right;
+					text-decoration: none;
+				}
+				
+				span.date {
+					margin-right: 2.5em;
+				}
+			}
+}
 	} // .profile
 	
 	#container #tutors {
