@@ -4,7 +4,7 @@ import java.io.StringReader
 import scala.annotation.target.field
 import scala.reflect.BeanProperty
 import collection.JavaConversions._
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable

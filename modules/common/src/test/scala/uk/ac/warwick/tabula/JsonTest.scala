@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula
 import scala.collection.mutable.{Map => MutableMap}
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringReader
@@ -27,7 +27,7 @@ class JsonTest extends TestBase {
 	@Test def parseNumbers {
 		val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
 		val map = m.readValue(new StringReader(props), classOf[Map[String,Any]])
-		map("filetypes").asInstanceOf[JList[_]].toSeq should equal (Seq("pdf","doc","docx"))
+		map("filetypes").asInstanceOf[scala.collection.mutable.Buffer[_]].toSeq should equal (Seq("pdf","doc","docx"))
 		map("age").asInstanceOf[Int] should be (23)
 	}
 	
