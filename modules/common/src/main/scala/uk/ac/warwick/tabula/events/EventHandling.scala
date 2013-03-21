@@ -37,13 +37,13 @@ trait EventHandling extends Logging {
 					listener.afterCommand(resultEvent, result)
 					return result
 				} catch {
-					case e => {
+					case e: Throwable => {
 						// On exception, pass that on then rethrow.
 						// If the exception handler throws an exception, just log that and rethrow the original
 						try {
 							listener.onException(event, e)
 						} catch {
-							case e1 => logger.error("Exception in EventHandling.onException", e1)
+							case e1: Throwable => logger.error("Exception in EventHandling.onException", e1)
 						} finally {
 							throw e
 						}

@@ -25,12 +25,12 @@ class UserPickerControllerTest extends TestBase {
 		val writer = new StringWriter
 		controller.queryJson(cmd, writer)
 		
-		val users = controller.json.readValue(writer.getBuffer().toString(), classOf[Seq[java.util.LinkedHashMap[String, Any]]])
+		val users = controller.json.readValue(writer.getBuffer().toString(), classOf[Seq[scala.collection.mutable.Map[String, Any]]])
 		users.length should be (2)
 		
 		// Ensure order has been retained
-		users(0).get("value") should be ("cuscav")
-		users(1).get("value") should be ("cusebr")
+		users(0).get("value") should be (Some("cuscav"))
+		users(1).get("value") should be (Some("cusebr"))
 	}
 	
 	@Test def setQuery {

@@ -54,5 +54,5 @@ abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifes
 	override def deepCopy(x: Object) = x
 	override def replace(original: Object, target: Object, owner: Object) = original
 	override def disassemble(value: Object) = value.asInstanceOf[jio.Serializable]
-	override def assemble(cached: jio.Serializable, owner: Object) = cached
+	override def assemble(cached: jio.Serializable, owner: Object) = cached.asInstanceOf[AnyRef]
 }

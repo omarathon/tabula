@@ -25,10 +25,11 @@
 	<inceptionYear>2012</inceptionYear>
 
 	<properties>
-		<scala.version>2.9.1</scala.version>
+		<scala.version>2.10.0</scala.version>
+		<scala.major.version>2.10</scala.major.version>
 		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
-		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
+		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 		<warwickutils.version>20130314</warwickutils.version>
@@ -781,14 +782,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scala-tools.testing</groupId>
-			<artifactId>specs_${scala.version}</artifactId>
+			<artifactId>specs_${scala.major.version}</artifactId>
 			<version>1.6.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.scalatest</groupId>
-			<artifactId>scalatest_${scala.version}</artifactId>
-			<version>2.0.M5</version>
+			<artifactId>scalatest_${scala.major.version}</artifactId>
+			<version>2.0.M6-SNAP8</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -812,13 +813,13 @@
 		</dependency>
 		<dependency>
 			<groupId>github.com.ingoem</groupId>
-			<artifactId>scala-react_2.9.1</artifactId>
-			<version>1.0</version>
+			<artifactId>scala-react_${scala.major.version}</artifactId>
+			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jsuereth</groupId>
-			<artifactId>scala-arm_${scala.version}</artifactId>
-			<version>1.2</version>
+			<artifactId>scala-arm_${scala.major.version}</artifactId>
+			<version>1.3</version>
 		</dependency>
 	</dependencies>
 

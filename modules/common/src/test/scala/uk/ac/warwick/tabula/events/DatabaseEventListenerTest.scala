@@ -21,6 +21,8 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 	listener.auditDirectory.deleteOnExit()
 	listener.createMissingDirs = true
 	
+	listener.afterPropertiesSet
+	
 	@Test def maintenanceModeDisabled {
 		maintenanceModeService.disable
 		
@@ -40,7 +42,6 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 	}
 	
 	@Test def maintenanceMode {
-		listener.afterPropertiesSet
 		maintenanceModeService.enable
 		
 		val event = Event(

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
-import scala.react.Observing
 import org.joda.time.DateTime
+import scala.react.Observing
 
 class MaintenanceModeServiceTest extends TestBase with Observing {
 	
