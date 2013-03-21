@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.web.views
-import org.scalatest.junit.ShouldMatchersForJUnit
-import org.scalatest.junit.JUnitSuite
-import org.junit.Test
+
 import scala.collection.mutable.Buffer
-import freemarker.template.SimpleSequence
 import scala.reflect.BeanProperty
-import org.junit.Ignore
-import org.joda.time.Duration
-import freemarker.template.SimpleHash
-import org.joda.time.Period
-import reflect.runtime.universe._
+
+import org.junit.Test
+import org.scalatest.junit.JUnitSuite
+
+import org.scalatest.junit.ShouldMatchersForJUnit
+
+import freemarker.template.SimpleSequence
 
 class MyObject {
   var name = "text"

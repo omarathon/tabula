@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
 import scala.reflect.BeanProperty
 import org.joda.time.DateTime
+import scala.react.EventSource
 import uk.ac.warwick.tabula.system.exceptions.HandledException
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
@@ -13,7 +14,6 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
 import org.springframework.beans.BeanWrapperImpl
-import scala.react.EventSource
 
 trait MaintenanceStatus {
 	def enabled: Boolean
