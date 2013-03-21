@@ -31,6 +31,8 @@ trait ProfileService {
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def findCurrentRelationship(relationshipType: RelationshipType, targetUniversityId: String): Option[StudentRelationship]
+	def getRelationships(relationshipType: RelationshipType, targetUniversityId: String): Seq[StudentRelationship]
+	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
@@ -85,6 +87,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
+	}
+	
+	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
+		memberDao.getRelationshipsByStudent(relationshipType, student)
 	}
 	
 	def getPersonalTutor(student: Member): Option[Member] = {

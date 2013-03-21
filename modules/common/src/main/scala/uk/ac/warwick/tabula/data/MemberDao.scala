@@ -32,6 +32,7 @@ trait MemberDao {
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
@@ -113,6 +114,25 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
+	}	
+	
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				Member m
+			where
+				sr.targetSprCode = m.studyDetails.sprCode
+			and
+				sr.relationshipType = :relationshipType
+			and
+				m = :student
+		""")
+			.setEntity("student", student)
+			.setParameter("relationshipType", relationshipType)
+			.seq
 	}	
 	
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =

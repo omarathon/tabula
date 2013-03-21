@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 
 
 class ViewProfileCommand(profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile)
@@ -18,8 +19,15 @@ class ViewProfileCommand(profile: StudentMember) extends ViewViewableCommand(Per
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
 	
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
+	@ModelAttribute("searchProfilesCommand")
+	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)) orNull
+	
+	@ModelAttribute("viewMeetingRecordCommand")
+	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
+		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
+		case _ => None
+	}
 	
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
@@ -29,15 +37,23 @@ class ViewProfileController extends ProfilesController {
 
 
 	@RequestMapping
-	def viewProfile(@ModelAttribute("viewProfileCommand") cmd: ViewProfileCommand) = {
-		val profiledStudentMember = cmd.apply
+	def viewProfile(
+			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
+			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand]) = {
 		
+		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 		
+		val meetings = meetingsCmd match {
+			case None => Seq()
+			case Some(cmd) => cmd.apply
+		}
+
 		Mav("profile/view", 
 		    "profile" -> profiledStudentMember,
 		    "viewer" -> currentMember,
-		    "isSelf" -> isSelf)
+		    "isSelf" -> isSelf,
+		    "meetings" -> meetings)
 		   .crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
