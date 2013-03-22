@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data.convert
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.springframework.beans.factory.annotation.Autowired
 

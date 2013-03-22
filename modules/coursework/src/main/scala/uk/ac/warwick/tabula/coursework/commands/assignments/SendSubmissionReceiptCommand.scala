@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.CurrentUser

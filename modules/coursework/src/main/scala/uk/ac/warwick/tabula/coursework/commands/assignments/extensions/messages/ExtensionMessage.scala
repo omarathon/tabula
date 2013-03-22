@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.joda.time.format.DateTimeFormat
 import org.springframework.mail.javamail.MimeMessageHelper

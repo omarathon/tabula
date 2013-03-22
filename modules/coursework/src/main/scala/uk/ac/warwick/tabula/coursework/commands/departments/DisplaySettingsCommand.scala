@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}

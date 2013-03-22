@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.AuditEventIndexService
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import org.springframework.beans.factory.annotation.Configurable

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.MockUserLookup
 import org.springframework.validation.BindException
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 class UsercodeListValidatorTest extends TestBase {
 	

@@ -11,7 +11,7 @@ import org.springframework.validation.Errors
 import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.forms.SubmissionValue

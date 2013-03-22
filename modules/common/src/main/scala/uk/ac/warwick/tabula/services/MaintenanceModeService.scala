@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import scala.react.EventSource
 import uk.ac.warwick.tabula.system.exceptions.HandledException

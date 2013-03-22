@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 

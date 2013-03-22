@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.home.commands.sysadmin
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.PermissionsTarget

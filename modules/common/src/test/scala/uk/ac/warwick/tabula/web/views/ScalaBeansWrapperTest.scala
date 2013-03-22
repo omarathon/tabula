@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
 import scala.collection.mutable.Buffer
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
