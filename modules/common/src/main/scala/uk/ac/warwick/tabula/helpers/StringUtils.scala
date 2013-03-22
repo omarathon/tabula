@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.util.core.{ StringUtils => Utils }
+import language.implicitConversions
 
 /**
  * Scala-style String utilities. Adds the methods as implicit methods

@@ -109,6 +109,6 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, (
 	}
 	
 	override def getProperty(prop: String): Object =
-		mutableSources.find { _.containsProperty(prop) } map { _.getProperty(prop) } orNull
+		(mutableSources.find { _.containsProperty(prop) } map { _.getProperty(prop) }).orNull
 	
 }

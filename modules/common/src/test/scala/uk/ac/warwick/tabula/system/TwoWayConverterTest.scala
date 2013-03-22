@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import org.joda.time.Days
 import org.springframework.core.convert.TypeDescriptor
 import java.util.Locale
-
+import scala.reflect.ClassTag
 
 class TwoWayConverterTest extends TestBase {
 
@@ -20,7 +20,7 @@ class TwoWayConverterTest extends TestBase {
 		converter.print(Days.FIVE, Locale.getDefault()) should be ("5")
 	}
 
-	private def descriptor[A](implicit m:Manifest[A]) = TypeDescriptor.valueOf(m.erasure)
+	private def descriptor[A](implicit tag: ClassTag[A]) = TypeDescriptor.valueOf(tag.runtimeClass)
 }
 
 

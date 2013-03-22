@@ -62,7 +62,7 @@ class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)) orNull
+		restricted(new SearchTutorsCommand(user)).orNull
 
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = student match {

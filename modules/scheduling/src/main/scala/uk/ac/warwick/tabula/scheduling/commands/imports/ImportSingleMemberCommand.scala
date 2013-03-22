@@ -73,10 +73,10 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
 		
-		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail) orNull)
-		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")) orNull)
+		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail).orNull)
+		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
 		
-		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }) orNull)
+		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }).orNull)
 		this.photoOption = mac.photo
 		
 		this.jobTitle = member.position
@@ -86,8 +86,8 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		this.groupName = member.targetGroup
 		this.inactivationDate = member.endDate
 		
-		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode) orNull)
-		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")) orNull) 
+		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode).orNull)
+		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")).orNull) 
 	}
 	
 	private def copyPhoto(property: String, photoOption: Option[Array[Byte]], memberBean: BeanWrapper) = {

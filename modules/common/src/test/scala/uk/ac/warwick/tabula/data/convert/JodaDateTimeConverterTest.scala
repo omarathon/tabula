@@ -19,7 +19,7 @@ class JodaDateTimeConverterTest extends TestBase {
 	}
 	
 	@Test def formatting {
-		converter.convertLeft(new DateTime(2013,12,31, 12,30,00)) should be ("31-Dec-2013 12:30:00")
+		converter.convertLeft(new DateTime(2013,12,31, 12,30,0)) should be ("31-Dec-2013 12:30:00")
 		converter.convertLeft(null) should be (null)
 	}
 

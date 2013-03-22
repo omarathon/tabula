@@ -21,8 +21,9 @@ import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.RequestInfo
+import scala.reflect.ClassTag
 
-class GrantPermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
+class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
 	
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 	

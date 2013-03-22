@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web
 
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http
+import language.implicitConversions
 
 /**
  * A Scala-ish wrapper for servlet Cookie.

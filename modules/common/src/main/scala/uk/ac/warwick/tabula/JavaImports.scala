@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula
 import collection.JavaConverters._
 import collection.mutable
+import language.implicitConversions
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -32,13 +33,13 @@ trait JavaImports {
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJBoolean(b: Option[Boolean]) = b map (b => b: JBoolean) orNull
+	protected implicit def ToJBoolean(b: Option[Boolean]) = (b map (b => b: JBoolean)).orNull
 
 	/**
 	 * Converts an Option[Integer] to a Java Integer, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJInteger(b: Option[Int]) = b map (b => b: JInteger) orNull
+	protected implicit def ToJInteger(b: Option[Int]) = (b map (b => b: JInteger)).orNull
 }
 
 object JavaImports extends JavaImports

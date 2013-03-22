@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 import uk.ac.warwick.tabula.roles.Role
+import scala.reflect.ClassTag
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions 
@@ -78,16 +79,16 @@ abstract trait PermissionsCheckingMethods extends Logging {
 	 * it throws an ItemNotFoundException, which should get picked
 	 * up by an exception handler to display a 404 page.
 	 */
-	def mandatory[A](something: A)(implicit m: Manifest[A]): A = something match {
-		case thing: Any if m.erasure.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A](something: A)(implicit tag: ClassTag[A]): A = something match {
+		case thing: Any if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
 		case _ => throw new ItemNotFoundException()
 	}
 	/**
 	 * Pass in an Option and receive either the actual value, or
 	 * an ItemNotFoundException is thrown.
 	 */
-	def mandatory[A](option: Option[A])(implicit m: Manifest[A]): A = option match {
-		case Some(thing: Any) if m.erasure.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A](option: Option[A])(implicit tag: ClassTag[A]): A = option match {
+		case Some(thing: Any) if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
 		case _ => throw new ItemNotFoundException()
 	}
 

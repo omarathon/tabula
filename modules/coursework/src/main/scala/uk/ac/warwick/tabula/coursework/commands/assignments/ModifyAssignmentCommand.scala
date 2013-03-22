@@ -152,14 +152,14 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		}
 
 		// add includeUsers to members.includeUsers
-		(includeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
+		((includeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.excludeUsers contains userId) {
 				members.unexcludeUser(userId)
 			}
 			else members.addUser(userId)
 		}
 		// for excludeUsers, either remove from previously-added users or add to excluded users.
-		(excludeUsers map { _.trim } filterNot { _.isEmpty } distinct) foreach { userId =>
+		((excludeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.includeUsers contains userId) members.removeUser(userId)
 			else members.excludeUser(userId)
 		}

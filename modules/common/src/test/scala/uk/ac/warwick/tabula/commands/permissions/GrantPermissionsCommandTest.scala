@@ -9,13 +9,14 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.SecurityService
+import scala.reflect.ClassTag
 
 class GrantPermissionsCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
 	val securityService = mock[SecurityService]
 	
-	private def command[A <: PermissionsTarget : Manifest](scope: A) = {
+	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new GrantPermissionsCommand(scope)
 		cmd.permissionsService = permissionsService
 		cmd.securityService = securityService

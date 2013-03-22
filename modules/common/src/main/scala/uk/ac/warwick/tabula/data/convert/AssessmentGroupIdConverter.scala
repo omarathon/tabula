@@ -10,9 +10,9 @@ class AssessmentGroupIdConverter extends TwoWayConverter[String, AssessmentGroup
 	@Autowired var service: AssignmentMembershipService = _
 
 	// Converter used for binding request
-	override def convertRight(id: String) = service.getAssessmentGroup(id) orNull
+	override def convertRight(id: String) = service.getAssessmentGroup(id).orNull
 	
 	// Formatter used for generating textual value in template
-	override def convertLeft(group: AssessmentGroup) = Option(group) map { _.id } orNull
+	override def convertLeft(group: AssessmentGroup) = (Option(group) map { _.id }).orNull
 
 }

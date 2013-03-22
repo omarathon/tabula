@@ -12,13 +12,14 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.permissions.Permission
+import scala.reflect.ClassTag
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
 	val securityService = mock[SecurityService]
 	
-	private def command[A <: PermissionsTarget : Manifest](scope: A) = {
+	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new GrantRoleCommand(scope)
 		cmd.permissionsService = permissionsService
 		cmd.securityService = securityService

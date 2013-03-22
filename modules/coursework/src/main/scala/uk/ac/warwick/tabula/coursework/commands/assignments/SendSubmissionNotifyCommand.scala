@@ -22,6 +22,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserSettingsService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.data.model.UserSettings
+import language.implicitConversions
 
 class SendSubmissionNotifyCommand (
 		@BeanProperty val submission: Submission, 

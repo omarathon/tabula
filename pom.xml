@@ -421,6 +421,10 @@
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
 					</jvmArgs>
+					<args>
+						<arg>-deprecation</arg>
+						<arg>-feature</arg>
+					</args>
 				</configuration>
 			</plugin>
 

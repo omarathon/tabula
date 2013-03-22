@@ -14,7 +14,7 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	@BeanProperty var userId: String = _
 	
 	def getAlertsSubmission = alertsSubmission
-	def alertsSubmission = getStringSetting(Settings.AlertsSubmission) orNull
+	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull
 	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
 		
 	def this(userId: String) = {

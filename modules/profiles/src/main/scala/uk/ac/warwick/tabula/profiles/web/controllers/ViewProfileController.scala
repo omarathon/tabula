@@ -21,7 +21,7 @@ class ViewProfileController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)) orNull
+		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 	
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {

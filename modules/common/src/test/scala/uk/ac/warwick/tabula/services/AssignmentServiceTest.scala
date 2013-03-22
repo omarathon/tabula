@@ -295,7 +295,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		val foundGroup = assignmentMembershipService.find(group)
 		foundGroup should be ('defined)
-		foundGroup.eq(group) should be (false)
+		foundGroup.eq(Some(group)) should be (false)
 		
 		foundGroup.get.occurrence = "B"
 			
@@ -416,10 +416,10 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.clear
 		
 		submissionService.getSubmission(submission.id) should be ('defined)
-		submissionService.getSubmission(submission.id).eq(submission) should be (false)
+		submissionService.getSubmission(submission.id).eq(Some(submission)) should be (false)
 		
 		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('defined)
-		submissionService.getSubmissionByUniId(assignment, "0070790").eq(submission) should be (false)
+		submissionService.getSubmissionByUniId(assignment, "0070790").eq(Some(submission)) should be (false)
 		
 		submissionService.getSubmissionByUniId(assignment, "0070790") map { submissionService.delete(_) }
 		
@@ -448,7 +448,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		session.clear
 		
 		extensionService.getExtensionById(extension.id) should be ('defined)
-		extensionService.getExtensionById(extension.id).eq(extension) should be (false)
+		extensionService.getExtensionById(extension.id).eq(Some(extension)) should be (false)
 		
 		extensionService.getExtensionById(extension.id) map { session.delete(_) }
 		

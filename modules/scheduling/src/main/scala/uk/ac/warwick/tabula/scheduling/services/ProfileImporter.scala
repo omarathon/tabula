@@ -228,7 +228,7 @@ object ProfileImporter {
 		)
 	
 	private implicit def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
-		Option(date) map { new LocalDate(_) } orNull
+		(Option(date) map { new LocalDate(_) }).orNull
 	  
 }
 

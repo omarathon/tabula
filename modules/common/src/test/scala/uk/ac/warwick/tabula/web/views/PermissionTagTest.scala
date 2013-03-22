@@ -30,7 +30,7 @@ class PermissionTagTest extends TestBase with Mockito {
 		
 		val writer = new StringWriter
 		
-		val env = new Environment(new Template("temp", new StringReader("")), model, writer)
+		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
 		val body = mock[TemplateDirectiveBody]
 		
 		val params = new java.util.HashMap[String, TemplateModel]
@@ -54,7 +54,7 @@ class PermissionTagTest extends TestBase with Mockito {
 		
 		val writer = new StringWriter
 		
-		val env = new Environment(new Template("temp", new StringReader("")), model, writer)
+		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
 		val body = mock[TemplateDirectiveBody]
 		
 		val params = new java.util.HashMap[String, TemplateModel]
