@@ -6,7 +6,7 @@ import scala.reflect._
 
 /**
  * Version of Validator that handles the supports() method for you,
- * using an implicit ClassManifest to work out what T is. You just
+ * using an implicit ClassTag to work out what T is. You just
  * have to implement `valid`.
  */
 abstract class ClassValidator[A : ClassTag] extends Validator {

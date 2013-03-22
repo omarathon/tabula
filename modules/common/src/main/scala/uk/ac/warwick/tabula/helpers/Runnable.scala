@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import java.lang.{ Runnable => JRunnable }
+import language.implicitConversions
 
 /**
  * Wrapper for java.lang.Runnable that lets you pass in a function to

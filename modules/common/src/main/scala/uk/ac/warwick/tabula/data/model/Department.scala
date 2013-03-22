@@ -52,11 +52,11 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
 	
 	def getExtensionGuidelineSummary = extensionGuidelineSummary
-	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary) orNull
+	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
 	def extensionGuidelineSummary_= (summary: String) = settings += (Settings.ExtensionGuidelineSummary -> summary)
 	
 	def getExtensionGuidelineLink = extensionGuidelineLink
-	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink) orNull
+	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink).orNull
 	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
 	
 	def isShowStudentName = showStudentName

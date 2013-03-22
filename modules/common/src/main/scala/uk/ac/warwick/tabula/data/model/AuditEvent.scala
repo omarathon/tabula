@@ -84,7 +84,7 @@ case class AuditEvent(
 	private def stringProperty(name: String): Option[String] =
 		relatedParsedData
 			.flatMap { _.get(name) }
-			.map { _.toString } headOption
+			.map { _.toString }.headOption
 
 	private def stringListProperty(name: String): Seq[String] =
 		relatedParsedData

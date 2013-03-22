@@ -8,7 +8,7 @@ class MemberUniversityIdConverter extends TwoWayConverter[String, Member] {
   
 	var service = Wire.auto[ProfileService]
 	
-	override def convertRight(universityId: String) = service.getMemberByUniversityId(universityId) orNull
-	override def convertLeft(member: Member) = Option(member) map {_.universityId} orNull
+	override def convertRight(universityId: String) = service.getMemberByUniversityId(universityId).orNull
+	override def convertLeft(member: Member) = (Option(member) map {_.universityId}).orNull
 
 }

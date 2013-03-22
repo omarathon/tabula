@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
+import language.implicitConversions
 
 /**
  * Send an email confirming the creation of a manual extension request to the student

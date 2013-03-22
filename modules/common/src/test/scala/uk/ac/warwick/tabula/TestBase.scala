@@ -136,7 +136,7 @@ trait TestHelpers extends TestFixtures {
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */
-	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _ => /* squash! will be cleaned from temp eventually anyway */}
+	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
 	/** withArgs(a,b,c) translates to
 	  * with(allOf(a,b,c)).

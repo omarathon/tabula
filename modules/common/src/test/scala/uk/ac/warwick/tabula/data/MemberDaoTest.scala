@@ -170,7 +170,7 @@ class MemberDaoTest extends AppContextTestBase {
 		session.flush
 				
 		dao.getRegisteredModules("0000001") should be (Seq(mod1))
-		dao.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2) toSet)
+		dao.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
 		dao.getRegisteredModules("0000003") should be (Seq(mod2))
 		dao.getRegisteredModules("0000004") should be (Seq())
 	}
@@ -227,7 +227,7 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(rel2))
 		dao.getRelationshipsByDepartment(null, dept1) should be (Seq())
 		
-		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2) toSet)
+		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2).toSet)
 		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000004") should be (Seq())
 		dao.getRelationshipsByAgent(null, "0000003") should be (Seq())
 		

@@ -22,7 +22,7 @@ class IntervalFormatterTest extends TestBase {
 	@Test 
 	def differentYear { 
 		val open = new DateTime(2012,12,10,/**/9,0,0)
-		val close = new DateTime(2013,01,15,/**/12,0,0)
+		val close = new DateTime(2013,1,15,/**/12,0,0)
 		format(open, close) should be ("09:00 Mon 10<sup>th</sup> Dec 2012 - 12:00 Tue 15<sup>th</sup> Jan 2013")
 	}
 

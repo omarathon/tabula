@@ -23,7 +23,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
-
+import language.implicitConversions
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 

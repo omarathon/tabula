@@ -71,7 +71,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	def applyInternal() = {
 		val currentUser = new CurrentUser(user, user)
 		
-		val scope = resolveScope() orNull
+		val scope = resolveScope().orNull
 		val scopeMissing = scope == null
 		val scopeMismatch = permission != null && (permission.isScoped == scopeMissing)
 		

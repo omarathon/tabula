@@ -13,6 +13,8 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
+import language.implicitConversions
+import scala.reflect.ClassTag
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -47,8 +49,8 @@ trait Daoisms {
 	}
 
 	class NiceQueryCreator(session: Session) {
-		def newCriteria[A](implicit m: Manifest[A]) = new ScalaCriteria[A](session.createCriteria(m.erasure))
-		def newQuery[A](hql: String)(implicit m: Manifest[A]) = new ScalaQuery[A](session.createQuery(hql))
+		def newCriteria[A](implicit tag: ClassTag[A]) = new ScalaCriteria[A](session.createCriteria(tag.runtimeClass))
+		def newQuery[A](hql: String)(implicit tag: ClassTag[A]) = new ScalaQuery[A](session.createQuery(hql))
 	}
 
 	/**
@@ -64,10 +66,10 @@ trait Daoisms {
 	 * For CanBeDeleted entities, it also checks if the entity is deleted and
 	 * the notDeleted filter is enabled, in which case it also returns None.
 	 */
-	protected def getById[A](id: String)(implicit m: Manifest[A]): Option[A] =
-		session.get(m.erasure.getName(), id) match {
+	protected def getById[A](id: String)(implicit tag: ClassTag[A]): Option[A] =
+		session.get(tag.runtimeClass.getName(), id) match {
 			case entity: CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
-			case entity: Any if m.erasure.isInstance(entity) => Some(entity.asInstanceOf[A])
+			case entity: Any if tag.runtimeClass.isInstance(entity) => Some(entity.asInstanceOf[A])
 			case _ => None
 		}
 

@@ -75,7 +75,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(userLookup.getUserByUserId(_))
 
-	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
+	def valuesByFieldName = (values map { v => (v.getName, v.getValue) }).toMap
 
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 

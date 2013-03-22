@@ -87,9 +87,8 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 			try {
 				command.apply()
 				fail ("Expect to throw a NullPointerException")
-			}
-			 catch {
-			 	case _NullPointerException => None 
+			} catch {
+			 	case _: NullPointerException => 
 			}
 		}
 	}

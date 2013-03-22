@@ -53,7 +53,7 @@ class MarkingWorkflowDaoTest extends AppContextTestBase {
 		session.save(ass1)
 		session.save(ass2)
 		
-		dao.getAssignmentsUsingMarkingWorkflow(mw1).toSet should be (Seq(ass1, ass2) toSet)
+		dao.getAssignmentsUsingMarkingWorkflow(mw1).toSet should be (Seq(ass1, ass2).toSet)
 		dao.getAssignmentsUsingMarkingWorkflow(mw2) should be ('empty)
 		
 		ass2.markingWorkflow = mw2

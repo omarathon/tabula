@@ -44,7 +44,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
 
-	@BeanProperty var message: String = service.message orNull
+	@BeanProperty var message: String = service.message.orNull
 	
 	def applyInternal() {
 		if (!enable) {
