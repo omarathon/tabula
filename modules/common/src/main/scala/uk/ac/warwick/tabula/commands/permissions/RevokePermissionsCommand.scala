@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.springframework.validation.Errors
 

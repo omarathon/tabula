@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
 import scala.annotation.target.field
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import collection.JavaConversions._
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type

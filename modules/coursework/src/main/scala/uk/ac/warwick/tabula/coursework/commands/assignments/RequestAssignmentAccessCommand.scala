@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire

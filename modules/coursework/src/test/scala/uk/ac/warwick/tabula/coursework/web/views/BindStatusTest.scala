@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.TestBase
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.support.RequestContext
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.context.WebApplicationContext

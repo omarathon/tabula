@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 

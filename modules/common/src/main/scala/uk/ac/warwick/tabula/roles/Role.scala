@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import scala.annotation.tailrec
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.collection.immutable.ListMap
 import javax.persistence.Transient
 

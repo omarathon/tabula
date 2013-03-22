@@ -4,7 +4,7 @@ import org.springframework.core.io._
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
 import javax.sql.DataSource
 import resource.managed
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 /**
  * Takes a DataSource and executes SQL files found on the classpath

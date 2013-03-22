@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.context.MessageSource

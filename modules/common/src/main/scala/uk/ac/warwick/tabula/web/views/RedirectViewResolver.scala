@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
 import java.util.Locale
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.util.matching.Regex._
 import scala.util.matching.Regex
 import org.springframework.beans.factory.annotation.Required

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command

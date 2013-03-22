@@ -5,7 +5,7 @@ import org.hibernate.annotations.Type
 import javax.persistence.Basic
 import javax.persistence.Column
 import javax.persistence.JoinColumn
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import javax.persistence.OneToOne
 import javax.persistence.CascadeType
 import javax.persistence.Entity

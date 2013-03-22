@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.Transactions._
 import java.sql.Date
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import org.springframework.beans.BeanWrapperImpl

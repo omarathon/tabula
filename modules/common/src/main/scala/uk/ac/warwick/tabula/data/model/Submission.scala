@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import java.util.HashSet
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.hibernate.annotations.{AccessType, Type}
 import org.joda.time.DateTime

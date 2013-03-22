@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.xml.NodeSeq
 import org.hibernate.annotations.AccessType
 import javax.persistence._

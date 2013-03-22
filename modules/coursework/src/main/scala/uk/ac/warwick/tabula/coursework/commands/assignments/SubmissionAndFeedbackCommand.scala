@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.joda.time.DateTime
 

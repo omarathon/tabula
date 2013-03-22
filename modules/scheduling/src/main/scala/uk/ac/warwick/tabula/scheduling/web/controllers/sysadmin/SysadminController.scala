@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller

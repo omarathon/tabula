@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire

@@ -8,7 +8,7 @@ import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.InputStream
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 class MarkItem {
 
