@@ -341,6 +341,7 @@
 	
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
+	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
