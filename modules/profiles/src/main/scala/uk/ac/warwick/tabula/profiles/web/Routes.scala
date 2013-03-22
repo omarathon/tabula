@@ -15,6 +15,7 @@ object Routes {
 
 	object profile {
 		def view(member: Member) = "/view/%s" format (encoded(member.universityId))
+		def view(member: Member, meeting: MeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
 	}
 }
