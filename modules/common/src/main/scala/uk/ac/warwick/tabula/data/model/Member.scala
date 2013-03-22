@@ -220,7 +220,6 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case Some(member: Member) => member
 			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
 		}
-	}
 	
 	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
 	
