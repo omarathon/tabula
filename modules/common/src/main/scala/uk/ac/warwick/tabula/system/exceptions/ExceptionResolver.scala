@@ -95,7 +95,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def reportExceptions[A](fn: => A) =
 		try fn
-		catch { case throwable => handle(throwable, None); throw throwable }
+		catch { case throwable: Throwable => handle(throwable, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
 		val token = ExceptionTokens.newToken

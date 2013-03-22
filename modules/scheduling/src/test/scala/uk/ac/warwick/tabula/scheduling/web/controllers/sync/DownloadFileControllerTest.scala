@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import java.io.ByteArrayInputStream
 import org.apache.http.HttpStatus
+import org.springframework.util.FileCopyUtils
+import java.io.FileOutputStream
 
 class DownloadFileControllerTest extends TestBase with MockitoSugar {
 	
@@ -27,12 +29,14 @@ class DownloadFileControllerTest extends TestBase with MockitoSugar {
 	def validFile() {
 		val macGenerator = new SHAMessageAuthenticationCodeGenerator("someSalt")
 		val fileDao = mock[FileDao]
-		val attachment = mock[FileAttachment]
+		
+		val attachment = new FileAttachment
+		
+		val file = createTemporaryFile
+		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
+		attachment.file = file
 		
 		when(fileDao.getFileById("abc")) thenReturn(Some(attachment))
-		when(attachment.hasData) thenReturn(true)
-		when(attachment.length) thenReturn(None)
-		when(attachment.dataStream) thenReturn(new ByteArrayInputStream("yes".getBytes))
 		
 		controller.macGenerator = macGenerator
 		controller.fileDao = fileDao
