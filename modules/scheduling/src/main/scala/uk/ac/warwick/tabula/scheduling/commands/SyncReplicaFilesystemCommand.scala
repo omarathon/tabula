@@ -76,7 +76,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 				try {
 					lastRetrievedCreationDate = new DateTime(json.getLong("lastFileReceived"))
 				} catch {
-					case e => {
+					case e: Throwable => {
 						logger.debug("No files received")
 						break
 					}
@@ -342,7 +342,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	}
 	
 	// TODO
-	override def describe(d: Description) = d
+	override def describe(d: Description) {}
 	
 }
 

@@ -104,8 +104,6 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 		message.setSubject(encodeSubject(moduleCode + ": Your coursework feedback is ready"))
 		// TODO configurable body
 		message.setText(messageTextFor(user))
-
-		message
 	}
 
 	def describe(d: Description) = d 

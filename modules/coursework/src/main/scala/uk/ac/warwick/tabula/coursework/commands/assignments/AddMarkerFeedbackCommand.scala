@@ -55,7 +55,6 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		val markerFeedback:MarkerFeedback = firstMarker match {
 			case true => parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback
-			case _ => null
 		}
 
 		for (attachment <- file.attached){

@@ -217,6 +217,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case None => "Not recorded"
 			case Some(name: String) => name
 			case Some(member: Member) => member
+			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
 		}
 	
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
