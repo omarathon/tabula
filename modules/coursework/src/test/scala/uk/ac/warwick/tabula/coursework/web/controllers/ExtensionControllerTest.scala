@@ -30,7 +30,7 @@ class ExtensionControllerTest extends TestBase with Mockito {
       val extensions = command.copyExtensionItems()
       val extensionsJson = controller.toJson(extensions)
       val string = json.writeValueAsString(extensionsJson)
-      string should be ("""{"1170836":{"id":"1170836","status":"","expiryDate":"Thu 23rd August 2012 at 12:00","approvalComments":"Donec a risus purus nullam."}}""")
+      string should be ("""{"1170836":{"id":"1170836","status":"","expiryDate":"Thu 23rd August 2012&#8194;at 12:00","approvalComments":"Donec a risus purus nullam."}}""")
     }
   }
 
