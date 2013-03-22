@@ -31,7 +31,31 @@ class MeetingRecordController extends ProfilesController {
 		case _ => throw new ItemNotFoundException
 	}
 	
-	// blank form
+	// blank async form
+	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
+	def showModalForm(@ModelAttribute("command") command: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		Mav("tutor/meeting/edit",
+			"modal" -> true,
+			"command" -> command,
+			"student" -> student,
+			"tutorName" -> command.relationship.agentName,
+			"creator" -> command.creator).noLayout()
+	}
+	
+	// submit async
+	@RequestMapping(method = Array(POST), params = Array("modal"))
+	def saveModalMeetingRecord(@Valid @ModelAttribute("command") command: CreateMeetingRecordCommand, errors: Errors, @PathVariable("student") student: Member) = {
+		transactional() {
+			if (errors.hasErrors) {
+				showModalForm(command, student)
+			} else {
+				val meeting = command.apply()
+				Redirect(Routes.profile.view(student, meeting))
+			}
+		}
+	}
+
+	// blank sync form
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
 		Mav("tutor/meeting/edit",
@@ -41,21 +65,21 @@ class MeetingRecordController extends ProfilesController {
 			"creator" -> command.creator)
 	}
 	
-	// cancel
-	@RequestMapping(method = Array(POST), params = Array("!submit"))
+	// cancel sync
+	@RequestMapping(method = Array(POST), params = Array("!submit", "!modal"))
 	def cancel(@PathVariable("student") student: Member) = {
 		Redirect(Routes.profile.view(student))
 	}
-	
-	// submit
+		
+	// submit sync
 	@RequestMapping(method = Array(POST), params = Array("submit"))
 	def saveMeetingRecord(@Valid @ModelAttribute("command") command: CreateMeetingRecordCommand, errors: Errors, @PathVariable("student") student: Member) = {
 		transactional() {
 			if (errors.hasErrors) {
 				showForm(command, student)
 			} else {
-				command.apply()
-				Redirect(Routes.profile.view(student))
+				val meeting = command.apply()
+				Redirect(Routes.profile.view(student, meeting))
 			}
 		}
 	}
