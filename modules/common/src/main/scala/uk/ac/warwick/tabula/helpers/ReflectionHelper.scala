@@ -116,7 +116,6 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 			new ZipDir(getJar(file))
 		} catch {
 			case e: Exception => try {
-				e.printStackTrace()
 				new ZipDir(new JarFile(url.getFile))
 			} catch {
 				case e: IOException => null

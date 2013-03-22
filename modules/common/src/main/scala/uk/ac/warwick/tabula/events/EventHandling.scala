@@ -35,7 +35,7 @@ trait EventHandling extends Logging {
 					val result = f
 					val resultEvent = Event.resultFromDescribable(d, result, event.id)
 					listener.afterCommand(resultEvent, result)
-					return result
+					result
 				} catch {
 					case e: Throwable => {
 						// On exception, pass that on then rethrow.
