@@ -1,5 +1,6 @@
 <#compress>
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
+<#escape x as x?html>
 
 <#macro module_name module>
 	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
@@ -81,4 +82,6 @@
 --><#else><#--
 	-->${nationality}<#--
 --></#if></#macro>
+
+</#escape>
 </#compress>

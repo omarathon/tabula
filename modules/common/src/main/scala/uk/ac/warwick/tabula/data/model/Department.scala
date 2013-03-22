@@ -105,6 +105,15 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@BeanProperty var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
 	
 	def permissionsParents = Option(parent).toSeq
+	
+	/**
+	 * Is this an actual department that exists upstream?
+	 * 
+	 * Currently this is defined by whether it's a sub-department: All top level
+	 * departments are ones that exist upstream, and all child departments are
+	 * virtual departments that have no upstream analogue.
+	 */
+	def isUpstream = (parent == null)
 
 	override def toString = "Department(" + code + ")"
 	
