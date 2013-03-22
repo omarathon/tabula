@@ -29,9 +29,7 @@ class AddAssignment extends CourseworkController {
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 	}
 
-	validatesWith[AddAssignmentCommand] { (cmd: AddAssignmentCommand, errors) =>
-		cmd.validate(errors)
-	}
+	validatesSelf[AddAssignmentCommand]
 
 	@ModelAttribute def addAssignmentForm(@PathVariable("module") module: Module) =
 		new AddAssignmentCommand(mandatory(module))
@@ -80,12 +78,7 @@ class AddAssignment extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
 class EditAssignment extends CourseworkController {
 
-	validatesWith[EditAssignmentCommand] { (form: EditAssignmentCommand, errors: Errors) =>
-		form.validate(errors)
-		if (form.academicYear != form.assignment.academicYear) {
-			errors.rejectValue("academicYear", "academicYear.immutable")
-		}
-	}
+	validatesSelf[EditAssignmentCommand]
 
 	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new EditAssignmentCommand(module, mandatory(assignment))
@@ -133,9 +126,7 @@ class EditAssignment extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/delete"))
 class DeleteAssignment extends CourseworkController {
 
-	validatesWith[DeleteAssignmentCommand] { (form: DeleteAssignmentCommand, errors: Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[DeleteAssignmentCommand]
 
 	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DeleteAssignmentCommand(module, mandatory(assignment))

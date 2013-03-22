@@ -24,6 +24,14 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 			case None => true
 		}
 	}
+	
+	override def validate(errors: Errors) {
+		super.validate(errors)
+		
+		if (academicYear != assignment.academicYear) {
+			errors.rejectValue("academicYear", "academicYear.immutable")
+		}
+	}
 
 	override def contextSpecificValidation(errors:Errors){
 		val workflowChanged = assignment.markingWorkflow != markingWorkflow

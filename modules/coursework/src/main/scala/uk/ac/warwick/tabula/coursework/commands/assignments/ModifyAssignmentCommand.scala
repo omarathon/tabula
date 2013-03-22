@@ -18,6 +18,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.commands.SelfValidating
 
 
 case class UpstreamGroupOption(
@@ -32,7 +33,7 @@ case class UpstreamGroupOption(
 /**
  * Common behaviour
  */
-abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment] with SharedAssignmentProperties {
+abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment] with SharedAssignmentProperties with SelfValidating {
 
 	var service = Wire.auto[AssignmentService]
 	var membershipService = Wire.auto[AssignmentMembershipService]
@@ -108,7 +109,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	def contextSpecificValidation(errors: Errors)
 
 	def validate(errors: Errors) {
-
 		contextSpecificValidation(errors)
 
 		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
