@@ -86,7 +86,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
 }
 
-class CompositePropertySource(name: String) extends PropertySource[Unit](name, null) {
+class CompositePropertySource(name: String) extends PropertySource[Unit](name, ()) {
 	val mutableSources = new MutablePropertySources
 
 	def addRequiredSource(src: Option[PropertySource[_]]) = 

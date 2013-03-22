@@ -88,7 +88,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 					hasErrors = true
 				}
 			} catch {
-				case _ => {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) => {
 					errors.rejectValue("actualMark", "actualMark.format")
 					hasErrors = true
 				}

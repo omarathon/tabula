@@ -218,9 +218,8 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case None => "Not recorded"
 			case Some(name: String) => name
 			case Some(member: Member) => member
-	}
-	
-	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
+			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
+		}
 	
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {
