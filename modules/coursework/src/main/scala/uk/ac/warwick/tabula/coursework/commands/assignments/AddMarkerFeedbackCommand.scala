@@ -37,7 +37,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		val markedIds = markedSubmissions.map(_.getUniversityId)
 		invalidStudents = items.filter(item => !universityIds.contains(item.uniNumber))
 		markedStudents = items.filter(item => !markedIds.contains(item.uniNumber))
-		items = (items.toList -- invalidStudents.toList) -- markedStudents.toList
+		items = (items.toList.diff(invalidStudents.toList)).diff(markedStudents.toList)
 	}
 
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {

@@ -29,7 +29,7 @@ class AddAssignment extends CourseworkController {
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 	}
 
-	validatesWith { (cmd: AddAssignmentCommand, errors) =>
+	validatesWith[AddAssignmentCommand] { (cmd: AddAssignmentCommand, errors) =>
 		cmd.validate(errors)
 	}
 
@@ -80,7 +80,7 @@ class AddAssignment extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
 class EditAssignment extends CourseworkController {
 
-	validatesWith { (form: EditAssignmentCommand, errors: Errors) =>
+	validatesWith[EditAssignmentCommand] { (form: EditAssignmentCommand, errors: Errors) =>
 		form.validate(errors)
 		if (form.academicYear != form.assignment.academicYear) {
 			errors.rejectValue("academicYear", "academicYear.immutable")
@@ -133,7 +133,7 @@ class EditAssignment extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/delete"))
 class DeleteAssignment extends CourseworkController {
 
-	validatesWith { (form: DeleteAssignmentCommand, errors: Errors) =>
+	validatesWith[DeleteAssignmentCommand] { (form: DeleteAssignmentCommand, errors: Errors) =>
 		form.validate(errors)
 	}
 
