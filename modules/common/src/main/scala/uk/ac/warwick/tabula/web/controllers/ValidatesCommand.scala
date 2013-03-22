@@ -34,6 +34,7 @@ trait ValidatesCommand {
 	 * If there's an existing globally set validator (such as the annotation
 	 * processor), this validation will run in addition to it.
 	 */
+	@deprecated("Use validatesSelf[A <: SelfValidating] instead of this; validation logic should be tied in with the command")
 	def validatesWith[A : ClassTag](fn: ValidatorMethod[A]) {
 		if (validator != null) throw new IllegalStateException("Already set validator once")
 		validator = new ClassValidator[A] {
@@ -53,6 +54,7 @@ trait ValidatesCommand {
 	 * Like validatesWith but replaces the existing set validator (usually
 	 * the annotation processor).
 	 */
+	@deprecated("Use validatesSelf[A <: SelfValidating] instead of this; validation logic should be tied in with the command")
 	def onlyValidatesWith[A](fn: ValidatorMethod[A])(implicit tag: ClassTag[A]) {
 		keepOriginalValidator = false
 		validatesWith(fn)

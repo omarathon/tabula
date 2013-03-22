@@ -91,9 +91,7 @@ class AddExtensionController extends ExtensionController {
 	def addCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = 
 		new AddExtensionCommand(module, assignment, user)
 	
-	validatesWith[AddExtensionCommand] { (form:AddExtensionCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[AddExtensionCommand]
 	
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(method=Array(GET))
@@ -136,9 +134,7 @@ class EditExtensionController extends ExtensionController {
 	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
-	validatesWith[EditExtensionCommand] { (form:EditExtensionCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[EditExtensionCommand]
 	
 	// edit an existing manually created extension
 	@RequestMapping(method=Array(GET))
@@ -185,9 +181,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
-	validatesWith[ReviewExtensionRequestCommand] { (form:ReviewExtensionRequestCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[ReviewExtensionRequestCommand]
 	
 	// review an extension request
 	@RequestMapping(method=Array(GET))
