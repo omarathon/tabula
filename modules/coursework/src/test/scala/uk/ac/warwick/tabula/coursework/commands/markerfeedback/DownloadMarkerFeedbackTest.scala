@@ -5,19 +5,23 @@ import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.mockito.Mockito._
 import java.io.{FileInputStream, ByteArrayInputStream}
 import uk.ac.warwick.tabula.coursework.commands.feedback.{DownloadFirstMarkersFeedbackCommand, AdminGetSingleMarkerFeedbackCommand}
 import java.util.zip.ZipInputStream
 import uk.ac.warwick.tabula.services.Zips
+import org.springframework.util.FileCopyUtils
+import java.io.FileOutputStream
 
-class DownloadMarkerFeedbackTest extends AppContextTestBase with Mockito with MarkingWorkflowWorld {
+class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 	@Before
 	def setup {
-		val attachment = mock[FileAttachment]
-		when(attachment.length) thenReturn(None)
-		when(attachment.dataStream) thenReturn(new ByteArrayInputStream("yes".getBytes))
+		val attachment = new FileAttachment
+		
+		val file = createTemporaryFile
+		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
+		
+		attachment.file = file
 
 		assignment.feedbacks.foreach{feedback =>
 			feedback.firstMarkerFeedback.attachments = List(attachment)
