@@ -24,10 +24,11 @@
 						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 					</p>
 					<@form.labelled_row "file.upload" "Files">
-					<input type="file" name="file.upload" multiple />
-				</@form.labelled_row>
-			</td>
-		</tr>
+						<input type="file" name="file.upload" multiple />
+					</@form.labelled_row>
+					<@f.errors path="" cssClass="error" />
+				</td>
+			</tr>
 	</table>
 	<div class="submit-buttons">
 		<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>

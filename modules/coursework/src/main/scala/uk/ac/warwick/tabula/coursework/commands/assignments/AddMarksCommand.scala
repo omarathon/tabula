@@ -7,28 +7,25 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, Module, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, FileAttachment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
-import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.NoUser
-import org.springframework.validation.Errors
+import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.permissions._
-import org.springframework.validation.BindingResult
 
 
 abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
 	with Daoisms with Logging with BindListener {
 
+	var validAttachmentStrings = Seq(".xlsx")
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
   
@@ -40,7 +37,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	def postExtractValidation(errors: Errors) {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
-		if (marks != null && !marks.isEmpty()) {
+		if (marks != null && !marks.isEmpty) {
 			for (i <- 0 until marks.length) {
 				val mark = marks.get(i)
 				val newPerson = if (mark.universityId != null){
@@ -104,15 +101,26 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	}
 
 	override def onBind(result:BindingResult) {
-		transactional() {
-			file.onBind(result)
-			if (!file.attached.isEmpty()) {
-				processFiles(file.attached)
-			}
 
-			def processFiles(files: Seq[FileAttachment]) {
-				for (file <- files.filter(_.hasData)) {
-					marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
+
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+
+		if (!result.hasErrors){
+			transactional() {
+				file.onBind(result)
+				if (!file.attached.isEmpty) {
+					processFiles(file.attached)
+				}
+
+				def processFiles(files: Seq[FileAttachment]) {
+					for (file <- files.filter(_.hasData)) {
+						marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+					}
 				}
 			}
 		}
