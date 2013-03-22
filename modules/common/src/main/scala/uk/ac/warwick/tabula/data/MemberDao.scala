@@ -198,6 +198,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				StudentMember sm
 			where
 				sm.homeDepartment = :department
+			and
+				sm.studyDetails.enrolmentStatus != null && sm.studyDetails.getRoute != null
 		""")
 			.setEntity("department", department)
 			.uniqueResult.getOrElse(0)
@@ -213,6 +215,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				sm.homeDepartment = :department
 			and
 				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			and
+				sm.studyDetails.enrolmentStatus != null && sm.studyDetails.getRoute != null
 		""")
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)
