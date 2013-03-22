@@ -154,6 +154,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+	def hasAPersonalTutor = false
 }
 
 @Entity
@@ -219,6 +220,9 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case Some(member: Member) => member
 			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
 		}
+	}
+	
+	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
 	
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {

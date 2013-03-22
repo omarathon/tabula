@@ -37,7 +37,10 @@ Include by default as "form", e.g.
 		<div class="${baseClass}"><#nested/></div>
 	<#else>
 		<@spring.bind path=path>
-			<div class="${baseClass}<#if status.error> error</#if>"><#nested/></div>
+			<#if status.error>
+				<#assign baseClass=baseClass + " error" />
+			</#if>
+			<div class="${baseClass}"><#nested/></div>
 		</@spring.bind>
 	</#if>
 </#macro>

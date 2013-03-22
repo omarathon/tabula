@@ -13,33 +13,37 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
 jQuery(function ($) {
-	$('input.date-time-picker').datetimepicker({
-		format: "dd-M-yyyy hh:ii:ss",
-		weekStart: 1,
-		minView: 'day',
-		autoclose: true
-	}).on('show', function(ev){
-		var d = new Date(ev.date.valueOf()),
-			  minutes = d.getUTCMinutes(),
-				seconds = d.getUTCSeconds(),
-				millis = d.getUTCMilliseconds();
+	jQuery.fn.tabulaDateTimePicker = function() {
+		$(this).datetimepicker({
+			format: "dd-M-yyyy hh:ii:ss",
+			weekStart: 1,
+			minView: 'day',
+			autoclose: true
+		}).on('show', function(ev){
+			var d = new Date(ev.date.valueOf()),
+				  minutes = d.getUTCMinutes(),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+					
+			if (minutes > 0 || seconds > 0 || millis > 0) {
+				d.setUTCMinutes(0);
+				d.setUTCSeconds(0);
+				d.setUTCMilliseconds(0);
 				
-		if (minutes > 0 || seconds > 0 || millis > 0) {
-			d.setUTCMinutes(0);
-			d.setUTCSeconds(0);
-			d.setUTCMilliseconds(0);
-			
-			var DPGlobal = $.fn.datetimepicker.DPGlobal;
-			$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
-			
-			$(this).datetimepicker('update');
-		}
-	});
+				var DPGlobal = $.fn.datetimepicker.DPGlobal;
+				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+				
+				$(this).datetimepicker('update');
+			}
+		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	};
+	
+	$('input.date-time-picker').tabulaDateTimePicker();
 
-    /* When a .long-running link is clicked it will be
-     * replaced with "Please wait" text, to tell the user to expect to
-     * wait a few seconds.
-     */ 
+	/* When a .long-running link is clicked it will be
+	 * replaced with "Please wait" text, to tell the user to expect to
+	 * wait a few seconds.
+	 */ 
 	$('a.long-running').click(function (event) {
 		var $this = $(this);
 		var originalText = $this.html();
@@ -93,8 +97,26 @@ jQuery(function ($) {
 	// add .use-popover and optional data- attributes to enable a cool popover. 
 	// http://twitter.github.com/bootstrap/javascript.html#popovers
 	$('.use-popover').popover().click(function(){ return false; });
+		
+	// apply details/summary polyfill
+	// https://github.com/mathiasbynens/jquery-details
+	$('html').addClass($.fn.details.support ? 'details' : 'no-details');
+	$('details').details();
 	
-	
+	// togglers
+	$(".open-all-details").on("click", function() {
+		$("html.no-details details:not(.open) summary").click();
+		$("html.details details:not([open]) summary").click();
+		$(".open-all-details").hide();
+		$(".close-all-details").show();
+	});
+	$(".close-all-details").on("click", function() {
+		$("html.no-details details.open summary").click();
+		$("html.details details[open] summary").click();
+		$(".close-all-details").hide();
+		$(".open-all-details").show();
+	});
+
 }); // end domready
 
 }(jQuery));

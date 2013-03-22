@@ -21,21 +21,21 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 			val today = new DateTime()
 			
 			// Test default settings
-			format(anotherDay) should be ("Sat 10th March 2012 at 12:13")
+			format(anotherDay) should be ("Sat 10th March 2012&#8194;at 12:13")
 			
-			format(anotherDay, false, false, false, true, true, false, false, true) should be ("Sat 10th March 2012 12:13")
-			format(anotherDay, true, true, true, true, true, false, false, true) should be ("Sat 10th March 2012 at 12:13:14 (GMT)")
+			format(anotherDay, false, false, false, true, true, false, false, true) should be ("Sat 10th March 2012&#8194;12:13")
+			format(anotherDay, true, true, true, true, true, false, false, true) should be ("Sat 10th March 2012&#8194;at 12:13:14 (GMT)")
 			
-			format(yesterday, false, true, false, true, true, false, false, true) should be ("Yesterday at 13:36")
-			format(tomorrow, true, true, false, false, true, false, false, true) should be ("tomorrow at 13:36:00")
-			format(today, false, false, false, true, true, false, false, true) should be ("Today 13:36")
+			format(yesterday, false, true, false, true, true, false, false, true) should be ("Yesterday&#8194;at 13:36")
+			format(tomorrow, true, true, false, false, true, false, false, true) should be ("tomorrow&#8194;at 13:36:00")
+			format(today, false, false, false, true, true, false, false, true) should be ("Today&#8194;13:36")
 			
-			format(today, false, false, false, true, false, false, false, true) should be ("Thu 12th April 2012 13:36")
+			format(today, false, false, false, true, false, false, false, true) should be ("Thu 12th April 2012&#8194;13:36")
 		  
 			// Freemarker exec
 			implicit val fmConfig = newFreemarkerConfiguration
 			val rendered = renderToString("dateBuilder.ftl", Map("b" -> new DateBuilder, "today" -> today))
-			rendered should be ("Today 13:36")
+			rendered should be ("Today&#8194;13:36")
 		}
 	}
 	

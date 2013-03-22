@@ -56,7 +56,7 @@ object DateBuilder {
 					pattern.append(" HH:mm")
 					if (includeSeconds) pattern.append(":ss")
 					if (includeTimezone) pattern.append(" (z)")
-					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else " ") + (formatterMap(pattern.toString) print date).trim()					
+					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else "&#8194;") + (formatterMap(pattern.toString) print date).trim()
 				}
 				else {
 					datePart(date, capitalise, relative, shortMonth)

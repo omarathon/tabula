@@ -32,6 +32,7 @@ trait MemberDao {
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
@@ -119,6 +120,25 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.seq
 	}	
 	
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				Member m
+			where
+				sr.targetSprCode = m.studyDetails.sprCode
+			and
+				sr.relationshipType = :relationshipType
+			and
+				m = :student
+		""")
+			.setEntity("student", student)
+			.setParameter("relationshipType", relationshipType)
+			.seq
+	}	
+	
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
@@ -178,6 +198,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				StudentMember sm
 			where
 				sm.homeDepartment = :department
+			and
+				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
 		""")
 			.setEntity("department", department)
 			.uniqueResult.getOrElse(0)
@@ -193,6 +215,8 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				sm.homeDepartment = :department
 			and
 				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			and
+				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
 		""")
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)

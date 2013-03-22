@@ -14,6 +14,10 @@ object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.TermTimeAddress,
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
-		Profiles.Read.Usercode
+		Profiles.Read.Usercode,
+		Profiles.MeetingRecord.Create,
+		Profiles.MeetingRecord.Read,
+		Profiles.MeetingRecord.Update,
+		Profiles.MeetingRecord.Delete
 	)
 }

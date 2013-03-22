@@ -22,4 +22,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_edit student tutor><@url page="/tutor/${student}/edit?tutor=${tutor.universityId}" /></#macro>
 <#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/edit" /></#macro>
 
+<#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
 </#compress>
