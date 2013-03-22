@@ -42,10 +42,10 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 		}
 	}
 	
-		/**
+	/**
 	 * Check that validation allows either mark or grade to be non-empty
 	 */
-		@Transactional @Test
+	@Transactional @Test
 	def gradeButEmptyMarkField {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
@@ -84,12 +84,7 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 			command.postExtractValidation(errors)
 			command.marks.filter(_.isValid).size should be (1)
 		
-			try {
-				command.apply()
-				fail ("Expect to throw a NullPointerException")
-			} catch {
-			 	case _: NullPointerException => 
-			}
+			command.apply()
 		}
 	}
 	
