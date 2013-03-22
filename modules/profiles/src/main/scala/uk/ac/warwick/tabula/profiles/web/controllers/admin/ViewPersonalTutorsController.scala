@@ -4,14 +4,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.profiles.commands.MissingPersonalTutorsCommand
+import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
+import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
-import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
-import uk.ac.warwick.tabula.profiles.commands.UploadPersonalTutorsCommand
-import uk.ac.warwick.tabula.profiles.commands.MissingPersonalTutorsCommand
-import uk.ac.warwick.tabula.web.BreadCrumb
 
 @Controller
 @RequestMapping(value = Array("/department/{department}/tutors"))
@@ -19,16 +18,13 @@ class ViewPersonalTutorsController extends ProfilesController {
 	@ModelAttribute("viewPersonalTutorsCommand") def viewPersonalTutorsCommand(@PathVariable("department") department: Department) =
 		new ViewPersonalTutorsCommand(department)
 
-	@ModelAttribute("missingPersonalTutorsCommand") def missingPersonalTutorsCommand(@PathVariable("department") department: Department) =
-		new MissingPersonalTutorsCommand(department)
-
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@PathVariable("department") department: Department, @ModelAttribute("viewPersonalTutorsCommand") rels: ViewPersonalTutorsCommand, @ModelAttribute("missingPersonalTutorsCommand") missing: MissingPersonalTutorsCommand): Mav = {
-		val (studentCount, missingStudents) = missing.apply
+	def view(@PathVariable("department") department: Department, @ModelAttribute("viewPersonalTutorsCommand") command: ViewPersonalTutorsCommand): Mav = {
+		val tutorGraph = command.apply
 		Mav("tutors/tutor_view",
-			"tutorRelationships" -> rels.apply,
-			"studentCount" -> studentCount,
-			"missingCount" -> missingStudents.size,
+			"tutorRelationships" -> tutorGraph.tuteeMap,
+			"studentCount" -> tutorGraph.studentCount,
+			"missingCount" -> tutorGraph.missingCount,
 			"department" -> department
 		)
 	}

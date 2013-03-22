@@ -162,7 +162,11 @@
 			<#include "_personal_development.ftl" />
 		</div>
 		<div class="untabbed">
-			<#include "_course_details.ftl" />
+			<#if hasCurrentEnrolment>
+				<#include "_course_details.ftl" />
+			<#else>
+				This student has no enrolment record for the current year.
+			</#if>
 		</div>
 	</#if>
 </article>

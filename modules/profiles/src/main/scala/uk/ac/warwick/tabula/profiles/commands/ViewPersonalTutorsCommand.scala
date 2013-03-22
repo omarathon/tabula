@@ -15,18 +15,31 @@ import scala.collection.immutable.TreeMap
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 
-class ViewPersonalTutorsCommand(val department: Department) extends Command[TreeMap[String, Seq[StudentRelationship]]] with Unaudited {
+// wrapper class for personal tutor data - just for less crufty method signature
+class PersonalTutorGraph(val tuteeMap: TreeMap[String, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
+
+class ViewPersonalTutorsCommand(val department: Department) extends Command[PersonalTutorGraph] with Unaudited {
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
 
 	var profileService = Wire.auto[ProfileService]
 	
-	override def applyInternal(): TreeMap[String, Seq[StudentRelationship]] = transactional() {
+	override def applyInternal(): PersonalTutorGraph = transactional(readOnly = true) {
+		// get all tutor/tutee relationships by dept
 		val unsortedTutorRelationships = profileService.listStudentRelationshipsByDepartment(PersonalTutor, department)
 		
-		val groupedTutorRelationships = unsortedTutorRelationships.groupBy(_.agentLastName)
+		// group into map by tutor id
+		val groupedTutorRelationships = unsortedTutorRelationships.groupBy(_.agent)
 		
-		TreeMap(groupedTutorRelationships.toSeq:_*)
+		// map id to lastname, where possible, and alpha sort by constructing a TreeMap
+		val sortedTutorRelationships = TreeMap((groupedTutorRelationships map {
+			case (tutor, tutees) => (StudentRelationship.getLastNameFromAgent(tutor), tutees)
+		}).toSeq:_*)
+		
+		// count students
+		val (studentCount, missingCount) = profileService.countStudentsByRelationshipAndDepartment(PersonalTutor, department)
+		
+		new PersonalTutorGraph(sortedTutorRelationships, studentCount, missingCount)
 	}
 }
 
@@ -36,9 +49,9 @@ class MissingPersonalTutorsCommand(val department: Department) extends Command[(
 
 	var profileService = Wire.auto[ProfileService]
 	
-	override def applyInternal(): (Int, Seq[Member]) = transactional() {
-		val ownStudentCount = profileService.findMembersByDepartment(department, false, Set(Student)).size
-		ownStudentCount match {
+	override def applyInternal(): (Int, Seq[Member]) = transactional(readOnly = true) {
+		val studentCount = profileService.countStudentsByDepartment(department)
+		studentCount match {
 			case 0 => (0, Nil)
 			case c => (c, profileService.listStudentsWithoutRelationship(PersonalTutor, department))
 		}
@@ -51,7 +64,7 @@ class ViewPersonalTuteesCommand(val currentMember: Member) extends Command[Seq[S
 
 	var profileService = Wire.auto[ProfileService]
 	
-	override def applyInternal(): Seq[StudentRelationship] = transactional() {
+	override def applyInternal(): Seq[StudentRelationship] = transactional(readOnly = true) {
 		profileService.listStudentRelationshipsWithMember(PersonalTutor, currentMember)
 	}
 }

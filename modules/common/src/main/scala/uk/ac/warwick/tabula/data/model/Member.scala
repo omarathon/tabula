@@ -178,6 +178,17 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
 		statusString
 	}
+	
+	// Find out if the student has an SCE record for the current year (which will mean
+	// their study details will be filled in).
+	// Could just check that enrolment status is not null, but it's not impossible that 
+	// on SITS an enrolment status which doesn't exist in the status table has been
+	// entered, in which case we wouldn't be able to populate that field - so checking
+	// that route is also not null for good measure.
+	
+	def hasCurrentEnrolment: Boolean = {
+		studyDetails != null && studyDetails.enrolmentStatus != null && studyDetails.getRoute != null
+	}
 
 	override def description = {
 		val userTypeString = Option(groupName).getOrElse("")
@@ -273,8 +284,8 @@ trait MemberProperties {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
 	
-	@OneToOne
-	@JoinColumn(name="PHOTO_ID")
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PHOTO_ID")
 	@BeanProperty var photo: FileAttachment = _
 	
 	@BeanProperty var inUseFlag: String = _
