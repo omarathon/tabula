@@ -97,7 +97,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 				item.submissionExists = true
 				checkForDuplicateFiles(item, markerFeedback)
 			}
-			case None => {}
+			case _ => {}
 		}
 	}
 
