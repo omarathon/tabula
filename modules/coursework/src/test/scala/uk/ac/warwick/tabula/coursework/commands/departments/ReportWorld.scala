@@ -1,5 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
+<<<<<<< HEAD
+=======
+import collection.JavaConversions._
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.data.model.Assignment
+>>>>>>> TAB-530 First stab at spreadsheet, also includes mock ReportWorld object
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.Feedback
