@@ -75,6 +75,7 @@ trait TestFixtures {
 
 	/** Returns midnight on the first day of this year and month. */
 	def dateTime(year: Int, month: Int) = new DateTime(year, month, 1, 0, 0, 0)
+	def dateTime(year: Int, month: Int, day: Int) = new DateTime(year, month, day, 0, 0, 0)
 	
 	def newSSOConfiguration = {
 		val config = new PropertiesConfiguration()

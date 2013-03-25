@@ -98,6 +98,24 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("assignment", assignment.id))
 	).transform{ toParsedAuditEvent(_) }
 
+	
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "PublishFeedback"),
+			termQuery("students", student.getWarwickId()),
+			termQuery("assignment", assignment.id)), 
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "SubmitAssignment"),
+			termQuery("masqueradeUserId", student.getUserId()),
+			termQuery("assignment", assignment.id)),
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	
 
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
