@@ -51,9 +51,9 @@
 								Requested <@fmt.date date=extension.requestedOn at=true/>
 							</#if>
 						</td>
-						<td class="expiryDate"></td>
+						<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
 						<td><#if isExtensionManager>
-							<a class="new-extension btn btn-mini btn-primary" href="<@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
+							<a class="review-extension btn btn-mini btn-primary" href="<@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
 								<i class="icon-edit icon-white"></i> Review request
 							</a>
 						</#if></td>
