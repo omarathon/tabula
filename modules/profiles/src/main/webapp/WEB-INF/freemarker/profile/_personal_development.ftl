@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <section id="personal-development" class="clearfix">
 	<h4>Personal tutor</h4>
 	
@@ -33,38 +34,7 @@
 	</#if>
 	
 	<#if profile.hasAPersonalTutor>
-		<section class="meetings">
-			<#if can.do("Profiles.MeetingRecord.Read", profile)>
-				<h5>Record of meetings</h5>
-			</#if>
-			
-			<#if can.do("Profiles.MeetingRecord.Create", profile)>
-				<a class="new" href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-			</#if>
-			<#if can.do("Profiles.MeetingRecord.Read", profile)>
-				<a class="toggle-all-details open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-				<a class="toggle-all-details close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
-			</#if>
-			
-			<#if can.do("Profiles.MeetingRecord.Read", profile)>
-				<#if meetings??>
-					<#if (info.requestParameters["meeting"])?has_content>
-						<#assign openMeeting = info.requestParameters["meeting"]?first />
-					</#if>
-					<#list meetings as meeting>
-						<details<#if openMeeting?? && openMeeting == meeting.id> open="open" class="open"</#if>>
-							<summary><span class="date"><@fmt.date meeting.meetingDate /></span> ${meeting.title}</summary>
-							
-							<#if meeting.description??>
-								<div class="description">${meeting.description}</div>
-							</#if>
-							
-							<small class="muted">Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-						</details>
-					</#list>
-				</#if>
-			</#if>
-		</section>
+		<#include "../tutor/meeting/list.ftl" />
 	</#if>
 		
 	<div id="modal" class="modal hide fade" style="display:none;">
@@ -75,24 +45,31 @@
 	
 	<script type="text/javascript">
 	jQuery(function($){
-		// jump to a single open details
-		var navHeight = window.recalculateNavigation() + $('#navigation.horizontal ul#primary-navigation').height();
+		function scrollToOpenDetails() {
+			var navHeight = window.recalculateNavigation() + $('#navigation.horizontal ul#primary-navigation').height();
+			
+			$("details.open").each(function() {
+				$("html, body").animate({
+					scrollTop: $(this).offset().top - (navHeight+(navHeight/3))
+				}, 300);
+			});
+		};
 		
-		$("details[open]").each(function() {
-			$("html, body").animate({
-				scrollTop: $(this).offset().top - (navHeight+(navHeight/3))
-			}, 300);
-		});
+		// run at start
+		scrollToOpenDetails();
 		
 		var $m = $("#modal");
 		
 		// load form into modal, with picker enabled
-		$("section.meetings .new").on("click", function(e) {
+		$("#personal-development").on("click", "section.meetings .new", function(e) {
 			e.preventDefault();
 			
 			$m.load($(this).attr("href") + "?modal", function() {
-				$m.find("input.date-time-picker").tabulaDateTimePicker();
+				$m.find("input.date-picker").tabulaDatePicker();
 				$m.modal("show");
+				$m.on("shown", function() {
+					$m.find("[name='title']").focus();
+				});
 			});
 		});
 		
@@ -113,12 +90,17 @@
 				},
 				
 				success: function(data, status) {
-					// reload modal data into modals, otherwise load to body
-					if (data.indexOf("<html") == -1) {
+					thing = data;
+					if (data.indexOf("modal-header") > -1) {
+						// reload into modal
 						$m.html(data);
-						$m.find("input.date-time-picker").tabulaDateTimePicker();
+						$m.find("input.date-picker").tabulaDatePicker();
 					} else {
-						$("body").html(data);
+						// reload meeting data
+						$("section.meetings").replaceWith(data);
+						$('details').details();
+						$m.modal("hide");
+						scrollToOpenDetails();
 					}
 				}
 			});
@@ -127,4 +109,4 @@
 	});
 	</script>
 </section>
-
+</#escape>

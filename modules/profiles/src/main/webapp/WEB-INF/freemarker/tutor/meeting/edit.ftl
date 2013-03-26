@@ -6,7 +6,7 @@
 	</h6>
 </#assign>
 
-<#if modal??><!-- modal -->
+<#if modal??>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		${heading}
@@ -15,7 +15,7 @@
 	${heading}
 </#if>
 	
-<@f.form method="post" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="command" class="form-horizontal">
+<@f.form method="post" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal">
 	<#if modal??>
 		<div class="modal-body">
 	</#if>
@@ -26,7 +26,7 @@
 	
 	<@form.labelled_row "meetingDate" "Date of meeting">
 		<div class="input-append">
-			<@f.input type="text" path="meetingDate" cssClass="input-medium date-time-picker" placeholder="dd-mmm-yyyy hh:mm" />
+			<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
 			<span class="add-on"><i class="icon-calendar"></i></span>
 		</div>
 	</@form.labelled_row>
