@@ -14,10 +14,13 @@ import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.roles.Masquerader
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.RuntimeMember
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	var roleService = Wire.auto[RoleService]
 	var userLookup = Wire.auto[UserLookupInterface]
+	var profileService = Wire.auto[ProfileService]
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
@@ -26,9 +29,12 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		val god = sysadmin && godModeEnabled
 		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader())
 		val canMasquerade =  sysadmin || masquerader
+		val apparentUser = masqueradeUser(user, canMasquerade)
+		
 		new CurrentUser(
 			realUser = user,
-			apparentUser = masqueradeUser(user, canMasquerade),
+			apparentUser = apparentUser,
+			profile = profileService.getMemberByUserId(apparentUser.getUserId, true),
 			sysadmin = sysadmin,
 			masquerader = masquerader,
 			god = god)
