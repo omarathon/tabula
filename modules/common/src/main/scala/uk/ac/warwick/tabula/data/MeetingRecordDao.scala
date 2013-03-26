@@ -25,6 +25,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			session.newCriteria[MeetingRecord]
 					.add(Restrictions.in("relationship", rel))
 					.addOrder(Order.desc("meetingDate"))
+					.addOrder(Order.desc("lastUpdatedDate"))
 					.seq
 	}
 }
