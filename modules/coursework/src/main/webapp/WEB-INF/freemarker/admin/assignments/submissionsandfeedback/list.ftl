@@ -347,7 +347,8 @@
 						<#if enhancedSubmission.downloaded>
 							<span class="label label-success">Downloaded</span>
 						</#if>
-						<#if submission.state?? && submission.state.toString == "ReleasedForMarking">
+						<!-- ignore placeholder submissions -->
+						<#if submission.assignment?? && submission.releasedForMarking>
 							<span class="label label-success">Markable</span>
 						</#if>
 						<#if submission.suspectPlagiarised>
