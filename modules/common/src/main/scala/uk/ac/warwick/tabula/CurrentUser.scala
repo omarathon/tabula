@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.data.model.Member
 
 /**
  * Represents... surprise, the current user.
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 class CurrentUser(
 	val realUser: User,
 	val apparentUser: User,
+	val profile: Option[Member] = None,
 	val sysadmin: Boolean = false,
 	val masquerader: Boolean = false,
 	val god: Boolean = false) {
@@ -35,11 +37,11 @@ class CurrentUser(
 	def masquerading = !apparentId.equals(realId)
 
 	/** Full name of the apparent user. */
-	def fullName = apparentUser.getFullName
+	def fullName = profile flatMap { _.fullName } getOrElse(apparentUser.getFullName)
 	/** First name of the apparent user. */
-	def firstName = apparentUser.getFirstName
+	def firstName = profile map { _.firstName } getOrElse(apparentUser.getFirstName)
 	/** Surname of the apparent user. */
-	def lastName = apparentUser.getLastName
+	def lastName = profile map { _.lastName } getOrElse(apparentUser.getLastName)
 	/** Warwick Uni ID of the apparent user. */
 	def universityId = apparentUser.getWarwickId
 	/** Department code of the apparent user. */
@@ -49,7 +51,7 @@ class CurrentUser(
 	/** Email address of the apparent user. */
 	def email = apparentUser.getEmail
 	/** User code of the apparent user. */	
-	def userId = apparentUser.getUserId()
+	def userId = apparentUser.getUserId
 	
 	/** Is of type Student? (includes PGT) */
 	def isStudent = apparentUser.isStudent
