@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.hibernate.validator.Valid
 import org.joda.time.DateTime

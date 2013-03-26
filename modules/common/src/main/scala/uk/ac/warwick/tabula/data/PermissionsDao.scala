@@ -7,19 +7,20 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
+import scala.reflect.ClassTag
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
 	
-	def getGrantedRolesFor[A <: PermissionsTarget : Manifest](scope: A): Seq[GrantedRole[A]]
-	def getGrantedPermissionsFor[A <: PermissionsTarget : Manifest](scope: A): Seq[GrantedPermission[A]]
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]]
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]]
 	
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, customRoleDefinition: CustomRoleDefinition): Option[GrantedRole[A]]
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[A]]
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, customRoleDefinition: CustomRoleDefinition): Option[GrantedRole[A]]
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[A]]
 	
-	def getGrantedPermission[A <: PermissionsTarget : Manifest](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
 }
 
 @Repository
@@ -31,33 +32,33 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = session.saveOrUpdate(role)
 	
-	def getGrantedRolesFor[A <: PermissionsTarget : Manifest](scope: A) = canDefineRoleSeq(scope) {
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A) = canDefineRoleSeq(scope) {
 		session.newCriteria[GrantedRole[A]]
 					 .add(is("scope", scope))
 					 .seq
 	}
 	
-	def getGrantedPermissionsFor[A <: PermissionsTarget : Manifest](scope: A) = canDefinePermissionSeq(scope) {
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A) = canDefinePermissionSeq(scope) {
 		session.newCriteria[GrantedPermission[A]]
 					 .add(is("scope", scope))
 					 .seq
 	}
 					 
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, customRoleDefinition: CustomRoleDefinition) = canDefineRole(scope) { 
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, customRoleDefinition: CustomRoleDefinition) = canDefineRole(scope) { 
 		session.newCriteria[GrantedRole[A]]
 					 .add(is("scope", scope))
 					 .add(is("customRoleDefinition", customRoleDefinition))
 					 .seq.headOption
 	}
 					 
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, builtInRoleDefinition: BuiltInRoleDefinition) = canDefineRole(scope) {
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition) = canDefineRole(scope) {
 		session.newCriteria[GrantedRole[A]]
 					 .add(is("scope", scope))
 					 .add(is("builtInRoleDefinition", builtInRoleDefinition))
 					 .seq.headOption
 	}
 					 
-	def getGrantedPermission[A <: PermissionsTarget : Manifest](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] = canDefinePermission(scope) {
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] = canDefinePermission(scope) {
 		session.newCriteria[GrantedPermission[A]]
 					 .add(is("scope", scope))
 					 .add(is("permission", permission))

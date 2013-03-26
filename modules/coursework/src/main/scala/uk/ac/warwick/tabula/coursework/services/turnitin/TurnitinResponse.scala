@@ -13,11 +13,11 @@ case class TurnitinResponse(
 	def success = code <= 100
 	def error = !success
 
-	lazy val assignmentId = xml map { _ \\ "assignmentid" text } filterNot emptyString
-	lazy val classId = xml map { _ \\ "classid" text } filterNot emptyString
-	lazy val userId = xml map { _ \\ "userid" text } filterNot emptyString
-	lazy val objectId = xml map { _ \\ "objectID" text } filterNot emptyString
-	lazy val sessionId = xml map { _ \\ "sessionid" text } filterNot emptyString
+	lazy val assignmentId = xml map { elem => (elem \\ "assignmentid").text } filterNot emptyString
+	lazy val classId = xml map { elem => (elem \\ "classid").text } filterNot emptyString
+	lazy val userId = xml map { elem => (elem \\ "userid").text } filterNot emptyString
+	lazy val objectId = xml map { elem => (elem \\ "objectID").text } filterNot emptyString
+	lazy val sessionId = xml map { elem => (elem \\ "sessionid").text } filterNot emptyString
 	
 	/**
 	 * Convert an <object> list into a list of TurnitinSubmissionInfo items.
@@ -29,14 +29,14 @@ case class TurnitinResponse(
 		xml map {
 			_ \\ "object" map { obj =>
 				TurnitinSubmissionInfo(
-					objectId = DocumentId(obj \\ "objectID" text),
-					title = (obj \\ "title" text),
-					universityId = (obj \\ "firstname" text),
-					similarityScore = (obj \\ "similarityScore" text).toInt,
-					overlap = parseInt(obj \\ "overlap" text),
-					webOverlap = parseInt(obj \\ "web_overlap" text),
-					publicationOverlap = parseInt(obj \\ "publication_overlap" text),
-					studentPaperOverlap = parseInt(obj \\ "student_paper_overlap" text))
+					objectId = DocumentId((obj \\ "objectID").text),
+					title = (obj \\ "title").text,
+					universityId = (obj \\ "firstname").text,
+					similarityScore = (obj \\ "similarityScore").text.toInt,
+					overlap = parseInt((obj \\ "overlap").text),
+					webOverlap = parseInt((obj \\ "web_overlap").text),
+					publicationOverlap = parseInt((obj \\ "publication_overlap").text),
+					studentPaperOverlap = parseInt((obj \\ "student_paper_overlap").text))
 			}
 		} getOrElse Nil
 	}

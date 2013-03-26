@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands._

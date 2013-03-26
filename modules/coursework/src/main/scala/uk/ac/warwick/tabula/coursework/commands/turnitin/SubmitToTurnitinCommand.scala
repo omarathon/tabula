@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinJob
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
 import uk.ac.warwick.spring.Wire

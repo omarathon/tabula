@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import javax.mail.internet.InternetAddress
@@ -13,7 +13,7 @@ import javax.mail.MessagingException
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited

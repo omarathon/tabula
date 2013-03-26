@@ -6,8 +6,6 @@ import org.hibernate.annotations.AccessType
 import javax.persistence.Column
 import org.hibernate.annotations.Type
 import javax.persistence.Id
-import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConversions._
 import uk.ac.warwick.tabula.events.Event
 
 /**
@@ -86,12 +84,12 @@ case class AuditEvent(
 	private def stringProperty(name: String): Option[String] =
 		relatedParsedData
 			.flatMap { _.get(name) }
-			.map { _.toString } headOption
+			.map { _.toString }.headOption
 
 	private def stringListProperty(name: String): Seq[String] =
 		relatedParsedData
 			.flatMap { _.get(name) }
-			.flatMap { _.asInstanceOf[JList[String]] }
+			.flatMap { _.asInstanceOf[collection.mutable.Buffer[String]] }
 
 	/**
 	 * Convert to an Event object (losing the stage information). There's usually

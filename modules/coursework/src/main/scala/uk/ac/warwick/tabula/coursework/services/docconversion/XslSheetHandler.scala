@@ -40,7 +40,7 @@ class XslSheetHandler extends HSSFListener with Logging {
 		val currentMarkItem = markItems.get(rowNumber)
 		val cellValue = record match {
 			case record: LabelSSTRecord => currentSST.getString(record.getSSTIndex()).toString()
-			case record: NumberRecord => record.getValue.toInt toString
+			case record: NumberRecord => record.getValue.toInt.toString
 		}
 
 		record.getColumn match {

@@ -8,7 +8,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.Expression

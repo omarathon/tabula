@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.Submission
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.commands.Command
@@ -22,6 +22,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserSettingsService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.data.model.UserSettings
+import language.implicitConversions
 
 class SendSubmissionNotifyCommand (
 		@BeanProperty val submission: Submission, 

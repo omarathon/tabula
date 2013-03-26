@@ -14,10 +14,10 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				click on linkText("Fully featured assignment")		
 				currentUrl should endWith(assignmentId + "/")
 				
-				click on (getInputByLabel("File") orNull)
+				click on (getInputByLabel("File").orNull)
 				pressKeys(getClass.getResource("/file1.txt").getFile)
 				
-				new TextField(getInputByLabel("Word count") orNull).value = "1000"
+				new TextField(getInputByLabel("Word count").orNull).value = "1000"
 					
 				// Don't click the plagiarism detection button yet
 				submit()

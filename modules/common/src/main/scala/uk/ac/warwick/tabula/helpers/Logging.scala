@@ -2,14 +2,16 @@ package uk.ac.warwick.tabula.helpers
 import org.apache.log4j.Logger
 import Stopwatches._
 import org.apache.log4j.Priority
+import scala.reflect.ClassTag
+import org.apache.log4j.Level
 
 trait Logging {
 	@transient val loggerName = this.getClass.getName
 	@transient lazy val logger = Logger.getLogger(loggerName)
 	@transient lazy val debugEnabled = logger.isDebugEnabled
 
-	@transient val Info = Priority.INFO
-	@transient val Debug = Priority.DEBUG
+	@transient val Info = Level.INFO
+	@transient val Debug = Level.DEBUG
 
 	/**
 	 * Logs a debug message, with the given arguments inserted into the
@@ -24,8 +26,8 @@ trait Logging {
 	 * Returns the collection so you can wrap it with this without having
 	 * to break out into a variable.
 	 */
-	def logSize[A](seq: Seq[A], level: Priority = Info)(implicit m: Manifest[A]) = {
-		logger.log(level, "Collection of " + m.erasure.getSimpleName + "s: " + seq.size)
+	def logSize[A](seq: Seq[A], level: Priority = Info)(implicit tag: ClassTag[A]) = {
+		logger.log(level, "Collection of " + tag.runtimeClass.getSimpleName + "s: " + seq.size)
 		seq
 	}
 

@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.web.views
-import org.scalatest.junit.ShouldMatchersForJUnit
-import org.scalatest.junit.JUnitSuite
-import org.junit.Test
+
 import scala.collection.mutable.Buffer
+import scala.beans.BeanProperty
+
+import org.junit.Test
+import org.scalatest.junit.JUnitSuite
+
+import org.scalatest.junit.ShouldMatchersForJUnit
+
 import freemarker.template.SimpleSequence
-import scala.reflect.BeanProperty
-
-
-import org.junit.Ignore
-import org.joda.time.Duration
-import freemarker.template.SimpleHash
 
 class MyObject {
   var name = "text"
@@ -33,7 +32,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	
 	@Test def nestedObjects {
 		World.Scotland.plant should be ("Thistle")
-		
+
 		val wrapper = new ScalaBeansWrapper()
 		wrapper.wrap(World) match {
 			case hash:ScalaHashModel => {
@@ -43,18 +42,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 					}
 				}
 			}
-		}
-	}
-	
-	@Ignore
-	@Test def duration {
-		val duration = Duration.standardSeconds(7) // seven seconds away...
-		val wrapper = new ScalaBeansWrapper()
-		val wrapped = wrapper.wrap(duration)
-		wrapped match {
-			case d:SimpleHash => {
-				d.get("standardSeconds") should be (7)
-			}
+			case somethingElse => fail("unexpected match; expected hash:ScalaHashModel but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
 		}
 	}
 	
@@ -68,6 +56,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 			case hash:ScalaHashModel => {
 				hash.get("greeting").toString should be ("Hello you!")
 			}
+			case somethingElse => fail("unexpected match; expected hash:ScalaHashModel but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
 		}
 	}
 	
@@ -96,6 +85,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	 	  case hash:ScalaHashModel => {
 	 	 	  hash.get("list") match {
 	 	 	 	  case listy:SimpleSequence => listy.size should be (2)
+	 	 	 	  case somethingElse => fail("unexpected match; expected listy:SimpleSequence but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
 	 	 	  }
 	 	  }
 	  }

@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.joda.time.DateTime
 
@@ -78,7 +78,11 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		
 		awaitingSubmissionExtensionRejected = awaitingSubmissionExtended.filter(member => member._2.rejected)
 		
-		awaitingSubmissionExtensionExpired = awaitingSubmissionExtended.filterNot(awaitingSubmissionExtensionRequested contains).filterNot(awaitingSubmissionWithinExtension contains).filterNot(awaitingSubmissionExtensionRejected contains)
+		awaitingSubmissionExtensionExpired = 
+			awaitingSubmissionExtended
+				.diff(awaitingSubmissionExtensionRequested)
+				.diff(awaitingSubmissionWithinExtension)
+				.diff(awaitingSubmissionExtensionRejected)
 		
 		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it

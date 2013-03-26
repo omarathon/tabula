@@ -77,7 +77,7 @@ object Transactions extends TransactionAspectSupport {
 			commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
 			result
 		} catch {
-			case t => {
+			case t: Throwable => {
 				
 				val info = TransactionSupport.currentTransactionInfo
 				if (info != null) {

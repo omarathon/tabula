@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.system
 
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import collection.JavaConverters._
 import collection.JavaConversions._
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter

@@ -9,6 +9,7 @@ import java.{ lang => jl }
 import org.hibernate.`type`.Type
 import org.hibernate.`type`.AbstractStandardBasicType
 import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
+import scala.reflect._
 
 /**
  * Handles a lot of the junk that isn't necessary if all you want to do is
@@ -18,11 +19,11 @@ import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
  * the nullObject and nullValue values to tell it what value to
  * use in the case of null coming from other direction
  */
-abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifest] extends UserType {
+abstract class AbstractBasicUserType[A <: Object: ClassTag, B: ClassTag] extends UserType {
 
 	// Store information about what A is.
-	protected val m: ClassManifest[A] = classManifest[A]
-	protected val vm: ClassManifest[B] = classManifest[B]
+	protected val tag: ClassTag[A] = classTag[A]
+	protected val vtag: ClassTag[B] = classTag[B]
 
 	val basicType: AbstractSingleColumnStandardBasicType[B]
 	val nullObject: A // what to use when NULL comes out of the DB
@@ -30,23 +31,25 @@ abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifes
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 
+	@SuppressWarnings(Array("deprecation"))
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
 		basicType.nullSafeGet(resultSet, names(0)) match {
 			case s: Any if s == nullValue => nullObject
-			case s: Any if vm.erasure.isInstance(s) => convertToObject(s.asInstanceOf[B])
+			case s: Any if vtag.runtimeClass.isInstance(s) => convertToObject(s.asInstanceOf[B])
 			case null => nullObject
 		}
 	}
 
+	@SuppressWarnings(Array("deprecation"))
 	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) =
 		basicType.nullSafeSet(stmt, toValue(value), index)
 
 	private final def toValue(value: Any): B = value match {
-		case obj: Any if m.erasure.isInstance(value) => convertToValue(value.asInstanceOf[A])
+		case obj: Any if tag.runtimeClass.isInstance(value) => convertToValue(value.asInstanceOf[A])
 		case null => nullValue
 	}
 
-	override def returnedClass = m.erasure
+	override def returnedClass = tag.runtimeClass
 
 	override def isMutable = false
 	override def equals(x: Object, y: Object) = x == y
@@ -54,5 +57,5 @@ abstract class AbstractBasicUserType[A <: Object: ClassManifest, B: ClassManifes
 	override def deepCopy(x: Object) = x
 	override def replace(original: Object, target: Object, owner: Object) = original
 	override def disassemble(value: Object) = value.asInstanceOf[jio.Serializable]
-	override def assemble(cached: jio.Serializable, owner: Object) = cached
+	override def assemble(cached: jio.Serializable, owner: Object) = cached.asInstanceOf[AnyRef]
 }

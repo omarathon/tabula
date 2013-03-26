@@ -39,8 +39,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
 				}
 			}
-			case null => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
-			case _ => errors.rejectValue("meetingDate", "typeMismatch.org.joda.time.DateTime")
+			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
 		}
 	}
 

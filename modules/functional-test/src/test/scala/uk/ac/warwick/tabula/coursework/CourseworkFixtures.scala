@@ -75,10 +75,10 @@ trait CourseworkFixtures extends BrowserTest {
 		}
 		
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
-		click on (getInputByLabel("File") orNull)
+		click on (getInputByLabel("File").orNull)
 		pressKeys(getClass.getResource(file).getFile)
 		
-		new TextField(getInputByLabel("Word count") orNull).value = "1000"
+		new TextField(getInputByLabel("Word count").orNull).value = "1000"
 			
 		checkbox("plagiarismDeclaration").select()
 		

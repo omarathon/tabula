@@ -4,6 +4,7 @@ import java.io.File
 import uk.ac.warwick.tabula.services._
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import language.implicitConversions
 
 object ZipGeneratingApp extends App with ZipCreator {
 	def zipDir = new File(System.getProperty("java.io.tmpdir"))

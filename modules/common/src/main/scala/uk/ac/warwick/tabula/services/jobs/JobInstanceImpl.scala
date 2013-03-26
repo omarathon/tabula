@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
 
 import scala.collection.mutable
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Configurable

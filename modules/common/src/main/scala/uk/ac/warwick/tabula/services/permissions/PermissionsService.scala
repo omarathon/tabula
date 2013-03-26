@@ -14,19 +14,20 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
+import scala.reflect.ClassTag
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
 	
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
-	def getGrantedPermission[A <: PermissionsTarget : Manifest](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
 	
 	def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]]
 	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]]
 	
-	def ensureUserGroupFor[A <: PermissionsTarget : Manifest](scope: A, roleDefinition: RoleDefinition): UserGroup
+	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup
 }
 
 @Service(value = "permissionsService")
@@ -38,7 +39,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 	def saveOrUpdate(permission: GrantedPermission[_]) = dao.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = dao.saveOrUpdate(role)
 	
-	def getGrantedRole[A <: PermissionsTarget : Manifest](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
 		transactional(readOnly = true) {
 			roleDefinition match {
 				case builtIn: BuiltInRoleDefinition => dao.getGrantedRole(scope, builtIn)
@@ -47,7 +48,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 			}
 		}
 	
-	def getGrantedPermission[A <: PermissionsTarget : Manifest](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] =
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] =
 		transactional(readOnly = true) {
 			dao.getGrantedPermission(scope, permission, overrideType)
 		}
@@ -60,7 +61,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 		dao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
 	}
 	
-	def ensureUserGroupFor[A <: PermissionsTarget : Manifest](scope: A, roleDefinition: RoleDefinition): UserGroup = transactional() {
+	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup = transactional() {
 		getGrantedRole(scope, roleDefinition) match {
 			case Some(role) => role.users
 			case _ => {

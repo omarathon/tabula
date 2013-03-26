@@ -13,8 +13,10 @@ object LazyMaps {
 	 * factory.
 	 */
     def create[K,V](factory: (K)=>(V)) = new mutable.HashMap[K,V] {
-    	override def get(key: K) = 
-    		Option( superGetOrUpdate(key, { factory(key) }) )
+    	override def apply(key: K) = 
+    		superGetOrUpdate(key, { factory(key) })
+    		
+    	override def get(key: K) = Option(apply(key))
     	
     	// same as getOrElseUpdate, except we call super.get to prevent a stack overflow.
     	private def superGetOrUpdate(key:K, op: =>V) = 

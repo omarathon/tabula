@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.Transactions._
@@ -91,7 +91,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 					hasErrors = true
 				}
 			} catch {
-				case _ => {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) => {
 					errors.rejectValue("actualMark", "actualMark.format")
 					hasErrors = true
 				}

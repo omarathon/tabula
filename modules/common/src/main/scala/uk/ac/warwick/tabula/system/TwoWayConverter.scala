@@ -6,6 +6,7 @@ import com.google.common.collect.Sets._
 import java.{ util => j }
 import org.springframework.format.Formatter
 import java.util.Locale
+import scala.reflect._
 
 /**
  * A Spring GenericConverter that can convert both to and from two types.
@@ -24,14 +25,14 @@ import java.util.Locale
  * If a value is invalid, throw IllegalArgumentException. Spring will pick it up and correctly
  * treat it as a type mismatch.
  */
-abstract class TwoWayConverter[A <: String: ClassManifest, B <: AnyRef: ClassManifest] extends GenericConverter with Formatter[B] {
+abstract class TwoWayConverter[A <: String: ClassTag, B <: AnyRef: ClassTag] extends GenericConverter with Formatter[B] {
 	// JVM can't normally remember types at runtime, so store them as Manifests here
-	val typeA = classManifest[A]
-	val typeB = classManifest[B]
+	val typeA = classTag[A]
+	val typeB = classTag[B]
 
 	val convertibleTypes: j.Set[ConvertiblePair] = newHashSet(
-		new ConvertiblePair(typeA.erasure, typeB.erasure),
-		new ConvertiblePair(typeB.erasure, typeA.erasure))
+		new ConvertiblePair(typeA.runtimeClass, typeB.runtimeClass),
+		new ConvertiblePair(typeB.runtimeClass, typeA.runtimeClass))
 
 	def getConvertibleTypes = convertibleTypes
 
@@ -56,6 +57,6 @@ abstract class TwoWayConverter[A <: String: ClassManifest, B <: AnyRef: ClassMan
 		}
 	}
 
-	private def matching(descriptor: TypeDescriptor, manifest: ClassManifest[_]) =
-		descriptor.getType().isAssignableFrom(manifest.erasure)
+	private def matching(descriptor: TypeDescriptor, manifest: ClassTag[_]) =
+		descriptor.getType().isAssignableFrom(manifest.runtimeClass)
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import language.implicitConversions
 
 /**
  * Sends a message to one or more admins to let them know that the current

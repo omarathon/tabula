@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 class AcademicYearTest extends TestBase {
 	@Test def year {
 		AcademicYear.guessByDate(dateTime(2010,11)).startYear should be(2010)
-		AcademicYear.guessByDate(dateTime(2010,05)).startYear should be(2009)
+		AcademicYear.guessByDate(dateTime(2010,5)).startYear should be(2009)
 	}
 	
 	@Test def strings {
