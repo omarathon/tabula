@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.apache.poi.ss.usermodel.{IndexedColors, ComparisonOperator}
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.ss.util.WorkbookUtil

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.springframework.validation.Errors
 
@@ -17,8 +17,9 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import scala.reflect.ClassTag
 
-class RevokePermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
+class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
 
 	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
 	
@@ -37,7 +38,7 @@ class RevokePermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) exte
 			permissionsService.saveOrUpdate(permission)
 		}
 		
-		grantedPermission orNull
+		grantedPermission.orNull
 	}
 	
 	def validate(errors: Errors) {

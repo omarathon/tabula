@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 import org.joda.time.DateTime
 import scala.math
+import language.implicitConversions
 
 /**
  * import uk.ac.warwick.tabula.helpers.DateTimeOrdering._

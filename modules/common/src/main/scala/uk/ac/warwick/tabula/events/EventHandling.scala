@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.events
 import uk.ac.warwick.tabula.commands.Describable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
@@ -35,15 +35,15 @@ trait EventHandling extends Logging {
 					val result = f
 					val resultEvent = Event.resultFromDescribable(d, result, event.id)
 					listener.afterCommand(resultEvent, result)
-					return result
+					result
 				} catch {
-					case e => {
+					case e: Throwable => {
 						// On exception, pass that on then rethrow.
 						// If the exception handler throws an exception, just log that and rethrow the original
 						try {
 							listener.onException(event, e)
 						} catch {
-							case e1 => logger.error("Exception in EventHandling.onException", e1)
+							case e1: Throwable => logger.error("Exception in EventHandling.onException", e1)
 						} finally {
 							throw e
 						}

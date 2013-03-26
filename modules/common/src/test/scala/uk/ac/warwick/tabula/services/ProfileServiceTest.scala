@@ -212,7 +212,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		session.flush
 				
 		profileService.getRegisteredModules("0000001") should be (Seq(mod1))
-		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2) toSet)
+		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
 		profileService.getRegisteredModules("0000003") should be (Seq(mod2))
 		profileService.getRegisteredModules("0000004") should be (Seq())
 	}
@@ -269,7 +269,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.listStudentRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(rel2))
 		profileService.listStudentRelationshipsByDepartment(null, dept1) should be (Seq())
 		
-		profileService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2) toSet)
+		profileService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2).toSet)
 		profileService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "0000004") should be (Seq())
 		profileService.listStudentRelationshipsWithUniversityId(null, "0000003") should be (Seq())
 		

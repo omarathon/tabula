@@ -10,8 +10,8 @@ import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import dispatch._
-import dispatch.Request.toRequestVerbs
+import dispatch.classic._
+import dispatch.classic.Request.toRequestVerbs
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.CurrentUser
@@ -22,7 +22,7 @@ import org.apache.http.client.params.ClientPNames
 import org.apache.http.client.params.CookiePolicy
 import uk.ac.warwick.tabula.data.model.Assignment
 import scala.util.matching.Regex
-import dispatch.thread.ThreadSafeHttpClient
+import dispatch.classic.thread.ThreadSafeHttpClient
 
 case class FileData(val file: File, val name: String)
 

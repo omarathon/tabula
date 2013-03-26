@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.services
 import java.io.StringWriter
 import java.sql.Clob
 import scala.collection.JavaConversions.asScalaBuffer
-import org.codehaus.jackson.map.JsonMappingException
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.codehaus.jackson.JsonParseException
 import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime

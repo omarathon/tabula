@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import javax.validation.Valid
 import org.springframework.format.annotation.DateTimeFormat
@@ -44,7 +44,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
 
-	@BeanProperty var message: String = service.message orNull
+	@BeanProperty var message: String = service.message.orNull
 	
 	def applyInternal() {
 		if (!enable) {

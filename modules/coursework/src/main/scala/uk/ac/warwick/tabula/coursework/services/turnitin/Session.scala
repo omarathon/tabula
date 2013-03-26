@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.services.turnitin
 
-import dispatch._
-import dispatch.mime.Mime._
+import dispatch.classic._
+import dispatch.classic.mime.Mime._
 import java.io.FileInputStream
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.entity.mime.content.FileBody

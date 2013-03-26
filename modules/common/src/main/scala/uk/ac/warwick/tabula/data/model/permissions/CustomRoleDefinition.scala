@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.hibernate.annotations.Type
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._

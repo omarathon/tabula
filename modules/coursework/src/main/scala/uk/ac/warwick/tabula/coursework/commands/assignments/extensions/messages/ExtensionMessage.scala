@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.joda.time.format.DateTimeFormat
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
+import language.implicitConversions
 
 /**
  * Send an email confirming the creation of a manual extension request to the student

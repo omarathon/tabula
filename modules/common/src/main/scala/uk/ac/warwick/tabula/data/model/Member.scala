@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data.model
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -218,7 +218,8 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case None => "Not recorded"
 			case Some(name: String) => name
 			case Some(member: Member) => member
-	}
+			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
+		}
 	
 	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
 	

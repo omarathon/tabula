@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}

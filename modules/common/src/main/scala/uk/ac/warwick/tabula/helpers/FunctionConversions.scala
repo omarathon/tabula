@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.ConnectionCallback
 import java.sql.Connection
 import org.springframework.orm.hibernate3.HibernateCallback
 import org.hibernate.Session
+import language.implicitConversions
 
 /**
  * A collection of implicit conversions from Scala functions to Java callback interfaces.

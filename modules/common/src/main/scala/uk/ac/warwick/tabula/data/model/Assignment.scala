@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.reflect.Manifest
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
@@ -28,6 +28,7 @@ import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.services.FeedbackService
+import scala.reflect.ClassTag
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -306,9 +307,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Find a FormField on the Assignment with the given name and type.
 	 * A field with a matching name but not a matching type is ignored.
 	 */
-	def findFieldOfType[A <: FormField](name: String)(implicit m: Manifest[A]): Option[A] =
+	def findFieldOfType[A <: FormField](name: String)(implicit tag: ClassTag[A]): Option[A] =
 		findField(name) match {
-			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[A])
+			case Some(field) if tag.runtimeClass.isInstance(field) => Some(field.asInstanceOf[A])
 			case _ => None
 		}
 

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._

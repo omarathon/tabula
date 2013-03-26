@@ -23,7 +23,7 @@ class Log4JEventListener extends EventListener {
 		logger.info(s.toString)
 	}
 
-	override def onException(event: Event, exception: Throwable) {
+	override def onException(event: Event, exception: Throwable) {		
 		val s = generateMessage(event, "failed-event")
 		logger.info(s.toString)
 	}

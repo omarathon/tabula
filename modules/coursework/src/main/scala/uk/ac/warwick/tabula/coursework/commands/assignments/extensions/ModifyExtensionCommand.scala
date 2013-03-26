@@ -18,6 +18,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.commands.SelfValidating
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
@@ -45,7 +46,7 @@ class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, exte
 }
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
-		extends Command[List[Extension]] with Daoisms with Logging	{
+		extends Command[List[Extension]] with Daoisms with Logging with SelfValidating {
 	
 	mustBeLinked(assignment,module)
 		
@@ -107,7 +108,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		if (extensionItems != null && !extensionItems.isEmpty) {
 			for (i <- 0 until extensionItems.length) {
 				val extension = extensionItems.get(i)
-				errors.pushNestedPath("extensionItems["+i+"]")
+				errors.pushNestedPath("extensionItems[" + i + "]")
 				validateExtension(extension, errors)
 				errors.popNestedPath()
 			}

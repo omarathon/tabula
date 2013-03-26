@@ -68,7 +68,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			breakable { while (true) {
 				logger.debug("Getting list of files: " + listFilesUrl + " : " + startDate.getMillis)
 				
-				val json = listFiles(startDate) orNull
+				val json = listFiles(startDate).orNull
 				
 				// We return here because this is a fault. We should not continue to write the sync log at the end of execution
 				if (json == null) return null
@@ -76,7 +76,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 				try {
 					lastRetrievedCreationDate = new DateTime(json.getLong("lastFileReceived"))
 				} catch {
-					case e => {
+					case e: Throwable => {
 						logger.debug("No files received")
 						break
 					}
@@ -222,7 +222,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			
 			val lastId = lastFiles.last.getString("id")
 			
-			val json = listFiles(startDate, lastId) orNull
+			val json = listFiles(startDate, lastId).orNull
 				
 			// We return here because this is a fault. We should not continue to write the sync log at the end of execution
 			if (json == null) return
@@ -342,7 +342,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	}
 	
 	// TODO
-	override def describe(d: Description) = d
+	override def describe(d: Description) {}
 	
 }
 

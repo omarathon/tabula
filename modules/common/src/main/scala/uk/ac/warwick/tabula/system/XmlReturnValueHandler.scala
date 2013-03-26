@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.JavaImports._
 import xml.Utility
+import scala.xml.MinimizeMode
 
 class XmlReturnValueHandler extends HandlerMethodReturnValueHandler {
 
@@ -34,9 +35,9 @@ class XmlReturnValueHandler extends HandlerMethodReturnValueHandler {
 			val writer = response.getWriter
 			writer write """<?xml version="1.0" encoding="UTF-8" ?>"""
 			writer write ("\n")
-			writer write Utility.toXML(xml,
+			writer write Utility.serialize(xml,
 				preserveWhitespace = false,
-				minimizeTags = true).toString
+				minimizeTags = MinimizeMode.Always).toString
 		}
 	}
 }
