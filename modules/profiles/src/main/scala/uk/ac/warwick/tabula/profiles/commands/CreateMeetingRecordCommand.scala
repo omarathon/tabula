@@ -8,12 +8,15 @@ import uk.ac.warwick.tabula.commands.{Command,Description,SelfValidating}
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model.{Member,StudentRelationship,MeetingRecord}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import org.joda.time.LocalDate
+import org.joda.time.LocalTime
 
-class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship) extends Command[MeetingRecord] with SelfValidating {
+class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship) extends Command[MeetingRecord] with SelfValidating with FormattedHtml {
 
 	@BeanProperty var title: String = _
 	@BeanProperty var description: String = _
-	@BeanProperty var meetingDate: DateTime = _
+	@BeanProperty var meetingDate: LocalDate = DateTime.now.toLocalDate
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
 	
@@ -22,8 +25,8 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	def applyInternal() = {
 		var meeting = new MeetingRecord(creator, relationship)
 		meeting.title = title
-		meeting.description = description
-		meeting.meetingDate = meetingDate
+		meeting.description = formattedHtml(description)
+		meeting.meetingDate = meetingDate.toDateTimeAtMidnight().plusHours(12) // arbitrarily record as noon
 		dao.saveOrUpdate(meeting)
 		meeting
 	}
@@ -32,10 +35,10 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
 		
 		meetingDate match {
-			case date:DateTime => {
-				if (meetingDate.isAfter(DateTime.now)) {
+			case date:LocalDate => {
+				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				} else if (meetingDate.isBefore(DateTime.now.minusYears(5))) {
+				} else if (meetingDate.isBefore(DateTime.now.minusYears(5).toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
 				}
 			}

@@ -14,6 +14,7 @@ import org.joda.time.format.DateTimeFormat
 object DateFormats {
 	/** String format as expected by Javascript date time picker */
 	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
+	final val DatePicker = "dd-MMM-yyyy"
 
 	/**
 	 * ISO 8601 date format. Has date, hours, minutes, timezone, no millis.

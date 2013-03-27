@@ -19,12 +19,12 @@
 			</#if>
 		</#if>
 		
-		<p>You can set personal tutors for many students at once by uploading a spreadsheet. <a href="#" class="use-popover" 
+		<p>You can set personal tutors for many students at once by uploading an <samp title="Microsoft Office Open XML Format">.xlsx</samp> spreadsheet. <a href="#" class="use-popover" 
 			data-title="Personal tutor spreadsheet"
 			data-trigger="click"
 			data-placement="bottom"
 			data-html="true"
-			data-content="&lt;p&gt;The spreadsheet must be in .xlsx format (created in Microsoft Office 2007 or later).&lt;p&gt;
+			data-content="&lt;p&gt;The spreadsheet must be in &lt;samp&gt;.xlsx&lt;/samp&gt; format (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application).&lt;p&gt;
 &lt;p&gt;The spreadsheet must contain two columns:&lt;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;b&gt;student_id&lt;/b&gt; - contains the student's University ID number (also known as the library card number)&lt;/li&gt;
@@ -36,7 +36,7 @@
 		
 		<p><a href="<@routes.tutor_template department />" >Download a template spreadsheet</a></p>
 		
-		<@f.form method="post" enctype="multipart/form-data" action=formDestination commandName="uploadPersonalTutorsCommand">
+		<@f.form method="post" enctype="multipart/form-data" action=formDestination commandName="command">
 			<input name="isfile" value="true" type="hidden"/>
 			<table role="presentation" class="narrowed-form">
 				<tr>
@@ -48,6 +48,7 @@
 						<@form.labelled_row "file.upload" "Files">
 							<input type="file" name="file.upload" multiple />
 						</@form.labelled_row>
+						<@f.errors path="*" cssClass="error" />
 					</td>
 				</tr>
 			</table>
