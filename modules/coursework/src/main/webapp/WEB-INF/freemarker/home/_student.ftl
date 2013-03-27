@@ -42,11 +42,11 @@
 							<div class="span5">
 								<#if !assignment.opened>
 									<div class="not-open deadline">
-										Opens <@fmt.date date=assignment.openDate timezone=true /><br>
+										Opens <@fmt.date date=assignment.openDate /><br>
 										<#if assignment.openEnded>
 											No close date
 										<#else>
-											Deadline <@fmt.date date=assignment.closeDate timezone=true />
+											Deadline <@fmt.date date=assignment.closeDate />
 										</#if>
 									</div>
 								<#else>
@@ -65,17 +65,17 @@
 											
 											<div class="extended deadline">
 												<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
-												Extension granted until <@fmt.date date=extension.expiryDate timezone=true />
+												Extension granted until <@fmt.date date=extension.expiryDate />
 											</div>
 										<#elseif assignment.closed>
 											<div class="late deadline">
 												<span class="time-remaining">${time_remaining} <span class="label label-important">Late</span></span>
-												Deadline was <@fmt.date date=assignment.closeDate timezone=true />
+												Deadline was <@fmt.date date=assignment.closeDate />
 											</div>
 										<#else>
 											<div class="deadline">
 												<span class="time-remaining">${time_remaining}</span>
-												Deadline <@fmt.date date=assignment.closeDate timezone=true />
+												Deadline <@fmt.date date=assignment.closeDate />
 											</div>
 										</#if>
 									</#if>
@@ -145,7 +145,7 @@
 							</div>
 							<div class="span5">
 								<#if hasSubmission>
-									Submitted <@fmt.date date=submission.submittedDate timezone=true />
+									Submitted <@fmt.date date=submission.submittedDate />
 									<#if submission.late>
 										<span class="label label-important">Late</span>
 									<#elseif  submission.authorisedLate>
