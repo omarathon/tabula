@@ -39,6 +39,17 @@ jQuery(function ($) {
 	};
 	
 	$('input.date-time-picker').tabulaDateTimePicker();
+	
+	jQuery.fn.tabulaDatePicker = function() {
+		$(this).datepicker({
+			format: "dd-M-yyyy",
+			weekStart: 1,
+			minView: 'day',
+			autoclose: true
+		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	};
+	
+	$('input.date-picker').tabulaDatePicker();
 
 	/* When a .long-running link is clicked it will be
 	 * replaced with "Please wait" text, to tell the user to expect to
@@ -104,13 +115,13 @@ jQuery(function ($) {
 	$('details').details();
 	
 	// togglers
-	$(".open-all-details").on("click", function() {
+	$(".tabula-page").on("click", ".open-all-details", function() {
 		$("html.no-details details:not(.open) summary").click();
 		$("html.details details:not([open]) summary").click();
 		$(".open-all-details").hide();
 		$(".close-all-details").show();
 	});
-	$(".close-all-details").on("click", function() {
+	$(".tabula-page").on("click", ".close-all-details", function() {
 		$("html.no-details details.open summary").click();
 		$("html.details details[open] summary").click();
 		$(".close-all-details").hide();

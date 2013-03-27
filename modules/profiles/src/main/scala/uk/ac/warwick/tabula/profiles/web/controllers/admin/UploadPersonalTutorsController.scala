@@ -18,23 +18,30 @@ class UploadPersonalTutorsController extends ProfilesController {
 	// tell @Valid annotation how to validate
 	validatesSelf[UploadPersonalTutorsCommand]
 	
-	@ModelAttribute def command(@PathVariable("department") department: Department) = new UploadPersonalTutorsCommand(department)
+	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = new UploadPersonalTutorsCommand(department)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadForm(@PathVariable("department") department: Department, @ModelAttribute cmd: UploadPersonalTutorsCommand): Mav = {
+	def uploadForm(@PathVariable("department") department: Department, @ModelAttribute("command") cmd: UploadPersonalTutorsCommand): Mav = {
 		Mav("tutors/upload_form")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
-		//validate(department, cmd, errors)
-		Mav("tutors/upload_preview")
+	def confirmBatchUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute("command") cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
+		val code = errors.getFieldError.getCode
+		if (errors.hasErrors && errors.getFieldError.getCode == "file.wrongtype.one") {
+			uploadForm(department, cmd)
+		} else {
+			Mav("tutors/upload_preview")
+		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
-		//validate(department, cmd, errors)
-		val tutorCount = cmd.apply().size
-		Mav("tutors/upload_form", "tutorCount" -> tutorCount)
+	def doUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute("command") cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
+		if (errors.hasErrors) {
+			uploadForm(department, cmd)
+		} else {
+			val tutorCount = cmd.apply().size
+			Mav("tutors/upload_form", "tutorCount" -> tutorCount)
+		}
 	}
 }
