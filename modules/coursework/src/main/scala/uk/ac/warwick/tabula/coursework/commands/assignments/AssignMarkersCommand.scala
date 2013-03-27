@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 
 class AssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] with Daoisms{
@@ -22,6 +23,8 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
+	@transient
+	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
 	var userLookup = Wire.auto[UserLookupService]
 
 	@BeanProperty var firstMarkerUnassignedStudents: JList[Student] = _
@@ -55,7 +58,7 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 
 		firstMarkers = retrieveMarkers(assignment.markingWorkflow.firstMarkers.members)
 		secondMarkers = retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
-		val members = assignmentService.determineMembershipUsers(assignment).map{s =>
+		val members = assignmentMembershipService.determineMembershipUsers(assignment).map{s =>
 			val displayValue = module.department.showStudentName match {
 				case true => s.getFullName
 				case false => s.getWarwickId

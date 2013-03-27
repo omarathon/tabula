@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.jobs._
 import java.util.HashMap
+import uk.ac.warwick.tabula.services.OriginalityReportService
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -50,6 +51,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	@Autowired implicit var freemarker: Configuration = _
 	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var originalityReportService: OriginalityReportService = _
 	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 
 	@Value("${mail.noreply.to}") var replyAddress: String = _
@@ -205,7 +207,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 						case Some(attachment) => {
 							// FIXME this is a clunky way to replace an existing report
 							if (attachment.originalityReport != null) {
-								assignmentService.deleteOriginalityReport(attachment)
+								originalityReportService.deleteOriginalityReport(attachment)
 							}
 							val r = {
 								val r = new OriginalityReport
@@ -217,7 +219,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 								r
 							}
 							attachment.originalityReport = r
-							assignmentService.saveOriginalityReport(attachment)
+							originalityReportService.saveOriginalityReport(attachment)
 						}
 						case None => logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
 					}

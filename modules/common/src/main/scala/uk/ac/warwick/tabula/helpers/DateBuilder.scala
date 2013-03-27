@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.joda.time.DateTime
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+import org.joda.time.LocalDate
+import org.joda.time.ReadableDateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-import collection.mutable
-import collection.JavaConversions._
 import freemarker.template.TemplateMethodModelEx
-import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
+import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
-import org.joda.time.LocalTime
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
+import org.joda.time.DateMidnight
 
 object DateBuilder {
 
@@ -28,7 +29,7 @@ object DateBuilder {
 		false -> _relativeWords.mapValues(_.toLowerCase))
 
 	/* called with just a DateTime - use the default arguments */
-	def format(date: DateTime): String = 
+	def format(date: ReadableDateTime): String = 
 		format(date=date, 
 			includeSeconds=false, 
 			includeAt=true, 
@@ -40,7 +41,7 @@ object DateBuilder {
 			includeTime=true)
 
 	/* everything is specified, including whether minutes should be included */
-	def format(date: DateTime, 
+	def format(date: ReadableDateTime, 
 			includeSeconds: Boolean, 
 			includeAt: Boolean, 
 			includeTimezone: Boolean, 
@@ -55,7 +56,7 @@ object DateBuilder {
 					pattern.append(" HH:mm")
 					if (includeSeconds) pattern.append(":ss")
 					if (includeTimezone) pattern.append(" (z)")
-					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else " ") + (formatterMap(pattern.toString) print date).trim()					
+					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else "&#8194;") + (formatterMap(pattern.toString) print date).trim()
 				}
 				else {
 					datePart(date, capitalise, relative, shortMonth)
@@ -70,9 +71,9 @@ object DateBuilder {
 		case _ => "th"
 	}
 
-	def datePart(date: DateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean) = {
-		val today = new DateTime().toDateMidnight
-		val thatDay = date.toDateMidnight
+	def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean) = {
+		val today = DateTime.now.toDateMidnight
+		val thatDay = new DateMidnight(date.getMillis, date.getChronology)
 
 		lazy val absoluteDate = (dayAndDateFormat print date) +
 			ordinal(date.getDayOfMonth) +
@@ -96,19 +97,16 @@ class DateBuilder extends TemplateMethodModelEx {
 
 	/** For Freemarker */
 	override def exec(list: java.util.List[_]) = {
-		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-		args match {
-			case Seq(date: LocalDate, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
-				format(date=date.toDateTimeAtStartOfDay(), 
-					includeSeconds=secs, 
-					includeAt=at, 
-					includeTimezone=tz, 
-					capitalise=caps, 
-					relative=relative,
-					split=split,
-					shortMonth=shortMonth,
-					includeTime=includeTime)
-			case Seq(date: DateTime, secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
+		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
+		
+		val date = args.head match {
+			case partial: LocalDate => partial.toDateTimeAtStartOfDay()
+			case instant: ReadableDateTime => instant
+			case _ => throw new IllegalArgumentException("Bad date argument")
+		}
+		
+		args.tail match {
+			case Seq(secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
 				format(date=date, 
 					includeSeconds=secs, 
 					includeAt=at, 

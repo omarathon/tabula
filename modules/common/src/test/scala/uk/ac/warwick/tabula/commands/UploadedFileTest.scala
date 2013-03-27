@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.AppContextTestBase
+import org.springframework.validation.BindException
 
 
 class UploadedFileTest extends AppContextTestBase with Mockito{
@@ -20,7 +21,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = ArrayList(multi1, multiEmpty)
-		uploadedFile.onBind
+		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
@@ -48,7 +49,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = ArrayList(multi1, multiSystemFile)
-		uploadedFile.onBind
+		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
@@ -60,7 +61,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = ArrayList(multi1, multiAppleDouble)
-		uploadedFile.onBind
+		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")

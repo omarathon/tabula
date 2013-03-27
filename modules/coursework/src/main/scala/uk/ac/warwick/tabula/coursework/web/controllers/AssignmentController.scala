@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
+import uk.ac.warwick.tabula.services.SubmissionService
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -27,7 +28,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotify
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
@@ -60,7 +61,7 @@ class AssignmentController extends CourseworkController {
 		} else {
 		    val feedback = getFeedback(assignment, user)
 
-			val submission = assignmentService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
+			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
 			val extension = assignment.extensions.find(_.userId == user.apparentId)
 			val isExtended = assignment.isWithinExtension(user.apparentId)

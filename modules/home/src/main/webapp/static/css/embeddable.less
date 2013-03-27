@@ -41,6 +41,33 @@ html.iframe {
   cursor: hand;
 }
 
+// details polyfill support
+details, summary { display: block; }
+
+// The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
+// However, we’re still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
+// Remember: by default (and probably most of the time), the contents of the <details> element are hidden.
+
+// Hide all direct descendants of every <details> element
+// Note that IE6 doesn’t support the child selector; we’ll work around that using jQuery later
+.no-details details > * { display: none; }
+
+// Make sure summary remains visible
+.no-details details summary { display: block; }
+
+// Apply a pointer cursor upon hover to indicate it’s a clickable element. These styles can be applied regardless of whether the fallback is needed
+summary { .cursor-pointer(); }
+
+// polyfill disclosure triangle
+.no-details details summary:before {
+	content: '\25ba\00a0';
+	font-size: 11px;
+	margin-right: 4px;
+}
+.no-details details.open summary:before {
+	content: '\25bc\00a0';
+}
+
 #container {
 	.collapse-trigger { .cursor-pointer(); }
 	
@@ -109,7 +136,9 @@ tr.error, tr.warning {
 	.module-manage-button { 
 		display: inline-block;
 		margin-left: 8px;
-		top: -8px;
+		top: 3px;
+		float:right;
+		i { .opacity-one(1); }
 	}
 
 	// fade out glypicons a bit, too dark
@@ -227,22 +256,31 @@ ul {
 	&.alt-row { background-color: #f5f5f5; }
 	
 	.column1 {
-		width: 24em;
+		width: 14.5em;
 		float:left;
+		margin-right: 1em;
 	}
 	.stats {
 		font-size: 0.85em;
-		width: 32em;
+		width: 44em;
 		float:left;
 	}
 	.assignment-buttons {
 		float: right;
-		text-align: right;
 		width: 11em;
+		
+		.btn-group {
+			float:right;
+		}
+		
+		// darken the icons a bit
+		i {
+			opacity:1
+		}
+				
 		a {
 			display: block;
-			margin: 1px 0;
-			text-align: right;
+			margin: 1px 0;	
 		}
 		
 		.btn-toolbar {
@@ -252,19 +290,21 @@ ul {
 	}
 	.feedback-published {
 		line-height: 1.4em;
+		font-size:13px;
 	}
 	span.label-like {
 		color: @subtle-text-color;
 	}
 	.submission-count, .feedback-count, .submission-and-feedback-count {
-	  padding-left: 20px;
-	  background: url(../images/filetypes/text-x-generic.png) 0 2px no-repeat;
+	  
 	}
-	.has-unreleased-feedback {
+	.has-unreleased-feedback, .has-unapproved-extensions {
 	  color: @warningText;
+	  display:block;
 	}
 	.no-unreleased-feedback {
 	  color: @subtle-text-color;
+	  display:block;
 	}
 	
 	&.archived {
@@ -272,6 +312,18 @@ ul {
 	}
 	
 }
+
+// fix for icons sitting a bit off the baseline
+#container {
+ .assignment-buttons, .module-manage-button {
+		i.icon-folder-close {
+			background-position: -384px -121px;
+		}
+	}
+	
+}
+
+
 
 // small assignment items as used on home page. Used to be same
 // as assignment-info on department page, but no more.
@@ -457,7 +509,7 @@ table {
 					background-image: url(/static/images/tablesorter/bg.gif);
 					background-repeat: no-repeat;
 					background-position: center right;
-					cursor: pointer;
+					.cursor-pointer();
 				}
 				
 				&.headerSortUp {
@@ -623,8 +675,7 @@ table {
   td.user-id {
     white-space: nowrap; 
   	width: 5%; 
-  	cursor: hand;
-  	cursor: pointer;
+  	.cursor-pointer();
   	font-weight: bold;
   	color: darkblue;
   }
@@ -638,12 +689,8 @@ table {
   display: block !important; 
 }
 
-// 1px out of alignment on all browsers for some reason.
-.user-code-picker { margin-top: -1px; }
-
 .clickable-cursor {
-	cursor:hand;
-	cursor:pointer;
+	.cursor-pointer();
 }
 
 *[rel=tooltip],
@@ -666,8 +713,7 @@ table {
     width: 36px;
     height: 155px;
     background: url(../images/app-feedback.png) no-repeat;
-    cursor: hand;
-    cursor: pointer;
+    .cursor-pointer();
     a { display: none; }
   }
 }
@@ -704,7 +750,7 @@ input.copyable-url {
   width: 100%;
   &, &[readonly] { cursor: pointer !important; }
   }
-span.copyable-url-container { position: relative; }
+span.copyable-url-container { display:block; position: relative; }
 span.press-ctrl-c {
   position:absolute;   
   top: 1.7em;
@@ -761,12 +807,6 @@ a.btn { text-decoration: none; }
 // Icons + ID6 require some adjustment
 [class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
 
-// Some fields not quite aligning with adjacent things like .add-on 
-input[type=text] {
-  position: relative;
-  top: 1px;
-}
-
 .originality-report {
   text-align: right;
   .hyphenate-words();
@@ -794,7 +834,7 @@ input[type=text] {
 .similarity-3 { .similarity-box(@btnWarningBackgroundHighlight); }
 .similarity-4 { .similarity-box(@btnDangerBackgroundHighlight); }
 
-.similarity-tooltip { cursor: pointer; }
+.similarity-tooltip { .cursor-pointer(); }
 
 .similarity-subcategories {
   margin-left: 0.5em;
@@ -872,9 +912,14 @@ h1.with-settings {
 	margin-right: 0px;
 }
 
-.dept-settings, .user-settings {
+.dept-settings, .user-settings, .dept-show {
 	display: inline-block;
-	margin: 0px 0px 16px 10px;
+	
+}
+
+.dept-toolbar {
+	display: inline-block;
+	float:right
 }
 
 #container .feedback-report {
@@ -888,6 +933,18 @@ h1.with-settings {
 	width: @modal-width;
 	margin-left: -(@modal-width/2);
 }
+
+// fix for disabled dropdown menu items icon flicker to white when hovering
+.tabula-page .dropdown-menu > li.disabled > a:hover > [class^="icon-"], #container .dropdown-menu > li.disabled > a:hover > [class^="icon-"] {
+	background-image: url("../libs/bootstrap/img/glyphicons-halflings.png");
+}
+
+// grey out disabled icons 
+.tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
+    opacity:.3;
+    filter: alpha(opacity=30);
+}
+
 
 // Fix popovers to be on top of modals
 .popover {
@@ -1014,7 +1071,30 @@ h1.with-settings {
 			div.photo {
 				.tabula-photo(50px, 5px);
 			}
-		}
+			
+			section.meetings {
+				margin: 12px 0;
+				
+				summary {
+					margin-top: 9px;
+					font-weight: bold;
+					border-bottom: dotted 1px lighten(@grayLight, 35%);
+				}
+			
+				.new, .toggle-all-details {
+					margin: -20px 0 0 10px;
+					float: right;
+					text-decoration: none;
+					.cursor-pointer();
+				}
+				
+				span.date {
+					margin-right: 1em;
+					display: inline-block;
+					width: 13em;
+				}
+			}
+}
 	} // .profile
 	
 	#container #tutors {
@@ -1127,6 +1207,12 @@ h1.with-settings {
 			.active > a, .active > a:hover {
 				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
 			}
+			
+			.pull-right a {
+				text-align: left;
+			}
+		
+			
 		}
 	} // .profile-search
 

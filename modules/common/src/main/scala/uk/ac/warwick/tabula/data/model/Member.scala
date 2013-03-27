@@ -154,6 +154,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+	def hasAPersonalTutor = false
 }
 
 @Entity
@@ -177,6 +178,17 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		if (studyDetails != null && studyDetails.enrolmentStatus != null)
 			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
 		statusString
+	}
+	
+	// Find out if the student has an SCE record for the current year (which will mean
+	// their study details will be filled in).
+	// Could just check that enrolment status is not null, but it's not impossible that 
+	// on SITS an enrolment status which doesn't exist in the status table has been
+	// entered, in which case we wouldn't be able to populate that field - so checking
+	// that route is also not null for good measure.
+	
+	def hasCurrentEnrolment: Boolean = {
+		studyDetails != null && studyDetails.enrolmentStatus != null && studyDetails.getRoute != null
 	}
 
 	override def description = {
@@ -206,7 +218,9 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			case None => "Not recorded"
 			case Some(name: String) => name
 			case Some(member: Member) => member
-		}
+	}
+	
+	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
 	
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {
@@ -273,8 +287,8 @@ trait MemberProperties {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	@BeanProperty var gender: Gender = _
 	
-	@OneToOne
-	@JoinColumn(name="PHOTO_ID")
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PHOTO_ID")
 	@BeanProperty var photo: FileAttachment = _
 	
 	@BeanProperty var inUseFlag: String = _
@@ -315,6 +329,4 @@ trait StaffProperties {
 	@BeanProperty var teachingStaff: JBoolean = _
 }
 
-trait AlumniProperties {
-	
-}
+trait AlumniProperties

@@ -22,13 +22,15 @@ import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.util.Assert
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.services.SubmissionService
 
 class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
 	
-	var service = Wire.auto[AssignmentService]
+	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
 	@BeanProperty var fields = buildEmptyFields
@@ -39,8 +41,8 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 	// just used as a hint to the view.
 	@transient @BeanProperty var plagiarismDeclaration: Boolean = false
 
-	override def onBind {
-		for ((key, field) <- fields) field.onBind
+	override def onBind(result:BindingResult) {
+		for ((key, field) <- fields) field.onBind(result)
 	}
 
 	/**

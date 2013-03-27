@@ -101,7 +101,7 @@
    <parameter name="maxLength"><![CDATA[50]]></parameter>
   </parameters>
  </check>
- <check level="warning" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
+ <check level="warning" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="false">
   <parameters>
    <parameter name="regex"><![CDATA[^[a-z][A-Za-z0-9]*$]]></parameter>
   </parameters>
@@ -131,7 +131,7 @@
   </parameters>
  </check>
  <check level="warning" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="false"></check>
- <check level="warning" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="true"></check>
+ <check level="warning" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="false"></check>
  <check level="warning" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="false">
   <parameters>
    <parameter name="allowed"><![CDATA[2]]></parameter>

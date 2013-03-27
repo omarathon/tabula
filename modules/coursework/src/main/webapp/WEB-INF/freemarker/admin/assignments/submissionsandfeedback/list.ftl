@@ -158,12 +158,12 @@
 		<ul class="dropdown-menu">
 			<#if department.plagiarismDetectionEnabled>
 				<li>
-					<a class="use-tooltip" title="Toggle whether the selected students' submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
+					<a class="use-tooltip" data-container="body" data-html="true" title="Toggle whether the selected students'<br>submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
 				</li>
 			</#if>
 			<#if features.markingWorkflows && mustReleaseForMarking>
 				<li>
-					<a class="use-tooltip form-post"
+					<a class="use-tooltip form-post" data-container="body" 
 					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
 					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
 					   id="release-submissions-button">
@@ -347,7 +347,8 @@
 						<#if enhancedSubmission.downloaded>
 							<span class="label label-success">Downloaded</span>
 						</#if>
-						<#if submission.state?? && submission.state.toString == "ReleasedForMarking">
+						<!-- ignore placeholder submissions -->
+						<#if submission.assignment?? && submission.releasedForMarking>
 							<span class="label label-success">Markable</span>
 						</#if>
 						<#if submission.suspectPlagiarised>

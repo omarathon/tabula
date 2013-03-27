@@ -14,34 +14,60 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
 
-	override def checkIfDuplicate(mark: MarkItem) {
+	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
 			case Some(feedback) => {
-				mark.warningMessage = markWarning
+				val markChanged = feedback.actualMark match {
+					case Some(m) if m.toString != mark.actualMark => true
+					case _ => false
+				}
+				val gradeChanged = feedback.actualGrade match {
+					case Some(g) if g != mark.actualGrade => true
+					case _ => false
+				}
+				if (markChanged || gradeChanged){
+					mark.isModified = true
+					mark.isPublished = feedback.released
+				}
 			}
 			case None => {}
 		}
 	}
 
 	override def applyInternal(): List[Feedback] = transactional() {
-		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
-			val feedback = assignment.findFeedback(universityId).getOrElse(new Feedback)
-			feedback.assignment = assignment
-			feedback.uploaderId = submitter.apparentId
-			feedback.universityId = universityId
-			feedback.released = false
+		def saveFeedback(universityId: String, actualMark: String, actualGrade: String, isModified: Boolean) = {
+			val feedback = assignment.findFeedback(universityId).getOrElse({
+				val newFeedback = new Feedback
+				newFeedback.assignment = assignment
+				newFeedback.uploaderId = submitter.apparentId
+				newFeedback.universityId = universityId
+				newFeedback.released = false
+				newFeedback
+			})
 			feedback.actualMark = StringUtils.hasText(actualMark) match {
 				case true => Some(actualMark.toInt)
 				case false => None
 			}
 			feedback.actualGrade = Option(actualGrade)
 			session.saveOrUpdate(feedback)
+
+			if (feedback.released && isModified){
+				transactional() {
+					val student = userLookup.getUserByWarwickUniId(feedback.universityId)
+					val notifyMarkChanged = new FeedbackChangeNotifyCommand(module, assignment, student)
+					notifyMarkChanged.apply()
+				}
+			}
+
 			feedback
 		}
 
 		// persist valid marks
-		val markList = marks filter (_.isValid) map { (mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade) }
+		val markList = marks filter (_.isValid) map {
+			(mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade, mark.isModified)
+		}
+
 		markList.toList
 	}
 

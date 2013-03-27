@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.services.SubmissionService
 
 /**
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
@@ -27,9 +29,10 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	PermissionCheck(Permissions.Feedback.Delete, assignment)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
+	var feedbackService = Wire.auto[FeedbackService]
+	
 	var zipService = Wire.auto[ZipService]
-	var feedbackDao = Wire.auto[FeedbackDao]
 	var userLookup = Wire.auto[UserLookupService]
 	
     @BeanProperty var students: JList[String] = ArrayList()
@@ -48,16 +51,16 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
 	def applyInternal() = {			
 		if (shouldDeleteSubmissions) {
-			for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
-				assignmentService.delete(mandatory(submission))
+			for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) {
+				submissionService.delete(mandatory(submission))
 				submissionsDeleted = submissionsDeleted + 1
 			}
 			zipService.invalidateSubmissionZip(assignment)
 		}
 
 		if (shouldDeleteFeedback) {
-			for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
-				feedbackDao.delete(mandatory(feedback))
+			for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) {
+				feedbackService.delete(mandatory(feedback))
 				feedbacksDeleted = feedbacksDeleted + 1
 			}
 			zipService.invalidateFeedbackZip(assignment)
@@ -65,11 +68,11 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	}
 
 	def prevalidate(errors: Errors) {
-		for (uniId <- students; submission <- assignmentService.getSubmissionByUniId(assignment, uniId)) {
+		for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) {
 			if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
 		}
 
-		for (uniId <- students; feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId)) {
+		for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) {
 			if (mandatory(feedback).assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
 		}
 		

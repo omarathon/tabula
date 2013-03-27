@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import uk.ac.warwick.tabula.helpers.Logging
 import org.hibernate.id.GUIDGenerator
 import java.util.UUID
+import java.util.zip.Deflater
 
 /**
  * An item in a Zip file. Can be a file or a folder.
@@ -69,19 +70,23 @@ trait ZipCreator extends Logging {
 		writeToFile(file, items)
 		file
 	}
+	
+	private val CompressionLevel = Deflater.BEST_COMPRESSION
 
 	private def writeToFile(file: File, items: Seq[ZipItem]) = {
 		file.getParentFile.mkdirs
 		openZipStream(file) { (zip) =>
-			zip.setLevel(9)
+			zip.setLevel(CompressionLevel)
 			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
 			zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
 			writeItems(items, zip)
 		}
 	}
+	
+	private val UnusedFilenameAttempts = 100
 
 	/** Try 100 times to get an unused filename */
-	private def unusedFile = Stream.range(1, 100)
+	private def unusedFile = Stream.range(1, UnusedFilenameAttempts)
 		.map(_ => fileForName(randomUUID))
 		.find(!_.exists)
 		.getOrElse(throw new IllegalStateException("Couldn't find unique filename"))
@@ -131,12 +136,14 @@ trait ZipCreator extends Logging {
 			if (zip != null) zip.close
 		}
 	}
+	
+	private val BufferSizeInBytes = 4096 // 4kb
 
 	// copies from is to os, but doesn't close os
 	private def copy(is: InputStream, os: OutputStream) {
 		try {
 			// not sure how to create a byte[] directly, this seems reasonable.
-			val buffer = ByteBuffer.allocate(4096).array
+			val buffer = ByteBuffer.allocate(BufferSizeInBytes).array
 			// "continually" creates an endless iterator, "takeWhile" gives it an end
 			val iterator = Iterator.continually { is.read(buffer) }.takeWhile { _ != -1 }
 			for (read <- iterator) {

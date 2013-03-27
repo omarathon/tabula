@@ -10,6 +10,7 @@ import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.validation.Errors
 
 
 class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
@@ -82,6 +83,28 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 			val markerFeedbacks = saveMarkerFeedback(uniNumber, file)
 			List(markerFeedbacks)
 		}
+	}
+	
+	override def validateExisting(item: FeedbackItem, errors: Errors) {
+		def toMarkerFeedback(feedback: Feedback) = 
+			if (firstMarker) Option(feedback.firstMarkerFeedback)
+			else Option(feedback.secondMarkerFeedback)
+		
+		// warn if feedback for this student is already uploaded
+		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber } flatMap { toMarkerFeedback(_) } match {
+			case Some(markerFeedback) if markerFeedback.hasFeedback => {
+				// set warning flag for existing feedback and check if any existing files will be overwritten
+				item.submissionExists = true
+				checkForDuplicateFiles(item, markerFeedback)
+			}
+			case _ => {}
+		}
+	}
+
+	private def checkForDuplicateFiles(item: FeedbackItem, feedback: MarkerFeedback){
+		val attachedFiles = item.file.attachedFileNames.toSet
+		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
+		item.duplicateFileNames = attachedFiles & feedbackFiles
 	}
 
 	def describe(d: Description){

@@ -1,23 +1,25 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ PathVariable, RequestMapping }
-import uk.ac.warwick.tabula.data.model.{ Module, Assignment }
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.services.AssignmentService
-import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
+import scala.reflect.BeanProperty
+import org.apache.poi.ss.usermodel.{IndexedColors, ComparisonOperator}
 import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.web.views.ExcelView
+import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.spring.Wire
-import org.springframework.web.bind.annotation.ModelAttribute
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.services.FeedbackService
 
 class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	import MarksTemplateCommand._
@@ -26,7 +28,8 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
 	@BeanProperty var members:Seq[String] =_
-	var assignmentService = Wire.auto[AssignmentService]
+	var feedbackService = Wire.auto[FeedbackService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	def applyInternal() = {
 
@@ -39,7 +42,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 			row.createCell(0).setCellValue(member)
 			val marksCell = row.createCell(1)
 			val gradesCell = row.createCell(2)
-			val feedbacks = assignmentService.getStudentFeedback(assignment, member)
+			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
 			feedbacks.foreach { feedback =>
 			  feedback.actualMark.foreach(marksCell.setCellValue(_))
 			  feedback.actualGrade.foreach(gradesCell.setCellValue(_))
@@ -83,14 +86,14 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 class MarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand) = {
-		cmd.members = assignmentService.determineMembershipUsers(cmd.assignment).map(_.getWarwickId)
+		cmd.members = assignmentMembershipService.determineMembershipUsers(cmd.assignment).map(_.getWarwickId)
 		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
 	}
 }

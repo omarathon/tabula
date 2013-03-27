@@ -64,6 +64,7 @@
 				<entry key="uk.ac.warwick.tabula.PermissionDeniedException" value="errors/permissionDenied" />
 				<entry key="uk.ac.warwick.tabula.ItemNotFoundException" value="errors/404" />
 				<entry key="uk.ac.warwick.tabula.services.MaintenanceModeEnabledException" value="errors/maintenance" />
+				<entry key="uk.ac.warwick.tabula.system.exceptions.FileUploadException" value="errors/fileUpload" />
 			</map>
 		</property>
 	</bean> 
@@ -125,6 +126,7 @@
 	    </property>
 	    <property name="formatters">
 	    	<list>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
@@ -340,6 +342,7 @@
 	
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
+	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />

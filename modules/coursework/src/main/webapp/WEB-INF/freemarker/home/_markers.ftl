@@ -21,7 +21,7 @@
 		<div class="alert alert-success deadline">
 			Assignment closed: <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
 			<div class="marker-btn btn-group">
-				<a class="btn btn-mini ${class}" href="${href}" data-title="${title}" >Manage <i class="icon-cog"></i></a>
+				<a class="btn btn-mini ${class}" href="${href}" data-title="${title}" data-container="body">Manage <i class="icon-cog"></i></a>
 			</div>
 		</div>
 	<#else>

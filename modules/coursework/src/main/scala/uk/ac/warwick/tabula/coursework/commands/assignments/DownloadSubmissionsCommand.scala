@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.SubmissionService
 
 
 /**
@@ -22,7 +23,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 	
 	var zipService = Wire.auto[ZipService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	@BeanProperty var filename: String = _
 	@BeanProperty var submissions: JList[Submission] = ArrayList()
@@ -34,7 +35,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 		else if (!students.isEmpty && submissions.isEmpty) {
 			submissions = for (
 				uniId <- students;
-				submission <- assignmentService.getSubmissionByUniId(assignment, uniId)
+				submission <- submissionService.getSubmissionByUniId(assignment, uniId)
 			) yield submission
 		}
 		
@@ -51,7 +52,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	override def describe(d: Description) {
 
 		val downloads: Seq[Submission] = {
-			if (!students.isEmpty) students.flatMap(assignmentService.getSubmissionByUniId(assignment, _))
+			if (!students.isEmpty) students.flatMap(submissionService.getSubmissionByUniId(assignment, _))
 			else submissions
 		}
 

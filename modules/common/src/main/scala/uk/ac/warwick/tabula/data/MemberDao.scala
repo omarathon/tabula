@@ -32,9 +32,12 @@ trait MemberDao {
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
+	def countStudentsByDepartment(department: Department): Number
+	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number
 }
 
 @Repository
@@ -46,7 +49,9 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
 	
 	def getByUniversityId(universityId: String) = 
-		session.newCriteria[Member].add(is("universityId", universityId.trim)).uniqueResult
+		session.newCriteria[Member]
+			.add(is("universityId", universityId.trim))
+			.uniqueResult
 	
 	def getBySprCode(sprCode: String) = 
 		session.newCriteria[StudentMember]
@@ -115,6 +120,25 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.seq
 	}	
 	
+	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				Member m
+			where
+				sr.targetSprCode = m.studyDetails.sprCode
+			and
+				sr.relationshipType = :relationshipType
+			and
+				m = :student
+		""")
+			.setEntity("student", student)
+			.setParameter("relationshipType", relationshipType)
+			.seq
+	}	
+	
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
@@ -164,4 +188,37 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)
 			.seq
+
+	def countStudentsByDepartment(department: Department): Number =
+		if (department == null) 0
+		else session.newQuery[Number]("""
+			select
+				count(*)
+			from
+				StudentMember sm
+			where
+				sm.homeDepartment = :department
+			and
+				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
+		""")
+			.setEntity("department", department)
+			.uniqueResult.getOrElse(0)
+
+	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number =
+		if (relationshipType == null) 0
+		else session.newQuery[Number]("""
+			select
+				count(*)
+			from
+				StudentMember sm
+			where
+				sm.homeDepartment = :department
+			and
+				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			and
+				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
+		""")
+			.setEntity("department", department)
+			.setParameter("relationshipType", relationshipType)
+			.uniqueResult.getOrElse(0)
 }

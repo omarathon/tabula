@@ -87,7 +87,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 		val unpublished = for ( 
 				module <- modules;
 				assignment <- module.assignments
-				if assignment.isAlive && assignment.anyUnreleasedFeedback
+				if assignment.isAlive && assignment.hasUnreleasedFeedback
 			) yield assignment
 			
 		Map(

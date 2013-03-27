@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.CurrentUser
 import org.codehaus.jackson.map.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -21,7 +20,6 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
-import uk.ac.warwick.userlookup.User
 
 abstract class ExtensionController extends CourseworkController {
 	@Autowired var json:ObjectMapper =_
@@ -204,7 +202,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 	
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, result:BindingResult,
+	def persistExtensionRequest(@Valid @ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, result:BindingResult,
 						 response:HttpServletResponse, errors: Errors):Mav = {
 		if (errors.hasErrors) {
 			val errorList = errors.getFieldErrors
@@ -220,7 +218,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId)
 			
 			val extensionMap = toJson(extensions)
-			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
+			val extensionsJson = Map("status" -> "success", "action" -> "edit", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))
 		}
 	}

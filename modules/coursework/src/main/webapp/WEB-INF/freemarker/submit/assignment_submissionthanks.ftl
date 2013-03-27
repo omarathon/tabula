@@ -34,7 +34,7 @@
 		</div>
 	</form> 
 	
-	<#if assignment.anyReleasedFeedback && !feedback??>
+	<#if assignment.hasReleasedFeedback && !feedback??>
 		<h3>Expecting your feedback?</h3>
 		<p>
 			There is no feedback available for you yet. 

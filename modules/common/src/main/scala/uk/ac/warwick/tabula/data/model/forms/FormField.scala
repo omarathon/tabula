@@ -120,18 +120,10 @@ trait SimpleValue[A] { self: FormField =>
 
 @Entity
 @DiscriminatorValue("comment")
-class CommentField extends FormField with SimpleValue[String] {
+class CommentField extends FormField with SimpleValue[String] with FormattedHtml {
 	override def isReadOnly = true
 
-	/**
-	 * Return a formatted version of the text that can be inserted
-	 * WITHOUT escaping.
-	 */
-	def formattedHtml: String = Option(value) map { raw =>
-		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
-		val nodes = Splitter.split(raw).map { p => <p>{ p }</p> }
-		(NodeSeq fromSeq nodes).toString
-	} getOrElse ("")
+	def formattedHtml: String = formattedHtml(Option(value))
 
 	override def validate(value: SubmissionValue, errors: Errors) {}
 }

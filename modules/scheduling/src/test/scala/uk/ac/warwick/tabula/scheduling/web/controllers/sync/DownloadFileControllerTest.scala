@@ -30,6 +30,7 @@ class DownloadFileControllerTest extends TestBase with MockitoSugar {
 		val attachment = mock[FileAttachment]
 		
 		when(fileDao.getFileById("abc")) thenReturn(Some(attachment))
+		when(attachment.hasData) thenReturn(true)
 		when(attachment.length) thenReturn(None)
 		when(attachment.dataStream) thenReturn(new ByteArrayInputStream("yes".getBytes))
 		

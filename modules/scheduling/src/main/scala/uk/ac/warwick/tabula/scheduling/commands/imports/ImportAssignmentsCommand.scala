@@ -20,7 +20,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var assignmentImporter = Wire.auto[AssignmentImporter]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	def applyInternal() {
 		benchmark("ImportAssignments") {
@@ -38,7 +38,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 					// Some SITS data is bad, but try to carry on.
 					assignment.name = "Assignment"
 				}
-				assignmentService.save(assignment)
+				assignmentMembershipService.save(assignment)
 			}
 		}
 	}
@@ -92,7 +92,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			val assessmentGroup = head.toUpstreamAssignmentGroup
 			// Convert ModuleRegistrations to simple uni ID strings.
 			val members = group map (mr => SprCode.getUniversityId(mr.sprCode))
-			assignmentService.replaceMembers(assessmentGroup, members)
+			assignmentMembershipService.replaceMembers(assessmentGroup, members)
 		}
 	}
 
@@ -101,7 +101,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		logger.debug("Importing " + groups.size + " assessment groups")
 		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {
-				assignmentService.save(group)
+				assignmentMembershipService.save(group)
 			}
 		}
 	}

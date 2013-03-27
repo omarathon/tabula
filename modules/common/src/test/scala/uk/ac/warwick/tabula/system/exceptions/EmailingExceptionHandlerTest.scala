@@ -36,6 +36,8 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 		RequestInfo.use(info) {
 			val handler = new EmailingExceptionHandler
 			handler.freemarker = newFreemarkerConfiguration
+			handler.production = true
+			handler.standby = true
 			
 			val mailSender = mock[WarwickMailSender]
 	   
@@ -56,6 +58,7 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 			}
 			
+			text should include ("env=PROD (standby)")
 			text should include ("time=")
 			text should include ("info.requestedUri="+uri)
 			text should include ("request.requestURI="+uri)

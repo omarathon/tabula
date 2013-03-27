@@ -20,7 +20,6 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
@@ -35,12 +34,15 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.StudentMember
+import org.springframework.validation.BindingResult
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
 
-	var userLookup = Wire.auto[UserLookupService]
+	val acceptedExtensions = Seq(".xlsx")
+	
+	val userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
 	var personalTutorExtractor = Wire.auto[RawStudentRelationshipExtractor]
 	
@@ -51,7 +53,6 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
-	//def postExtractValidation(errors: Errors, department: Department) = {
 	def validate(errors: Errors) = {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
@@ -189,16 +190,26 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 		}
 	}
 
-	def onBind {
-		transactional() {
-			file.onBind
-			if (!file.attached.isEmpty()) {
-				processFiles(file.attached)
-			}
+	def onBind(result:BindingResult) {
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !acceptedExtensions.exists(s.endsWith))
 
-			def processFiles(files: Seq[FileAttachment]) {
-				for (file <- files.filter(_.hasData)) {
-					rawStudentRelationships addAll personalTutorExtractor.readXSSFExcelFile(file.dataStream)
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+
+		if (!result.hasErrors) {
+			transactional() {
+				file.onBind(result)
+				if (!file.attached.isEmpty()) {
+					processFiles(file.attached)
+				}
+	
+				def processFiles(files: Seq[FileAttachment]) {
+					for (file <- files.filter(_.hasData)) {
+						rawStudentRelationships addAll personalTutorExtractor.readXSSFExcelFile(file.dataStream)
+					}
 				}
 			}
 		}

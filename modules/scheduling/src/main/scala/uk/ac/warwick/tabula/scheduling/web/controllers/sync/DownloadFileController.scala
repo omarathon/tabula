@@ -34,7 +34,7 @@ class DownloadFileController extends BaseController with Logging {
 		} else {
 			val file = fileDao.getFileById(id)
 			file match {
-				case Some(a) => fileServer.serve(new RenderableAttachment(a))
+				case Some(a) if a.hasData => fileServer.serve(new RenderableAttachment(a))
 				case _ => throw new ItemNotFoundException()
 			}
 		}

@@ -162,7 +162,10 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 			if (dontDelete.size > 0) {
 				// Somewhere else in the app is failing to set temporary=false
-				logger.error("%d fileAttachments are temporary but are attached to another entity! I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size)
+				logger.error(
+					"%d fileAttachments are temporary but are attached to another entity! " +
+					"I won't delete them, but this is a bug that needs fixing!!" format dontDelete.size
+				)
 			}
 
 			session.newQuery[FileAttachment]("delete FileAttachment f where f.id in :ids")

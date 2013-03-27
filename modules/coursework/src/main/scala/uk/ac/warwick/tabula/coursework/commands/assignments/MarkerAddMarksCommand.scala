@@ -14,14 +14,14 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
 
-	override def checkIfDuplicate(mark: MarkItem) {
+	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) => {
 				if (assignment.isFirstMarker(submitter.apparentUser) && feedback.firstMarkerFeedback != null && (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade))
-					mark.warningMessage = markWarning
+					mark.isModified = true
 				else if (assignment.isSecondMarker(submitter.apparentUser) && feedback.secondMarkerFeedback != null && (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade))
-					mark.warningMessage = markWarning
+					mark.isModified = true
 			}
 			case None =>
 		}

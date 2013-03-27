@@ -22,9 +22,9 @@
 
 <#macro paginator>
 <#if page gt 0>
-<a href="?page=${page-1}">Newer</a>
+<a href="?page=${page-1}&query=${auditLogQuery.query?url}">Newer</a>
 </#if>
-<a href="?page=${page+1}">Older</a>
+<a href="?page=${page+1}&query=${auditLogQuery.query?url}">Older</a>
 </#macro>
 
 <p>Results ${startIndex} - ${endIndex} <@paginator /></p>

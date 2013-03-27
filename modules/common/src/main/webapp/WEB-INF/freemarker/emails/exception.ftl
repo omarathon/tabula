@@ -1,3 +1,4 @@
+env=${environment}<#if standby> (standby)</#if>
 time=${time.toDate()?string.long}
 <#compress>
 <#if requestInfo??>

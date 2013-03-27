@@ -24,25 +24,32 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
-import scala.Some
-import uk.ac.warwick.tabula.system.{BindWithResultsListener, BindListener}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 
 class FeedbackItem {
 	@BeanProperty var uniNumber: String = _
 	@BeanProperty var file: UploadedFile = new UploadedFile
 
-	@BeanProperty var submissionExists: Boolean = false
+	@BeanProperty var submissionExists = false
+	@BeanProperty var isPublished = false
+	// true when at least one non-ignored file is uploaded
+	@BeanProperty var isModified = true
 	@BeanProperty var duplicateFileNames: Set[String] = Set()
+	@BeanProperty var ignoredFileNames: Set[String] = Set()
 
-	def listAttachments() = file.attached.map(f => new AttachmentItem(f.name, duplicateFileNames.contains(f.name)))
+	def listAttachments() = file.attached.map(f => {
+		val duplicate = duplicateFileNames.contains(f.name)
+		val ignore = ignoredFileNames.contains(f.name)
+		new AttachmentItem(f.name, duplicate, ignore)
+	})
 
 	def this(uniNumber: String) = {
 		this()
 		this.uniNumber = uniNumber
 	}
 
-	class AttachmentItem(val name: String, val duplicate: Boolean){}
+	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean){}
 }
 
 // Purely for storing in command to display on the model.
@@ -69,7 +76,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * remove all the code in here that handles it, to simplify it a little.
  */
 abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser)
-	extends Command[A] with Daoisms with Logging with BindWithResultsListener {
+	extends Command[A] with Daoisms with Logging with BindListener {
 	
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
@@ -105,7 +112,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	def preExtractValidation(errors: Errors) {
 		if (batch) {
 			if (archive != null && !archive.isEmpty()) {
-				logger.info("file name is " + archive.getOriginalFilename())
+				logger.debug("file name is " + archive.getOriginalFilename())
 				if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 					errors.rejectValue("archive", "archive.notazip")
 				}
@@ -134,11 +141,15 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
 		val file = item.file
 		val uniNumber = item.uniNumber
-
+		
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		for(f <- file.attached){
+		for((f, i) <- file.attached.zipWithIndex){
+			if (f.actualDataLength == 0) {
+				errors.rejectValue("file.attached[" + i + "]", "file.empty")
+			}
+			
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
-				errors.rejectValue("file", "file.url")
+				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
 		if (uniNumber.hasText) {
@@ -149,31 +160,19 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					case FoundUser(u) =>
 					case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
 				}
-
-				// warn if feedback for this student is already uploaded
-				assignment.feedbacks.find { feedback => feedback.universityId == uniNumber && feedback.hasAttachments } match {
-					case Some(feedback) => {
-						// set warning flag for existing feedback and check if any existing files will be overwritten
-						item.submissionExists = true
-						checkForDuplicateFiles(item, feedback)
-					}
-					case None => {}
-				}
+				
+				validateExisting(item, errors)
 
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
 		}
 	}
-
-	private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback){
-		val attachedFiles = item.file.attachedFileNames.toSet
-		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
-		item.duplicateFileNames = attachedFiles & feedbackFiles
-	}
+	
+	def validateExisting(item: FeedbackItem, errors: Errors)
 
 	override def onBind(result:BindingResult) = transactional() {
-		file.onBind
+		file.onBind(result)
 
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
@@ -251,13 +250,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 			if (items != null) {
 				for (item <- items if item.file != null) {
-					try{
-						item.file.onBind
-					} catch {
-						case e:IllegalStateException => {
-							result.reject("binding.reSubmission")
-						}
-					}
+					item.file.onBind(result)
 				}
 			}
 		}

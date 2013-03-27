@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 
 case class UpstreamGroupOption(
@@ -34,6 +35,7 @@ case class UpstreamGroupOption(
 abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment] with SharedAssignmentProperties {
 
 	var service = Wire.auto[AssignmentService]
+	var membershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 
 	def assignment: Assignment
@@ -193,16 +195,14 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 	def persistAssessmentGroupChanges() {
 			val removedGroups = assignment.assessmentGroups.filterNot(assessmentGroups.contains(_))
-			for (group <- removedGroups){
-				service.delete(group)
-			}
+			removedGroups.foreach(membershipService.delete(_))
 
 			val newGroups = assessmentGroupItems.map{item =>
 				val assessmentGroup = new AssessmentGroup
 				assessmentGroup.occurrence =  item.occurrence
 				assessmentGroup.upstreamAssignment =  item.upstreamAssignment
 				assessmentGroup.assignment = assignment
-				service.save(assessmentGroup)
+				membershipService.save(assessmentGroup)
 				assessmentGroup
 			}
 
@@ -254,9 +254,9 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 * occurrence ID, plus some info like the number of members there.
 	 */
 	def upstreamGroupOptions: Seq[UpstreamGroupOption] = {
-		val assignments = service.getUpstreamAssignments(module)
+		val assignments = membershipService.getUpstreamAssignments(module)
 		assignments flatMap { assignment =>
-			val groups = service.getAssessmentGroups(assignment, academicYear)
+			val groups = membershipService.getAssessmentGroups(assignment, academicYear)
 			groups map { group =>
 				UpstreamGroupOption(
 					assignmentId = assignment.id,
@@ -275,7 +275,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 * Returns a sequence of MembershipItems
 	 */
 	def membershipDetails =
-		service.determineMembership(upstreamAssessmentGroups, Option(members))
+		membershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
 		if(academicYear == null || assessmentGroups == null){
@@ -289,7 +289,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
-				service.getAssessmentGroup(template)
+				membershipService.getAssessmentGroup(template)
 			}
 			groups
 		}

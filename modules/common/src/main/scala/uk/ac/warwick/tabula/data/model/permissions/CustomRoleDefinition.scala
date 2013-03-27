@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
 
 	// The department which owns this definition - probably want to expand this to include sub-departments later
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	@BeanProperty var department: Department = _
 	

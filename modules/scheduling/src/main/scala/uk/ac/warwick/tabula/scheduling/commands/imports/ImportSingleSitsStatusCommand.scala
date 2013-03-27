@@ -50,7 +50,7 @@ class ImportSingleSitsStatusCommand(resultSet: ResultSet) extends Command[SitsSt
 		val commandBean = new BeanWrapperImpl(this)
 		val sitsStatusBean = new BeanWrapperImpl(sitsStatus)
 		
-		val hasChanged = copyBasicProperties(properties, commandBean, sitsStatusBean, logger)
+		val hasChanged = copyBasicProperties(properties, commandBean, sitsStatusBean)
 			
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + sitsStatus)

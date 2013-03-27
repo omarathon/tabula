@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.validation.BindingResult
 
 class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	
@@ -69,7 +70,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	
 	class BindTestCommand() extends TestCommand with Public with BindListener {
 		var bound = false
-		override def onBind {
+		override def onBind(result: BindingResult) {
 			bound = true
 		}
 	}

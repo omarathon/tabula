@@ -18,7 +18,8 @@ case object UniversityMemberRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.Usercode,
 		Profiles.PersonalTutor.Read,
 		Profiles.Read.PersonalTutees,
-		Profiles.Read.StudyDetails
+		Profiles.Read.StudyDetails,
+		Profiles.MeetingRecord.Read
 	)
 	
 	GrantsScopelessPermission(

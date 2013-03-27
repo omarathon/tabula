@@ -1,26 +1,29 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
+import scala.reflect.BeanProperty
+
+import org.joda.time.DateTime
+
+import uk.ac.warwick.spring.Wire
 
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model._
-import forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import scala.reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService, AuditEventIndexService}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.{UserLookupService, AuditEventIndexService}
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var auditIndexService = Wire.auto[AuditEventIndexService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 
 	@BeanProperty var students:Seq[Item] = _
@@ -30,7 +33,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	@BeanProperty var awaitingSubmissionExtensionExpired:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmissionExtensionRejected:Seq[(User, Extension)] = _
 	@BeanProperty var awaitingSubmissionNoExtension:Seq[User] = _
-	@BeanProperty var whoDownloaded: Seq[User] = _
+	@BeanProperty var whoDownloaded: Seq[(User, DateTime)] = _
 	@BeanProperty var stillToDownload: Seq[Item] =_
 	@BeanProperty var hasPublishedFeedback: Boolean =_
 	@BeanProperty var hasOriginalityReport: Boolean =_
@@ -43,7 +46,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
 		hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
-		val moduleMembers = assignmentService.determineMembershipUsers(assignment)
+		val moduleMembers = assignmentMembershipService.determineMembershipUsers(assignment)
 		val unSubmitted =  moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
 		val withExtension = unSubmitted.map(member => (member, assignment.findExtension(member.getWarwickId)))
 		
@@ -81,8 +84,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 		mustReleaseForMarking = assignment.markingWorkflow != null
 		
-		whoDownloaded = auditIndexService.whoDownloadedFeedback(assignment).map(userLookup.getUserByUserId(_))
-
+		whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
+		
 		students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
 			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
@@ -107,7 +110,10 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			}
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption match {
-				case Some(feedback) => new FeedbackListItem(feedback, whoDownloaded exists { _.getWarwickId == feedback.universityId })
+				case Some(feedback) => {
+					new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+							x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+				}
 				case _ => null
 			}
 
