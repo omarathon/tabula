@@ -12,9 +12,9 @@
 	<#else>
 		<p>You can re-submit your work in case you've made a mistake,
 			<#if isExtended>
-				up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
+				up until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
 			<#else>
-				up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
+				up until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
 		    </#if>
 		</p>
 		</#if>
@@ -114,7 +114,7 @@
 			This assignment doesn't allow late submissions.
 		</div>
 	<#elseif !assignment.opened>
-		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true timezone=true />.</p>
+		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true />.</p>
 	<#else>
 		<p>
 			

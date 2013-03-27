@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import java.io.Writer
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.beans.factory.annotation.Autowired

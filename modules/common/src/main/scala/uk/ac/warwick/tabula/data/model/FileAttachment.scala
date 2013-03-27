@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 import java.io._
 import com.google.common.io.Files
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
@@ -102,7 +102,7 @@ class FileAttachment extends GeneratedId {
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream: InputStream = Option(file) map { new FileInputStream(_) } orNull
+	def dataStream: InputStream = (Option(file) map { new FileInputStream(_) }).orNull
 
 	def hasData = file != null
 

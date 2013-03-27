@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web
 
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http
+import language.implicitConversions
 
 /**
  * A Scala-ish wrapper for servlet Cookie.
@@ -35,7 +36,7 @@ class Cookies(val _cookies: Array[http.Cookie]) {
 		case Some(cookie) => try {
 			cookie.value.toBoolean
 		} catch {
-			case e: NumberFormatException => default
+			case _ @ (_: NumberFormatException | _: IllegalArgumentException) => default
 		}
 		case None => default
 	}

@@ -14,6 +14,7 @@ import scala.util.matching.Regex
 import freemarker.ext.beans.BeanModel
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
+import scala.reflect.runtime.universe._
 
 /**
  * A implemenation of BeansWrapper that support native Scala basic and collection types
@@ -25,7 +26,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		super.wrap(obj)
 	}
 
-	override def wrap(obj: Object): TemplateModel = {
+	override def wrap(obj: Object): TemplateModel = {	
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
@@ -35,14 +36,20 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case jmap: java.util.Map[_, _] => superWrap(jmap)
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
-			case scol: scala.Collection[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
+			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
 			case directive: TemplateDirectiveModel => superWrap(directive)
 			case method: TemplateMethodModel => superWrap(method)
 			case model: TemplateModel => superWrap(model)
-			case sobj: ScalaObject => new ScalaHashModel(sobj, this)
+			case sobj if isScalaCompiled(sobj) => new ScalaHashModel(obj, this)
 			case _ => superWrap(obj)
 		}
 	}
+	
+	private def isScalaCompiled(obj: Any) = Option(obj) match {
+		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
+		case _ => false
+	}
+
 }
 
 /**
@@ -52,10 +59,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 
 /**
  * Also understands regular JavaBean getters, useful when a Java bean has been extended
- * in Scala to implement ScalaObject. If both getter type is present, one will overwrite
+ * in Scala to implement Any. If both getter type is present, one will overwrite
  * the other in the map but this doesn't really matter as they do the same thing
  */
-class ScalaHashModel(sobj: ScalaObject, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
+class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
 	type Getter = () => AnyRef
 
 	val gettersCache = new mutable.HashMap[Class[_], mutable.HashMap[String, Getter]]
@@ -90,16 +97,19 @@ class ScalaHashModel(sobj: ScalaObject, wrapper: ScalaBeansWrapper) extends Bean
 		val x = key
 		getters.get(key) match {
 			case Some(getter) => wrapper.wrap(getter())
-			case None => checkInnerClasses(key)
+			case None => checkInnerClasses(key) match {
+				case Some(method) => method
+				case None => super.get(key)
+			}
 		}
 	}
 
-	def checkInnerClasses(key: String): TemplateModel = {
+	def checkInnerClasses(key: String): Option[TemplateModel] = {
 		try {
-			wrapper.wrap(Class.forName(sobj.getClass.getName + key + "$").getField("MODULE$").get(null))
+			Some(wrapper.wrap(Class.forName(sobj.getClass.getName + key + "$").getField("MODULE$").get(null)))
 		} catch {
 			case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
-				throw new TemplateModelException(key + " not found in object " + sobj)
+				None
 		}
 	}
 

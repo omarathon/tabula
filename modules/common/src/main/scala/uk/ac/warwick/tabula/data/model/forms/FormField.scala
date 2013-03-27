@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
 import scala.annotation.target.field
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import collection.JavaConversions._
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -27,6 +27,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
+import scala.reflect.ClassTag
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -83,9 +84,9 @@ abstract class FormField extends GeneratedId {
 	 * has decided on, so integers come out as java.lang.Integer, and Int
 	 * won't match.
 	 */
-	protected def getProperty[A](name: String, default: A)(implicit m: Manifest[A]) =
+	protected def getProperty[A](name: String, default: A)(implicit tag: ClassTag[A]) =
 		propertiesMap.get(name) match {
-			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[A]
+			case Some(obj) if tag.runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
 			case _ => default
 		}
 

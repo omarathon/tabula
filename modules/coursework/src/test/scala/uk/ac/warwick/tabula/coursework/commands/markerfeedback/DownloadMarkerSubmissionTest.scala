@@ -1,25 +1,30 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
+import uk.ac.warwick.tabula.AppContextTestBase
 import java.util.zip.ZipInputStream
 import java.io.{ByteArrayInputStream, FileInputStream}
 import uk.ac.warwick.tabula.services.Zips
 import uk.ac.warwick.tabula.data.model.{SavedSubmissionValue, FileAttachment}
-import org.mockito.Mockito._
 import org.junit.Before
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 import org.apache.velocity.tools.config.SkipSetters
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.FileCopyUtils
+import java.io.FileOutputStream
 
 
-class DownloadMarkerSubmissionTest extends AppContextTestBase with Mockito with MarkingWorkflowWorld {
+class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 	@Before
 	def setup {
-		val attachment = mock[FileAttachment]
-		when(attachment.length) thenReturn(None)
-		when(attachment.dataStream) thenReturn(new ByteArrayInputStream("yes".getBytes))
+		val attachment = new FileAttachment
+		
+		val file = createTemporaryFile
+		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
+		
+		attachment.file = file
+		
 		assignment.submissions.foreach{submission =>
 			submission.values.add({
 				val sv = new SavedSubmissionValue()

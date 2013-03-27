@@ -24,6 +24,7 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.jobs._
 import java.util.HashMap
 import uk.ac.warwick.tabula.services.OriginalityReportService
+import language.implicitConversions
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"

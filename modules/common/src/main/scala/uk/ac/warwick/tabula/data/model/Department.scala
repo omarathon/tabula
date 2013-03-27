@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.xml.NodeSeq
 import org.hibernate.annotations.AccessType
 import javax.persistence._
@@ -52,11 +52,11 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
 	
 	def getExtensionGuidelineSummary = extensionGuidelineSummary
-	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary) orNull
+	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
 	def extensionGuidelineSummary_= (summary: String) = settings += (Settings.ExtensionGuidelineSummary -> summary)
 	
 	def getExtensionGuidelineLink = extensionGuidelineLink
-	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink) orNull
+	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink).orNull
 	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
 	
 	def isShowStudentName = showStudentName

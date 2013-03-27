@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -19,8 +19,9 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.RequestInfo
+import scala.reflect.ClassTag
 
-class GrantRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends Command[GrantedRole[A]] with SelfValidating {
+class GrantRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends Command[GrantedRole[A]] with SelfValidating {
 	
 	def this(scope: A, defin: RoleDefinition) = {
 		this(scope)
@@ -63,7 +64,7 @@ class GrantRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends 
 		else {
 			val user = RequestInfo.fromThread.get.user
 			if (!user.sysadmin) roleDefinition.allPermissions(Some(scope)) map { permissionAndScope =>
-				val (permission, scope) = (permissionAndScope._1, permissionAndScope._2 orNull)
+				val (permission, scope) = (permissionAndScope._1, permissionAndScope._2.orNull)
 				
 				if (!securityService.can(user, permission, scope)) {
 					errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(permission, scope), "")

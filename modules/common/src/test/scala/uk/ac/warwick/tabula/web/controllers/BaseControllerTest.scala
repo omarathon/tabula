@@ -50,7 +50,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		}
 		
 		controller.validator match {
-			case _: ClassValidator[SelfValidating] =>
+			case _: ClassValidator[_] =>
 			case _ => fail()
 		}
 		
@@ -65,7 +65,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		binder.getValidator() match {
 			case v: CompositeValidator => {
 				v.list.length should be (2)
-				v.list(0).isInstanceOf[ClassValidator[SelfValidating]] should be (true)
+				v.list(0) should be (controller.validator)
 				v.list(1) should be (validator)
 			}
 			case _ => fail()
@@ -74,20 +74,22 @@ class BaseControllerTest extends TestBase with Mockito {
 	}
 	
 	@Test def nukeOriginal {
-		val command = new SelfValidating {
+		val command = new Object with SelfValidating {
 			def validate(errors: Errors) {}
 		}
 		
 		val controller = new BaseController {
-			onlyValidatesWith{ (obj: SelfValidating, errors) => }
+			onlyValidatesWith[SelfValidating] { (obj: SelfValidating, errors) => }
 		}
 		
 		controller.validator match {
-			case _: ClassValidator[SelfValidating] =>
+			case _: ClassValidator[_] =>
 			case _ => fail()
 		}
 		
-		val binder = new WebDataBinder(new Object)
+		controller.validator.supports(classOf[SelfValidating]) should be (true)
+		
+		val binder = new WebDataBinder(command)
 		
 		val validator = mock[Validator]
 		validator.supports(isA[Class[_]]) returns (true)
@@ -96,8 +98,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		controller._binding(binder)
 		
 		// original validator was nuked by "onlyValidatesWith"
-		binder.getValidator() should not be (validator)
-		binder.getValidator().isInstanceOf[ClassValidator[SelfValidating]] should be (true)
+		binder.getValidator() should be (controller.validator)
 		binder.getDisallowedFields() should be (Array())
 	}
 	

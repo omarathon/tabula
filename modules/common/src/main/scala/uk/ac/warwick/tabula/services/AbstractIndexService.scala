@@ -36,6 +36,7 @@ import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import scala.collection.GenTraversableOnce
+import language.implicitConversions
 
 trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
 

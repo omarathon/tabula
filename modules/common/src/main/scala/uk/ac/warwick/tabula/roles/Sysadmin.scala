@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class Sysadmin extends BuiltInRole(None, SysadminRoleDefinition)
+case class Sysadmin() extends BuiltInRole(None, SysadminRoleDefinition)
 
 case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 	

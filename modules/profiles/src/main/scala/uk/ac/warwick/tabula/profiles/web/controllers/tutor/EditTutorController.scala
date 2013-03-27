@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -62,7 +62,7 @@ class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)) orNull
+		restricted(new SearchTutorsCommand(user)).orNull
 
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = student match {

@@ -95,7 +95,7 @@ class JobService extends HasJobDao with Logging {
 					instance.status = failed.status
 					fail(instance)
 				}
-				case e => {
+				case e: Throwable => {
 					logger.info("Job " + instance.id + " failed", e)
 					instance.status = "Sorry, there was an error: " + e.getMessage()
 					fail(instance)

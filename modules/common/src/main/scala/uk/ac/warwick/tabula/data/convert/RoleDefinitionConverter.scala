@@ -13,7 +13,7 @@ class RoleDefinitionConverter extends TwoWayConverter[String, RoleDefinition] wi
 	override def convertLeft(definition: RoleDefinition) = Option(definition) match {
 		case Some(builtIn: BuiltInRoleDefinition) => builtIn.getName
 		case Some(custom: CustomRoleDefinition) => custom.getId
-		case None => null
+		case _ => null
 	}
   
 	override def convertRight(name: String) = 

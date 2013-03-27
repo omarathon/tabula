@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import java.util.HashSet
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.hibernate.annotations.{AccessType, Type}
 import org.joda.time.DateTime
@@ -75,7 +75,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(userLookup.getUserByUserId(_))
 
-	def valuesByFieldName = values map { v => (v.getName, v.getValue) } toMap
+	def valuesByFieldName = (values map { v => (v.getName, v.getValue) }).toMap
 
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 

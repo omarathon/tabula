@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.mail.MailException
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
@@ -23,7 +23,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
-
+import language.implicitConversions
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
@@ -104,8 +104,6 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 		message.setSubject(encodeSubject(moduleCode + ": Your coursework feedback is ready"))
 		// TODO configurable body
 		message.setText(messageTextFor(user))
-
-		message
 	}
 
 	def describe(d: Description) = d 

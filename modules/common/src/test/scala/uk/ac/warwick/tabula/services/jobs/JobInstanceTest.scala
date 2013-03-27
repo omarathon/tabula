@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import uk.ac.warwick.tabula.services.permissions.RoleService
+import uk.ac.warwick.tabula.services.ProfileService
 
 class JobInstanceTest extends TestBase with Mockito {
 	
@@ -15,6 +16,7 @@ class JobInstanceTest extends TestBase with Mockito {
 	val roleService = mock[RoleService]
 	currentUserFinder.userLookup = userLookup
 	currentUserFinder.roleService = roleService
+	currentUserFinder.profileService = smartMock[ProfileService]
 
 	@Test def onLoad {
 		val instance = new JobInstanceImpl

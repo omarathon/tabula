@@ -1,10 +1,5 @@
-<#assign has_feedback = assignmentsWithFeedback?has_content />
-<#assign has_submissions = assignmentsWithSubmission?has_content />
 <#assign has_assignments = enrolledAssignments?has_content />
-<#assign has_archived = archivedAssignments?has_content />
-
-<#assign has_pending_items = (has_feedback || has_assignments) />
-<#assign has_historical_items = (has_submissions || has_archived || has_feedback) />
+<#assign has_historical_items = historicAssignments?has_content />
 
 <#assign missing_assignments_markup>
 	<p>Talk to your module convenor if this seems like a mistake.</p>
@@ -15,89 +10,180 @@
 	</ul>
 </#assign>
 
-<#if has_pending_items || has_historical_items || user.student>
-	<h2 class="section">Your assignments</h2>
-	
-	<div class="row-fluid">
-		<div class="span6">
-			<h6>Pending</h6>
-			
-			<#if has_pending_items>
-				<ul class="links">		
-					<#if has_assignments>
-						<#macro enrolled_assignment info>
-							<#local assignment = info.assignment />
-							<#local extension = info.extension!false />
-							<#local isExtended = info.isExtended!false />
-							<#local extensionRequested = info.extensionRequested!false />
-							<@fmt.assignment_link assignment />
-							<#if info.submittable>
-								<#include "../submit/assignment_deadline.ftl" />
-							</#if>
-						</#macro>
-						
-						<#list enrolledAssignments as info>
-							<li class="simple-assignment-info">
-								<#if !info.isExtended && info.closed>
-									<span class="pull-right label label-important">Late</span>
-								<#elseif info.isExtended!false>
-									<span class="pull-right label label-info">Extended</span>
-								</#if>
-								<@enrolled_assignment info />
-							</li>
-						</#list>
-					</#if>
-				</ul>	
-			
-				<div class="alert alert-block">
-					<h6>Is an assignment missing here?</h6>
-					${missing_assignments_markup}
-				</div>
-			<#else>
-				<div class="alert alert-block">
-					<h6>We don't have anything for you here.</h6>
-					${missing_assignments_markup}
-				</div>
-			</#if>
-		</div>
-		
-		<div class="span6">
-			<h6>Past</h6>
-
-			<#if has_historical_items>
-				<#if has_submissions || has_feedback>
-					<ul class="links" id="submitted-assignments-list">
-						<#list assignmentsWithFeedback as assignment>
-							<li class="simple-assignment-info">
-								<span class="pull-right label label-success">Marked</span>
-								<@fmt.assignment_link assignment />
-							</li>
-						</#list>
-						
-						<#list assignmentsWithSubmission as assignment>
-							<li class="simple-assignment-info">
-								<span class="pull-right label">Submitted</span>
-								<@fmt.assignment_link assignment />
-							</li>
-						</#list>
-					</ul>
-				</#if>
-	
-				<#if has_archived>
-					<div id="archived-assignments-container">
-						<ul class="links" id="archived-assignments-list">
-							<#list archivedAssignments as assignment>
-								<li class="simple-assignment-info">
-									<span class="pull-right label">Archived</span>
-									<@fmt.assignment_link assignment />
-								</li>
-							</#list>
-						</ul>
-					</div>
-				</#if>
-			<#else>
-				<p class="alert">There are no old assignments to show you right now.</p>
-			</#if>
-		</div>
+<#if has_assignments || has_historical_items || user.student>
+	<div class="header-with-tooltip" id="your-assignments">
+		<h2 class="section">Your assignments</h2>
+		<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
 	</div>
+	
+	<#if has_assignments>
+		<div class="striped-section collapsible expanded" data-name="pending">
+			<div class="clearfix">
+				<h3 class="section-title">Pending</h2>
+			</div>
+			
+			<div class="striped-section-contents">
+				<#macro enrolled_assignment info>
+					<#local assignment = info.assignment />
+					<#local extension = info.extension!false />
+					<#local isExtended = info.isExtended!false />
+					<#local extensionRequested = info.extensionRequested!false />
+					
+					<div class="item-info clearfix<#if !info.isExtended && info.closed> late<#elseif info.isExtended!false> extended</#if>">
+						<div class="row-fluid">
+							<div class="span4">
+								<div class="module-title"><@fmt.module_name assignment.module /></div>
+								<h4 class="name">
+									<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<span class="ass-name">${assignment.name}</span>
+									</a>
+								</h4>
+							</div>
+							<div class="span5">
+								<#if !assignment.opened>
+									<div class="not-open deadline">
+										Opens <@fmt.date date=assignment.openDate /><br>
+										<#if assignment.openEnded>
+											No close date
+										<#else>
+											Deadline <@fmt.date date=assignment.closeDate />
+										</#if>
+									</div>
+								<#else>
+									<#if assignment.openEnded>
+										<#-- Open ended assignment. Can't display a deadline, but display whether it's open yet -->
+										<div class="deadline open-ended">
+											<#if info.submittable>
+												<div class="deadline">No close date</div>
+											</#if>
+										</div>
+									<#elseif info.submittable>
+										<#assign time_remaining = durationFormatter(assignment.closeDate) />
+										
+										<#if isExtended>
+											<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
+											
+											<div class="extended deadline">
+												<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
+												Extension granted until <@fmt.date date=extension.expiryDate />
+											</div>
+										<#elseif assignment.closed>
+											<div class="late deadline">
+												<span class="time-remaining">${time_remaining} <span class="label label-important">Late</span></span>
+												Deadline was <@fmt.date date=assignment.closeDate />
+											</div>
+										<#else>
+											<div class="deadline">
+												<span class="time-remaining">${time_remaining}</span>
+												Deadline <@fmt.date date=assignment.closeDate />
+											</div>
+										</#if>
+									</#if>
+								</#if>
+							</div>
+							<div class="span3 button-list">
+								<#if info.submittable>	
+									<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<i class="icon-folder-close icon-white"></i> Submit
+									</a>
+								
+									<#if !assignment.openEnded>
+										<#if extensionRequested>
+											<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-block">
+												<i class="icon-calendar"></i> Review extension request
+											</a>
+										<#elseif !isExtended && !assignment.closed && assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
+											<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-block">
+												<i class="icon-calendar"></i> Request extension
+											</a>
+										</#if>
+									</#if>
+								</#if>
+							</div>
+						</div>
+					</div>
+				</#macro>
+			
+				<#list enrolledAssignments as info>
+					<@enrolled_assignment info />
+				</#list>
+			</div>
+		</div>
+	<#else>
+		<div class="alert alert-block alert-info">
+			<h3>Pending</h3>
+			There are no pending assignments to show you right now
+		</div>
+	</#if>
+	
+	<#if has_historical_items>
+		<div class="striped-section collapsible" data-name="past">
+			<div class="clearfix">
+				<h3 class="section-title">Past</h2>
+			</div>
+			
+			<div class="striped-section-contents">
+				<#macro marked_assignment info>
+					<#local assignment = info.assignment />
+					<#local submission = info.submission!false />
+					<#local hasSubmission = info.hasSubmission!false />
+					<#local feedback = info.feedback!false />
+					<#local hasFeedback = info.hasFeedback!false />
+					<#local extension = info.extension!false />
+					<#local isExtended = info.isExtended!false />
+					<#local extensionRequested = info.extensionRequested!false />
+					
+					<div class="item-info clearfix marked">
+						<div class="row-fluid">
+							<div class="span4">
+								<div class="module-title"><@fmt.module_name assignment.module /></div>
+								<h4 class="name">
+									<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<span class="ass-name">${assignment.name}</span>
+									</a>
+								</h4>
+							</div>
+							<div class="span5">
+								<#if hasSubmission>
+									Submitted <@fmt.date date=submission.submittedDate />
+									<#if submission.late>
+										<span class="label label-important">Late</span>
+									<#elseif  submission.authorisedLate>
+										<span class="label label-info">Within Extension</span>
+									</#if>
+								</#if>
+							</div>
+							<div class="span3 button-list">
+								<#if hasFeedback>
+									<#-- View feedback -->
+									<a class="btn btn-block btn-success" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<i class="icon-check icon-white"></i> View feedback
+									</a>
+								<#elseif info.resubmittable>
+									<#-- Resubmission allowed -->
+									<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<i class="icon-folder-close icon-white"></i> Resubmit
+									</a>
+								<#else>
+									<#-- View receipt -->
+									<a class="btn btn-block" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<i class="icon-list-alt"></i> View receipt
+									</a>
+								</#if>
+							</div>
+						</div>
+					</div>
+				</#macro>
+				
+				<#list historicAssignments as info>
+					<@marked_assignment info />
+				</#list>
+			</div>
+		</div>
+	<#else>
+		<div class="alert alert-block alert-info">
+			<h3>Past</h3>
+			There are no past assignments to show you right now
+		</div>
+	</#if>
 </#if>

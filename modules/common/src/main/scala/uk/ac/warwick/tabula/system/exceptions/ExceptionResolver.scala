@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.servlet.HandlerExceptionResolver
@@ -95,7 +95,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def reportExceptions[A](fn: => A) =
 		try fn
-		catch { case throwable => handle(throwable, None); throw throwable }
+		catch { case throwable: Throwable => handle(throwable, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
 		val token = ExceptionTokens.newToken

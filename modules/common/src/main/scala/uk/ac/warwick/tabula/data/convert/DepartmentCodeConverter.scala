@@ -14,11 +14,11 @@ class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
 
 	override def convertRight(code: String) = {
 		service.getDepartmentByCode(sanitise(code)).getOrElse {
-			service.getDepartmentById(code) orNull
+			service.getDepartmentById(code).orNull
 		}
 	}
 
-	override def convertLeft(department: Department) = Option(department) map { _.code } orNull
+	override def convertLeft(department: Department) = (Option(department) map { _.code }).orNull
 
 	def sanitise(code: String) = {
 		if (code == null) throw new IllegalArgumentException

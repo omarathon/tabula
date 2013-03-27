@@ -10,6 +10,6 @@ class FeedbackIdConverter extends TwoWayConverter[String, Feedback] {
 	@Autowired var service: FeedbackDao = _
 
 	override def convertRight(id: String) = service.getFeedback(id).orNull
-	override def convertLeft(feedback: Feedback) = Option(feedback) map {_.id} orNull
+	override def convertLeft(feedback: Feedback) = (Option(feedback) map {_.id}).orNull
 
 }

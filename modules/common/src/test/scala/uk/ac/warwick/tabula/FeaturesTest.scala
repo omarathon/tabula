@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 
 import uk.ac.warwick.util.queue.conversion.ItemType
