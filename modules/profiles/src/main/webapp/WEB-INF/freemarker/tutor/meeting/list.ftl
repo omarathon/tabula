@@ -6,6 +6,7 @@
 		
 		<#if can.do("Profiles.MeetingRecord.Create", profile)>
 			<a class="new" href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			<small class="muted">Meeting records are currently visible to the student, tutor, and departmental administrators</small>
 		</#if>
 		<#if can.do("Profiles.MeetingRecord.Read", profile)>
 			<a class="toggle-all-details open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
