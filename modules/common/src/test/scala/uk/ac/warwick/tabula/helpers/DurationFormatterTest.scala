@@ -16,7 +16,7 @@ class DurationFormatterTest extends TestBase {
 		check(start.plusMonths(4), "4 months")
 		check(start.plusYears(2), "2 years")
 		check(start.plusWeeks(3), "21 days") // no weeks field, so represented as days
-		check(start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year, 4 days and 3 hours")
+		check(start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year and 4 days")
 		check(start.plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "4 days and 3 hours")
 		check(start.plusDays(4).plusMinutes(2).plusSeconds(1), "4 days")
 		check(start.plusHours(3).plusMinutes(2).plusSeconds(1), "3 hours and 2 minutes")
@@ -32,7 +32,7 @@ class DurationFormatterTest extends TestBase {
 		checkTag(start, start.plusMonths(4), "4 months")
 		checkTag(start, start.plusYears(2), "2 years")
 		checkTag(start, start.plusWeeks(3), "21 days") // no weeks field, so represented as days
-		checkTag(start, start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year, 4 days and 3 hours")
+		checkTag(start, start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year and 4 days")
 		checkTag(start, start.plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "4 days and 3 hours")
 		checkTag(start, start.plusDays(4).plusMinutes(2).plusSeconds(1), "4 days")
 		checkTag(start, start.plusHours(3).plusMinutes(2).plusSeconds(1), "3 hours and 2 minutes")
@@ -49,7 +49,7 @@ class DurationFormatterTest extends TestBase {
 			checkTag(start.plusMonths(4), "4 months")
 			checkTag(start.plusYears(2), "2 years")
 			checkTag(start.plusWeeks(3), "21 days") // no weeks field, so represented as days
-			checkTag(start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year, 4 days and 3 hours")
+			checkTag(start.plusYears(1).plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "1 year and 4 days")
 			checkTag(start.plusDays(4).plusHours(3).plusMinutes(2).plusSeconds(1), "4 days and 3 hours")
 			checkTag(start.plusDays(4).plusMinutes(2).plusSeconds(1), "4 days")
 			checkTag(start.plusHours(3).plusMinutes(2).plusSeconds(1), "3 hours and 2 minutes")

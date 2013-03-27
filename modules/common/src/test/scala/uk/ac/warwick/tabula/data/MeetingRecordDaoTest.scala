@@ -68,7 +68,7 @@ class MeetingRecordDaoTest extends AppContextTestBase {
 		val savedMeetings = meetingDao.list(relSet)
 		
 		savedMeetings.size should be (3)
-		savedMeetings.first should be (newestMeeting)
+		savedMeetings.head should be (newestMeeting)
 		savedMeetings.last should be (earliestMeeting)
 	}
 }
