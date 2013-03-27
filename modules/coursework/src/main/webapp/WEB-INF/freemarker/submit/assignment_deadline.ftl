@@ -17,7 +17,7 @@
 		
 		<p class="extended deadline">
 			<span class="time-remaining">${extension_time_remaining}</span>
-			Extension granted until <@fmt.date date=extension.expiryDate timezone=true />
+			Extension granted until <@fmt.date date=extension.expiryDate />
 		</p>
 		<#if extensionRequested>
 			<@extensionButton "Review extension request" assignment />
@@ -25,7 +25,7 @@
 	<#elseif assignment.closed>
 		<p class="late deadline">
 			<span class="time-remaining">${time_remaining}</span>
-			Deadline was <@fmt.date date=assignment.closeDate timezone=true />
+			Deadline was <@fmt.date date=assignment.closeDate />
 		</p>
 		<#if extensionRequested>
 			<@extensionButton "Review extension request" assignment />
@@ -33,7 +33,7 @@
 	<#else>
 		<p class="deadline">
 			<span class="time-remaining">${time_remaining}</span>
-			Deadline <@fmt.date date=assignment.closeDate timezone=true />
+			Deadline <@fmt.date date=assignment.closeDate />
 		</p>
 		<#if assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
 			<#if extensionRequested>
