@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-	<#assign commandName="uploadPersonalTutorsCommand" />
+	<#assign commandName="command" />
 	<#assign formDestination><@routes.tutor_upload department /></#assign> 
 		
 	<@spring.bind path=commandName>
