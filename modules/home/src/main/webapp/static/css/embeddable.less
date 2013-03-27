@@ -45,17 +45,17 @@ html.iframe {
 details, summary { display: block; }
 
 // The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
-// However, weÕre still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
+// However, weï¿½re still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
 // Remember: by default (and probably most of the time), the contents of the <details> element are hidden.
 
 // Hide all direct descendants of every <details> element
-// Note that IE6 doesnÕt support the child selector; weÕll work around that using jQuery later
+// Note that IE6 doesnï¿½t support the child selector; weï¿½ll work around that using jQuery later
 .no-details details > * { display: none; }
 
 // Make sure summary remains visible
 .no-details details summary { display: block; }
 
-// Apply a pointer cursor upon hover to indicate itÕs a clickable element. These styles can be applied regardless of whether the fallback is needed
+// Apply a pointer cursor upon hover to indicate itï¿½s a clickable element. These styles can be applied regardless of whether the fallback is needed
 summary { cursor: pointer; }
 
 // polyfill disclosure triangle
@@ -125,7 +125,7 @@ tr.error, tr.warning {
 	display: table-row;
 }
 
-.module-info {
+.module-info, .striped-section {
 	.box-style;
 	
 	padding: 0.5em 0.5em 0 0.5em;
@@ -134,13 +134,33 @@ tr.error, tr.warning {
 	
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
 	
+	.section-title { color: #606060 !important; }
+	
+	.button-list .btn {
+		text-align: left !important;
+		padding-left: 10px !important;
+	}
+	
+	&.collapsible {
+		.striped-section-contents { display: none; }
+		
+		&.expanded {
+			.striped-section-contents { display: block; }
+		}
+	}
+}
+
+.module-info {
 	// Position module title and its Manage dropdown on the same line.
 	.module-title { display: inline-block; }
-	.module-manage-button { 
+	.module-manage-button, .section-manage-button { 
 		display: inline-block;
 		margin-left: 8px;
 		top: 3px;
 		float:right;
+	}
+
+	.module-manage-button {
 		i { .opacity-one(1); }
 	}
 
@@ -150,6 +170,21 @@ tr.error, tr.warning {
 
 h2.section {
 	margin-top: 1em;
+}
+
+#container h1 + .header-with-tooltip h2 {
+	margin-top: -8px;
+}
+
+.header-with-tooltip {
+	> * { 
+		.inline-block; 
+		margin-right: 10px; 
+	}
+	
+	> .use-tooltip {
+		vertical-align: top;
+	}
 }
 
 ul {
@@ -240,7 +275,7 @@ ul {
 	}
 }
 
-.assignment-info {
+.assignment-info, .striped-section-contents .item-info {
 	border-top: 2px groove white;
 
 	//fix appearance against bottom of rounded module box
@@ -258,17 +293,17 @@ ul {
 	//&:not(.archived):nth-of-type(odd) { background-color: #f5f5f5; }
 	&.alt-row { background-color: #f5f5f5; }
 	
-	.column1 {
+	.column1, .left {
 		width: 14.5em;
 		float:left;
 		margin-right: 1em;
 	}
-	.stats {
+	.stats, .middle {
 		font-size: 0.85em;
 		width: 44em;
 		float:left;
 	}
-	.assignment-buttons {
+	.assignment-buttons, .right {
 		float: right;
 		width: 11em;
 		
@@ -316,6 +351,10 @@ ul {
 	
 }
 
+.striped-section-contents .item-info {
+	&:nth-of-type(odd) { background-color: #f5f5f5; }
+}
+
 // fix for icons sitting a bit off the baseline
 #container {
  .assignment-buttons, .module-manage-button {
@@ -361,6 +400,7 @@ ul {
 	
 	&.late { color: @red; }
 	&.extended { color: @blue; }
+	&.not-open { color: #606060; }
 }
 
 .end-assignment-info { clear: both; }

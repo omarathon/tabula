@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.Submission
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -84,27 +85,70 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 					.diff(assignmentsWithFeedback)
 					.diff(assignmentsWithSubmission)
 					.filter {_.collectSubmissions} // TAB-475
-					.sortBy(_.closeDate)  
-				
-			// adorn the enrolled assignments with extra data.
-			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield {
+					.sortWith { (ass1, ass2) => 
+						// TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
+						// Show open ended assignments after
+						if (ass2.openEnded && !ass1.openEnded) true
+						else if (ass1.openEnded && !ass2.openEnded) false
+						else {
+							def timeToDeadline(ass: Assignment) = {
+								val extension = ass.extensions.find(_.userId == user.apparentId)
+								val isExtended = ass.isWithinExtension(user.apparentId)
+								
+								if (ass.openEnded) ass.openDate
+								else if (isExtended) (extension map { _.expiryDate }).get
+								else ass.closeDate
+							}
+							
+							timeToDeadline(ass1) < timeToDeadline(ass2)
+						}
+					}
+					
+			def enhanced(assignment: Assignment) = {
 				val extension = assignment.extensions.find(_.userId == user.apparentId)
 				val isExtended = assignment.isWithinExtension(user.apparentId)
 				val extensionRequested = extension.isDefined && !extension.get.isManual
+				val submission = assignment.submissions.find(_.universityId == user.universityId)
+				val feedback = assignment.feedbacks.filter(_.released).find(_.universityId == user.universityId)
 				Map(
 					"assignment" -> assignment,
+					"submission" -> submission,
+					"hasSubmission" -> submission.isDefined,
+					"feedback" -> feedback,
+					"hasFeedback" -> feedback.isDefined,
 					"extension" -> extension,
 					"isExtended" -> isExtended,
 					"extensionRequested" -> extensionRequested,
 					"submittable" -> assignment.submittable(user.apparentId),
+					"resubmittable" -> assignment.resubmittable(user.apparentId),
 					"closed" -> assignment.isClosed
 				)
 			}
+				
+			// adorn the enrolled assignments with extra data.
+			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield enhanced(assignment)
+			val assignmentsWithFeedbackInfo = for (assignment <- assignmentsWithFeedback) yield enhanced(assignment)
+			val assignmentsWithSubmissionInfo = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment)
+			
+			val historicAssignmentsInfo =
+				assignmentsWithFeedbackInfo
+				.union(assignmentsWithSubmissionInfo)
+				.sortWith { (info1, info2) =>
+					def toDate(info: Map[String, Any]) = {
+						val assignment = info("assignment").asInstanceOf[Assignment]
+						val submission = info("submission").asInstanceOf[Option[Submission]]
+						
+						submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
+					}
+					
+					toDate(info1) < toDate(info2)
+				}
+				.reverse
 
 			Mav("home/view",
-				"assignmentsWithFeedback" -> assignmentsWithFeedback,
 				"enrolledAssignments" -> enrolledAssignmentsInfo,
-				"assignmentsWithSubmission" -> assignmentsWithSubmission.diff(assignmentsWithFeedback),
+				"historicAssignments" -> historicAssignmentsInfo,
+				
 				"assignmentsForMarking" -> assignmentsForMarkingInfo,
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,

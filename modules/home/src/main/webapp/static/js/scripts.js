@@ -116,6 +116,43 @@ jQuery(function ($) {
 		$(".close-all-details").hide();
 		$(".open-all-details").show();
 	});
+	
+	// collapsible striped section
+	$('.striped-section.collapsible').each(function() {
+		var $section = $(this);
+		var open = function() {
+			return $section.hasClass('expanded')
+		};
+		
+		var $icon = $('<i></i>');
+		if (open()) $icon.addClass('icon-chevron-down');
+		else $icon.addClass('icon-chevron-right');
+		
+		var $title = $section.find('.section-title'); 
+		$title.prepend(' ').prepend($icon);
+		
+		var buffer = $title.height() / 2 - 10;
+		$icon.css('margin-top', buffer + 'px');
+		
+		$title.css('cursor', 'pointer').on('click', function() {
+			if (open()) {
+				$section.removeClass('expanded');
+				$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+			} else {
+				$section.addClass('expanded');
+				$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+				
+				if ($section.data('name')) {
+					window.location.hash = $section.data('name'); 
+				}
+			}
+		});
+		
+		if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
+			// simulate a click
+			$title.trigger('click');
+		}
+	});
 
 }); // end domready
 
