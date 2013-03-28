@@ -1,89 +1,59 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.AuditEventQueryMethods
-import uk.ac.warwick.tabula.services.AbstractIndexService
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import org.junit.Ignore
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-class FeedbackReportCommandTest extends AppContextTestBase with Mockito with ReportWorld {
-	
-	var auditIndexService = mock[AuditEventQueryMethods]
-	
-//	auditIndexService.submissionForStudent(any[Assignment], any[User]) answers {_ match {
-//		case(a, u) => {
-//			val assignment = a.asInstanceOf[Assignment]
-//			val user = u.asInstanceOf[User]
-//			auditEvents.filter(event => {event.userId == user.getUserId() && event.assignmentId.get == assignment.id})
-//		}
-//		case _ => Seq()
-//	}}
-	
-	auditIndexService.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {		
-		val args = argsObj.asInstanceOf[Array[_]]
-		val assignment = args(0).asInstanceOf[Assignment]
-		val user = args(1).asInstanceOf[User]
-		auditEvents.filter(event => {event.userId == user.getUserId() && event.assignmentId.get == assignment.id})
-	}}
-	
-	auditIndexService.publishFeedbackForStudent(any[Assignment], any[User]) answers {argsObj => {
-		val args = argsObj.asInstanceOf[Array[_]]
-		val assignment = args(0).asInstanceOf[Assignment]
-		val user = args(1).asInstanceOf[User]
-		auditEvents.filter(event => {event.students.contains(user.getWarwickId) && event.assignmentId.get == assignment.id})
-	}}
-
-	var assignmentMembershipService = mock[AssignmentMembershipService]
-	assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
-		val assignment = assignmentObj.asInstanceOf[Assignment]
-		val studentIds = assignment.members.includeUsers
-		val users = studentIds.map{userId =>
-			val userOne = new User(userId)
-			userOne.setWarwickId(userId)
-			userOne
-		}.toList
-		users
-	}
-	
+class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 
 	@Test
 	def simpleGetSubmissionTest() {
 		val userOne = new User(idFormat(1))
 		userOne.setWarwickId(idFormat(1))
-		
-		var submissions = auditIndexService.submissionForStudent(assignmentOne, userOne)
+		val submissions = auditEventQueryMethods.submissionForStudent(assignmentOne, userOne)
 		submissions.size should be (1)
-
 	}
-	
-	
-	
-	
+
 	@Test
 	def simpleGetFeedbackTest() {
 		val userOne = new User(idFormat(1))
 		userOne.setWarwickId(idFormat(1))
-		
-		val publishes = auditIndexService.publishFeedbackForStudent(assignmentOne, userOne)
+		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, userOne)
 		publishes.size should be (1)
-		
 	}
-	
 
-	/*
-	
 	@Test
 	def feedbackCountsTest() {
-		val feedbackReportCommand = new FeedbackReportCommand(department)
-		val feedbackCount = feedbackReportCommand.getFeedbackCounts(assignmentOne) 
-		
-		feedbackCount should be (10,0)
+		val command = new FeedbackReportCommand(department)
+		command.assignmentMembershipService = assignmentMembershipService
+		command.auditEventQueryMethods = auditEventQueryMethods
+
+		var feedbackCount = command.getFeedbackCounts(assignmentOne)
+		feedbackCount should be (10,0) // 10 on time
+		feedbackCount = command.getFeedbackCounts(assignmentTwo)
+		feedbackCount should be (0,29) // 29 late
+		feedbackCount = command.getFeedbackCounts(assignmentThree)
+		feedbackCount should be (4,9) // 4 on time - 9 late
+		feedbackCount = command.getFeedbackCounts(assignmentFour)
+		feedbackCount should be (7,28) // 7 on time - 28 late
+		feedbackCount = command.getFeedbackCounts(assignmentFive)
+		feedbackCount should be (2,98) // 2 on time - 98 late
+		feedbackCount = command.getFeedbackCounts(assignmentSix)
+		feedbackCount should be (65,8) // 65 on time - 8 late
 	}
-	*/
-	
-	
+
+	@Test
+	def assignmentSheetTest() {
+		val command = new FeedbackReportCommand(department)
+		command.assignmentMembershipService = assignmentMembershipService
+		command.auditEventQueryMethods = auditEventQueryMethods
+
+		val workbook = new XSSFWorkbook()
+		val sheet = command.generateAssignmentSheet(department, workbook)
+		command.populateAssignmentSheet(sheet)
+
+
+	}
+
 }

@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.Feedback
@@ -11,16 +8,22 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AuditEventQueryMethods}
+import collection.JavaConversions._
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.userlookup.User
+
 
 // reusable environment for marking workflow tests
-trait ReportWorld extends AppContextTestBase{
+trait ReportWorld extends AppContextTestBase with Mockito {
 	
 	val department = new Department
 	val moduleOne = new Module("IN101", department)
 	val moduleTwo = new Module("IN102", department)
 
-	var auditEvents: List[AuditEvent] = List()	
+	var auditEvents: List[AuditEvent] = List()
 	
 	val assignmentOne = addAssignment("1001", "test one", dateTime(2013, 3, 10), 10, 5, moduleOne)
 	val assignmentTwo = addAssignment("1002", "test two", dateTime(2013, 4, 10), 29, 5, moduleOne)
@@ -32,20 +35,48 @@ trait ReportWorld extends AppContextTestBase{
 	
 	
 	createPublishEvent(assignmentOne, 15, studentData(1, 10)) 	// all on time
-	createPublishEvent(assignmentTwo, 25, studentData(1, 29))		// all late
+	createPublishEvent(assignmentTwo, 35, studentData(1, 29))		// all late
 	createPublishEvent(assignmentThree, 10, studentData(1, 4))	// for test three - these on time
 	createPublishEvent(assignmentThree, 35, studentData(5, 13))	// ... and these late
 
-	createPublishEvent(assignmentFour, 21, studentData(1, 35))	// on time for the 7 (that is, 35 % 5) that have submitted late, late for the rest
-	createPublishEvent(assignmentFive, 21, studentData(1, 100))	// on time for the 2 (100 % 50) that have submitted late, late for the rest
+	createPublishEvent(assignmentFour, 30, studentData(1, 35))	// on time for the 7 (that is, 35 % 5) that have submitted late, late for the rest
+	createPublishEvent(assignmentFive, 31, studentData(1, 100))	// on time for the 2 (100 % 50) that have submitted late, late for the rest
 	createPublishEvent(assignmentSix, 15, studentData(1, 23))		// on time
 	createPublishEvent(assignmentSix, 20, studentData(24, 65))	// on time
-	createPublishEvent(assignmentSix, 25, studentData(66, 73))	// late
-	
+	createPublishEvent(assignmentSix, 29, studentData(66, 73))	// late
+
+	var auditEventQueryMethods = mock[AuditEventQueryMethods]
+	auditEventQueryMethods.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {
+		val args = argsObj.asInstanceOf[Array[_]]
+		val assignment = args(0).asInstanceOf[Assignment]
+		val user = args(1).asInstanceOf[User]
+		auditEvents.filter(event => {event.userId == user.getUserId && event.assignmentId.get == assignment.id})
+	}}
+
+	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[User]) answers {argsObj => {
+		val args = argsObj.asInstanceOf[Array[_]]
+		val assignment = args(0).asInstanceOf[Assignment]
+		val user = args(1).asInstanceOf[User]
+		auditEvents.filter(event => {event.students.contains(user.getWarwickId) && event.assignmentId.get == assignment.id})
+	}}
+
+	var assignmentMembershipService = mock[AssignmentMembershipService]
+	assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
+		val assignment = assignmentObj.asInstanceOf[Assignment]
+		val studentIds = assignment.members.includeUsers
+		val users = studentIds.map{userId =>
+			val userOne = new User(userId)
+			userOne.setWarwickId(userId)
+			userOne
+		}.toList
+		users
+	}
+
+
 	def studentData(start:Int, end:Int) = (start to end).map(idFormat(_)).toList 
 	
 	def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) = {
-		val date = assignment.closeDate.plus(daysAfter)
+		val date = assignment.closeDate.plusDays(daysAfter)
 		val event = AuditEvent(
 				eventId="event", eventType="PublishFeedback", userId="cuslat", eventDate=date,
 				eventStage="before", data="""{"assignment": """ + assignment.id + """,
