@@ -23861,17 +23861,19 @@ jQuery(function($) {
 	});
 });
 (function($) {
-window.recalculateNavigation = function() {
-	// Set the height of the inline blocks to the maximal height;
+window.getNavigationHeight = function() {
+	return $('#navigation').outerHeight(true);
+}
+
+window.fixHeightNavigationHoriz = function() {
+	// Get the maximal height of the inline blocks
 	var tallest = 0;
 	var linksWidth = 0;
 	$('#navigation.horizontal ul#primary-navigation > li:visible').each(function() { tallest = Math.max($(this).height(), tallest); linksWidth += $(this).width(); });
 	$('#navigation.horizontal ul#primary-navigation > li:visible').height(tallest);
-	// SBTWO-5546 return height of navigation
 	var rows = Math.ceil(linksWidth/$('#navigation.horizontal').width());
-	return tallest * rows;
 };
-	
+
 window.repositionChildList = function($list) {
 	if ($list.length == 0) { return; }
 	
@@ -23942,12 +23944,11 @@ jQuery(function($) {
 		if(isSmallScreen) { 
 			$('#horizontal-nav-spacer').css('display', 'none');
 		} else {
-			var navigationHeight = $('#navigation').outerHeight(true);
 			if(isiOSdevice == null && navigator.userAgent.match(/Android/i)==null && isIE6or7==false) {
 				// if not ipad/android/ie6/ie7, fix vertical nav
 				$(window).scroll(positionNavigationHoriz);
 				$(window).resize(positionNavigationHoriz);
-				window.recalculateNavigation();	
+				window.fixHeightNavigationHoriz();
 			}
 		}
 	}
@@ -23957,12 +23958,12 @@ jQuery(function($) {
 	if ($('#navigation.vertical').length > 0) {
 		// SBTWO-4579
 		var navigationOffset = $('#navigation').offset().top;
-		var navigationHeight = $('#navigation').outerHeight(true);
 		
 		var positionNavigation = function() {
 			var scrollY = $(window).scrollTop();
 			var documentHeight = $('#navigation-wrapper').height() + navigationOffset;
 			var windowHeight = $(window).height();
+			var navigationHeight = window.getNavigationHeight();
 			
 			if (scrollY <= navigationOffset || windowHeight < navigationHeight) {
 				$('#navigation').removeClass('fixed').removeClass('fixed-bottom');
@@ -24093,14 +24094,13 @@ jQuery(function($) {
 				return false;
 			}
 		});
-	
 
 		// SBTWO-4579
 		var navigationOffset = $('#navigation').offset().top;
-		var navigationHeight = $('#navigation').outerHeight(true);
+		var navigationHeight = window.getNavigationHeight();
 		
 		var positionNavigationHoriz = function() {
-			var navigationOffset = $('#header').height();
+			var navigationOffset = $('#header').height() + $('#pre-header:visible').height();
 			var scrollY = $(window).scrollTop();
 			var documentHeight = $('#navigation-wrapper').height() + navigationOffset;
 			var windowHeight = $(window).height();
@@ -24108,9 +24108,9 @@ jQuery(function($) {
 			if(scrollY >= navigationOffset && !$(document.body).hasClass('is-smallscreen')) {
 				$('#navigation').removeClass('fixed-bottom').addClass('fixed').removeClass('horizontal-nav-spacer');
 				if($('#horizontal-nav-spacer').length==0) {
-					$('#navigation-wrapper').after('<div id="horizontal-nav-spacer" style="display:block; height:'+navigationHeight+'px"></div>');			
+					$('#navigation-wrapper').after('<div id="horizontal-nav-spacer" style="display:block; height:'+navigationHeight+'px"></div>');
 					//nav spacer added to counteract horizontal nav swallowing [depth of nav]pixels when it sticks to top of screen
-				}	
+				}
 			} else if(scrollY< navigationOffset) {
 				$('#navigation').removeClass('fixed');
 				$('#horizontal-nav-spacer').remove();
@@ -24122,35 +24122,26 @@ jQuery(function($) {
 			// if not ipad/android/ie6/ie7, fix vertical nav
 			$(window).scroll(positionNavigationHoriz);
 			$(window).resize(positionNavigationHoriz);
+			window.fixHeightNavigationHoriz();
 		}
-
 		
-		var navHeight = window.recalculateNavigation() + $('#navigation.horizontal ul#secondary-navigation').height();
-				
-		// SBTW0-5299 move anchors up by height of horizontal navigation on 
-		anchors = $('#main-content a[name]:empty');
-		anchors.css({'position': 'relative', 'top': -($('#navigation').height()+30) +'px', 'display':'inline-block'});
-		
-		if(window.location.hash && $(window.location.hash).length) {
-			// SBTWO-5546 if there's a hash in the URL, check for an item in the HTML with that ID
-			// if we find it, add an anchor in and shift that up by the height of the horizontal
-			// navigation. plus cheesy scrollTo() for Firefox and IE on first load
-			var hashtext = window.location.hash.substr(1);
-			if ($('a#'+hashtext)){
-				$(window.location.hash).append('<span id="'+hashtext+'">&nbsp;</span>');
-				$('span#'+hashtext).css({'position':'relative', 'top': -(navHeight+30) +'px', 'display':'none'});
-			} else {
-				$(window.location.hash).append('<a id="'+hashtext+'">&nbsp;</a>');
-				$('a#'+hashtext).css({'position':'relative', 'top': -(navHeight+30) +'px', 'display':'block'});
-			}
-			window.scrollTo(0, $(window.location.hash).offset().top-(navHeight+(navHeight/3)));
-			$(window.location.hash).attr("id",hashtext+"_");
+		// SBTWO-6118, supersedes SBTWO-5299 & SBTWO-5546
+		if ("onhashchange" in window) {
+			$(window).on("hashchange", function() {
+				if (location.hash.length) {
+					var hash = location.hash.substr(1)
+					// match by id first, then named anchors
+					var $dests = $("#" + hash).add("a[name='" + hash + "']")
+					if ($dests.length) {
+						var newOffset = $dests.first().offset().top - window.getNavigationHeight();
+						$(window).scrollTop(newOffset);
+					}
+				}
+			});
+			// fire on page load, with arbitrary delay for rendering
+			setTimeout(function() {$(window).trigger("hashchange")}, 200);
 		}
 	}
-	
-	
-
-	
 });
 
 jQuery(function($) {
