@@ -13,8 +13,7 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
@@ -26,9 +25,9 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.services.FeedbackService
 import scala.reflect.ClassTag
+import scala.Some
+import uk.ac.warwick.tabula.data.model.SubmissionsReport
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -64,7 +63,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
-	
+
+	@transient
+	var extensionService = Wire[ExtensionService]("extensionService")
+
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
 
@@ -325,11 +327,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * assumes all feedback has already been published.
 	 */
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
+
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)
 	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
 	def hasReleasedFeedback = countReleasedFeedback > 0
 	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
+	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
 
 
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
