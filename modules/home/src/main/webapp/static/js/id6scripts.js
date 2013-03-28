@@ -23333,7 +23333,6 @@ window.SitebuilderInfo = {
 		if (footer.length) {
 			calculateMinHeight = function() {
 				var footerHeight = footer.offset().top + footer.outerHeight(true) + 1;
-				
 				return contentContainer.outerHeight(true) + (jQuery(window).height() - footerHeight);
 			};
 		} else {
@@ -23345,7 +23344,7 @@ window.SitebuilderInfo = {
 		var minHeight = calculateMinHeight();
 		
 		// SBTWO-4579
-		if (minHeight<jQuery('#navigation.vertical').outerHeight(true)) {
+		if (jQuery('#navigation.vertical').length && minHeight<jQuery('#navigation.vertical').outerHeight(true)) {
 			minHeight = jQuery('#navigation.vertical').outerHeight(true); 
 		}
 		
@@ -23546,12 +23545,22 @@ $(function($){
 		$body.bind('smallscreen', function(event, isSmallscreen) {
 			if (isSmallscreen) {
 				if ($('#alternate-search').length == 0) {
-					$('#content-wrapper').append(
-						$('<div id="alternate-search"><hr /></div>')
-					);
+					if ($body.is('.site-root')) {
+						$('#content-wrapper').prepend(
+							$('<div id="alternate-search"><hr /></div>')
+						);
+					} else {
+						$('#content-wrapper').append(
+							$('<div id="alternate-search"><hr /></div>')
+						);
+					}
 				}
 				
-				$('#alternate-search').append($searchContainer);
+				if ($body.is('.site-root')) {
+					$('#alternate-search').prepend($searchContainer);
+				} else {
+					$('#alternate-search').append($searchContainer);
+				}
 			} else {
 				$('#utility-container').append($searchContainer);
 			}
@@ -23862,11 +23871,11 @@ jQuery(function($) {
 });
 (function($) {
 window.getNavigationHeight = function() {
-	return $('#navigation').outerHeight(true);
+	return jQuery('#navigation').outerHeight(true);
 }
 
 window.fixHeightNavigationHoriz = function() {
-	// Get the maximal height of the inline blocks
+	// Set the height of the inline blocks to the maximal height
 	var tallest = 0;
 	var linksWidth = 0;
 	$('#navigation.horizontal ul#primary-navigation > li:visible').each(function() { tallest = Math.max($(this).height(), tallest); linksWidth += $(this).width(); });
@@ -23956,14 +23965,13 @@ jQuery(function($) {
 	$(document.body).bind('smallscreen', refixNavigation);
 	
 	if ($('#navigation.vertical').length > 0) {
-		// SBTWO-4579
-		var navigationOffset = $('#navigation').offset().top;
-		
 		var positionNavigation = function() {
+			// SBTWO-4579
+			var navigationOffset = $('#navigation').offset().top;
+			var navigationHeight = window.getNavigationHeight();
 			var scrollY = $(window).scrollTop();
 			var documentHeight = $('#navigation-wrapper').height() + navigationOffset;
 			var windowHeight = $(window).height();
-			var navigationHeight = window.getNavigationHeight();
 			
 			if (scrollY <= navigationOffset || windowHeight < navigationHeight) {
 				$('#navigation').removeClass('fixed').removeClass('fixed-bottom');
@@ -24006,44 +24014,102 @@ jQuery(function($) {
 			}
 		});
 	} else if ($('#navigation.horizontal').length > 0) {
-		
 
-		// Horizontal navigation - reduce to "Show all" if we wrap over multiple lines...!
+		// SBTWO-6054 Horizontal navigation - reduce to show more drop-down if we wrap over multiple lines...!
 		var $links = $('#navigation.horizontal #secondary-navigation > li:not(.breadcrumb)');
 		if ($links.length > 0) {
 			var lefts = $links.map(function(i, el) { return $(el).position().left; });
 			var multiline = lefts.filter(function(i, left) { return i != 0 && left === 0; }).length > 0;
 			
 			if (multiline) {
-				var $childrenList = $('<ul class="children-list" />').hide();
-				$links.appendTo($childrenList);
-				hoverClass($links, 'hover');
 				
-				var $content = $('<div class="link-content">' +
-						'<div class="title rendered-link-content"><span>Show all</span></div>' +
+				var $content = $('<div class="link-content arrow">' +
+						'<div class="title rendered-link-content"><div class="arrow" title="Show more"></div></div>' +
 						'<div class="separator rendered-link-content"></div>' +
-					'</div>').append($childrenList);
-				var $showAll = $('<li class="show-all-link rendered-link" />').append($content);
+					'</div>');
+				var $showMoreArrow = $('<li class="show-more-link rendered-link" />').append($content);
 				
-				$childrenList.find('.rendered-link-content').removeClass('rendered-link-content');
+				$('#navigation.horizontal #secondary-navigation').prepend($showMoreArrow);
+				$showMoreArrow.find('.arrow .arrow').css('border-top-color', $showMoreArrow.find('.arrow .arrow').css('color'));
 				
-				$('#navigation.horizontal #secondary-navigation').append($showAll);
+				var calculateLightnessAndAdjustColor = function(colourString) {
+					var RGBA_REGEX = /rgba*\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\s*\)/;
+					var HEX_REGEX = /^#([0-9A-Fa-f]{1})([0-9A-Fa-f]{1})([0-9A-Fa-f]{1})$|^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/;
+					var adjustColor = function(r,g,b,l) {
+						if (lightness / 255 > 0.5) {
+							return 'rgb(' + Math.max(r - 50, 0) + ',' + Math.max(g - 50, 0) + ',' + Math.max(b - 50, 0) + ')';
+						} else {
+							return 'rgb(' + Math.min(r + 50, 255) + ',' + Math.min(g + 50, 255) + ',' + Math.min(b + 50, 255) + ')';
+						}
+					}
+					var rgbaMatch = colourString.match(RGBA_REGEX), hexMatch = colourString.match(HEX_REGEX);
+					if (rgbaMatch) {
+						var r = parseInt(rgbaMatch[1], 10), g = parseInt(rgbaMatch[2], 10), b = parseInt(rgbaMatch[3], 10);
+						var lightness = (Math.max(r,g,b) + Math.min(r,g,b))/2;
+						return adjustColor(r,g,b,lightness);
+					} else if (hexMatch) {
+						if (hexMatch[1] && hexMatch[1].length > 0) {
+							// 3 digit variant
+							var r = parseInt(hexMatch[1], 16), g = parseInt(hexMatch[2], 16), b = parseInt(hexMatch[3], 16);
+						} else {
+							// 6 digit variant
+							var r = parseInt(hexMatch[4], 16), g = parseInt(hexMatch[5], 16), b = parseInt(hexMatch[6], 16);
+						}
+						var lightness = (Math.max(r,g,b) + Math.min(r,g,b))/2;
+						return adjustColor(r,g,b,lightness);
+					} else {
+						// something bad has happened... just return the same string
+						return colourString;
+					}
+				};
+				
+				$showMoreArrow.css('border-color', calculateLightnessAndAdjustColor($('#secondary-navigation-wrapper').css('background-color')));
 			
 				// SBTWO-4840 remove leading text nodes
-				var el = $showAll[0];
+				var el = $showMoreArrow[0];
 				while (el.previousSibling && el.previousSibling.nodeType === 3) {
 					el.previousSibling.parentNode.removeChild(el.previousSibling);
 				}
 				
+				// recalculate the lefts as the show more arrow has been added 
+				var fromNowOn = false, $linksToMove = $links.filter(function(i, el) {
+					if(i != 0 && $(el).position().left === 0) {
+						fromNowOn = true;
+					}
+					return fromNowOn;
+				});
+				
+				var $childrenList = $('<ul class="children-list" />').hide();
+				$linksToMove.appendTo($childrenList);
+				hoverClass($linksToMove, 'hover');
+				$childrenList.find('.rendered-link-content').removeClass('rendered-link-content')
+				$childrenList.appendTo($content)
+				
 				$content.hoverIntent({
 					timeout: 400,
-					over: function() {
+					over: function(e) {
+						try {
+							e.stopPropagation();
+						} catch(err){
+							// see SBTWO-6091
+						}
 						$childrenList.fadeIn('fast');
 						repositionChildList($childrenList);
 					},
 					out: function() {
 						$childrenList.fadeOut('fast');
 					}
+				}).on('touchstart', function(e){
+					try {
+						e.stopPropagation();
+					} catch(err){
+						// see SBTWO-6091
+					}
+					$childrenList.fadeIn('fast');
+					repositionChildList($childrenList);
+				});
+				$(document.body).bind('touchstart',function(){
+					$childrenList.fadeOut('fast');
 				});
 			}
 		}
@@ -24094,13 +24160,11 @@ jQuery(function($) {
 				return false;
 			}
 		});
-
-		// SBTWO-4579
-		var navigationOffset = $('#navigation').offset().top;
-		var navigationHeight = window.getNavigationHeight();
 		
 		var positionNavigationHoriz = function() {
-			var navigationOffset = $('#header').height() + $('#pre-header:visible').height();
+			// SBTWO-4579
+			var navigationOffset = $('#navigation').offset().top;
+			var navigationHeight = window.getNavigationHeight();
 			var scrollY = $(window).scrollTop();
 			var documentHeight = $('#navigation-wrapper').height() + navigationOffset;
 			var windowHeight = $(window).height();
@@ -24111,7 +24175,7 @@ jQuery(function($) {
 					$('#navigation-wrapper').after('<div id="horizontal-nav-spacer" style="display:block; height:'+navigationHeight+'px"></div>');
 					//nav spacer added to counteract horizontal nav swallowing [depth of nav]pixels when it sticks to top of screen
 				}
-			} else if(scrollY< navigationOffset) {
+			} else if(scrollY < navigationOffset) {
 				$('#navigation').removeClass('fixed');
 				$('#horizontal-nav-spacer').remove();
 			}
@@ -24389,7 +24453,7 @@ jQuery(function($) {
 								});
 								
 								level++;
-								$('#secondary-navigation > li:not(.breadcrumb):not(.show-all-link), #secondary-navigation .show-all-link .children-list > li').each(function(i, li) {
+								$('#secondary-navigation > li:not(.breadcrumb):not(.show-more-link), #secondary-navigation .show-more-link .children-list > li').each(function(i, li) {
 									$li = $(li);
 									
 									var title = $li.find('.title').html().trim();
@@ -24441,8 +24505,9 @@ jQuery(function($) {
 jQuery(function($) {
 	var addAnchorLinks = function(evt, isSmallscreen) {
 		if (isSmallscreen && $('#masthead .smallscreen-anchor-links').length == 0) {
+			var anchorID = ($(document.body).is('.site-root')) ? '#alternate-navigation' : '#alternate-search';
 			$('#masthead').append(
-				$('<div class="smallscreen-anchor-links"><a href="' + window.location.pathname + '#alternate-search">Skip to navigation</a></div>')
+				$('<div class="smallscreen-anchor-links"><a href="' + window.location.pathname + anchorID + '">Skip to navigation</a></div>')
 			);
 			
 			$('#footer > .content').prepend(
@@ -24456,23 +24521,4 @@ jQuery(function($) {
 	if ($(document.body).hasClass('is-smallscreen')) {
 		addAnchorLinks(null, true);
 	}
-
 });
-
-	// support sortable table
-	jQuery.fn.sortableTable = function(settings){
-		var $ = jQuery;
-		var $this = $(this);
-		if ($this.tablesorter) {
-			var headerSettings = {};
-			$('th', $this).each(function(index){
-				var sortable = $(this).hasClass("sortable");
-				if(!sortable){
-					headerSettings[index] = {sorter: false};
-				}
-			});
-			$this.tablesorter({headers: headerSettings});
-			return this;
-		}
-	};	
-

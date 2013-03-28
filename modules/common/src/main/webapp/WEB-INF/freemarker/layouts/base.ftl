@@ -6,24 +6,21 @@
 	</head>
 	<body class="horizontal-nav layout-100 tabula-page ${component.bodyClass?default('component-page')} ${bodyClasses?default('')}">
 		<div id="container">
-			<#-- Pre-header notices are accounted for in header-hiding on scroll -->
-			<div id="pre-header">
-				<#if (user.god)!false>
-					<div id="god-notice" class="sysadmin-only-content">
-						God mode enabled.
-						<@f.form method="post" action="${url('/sysadmin/god', '/')}">
-							<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
-							<input type="hidden" name="action" value="remove" />
-							<button class="btn btn-mini btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
-						</@f.form>
-					</div>
-				</#if>
-				<#if (user.masquerading)!false>
-					<div id="masquerade-notice" class="sysadmin-only-content">
-						Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/admin/masquerade" context="/"/>">Change</a>
-					</div>
-				</#if>
-			</div>
+			<#if (user.god)!false>
+				<div id="god-notice" class="sysadmin-only-content">
+					God mode enabled.
+					<@f.form method="post" action="${url('/sysadmin/god', '/')}">
+						<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
+						<input type="hidden" name="action" value="remove" />
+						<button class="btn btn-mini btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
+					</@f.form>
+				</div>
+			</#if>
+			<#if (user.masquerading)!false>
+				<div id="masquerade-notice" class="sysadmin-only-content">
+					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/admin/masquerade" context="/"/>">Change</a>
+				</div>
+			</#if>
 			<#-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="<#if jumbotron?? && jumbotron>header-medium<#else>header-small</#if>" data-type="image">
 				<div id="masthead">

@@ -13,6 +13,23 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
 jQuery(function ($) {
+	// support tablesorter plugin for sortable tables
+	jQuery.fn.sortableTable = function(settings){
+		var $ = jQuery;
+		var $this = $(this);
+		if ($this.tablesorter) {
+			var headerSettings = {};
+			$('th', $this).each(function(index){
+				var sortable = $(this).hasClass("sortable");
+				if(!sortable){
+					headerSettings[index] = {sorter: false};
+				}
+			});
+			$this.tablesorter({headers: headerSettings});
+			return this;
+		}
+	};	
+
 	jQuery.fn.tabulaDateTimePicker = function() {
 		$(this).datetimepicker({
 			format: "dd-M-yyyy hh:ii:ss",
