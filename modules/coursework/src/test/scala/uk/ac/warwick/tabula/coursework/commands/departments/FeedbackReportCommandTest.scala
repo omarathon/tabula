@@ -6,7 +6,6 @@ import org.junit.Ignore
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
-
 	@Test
 	def simpleGetSubmissionTest() {
 		val userOne = new User(idFormat(1))
