@@ -33,6 +33,14 @@
 		<#-- At some point, also check if resubmission is allowed for this assignment -->
 		<#include "assignment_submissionform.ftl" />
 		
+		<#if submission?? && !canReSubmit>
+			<#if assignment.allowResubmission>
+				<p>It is not possible to resubmit your assignment because the deadline has passed.</p>
+			<#else>
+				<p>This assignment does not allow you to resubmit.</p>
+			</#if>
+		</#if>
+		
 		
 	<#else>
 	
