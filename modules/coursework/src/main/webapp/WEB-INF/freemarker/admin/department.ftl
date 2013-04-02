@@ -187,20 +187,19 @@
 							<@fmt.p assignment.submissions?size "submission" />
 							<#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if>
 						</a>
-						
-						
-						<#assign unapprovedExtensions = assignment.extensions />
-						<#if unapprovedExtensions?size gt 0>
+
+						<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
+						<#if numUnapprovedExtensions gt 0>
 							<span class="has-unapproved-extensions">
 								<i class="icon-info-sign"></i>
-								<#if unapprovedExtensions?size gt 1>
-									${unapprovedExtensions?size} extensions need granting
+								<#if numUnapprovedExtensions gt 1>
+									${numUnapprovedExtensions} extensions need granting
 								<#else>
-								1 extension needs granting
+									1 extension needs granting
 								</#if>
 							</span>
 						</#if>
-							
+
 						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
 						<#if countUnreleasedFeedback gt 0>
 							<span class="has-unreleased-feedback">
