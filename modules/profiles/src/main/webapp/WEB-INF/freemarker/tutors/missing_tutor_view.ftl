@@ -21,7 +21,7 @@
 						<tr class="tutee">
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
-							<td><a href="<@routes.profile student />">${student.universityId}</a></td>
+							<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
 							<td>${student.groupName}</td>
 							<td>${student.studyDetails.yearOfStudy!""}</td>
 							<td><#if student.studyDetails.route??>${student.studyDetails.route.name}</#if></td>
@@ -40,8 +40,18 @@
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
 (function($) {
-	$(".tutees").tablesorter({
-		sortList: [[1,0], [3,0], [4,0]]
+	$(function() {
+		$(".tutees").tablesorter({
+			sortList: [[1,0], [3,0], [4,0]]
+		});
+		
+		$(".tutee").on("mouseover", function(e) {
+			$(this).find("td").addClass("hover");
+		}).on("mouseout", function(e) {
+			$(this).find("td").removeClass("hover");
+		}).on("click", function(e) {
+			if (! $(e.target).is("a")) $(this).find("a.profile-link")[0].click();
+		});
 	});
 })(jQuery);
 </script>
