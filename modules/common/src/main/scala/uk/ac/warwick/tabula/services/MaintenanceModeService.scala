@@ -123,7 +123,7 @@ class MaintenanceModeMessage {
 		
 		this.enabled = status.enabled
 		this.until = status.until map { _.getMillis } getOrElse(-1)
-		this.message = status.message getOrElse(null)
+		this.message = status.message.orNull
 	}
 	
 	@BeanProperty var enabled: Boolean = _

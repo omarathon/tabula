@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.helpers
 import org.apache.commons.collections.list.LazyList
 import org.apache.commons.collections.FactoryUtils
 import uk.ac.warwick.tabula.JavaImports._
-import scala.reflect.ClassTag
+import scala.reflect._
 
 /**
  * Lazy lists are useful in Spring forms when you have a list of rich class objects
@@ -20,8 +20,8 @@ object LazyLists {
 	 * Creates a lazy list (optionally based on an existing list) that will create
 	 * elements on demand using the default no-arg constructor for the class.
 	 */
-	def simpleFactory[A](list: JList[A] = ArrayList[A]())(implicit tag: ClassTag[A]): JList[A] =
-		LazyList.decorate(list, FactoryUtils.instantiateFactory(tag.runtimeClass))
+	def simpleFactory[A:ClassTag](list: JList[A] = ArrayList[A]()): JList[A] =
+		LazyList.decorate(list, FactoryUtils.instantiateFactory(classTag[A].runtimeClass))
 			.asInstanceOf[JList[A]]
 
 }

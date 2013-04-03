@@ -14,7 +14,7 @@ import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
-import scala.reflect.ClassTag
+import scala.reflect._
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -48,16 +48,14 @@ trait Daoisms {
 		try fn(sess) finally sess.close()
 	}
 
-	class NiceQueryCreator(session: Session) {
-		def newCriteria[A](implicit tag: ClassTag[A]) = new ScalaCriteria[A](session.createCriteria(tag.runtimeClass))
-		def newQuery[A](hql: String)(implicit tag: ClassTag[A]) = new ScalaQuery[A](session.createQuery(hql))
-	}
-
 	/**
 	 * Adds a method to Session which returns a wrapped Criteria or Query that works
 	 * better with Scala's generics support.
 	 */
-	implicit def niceCriteriaCreator(session: Session) = new NiceQueryCreator(session)
+	implicit class NiceQueryCreator(session: Session) {
+		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
+		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
+	}
 
 	/**
 	 * type-safe session.get. returns an Option object, which will match None if
@@ -66,11 +64,13 @@ trait Daoisms {
 	 * For CanBeDeleted entities, it also checks if the entity is deleted and
 	 * the notDeleted filter is enabled, in which case it also returns None.
 	 */
-	protected def getById[A](id: String)(implicit tag: ClassTag[A]): Option[A] =
-		session.get(tag.runtimeClass.getName(), id) match {
+	protected def getById[A:ClassTag](id: String): Option[A] = {
+		val runtimeClass = classTag[A].runtimeClass
+		session.get(runtimeClass.getName(), id) match {
 			case entity: CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
-			case entity: Any if tag.runtimeClass.isInstance(entity) => Some(entity.asInstanceOf[A])
+			case entity: Any if runtimeClass.isInstance(entity) => Some(entity.asInstanceOf[A])
 			case _ => None
 		}
+	}
 
 }

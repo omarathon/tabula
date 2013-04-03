@@ -18,16 +18,14 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import org.hibernate.annotations.ForeignKey
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.MarkingMethod._
-import scala.reflect.ClassTag
-import scala.Some
-
+import scala.reflect._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -309,14 +307,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Find a FormField on the Assignment with the given name and type.
 	 * A field with a matching name but not a matching type is ignored.
 	 */
-	def findFieldOfType[A <: FormField](name: String)(implicit tag: ClassTag[A]): Option[A] =
+	def findFieldOfType[A <: FormField : ClassTag](name: String): Option[A] =
 		findField(name) match {
-			case Some(field) if tag.runtimeClass.isInstance(field) => Some(field.asInstanceOf[A])
+			case Some(field) if classTag[A].runtimeClass.isInstance(field) => Some(field.asInstanceOf[A])
 			case _ => None
 		}
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
-	def fullFeedback = feedbacks.filterNot(_.isPlaceholder)
+	def fullFeedback = feedbacks.filterNot(_.isPlaceholder).toSeq
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countFullFeedback = feedbackService.countFullFeedback(this)
 	def hasFullFeedback = countFullFeedback > 0
@@ -478,9 +476,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		"closeDate" -> closeDate,
 		"module" -> module)
 
-    def getUniIdsWithSubmissionOrFeedback = 
-    	(submissions map { _.universityId }).toSet ++
-    	(fullFeedback map { _.universityId }).toSet
+    def getUniIdsWithSubmissionOrFeedback = {
+        var idsWithSubmissionOrFeedback: Set[String] = Set()
+        
+        for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
+        for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
+        
+        idsWithSubmissionOrFeedback
+    }   
 			
 }
 
