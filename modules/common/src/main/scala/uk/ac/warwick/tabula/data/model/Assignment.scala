@@ -27,7 +27,7 @@ import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import scala.reflect.ClassTag
 import scala.Some
-import uk.ac.warwick.tabula.data.model.SubmissionsReport
+
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -478,14 +478,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		"closeDate" -> closeDate,
 		"module" -> module)
 
-    def getUniIdsWithSubmissionOrFeedback = {
-        var idsWithSubmissionOrFeedback: Set[String] = Set()
-        
-        for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
-        for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
-        
-        idsWithSubmissionOrFeedback
-    }   
+    def getUniIdsWithSubmissionOrFeedback = 
+    	(submissions map { _.universityId }).toSet ++
+    	(fullFeedback map { _.universityId }).toSet
 			
 }
 

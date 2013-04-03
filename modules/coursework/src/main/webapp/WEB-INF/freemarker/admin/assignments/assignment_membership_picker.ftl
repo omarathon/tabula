@@ -65,7 +65,7 @@
 						   name="assessmentGroups"
 						   value="${group.id}"
 						   data-id = "${group.upstreamAssignment.id}"
-						   data-occurrence = "${group.occurrence}" />
+						   data-occurrence = "${group.occurrence!""}" />
 				</#list>
 			<#else>
 				<@f.hidden class="empty-group group-id" name="assessmentGroups" value="" />

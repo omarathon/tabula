@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
+
 import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 import org.joda.time.DateTime
 
@@ -18,7 +20,7 @@ import uk.ac.warwick.tabula.services.{UserLookupService, AuditEventIndexService}
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 
-class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with Unaudited with ReadOnly {
+class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Results] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
@@ -26,73 +28,47 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 
-	@BeanProperty var students:Seq[Item] = _
-	@BeanProperty var awaitingSubmissionExtended:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmissionWithinExtension:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmissionExtensionRequested:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmissionExtensionExpired:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmissionExtensionRejected:Seq[(User, Extension)] = _
-	@BeanProperty var awaitingSubmissionNoExtension:Seq[User] = _
-	@BeanProperty var whoDownloaded: Seq[(User, DateTime)] = _
-	@BeanProperty var stillToDownload: Seq[Item] =_
-	@BeanProperty var hasPublishedFeedback: Boolean =_
-	@BeanProperty var hasOriginalityReport: Boolean =_
-	@BeanProperty var mustReleaseForMarking: Boolean =_
-
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 
-	def applyInternal(){
+	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
-		hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
+		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
 		val moduleMembers = assignmentMembershipService.determineMembershipUsers(assignment)
-		val unSubmitted =  moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
-		val withExtension = unSubmitted.map(member => (member, assignment.findExtension(member.getWarwickId)))
-		
-		awaitingSubmissionExtended =  Option(moduleMembers) match {
-			case Some(members) => {
-				val result = withExtension.flatMap(pair => pair match {
-					case (u, Some(extension)) => List(Pair(u, extension))
-					case (u, None) => Nil
-				})
-				result
-			}
-			case None => Nil
-		}
-		
-		awaitingSubmissionNoExtension =  Option(moduleMembers) match {
-			case Some(members) => {
-				val result = withExtension.flatMap(pair => pair match {
-					case (u, Some(extension)) => Nil
-					case (u, None) => List(u)
-				})
-				result
-			}
-			case None => Nil
-		}
-		
-		awaitingSubmissionWithinExtension = awaitingSubmissionExtended.filter(member => assignment.isWithinExtension(member._1.getUserId))
-		
-		awaitingSubmissionExtensionRequested = awaitingSubmissionExtended.filter(member => member._2.isAwaitingApproval)
-		
-		awaitingSubmissionExtensionRejected = awaitingSubmissionExtended.filter(member => member._2.rejected)
-		
-		awaitingSubmissionExtensionExpired = 
-			awaitingSubmissionExtended
-				.diff(awaitingSubmissionExtensionRequested)
-				.diff(awaitingSubmissionWithinExtension)
-				.diff(awaitingSubmissionExtensionRejected)
+		val unsubmittedMembers = moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
+		val withExtension = unsubmittedMembers.map(member => (member, assignment.findExtension(member.getWarwickId)))
 		
 		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-		mustReleaseForMarking = assignment.markingWorkflow != null
+		val mustReleaseForMarking = assignment.markingWorkflow != null
 		
-		whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
+		val whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
 		
-		students = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
+		val unsubmitted = for (user <- unsubmittedMembers) yield {
+			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == user.getWarwickId)
+			
+			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
+			
+			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+				new ExtensionListItem(
+					extension=extension,
+					within=assignment.isWithinExtension(user.getUserId)
+				)
+			}
+			
+			Item(
+				uniId=user.getWarwickId, 
+				enhancedSubmission=None, 
+				enhancedFeedback=None,
+				enhancedExtension=enhancedExtensionForUniId,
+				fullName=user.getFullName
+			)
+		}
+		val submitted = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
 			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
+			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
 
 			val userFilter = moduleMembers.filter(member => member.getWarwickId == uniId)
 			val user = if(userFilter.isEmpty) {
@@ -102,38 +78,73 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			}
 
 			val userFullName = user.getFullName
+			
+			if (usersSubmissions.size > 1) throw new IllegalStateException("More than one Submission for " + uniId)
+			if (usersFeedback.size > 1) throw new IllegalStateException("More than one Feedback for " + uniId)
+			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + uniId)
 
-			val enhancedSubmissionForUniId = usersSubmissions.toList match {
-				case head :: Nil => head
-				case head :: others => throw new IllegalStateException("More than one SubmissionListItem (" + usersSubmissions.size + ") for " + uniId)
-				case Nil => new SubmissionListItem(new Submission(), false)
+			val enhancedSubmissionForUniId = usersSubmissions.headOption
+
+			val enhancedFeedbackForUniId = usersFeedback.headOption map { feedback =>
+				new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+						x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+			}
+			
+			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+				new ExtensionListItem(
+					extension=extension,
+					within=assignment.isWithinExtension(user.getUserId)
+				)
 			}
 
-			if (usersFeedback.size > 1) {
-				throw new IllegalStateException("More than one Feedback for " + uniId)
-			}
-
-			val enhancedFeedbackForUniId = usersFeedback.headOption match {
-				case Some(feedback) => {
-					new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
-							x._2.isAfter(feedback.mostRecentAttachmentUpload))})
-				}
-				case _ => null
-			}
-
-			new Item(uniId, enhancedSubmissionForUniId, enhancedFeedbackForUniId, userFullName)
+			Item(
+				uniId=uniId, 
+				enhancedSubmission=enhancedSubmissionForUniId, 
+				enhancedFeedback=enhancedFeedbackForUniId,
+				enhancedExtension=enhancedExtensionForUniId,
+				fullName=userFullName
+			)
 		}
 		
-		val membersWithPublishedFeedback = students.filter { student => 
-			student.enhancedFeedback != null && student.enhancedFeedback.feedback.checkedReleased
+		val membersWithPublishedFeedback = submitted.filter { student => 
+			student.enhancedFeedback map { _.feedback.checkedReleased } getOrElse (false)
 		}
 
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
-		hasPublishedFeedback = !membersWithPublishedFeedback.isEmpty
+		val hasPublishedFeedback = !membersWithPublishedFeedback.isEmpty
 		
-		stillToDownload = membersWithPublishedFeedback filter { !_.enhancedFeedback.downloaded }
+		val stillToDownload = membersWithPublishedFeedback filter { item => !(item.enhancedFeedback map { _.downloaded } getOrElse(false)) }
+		
+		Results(
+			students=unsubmitted ++ submitted,
+			whoDownloaded=whoDownloaded,
+			stillToDownload=stillToDownload,
+			hasPublishedFeedback=hasPublishedFeedback,
+			hasOriginalityReport=hasOriginalityReport,
+			mustReleaseForMarking=mustReleaseForMarking
+		)
 	}
 }
 
+case class Results(
+	val students:Seq[Item],
+	val whoDownloaded: Seq[(User, DateTime)],
+	val stillToDownload: Seq[Item],
+	val hasPublishedFeedback: Boolean,
+	val hasOriginalityReport: Boolean,
+	val mustReleaseForMarking: Boolean
+)
+
 // Simple object holder
-class Item(val uniId: String, val enhancedSubmission: SubmissionListItem, val enhancedFeedback: FeedbackListItem, val fullName: String)
+case class Item(
+	val uniId: String, 
+	val fullName: String,
+	val enhancedSubmission: Option[SubmissionListItem], 
+	val enhancedFeedback: Option[FeedbackListItem],
+	val enhancedExtension: Option[ExtensionListItem]
+)
+
+case class ExtensionListItem(
+	val extension: Extension,
+	val within: Boolean
+)
