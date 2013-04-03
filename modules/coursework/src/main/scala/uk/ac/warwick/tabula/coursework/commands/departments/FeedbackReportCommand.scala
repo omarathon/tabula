@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.services.{AuditEventQueryMethods, AssignmentService,
 import uk.ac.warwick.spring.Wire
 import org.joda.time.format.DateTimeFormat
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.commands.Unaudited
@@ -14,6 +15,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import collection.JavaConversions._
 import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
 
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
@@ -28,20 +30,50 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 	
 	val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
 	
+	var dateCellStyle : XSSFCellStyle = null
+	var percentageCellStyle : XSSFCellStyle = null
+	
+	
 	def applyInternal() = {
 		val workbook = new XSSFWorkbook()
+		dateCellStyle = createDateCellStyle(workbook)
+		percentageCellStyle = createPercentageCellStyle(workbook)
 		val sheet = generateAssignmentSheet(department, workbook)
 		populateAssignmentSheet(sheet)
 		formatWorksheet(sheet)
 		workbook
 	}
 
-	def addCell(value: String, row: XSSFRow) {
+	def addCell(value: String, row: XSSFRow) : Int = {
 		val cellNum = if(row.getLastCellNum == -1) 0 else row.getLastCellNum 	// if row has no cells, getLastCellNum() returns -1. aargh.
 		row.createCell(cellNum).setCellValue(value)
+		cellNum
+	}
+	
+	
+	def addCell(value: String, row: XSSFRow, style: XSSFCellStyle) : Int = {
+		var cellNum = addCell(value, row)
+		var cell = row.getCell(cellNum)
+		cell.setCellStyle(style)
+		cellNum
 	}
 
-	def generateAssignmentSheet(dept: Department, workbook: XSSFWorkbook) = {
+	def createDateCellStyle(workbook: XSSFWorkbook) = {
+		val createHelper = workbook.getCreationHelper
+		val cellStyle = workbook.createCellStyle
+		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yy"))
+		cellStyle
+	}
+	
+	def createPercentageCellStyle(workbook: XSSFWorkbook) = {
+		val createHelper = workbook.getCreationHelper
+		val cellStyle = workbook.createCellStyle
+		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
+		cellStyle
+	}
+	
+	
+	def generateAssignmentSheet(dept: Department, workbook: XSSFWorkbook) = {		
 		val sheet = workbook.createSheet("Report for " + safeDeptName(dept))
 
 		// add header row
@@ -57,6 +89,15 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		addCell("On-time feedback %", header)
 		addCell("Late feedback", header)
 		addCell("Late feedback %", header)
+		
+		// set header style
+		var headerStyle = workbook.createCellStyle();
+		var font = workbook.createFont()
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+		font.setFontName("Arial")
+    	headerStyle.setFont(font)
+    	header.setRowStyle(headerStyle)
+    	
 		sheet
 	}
 
@@ -67,7 +108,7 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			addCell(assignment.name, row)
 			addCell(assignment.module.code.toUpperCase, row)
-			addCell(dateFormatter.print(assignment.closeDate), row)
+			addCell(dateFormatter.print(assignment.closeDate), row, dateCellStyle)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addCell(numberOfStudents.toString, row)
 			addCell(assignment.submissions.size.toString, row)
@@ -78,9 +119,9 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 			val onTimePercentage = if (totalPublished == 0) "N/A" else ((onTime / totalPublished)*100).toString
 			val latePercentage = if (totalPublished == 0) "N/A" else ((late / totalPublished)*100).toString
 			addCell(onTime.toString, row)
-			addCell(onTimePercentage, row)
+			addCell(onTimePercentage, row, percentageCellStyle)
 			addCell(late.toString, row)
-			addCell(latePercentage, row)
+			addCell(latePercentage, row, percentageCellStyle)
 		}
 	}
 
