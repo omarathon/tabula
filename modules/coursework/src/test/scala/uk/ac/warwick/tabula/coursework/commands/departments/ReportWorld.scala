@@ -20,6 +20,9 @@ import uk.ac.warwick.userlookup.User
 trait ReportWorld extends AppContextTestBase with Mockito {
 	
 	val department = new Department
+	department.code = "IN"
+	department.name = "Test Department"
+		
 	val moduleOne = new Module("IN101", department)
 	val moduleTwo = new Module("IN102", department)
 
