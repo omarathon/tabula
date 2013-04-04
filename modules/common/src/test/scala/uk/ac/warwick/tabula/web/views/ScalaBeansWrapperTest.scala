@@ -76,7 +76,7 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	  }
 	   
 	  class ListHolder {
-	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
+	 	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
 	  }
 	   
 	  new ListHolder().list.size should be (2)

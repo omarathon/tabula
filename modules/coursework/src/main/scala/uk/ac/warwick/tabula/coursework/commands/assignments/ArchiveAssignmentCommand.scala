@@ -16,7 +16,7 @@ class ArchiveAssignmentCommand(val module: Module, val assignment: Assignment) e
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Archive, assignment)
 
-	@BeanProperty var unarchive: Boolean = false
+	var unarchive: Boolean = false
 
 	def applyInternal() {
 		transactional() {

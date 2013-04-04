@@ -30,9 +30,9 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 	var zipService = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 	
-    @BeanProperty var filename: String = _
+    var filename: String = _
 
-    @BeanProperty var students: JList[String] = ArrayList()
+    var students: JList[String] = ArrayList()
     
     var feedbacks: JList[Feedback] = _
     

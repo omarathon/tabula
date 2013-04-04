@@ -25,8 +25,8 @@ class DeleteFeedbackCommand(val module: Module, val assignment: Assignment) exte
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
-	@BeanProperty var confirm: Boolean = false
+	var feedbacks: JList[Feedback] = ArrayList()
+	var confirm: Boolean = false
 
 	def applyInternal() = {
 		for (feedback <- feedbacks) feedbackDao.delete(feedback)

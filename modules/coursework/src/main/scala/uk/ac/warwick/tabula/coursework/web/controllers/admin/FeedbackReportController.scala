@@ -31,13 +31,13 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
-	
+
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department) =
 		new FeedbackReportCommand(dept)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def generateReport(cmd: FeedbackReportCommand) = {
-		new ExcelView(cmd.department.getName + " feedback report.xlsx", cmd.apply())
+		new ExcelView(cmd.department.name + " feedback report.xlsx", cmd.apply())
 	}
-		
+
 }

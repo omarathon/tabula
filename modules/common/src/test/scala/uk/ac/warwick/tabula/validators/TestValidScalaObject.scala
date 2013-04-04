@@ -10,6 +10,6 @@ class TestValidScalaObject {
   }
   
   @NotEmpty
-  @BeanProperty var name:String =_
+  var name:String =_
 }
     

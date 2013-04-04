@@ -22,7 +22,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
- * 
+ *
  * @deprecated Use version in home module instead
  */
 
@@ -36,8 +36,8 @@ abstract class BaseSysadminController extends BaseController {
 /* Just a pojo to bind to; actually used in scheduling */
 class ReindexForm {
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from: DateTime = _
-	@BeanProperty var deptCode: String = _
+	var from: DateTime = _
+	var deptCode: String = _
 }
 
 @Controller
@@ -56,14 +56,14 @@ class SysadminController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/god"))
 class GodModeController extends BaseSysadminController {
-	
+
 	@RequestMapping(method = Array(HEAD, GET))
 	def form(cmd: GodModeCommand) = Mav("sysadmin/masquerade/form")
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid cmd: GodModeCommand, response: HttpServletResponse) = {
-		cmd.apply() map { response addCookie _ }
+		for (cookie <- cmd.apply()) response.addCookie(cookie)
 		redirectToHome
 	}
-	
+
 }

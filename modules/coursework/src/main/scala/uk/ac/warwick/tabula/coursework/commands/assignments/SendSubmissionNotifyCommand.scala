@@ -25,13 +25,13 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 import language.implicitConversions
 
 class SendSubmissionNotifyCommand (
-		@BeanProperty val submission: Submission, 
-		@BeanProperty val users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails with Public { 
+		val submission: Submission, 
+		val users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails with Public { 
 
 	mandatory(submission)
 	
-	@BeanProperty var assignment: Assignment = submission.assignment
-	@BeanProperty var module: Module = assignment.module
+	var assignment: Assignment = submission.assignment
+	var module: Module = assignment.module
 	
 	var userLookup = Wire.auto[UserLookupService]
 	var userSettings = Wire.auto[UserSettingsService]

@@ -27,7 +27,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
-	@BeanProperty var members:Seq[String] =_
+	var members:Seq[String] =_
 	var feedbackService = Wire.auto[FeedbackService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 

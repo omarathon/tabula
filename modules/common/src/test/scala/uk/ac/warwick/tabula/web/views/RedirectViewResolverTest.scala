@@ -15,20 +15,20 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
   @Test def redirectPage {
     val request = mockRequest
     request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
-    
+
     val response = mockResponse
 	val resolver = new RedirectViewResolver
-	resolver.setToplevelUrl("https://tabula.warwick.ac.uk")
-	resolver.setContext("/")
-	
+	resolver.toplevelUrl = "https://tabula.warwick.ac.uk"
+	resolver.context = "/"
+
 	resolver.resolveViewName("redirect:/sysadmin/departments", null) match {
 	  case redirect:RedirectView => {
 	    redirect.render(null, request, response)
 	    response.getRedirectedUrl() should be ("https://tabula.warwick.ac.uk/sysadmin/departments")
 	  }
 	}
-    
+
     resolver.resolveViewName("sysadmin/departments", null) should be (null)
   }
-  
+
 }

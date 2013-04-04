@@ -7,7 +7,7 @@ import scala.beans.BeanProperty
 trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
-	@BeanProperty var settings: Map[String, Any] = Map()
+	var settings: Map[String, Any] = Map()
 	
 	protected def -=(key: String) = {
 		settings -= key

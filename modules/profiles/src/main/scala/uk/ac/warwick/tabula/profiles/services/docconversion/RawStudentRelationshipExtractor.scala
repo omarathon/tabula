@@ -24,14 +24,14 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class RawStudentRelationship {
 
-	@BeanProperty var targetUniversityId: String = _
-	@BeanProperty var agentUniversityId: String = _
-	@BeanProperty var agentName: String = _
-	@BeanProperty var isValid = true
-	@BeanProperty var warningMessage: String = _
+	var targetUniversityId: String = _
+	var agentUniversityId: String = _
+	var agentName: String = _
+	var isValid = true
+	var warningMessage: String = _
 	
-	@BeanProperty var agentMember: Member = _
-	@BeanProperty var targetMember: Member = _
+	var agentMember: Member = _
+	var targetMember: Member = _
 	
 	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
 		this();

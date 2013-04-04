@@ -39,12 +39,12 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 	
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
-	@BeanProperty var enable: Boolean = service.enabled
+	var enable: Boolean = service.enabled
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
+	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
 
-	@BeanProperty var message: String = service.message.orNull
+	var message: String = service.message.orNull
 	
 	def applyInternal() {
 		if (!enable) {

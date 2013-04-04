@@ -1163,6 +1163,22 @@ h1.with-settings {
 
 			h6 { display: inline; }
 		}
+		
+		.profile-link {
+			font-weight: bold;
+			color: @grayLight;
+			text-decoration: none;
+			
+			&:hover,&:active {
+				text-decoration: underline;
+			}
+		}
+		
+		.hover {
+			background-color: #ddd;
+			background-color: fadeout(lighten(#ff0,30%), 40%);
+		}
+		
 	} // #tutors
 	
 	#container ul.profile-user-list {

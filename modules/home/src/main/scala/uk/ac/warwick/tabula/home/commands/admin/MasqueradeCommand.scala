@@ -19,8 +19,8 @@ class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
 	var userLookup = Wire.auto[UserLookupInterface]
 	
-	@BeanProperty var usercode: String = _	
-	@BeanProperty var action: String = _
+	var usercode: String = _	
+	var action: String = _
 	
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(null))

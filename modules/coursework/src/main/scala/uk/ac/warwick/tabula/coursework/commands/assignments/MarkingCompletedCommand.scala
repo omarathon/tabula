@@ -18,14 +18,14 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 	var stateService = Wire.auto[StateService]
 
-	@BeanProperty var students: JList[String] = ArrayList()
-	@BeanProperty var markerFeedbacks: JList[MarkerFeedback] = ArrayList()
+	var students: JList[String] = ArrayList()
+	var markerFeedbacks: JList[MarkerFeedback] = ArrayList()
 
-	@BeanProperty var noMarks: JList[MarkerFeedback] = ArrayList()
-	@BeanProperty var noFeedback: JList[MarkerFeedback] = ArrayList()
-	@BeanProperty var releasedFeedback: JList[MarkerFeedback] = ArrayList()
+	var noMarks: JList[MarkerFeedback] = ArrayList()
+	var noFeedback: JList[MarkerFeedback] = ArrayList()
+	var releasedFeedback: JList[MarkerFeedback] = ArrayList()
 
-	@BeanProperty var confirm: Boolean = false
+	var confirm: Boolean = false
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Create, assignment)

@@ -15,7 +15,7 @@ class ModifiedExtensionRequestMessage(extension: Extension, userId: String)
 			"reasonForRequest" -> extension.reason,
 			"attachments" -> extension.attachments,
 			"assignment" -> assignment,
-			"student" -> userLookup.getUserByUserId(extension.getUserId),
+			"student" -> userLookup.getUserByUserId(extension.userId),
 			"module" -> module,
 			"user" -> recipient,
 			"path" -> Routes.admin.assignment.extension.review(assignment, extension.universityId)

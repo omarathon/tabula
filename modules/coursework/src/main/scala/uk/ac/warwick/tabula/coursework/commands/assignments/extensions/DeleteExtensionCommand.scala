@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
 	with Daoisms with Logging {
 	
-	@BeanProperty var universityIds: JList[String] = LazyLists.simpleFactory()
+	var universityIds: JList[String] = LazyLists.simpleFactory()
 
 	universityIds.add(universityId)
 

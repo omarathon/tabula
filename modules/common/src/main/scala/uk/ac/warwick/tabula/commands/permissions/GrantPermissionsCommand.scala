@@ -30,9 +30,9 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 	var permissionsService = Wire.auto[PermissionsService]
 	var securityService = Wire.auto[SecurityService]
 	
-	@BeanProperty var permission: Permission = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
-	@BeanProperty var overrideType: Boolean = _
+	var permission: Permission = _
+	var usercodes: JList[String] = ArrayList()
+	var overrideType: Boolean = _
 	
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 	

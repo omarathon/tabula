@@ -57,7 +57,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	var secondMarkers = new UserGroup()
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingMethodUserType")
-	@BeanProperty var markingMethod: MarkingMethod = _
+	var markingMethod: MarkingMethod = _
 
 	/** If true, the submitter chooses their first marker from a dropdown */
 	def studentsChooseMarker = markingMethod == StudentsChooseMarker

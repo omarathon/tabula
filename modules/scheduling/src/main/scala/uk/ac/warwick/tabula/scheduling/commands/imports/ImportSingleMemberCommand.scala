@@ -51,9 +51,9 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]	
 	
 	// A couple of intermediate properties that will be transformed later
-	@BeanProperty var photoOption: Option[Array[Byte]] = _
-	@BeanProperty var homeDepartmentCode: String = _
-	//@BeanProperty var studyDepartmentCode: String = _
+	var photoOption: Option[Array[Byte]] = _
+	var homeDepartmentCode: String = _
+	//var studyDepartmentCode: String = _
 	
 	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
 		this()

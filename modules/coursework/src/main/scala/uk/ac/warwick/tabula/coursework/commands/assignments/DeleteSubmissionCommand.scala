@@ -30,8 +30,8 @@ class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) ex
 	var submissionService = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
-	@BeanProperty var confirm: Boolean = false
+	var submissions: JList[Submission] = ArrayList()
+	var confirm: Boolean = false
 
 	def applyInternal() = {
 		for (submission <- submissions) submissionService.delete(submission)

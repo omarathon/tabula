@@ -34,10 +34,10 @@ class UploadedFile extends BindListener {
 	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 		
 	// files bound from an upload request, prior to being persisted
-	@BeanProperty var upload: JList[MultipartFile] = ArrayList()
+	var upload: JList[MultipartFile] = ArrayList()
 
 	// files that have been persisted - can be represented in forms by ID
-	@BeanProperty var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
+	var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
 
 	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
 	def attachedFileNames: Seq[String] = attached.map(file => file.getName)

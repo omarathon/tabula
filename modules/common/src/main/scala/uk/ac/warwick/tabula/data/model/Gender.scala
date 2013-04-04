@@ -4,7 +4,7 @@ import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class Gender(val dbValue: String, @BeanProperty val description: String)
+sealed abstract class Gender(val dbValue: String, val description: String)
 
 object Gender {
 	case object Male extends Gender("M", "Male")
