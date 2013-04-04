@@ -17,14 +17,14 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 
 class AuditLogQuery {
-	@BeanProperty var page: Int = 0
-	@BeanProperty var query: String = ""
+	var page: Int = 0
+	var query: String = ""
 }
 
 case class UserLookupQuery() {
 	var userLookup = Wire.auto[UserLookupInterface]
-	@BeanProperty var userId: String = _
-	@BeanProperty var uniId: String = _
+	var userId: String = _
+	var uniId: String = _
 
 	def user = {
 

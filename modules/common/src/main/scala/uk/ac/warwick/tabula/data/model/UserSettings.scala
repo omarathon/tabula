@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 class UserSettings extends GeneratedId with SettingsMap[UserSettings] with PermissionsTarget {
 	import UserSettings._
 	
-	@BeanProperty var userId: String = _
+	var userId: String = _
 	
 	def getAlertsSubmission = alertsSubmission
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull

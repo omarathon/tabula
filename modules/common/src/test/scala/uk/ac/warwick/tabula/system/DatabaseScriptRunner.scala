@@ -12,7 +12,7 @@ import scala.beans.BeanProperty
 class DatabaseScriptRunner extends InitializingBean {
     val populator = new ResourceDatabasePopulator
     
-    @BeanProperty var dataSource:DataSource =_
+    var dataSource:DataSource =_
     
     def setScripts(scripts:Array[Resource]) = {
     	populator.setScripts(scripts)

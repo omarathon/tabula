@@ -33,8 +33,8 @@ class GrantRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends C
 	var permissionsService = Wire.auto[PermissionsService]
 	var securityService = Wire.auto[SecurityService]
 	
-	@BeanProperty var roleDefinition: RoleDefinition = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
+	var roleDefinition: RoleDefinition = _
+	var usercodes: JList[String] = ArrayList()
 	
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 	

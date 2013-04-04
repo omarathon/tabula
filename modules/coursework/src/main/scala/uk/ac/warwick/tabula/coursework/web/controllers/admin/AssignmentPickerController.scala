@@ -57,7 +57,7 @@ class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] w
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	
-	@BeanProperty var searchTerm: String = ""
+	var searchTerm: String = ""
 		
 	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.department)
 }

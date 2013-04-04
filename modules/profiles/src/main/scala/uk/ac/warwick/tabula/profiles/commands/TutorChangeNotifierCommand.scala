@@ -17,9 +17,9 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newTutorPromise: Promise[Member])
 	extends Command[Unit] with UnicodeEmails with Public with FreemarkerRendering {
 	
-	@BeanProperty var notifyTutee: Boolean = false
-	@BeanProperty var notifyOldTutor: Boolean = false
-	@BeanProperty var notifyNewTutor: Boolean = false
+	var notifyTutee: Boolean = false
+	var notifyOldTutor: Boolean = false
+	var notifyNewTutor: Boolean = false
 
 	implicit var freemarker = Wire.auto[Configuration]
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")

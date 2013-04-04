@@ -20,7 +20,7 @@ import javax.validation.Valid
 class AppCommentsController extends BaseController {
 
 	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
-	
+
 	validatesSelf[AppCommentCommand]
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -32,7 +32,7 @@ class AppCommentsController extends BaseController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute command: AppCommentCommand, errors: Errors): Mav = {
-		if (errors hasErrors) {
+		if (errors.hasErrors) {
 			formView
 		} else {
 			command.apply()

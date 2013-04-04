@@ -19,7 +19,7 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	var userLookup = Wire.auto[UserLookupService]
-	@BeanProperty var completedFeedback:Seq[MarkerFeedbackItem] = _
+	var completedFeedback:Seq[MarkerFeedbackItem] = _
 
 	def applyInternal():Seq[MarkerFeedbackItem] = {
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)

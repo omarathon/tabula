@@ -40,24 +40,24 @@ class UserGroup extends GeneratedId {
 	@transient var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
-	@BeanProperty var baseWebgroup: String = _
+	var baseWebgroup: String = _
 
 	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var includeUsers: JList[String] = ArrayList()
+	var includeUsers: JList[String] = ArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var staticIncludeUsers: JList[String] = ArrayList()
+	var staticIncludeUsers: JList[String] = ArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var excludeUsers: JList[String] = ArrayList()
+	var excludeUsers: JList[String] = ArrayList()
 
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {

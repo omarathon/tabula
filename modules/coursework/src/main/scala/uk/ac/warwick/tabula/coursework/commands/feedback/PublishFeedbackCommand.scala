@@ -38,7 +38,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 	var replyAddress = Wire.property("${mail.noreply.to}")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 	
-	@BeanProperty var confirm: Boolean = false
+	var confirm: Boolean = false
 
 	case class MissingUser(universityId: String)
 	case class BadEmail(user: User, exception: Exception = null)

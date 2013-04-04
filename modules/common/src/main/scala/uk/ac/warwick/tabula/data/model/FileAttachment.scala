@@ -25,29 +25,29 @@ class FileAttachment extends GeneratedId {
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submission_id")
-	@BeanProperty var submissionValue: SavedSubmissionValue = null
+	var submissionValue: SavedSubmissionValue = null
 
 	// optional link to some Feedback
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_id")
-	@BeanProperty var feedback: Feedback = _
+	var feedback: Feedback = _
 
 	// optional link to an Extension
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="extension_id")
-	@BeanProperty var extension:Extension =_
+	var extension:Extension =_
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
 		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
 		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
-	@BeanProperty var markerFeedback:MarkerFeedback = _
+	var markerFeedback:MarkerFeedback = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
-	@BeanProperty var originalityReport: OriginalityReport = _
+	var originalityReport: OriginalityReport = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
-	@BeanProperty var feedbackForm: FeedbackTemplate = _
+	var feedbackForm: FeedbackTemplate = _
 
 	/**
 	 * WARNING this method isn't exhaustive. It only checks fields that are directly on this
@@ -56,10 +56,10 @@ class FileAttachment extends GeneratedId {
 	 */
 	def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
 
-	@BeanProperty var temporary: JBoolean = true
+	var temporary: JBoolean = true
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var dateUploaded: DateTime = new DateTime
+	var dateUploaded: DateTime = new DateTime
 
 	@transient private var _file: File = null
 	def file = {
@@ -106,8 +106,8 @@ class FileAttachment extends GeneratedId {
 
 	def hasData = file != null
 
-	@transient @BeanProperty var uploadedData: InputStream = null
-	@transient @BeanProperty var uploadedDataLength: Long = 0
+	@transient var uploadedData: InputStream = null
+	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {
 		case that: FileAttachment => {

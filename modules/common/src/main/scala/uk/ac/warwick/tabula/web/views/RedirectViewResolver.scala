@@ -19,10 +19,10 @@ class RedirectViewResolver extends ViewResolver with Ordered {
 	val redirectPattern = new Regex("redirect:(/.+)")
 
 	@Required
-	@BeanProperty var toplevelUrl: String = _
+	var toplevelUrl: String = _
 
 	@Required
-	@BeanProperty var context: String = _
+	var context: String = _
 
 	def resolveViewName(viewName: String, locale: Locale): View = viewName match {
 		case redirectPattern(urlPath) => {

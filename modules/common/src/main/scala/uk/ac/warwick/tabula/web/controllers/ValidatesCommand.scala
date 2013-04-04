@@ -16,7 +16,7 @@ import scala.reflect.ClassTag
  */
 trait ValidatesCommand {
 
-	@BeanProperty var validator: Validator = _
+	var validator: Validator = _
 
 	/**
 	 * When specifying a Validator for this controller, whether to

@@ -33,13 +33,13 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
-	@BeanProperty var fields = buildEmptyFields
+	var fields = buildEmptyFields
 
 	// used as a hint to the view.
-	@transient @BeanProperty var justSubmitted: Boolean = false
+	@transient var justSubmitted: Boolean = false
 
 	// just used as a hint to the view.
-	@transient @BeanProperty var plagiarismDeclaration: Boolean = false
+	@transient var plagiarismDeclaration: Boolean = false
 
 	override def onBind(result:BindingResult) {
 		for ((key, field) <- fields) field.onBind(result)

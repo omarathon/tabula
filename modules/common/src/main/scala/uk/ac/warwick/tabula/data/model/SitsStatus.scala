@@ -20,12 +20,12 @@ class SitsStatus {
 		this.fullName = fullName
 	}
 
-	@Id @BeanProperty var code: String = _
-	@BeanProperty var shortName: String = _
-	@BeanProperty var fullName: String = _
+	@Id var code: String = _
+	var shortName: String = _
+	var fullName: String = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var lastUpdatedDate = DateTime.now	
+	var lastUpdatedDate = DateTime.now	
 	
 	override def toString = fullName.toLowerCase()
 

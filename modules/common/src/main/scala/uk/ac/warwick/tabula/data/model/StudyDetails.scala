@@ -22,7 +22,7 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 	
 	@GenericGenerator(name = "generator", strategy = "foreign", parameters = Array(new Parameter(name="property", value = "student")))
 	@GeneratedValue(generator = "generator")
-	@Id @BeanProperty var universityId: String = _
+	@Id var universityId: String = _
 	
 	def id = universityId
 	
@@ -33,84 +33,84 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 
 trait StudyDetailsProperties {
 	
-	@BeanProperty var sprCode: String = _
-	@BeanProperty var sitsCourseCode: String = _
+	var sprCode: String = _
+	var sitsCourseCode: String = _
 	
 	@ManyToOne
 	@JoinColumn(name = "route_id")
-	@BeanProperty var route: Route = _
+	var route: Route = _
 	
 	@ManyToOne
 	@JoinColumn(name = "study_department_id")
-	@BeanProperty var studyDepartment: Department = _
+	var studyDepartment: Department = _
 	
-	@BeanProperty var yearOfStudy: JInteger = _
+	var yearOfStudy: JInteger = _
 
-	@BeanProperty var fundingSource: String = _
+	var fundingSource: String = _
 	
-	@BeanProperty var intendedAward: String = _
+	var intendedAward: String = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var beginDate: LocalDate = _
+	var beginDate: LocalDate = _
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var endDate: LocalDate = _
+	var endDate: LocalDate = _
 	
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-	@BeanProperty var expectedEndDate: LocalDate = _
+	var expectedEndDate: LocalDate = _
 	
-	@BeanProperty var courseYearLength: String = _	
+	var courseYearLength: String = _	
 
-	//@BeanProperty var sprStatusCode: String = _
+	//var sprStatusCode: String = _
 	@ManyToOne
 	@JoinColumn(name="sprStatusCode", referencedColumnName="code")
-	@BeanProperty var sprStatus: SitsStatus = _
+	var sprStatus: SitsStatus = _
 	
-	//@BeanProperty var enrolmentStatusCode: String = _
+	//var enrolmentStatusCode: String = _
 	@ManyToOne
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
-	@BeanProperty var enrolmentStatus: SitsStatus = _
+	var enrolmentStatus: SitsStatus = _
 	
 
-	//@BeanProperty var levelCode: String = _
+	//var levelCode: String = _
 	
 	@ManyToOne
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")	
-	@BeanProperty var modeOfAttendance: ModeOfAttendance = _
+	var modeOfAttendance: ModeOfAttendance = _
 	
-	@BeanProperty var ugPg: String = _
+	var ugPg: String = _
 	
-//	@BeanProperty var attendanceMode: String = _
+//	var attendanceMode: String = _
 //	
-//	@BeanProperty var programmeOfStudy: String = _	
-//	
-//	@Basic
-//	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-//	@BeanProperty var academicYear: AcademicYear = _
+//	var programmeOfStudy: String = _	
 //	
 //	@Basic
 //	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-//	@BeanProperty var courseStartYear: AcademicYear = _
+//	var academicYear: AcademicYear = _
 //	
 //	@Basic
 //	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-//	@BeanProperty var yearCommencedDegree: AcademicYear = _
+//	var courseStartYear: AcademicYear = _
 //	
 //	@Basic
 //	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-//	@BeanProperty var courseBaseYear: AcademicYear = _
+//	var yearCommencedDegree: AcademicYear = _
+//	
+//	@Basic
+//	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+//	var courseBaseYear: AcademicYear = _
 //	
 //	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
-//	@BeanProperty var courseEndDate: LocalDate = _
+//	var courseEndDate: LocalDate = _
 	
-//	@BeanProperty var transferReason: String = _
+//	var transferReason: String = _
 
 //	
-//	@BeanProperty var feeStatus: String = _
-//	@BeanProperty var domicile: String = _
-//	@BeanProperty var highestQualificationOnEntry: String = _
+//	var feeStatus: String = _
+//	var domicile: String = _
+//	var highestQualificationOnEntry: String = _
 //	
-//	@BeanProperty var lastInstitute: String = _
-//	@BeanProperty var lastSchool: String = _	
+//	var lastInstitute: String = _
+//	var lastSchool: String = _	
 	
 }

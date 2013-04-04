@@ -9,7 +9,7 @@ import scala.beans.BeanProperty
  * This is confusable with the Deleteable trait for the Delete() action.
  */
 trait CanBeDeleted {
-	@BeanProperty var deleted: JBoolean = false
+	var deleted: JBoolean = false
 
 	def markDeleted() = {
 		deleted = true

@@ -33,7 +33,7 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
-	@BeanProperty var query: String = _
+	var query: String = _
 		
 	def validQuery = 
 		(query.trim().length > MinimumQueryLength) &&

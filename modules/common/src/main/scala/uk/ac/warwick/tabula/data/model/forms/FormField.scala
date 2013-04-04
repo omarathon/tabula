@@ -56,10 +56,10 @@ abstract class FormField extends GeneratedId {
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
 
-	@BeanProperty var name: String = _
-	@BeanProperty var label: String = _
-	@BeanProperty var instructions: String = _
-	@BeanProperty var required: Boolean = _
+	var name: String = _
+	var label: String = _
+	var instructions: String = _
+	var required: Boolean = _
 
 	@Basic(optional = false)
 	@Access(AccessType.PROPERTY)
@@ -73,7 +73,7 @@ abstract class FormField extends GeneratedId {
 		propertiesMap = json.readValue(new StringReader(props), classOf[Map[String, Any]])
 	}
 
-	@transient @BeanProperty var propertiesMap: collection.Map[String, Any] = Map()
+	@transient var propertiesMap: collection.Map[String, Any] = Map()
 
 	protected def setProperty(name: String, value: Any) = {
 		propertiesMap += name -> value
@@ -94,7 +94,7 @@ abstract class FormField extends GeneratedId {
 	final def readOnly = isReadOnly
 
 	@Type(`type` = "int")
-	@BeanProperty var position: JInteger = 0
+	var position: JInteger = 0
 
 	/** Determines which Freemarker template is used to render it. */
 	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value

@@ -16,7 +16,7 @@ import org.springframework.web.context.request.ServletWebRequest
  * run the interceptor.
  */
 class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebRequestInterceptor with InitializingBean {
-	@BeanProperty var excludePath: String = _
+	var excludePath: String = _
 
 	private var excludeString: String = _
 

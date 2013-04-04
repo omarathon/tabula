@@ -4,7 +4,7 @@ import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class MemberUserType(val dbValue: String, @BeanProperty val description: String)
+sealed abstract class MemberUserType(val dbValue: String, val description: String)
 
 object MemberUserType {
 	case object Student extends MemberUserType("S", "Student")

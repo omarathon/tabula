@@ -34,7 +34,7 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, feedback)
 	
-	@BeanProperty var filename: String = _
+	var filename: String = _
 
 	private var fileFound: Boolean = _
 	

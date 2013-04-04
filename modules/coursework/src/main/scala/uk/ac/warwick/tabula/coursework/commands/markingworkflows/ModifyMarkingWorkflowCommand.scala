@@ -16,13 +16,13 @@ import uk.ac.warwick.tabula.permissions._
 
 /** Abstract base command for either creating or editing a MarkingWorkflow */
 abstract class ModifyMarkingWorkflowCommand(
-	@BeanProperty val department: Department) extends Command[MarkingWorkflow] with Daoisms with SelfValidating {
+	val department: Department) extends Command[MarkingWorkflow] with Daoisms with SelfValidating {
 
-	@BeanProperty var name: String = _
-	@BeanProperty var firstMarkers: JList[String] = ArrayList()
-	@BeanProperty var secondMarkers: JList[String] = ArrayList()
-	@BeanProperty var markingMethod: MarkingMethod = _
-	
+	var name: String = _
+	var firstMarkers: JList[String] = ArrayList()
+	var secondMarkers: JList[String] = ArrayList()
+	var markingMethod: MarkingMethod = _
+
 	// Subclasses can provide the "current" markingWorkflow if one applies, for validation.
 	def currentMarkingWorkflow: Option[MarkingWorkflow]
 
@@ -39,7 +39,7 @@ abstract class ModifyMarkingWorkflowCommand(
 
 		if (markingMethod == null)
 			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.none")
-		
+
 		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers"){
 			override def alreadyHasCode = hasDuplicates(firstMarkers)
 		}
@@ -63,17 +63,17 @@ abstract class ModifyMarkingWorkflowCommand(
 	def hasDuplicates(markers:JList[_]):Boolean = {
 		markers.distinct.size != markers.size
 	}
-	
+
 	// If there's a current markingWorkflow, returns whether "other" is a different
 	// scheme with the same name we're trying to use.
 	// If there's no current markingWorkflow we just check if it's just the same name.
 	def sameName(other: MarkingWorkflow) = currentMarkingWorkflow match {
-		case Some(existing) => 
+		case Some(existing) =>
 			other.id != existing.id && other.name == name
-		case None => 
+		case None =>
 			other.name == name
 	}
-		
+
 	// Called manually by controller.
 	def doBind() {
 	  firstMarkers = firstMarkers.filter(_.hasText)
@@ -82,8 +82,8 @@ abstract class ModifyMarkingWorkflowCommand(
 
 	def copyTo(scheme: MarkingWorkflow) {
 		scheme.name = name
-		scheme.firstMarkers.setIncludeUsers(firstMarkers)
-		scheme.secondMarkers.setIncludeUsers(secondMarkers)
+		scheme.firstMarkers.includeUsers = firstMarkers
+		scheme.secondMarkers.includeUsers = secondMarkers
 		scheme.markingMethod = markingMethod
 	}
 

@@ -20,10 +20,10 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	
 	PermissionCheck(Permissions.Department.ManageExtensionSettings, department)
 
-	@BeanProperty var allowExtensionRequests:Boolean = department.allowExtensionRequests
-	@BeanProperty var extensionGuidelineSummary:String = department.extensionGuidelineSummary
-	@BeanProperty var extensionGuidelineLink:String = department.extensionGuidelineLink
-	@BeanProperty var extensionManagers: JList[String] = ArrayList()
+	var allowExtensionRequests:Boolean = department.allowExtensionRequests
+	var extensionGuidelineSummary:String = department.extensionGuidelineSummary
+	var extensionGuidelineLink:String = department.extensionGuidelineLink
+	var extensionManagers: JList[String] = ArrayList()
 	
 	extensionManagers.addAll(department.extensionManagers.includeUsers)
 
@@ -49,7 +49,7 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 				department.extensionGuidelineSummary = extensionGuidelineSummary
 				department.extensionGuidelineLink = extensionGuidelineLink
 
-				department.extensionManagers.setIncludeUsers(extensionManagers)
+				department.extensionManagers.includeUsers = extensionManagers
 			}
 		}
 	}

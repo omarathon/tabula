@@ -39,7 +39,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 
 class SwappableUserLookupService(d: UserLookupService) extends UserLookupServiceAdapter(d)
 
-abstract class UserLookupServiceAdapter(@BeanProperty var delegate: UserLookupService) extends UserLookupService {
+abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends UserLookupService {
 
 	def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
 	def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)

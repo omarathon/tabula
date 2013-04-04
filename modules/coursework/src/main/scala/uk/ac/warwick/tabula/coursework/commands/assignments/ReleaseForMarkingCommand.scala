@@ -22,9 +22,9 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]
 
-	@BeanProperty var students: JList[String] = ArrayList()
-	@BeanProperty var confirm: Boolean = false
-	@BeanProperty var invalidFeedback: JList[Feedback] = ArrayList()
+	var students: JList[String] = ArrayList()
+	var confirm: Boolean = false
+	var invalidFeedback: JList[Feedback] = ArrayList()
 
 	var feedbacksUpdated = 0
 

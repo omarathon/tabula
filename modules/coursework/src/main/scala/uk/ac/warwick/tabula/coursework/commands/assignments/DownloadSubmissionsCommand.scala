@@ -25,9 +25,9 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	var zipService = Wire.auto[ZipService]
 	var submissionService = Wire.auto[SubmissionService]
 
-	@BeanProperty var filename: String = _
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
-	@BeanProperty var students: JList[String] = ArrayList()
+	var filename: String = _
+	var submissions: JList[Submission] = ArrayList()
+	var students: JList[String] = ArrayList()
 
 	override def applyInternal(): RenderableZip = {
 		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException

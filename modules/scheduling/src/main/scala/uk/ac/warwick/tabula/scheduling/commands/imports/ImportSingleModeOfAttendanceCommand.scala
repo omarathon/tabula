@@ -27,9 +27,9 @@ class ImportSingleModeOfAttendanceCommand(resultSet: ResultSet) extends Command[
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
 	// A couple of intermediate properties that will be transformed later
-	@BeanProperty var code: String = _
-	@BeanProperty var shortName: String = _
-	@BeanProperty var fullName: String = _
+	var code: String = _
+	var shortName: String = _
+	var fullName: String = _
 	
 	this.code = resultSet.getString("moa_code")
 	this.shortName = resultSet.getString("moa_snam")

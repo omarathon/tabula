@@ -21,17 +21,17 @@ class Route extends GeneratedId {
 		this.department = department
 	}
 
-	@BeanProperty var code: String = _
-	@BeanProperty var name: String = _
+	var code: String = _
+	var name: String = _
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
-	@BeanProperty var department: Department = _
+	var department: Department = _
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
-	@BeanProperty var degreeType: DegreeType = _
+	var degreeType: DegreeType = _
 
-	@BeanProperty var active: Boolean = _
+	var active: Boolean = _
 
 	override def toString = "Route[" + code + "]"
 

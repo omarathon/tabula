@@ -14,9 +14,9 @@ import org.joda.time.LocalTime
 
 class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship) extends Command[MeetingRecord] with SelfValidating with FormattedHtml {
 
-	@BeanProperty var title: String = _
-	@BeanProperty var description: String = _
-	@BeanProperty var meetingDate: LocalDate = DateTime.now.toLocalDate
+	var title: String = _
+	var description: String = _
+	var meetingDate: LocalDate = DateTime.now.toLocalDate
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
 	

@@ -36,19 +36,19 @@ abstract class Features {
 	
 	// FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
 	
-	@Value("${features.emailStudents:false}") @BeanProperty var emailStudents: Boolean = defaults.emailStudents
-	@Value("${features.collectRatings:true}") @BeanProperty var collectRatings: Boolean = defaults.collectRatings
-	@Value("${features.submissions:true}") @BeanProperty var submissions: Boolean = defaults.submissions
-	@Value("${features.privacyStatement:true}") @BeanProperty var privacyStatement: Boolean = defaults.privacyStatement
-	@Value("${features.collectMarks:true}") @BeanProperty var collectMarks: Boolean = defaults.collectMarks
-	@Value("${features.turnitin:true}") @BeanProperty var turnitin: Boolean = defaults.turnitin
-	@Value("${features.assignmentMembership:true}") @BeanProperty var assignmentMembership: Boolean = defaults.assignmentMembership
-	@Value("${features.extensions:true}") @BeanProperty var extensions: Boolean = defaults.extensions
-	@Value("${features.combinedForm:true}") @BeanProperty var combinedForm: Boolean = defaults.combinedForm
-	@Value("${features.feedbackTemplates:true}") @BeanProperty var feedbackTemplates: Boolean = defaults.feedbackTemplates
-	@Value("${features.markingWorkflows:true}") @BeanProperty var markingWorkflows: Boolean = defaults.markingWorkflows
-	@Value("${features.markerFeedback:true}") @BeanProperty var markerFeedback: Boolean = defaults.markerFeedback
-	@Value("${features.profiles:true}") @BeanProperty var profiles: Boolean = defaults.profiles
+	@Value("${features.emailStudents:false}") var emailStudents: Boolean = defaults.emailStudents
+	@Value("${features.collectRatings:true}") var collectRatings: Boolean = defaults.collectRatings
+	@Value("${features.submissions:true}") var submissions: Boolean = defaults.submissions
+	@Value("${features.privacyStatement:true}") var privacyStatement: Boolean = defaults.privacyStatement
+	@Value("${features.collectMarks:true}") var collectMarks: Boolean = defaults.collectMarks
+	@Value("${features.turnitin:true}") var turnitin: Boolean = defaults.turnitin
+	@Value("${features.assignmentMembership:true}") var assignmentMembership: Boolean = defaults.assignmentMembership
+	@Value("${features.extensions:true}") var extensions: Boolean = defaults.extensions
+	@Value("${features.combinedForm:true}") var combinedForm: Boolean = defaults.combinedForm
+	@Value("${features.feedbackTemplates:true}") var feedbackTemplates: Boolean = defaults.feedbackTemplates
+	@Value("${features.markingWorkflows:true}") var markingWorkflows: Boolean = defaults.markingWorkflows
+	@Value("${features.markerFeedback:true}") var markerFeedback: Boolean = defaults.markerFeedback
+	@Value("${features.profiles:true}") var profiles: Boolean = defaults.profiles
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -77,19 +77,19 @@ class FeaturesMessage {
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 	}
 	
-	@BeanProperty var emailStudents = false
-	@BeanProperty var collectRatings = true
-	@BeanProperty var submissions = true
-	@BeanProperty var privacyStatement = true
-	@BeanProperty var collectMarks = true
-	@BeanProperty var turnitin = true
-	@BeanProperty var assignmentMembership = true
-	@BeanProperty var extensions = true
-	@BeanProperty var combinedForm = true
-	@BeanProperty var feedbackTemplates = true
-	@BeanProperty var markingWorkflows = true
-	@BeanProperty var markerFeedback = true
-	@BeanProperty var profiles = true
+	var emailStudents = false
+	var collectRatings = true
+	var submissions = true
+	var privacyStatement = true
+	var collectMarks = true
+	var turnitin = true
+	var assignmentMembership = true
+	var extensions = true
+	var combinedForm = true
+	var feedbackTemplates = true
+	var markingWorkflows = true
+	var markerFeedback = true
+	var profiles = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
