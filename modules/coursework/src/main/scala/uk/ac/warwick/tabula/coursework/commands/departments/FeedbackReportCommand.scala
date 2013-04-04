@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.services.{AuditEventQueryMethods, AssignmentService, AssignmentMembershipService}
 import uk.ac.warwick.spring.Wire
-import org.joda.time.format.DateTimeFormat
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -16,19 +15,39 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import collection.JavaConversions._
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
-
+import scala.reflect.BeanProperty
+import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.tabula.DateFormats
+import org.joda.time.ReadableInstant
+//import org.joda.time.format.DateTimeFormat
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	
 	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)
 
+	@BeanProperty var startDate:DateTime = _
+	@BeanProperty var endDate:DateTime = _
+
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty
+	val defaultStartDate = new DateTime().minusMonths(3)
+
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@BeanProperty
+	val defaultEndDate = new DateTime()
+	
+	val csvDateFormatter = DateFormats.CSVDate
+
+	def csvFormat(i: ReadableInstant) = csvDateFormatter print i
+	
+	
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	var workingDaysHelper = new WorkingDaysHelperImpl
 	
-	val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
 	
 	var dateCellStyle : XSSFCellStyle = null
 	var percentageCellStyle : XSSFCellStyle = null
@@ -38,9 +57,9 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		val workbook = new XSSFWorkbook()
 		dateCellStyle = createDateCellStyle(workbook)
 		percentageCellStyle = createPercentageCellStyle(workbook)
-		val sheet = generateAssignmentSheet(department, workbook)
-		populateAssignmentSheet(sheet)
-		formatWorksheet(sheet)
+		val assignmentSheet = generateAssignmentSheet(department, workbook)
+		populateAssignmentSheet(assignmentSheet)
+		formatWorksheet(assignmentSheet)	
 		workbook
 	}
 
@@ -103,12 +122,12 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 
 	def populateAssignmentSheet(sheet: XSSFSheet) {
 		for (module <- department.modules;
-			 assignment <- module.assignments.filter( a => a.collectSubmissions && a.submissions.size > 0)) {
+			 assignment <- module.assignments.filter( a => a.collectSubmissions && a.submissions.size > 0 && a.closeDate.isBefore(endDate) && a.closeDate.isAfter(startDate))) {
 		
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			addCell(assignment.name, row)
 			addCell(assignment.module.code.toUpperCase, row)
-			addCell(dateFormatter.print(assignment.closeDate), row, dateCellStyle)
+			addCell(csvFormat(assignment.closeDate), row, dateCellStyle)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addCell(numberOfStudents.toString, row)
 			addCell(assignment.submissions.size.toString, row)

@@ -24,5 +24,9 @@ object DateFormats {
 	
 	/** Date-time format used in Formsbuilder-style CSV export */
 	final val CSVDateTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+	
+	/** Date format used in feedback report spreadsheet */
+	final val CSVDate = DateTimeFormat.forPattern("dd/MM/yyyy")
+	
 }
 

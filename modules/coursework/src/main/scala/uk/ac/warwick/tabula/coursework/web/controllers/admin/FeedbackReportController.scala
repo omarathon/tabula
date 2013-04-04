@@ -27,6 +27,7 @@ import java.util.ArrayList
 import org.joda.time.format.DateTimeFormat
 import org.apache.poi.xssf.usermodel.XSSFFont
 import uk.ac.warwick.tabula.data.model.AuditEvent
+import org.joda.time.DateTime
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
@@ -35,9 +36,21 @@ class FeedbackReportController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department) =
 		new FeedbackReportCommand(dept)
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateReport(cmd: FeedbackReportCommand) = {
-		new ExcelView(cmd.department.getName + " feedback report.xlsx", cmd.apply())
+	
+	@RequestMapping(method=Array(HEAD, GET))
+	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
+		val dateFormat = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
+		val model = Mav("admin/assignments/feedbackreport/report_range",
+			"department" -> cmd.department,
+			"startDate" -> dateFormat.print(DateTime.now.minusMonths(3)),
+			"endDate" -> dateFormat.print(DateTime.now)
+		).noLayout()
+		model
 	}
-		
+	
+	@RequestMapping(method = Array(POST))
+	def generateReport(cmd: FeedbackReportCommand) = {
+		new ExcelView(cmd.department.getName + " feedback report.xlsx", cmd.apply())	
+	}
+
 }
