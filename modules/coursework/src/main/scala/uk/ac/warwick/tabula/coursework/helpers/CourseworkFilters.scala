@@ -5,27 +5,21 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.Student
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState
 import uk.ac.warwick.tabula.data.model.MarkingMethod
+import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 
-sealed abstract class CourseworkFilter {
-	def getName = CourseworkFilters.shortName(getClass.asInstanceOf[Class[_ <: CourseworkFilter]])
+/**
+ * Filters a set of "Student" case objects (which are a representation of the current 
+ * state of a single student's submission workflow on an assignment, containing the
+ * submission, extension and feedback where available). Provides a predicate for
+ * filtering Student objects, and an applies() method to see whether it is even relevant
+ * for an assigment (for example, if an assignment doesn't take submissions, there's no
+ * point offering a filter for Unsubmitted students).
+ */
+sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[CourseworkFilter] {
+	val getName = CourseworkFilters.shortName(getClass.asInstanceOf[Class[_ <: CourseworkFilter]])
 	def getDescription: String 
 	def predicate: (Student => Boolean)
 	def applies(assignment: Assignment): Boolean
-	
-	/* We need to override equals() here because under heavy load, the class loader will 
-	 * (stupidly) return a different instance of the case object, which fails the equality
-	 * check because the default AnyRef implementation of equals is just this eq that.
-	 * 
-	 * We also have to override hashCodes because their default is computed at compile time,
-	 * based only on the (unqualified) name of the current case object, so,
-	 * before override, Module.Create.hashCode() == PersonalTutor.Create.hashCode()
-	 */
-	override def equals(other: Any) = other match {
-		case that: CourseworkFilter => getName == that.getName
-		case _ => false
-	}
-	override def hashCode() = getName.hashCode()
-	override def toString() = getName
 }
 
 object CourseworkFilters {
