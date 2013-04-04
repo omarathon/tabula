@@ -58,7 +58,7 @@ jQuery(function ($) {
 	$('a.long-running').click(function (event) {
 		var $this = $(this);
 		var originalText = $this.html();
-		if (!$this.hasClass('clicked') && !$this.hasClass('disabled')) {
+		if (!$this.hasClass('clicked') && !$this.hasClass('disabled') && !$this.parent().hasClass('disabled')) {
 			$this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
 			setTimeout(function(){
 				$this.removeClass('clicked').css({opacity:1}).html(originalText);

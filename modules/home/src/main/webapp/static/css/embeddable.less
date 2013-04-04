@@ -259,6 +259,74 @@ ul {
     }
 }
 
+#coursework-progress-table {
+	margin-top: 20px;
+
+	th, td {
+		white-space: nowrap;
+	}
+	
+	.check-col {
+		width: 1%;
+	}
+	
+	.student-col {
+		width: 10%;
+	}
+	
+	.progress-col {
+		width: 40%;
+	}
+	
+	.action-col {
+		width: 40%;
+	}
+}
+
+.workflow-container {
+	position: absolute;
+	width: 100%;
+	padding: 10px;
+	border-top: 1px solid @tableBorder;
+
+	.workflow {
+		h3 { 
+			font-size: 18px;
+			letter-spacing: -1px;
+			
+			display: inline-block;
+		  .ie7-inline-block();
+		}
+		
+		h3 + .labels {
+			display: inline-block;
+		  .ie7-inline-block();
+		  
+		  position: relative;
+		  top: -2px;
+		}
+		
+		.stage-group {
+			margin-top: 12px;
+			&:first-child { margin-top: 0; }
+			
+			.stage {
+				&.incomplete {
+					color: @very-subtle-text-color;
+				
+					&.preconditions-not-met {
+						color: lighten(@very-subtle-text-color, 10%);
+					}
+				
+					&.current {
+						color: darken(@very-subtle-text-color, 10%);
+					}
+				}
+			}
+		}
+	}
+}
+
 .feedback-info, .submission-info {
 	clear:both;
 	.box-style;
@@ -733,8 +801,7 @@ table {
 	.cursor-pointer();
 }
 
-*[rel=tooltip],
-.use-tooltip {
+*[rel=tooltip] {
 	cursor:help;
 	border-bottom: 1px dotted @grayLight;
 }
@@ -1301,4 +1368,81 @@ h1.with-settings {
 
 .datetimepicker {
 	line-height: 20px;
+}
+
+// btn-group-group, because the submission/feedback page is too complicated for normal btn-groups
+.tabula-page, #container {
+	.btn-toolbar {
+		.btn.hover {
+			color: @grayDark;
+    	text-decoration: none;
+    	background-position: 0 -15px;
+    	background-color: @btnBackgroundHighlight;
+		}
+	
+		.btn-group-group {
+			position: relative;
+		  display: inline-block;
+		  .ie7-inline-block();
+		  font-size: 0; // remove as part 1 of font-size inline-block hack
+		  vertical-align: middle; // match .btn alignment given font-size hack above
+		  white-space: nowrap; // prevent buttons from wrapping when in tight spaces (e.g., the table on the tests page)
+		  .ie7-restore-left-whitespace();
+		  
+		  > .btn-group > .btn {
+	  		.border-radius(0);
+	  	}
+	  	
+	  	> .btn-group:first-child > .btn:first-child {
+			  margin-left: 0;
+			  .border-top-left-radius(@baseBorderRadius);
+			  .border-bottom-left-radius(@baseBorderRadius);
+			}
+			
+			> .btn-group:last-child > .btn:last-child,
+			> .btn-group:last-child > .dropdown-toggle {
+			  .border-top-right-radius(@baseBorderRadius);
+			  .border-bottom-right-radius(@baseBorderRadius);
+			}
+			
+			.btn-group + .btn-group {
+				margin-left: 0;
+			
+				> .btn:first-child {
+					margin-left: -1px;
+				}
+			}
+		}
+		
+		> .btn-group-group + .btn,
+		> .btn-group-group + .btn-group,
+		> .btn-group-group + .btn-group-group,
+		> .btn + .btn-group-group,
+		> .btn-group + .btn-group-group {
+   		margin-left: 5px;
+  	}
+	}
+}
+
+.tabula-page, #container {
+	// Style guide zebra striping - double borders between rows
+	.table-striped {
+	  thead, tbody {
+	    > tr > td,
+	    > tr > th {
+	    	border-top: 1px solid @tableRowBorderTop;
+	      border-bottom: 1px solid @tableRowBorderBottom;
+	    }
+	  }
+	  
+	  tbody > tr:last-child > td,
+	  tbody > tr:last-child > th {
+	  	border-bottom: 0;
+	  }
+	  
+	  thead > tr:first-child > td,
+	  thead > tr:first-child > th {
+	  	border-top: 0;
+	  }
+	}
 }

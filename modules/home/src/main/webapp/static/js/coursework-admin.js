@@ -109,8 +109,7 @@ $(function(){
     // enable shift-click on multiple checkboxes in tables
     $('table').find('input[type="checkbox"]').shiftSelectable();
     
-    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list').bigList({
-    
+    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table').bigList({
         setup : function() {
             var $container = this;
             // #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -177,12 +176,12 @@ $(function(){
                     }
                 });                 
             }
-            $('.submission-feedback-list,.submission-list').data("all-plagiarised", allPlagiarised);
+            $('.submission-feedback-list,.submission-list,#coursework-progress-table').data("all-plagiarised", allPlagiarised);
             if (allPlagiarised) {
-                $('#mark-plagiarised-selected-button').text("Unmark selected plagiarised");
+                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
             }
             else {
-                $('#mark-plagiarised-selected-button').text("Mark selected plagiarised");               
+                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');               
             }
         },
     

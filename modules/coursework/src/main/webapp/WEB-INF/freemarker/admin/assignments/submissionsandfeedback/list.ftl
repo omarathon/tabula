@@ -17,9 +17,9 @@
 				<ul><#list stillToDownload as student>
 					<li>
 						<#if module.department.showStudentName>
-							${student.fullName}
+							${student.user.fullName}
 						<#else>
-							${student.uniId}
+							${student.user.warwickId}
 						</#if>
 					</li>
 				</#list></ul>
@@ -229,36 +229,36 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list students as student>
-				<#if student.enhancedSubmission??>
-					<#assign enhancedSubmission=student.enhancedSubmission>
-					<#assign submission=enhancedSubmission.submission>
+			<#macro row student>
+				<#if student.coursework.enhancedSubmission??>
+					<#local enhancedSubmission=student.coursework.enhancedSubmission>
+					<#local submission=enhancedSubmission.submission>
 				</#if>
 
 				<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-					<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+					<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
 				<#else>
-					<#assign lateness = "" />
+					<#local lateness = "" />
 				</#if>
 
 				<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-					<td><#if student.enhancedSubmission?? || student.enhancedFeedback??><@form.selector_check_row "students" student.uniId /></#if></td>
+					<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
 					<td class="id">
 					<#if module.department.showStudentName>
-						${student.fullName}
+						${student.user.fullName}
 					<#else>
-						${student.uniId}
+						${student.user.warwickId}
 					</#if>
 					</td>
 					
 					<td class="files">
 						<#if submission??>
-							<#assign attachments=submission.allAttachments />
+							<#local attachments=submission.allAttachments />
 							<#if attachments?size gt 0>
 								<#if attachments?size == 1> 
-									<#assign filename = "${attachments[0].name}">
+									<#local filename = "${attachments[0].name}">
 								<#else>
-									<#assign filename = "submission-${submission.universityId}.zip">
+									<#local filename = "submission-${submission.universityId}.zip">
 								</#if>
 								<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
 									${attachments?size}
@@ -293,16 +293,16 @@
 							<#if submission.suspectPlagiarised>
 								<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
 							</#if>
-						<#elseif !student.enhancedFeedback??>
-							<#if student.enhancedExtension?has_content>
-								<#assign enhancedExtension=student.enhancedExtension>
-								<#assign extension=enhancedExtension.extension>
+						<#elseif !student.coursework.enhancedFeedback??>
+							<#if student.coursework.enhancedExtension?has_content>
+								<#local enhancedExtension=student.coursework.enhancedExtension>
+								<#local extension=enhancedExtension.extension>
 							
 								<span class="label label-info">Unsubmitted</span>
 								<#if extension.approved && !extension.rejected>
-									<#assign date>
+									<#local date>
 										<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-									</#assign>
+									</#local>
 								</#if>
 								<#if enhancedExtension.within>
 									<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
@@ -352,15 +352,15 @@
 					</#if>
 					
 					<td class="download">
-						<#if student.enhancedFeedback??>
-							<#assign attachments=student.enhancedFeedback.feedback.attachments />
+						<#if student.coursework.enhancedFeedback??>
+							<#local attachments=student.coursework.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
 							<#if attachments?size == 1> 
-								<#assign attachmentExtension = student.enhancedFeedback.feedback.attachments[0].fileExt>
+								<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
 							<#else>
-								<#assign attachmentExtension = "zip">
+								<#local attachmentExtension = "zip">
 							</#if>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
 								${attachments?size}
 								<#if attachments?size == 1> file
 								<#else> files
@@ -369,20 +369,20 @@
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
+					<td class="uploaded"><#if student.coursework.enhancedFeedback??><@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
 					
 					 <#if assignment.collectMarks>
 						<td class="mark">
-							${(student.enhancedFeedback.feedback.actualMark)!''}
+							${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
 						</td>
 						<td class="grade">
-							${(student.enhancedFeedback.feedback.actualGrade)!''}
+							${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
 					<td class="feedbackReleased">
-						<#if student.enhancedFeedback??>
-							<#if student.enhancedFeedback.feedback.released>
-								<#if student.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
+						<#if student.coursework.enhancedFeedback??>
+							<#if student.coursework.enhancedFeedback.feedback.released>
+								<#if student.coursework.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
 								<#else><span class="label label-info">Published</span>
 								</#if>
 							<#else><span class="label label-warning">Not yet published</span>
@@ -390,6 +390,10 @@
 						</#if>
 					</td>
 				</tr>
+			</#macro>
+		
+			<#list students as student>
+				<@row student />
 			</#list>
 		</tbody>
 	</table>

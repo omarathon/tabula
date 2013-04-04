@@ -2,11 +2,8 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-
 import org.joda.time.DateTime
-
 import uk.ac.warwick.spring.Wire
-
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
@@ -15,20 +12,32 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{UserLookupService, AuditEventIndexService}
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
+import scala.util.Random
+import org.hibernate.annotations.Filters
+import uk.ac.warwick.tabula.coursework.helpers.CourseworkFilters
+import uk.ac.warwick.tabula.coursework.helpers.CourseworkFilter
+import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
+import uk.ac.warwick.tabula.coursework.services.WorkflowStages
+import scala.collection.immutable.ListMap
+import uk.ac.warwick.tabula.coursework.services.WorkflowStage
 
-class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Results] with Unaudited with ReadOnly {
+class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
+	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
+	
+	@BeanProperty var filter: CourseworkFilter = CourseworkFilters.AllStudents
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
@@ -45,7 +54,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		
 		val whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
 		
-		val unsubmitted = for (user <- unsubmittedMembers) yield {
+		val unsubmitted = for (user <- unsubmittedMembers) yield {			
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == user.getWarwickId)
 			
 			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
@@ -56,13 +65,21 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 					within=assignment.isWithinExtension(user.getUserId)
 				)
 			}
-			
-			Item(
-				uniId=user.getWarwickId, 
+						
+			val coursework = WorkflowItems(
 				enhancedSubmission=None, 
 				enhancedFeedback=None,
-				enhancedExtension=enhancedExtensionForUniId,
-				fullName=user.getFullName
+				enhancedExtension=enhancedExtensionForUniId
+			)
+			
+			val progress = courseworkWorkflowService.progress(assignment, user)(coursework)
+			
+			Student(
+				user=user,
+				progress=Progress(progress.percentage, progress.cssClass, progress.message),
+				nextStage=progress.nextStage,
+				stages=progress.stages,
+				coursework=coursework
 			)
 		}
 		val submitted = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
@@ -76,8 +93,6 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			} else {
 				userFilter.head
 			}
-
-			val userFullName = user.getFullName
 			
 			if (usersSubmissions.size > 1) throw new IllegalStateException("More than one Submission for " + uniId)
 			if (usersFeedback.size > 1) throw new IllegalStateException("More than one Feedback for " + uniId)
@@ -96,27 +111,35 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 					within=assignment.isWithinExtension(user.getUserId)
 				)
 			}
-
-			Item(
-				uniId=uniId, 
+			
+			val coursework = WorkflowItems(
 				enhancedSubmission=enhancedSubmissionForUniId, 
 				enhancedFeedback=enhancedFeedbackForUniId,
-				enhancedExtension=enhancedExtensionForUniId,
-				fullName=userFullName
+				enhancedExtension=enhancedExtensionForUniId
+			)
+			
+			val progress = courseworkWorkflowService.progress(assignment, user)(coursework)
+
+			Student(
+				user=user,
+				progress=Progress(progress.percentage, progress.cssClass, progress.message),
+				nextStage=progress.nextStage,
+				stages=progress.stages,
+				coursework=coursework
 			)
 		}
 		
 		val membersWithPublishedFeedback = submitted.filter { student => 
-			student.enhancedFeedback map { _.feedback.checkedReleased } getOrElse (false)
+			student.coursework.enhancedFeedback map { _.feedback.checkedReleased } getOrElse (false)
 		}
 
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
 		val hasPublishedFeedback = !membersWithPublishedFeedback.isEmpty
 		
-		val stillToDownload = membersWithPublishedFeedback filter { item => !(item.enhancedFeedback map { _.downloaded } getOrElse(false)) }
+		val stillToDownload = membersWithPublishedFeedback filterNot { item => item.coursework.enhancedFeedback map { _.downloaded } getOrElse(false) }
 		
-		Results(
-			students=unsubmitted ++ submitted,
+		SubmissionAndFeedbackResults(
+			students=(unsubmitted ++ submitted).filter(filter.predicate),
 			whoDownloaded=whoDownloaded,
 			stillToDownload=stillToDownload,
 			hasPublishedFeedback=hasPublishedFeedback,
@@ -126,22 +149,34 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	}
 }
 
-case class Results(
-	val students:Seq[Item],
+case class SubmissionAndFeedbackResults(
+	val students:Seq[Student],
 	val whoDownloaded: Seq[(User, DateTime)],
-	val stillToDownload: Seq[Item],
+	val stillToDownload: Seq[Student],
 	val hasPublishedFeedback: Boolean,
 	val hasOriginalityReport: Boolean,
 	val mustReleaseForMarking: Boolean
 )
 
 // Simple object holder
-case class Item(
-	val uniId: String, 
-	val fullName: String,
+case class Student(
+	val user: User,
+	val progress: Progress,
+	val nextStage: Option[WorkflowStage],
+	val stages: ListMap[String, WorkflowStages.StageProgress],
+	val coursework: WorkflowItems
+)
+
+case class WorkflowItems(
 	val enhancedSubmission: Option[SubmissionListItem], 
 	val enhancedFeedback: Option[FeedbackListItem],
 	val enhancedExtension: Option[ExtensionListItem]
+)
+
+case class Progress(
+	val percentage: Int,
+	val t: String,
+	val message: String
 )
 
 case class ExtensionListItem(

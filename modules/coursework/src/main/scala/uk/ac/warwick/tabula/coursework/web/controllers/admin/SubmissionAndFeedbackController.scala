@@ -25,6 +25,9 @@ import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.commons.lang3.text.WordUtils
 import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import org.springframework.web.bind.WebDataBinder
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
+import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
@@ -42,6 +45,23 @@ class SubmissionAndFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
 
+		Mav("admin/assignments/submissionsandfeedback/progress",
+			"assignment" -> assignment,
+			"students" -> results.students,
+			"whoDownloaded" -> results.whoDownloaded,
+			"stillToDownload" -> results.stillToDownload,
+			"hasPublishedFeedback" -> results.hasPublishedFeedback,
+			"hasOriginalityReport" -> results.hasOriginalityReport,
+			"mustReleaseForMarking" -> results.mustReleaseForMarking,
+			"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
+		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	}
+	
+	@RequestMapping(Array("/table"))
+	def table(command: SubmissionAndFeedbackCommand) = {
+		val (assignment, module) = (command.assignment, command.module)
+		val results = command.apply()
+
 		Mav("admin/assignments/submissionsandfeedback/list",
 			"assignment" -> assignment,
 			"students" -> results.students,
@@ -49,7 +69,8 @@ class SubmissionAndFeedbackController extends CourseworkController {
 			"stillToDownload" -> results.stillToDownload,
 			"hasPublishedFeedback" -> results.hasPublishedFeedback,
 			"hasOriginalityReport" -> results.hasOriginalityReport,
-			"mustReleaseForMarking" -> results.mustReleaseForMarking
+			"mustReleaseForMarking" -> results.mustReleaseForMarking,
+			"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
 		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 	
@@ -92,6 +113,13 @@ class SubmissionAndFeedbackController extends CourseworkController {
 		val workbook = new ExcelBuilder(items, assignment, module).toXLSX
 		
 		new ExcelView(assignment.name + ".xlsx", workbook)
+	}
+	
+	override def binding[SubmissionAndFeedbackCommand](binder: WebDataBinder, cmd: SubmissionAndFeedbackCommand) {
+		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
+			override def fromString(name: String) = CourseworkFilters.of(name)			
+			override def toString(filter: CourseworkFilter) = filter.getName
+		})
 	}
 	
 }
