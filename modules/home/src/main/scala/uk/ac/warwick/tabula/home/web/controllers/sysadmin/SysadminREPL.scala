@@ -8,7 +8,6 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
-import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.Expression
@@ -21,6 +20,7 @@ import collection.JavaConversions._
 import java.util.HashMap
 import org.springframework.expression.spel.SpelEvaluationException
 import org.hibernate.Session
+import scala.beans.BeanProperty
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/repl"))

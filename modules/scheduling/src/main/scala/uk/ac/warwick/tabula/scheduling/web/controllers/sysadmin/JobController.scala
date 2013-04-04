@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.jobs.TestingJob
-import scala.beans.BeanProperty
 
 class JobQuery {
 	var page: Int = 0

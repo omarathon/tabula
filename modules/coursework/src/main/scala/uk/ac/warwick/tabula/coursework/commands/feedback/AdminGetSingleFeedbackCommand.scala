@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
-import scala.beans.BeanProperty
 
 class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
 	mustBeLinked(assignment, module)

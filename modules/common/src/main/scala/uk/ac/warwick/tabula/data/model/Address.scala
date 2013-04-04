@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.beans.BeanProperty
 import org.springframework.util.StringUtils
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._

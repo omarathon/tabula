@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.beans.BeanProperty
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence.Entity

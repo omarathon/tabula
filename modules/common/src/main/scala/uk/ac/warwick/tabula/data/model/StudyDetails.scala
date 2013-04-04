@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data.model
-import scala.beans.BeanProperty
 
-import scala.beans.BeanProperty
 import org.hibernate.annotations.{AccessType, Type}
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import javax.persistence._

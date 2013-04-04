@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions.asScalaBuffer
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser

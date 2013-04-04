@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type

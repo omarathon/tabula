@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.commands
 import java.io.File
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.beans.BeanProperty
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._

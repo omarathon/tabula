@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula
 
-import scala.beans.BeanProperty
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.springframework.beans.BeanWrapperImpl

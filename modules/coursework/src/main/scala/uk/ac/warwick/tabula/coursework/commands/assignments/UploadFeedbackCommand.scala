@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import java.util.ArrayList
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import scala.util.matching.Regex
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import org.springframework.mail.MailException
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors

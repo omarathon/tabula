@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.home.commands
 import java.lang.Boolean
 import java.util.concurrent.Future
 
-import scala.beans.BeanProperty
 
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.validation.Errors

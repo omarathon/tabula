@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import scala.beans.BeanProperty
 
 import org.hibernate.validator.constraints.NotEmpty
 

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 import org.joda.time.DateTime

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
-import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav

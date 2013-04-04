@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model;
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Column

@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.FileInputStream
 import java.io.InputStream
-import scala.beans.BeanProperty
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.model.StylesTable

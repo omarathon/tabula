@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
-import scala.beans.BeanProperty
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute

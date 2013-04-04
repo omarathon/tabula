@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Feedback
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
