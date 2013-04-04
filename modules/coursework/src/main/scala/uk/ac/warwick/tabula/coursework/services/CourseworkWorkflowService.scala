@@ -11,7 +11,6 @@ import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState
 import scala.collection.immutable.ListMap
 
@@ -19,6 +18,7 @@ import scala.collection.immutable.ListMap
 class CourseworkWorkflowService {
 	import WorkflowStages._
 	
+	final val MaxPower = 100
 	var features = Wire.auto[Features]
 	
 	def getStagesFor(assignment: Assignment) = {
@@ -26,7 +26,7 @@ class CourseworkWorkflowService {
 		if (assignment.collectSubmissions) {
 			stages = stages ++ Seq(Submission, DownloadSubmission)
 			
-			if (features.turnitin) {
+			if (features.turnitin && assignment.module.department.plagiarismDetectionEnabled) {
 				stages = stages ++ Seq(CheckForPlagiarism)
 			}
 			
@@ -48,7 +48,7 @@ class CourseworkWorkflowService {
 		stages
 	}
 	
-	def progress(assignment: Assignment, user: User)(coursework: WorkflowItems) = {
+	def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 		val allStages = getStagesFor(assignment)
 		val progresses = allStages map { _.progress(assignment)(coursework) }
 		
@@ -59,6 +59,26 @@ class CourseworkWorkflowService {
 				case _ => lastProgress.message
 			}
 		
+		val workflowMap = toMap(progresses)
+		
+		// Quick exit for if we're at the end
+		if (progresses.last.completed) {
+			Progress(MaxPower, message(progresses.last), progresses.last.health.cssClass, None, workflowMap)
+		} else {
+			// get the last started stage
+			val stageIndex = progresses.lastIndexWhere(_.started)
+			if (stageIndex == -1) Progress(0, progresses.head.message, progresses.head.health.cssClass, None, workflowMap) 
+			else {
+				val lastProgress = progresses(stageIndex)
+				val nextProgress = if (lastProgress.completed) progresses(stageIndex + 1) else lastProgress
+				
+				val percentage = ((stageIndex + 1) * MaxPower) / allStages.size
+				Progress(percentage, message(lastProgress), lastProgress.health.cssClass, Some(nextProgress.stage), workflowMap)
+			}
+		}
+	}
+	
+	private def toMap(progresses: Seq[WorkflowStages.StageProgress]) = {
 		val builder = ListMap.newBuilder[String, WorkflowStages.StageProgress]
 		
 		def preconditionsMet(p: WorkflowStages.StageProgress) = 
@@ -83,23 +103,7 @@ class CourseworkWorkflowService {
 			) 
 		})
 		
-		val workflowMap = builder.result
-		
-		// Quick exit for if we're at the end
-		if (progresses.last.completed) {
-			Progress(100, message(progresses.last), progresses.last.health.cssClass, None, workflowMap)
-		} else {
-			// get the last started stage
-			val stageIndex = progresses.lastIndexWhere(_.started)
-			if (stageIndex == -1) Progress(0, progresses.head.message, progresses.head.health.cssClass, None, workflowMap) 
-			else {
-				val lastProgress = progresses(stageIndex)
-				val nextProgress = if (lastProgress.completed) progresses(stageIndex + 1) else lastProgress
-				
-				val percentage = ((stageIndex + 1) * 100) / allStages.size
-				Progress(percentage, message(lastProgress), lastProgress.health.cssClass, Some(nextProgress.stage), workflowMap)
-			}
-		}
+		builder.result
 	}
 }
 
@@ -151,12 +155,14 @@ object WorkflowStages {
 			case None if !assignment.isClosed => StageProgress(Submission, false, "Not submitted, within deadline")
 			
 			// Not submitted
-			case _ => coursework.enhancedExtension match {
-				case Some(extension) if extension.within => StageProgress(Submission, false, "Not submitted, within extension")
-				
-				case _ => StageProgress(Submission, true, "Not submitted", Danger, false)
-			}
+			case _ => unsubmittedProgress(assignment)(coursework)
 		}
+		
+		private def unsubmittedProgress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedExtension match {
+			case Some(extension) if extension.within => StageProgress(Submission, false, "Not submitted, within extension")
+			
+			case _ => StageProgress(Submission, true, "Not submitted", Danger, false)
+		} 
 	}
 	
 	case object DownloadSubmission extends WorkflowStage {

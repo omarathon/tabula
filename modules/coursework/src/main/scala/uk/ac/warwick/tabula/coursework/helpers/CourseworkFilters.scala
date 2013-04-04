@@ -101,7 +101,7 @@ object CourseworkFilters {
 	case object NotReleasedForMarking extends CourseworkFilter {
 		def getDescription = "submissions that have not been released for marking"
 		def predicate = { item: Student =>
-			(item.coursework.enhancedSubmission map { item => item.submission.isReleasedForMarking }) getOrElse(false)
+			(item.coursework.enhancedSubmission map { item => !item.submission.isReleasedForMarking }) getOrElse(false)
 		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
@@ -150,7 +150,7 @@ object CourseworkFilters {
 		def getDescription = "submissions checked for plagiarism"
 		def predicate = { item: Student =>
 			(item.coursework.enhancedSubmission map { item => 
-				item.submission.allAttachments.find(_.originalityReport != null).isDefined
+				item.submission.hasOriginalityReport.booleanValue()
 			}) getOrElse(false)
 		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.department.plagiarismDetectionEnabled
@@ -158,7 +158,11 @@ object CourseworkFilters {
 	
 	case object NotCheckedForPlagiarism extends CourseworkFilter {
 		def getDescription = "submissions not checked for plagiarism"
-		def predicate = { item: Student => !CheckedForPlagiarism.predicate(item) }
+		def predicate = { item: Student =>
+			(item.coursework.enhancedSubmission map { item => 
+				!item.submission.hasOriginalityReport.booleanValue()
+			}) getOrElse(false)
+		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.department.plagiarismDetectionEnabled
 	}
 	

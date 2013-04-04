@@ -72,7 +72,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 				enhancedExtension=enhancedExtensionForUniId
 			)
 			
-			val progress = courseworkWorkflowService.progress(assignment, user)(coursework)
+			val progress = courseworkWorkflowService.progress(assignment)(coursework)
 			
 			Student(
 				user=user,
@@ -118,7 +118,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 				enhancedExtension=enhancedExtensionForUniId
 			)
 			
-			val progress = courseworkWorkflowService.progress(assignment, user)(coursework)
+			val progress = courseworkWorkflowService.progress(assignment)(coursework)
 
 			Student(
 				user=user,
