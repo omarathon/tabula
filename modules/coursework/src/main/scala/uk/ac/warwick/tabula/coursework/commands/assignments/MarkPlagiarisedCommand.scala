@@ -29,10 +29,10 @@ class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) ext
 
 	var submissionService = Wire.auto[SubmissionService]
 
-	//@BeanProperty var submissions: JList[Submission] = ArrayList()
-    @BeanProperty var students: JList[String] = ArrayList()
-	@BeanProperty var confirm: Boolean = false
-	@BeanProperty var markPlagiarised: Boolean = true
+	//var submissions: JList[Submission] = ArrayList()
+    var students: JList[String] = ArrayList()
+	var confirm: Boolean = false
+	var markPlagiarised: Boolean = true
 	
 	var submissionsUpdated = 0
 

@@ -25,7 +25,7 @@ class DownloadAttachmentCommand(val module: Module, val assignment: Assignment, 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, submission)
 
-	@BeanProperty var filename: String = _
+	var filename: String = _
 
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _

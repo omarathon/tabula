@@ -17,20 +17,20 @@ class TutorChangeNotifierCommandTest extends TestBase with Mockito with Promises
 		val oldTutor: Option[Member] = Some(actualOldTutor)
 
 		val newTutor = mock[Member]
-		newTutor.setEmail("foo@bar.com")
+		newTutor.email = "foo@bar.com"
 
 		val student = mock[Member]
 
-		
+
 		val cmd = new TutorChangeNotifierCommand(student, oldTutor, promise { newTutor })
-		
+
 		// get a sufficient mailSender
 		val mailSender = mock[WarwickMailSender]
 		val session = Session.getDefaultInstance(new Properties)
-		val mimeMessage = new MimeMessage(session)	   
+		val mimeMessage = new MimeMessage(session)
 		mailSender.createMimeMessage() returns mimeMessage
 		cmd.mailSender = mailSender
-		
+
 
 		cmd.replyAddress = "reply@to.me"
 		cmd.fromAddress = "from@to.me"

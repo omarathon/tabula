@@ -18,7 +18,7 @@ class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
 	PermissionCheck(Permissions.GodMode)
 	
-	@BeanProperty var action: String = _
+	var action: String = _
 	
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(false))

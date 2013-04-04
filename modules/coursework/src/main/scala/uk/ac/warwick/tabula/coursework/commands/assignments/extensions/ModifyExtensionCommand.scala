@@ -52,8 +52,8 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		
 	var userLookup = Wire.auto[UserLookupService]
 	
-	@BeanProperty var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
-	@BeanProperty var extensions:JList[Extension] = LazyLists.simpleFactory()
+	var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
+	var extensions:JList[Extension] = LazyLists.simpleFactory()
 
 	/**
 	 * Transforms the commands extensionItems into Extension beans for persisting
@@ -140,13 +140,13 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 
 class ExtensionItem{
 
-	@BeanProperty var universityId:String =_
+	var universityId:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var expiryDate:DateTime =_
-	@BeanProperty var approvalComments:String =_
+	var expiryDate:DateTime =_
+	var approvalComments:String =_
 
-	@BeanProperty var approved:Boolean = false
-	@BeanProperty var rejected:Boolean = false
+	var approved:Boolean = false
+	var rejected:Boolean = false
 
 	def this(universityId:String, expiryDate:DateTime, reason:String) = {
 		this()

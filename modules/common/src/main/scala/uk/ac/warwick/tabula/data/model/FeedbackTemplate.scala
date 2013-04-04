@@ -13,19 +13,19 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 @Entity @AccessType("field")
 class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 
-	@BeanProperty var name:String = _
-	@BeanProperty var description:String = _
+	var name:String = _
+	var description:String = _
 
 	@OneToOne
 	@JoinColumn(name="ATTACHMENT_ID")
-	@BeanProperty var attachment: FileAttachment = _
+	var attachment: FileAttachment = _
 
 	@ManyToOne
 	@JoinColumn(name="DEPARTMENT_ID")
-	@BeanProperty var department:Department = _
+	var department:Department = _
 
 	@OneToMany(mappedBy = "feedbackTemplate", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BeanProperty var assignments: JList[Assignment] = ArrayList()
+	var assignments: JList[Assignment] = ArrayList()
 	
 	/* For permission parents, we include both the department and any assignments linked to this template */
 	def permissionsParents = Option(assignments) match { 

@@ -22,8 +22,8 @@ import language.implicitConversions
  */
 class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] with FreemarkerRendering with UnicodeEmails with Public {
 
-	@BeanProperty var module: Module = _
-	@BeanProperty var assignment: Assignment = _
+	var module: Module = _
+	var assignment: Assignment = _
 
 	var userLookup = Wire.auto[UserLookupService]
 	implicit var freemarker = Wire.auto[Configuration]

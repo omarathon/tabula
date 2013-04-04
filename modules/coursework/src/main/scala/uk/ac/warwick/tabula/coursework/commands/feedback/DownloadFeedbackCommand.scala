@@ -25,8 +25,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@BeanProperty var filename: String = _
-    @BeanProperty var students: JList[String] = ArrayList()
+	var filename: String = _
+    var students: JList[String] = ArrayList()
     
 	private var fileFound: Boolean = _
 

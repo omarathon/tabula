@@ -30,8 +30,8 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 	
 	var permissionsService = Wire.auto[PermissionsService]
 	
-	@BeanProperty var roleDefinition: RoleDefinition = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
+	var roleDefinition: RoleDefinition = _
+	var usercodes: JList[String] = ArrayList()
 	
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 	

@@ -101,7 +101,7 @@ abstract class BaseController extends ControllerMethods
 	@Required @Resource(name = "validator") var globalValidator: Validator = _
 
 	@Autowired
-	@BeanProperty var securityService: SecurityService = _
+	var securityService: SecurityService = _
 
 	@Autowired private var messageSource: MessageSource = _
 

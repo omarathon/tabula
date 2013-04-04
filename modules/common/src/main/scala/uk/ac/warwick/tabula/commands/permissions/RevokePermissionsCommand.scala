@@ -25,9 +25,9 @@ class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) exten
 	
 	var permissionsService = Wire.auto[PermissionsService]
 	
-	@BeanProperty var permission: Permission = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
-	@BeanProperty var overrideType: Boolean = _
+	var permission: Permission = _
+	var usercodes: JList[String] = ArrayList()
+	var overrideType: Boolean = _
 	
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 	

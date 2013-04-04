@@ -9,7 +9,7 @@ import scala.beans.BeanProperty
 class UsercodeListValidatorTest extends TestBase {
 	
 	class ValidateMe {
-		@BeanProperty var usercodes: List[String] = _
+		var usercodes: List[String] = _
 	}
 	
 	@Test def passes {

@@ -53,8 +53,8 @@ object UserPickerController {
 		
 		var userLookup = Wire.auto[UserLookupService]
 	
-		@BeanProperty var firstName: String = ""
-		@BeanProperty var lastName: String = ""
+		var firstName: String = ""
+		var lastName: String = ""
 			
 		def applyInternal() = {
 			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq

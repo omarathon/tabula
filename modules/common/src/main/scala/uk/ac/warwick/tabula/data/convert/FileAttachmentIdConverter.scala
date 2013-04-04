@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class FileAttachmentIdConverter extends TwoWayConverter[String, FileAttachment] {
-	@Autowired @BeanProperty var fileDao: FileDao = _
+	@Autowired var fileDao: FileDao = _
 
 	override def convertRight(id: String) = fileDao.getFileById(id).orNull
 	override def convertLeft(attachment: FileAttachment) = (Option(attachment) map {_.id}).orNull

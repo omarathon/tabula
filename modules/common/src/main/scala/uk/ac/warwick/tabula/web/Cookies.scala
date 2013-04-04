@@ -52,7 +52,7 @@ class Cookies(val _cookies: Array[http.Cookie]) {
  */
 object Cookies {
 	implicit def toMagicCookies(cookies: Array[http.Cookie]) = new Cookies(cookies)
-	implicit def responseToCookiesResponse(response: HttpServletResponse) = new {
+	implicit class CookieMethods(response: HttpServletResponse) {
 		def addCookie(cookie: Cookie) = response.addCookie(cookie.cookie)
 	}
 }

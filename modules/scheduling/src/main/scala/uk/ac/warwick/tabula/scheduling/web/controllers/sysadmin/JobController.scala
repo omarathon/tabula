@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.jobs.TestingJob
 import scala.beans.BeanProperty
 
 class JobQuery {
-	@BeanProperty var page: Int = 0
+	var page: Int = 0
 }
 
 @Controller

@@ -19,7 +19,7 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	
 	var service = Wire.auto[UserSettingsService]
 	
-	@BeanProperty var alertsSubmission = settings.alertsSubmission
+	var alertsSubmission = settings.alertsSubmission
 		
 	override def applyInternal() {
 		transactional() {

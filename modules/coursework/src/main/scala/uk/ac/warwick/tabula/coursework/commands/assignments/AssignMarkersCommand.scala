@@ -27,11 +27,11 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
 	var userLookup = Wire.auto[UserLookupService]
 
-	@BeanProperty var firstMarkerUnassignedStudents: JList[Student] = _
-	@BeanProperty var secondMarkerUnassignedStudents: JList[Student] = _
-	@BeanProperty var firstMarkers: JList[Marker] = _
-	@BeanProperty var secondMarkers: JList[Marker] = _
-	@BeanProperty var markerMapping: JMap[String, JList[String]] = _
+	var firstMarkerUnassignedStudents: JList[Student] = _
+	var secondMarkerUnassignedStudents: JList[Student] = _
+	var firstMarkers: JList[Marker] = _
+	var secondMarkers: JList[Marker] = _
+	var markerMapping: JMap[String, JList[String]] = _
 
 	def onBind() {
 

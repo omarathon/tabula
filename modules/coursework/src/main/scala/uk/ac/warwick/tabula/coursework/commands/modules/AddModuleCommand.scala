@@ -18,8 +18,8 @@ class AddModuleCommand(val department: Department) extends Command[Module] with 
 	
 	PermissionCheck(Permissions.Module.Create, department)
 
-	@BeanProperty var code: String = _
-	@BeanProperty var name: String = _
+	var code: String = _
+	var name: String = _
 
 	def sanitisedCode = Option(code).map(_.toLowerCase).orNull
 

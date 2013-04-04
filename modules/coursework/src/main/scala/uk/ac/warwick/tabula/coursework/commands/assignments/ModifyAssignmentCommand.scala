@@ -43,13 +43,13 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 	@Length(max = 200)
 	@NotEmpty(message = "{NotEmpty.assignmentName}")
-	@BeanProperty var name: String = _
+	var name: String = _
 
-	@BeanProperty var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
+	var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
 
-	@BeanProperty var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
+	var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
 
-	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
 
 	def getAcademicYearString =
 		if (academicYear != null)
@@ -60,10 +60,10 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	// start complicated membership stuff
 
 	/** linked SITS assignment. Optional. */
-	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
+	var upstreamAssignment: UpstreamAssignment = _
 
-	@BeanProperty var assessmentGroups: JList[AssessmentGroup] = ArrayList()
-	@BeanProperty var assessmentGroupItems: JList[AssessmentGroupItem] = ArrayList()
+	var assessmentGroups: JList[AssessmentGroup] = ArrayList()
+	var assessmentGroupItems: JList[AssessmentGroupItem] = ArrayList()
 
 	/**
 	 * If copying from existing Assignment, this must be a DEEP COPY
@@ -75,17 +75,17 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 * it is difficult to bind additions and removals directly to a collection
 	 * with Spring binding.
 	 */
-	@BeanProperty var members: UserGroup = new UserGroup
+	var members: UserGroup = new UserGroup
 
 	// items added here are added to members.includeUsers.
-	@BeanProperty var includeUsers: JList[String] = ArrayList()
+	var includeUsers: JList[String] = ArrayList()
 
 	// items added here are either removed from members.includeUsers or added to members.excludeUsers.
-	@BeanProperty var excludeUsers: JList[String] = ArrayList()
+	var excludeUsers: JList[String] = ArrayList()
 
 	// bind property for the big free-for-all textarea of usercodes/uniIDs to add.
 	// These are first resolved to userIds and then added to includeUsers
-	@BeanProperty var massAddUsers: String = _
+	var massAddUsers: String = _
 
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =
@@ -95,12 +95,12 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	///// end of complicated membership stuff
 
 	// can be set to false if that's not what you want.
-	@BeanProperty var prefillFromRecent = true
+	var prefillFromRecent = true
 
 	/** MAV_OCCURRENCE as per the value in SITS.  */
-	@BeanProperty var occurrence: String = _
+	var occurrence: String = _
 
-	@BeanProperty var prefillAssignment: Assignment = _
+	var prefillAssignment: Assignment = _
 
 	private var _prefilled: Boolean = _
 	def prefilled = _prefilled
@@ -297,6 +297,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 }
 
 class AssessmentGroupItem(){
-	@BeanProperty var occurrence: String = _
-	@BeanProperty var upstreamAssignment: UpstreamAssignment =_
+	var occurrence: String = _
+	var upstreamAssignment: UpstreamAssignment =_
 }

@@ -50,13 +50,13 @@ class SysadminREPL extends BaseController with BeanFactoryAware {
 	 * as top-level items in your SpEL query.
 	 */
 	case class RootObject(
-		@BeanProperty val session: Session,
-		@BeanProperty val beanFactory: BeanFactory = beanFactory,
+		val session: Session,
+		val beanFactory: BeanFactory = beanFactory,
 		// expose Assignments as a map of ids
-		@BeanProperty val assignments: MapAccessor[Assignment] = MapAccessor { id =>
+		val assignments: MapAccessor[Assignment] = MapAccessor { id =>
 			assignmentService.getAssignmentById(id).orNull
 		},
-		@BeanProperty val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
+		val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
 			moduleAndDepartmentService.getDepartmentByCode(code).orNull
 		})
 }

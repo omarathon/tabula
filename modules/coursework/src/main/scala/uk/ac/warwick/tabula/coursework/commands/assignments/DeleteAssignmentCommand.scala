@@ -17,7 +17,7 @@ class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignm
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Delete, assignment)
 
-	@BeanProperty var confirm: JBoolean = false
+	var confirm: JBoolean = false
 
 	def validate(errors: Errors) {
 		if (!confirm) {
