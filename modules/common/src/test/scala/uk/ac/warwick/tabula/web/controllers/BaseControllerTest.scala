@@ -73,35 +73,6 @@ class BaseControllerTest extends TestBase with Mockito {
 		binder.getDisallowedFields() should be (Array())
 	}
 	
-	@Test def nukeOriginal {
-		val command = new Object with SelfValidating {
-			def validate(errors: Errors) {}
-		}
-		
-		val controller = new BaseController {
-			onlyValidatesWith[SelfValidating] { (obj: SelfValidating, errors) => }
-		}
-		
-		controller.validator match {
-			case _: ClassValidator[_] =>
-			case _ => fail()
-		}
-		
-		controller.validator.supports(classOf[SelfValidating]) should be (true)
-		
-		val binder = new WebDataBinder(command)
-		
-		val validator = mock[Validator]
-		validator.supports(isA[Class[_]]) returns (true)
-		
-		binder.setValidator(validator)
-		controller._binding(binder)
-		
-		// original validator was nuked by "onlyValidatesWith"
-		binder.getValidator() should be (controller.validator)
-		binder.getDisallowedFields() should be (Array())
-	}
-	
 	@Test def disallowedFields {
 		val controller = new BaseController {}
 		controller.disallowedFields = List("steve", "yes")

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.services.ProfileService
 import org.springframework.validation.BindException
 import org.springframework.transaction.annotation.Transactional
+import org.joda.time.LocalDate
 
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
@@ -19,7 +20,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
 	@Transactional
-	@Test def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
+	@Test
+	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val ps = mock[ProfileService]
 		val creator = new StaffMember("9876543")
@@ -70,7 +72,7 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// add some text and apply
 		cmd.description = "Lovely words"
-		val meeting = cmd.apply
+		val meeting = cmd.apply()
 
 		meeting.creator should be (creator)
 		meeting.creationDate should be (aprilFool)

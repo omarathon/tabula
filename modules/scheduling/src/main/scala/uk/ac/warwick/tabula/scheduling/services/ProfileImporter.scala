@@ -216,18 +216,18 @@ object ProfileImporter {
 			preferredForenames		= rs.getString("pref_forenames"),
 			preferredSurname		= rs.getString("pref_surname"),
 			position				= rs.getString("desc_position"),
-			dateOfBirth				= rs.getDate("dob"),
+			dateOfBirth				= sqlDateToLocalDate(rs.getDate("dob")),
 			usercode				= rs.getString("its_usercode"),
-			startDate				= rs.getDate("dt_start"),
-			endDate					= rs.getDate("dt_end"),
-			modified				= rs.getDate("dt_modified"),
+			startDate				= sqlDateToLocalDate(rs.getDate("dt_start")),
+			endDate					= sqlDateToLocalDate(rs.getDate("dt_end")),
+			modified				= sqlDateToLocalDate(rs.getDate("dt_modified")),
 			phoneNumber				= rs.getString("tel_business"),
 			gender					= Gender.fromCode(rs.getString("gender")),
 			alternativeEmailAddress	= rs.getString("external_email"),
 			userType				= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
 		)
 
-	private implicit def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
+	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
 		(Option(date) map { new LocalDate(_) }).orNull
 
 }

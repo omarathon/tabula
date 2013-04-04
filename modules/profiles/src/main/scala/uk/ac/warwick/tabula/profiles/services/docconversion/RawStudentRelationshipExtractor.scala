@@ -28,17 +28,17 @@ class RawStudentRelationship {
 	var agentName: String = _
 	var isValid = true
 	var warningMessage: String = _
-	
+
 	var agentMember: Member = _
 	var targetMember: Member = _
-	
+
 	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
 		this();
 		this.targetUniversityId = targetUniversityId
 		this.agentUniversityId = agentUniversityId
 		this.agentName = agentName
 	}
-	
+
 	def getAgentNameIfNonMember(): String = {
 		if (agentUniversityId.hasText) ""
 		else agentName
@@ -62,7 +62,7 @@ class RawStudentRelationshipExtractor {
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
-			sheet close
+			sheet.close()
 		}
 		rawStudentRelationships
 	}
@@ -74,7 +74,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 	var isParsingHeader = true // flag to parse the first row for column headers
 	var foundStudentInRow = false
 	var foundTutorInRow = false
-	
+
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	var currentRawStudentRelationship: RawStudentRelationship = _
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
@@ -99,11 +99,11 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			foundTutorInRow = false
 		}
 	}
-	
+
 	def cell(cellReference: String, formattedValue: String) = {
 		val col = new CellReference(cellReference).getCol
 		//logger.debug("cell: " + col.toString + ": " + formattedValue)
-		
+
 		isParsingHeader match {
 			case true => {
 				columnMap(col) = formattedValue
@@ -112,7 +112,7 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 				if (columnMap.containsKey(col)) {
 					columnMap(col) match {
 						case "student_id" => {
-							currentRawStudentRelationship.targetUniversityId = formattedValue	
+							currentRawStudentRelationship.targetUniversityId = formattedValue
 							foundStudentInRow = true
 						}
 						case "tutor_id" => {
@@ -129,10 +129,10 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 			}
 		}
 	}
-	
+
 	def endRow = {
-		if (!isParsingHeader) 
-			//if (foundStudentInRow) 
+		if (!isParsingHeader)
+			//if (foundStudentInRow)
 				rawStudentRelationships.add(currentRawStudentRelationship)
 			//else if (foundTutorInRow) // TODO need to give some kind of warning
 	}
