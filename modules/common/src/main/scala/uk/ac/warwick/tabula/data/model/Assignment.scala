@@ -417,9 +417,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
 		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+			val mapEntry = Option(markerMap) flatMap {_.find{p:(String,UserGroup) =>
 				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
-			}
+			}}
 			mapEntry match {
 				case Some((markerId, students)) => Some(markerId)
 				case _ => None

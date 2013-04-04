@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
  * before override, Module.Create.hashCode() == PersonalTutor.Create.hashCode()
  */
 abstract class CaseObjectEqualityFixes[A <: CaseObjectEqualityFixes[A] : ClassTag] {
-	val getName: String
+	def getName: String
 	
 	override final def equals(other: Any) = other match {
 		case that: A => getName == that.getName

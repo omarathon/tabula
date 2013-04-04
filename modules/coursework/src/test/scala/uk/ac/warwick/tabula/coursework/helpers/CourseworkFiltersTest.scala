@@ -107,7 +107,7 @@ class CourseworkFiltersTest extends TestBase {
 		filter.predicate(student(submission=Some(submission))) should be (true)
 		
 		// Where submission is late, they don't fit
-		assignment.setCloseDate(DateTime.now.minusDays(1))
+		assignment.closeDate = DateTime.now.minusDays(1)
 		submission.submittedDate = DateTime.now
 		
 		submission.isLate should be (true)
@@ -185,7 +185,7 @@ class CourseworkFiltersTest extends TestBase {
 		filter.predicate(student(submission=Some(submission))) should be (false)
 		
 		// Where submission is late, they don't fit
-		assignment.setCloseDate(DateTime.now.minusDays(1))
+		assignment.closeDate = DateTime.now.minusDays(1)
 		submission.submittedDate = DateTime.now
 		
 		submission.isLate should be (true)

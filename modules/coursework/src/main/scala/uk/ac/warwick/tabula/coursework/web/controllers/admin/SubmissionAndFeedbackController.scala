@@ -44,7 +44,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	def list(command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
-
+		
 		Mav("admin/assignments/submissionsandfeedback/progress",
 			"assignment" -> assignment,
 			"students" -> results.students,

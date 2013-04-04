@@ -202,338 +202,353 @@
 	</div>
 </div>
 
-<table id="coursework-progress-table" class="students table table-bordered table-striped tabula-greenLight">
-	<thead>
-		<tr>
-			<th class="check-col" style="padding-right: 0px;"><input type="checkbox" class="collection-check-all"></th>
-			
-			<#if department.showStudentName>
-				<th class="student-col">First name</th>
-				<th class="student-col">Last name</th>
-			<#else>
-				<th class="student-col">University ID</th>
-			</#if>
-			
-			<th class="progress-col">Progress</th>
-			<th class="action-col">Next action</th>
-		</tr>
-	</thead>
-	
-	<tbody>
-		<#macro action action student>
-			<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
-			<#local firstMarker="first marker" />
-			<#local secondMarker="second marker" />
-			
-			<#if student.coursework.enhancedSubmission??>
-				<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
-					<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
-						<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
-					</#if>
-					
-					<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
-						<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
+<#if students?size gt 0>
+	<table id="coursework-progress-table" class="students table table-bordered table-striped tabula-greenLight">
+		<thead>
+			<tr>
+				<th class="check-col" style="padding-right: 0px;"><input type="checkbox" class="collection-check-all"></th>
+				<#if department.showStudentName>
+					<th class="student-col">First name</th>
+					<th class="student-col">Last name</th>
+				<#else>
+					<th class="student-col">University ID</th>
+				</#if>
+				
+				<th class="progress-col">Progress</th>
+				<th class="action-col">Next action</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<#macro action actionCode student>
+				<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
+				<#local firstMarker="first marker" />
+				<#local secondMarker="second marker" />
+				
+				<#if student.coursework.enhancedSubmission??>
+					<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
+						<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
+							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
+						</#if>
+						
+						<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
+							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
+						</#if>
 					</#if>
 				</#if>
-			</#if>
+				
+				<#local text><@spring.message code=actionCode /></#local>
+			
+				<#noescape>${(text!"")?replace("[STUDENT]", studentDetails)?replace("[FIRST_MARKER]", firstMarker)?replace("[SECOND_MARKER]", secondMarker)}</#noescape>
+			</#macro>
 		
-			<#noescape>${(action!"")?replace("[STUDENT]", studentDetails)?replace("[FIRST_MARKER]", firstMarker)?replace("[SECOND_MARKER]", secondMarker)}</#noescape>
-		</#macro>
-	
-		<#macro stage stage>
-			<#if stage.message?default("")?length gt 0>
-				<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
-					<#if stage.completed>
-						<#if stage.health.toString == 'Good'>
-							<i class="icon-ok"></i>
+			<#macro stage stage>
+				<#if stage.messageCode?default("")?length gt 0>
+					<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
+						<#if stage.completed>
+							<#if stage.health.toString == 'Good'>
+								<i class="icon-ok"></i>
+							<#else>
+								<i class="icon-remove"></i>
+							</#if>
 						<#else>
-							<i class="icon-remove"></i>
+							<i class="icon-blank"></i>
 						</#if>
-					<#else>
-						<i class="icon-blank"></i>
-					</#if>
-					${stage.message}<#nested/>
-				</div>
-			</#if>
-		</#macro>
-	
-		<#macro workflow student>
-			<#if student.coursework.enhancedSubmission??>
-				<#local enhancedSubmission=student.coursework.enhancedSubmission>
-				<#local submission=enhancedSubmission.submission>
-			</#if>
-			<#if student.coursework.enhancedFeedback??>
-				<#local enhancedFeedback=student.coursework.enhancedFeedback>
-				<#local feedback=enhancedFeedback.feedback>
-			</#if>
-			<#if student.coursework.enhancedExtension??>
-				<#local enhancedExtension=student.coursework.enhancedExtension>
-				<#local extension=enhancedExtension.extension>
-			</#if>
-			
-			<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-				<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
-			<#else>
-				<#local lateness = "" />
-			</#if>
+						<@spring.message code=stage.messageCode /><#nested/>
+					</div>
+				</#if>
+			</#macro>
 		
-			<div class="workflow">
-				<#if student.stages?keys?seq_contains('Submission')>
-					<div class="stage-group clearfix">
-						<h3>Submission</h3>
-						
-						<div class="labels">
-							<#if submission??>
-								<#if submission.late>
-									<span class="label label-important use-tooltip" title="${lateness!''}" data-container="body">Late</span>
-								<#elseif  submission.authorisedLate>
-									<span class="label label-info use-tooltip" title="${lateness!''}" data-container="body">Within Extension</span>
-								</#if>
-							<#elseif !enhancedFeedback??>
-								<#if enhancedExtension?has_content>
-									<span class="label label-info">Unsubmitted</span>
-									<#if extension.approved && !extension.rejected>
-										<#local date>
-											<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-										</#local>
-									</#if>
-									<#if enhancedExtension.within>
-										<span class="label label-info use-tooltip" title="${date}" data-container="body">Within Extension</span>
-									<#elseif extension.rejected>
-										<span class="label label-info">Extension Rejected</span>
-									<#elseif !extension.approved>
-										<span class="label label-info">Extension Requested</span>
-									<#else>
-										<span class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
-									</#if>
-								<#else>
-									<span class="label label-info">Unsubmitted</span>
-								</#if>
-							</#if>
-						</div>
-						
-						<#-- If the current action is in this section, then add the next action blowout here -->
-						<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString)>
-							<div class="alert pull-right">
-								<strong>Next action:</strong> <@action student.nextStage.action student />
-							</div>
-						</#if>
-						
-						<@stage student.stages['Submission']><#compress>
-							<#if submission??>: <#compress>
-								<#local attachments=submission.allAttachments />
-								<#if attachments?size gt 0>
-									<#if attachments?size == 1> 
-										<#local filename = "${attachments[0].name}">
-									<#else>
-										<#local filename = "submission-${submission.universityId}.zip">
-									</#if>
-									<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>"><#compress>
-										${attachments?size}
-										<#if attachments?size == 1> file
-										<#else> files
-										</#if>
-									</#compress></a><#--
-								--></#if><#--
-								--><#if submission.submittedDate??> <#compress>
-									<span class="date use-tooltip" title="${lateness!''}" data-container="body"><#compress>
-										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
-									</#compress></span>
-								</#compress></#if><#--
-								--><#if assignment.wordCountField?? && submission.valuesByFieldName[assignment.defaultWordCountName]??><#compress>
-									, ${submission.valuesByFieldName[assignment.defaultWordCountName]?number} words
-								</#compress></#if>
-							</#compress></#if>
-						</#compress></@stage>
-						
-						<#if student.stages?keys?seq_contains('DownloadSubmission')>
-							<@stage student.stages['DownloadSubmission'] />
-						</#if>
-					</div>
+			<#macro workflow student>
+				<#if student.coursework.enhancedSubmission??>
+					<#local enhancedSubmission=student.coursework.enhancedSubmission>
+					<#local submission=enhancedSubmission.submission>
 				</#if>
-					
-				<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
-					<div class="stage-group clearfix">
-						<h3>Plagiarism</h3>
-						
-						<div class="labels">
-							<#if submission?? && submission.suspectPlagiarised>
-								<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
-							</#if>
-						</div>
-						
-						<#-- If the current action is in this section, then add the next action blowout here -->
-						<#if student.nextStage?? && ['CheckForPlagiarism']?seq_contains(student.nextStage.toString)>
-							<div class="alert pull-right">
-								<strong>Next action:</strong> <@action student.nextStage.action student />
-							</div>
-						</#if>
-						
-						<@stage student.stages['CheckForPlagiarism']><#compress>
-							<#if submission??>
-								<#list submission.allAttachments as attachment>
-									<!-- Checking originality report for ${attachment.name} ... -->
-									<#if attachment.originalityReport??>
-										: <@originalityReport attachment />
-									</#if>
-								</#list>
-							</#if>						
-						</#compress></@stage>
-					</div>
+				<#if student.coursework.enhancedFeedback??>
+					<#local enhancedFeedback=student.coursework.enhancedFeedback>
+					<#local feedback=enhancedFeedback.feedback>
+				</#if>
+				<#if student.coursework.enhancedExtension??>
+					<#local enhancedExtension=student.coursework.enhancedExtension>
+					<#local extension=enhancedExtension.extension>
 				</#if>
 				
-				<#if student.stages?keys?seq_contains('ReleaseForMarking')>
-					<div class="stage-group clearfix">
-						<h3>Marking</h3>
-						
-						<div class="labels">
-							<#if submission?? && submission.assignment?? && submission.releasedForMarking>
-								<span class="label label-success">Markable</span>
-							</#if>
-						</div>
-						
-						<#-- If the current action is in this section, then add the next action blowout here -->
-						<#if student.nextStage?? && ['ReleaseForMarking','FirstMarking','SecondMarking']?seq_contains(student.nextStage.toString)>
-							<div class="alert pull-right">
-								<strong>Next action:</strong> <@action student.nextStage.action student />
-							</div>
-						</#if>
-						
-						<@stage student.stages['ReleaseForMarking'] />
-						
-						<#if student.stages?keys?seq_contains('FirstMarking')>
-							<#if submission?? && submission.assignment??>
-								<#if submission.firstMarker?has_content>
-									<#local firstMarker><span data-profile="${submission.firstMarker.warwickId}">${submission.firstMarker.fullName}</span></#local>
-								</#if>
-							</#if>
-						
-							<@stage student.stages['FirstMarking']> <#compress>
-								<#if firstMarker?default("")?length gt 0>(<#noescape>${firstMarker}</#noescape>)</#if>
-							</#compress></@stage>
-						</#if>
-						
-						<#if student.stages?keys?seq_contains('SecondMarking')>
-							<#if submission?? && submission.assignment??>
-								<#if submission.secondMarker?has_content>
-									<#local secondMarker><span data-profile="${submission.secondMarker.warwickId}">${submission.secondMarker.fullName}</span></#local>
-								</#if>
-							</#if>
-						
-							<@stage student.stages['SecondMarking']> <#compress>
-								<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
-							</#compress></@stage>
-						</#if>
-					</div>
+				<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
+					<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+				<#else>
+					<#local lateness = "" />
 				</#if>
-				
-				<#if student.stages?keys?seq_contains('AddMarks') || student.stages?keys?seq_contains('AddFeedback')>
-					<div class="stage-group">
-						<h3>Feedback</h3>
-						
-						<div class="labels">
-							<#if enhancedFeedback?? && feedback??>
-								<#if feedback.released>
-									<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
-									<#else><span class="label label-info">Published</span>
+			
+				<div class="workflow">
+					<#if student.stages?keys?seq_contains('Submission')>
+						<div class="stage-group clearfix">
+							<h3>Submission</h3>
+							
+							<div class="labels">
+								<#if submission??>
+									<#if submission.late>
+										<span class="label label-important use-tooltip" title="${lateness!''}" data-container="body">Late</span>
+									<#elseif  submission.authorisedLate>
+										<span class="label label-info use-tooltip" title="${lateness!''}" data-container="body">Within Extension</span>
 									</#if>
-								<#else><span class="label label-warning">Not yet published</span>
+								<#elseif !enhancedFeedback??>
+									<#if enhancedExtension?has_content>
+										<span class="label label-info">Unsubmitted</span>
+										<#if extension.approved && !extension.rejected>
+											<#local date>
+												<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+											</#local>
+										</#if>
+										<#if enhancedExtension.within>
+											<span class="label label-info use-tooltip" title="${date}" data-container="body">Within Extension</span>
+										<#elseif extension.rejected>
+											<span class="label label-info">Extension Rejected</span>
+										<#elseif !extension.approved>
+											<span class="label label-info">Extension Requested</span>
+										<#else>
+											<span class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
+										</#if>
+									<#else>
+										<span class="label label-info">Unsubmitted</span>
+									</#if>
 								</#if>
-							</#if>
-						</div>
-						
-						<#-- If the current action is in this section, then add the next action blowout here -->
-						<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
-							<div class="alert pull-right">
-								<strong>Next action:</strong> <@action student.nextStage.action student />
 							</div>
-						</#if>
-						
-						<#if student.stages?keys?seq_contains('AddMarks')>
-							<@stage student.stages['AddMarks']><#compress>
-								<#if feedback?? && feedback.hasMarkOrGrade>
-									: <#compress>
-										<#if feedback.hasMark>
-											${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
-										</#if>
-										<#if feedback.hasGrade>
-											grade ${feedback.actualGrade!''}
-										</#if>
-									</#compress>
-								</#if>
-							</#compress></@stage>
-						</#if>
-						
-						<#if student.stages?keys?seq_contains('AddFeedback')>
-							<@stage student.stages['AddFeedback']><#compress>
-								<#if feedback?? && feedback.hasAttachments>: <#compress>
-									<#local attachments=feedback.attachments />
+							
+							<#-- If the current action is in this section, then add the next action blowout here -->
+							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString)>
+								<div class="alert pull-right">
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+								</div>
+							</#if>
+							
+							<@stage student.stages['Submission']><#compress>
+								<#if submission??>: <#compress>
+									<#local attachments=submission.allAttachments />
 									<#if attachments?size gt 0>
 										<#if attachments?size == 1> 
-											<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
+											<#local filename = "${attachments[0].name}">
 										<#else>
-											<#local attachmentExtension = "zip">
+											<#local filename = "submission-${submission.universityId}.zip">
 										</#if>
-										<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>"><#compress>
+										<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>"><#compress>
 											${attachments?size}
 											<#if attachments?size == 1> file
 											<#else> files
 											</#if>
 										</#compress></a><#--
 									--></#if><#--
-									--><#if feedback.uploadedDate??> <#compress>
-											<@fmt.date date=feedback.uploadedDate seconds=true capitalise=true shortMonth=true />
+									--><#if submission.submittedDate??> <#compress>
+										<span class="date use-tooltip" title="${lateness!''}" data-container="body"><#compress>
+											<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
+										</#compress></span>
+									</#compress></#if><#--
+									--><#if assignment.wordCountField?? && submission.valuesByFieldName[assignment.defaultWordCountName]??><#compress>
+										, ${submission.valuesByFieldName[assignment.defaultWordCountName]?number} words
 									</#compress></#if>
 								</#compress></#if>
 							</#compress></@stage>
-						</#if>
-						
-						<#if student.stages?keys?seq_contains('ReleaseFeedback')>
-							<@stage student.stages['ReleaseFeedback'] />
-						</#if>
-						
-						<#if student.stages?keys?seq_contains('DownloadFeedback')>
-							<@stage student.stages['DownloadFeedback'] />
-						</#if>
-					</div>
-				</#if>
-			</div>
-		</#macro>
-		
-		<#macro row student>
-			<tr class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
-				<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
-				<#if department.showStudentName>
-					<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
-					<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
-				<#else>
-					<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
-				</#if>
-				<td class="progress-col">
-					<dl class="progress progress-${student.progress.t} use-tooltip" title="${student.progress.message}" style="margin: 0; border-bottom: 0;" data-container="body">
-						<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
-						<dd style="display: none;" class="workflow-progress-container" data-profile="${student.user.warwickId}">
-							<div id="workflow-${student.user.warwickId}" class="workflow-container">
-								<@workflow student />
-							</div>
-						</dd>
-					</dl>
-				</td>
-				<td class="action-col">
-					<#if student.nextStage??>
-						<@action student.nextStage.action student />
-					<#elseif student.progress.percentage == 100>
-						Complete
+							
+							<#if student.stages?keys?seq_contains('DownloadSubmission')>
+								<@stage student.stages['DownloadSubmission'] />
+							</#if>
+						</div>
 					</#if>
-				</td>
-			</tr>
-		</#macro>
-	
-		<#list students as student>
-			<@row student />
-		</#list>
-	</tbody>
-</table>
+						
+					<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
+						<div class="stage-group clearfix">
+							<h3>Plagiarism</h3>
+							
+							<div class="labels">
+								<#if submission?? && submission.suspectPlagiarised>
+									<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+								</#if>
+							</div>
+							
+							<#-- If the current action is in this section, then add the next action blowout here -->
+							<#if student.nextStage?? && ['CheckForPlagiarism']?seq_contains(student.nextStage.toString)>
+								<div class="alert pull-right">
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+								</div>
+							</#if>
+							
+							<@stage student.stages['CheckForPlagiarism']><#compress>
+								<#if submission??>
+									<#list submission.allAttachments as attachment>
+										<!-- Checking originality report for ${attachment.name} ... -->
+										<#if attachment.originalityReport??>
+											: <@originalityReport attachment />
+										</#if>
+									</#list>
+								</#if>						
+							</#compress></@stage>
+						</div>
+					</#if>
+					
+					<#if student.stages?keys?seq_contains('ReleaseForMarking')>
+						<div class="stage-group clearfix">
+							<h3>Marking</h3>
+							
+							<div class="labels">
+								<#if submission?? && submission.assignment?? && submission.releasedForMarking>
+									<span class="label label-success">Markable</span>
+								</#if>
+							</div>
+							
+							<#-- If the current action is in this section, then add the next action blowout here -->
+							<#if student.nextStage?? && ['ReleaseForMarking','FirstMarking','SecondMarking']?seq_contains(student.nextStage.toString)>
+								<div class="alert pull-right">
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+								</div>
+							</#if>
+							
+							<@stage student.stages['ReleaseForMarking'] />
+							
+							<#if student.stages?keys?seq_contains('FirstMarking')>
+								<#if submission?? && submission.assignment??>
+									<#if submission.firstMarker?has_content>
+										<#local firstMarker><span data-profile="${submission.firstMarker.warwickId}">${submission.firstMarker.fullName}</span></#local>
+									</#if>
+								</#if>
+							
+								<@stage student.stages['FirstMarking']> <#compress>
+									<#if firstMarker?default("")?length gt 0>(<#noescape>${firstMarker}</#noescape>)</#if>
+								</#compress></@stage>
+							</#if>
+							
+							<#if student.stages?keys?seq_contains('SecondMarking')>
+								<#if submission?? && submission.assignment??>
+									<#if submission.secondMarker?has_content>
+										<#local secondMarker><span data-profile="${submission.secondMarker.warwickId}">${submission.secondMarker.fullName}</span></#local>
+									</#if>
+								</#if>
+							
+								<@stage student.stages['SecondMarking']> <#compress>
+									<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
+								</#compress></@stage>
+							</#if>
+						</div>
+					</#if>
+					
+					<#if student.stages?keys?seq_contains('AddMarks') || student.stages?keys?seq_contains('AddFeedback')>
+						<div class="stage-group">
+							<h3>Feedback</h3>
+							
+							<div class="labels">
+								<#if enhancedFeedback?? && feedback??>
+									<#if feedback.released>
+										<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
+										<#else><span class="label label-info">Published</span>
+										</#if>
+									<#else><span class="label label-warning">Not yet published</span>
+									</#if>
+								</#if>
+							</div>
+							
+							<#-- If the current action is in this section, then add the next action blowout here -->
+							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
+								<div class="alert pull-right">
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+								</div>
+							</#if>
+							
+							<#if student.stages?keys?seq_contains('AddMarks')>
+								<@stage student.stages['AddMarks']><#compress>
+									<#if feedback?? && feedback.hasMarkOrGrade>
+										: <#compress>
+											<#if feedback.hasMark>
+												${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
+											</#if>
+											<#if feedback.hasGrade>
+												grade ${feedback.actualGrade!''}
+											</#if>
+										</#compress>
+									</#if>
+								</#compress></@stage>
+							</#if>
+							
+							<#if student.stages?keys?seq_contains('AddFeedback')>
+								<@stage student.stages['AddFeedback']><#compress>
+									<#if feedback?? && feedback.hasAttachments>: <#compress>
+										<#local attachments=feedback.attachments />
+										<#if attachments?size gt 0>
+											<#if attachments?size == 1> 
+												<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
+											<#else>
+												<#local attachmentExtension = "zip">
+											</#if>
+											<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>"><#compress>
+												${attachments?size}
+												<#if attachments?size == 1> file
+												<#else> files
+												</#if>
+											</#compress></a><#--
+										--></#if><#--
+										--><#if feedback.uploadedDate??> <#compress>
+												<@fmt.date date=feedback.uploadedDate seconds=true capitalise=true shortMonth=true />
+										</#compress></#if>
+									</#compress></#if>
+								</#compress></@stage>
+							</#if>
+							
+							<#if student.stages?keys?seq_contains('ReleaseFeedback')>
+								<@stage student.stages['ReleaseFeedback'] />
+							</#if>
+							
+							<#if student.stages?keys?seq_contains('DownloadFeedback')>
+								<@stage student.stages['DownloadFeedback'] />
+							</#if>
+						</div>
+					</#if>
+				</div>
+			</#macro>
+			
+			<#macro row student>
+				<tr class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+					<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
+					<#if department.showStudentName>
+						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
+						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
+					<#else>
+						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
+					</#if>
+					<td class="progress-col">	
+						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission'>
+							<#local progressTooltip><@spring.message code=student.stages['Submission'].messageCode />. <@spring.message code=student.progress.messageCode /></#local>
+						<#else>
+							<#local progressTooltip><@spring.message code=student.progress.messageCode /></#local>
+						</#if>
+					
+						<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
+							<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
+							<dd style="display: none;" class="workflow-progress-container" data-profile="${student.user.warwickId}">
+								<div id="workflow-${student.user.warwickId}" class="workflow-container">
+									<@workflow student />
+								</div>
+							</dd>
+						</dl>
+					</td>
+					<td class="action-col">
+						<#if student.nextStage??>
+							<@action student.nextStage.actionCode student />
+						<#elseif student.progress.percentage == 100>
+							Complete
+						</#if>
+					</td>
+				</tr>
+			</#macro>
+		
+			<#list students as student>
+				<@row student />
+			</#list>
+		</tbody>
+	</table>
+<#else>
+	<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
+		<p>There are no submissions or feedbacks yet for this assignment.</p>
+	<#else>
+		<p>There are no ${submissionAndFeedbackCommand.filter.description} for this assignment.</p>
+	</#if>
+</#if>
 
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">

@@ -111,7 +111,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			))
 			p.percentage should be (0)
 			p.nextStage should be (None) // no next stage because we haven't started
-			p.message should be ("Feedback not uploaded")
+			p.messageCode should be ("Feedback not uploaded")
 			p.cssClass should be ("success")
 		}
 		
@@ -127,7 +127,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			))
 			p.percentage should be (66)
 			p.nextStage should be (Some(WorkflowStages.ReleaseFeedback))
-			p.message should be ("Feedback not published")
+			p.messageCode should be ("Feedback not published")
 			p.cssClass should be ("warning")
 		}
 		
@@ -142,7 +142,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			))
 			p.percentage should be (100)
 			p.nextStage should be (Some(WorkflowStages.DownloadFeedback))
-			p.message should be ("Feedback not downloaded by student")
+			p.messageCode should be ("Feedback not downloaded by student")
 			p.cssClass should be ("warning")
 		}
 		
@@ -155,7 +155,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			))
 			p.percentage should be (100)
 			p.nextStage should be (None) // Complete
-			p.message should be ("Feedback downloaded by student")
+			p.messageCode should be ("Feedback downloaded by student")
 			p.cssClass should be ("success")
 		}
 		

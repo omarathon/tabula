@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.CaseObjectEqualityFixes
  * point offering a filter for Unsubmitted students).
  */
 sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[CourseworkFilter] {
-	val getName = CourseworkFilters.shortName(getClass.asInstanceOf[Class[_ <: CourseworkFilter]])
+	def getName = CourseworkFilters.shortName(getClass.asInstanceOf[Class[_ <: CourseworkFilter]])
 	def getDescription: String 
 	def predicate: (Student => Boolean)
 	def applies(assignment: Assignment): Boolean
@@ -24,7 +24,7 @@ sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[Coursewor
 
 object CourseworkFilters {
 	private val ObjectClassPrefix = CourseworkFilters.getClass.getName
-	val AllFilters = Seq(
+	lazy val AllFilters = Seq(
 		AllStudents, OnTime, WithExtension, WithinExtension, Unsubmitted,
 		NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
 		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised,
@@ -137,7 +137,7 @@ object CourseworkFilters {
 		def applies(assignment: Assignment) = 
 			assignment.collectSubmissions && 
 			assignment.markingWorkflow != null && 
-			assignment.markingWorkflow.getMarkingMethod == MarkingMethod.SeenSecondMarking
+			assignment.markingWorkflow.markingMethod == MarkingMethod.SeenSecondMarking
 	}
 	
 	case object CheckedForPlagiarism extends CourseworkFilter {
@@ -179,7 +179,7 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotReleased extends CourseworkFilter {
-		def getDescription = "feedback not published"
+		def getDescription = "feedbacks not published"
 		def predicate = { item: Student => 
 			(item.coursework.enhancedFeedback map { item => 
 				!item.feedback.released
@@ -189,7 +189,7 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotDownloaded extends CourseworkFilter {
-		def getDescription = "feedback not downloaded by student"
+		def getDescription = "feedbacks not downloaded by students"
 		def predicate = { item: Student => 
 			(item.coursework.enhancedFeedback map { item => 
 				!item.downloaded

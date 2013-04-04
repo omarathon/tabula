@@ -2,29 +2,24 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
+
 import org.joda.time.DateTime
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
+import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
+import uk.ac.warwick.tabula.coursework.services.{CourseworkWorkflowService, WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{UserLookupService, AuditEventIndexService}
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService, AuditEventIndexService}
 import uk.ac.warwick.userlookup.User
-import scala.util.Random
-import org.hibernate.annotations.Filters
-import uk.ac.warwick.tabula.coursework.helpers.CourseworkFilters
-import uk.ac.warwick.tabula.coursework.helpers.CourseworkFilter
-import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
-import uk.ac.warwick.tabula.coursework.services.WorkflowStages
-import scala.collection.immutable.ListMap
-import uk.ac.warwick.tabula.coursework.services.WorkflowStage
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly {
 	mustBeLinked(mandatory(assignment), mandatory(module))
@@ -37,7 +32,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	
-	@BeanProperty var filter: CourseworkFilter = CourseworkFilters.AllStudents
+	var filter: CourseworkFilter = CourseworkFilters.AllStudents
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
@@ -76,7 +71,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			
 			Student(
 				user=user,
-				progress=Progress(progress.percentage, progress.cssClass, progress.message),
+				progress=Progress(progress.percentage, progress.cssClass, progress.messageCode),
 				nextStage=progress.nextStage,
 				stages=progress.stages,
 				coursework=coursework
@@ -122,7 +117,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 			Student(
 				user=user,
-				progress=Progress(progress.percentage, progress.cssClass, progress.message),
+				progress=Progress(progress.percentage, progress.cssClass, progress.messageCode),
 				nextStage=progress.nextStage,
 				stages=progress.stages,
 				coursework=coursework
@@ -176,7 +171,7 @@ case class WorkflowItems(
 case class Progress(
 	val percentage: Int,
 	val t: String,
-	val message: String
+	val messageCode: String
 )
 
 case class ExtensionListItem(
