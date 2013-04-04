@@ -25,7 +25,7 @@
 	<inceptionYear>2012</inceptionYear>
 
 	<properties>
-		<scala.version>2.10.0</scala.version>
+		<scala.version>2.10.1</scala.version>
 		<scala.major.version>2.10</scala.major.version>
 		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
@@ -422,6 +422,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
