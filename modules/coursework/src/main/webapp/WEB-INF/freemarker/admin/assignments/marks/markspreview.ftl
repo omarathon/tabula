@@ -59,9 +59,9 @@
 				</tr>
 				<#list itemList as item>
 					<@spring.nestedPath path="marks[${item_index}]">
-						<#if !item.isValid>
+						<#if !item.valid>
 							<#assign errorClass="alert-error" />
-						<#elseif item.isModified>
+						<#elseif item.modified>
 							<#assign errorClass="alert" />
 						<#else>
 							<#assign errorClass="alert-success" />
@@ -71,19 +71,19 @@
 							<@f.hidden path="universityId" />
 							<@f.hidden path="actualMark" />
 							<@f.hidden path="actualGrade" />
-							<@f.hidden path="isValid" />
+							<@f.hidden path="valid" />
 							<td>
 								<@spring.bind path="universityId">
 									${status.value}
 								</@spring.bind>
 								<@f.errors path="universityId" cssClass="error" />
 								
-								<#if item.isModified>
+								<#if item.modified>
 									<div class="warning">
 										Mark for this student already uploaded - previous mark will be overwritten when you click Confirm.
 									</div>
 								</#if>
-								<#if item.isPublished>
+								<#if item.published>
 									<div class="warning">
 										Feedback for this student has already been published. They will be notified that their mark has changed.
 									</div>
