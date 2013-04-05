@@ -68,9 +68,19 @@
 
 </#macro>
 
-<#if students?size = 0>
+<#function hasSubmissionOrFeedback students>
+	<#local result = [] />
+	<#list students as student>
+		<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
+			<#local result = result + [student] />
+		</#if>
+	</#list>
+	<#return result />
+</#function>
+
+<#if hasSubmissionOrFeedback(students)?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
-<#else>
+</#if>
 
 <!-- Extra junk that most people probably won't care about -->
 <div class="btn-group" id="assignment-extra-dropdown" style="float:right">
@@ -404,5 +414,4 @@
 		})(jQuery);
 	</script>
 </div>
-</#if>
 </#escape>

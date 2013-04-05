@@ -13,11 +13,12 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			
 			// Check that the assignment is there
 			id should not be ('empty)
+			println(id)
 			
 			// Check that an empty assignment looks right
 			click on getAssignmentInfo("xxx101", "Fully featured assignment").findElement(By.partialLinkText("0 submissions"))
 			
-			pageSource contains "There are no submissions or feedbacks" should be (true)
+			pageSource contains "Fully featured assignment (XXX101)" should be (true)
 			
 			// Go back to the admin page
 			click on linkText("Test Services")
@@ -43,8 +44,8 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 	}
 	
 	"Department admin" should "be able to archive an assignment" in {
-		withAssignment("xxx101", "Fully featured assignment") { assignmentId =>
-			val info = getAssignmentInfo("xxx101", "Fully featured assignment")
+		withAssignment("xxx101", "Fully featured assignment for archiving") { assignmentId =>
+			val info = getAssignmentInfo("xxx101", "Fully featured assignment for archiving")
 			
 			click on (info.findElement(By.partialLinkText("Actions")))
 			val archiveAssignment = info.findElement(By.partialLinkText("Archive assignment"))
@@ -80,7 +81,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 				click on (minfo.findElement(By.partialLinkText("Show archived assignments")))
 			}
 			
-			getAssignmentInfo("xxx101", "Fully featured assignment (Archived)").isDisplayed() should be (true)
+			getAssignmentInfo("xxx101", "Fully featured assignment for archiving (Archived)").isDisplayed() should be (true)
 		}
 	}
 
