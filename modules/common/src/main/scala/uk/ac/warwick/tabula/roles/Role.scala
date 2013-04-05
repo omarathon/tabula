@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 import javax.persistence.Transient
+import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 
 trait RoleDefinition {
 	def getName: String
@@ -19,7 +20,7 @@ trait RoleDefinition {
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
 }
 
-trait BuiltInRoleDefinition extends RoleDefinition {
+trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinition] with RoleDefinition {
 	final val getName = RoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: BuiltInRoleDefinition]])
 
 	private var scopedPermissions: List[Permission] = List()
@@ -53,22 +54,6 @@ trait BuiltInRoleDefinition extends RoleDefinition {
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
-
-	/* We need to override equals() here because under heavy load, the class loader will
-	 * (stupidly) return a different instance of the case object, which fails the equality
-	 * check because the default AnyRef implementation of equals is just this eq that.
-	 *
-	 * The hashCode is computed at compile time, so this is safe.
-	 *
-	 * DISREGARD THAT hashCodes collide because they are generated only based on the name
-	 * of the current case object, so Module.Create.hashCode() == PersonalTutor.Create.hashCode()
-	 */
-	override def equals(other: Any) = other match {
-		case that: BuiltInRoleDefinition => getName == that.getName
-		case _ => false
-	}
-	override def hashCode() = getName.hashCode()
-	override def toString() = getName
 }
 
 object RoleDefinition {

@@ -93,8 +93,8 @@ class Submission extends GeneratedId with PermissionsTarget {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def isReleasedForMarking: JBoolean = assignment.isReleasedForMarking(this)
-	def isReleasedToSecondMarker: JBoolean = assignment.isReleasedToSecondMarker(this)
+	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
+	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
 }
 
 /**

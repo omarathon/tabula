@@ -414,11 +414,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+	def getStudentsFirstMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
 		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+			val mapEntry = Option(markerMap) flatMap {_.find{p:(String,UserGroup) =>
 				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
-			}
+			}}
 			mapEntry match {
 				case Some((markerId, students)) => Some(markerId)
 				case _ => None
@@ -434,9 +434,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			case None => None
 		}
 		case _ => None
-	}
+	}}
 
-	def getStudentsSecondMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+	def getStudentsSecondMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
 		case SeenSecondMarking =>  {
 			val mapEntry = markerMap.find{p:(String,UserGroup) =>
 				p._2.includes(submission.userId) && markingWorkflow.secondMarkers.includes(p._1)
@@ -447,14 +447,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			}
 		}
 		case _ => None
-	}
+	}}
 
 		/**
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
 	def getMarkersSubmissions(marker: User): Seq[Submission] = {
-		if (markingWorkflow != null)	markingWorkflow.getSubmissions(this, marker)
+		if (markingWorkflow != null) markingWorkflow.getSubmissions(this, marker)
 		else Seq()
 	}
 
