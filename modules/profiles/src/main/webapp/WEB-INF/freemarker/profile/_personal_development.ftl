@@ -46,11 +46,9 @@
 	<script type="text/javascript">
 	jQuery(function($){
 		function scrollToOpenDetails() {
-			var navHeight = window.recalculateNavigation() + $('#navigation.horizontal ul#primary-navigation').height();
-			
 			$("details.open").each(function() {
 				$("html, body").animate({
-					scrollTop: $(this).offset().top - (navHeight+(navHeight/3))
+					scrollTop: $(this).offset().top - window.getNavigationHeight()
 				}, 300);
 			});
 		};
