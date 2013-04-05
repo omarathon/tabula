@@ -9,22 +9,21 @@ import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.AuditEventIndexService
-import scala.reflect.BeanProperty
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 
 class AuditLogQuery {
-	@BeanProperty var page: Int = 0
-	@BeanProperty var query: String = ""
+	var page: Int = 0
+	var query: String = ""
 }
 
 case class UserLookupQuery() {
 	var userLookup = Wire.auto[UserLookupInterface]
-	@BeanProperty var userId: String = _
-	@BeanProperty var uniId: String = _
+	var userId: String = _
+	var uniId: String = _
 
 	def user = {
 

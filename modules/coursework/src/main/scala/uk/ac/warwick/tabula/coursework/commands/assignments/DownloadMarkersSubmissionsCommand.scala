@@ -22,7 +22,7 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	@BeanProperty var submissions:JList[Submission] = ArrayList()
+	var submissions:JList[Submission] = ArrayList()
 	
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

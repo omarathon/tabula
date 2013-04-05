@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
@@ -31,17 +30,17 @@ abstract class SubmissionValue extends BindListener {
 }
 
 class StringSubmissionValue(val field: FormField) extends SubmissionValue {
-	@BeanProperty var value: String = _
+	var value: String = _
 	def persist(ssv: SavedSubmissionValue) { ssv.value = value }
 }
 
 class BooleanSubmissionValue(val field: FormField) extends SubmissionValue {
-	@BeanProperty var value: JBoolean = null
+	var value: JBoolean = null
 	def persist(ssv: SavedSubmissionValue) { ssv.value = Option(value).map { _.toString }.getOrElse("") }
 }
 
 class FileSubmissionValue(val field: FormField) extends SubmissionValue {
-	@BeanProperty var file: UploadedFile = new UploadedFile
+	var file: UploadedFile = new UploadedFile
 
 	lazy val fileDao = Wire.auto[FileDao]
 	override def onBind(result: BindingResult) { file.onBind(result) }

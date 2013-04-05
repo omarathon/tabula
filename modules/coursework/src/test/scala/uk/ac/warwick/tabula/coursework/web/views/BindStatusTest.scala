@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.TestBase
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.support.RequestContext
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.context.WebApplicationContext
@@ -16,7 +15,7 @@ import java.util.HashMap
 import uk.ac.warwick.tabula.helpers.LazyLists
 
 class MyCommand {
-	@BeanProperty var attached:JList[FileAttachment] = LazyLists.simpleFactory()
+	var attached:JList[FileAttachment] = LazyLists.simpleFactory()
 }
 
 class BindStatusTest extends TestBase {

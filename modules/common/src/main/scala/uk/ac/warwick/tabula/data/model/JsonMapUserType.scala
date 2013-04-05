@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.spring.Wire
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types

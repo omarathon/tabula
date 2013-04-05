@@ -7,7 +7,7 @@ import java.io.File
 import TurnitinDates._
 import TurnitinMethods._
 
-import dispatch.Request
+import dispatch.classic.Request
 
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.web._

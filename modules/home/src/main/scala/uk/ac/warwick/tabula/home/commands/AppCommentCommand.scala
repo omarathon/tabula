@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.home.commands
 import java.lang.Boolean
 import java.util.concurrent.Future
 
-import scala.reflect.BeanProperty
 
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.validation.Errors
@@ -28,16 +27,16 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with
 	
 	lazy val template: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 
-	@BeanProperty var message: String = _
-	//	@BeanProperty var pleaseRespond:Boolean =_
-	@BeanProperty var usercode: String = _
-	@BeanProperty var name: String = _
-	@BeanProperty var email: String = _
-	@BeanProperty var currentPage: String = _
-	@BeanProperty var browser: String = _
-	@BeanProperty var os: String = _
-	@BeanProperty var resolution: String = _
-	@BeanProperty var ipAddress: String = _
+	var message: String = _
+	//	var pleaseRespond:Boolean =_
+	var usercode: String = _
+	var name: String = _
+	var email: String = _
+	var currentPage: String = _
+	var browser: String = _
+	var os: String = _
+	var resolution: String = _
+	var ipAddress: String = _
 	
 	if (user != null && user.loggedIn) {
 		if (!usercode.hasText) usercode = user.apparentId

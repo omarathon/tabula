@@ -61,10 +61,17 @@ object DurationFormatter {
 	private def toPeriod(start: DateTime, end: DateTime): ReadablePeriod = {
 		val duration = new Duration(start, end)
 		var period = new Period(start, end, periodType)
+		period = stripTime(period, duration)
 		period = stripSeconds(period, duration)
 		period = stripMinutes(period, duration)
 		period
 	}
+	
+	private def stripTime(period: Period, duration: Duration): Period =
+		if (duration.getStandardDays() >= 7)
+			period.withHours(0).withMinutes(0).withSeconds(0)
+		else
+			period
 
 	/**
 	 * If more than an hour, set seconds to 0 so they aren't printed.

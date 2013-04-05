@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 
@@ -16,7 +15,7 @@ class ArchiveAssignmentCommand(val module: Module, val assignment: Assignment) e
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Archive, assignment)
 
-	@BeanProperty var unarchive: Boolean = false
+	var unarchive: Boolean = false
 
 	def applyInternal() {
 		transactional() {

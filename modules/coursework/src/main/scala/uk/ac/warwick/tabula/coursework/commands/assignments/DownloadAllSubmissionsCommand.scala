@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
 import org.springframework.beans.factory.annotation.Autowired
-import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment

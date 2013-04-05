@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
-import scala.reflect.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}
@@ -14,8 +13,8 @@ class DisplaySettingsCommand (val department:Department) extends Command[Unit] w
 	
 	PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
 
-	@BeanProperty var showStudentName:Boolean = department.isShowStudentName
-	@BeanProperty var plagiarismDetection:Boolean = department.isPlagiarismDetectionEnabled
+	var showStudentName:Boolean = department.isShowStudentName
+	var plagiarismDetection:Boolean = department.isPlagiarismDetectionEnabled
 
 	override def applyInternal() {
 		transactional() {

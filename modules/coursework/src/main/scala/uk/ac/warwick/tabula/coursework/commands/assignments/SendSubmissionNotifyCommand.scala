@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.Submission
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.commands.Command
@@ -22,15 +21,16 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserSettingsService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.data.model.UserSettings
+import language.implicitConversions
 
 class SendSubmissionNotifyCommand (
-		@BeanProperty val submission: Submission, 
-		@BeanProperty val users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails with Public { 
+		val submission: Submission, 
+		val users: UserGroup) extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails with Public { 
 
 	mandatory(submission)
 	
-	@BeanProperty var assignment: Assignment = submission.assignment
-	@BeanProperty var module: Module = assignment.module
+	var assignment: Assignment = submission.assignment
+	var module: Module = assignment.module
 	
 	var userLookup = Wire.auto[UserLookupService]
 	var userSettings = Wire.auto[UserSettingsService]

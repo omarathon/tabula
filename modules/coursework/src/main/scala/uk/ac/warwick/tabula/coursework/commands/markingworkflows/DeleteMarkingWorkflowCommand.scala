@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework.commands.markingworkflows
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.Errors
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire

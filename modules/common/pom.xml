@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>31</version>
+		<version>32</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -145,12 +145,12 @@
 
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch_${scala.version}</artifactId>
+			<artifactId>dispatch_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-core_${scala.version}</artifactId>
+			<artifactId>dispatch-core_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 			<exclusions>
 				<exclusion>
@@ -161,27 +161,27 @@
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-futures_${scala.version}</artifactId>
+			<artifactId>dispatch-futures_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-http_${scala.version}</artifactId>
+			<artifactId>dispatch-http_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-jsoup_${scala.version}</artifactId>
+			<artifactId>dispatch-jsoup_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-mime_${scala.version}</artifactId>
+			<artifactId>dispatch-mime_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.databinder</groupId>
-			<artifactId>dispatch-tagsoup_${scala.version}</artifactId>
+			<artifactId>dispatch-tagsoup_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>
 		</dependency>
 
@@ -210,7 +210,7 @@
 					<groupId>commons-codec</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
@@ -224,7 +224,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
-			<artifactId>spring-scala-glue_2.9.2</artifactId>
+			<artifactId>spring-scala-glue_${scala.major.version}</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
@@ -358,9 +358,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.fasterxml</groupId>
-			<artifactId>jackson-module-scala</artifactId>
-			<version>1.9.2</version>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-scala_${scala.major.version}</artifactId>
+			<version>2.1.3</version>
 		</dependency>
 
 		<dependency>
@@ -472,7 +472,7 @@
 			<artifactId>ehcache-core</artifactId>
 			<version>1.7.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
@@ -483,6 +483,11 @@
 			<groupId>uk.ac.warwick.membership</groupId>
 			<artifactId>membership-rmi</artifactId>
 			<version>2.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.scala</groupId>
+			<artifactId>spring-scala</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->

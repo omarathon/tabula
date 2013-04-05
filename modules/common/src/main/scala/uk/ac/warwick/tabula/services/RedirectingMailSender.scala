@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import javax.mail.Message.RecipientType
 import javax.mail.internet.MimeMultipart
+import scala.reflect.ClassTag
+import language.implicitConversions
 
 final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMailSender with Logging with UnicodeEmails {
 
@@ -46,7 +48,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 		delegate.send(messageToSend)
 	}
 
-	implicit def ArrayOrEmpty[A: Manifest](a: Array[A]) = new {
+	implicit def ArrayOrEmpty[A: ClassTag](a: Array[A]) = new {
 		def orEmpty: Array[A] = Option(a).getOrElse(Array.empty)
 	}
 

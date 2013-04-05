@@ -8,7 +8,6 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.Expression
@@ -21,6 +20,7 @@ import collection.JavaConversions._
 import java.util.HashMap
 import org.springframework.expression.spel.SpelEvaluationException
 import org.hibernate.Session
+import scala.beans.BeanProperty
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/repl"))
@@ -50,13 +50,13 @@ class SysadminREPL extends BaseController with BeanFactoryAware {
 	 * as top-level items in your SpEL query.
 	 */
 	case class RootObject(
-		@BeanProperty val session: Session,
-		@BeanProperty val beanFactory: BeanFactory = beanFactory,
+		val session: Session,
+		val beanFactory: BeanFactory = beanFactory,
 		// expose Assignments as a map of ids
-		@BeanProperty val assignments: MapAccessor[Assignment] = MapAccessor { id =>
+		val assignments: MapAccessor[Assignment] = MapAccessor { id =>
 			assignmentService.getAssignmentById(id).orNull
 		},
-		@BeanProperty val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
+		val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
 			moduleAndDepartmentService.getDepartmentByCode(code).orNull
 		})
 }

@@ -46,9 +46,9 @@
 							<@f.hidden path="targetUniversityId" />
 							<@f.hidden path="agentUniversityId" />
 							<@f.hidden path="agentName" />
-							<@f.hidden path="isValid" />
+							<@f.hidden path="valid" />
 							
-							<#if !item.isValid>
+							<#if !item.valid>
 								<tr class="error">
 							<#else>
 								<tr class="success">
@@ -76,7 +76,7 @@
 									</#if>
 								</td>
 							</tr>
-							<#if !item.isValid>
+							<#if !item.valid>
 								<tr class="error"><td colspan="4"><i class="icon-warning-sign"></i> <@f.errors path="*" cssClass="" /></td></tr>
 							</#if>
 						</@spring.nestedPath>

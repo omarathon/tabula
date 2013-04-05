@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.Date
 import java.sql.ResultSet
-import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.springframework.beans.BeanWrapper
@@ -47,11 +46,11 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
 	// A few intermediate properties that will be transformed later
-	@BeanProperty var studyDepartmentCode: String = _
-	@BeanProperty var routeCode: String = _
-	@BeanProperty var sprStatusCode: String = _
-	@BeanProperty var enrolmentStatusCode: String = _
-	@BeanProperty var modeOfAttendanceCode: String = _
+	var studyDepartmentCode: String = _
+	var routeCode: String = _
+	var sprStatusCode: String = _
+	var enrolmentStatusCode: String = _
+	var modeOfAttendanceCode: String = _
 	
 	this.sprCode = rs.getString("spr_code")
 	this.sitsCourseCode = rs.getString("sits_course_code")

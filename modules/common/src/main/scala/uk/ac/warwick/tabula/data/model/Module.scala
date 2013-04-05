@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import scala.util.matching.Regex
 import org.hibernate.annotations.AccessType
 import javax.persistence._
@@ -28,8 +27,8 @@ class Module extends GeneratedId with PermissionsTarget {
 		this.department = department
 	}
 
-	@BeanProperty var code: String = _
-	@BeanProperty var name: String = _
+	var code: String = _
+	var name: String = _
 
 	// The managers are markers/moderators who upload feedback. 
 	// They can also publish feedback.
@@ -43,18 +42,18 @@ class Module extends GeneratedId with PermissionsTarget {
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
-	@BeanProperty var department: Department = _
+	var department: Department = _
 	
 	def permissionsParents = Seq(Option(department)).flatten
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BeanProperty var assignments: java.util.List[Assignment] = ArrayList()
+	var assignments: java.util.List[Assignment] = ArrayList()
 
-	@BeanProperty var active: Boolean = _
+	var active: Boolean = _
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	@BeanProperty var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
+	var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
 
 	override def toString = "Module[" + code + "]"
 }

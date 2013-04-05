@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
-import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import scala.react.EventSource
 import uk.ac.warwick.tabula.system.exceptions.HandledException
@@ -30,7 +29,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	def disable
 
 	/** Returns whether maintenance mode is enabled. */
-	@BeanProperty def enabled: Boolean
+	def enabled: Boolean
 
 	/**
 	 * An EventSource to which you can attach a listener to find
@@ -45,8 +44,8 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	 */
 	def exception(): Exception
 
-	@BeanProperty var until: Option[DateTime]
-	@BeanProperty var message: Option[String]
+	var until: Option[DateTime]
+	var message: Option[String]
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: MaintenanceModeMessage) = {
@@ -69,9 +68,9 @@ trait MaintenanceModeService extends MaintenanceStatus {
 class MaintenanceModeServiceImpl extends MaintenanceModeService {
 	@Value("${environment.standby}") var _enabled: Boolean = _
 
-	@BeanProperty def enabled: Boolean = _enabled
-	@BeanProperty var until: Option[DateTime] = None
-	@BeanProperty var message: Option[String] = None
+	def enabled: Boolean = _enabled
+	var until: Option[DateTime] = None
+	var message: Option[String] = None
 
 	// for other classes to listen to changes to maintenance mode.
 	val changingState = EventSource[Boolean]
@@ -123,12 +122,12 @@ class MaintenanceModeMessage {
 		
 		this.enabled = status.enabled
 		this.until = status.until map { _.getMillis } getOrElse(-1)
-		this.message = status.message getOrElse(null)
+		this.message = status.message.orNull
 	}
 	
-	@BeanProperty var enabled: Boolean = _
-	@BeanProperty var until: Long = _
-	@BeanProperty var message: String = _
+	var enabled: Boolean = _
+	var until: Long = _
+	var message: String = _
 }
 
 class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
@@ -140,6 +139,7 @@ class MaintenanceModeListener extends QueueListener with InitializingBean with L
 		override def onReceive(item: Any) {	
 				item match {
 						case copy: MaintenanceModeMessage => service.update(copy)
+						case _ =>
 				}
 		}
 		

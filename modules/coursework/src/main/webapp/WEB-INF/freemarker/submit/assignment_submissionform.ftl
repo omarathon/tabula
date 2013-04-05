@@ -12,9 +12,9 @@
 	<#else>
 		<p>You can re-submit your work in case you've made a mistake,
 			<#if isExtended>
-				up until the end of your extension, <@fmt.date date=extension.expiryDate timezone=true /> (in ${durationFormatter(extension.expiryDate)}).
+				up until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
 			<#else>
-				up until the deadline, <@fmt.date date=assignment.closeDate timezone=true /> (in ${durationFormatter(assignment.closeDate)}).
+				up until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
 		    </#if>
 		</p>
 		</#if>
@@ -82,6 +82,52 @@
 	</@form.row>
 	</#if>
 	
+	<@form.row>
+	<label class="control-label">Assignment information</label>
+	<@form.field>
+		<div class="assignment-info-field">
+			<#if !assignment.openEnded>
+				<#assign time_remaining = durationFormatter(assignment.closeDate) />
+				<p>
+					The deadline for this assignment is <@fmt.date date=assignment.closeDate />, 
+					<span class="time-remaining">${time_remaining}</span>.
+					
+					<#if isExtended>
+						<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
+						
+						You have an extension until <@fmt.date date=extension.expiryDate />,
+						<span class="time-remaining">${extension_time_remaining}</span>.
+					</#if>
+				</p>
+				
+				<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
+					<p>
+						You can submit to this assignment multiple times up to the deadline. Only
+						the latest submission of your work will be accepted, and you will not be able
+						to change this once the deadline has passed.
+					</p> 
+				</#if>
+				
+				<#if assignment.allowLateSubmissions>
+					<p>
+					  You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark 
+					  may be affected.
+					</p>
+				</#if>
+			<#else>
+				<p>
+					This assignment does not have a deadline.
+				
+					<#if assignment.allowResubmission>
+						You can submit to this assignment multiple times, but only
+						the latest submission of your work will be kept. 
+					</#if>
+				</p>
+			</#if>
+		</div>
+	</@form.field>
+	</@form.row>
+	
 	</div>
 	
 	<div class="submit-buttons">
@@ -114,7 +160,7 @@
 			This assignment doesn't allow late submissions.
 		</div>
 	<#elseif !assignment.opened>
-		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true timezone=true />.</p>
+		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true />.</p>
 	<#else>
 		<p>
 			

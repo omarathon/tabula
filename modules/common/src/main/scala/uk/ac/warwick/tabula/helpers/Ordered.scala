@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.reflect.BeanProperty
 
 /**
  * Extends Spring's Ordered interface for beans, with the only

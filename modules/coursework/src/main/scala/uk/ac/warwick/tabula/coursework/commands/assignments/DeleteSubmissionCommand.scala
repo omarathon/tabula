@@ -6,7 +6,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.helpers.ArrayList
-import scala.reflect.BeanProperty
 import collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FeedbackDao
@@ -30,8 +29,8 @@ class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) ex
 	var submissionService = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
-	@BeanProperty var confirm: Boolean = false
+	var submissions: JList[Submission] = ArrayList()
+	var confirm: Boolean = false
 
 	def applyInternal() = {
 		for (submission <- submissions) submissionService.delete(submission)

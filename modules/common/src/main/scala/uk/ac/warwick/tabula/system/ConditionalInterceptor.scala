@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.system
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
@@ -16,7 +15,7 @@ import org.springframework.web.context.request.ServletWebRequest
  * run the interceptor.
  */
 class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebRequestInterceptor with InitializingBean {
-	@BeanProperty var excludePath: String = _
+	var excludePath: String = _
 
 	private var excludeString: String = _
 

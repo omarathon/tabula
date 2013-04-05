@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.CurrentUser
@@ -17,6 +16,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
+import language.implicitConversions
 
 /**
  * Send an email confirming the receipt of a submission to the student

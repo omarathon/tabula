@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
@@ -23,7 +22,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@BeanProperty var assignment: Assignment = _
+	var assignment: Assignment = _
 	
 	def permissionsParents = Seq(Option(assignment)).flatten
 
@@ -53,11 +52,11 @@ class Feedback extends GeneratedId with PermissionsTarget {
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
-	@BeanProperty var firstMarkerFeedback: MarkerFeedback = _
+	var firstMarkerFeedback: MarkerFeedback = _
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "second_marker_feedback")
-	@BeanProperty var secondMarkerFeedback: MarkerFeedback = _
+	var secondMarkerFeedback: MarkerFeedback = _
 
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {

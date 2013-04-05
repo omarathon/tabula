@@ -41,7 +41,7 @@ class AssignmentController extends CourseworkController {
 	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
 		restrictedBy {
 			getFeedback(assignment, user).isDefined
-		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)) orNull
+		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
 
 	/**
 	 * Sitebuilder-embeddable view.

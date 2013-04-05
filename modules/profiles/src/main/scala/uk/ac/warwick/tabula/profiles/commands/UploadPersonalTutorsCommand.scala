@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.reflect.BeanProperty
-import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
@@ -37,19 +35,19 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import org.springframework.validation.BindingResult
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
-	
+
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
 
 	val acceptedExtensions = Seq(".xlsx")
-	
+
 	val userLookup = Wire.auto[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
 	var personalTutorExtractor = Wire.auto[RawStudentRelationshipExtractor]
-	
+
 	var extractWarning = Wire.property("${profiles.relationship.upload.warning}")
 
-	@BeanProperty var file: UploadedFile = new UploadedFile
-	@BeanProperty var rawStudentRelationships: JList[RawStudentRelationship] = LazyLists.simpleFactory()
+	var file: UploadedFile = new UploadedFile
+	var rawStudentRelationships: JList[RawStudentRelationship] = LazyLists.simpleFactory()
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
@@ -61,7 +59,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 				val rawStudentRelationship = rawStudentRelationships.get(i)
 				val newTarget = uniIdsSoFar.add(rawStudentRelationship.targetUniversityId match {
 					case null => "[missing value]"
-					case id => id 
+					case id => id
 				})
 				errors.pushNestedPath("rawStudentRelationships[" + i + "]")
 				rawStudentRelationship.isValid = validateRawStudentRelationship(rawStudentRelationship, errors, newTarget, department)
@@ -71,7 +69,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	}
 
 	def validateRawStudentRelationship(rawStudentRelationship: RawStudentRelationship, errors: Errors, newTarget: Boolean, department: Department): Boolean = {
-		setAndValidateStudentMember(rawStudentRelationship, department, newTarget, errors) && 
+		setAndValidateStudentMember(rawStudentRelationship, department, newTarget, errors) &&
 			setAndValidateAgentMember(rawStudentRelationship, errors)
 	}
 
@@ -101,7 +99,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 								valid = false
 							}
 							if (!targetMember.affiliatedDepartments.contains(department)) {
-								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.getName), "")
+								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.name), "")
 								valid = false
 							}
 						}
@@ -132,7 +130,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						errors.rejectValue("agentUniversityId", "uniNumber.userNotFound")
 						valid = false
 					}
-					case Some(agentMember) => 
+					case Some(agentMember) =>
 						rawStudentRelationship.agentMember = agentMember
 				}
 			}
@@ -143,10 +141,10 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 			valid = false
 		}
 		valid
-	}	
-	
+	}
+
 	private def getMember(uniId: String): Option[Member] = {
-		if (!uniId.hasText) 
+		if (!uniId.hasText)
 			None
 		else {
 			userLookup.getUserByWarwickUniId(uniId) match {
@@ -162,30 +160,30 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 	override def applyInternal(): Seq[StudentRelationship] = transactional() {
 		def savePersonalTutor(rawStudentRelationship: RawStudentRelationship): StudentRelationship = {
-			val agent = 
+			val agent =
 			if (rawStudentRelationship.agentUniversityId.hasText)
 				rawStudentRelationship.agentUniversityId
 			else
 				rawStudentRelationship.agentName
-				
+
 			val targetUniId = rawStudentRelationship.targetUniversityId
-			
+
 			var targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
 				// should never be None as validation has already checked for this
-				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId) 
+				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId)
 				case Some(mem: StudentMember) => mem.studyDetails.sprCode
 				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
-			
+
 			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
 			logger.debug("Saved personal tutor for " + targetUniId)
-			
+
 			rel
 		}
 
 		// persist valid personal tutors
-		rawStudentRelationships filter (_.isValid) map { 
+		rawStudentRelationships filter (_.isValid) map {
 			(rawStudentRelationship) => savePersonalTutor(rawStudentRelationship)
 		}
 	}
@@ -205,7 +203,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 				if (!file.attached.isEmpty()) {
 					processFiles(file.attached)
 				}
-	
+
 				def processFiles(files: Seq[FileAttachment]) {
 					for (file <- files.filter(_.hasData)) {
 						rawStudentRelationships addAll personalTutorExtractor.readXSSFExcelFile(file.dataStream)

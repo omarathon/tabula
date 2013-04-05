@@ -15,14 +15,14 @@ class SearchProfilesCommandTest extends TestBase with Mockito {
 		val cmd = new SearchProfilesCommand(member, user)
 
 		// query needs to be at least 3 characters
-		cmd.setQuery("xx")
+		cmd.query = "xx"
 		cmd.validQuery should be(false)
 
 		// and the minimum term length is two
-		cmd.setQuery("xx x")
+		cmd.query = "xx x"
 		cmd.validQuery should be(false)
 
-		cmd.setQuery("select foo from bar")
+		cmd.query = "select foo from bar"
 		cmd.validQuery should be(true)
 	}
 }

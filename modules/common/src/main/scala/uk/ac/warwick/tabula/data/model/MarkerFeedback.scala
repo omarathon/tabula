@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.reflect.BeanProperty
 
 import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
 import org.joda.time.DateTime
@@ -19,7 +18,7 @@ class MarkerFeedback extends GeneratedId {
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
-	@BeanProperty var feedback: Feedback = _
+	var feedback: Feedback = _
 
 	@Column(name = "uploaded_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
@@ -32,7 +31,7 @@ class MarkerFeedback extends GeneratedId {
 	var grade: Option[String] = None
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
-	@BeanProperty var state : MarkingState = _
+	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
 	@Fetch(FetchMode.JOIN)

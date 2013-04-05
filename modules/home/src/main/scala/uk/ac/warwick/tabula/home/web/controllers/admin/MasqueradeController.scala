@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends BaseController {
-	
+
 	@ModelAttribute("masqueradeCommand") def command = new MasqueradeCommand()
 
 	@RequestMapping(method = Array(HEAD, GET))
@@ -26,7 +26,7 @@ class MasqueradeController extends BaseController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, response: HttpServletResponse): Mav = {
-		cmd.apply() map { response addCookie _ }
+		for (cookie <- cmd.apply()) response.addCookie(cookie)
 		Redirect("/admin/masquerade")
 	}
 

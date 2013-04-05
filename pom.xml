@@ -11,27 +11,28 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>31</version>
+	<version>32</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
 	<description>
-  		Tabula is a tool to support the administration of teaching and learning in academic departments. 
-  		It's also referred to as My Department.
-  	</description>
+			Tabula is a tool to support the administration of teaching and learning in academic departments.
+			It's also referred to as My Department.
+		</description>
 	<url>http://warwick.ac.uk/tabula</url>
 
 	<!-- I N C E P T I O N -->
 	<inceptionYear>2012</inceptionYear>
 
 	<properties>
-		<scala.version>2.9.1</scala.version>
+		<scala.version>2.10.1</scala.version>
+		<scala.major.version>2.10</scala.major.version>
 		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
-		<net.databinder.dispatch.version>0.8.8</net.databinder.dispatch.version>
+		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130314</warwickutils.version>
+		<warwickutils.version>20130405</warwickutils.version>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -177,10 +178,10 @@
 		<profile>
 			<id>war</id>
 
-			<!-- TODO we need to think of a better way to do this, this activation 
-				means it'll be active on all modules EXCEPT common and the project itself, 
-				which is probably okay but we could have modules which aren't wars but also 
-				aren't common - e.g. if we moved static content out of home and into its 
+			<!-- TODO we need to think of a better way to do this, this activation
+				means it'll be active on all modules EXCEPT common and the project itself,
+				which is probably okay but we could have modules which aren't wars but also
+				aren't common - e.g. if we moved static content out of home and into its
 				own module. -->
 			<activation>
 				<file>
@@ -249,7 +250,7 @@
 								<phase>process-test-resources</phase>
 								<configuration>
 									<target>
-										<!-- We need to touch first otherwise Ant will overwrite any files 
+										<!-- We need to touch first otherwise Ant will overwrite any files
 											that are older -->
 										<touch>
 											<fileset dir="${project.build.testOutputDirectory}" />
@@ -329,7 +330,7 @@
 					<scope>test</scope>
 				</dependency>
 
-				<!-- http://jira.codehaus.org/browse/MNG-1378 "By design, test dependencies 
+				<!-- http://jira.codehaus.org/browse/MNG-1378 "By design, test dependencies
 					are not transitive" So need to include any test dependencies in common here -->
 				<dependency>
 					<groupId>org.springframework</groupId>
@@ -366,6 +367,11 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+				<id>milestone.repo.springsource.org</id>
+				<name>repo.springsource.org-milestone</name>
+				<url>https://repo.springsource.org/libs-milestone</url>
+		</repository>
 	</repositories>
 
 	<!-- ====================================================================== -->
@@ -398,7 +404,7 @@
 	<!-- ====================================================================== -->
 	<build>
 		<defaultGoal>install</defaultGoal>
-		
+
 		<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 		<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 
@@ -416,10 +422,15 @@
 					</execution>
 				</executions>
 				<configuration>
+					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
 					</jvmArgs>
+					<args>
+						<arg>-deprecation</arg>
+						<arg>-feature</arg>
+					</args>
 				</configuration>
 			</plugin>
 
@@ -549,7 +560,7 @@
 					<version>2.3.2</version>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -734,7 +745,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Define xerces and xmlParserAPIs as provided to avoid them being packaged 
+		<!-- Define xerces and xmlParserAPIs as provided to avoid them being packaged
 			by a transitive dependency in the war -->
 		<dependency>
 			<groupId>xerces</groupId>
@@ -781,14 +792,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scala-tools.testing</groupId>
-			<artifactId>specs_${scala.version}</artifactId>
+			<artifactId>specs_${scala.major.version}</artifactId>
 			<version>1.6.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.scalatest</groupId>
-			<artifactId>scalatest_${scala.version}</artifactId>
-			<version>2.0.M5</version>
+			<artifactId>scalatest_${scala.major.version}</artifactId>
+			<version>2.0.M6-SNAP8</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -812,15 +823,16 @@
 		</dependency>
 		<dependency>
 			<groupId>github.com.ingoem</groupId>
-			<artifactId>scala-react_2.9.1</artifactId>
-			<version>1.0</version>
+			<artifactId>scala-react_${scala.major.version}</artifactId>
+			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jsuereth</groupId>
-			<artifactId>scala-arm_${scala.version}</artifactId>
-			<version>1.2</version>
+			<artifactId>scala-arm_${scala.major.version}</artifactId>
+			<version>1.3</version>
 		</dependency>
 	</dependencies>
+
 
 	<dependencyManagement>
 		<dependencies>
@@ -865,6 +877,11 @@
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.scala</groupId>
+				<artifactId>spring-scala</artifactId>
+				<version>1.0.0.M2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 
 import org.hibernate.annotations.{Type, AccessType}
 import org.joda.time.DateTime
@@ -25,26 +24,26 @@ class Extension extends GeneratedId with PermissionsTarget {
 
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
-	@BeanProperty var assignment:Assignment = _
+	var assignment:Assignment = _
 	
 	def permissionsParents = Seq(Option(assignment)).flatten
 
 	@NotNull
-	@BeanProperty var userId:String =_
+	var userId:String =_
 
 	@NotNull
-	@BeanProperty var universityId:String =_
+	var universityId:String =_
 
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var requestedExpiryDate:DateTime =_
+	var requestedExpiryDate:DateTime =_
 
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var expiryDate:DateTime =_
+	var expiryDate:DateTime =_
 
-	@BeanProperty var reason:String =_
+	var reason:String =_
 
 	@OneToMany(mappedBy="extension", fetch=LAZY)
-	@BeanProperty var attachments:JSet[FileAttachment] = JSet()
+	var attachments:JSet[FileAttachment] = JSet()
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
 
@@ -55,16 +54,16 @@ class Extension extends GeneratedId with PermissionsTarget {
 		attachments.add(attachment)
 	}
 
-	@BeanProperty var approved:Boolean = false
-	@BeanProperty var rejected:Boolean = false
+	var approved:Boolean = false
+	var rejected:Boolean = false
 
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var requestedOn:DateTime =_
+	var requestedOn:DateTime =_
 
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var approvedOn:DateTime =_
+	var approvedOn:DateTime =_
 
-	@BeanProperty var approvalComments:String =_
+	var approvalComments:String =_
 
 	// this was not requested by a student. i.e. was manually created by an administrator
 	def isManual = requestedOn == null

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.servlet.HandlerExceptionResolver
@@ -35,7 +34,7 @@ import org.springframework.web.multipart.MultipartException
  */
 class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered with ControllerViews {
 
-	@Required @BeanProperty var defaultView: String = _
+	@Required var defaultView: String = _
 
 	@Autowired var exceptionHandler: ExceptionHandler = _
 	
@@ -48,7 +47,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 *
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
-	@Required @BeanProperty var viewMappings: JMap[String, String] = Map[String, String]()
+	@Required var viewMappings: JMap[String, String] = Map[String, String]()
 	
 	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {	
 		val interceptors = List(userInterceptor, infoInterceptor)
@@ -95,7 +94,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def reportExceptions[A](fn: => A) =
 		try fn
-		catch { case throwable => handle(throwable, None); throw throwable }
+		catch { case throwable: Throwable => handle(throwable, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
 		val token = ExceptionTokens.newToken

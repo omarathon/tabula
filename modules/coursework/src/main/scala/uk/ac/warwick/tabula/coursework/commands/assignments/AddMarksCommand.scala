@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.Transactions._
@@ -32,8 +31,8 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
   
-	@BeanProperty var file: UploadedFile = new UploadedFile
-	@BeanProperty var marks: JList[MarkItem] = LazyLists.simpleFactory()
+	var file: UploadedFile = new UploadedFile
+	var marks: JList[MarkItem] = LazyLists.simpleFactory()
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 
@@ -91,7 +90,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 					hasErrors = true
 				}
 			} catch {
-				case _ => {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) => {
 					errors.rejectValue("actualMark", "actualMark.format")
 					hasErrors = true
 				}

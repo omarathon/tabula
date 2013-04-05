@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import java.util.ArrayList
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import scala.util.matching.Regex
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
@@ -28,15 +27,15 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 
 class FeedbackItem {
-	@BeanProperty var uniNumber: String = _
-	@BeanProperty var file: UploadedFile = new UploadedFile
+	var uniNumber: String = _
+	var file: UploadedFile = new UploadedFile
 
-	@BeanProperty var submissionExists = false
-	@BeanProperty var isPublished = false
+	var submissionExists = false
+	var isPublished = false
 	// true when at least one non-ignored file is uploaded
-	@BeanProperty var isModified = true
-	@BeanProperty var duplicateFileNames: Set[String] = Set()
-	@BeanProperty var ignoredFileNames: Set[String] = Set()
+	var isModified = true
+	var duplicateFileNames: Set[String] = Set()
+	var ignoredFileNames: Set[String] = Set()
 
 	def listAttachments() = file.attached.map(f => {
 		val duplicate = duplicateFileNames.contains(f.name)
@@ -53,9 +52,7 @@ class FeedbackItem {
 }
 
 // Purely for storing in command to display on the model.
-case class ProblemFile(
-	                      @BeanProperty path: String,
-	                      @BeanProperty file: FileAttachment) {
+case class ProblemFile(var path: String, var file: FileAttachment) {
 	def this() = this(null, null)
 }
 
@@ -91,20 +88,20 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	var stateService = Wire.auto[StateService]
 
 	/* for single upload */
-	@BeanProperty var uniNumber: String = _
-	@BeanProperty var file: UploadedFile = new UploadedFile
+	var uniNumber: String = _
+	var file: UploadedFile = new UploadedFile
 	/* ----- */
 
 	/* for multiple upload */
 	// use lazy list with factory as spring doesn't know how to dynamically create items
-	@BeanProperty var items: JList[FeedbackItem] = LazyLists.simpleFactory()
-	@BeanProperty var unrecognisedFiles: JList[ProblemFile] = LazyLists.simpleFactory()
-	@BeanProperty var moduleMismatchFiles: JList[ProblemFile] = LazyLists.simpleFactory()
-	@BeanProperty var invalidFiles: JList[ProblemFile] = LazyLists.simpleFactory()
-	@BeanProperty var archive: MultipartFile = _
-	@BeanProperty var batch: Boolean = false
-	@BeanProperty var fromArchive: Boolean = false
-	@BeanProperty var confirmed: Boolean = false
+	var items: JList[FeedbackItem] = LazyLists.simpleFactory()
+	var unrecognisedFiles: JList[ProblemFile] = LazyLists.simpleFactory()
+	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.simpleFactory()
+	var invalidFiles: JList[ProblemFile] = LazyLists.simpleFactory()
+	var archive: MultipartFile = _
+	var batch: Boolean = false
+	var fromArchive: Boolean = false
+	var confirmed: Boolean = false
 	/* ---- */
 
 	private def filenameOf(path: String) = new java.io.File(path).getName

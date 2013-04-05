@@ -13,7 +13,7 @@ import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.CurrentUser
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
@@ -89,9 +89,7 @@ class AddExtensionController extends ExtensionController {
 	def addCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) = 
 		new AddExtensionCommand(module, assignment, user)
 	
-	validatesWith{ (form:AddExtensionCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[AddExtensionCommand]
 	
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(method=Array(GET))
@@ -134,9 +132,7 @@ class EditExtensionController extends ExtensionController {
 	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
-	validatesWith{ (form:EditExtensionCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[EditExtensionCommand]
 	
 	// edit an existing manually created extension
 	@RequestMapping(method=Array(GET))
@@ -183,9 +179,7 @@ class ReviewExtensionRequestController extends ExtensionController {
 	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
-	validatesWith{ (form:ReviewExtensionRequestCommand, errors:Errors) =>
-		form.validate(errors)
-	}
+	validatesSelf[ReviewExtensionRequestCommand]
 	
 	// review an extension request
 	@RequestMapping(method=Array(GET))

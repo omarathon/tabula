@@ -4,11 +4,11 @@ import org.hibernate.classic.Session
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services._
+import scala.reflect._
 
 class ImportModulesCommandTest extends TestBase with MockitoSugar {
 
@@ -64,8 +64,8 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 		}
 	}
 	
-	private def isA[A : Manifest] = { 
-		org.mockito.Matchers.isA[A](manifest[A].erasure.asInstanceOf[Class[A]])
+	private def isA[A : ClassTag] = { 
+		org.mockito.Matchers.isA[A](classTag[A].runtimeClass.asInstanceOf[Class[A]])
 	}
 
 }

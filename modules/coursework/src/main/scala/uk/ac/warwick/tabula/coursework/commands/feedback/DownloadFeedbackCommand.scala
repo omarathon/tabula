@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands._
@@ -25,8 +24,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@BeanProperty var filename: String = _
-    @BeanProperty var students: JList[String] = ArrayList()
+	var filename: String = _
+    var students: JList[String] = ArrayList()
     
 	private var fileFound: Boolean = _
 

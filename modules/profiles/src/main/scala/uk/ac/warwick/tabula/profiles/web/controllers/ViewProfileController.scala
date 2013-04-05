@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
+import org.springframework.web.bind.annotation.RequestParam
 
 
 class ViewProfileCommand(profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile)
@@ -21,7 +22,7 @@ class ViewProfileController extends ProfilesController {
 	
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)) orNull
+		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 	
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
@@ -35,11 +36,11 @@ class ViewProfileController extends ProfilesController {
 		case _ => throw new ItemNotFoundException
 	}
 
-
 	@RequestMapping
 	def viewProfile(
 			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
-			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand]) = {
+			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
+			@RequestParam(value="meeting", required=false) openMeetingId: String) = {
 		
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
@@ -48,13 +49,16 @@ class ViewProfileController extends ProfilesController {
 			case None => Seq()
 			case Some(cmd) => cmd.apply
 		}
-
+		
+		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
+		
 		Mav("profile/view", 
-		    "profile" -> profiledStudentMember,
-		    "viewer" -> currentMember,
-		    "isSelf" -> isSelf,
-		    "hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment,
-		    "meetings" -> meetings)
-		   .crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+			"profile" -> profiledStudentMember,
+			"viewer" -> currentMember,
+			"isSelf" -> isSelf,
+			"hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment,
+			"meetings" -> meetings,
+			"openMeeting" -> openMeeting)
+		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }

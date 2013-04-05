@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.Logging
 import org.hibernate.criterion.Restrictions
-import org.codehaus.jackson.map.JsonMappingException
+import com.fasterxml.jackson.databind.JsonMappingException
 import org.codehaus.jackson.JsonParseException
 import org.springframework.beans.factory.annotation.Autowired
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.CurrentUser
 import scala.util.parsing.json.JSONObject
 import scala.util.parsing.json.JSONArray

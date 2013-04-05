@@ -21,7 +21,7 @@
 				Open-ended submission
 			<#else>
 				Submission ${assignment.active?string("closes", "closed")}
-				<@fmt.date date=assignment.closeDate seconds=true timezone=true />
+				<@fmt.date date=assignment.closeDate seconds=true />
 			</#if>
 		</div>
 	</div>

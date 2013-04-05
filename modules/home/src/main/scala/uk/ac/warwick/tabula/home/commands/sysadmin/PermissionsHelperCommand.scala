@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.home.commands.sysadmin
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -30,10 +29,10 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	
 	var conversionService = Wire.auto[ConversionService]
 	
-	@BeanProperty var user: User = null
-	@BeanProperty var scopeType: Class[_ <: PermissionsTarget] = null
-	@BeanProperty var scope: String = null
-	@BeanProperty var permission: Permission = null
+	var user: User = null
+	var scopeType: Class[_ <: PermissionsTarget] = null
+	var scope: String = null
+	var permission: Permission = null
 	
 	private def resolveScope() = {
 		if (scopeType == null) {
@@ -71,7 +70,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	def applyInternal() = {
 		val currentUser = new CurrentUser(user, user)
 		
-		val scope = resolveScope() orNull
+		val scope = resolveScope().orNull
 		val scopeMissing = scope == null
 		val scopeMismatch = permission != null && (permission.isScoped == scopeMissing)
 		

@@ -19,7 +19,7 @@ class CustomFreemarkerServletTest extends TestBase with Mockito {
 		val req = new MockHttpServletRequest
 		val res = new MockHttpServletResponse
 		
-		val template = new Template("mytemplate", new StringReader(""))
+		val template = new Template("mytemplate", new StringReader(""), null)
 		val model = new SimpleHash
 		model.put("contentType", "text/plain")
 		

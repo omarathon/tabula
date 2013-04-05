@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.web.Cookie
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import org.hibernate.validator.constraints.NotEmpty
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
@@ -19,8 +18,8 @@ class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
 	var userLookup = Wire.auto[UserLookupInterface]
 	
-	@BeanProperty var usercode: String = _	
-	@BeanProperty var action: String = _
+	var usercode: String = _	
+	var action: String = _
 	
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(null))

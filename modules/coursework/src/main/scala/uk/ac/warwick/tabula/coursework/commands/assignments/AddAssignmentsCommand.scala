@@ -34,30 +34,30 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
  */
 class AssignmentItem(
 	// whether to create an assignment from this item or not
-	@BeanProperty var include: Boolean,
-	@BeanProperty var occurrence: String,
-	@BeanProperty var upstreamAssignment: UpstreamAssignment) {
+	var include: Boolean,
+	var occurrence: String,
+	var upstreamAssignment: UpstreamAssignment) {
 	
     def this() = this(true, null, null)
     
 	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
-	@BeanProperty var assessmentGroup: Option[UpstreamAssessmentGroup] = _
+	var assessmentGroup: Option[UpstreamAssessmentGroup] = _
 
 	// Name for new assignment. Defaults to the name of the upstream assignment, if provided.
-	@BeanProperty var name: String = Option(upstreamAssignment).map { _.name }.orNull
+	var name: String = Option(upstreamAssignment).map { _.name }.orNull
 	if (upstreamAssignment != null) upstreamAssignment.name else null
 
 	// Will reference a key of AddAssignmentsCommand.optionsMap. In this way, many AssignmentItems
 	// can share the same set of options without having to post many copies separately.
-	@BeanProperty var optionsId: String = _
+	var optionsId: String = _
 
-	@BeanProperty var openDate: DateTime = _
+	var openDate: DateTime = _
 
-	@BeanProperty var closeDate: DateTime = _
+	var closeDate: DateTime = _
 	
-	@BeanProperty var openEnded: JBoolean = false
+	var openEnded: JBoolean = false
 
 	def sameAssignment(other: AssignmentItem) =
 		upstreamAssignment == other.upstreamAssignment &&
@@ -78,17 +78,17 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
 	// months, which means it will start defaulting to next year from about May (under the assumption that
 	// you would've done the current year's import long before then).
-	@BeanProperty var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(3))
+	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(3))
 
 	// All the possible assignments, prepopulated from SITS.
-	@BeanProperty var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
+	var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
 
 	private def includedItems = assignmentItems.filter { _.include }
 
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
 	 */
-	@BeanProperty var optionsMap: JMap[String, SharedAssignmentPropertiesForm] = Maps.newHashMap()
+	var optionsMap: JMap[String, SharedAssignmentPropertiesForm] = Maps.newHashMap()
 
 	// just for prepopulating the date form fields.
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

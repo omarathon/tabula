@@ -6,17 +6,17 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.commands.SelfValidating
 
 
-class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends Command[Unit] {
+class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Delete, assignment)
 
-	@BeanProperty var confirm: JBoolean = false
+	var confirm: JBoolean = false
 
 	def validate(errors: Errors) {
 		if (!confirm) {

@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages
-import scala.reflect.BeanProperty
 
 import org.joda.time.format.DateTimeFormat
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -15,12 +14,13 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.util.mail.WarwickMailSender
+import language.implicitConversions
 
 /**
  * Send an email confirming the creation of a manual extension request to the student
  */
-abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanProperty var assignment: Assignment,
-								@BeanProperty var userId: String)
+abstract class ExtensionMessage(var extension: Extension, var assignment: Assignment,
+								var userId: String)
 	extends Command[Boolean] with ReadOnly with FreemarkerRendering with Logging with UnicodeEmails {
 
 	def this(assignment:Assignment, uniId:String) = this(null, assignment, uniId)
@@ -31,7 +31,7 @@ abstract class ExtensionMessage(@BeanProperty var extension: Extension, @BeanPro
 	implicit var freemarker= Wire.auto[Configuration]
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 
-	@BeanProperty var module: Module = Option(assignment).map { _.module }.orNull
+	var module: Module = Option(assignment).map { _.module }.orNull
 
 	// email constants
 	var replyAddress: String = Wire.property("${mail.noreply.to}")

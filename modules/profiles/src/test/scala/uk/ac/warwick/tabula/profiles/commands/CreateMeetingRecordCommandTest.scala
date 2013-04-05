@@ -12,25 +12,27 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.services.ProfileService
 import org.springframework.validation.BindException
 import org.springframework.transaction.annotation.Transactional
+import org.joda.time.LocalDate
 
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
-	
+
 	@Transactional
-	@Test def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
-		
+	@Test
+	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
+
 		val ps = mock[ProfileService]
 		val creator = new StaffMember("9876543")
 		val student = mock[StudentMember]
 		val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
 		relationship.profileService = ps
 		ps.getStudentBySprCode("0123456/1") returns (Some(student))
-		
+
 		val cmd = new CreateMeetingRecordCommand(creator, relationship)
-		cmd.setTitle("A title")
-		cmd.setMeetingDate(dateTime(3903, DateTimeConstants.MARCH).toLocalDate) // it's the future
+		cmd.title = "A title"
+		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
 
 		// check invalid future date
 		var errors = new BindException(cmd, "command")
@@ -39,8 +41,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("meetingDate")
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
-		
-		cmd.setMeetingDate(dateTime(2007, DateTimeConstants.MARCH).toLocalDate) // > 5 years ago
+
+		cmd.meetingDate = dateTime(2007, DateTimeConstants.MARCH).toLocalDate // > 5 years ago
 
 		// check invalid past date
 		errors = new BindException(cmd, "command")
@@ -49,9 +51,9 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("meetingDate")
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
-		
-		cmd.setMeetingDate(marchHare)
-		cmd.setTitle("")
+
+		cmd.meetingDate = marchHare
+		cmd.title = ""
 
 		// check invalid empty title
 		errors = new BindException(cmd, "command")
@@ -60,18 +62,18 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("title")
 		errors.getFieldError.getCode should be ("NotEmpty")
-		
-		cmd.setTitle("A good title")
+
+		cmd.title = "A good title"
 
 		// check valid
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		errors.hasErrors should be (false)
-		
+
 		// add some text and apply
 		cmd.description = "Lovely words"
-		val meeting = cmd.apply
-		
+		val meeting = cmd.apply()
+
 		meeting.creator should be (creator)
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)

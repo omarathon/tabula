@@ -8,16 +8,15 @@ import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.InputStream
-import scala.reflect.BeanProperty
 
 class MarkItem {
 
-	@BeanProperty var universityId: String = _
-	@BeanProperty var actualMark: String = _
-	@BeanProperty var actualGrade: String = _
-	@BeanProperty var isValid = true
-	@BeanProperty var isModified = false
-	@BeanProperty var isPublished = false
+	var universityId: String = _
+	var actualMark: String = _
+	var actualGrade: String = _
+	var isValid = true
+	var isModified = false
+	var isPublished = false
 
 	def this(universityId: String, actualMark: String, actualGrade: String) = {
 		this()

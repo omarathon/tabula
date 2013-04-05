@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.commands
 import java.io.File
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.BeanProperty
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -34,10 +33,10 @@ class UploadedFile extends BindListener {
 	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 		
 	// files bound from an upload request, prior to being persisted
-	@BeanProperty var upload: JList[MultipartFile] = ArrayList()
+	var upload: JList[MultipartFile] = ArrayList()
 
 	// files that have been persisted - can be represented in forms by ID
-	@BeanProperty var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
+	var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
 
 	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
 	def attachedFileNames: Seq[String] = attached.map(file => file.getName)

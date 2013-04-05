@@ -19,9 +19,9 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	// list to contain feedback files that are not for a student you should be marking
-	@BeanProperty var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+	var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
 	// list to contain feedback files that are  for a student that has already been completed
-	@BeanProperty var markedStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+	var markedStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
 
 	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser)
 
@@ -33,11 +33,11 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 				case _ => false
 			}
 		}
-		val universityIds = submissions.map(_.getUniversityId)
-		val markedIds = markedSubmissions.map(_.getUniversityId)
+		val universityIds = submissions.map(_.universityId)
+		val markedIds = markedSubmissions.map(_.universityId)
 		invalidStudents = items.filter(item => !universityIds.contains(item.uniNumber))
 		markedStudents = items.filter(item => !markedIds.contains(item.uniNumber))
-		items = (items.toList -- invalidStudents.toList) -- markedStudents.toList
+		items = (items.toList.diff(invalidStudents.toList)).diff(markedStudents.toList)
 	}
 
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {
@@ -55,7 +55,6 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		val markerFeedback:MarkerFeedback = firstMarker match {
 			case true => parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback
-			case _ => null
 		}
 
 		for (attachment <- file.attached){

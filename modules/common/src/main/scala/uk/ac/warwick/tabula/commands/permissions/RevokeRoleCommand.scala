@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 
 import org.springframework.validation.Errors
 
@@ -17,8 +16,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import scala.reflect.ClassTag
 
-class RevokeRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends Command[GrantedRole[A]] with SelfValidating {
+class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends Command[GrantedRole[A]] with SelfValidating {
 	
 	def this(scope: A, defin: RoleDefinition) = {
 		this(scope)
@@ -29,8 +29,8 @@ class RevokeRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends
 	
 	var permissionsService = Wire.auto[PermissionsService]
 	
-	@BeanProperty var roleDefinition: RoleDefinition = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
+	var roleDefinition: RoleDefinition = _
+	var usercodes: JList[String] = ArrayList()
 	
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 	
@@ -41,7 +41,7 @@ class RevokeRoleCommand[A <: PermissionsTarget : Manifest](val scope: A) extends
 			permissionsService.saveOrUpdate(role)
 		}
 		
-		grantedRole orNull
+		grantedRole.orNull
 	}
 	
 	def validate(errors: Errors) {

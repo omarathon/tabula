@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import scala.reflect.Manifest
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
@@ -13,21 +12,19 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import org.hibernate.annotations.ForeignKey
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.MarkingMethod._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.services.FeedbackService
+import scala.reflect._
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -63,7 +60,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
-	
+
+	@transient
+	var extensionService = Wire[ExtensionService]("extensionService")
+
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
 
@@ -78,40 +78,40 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
-	@BeanProperty var fileExtensions: Seq[String] = _
+	var fileExtensions: Seq[String] = _
 
-	@BeanProperty var attachmentLimit: Int = 1
+	var attachmentLimit: Int = 1
 
-	@BeanProperty var name: String = _
-	@BeanProperty var active: JBoolean = true
+	var name: String = _
+	var active: JBoolean = true
 
-	@BeanProperty var archived: JBoolean = false
-
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var openDate: DateTime = _
+	var archived: JBoolean = false
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var closeDate: DateTime = _
+	var openDate: DateTime = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var createdDate = DateTime.now()
+	var closeDate: DateTime = _
 
-	@BeanProperty var openEnded: JBoolean = false
-	@BeanProperty var collectMarks: JBoolean = false
-	@BeanProperty var collectSubmissions: JBoolean = false
-	@BeanProperty var restrictSubmissions: JBoolean = false
-	@BeanProperty var allowLateSubmissions: JBoolean = true
-	@BeanProperty var allowResubmission: JBoolean = false
-	@BeanProperty var displayPlagiarismNotice: JBoolean = false
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	var createdDate = DateTime.now()
 
-	@BeanProperty var allowExtensions: JBoolean = false
+	var openEnded: JBoolean = false
+	var collectMarks: JBoolean = false
+	var collectSubmissions: JBoolean = false
+	var restrictSubmissions: JBoolean = false
+	var allowLateSubmissions: JBoolean = true
+	var allowResubmission: JBoolean = false
+	var displayPlagiarismNotice: JBoolean = false
+
+	var allowExtensions: JBoolean = false
 	// allow students to request extensions via the app
 
-	@BeanProperty var allowExtensionRequests: JBoolean = false
+	var allowExtensionRequests: JBoolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
-	@BeanProperty var module: Module = _
+	var module: Module = _
 	
 	def permissionsParents = Seq(Option(module)).flatten
 
@@ -119,34 +119,34 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 //	@JoinTable(name="assignment_assessmentgroup",
 //		joinColumns=Array(new JoinColumn(name="assignment_id")),
 //		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-//	@BeanProperty var assessmentGroups :JList[UpstreamAssessmentGroup] = ArrayList()
+//	var assessmentGroups :JList[UpstreamAssessmentGroup] = ArrayList()
 //
 //	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BeanProperty var assessmentGroups: JList[AssessmentGroup] = ArrayList()
+	var assessmentGroups: JList[AssessmentGroup] = ArrayList()
 
 
 	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")
-	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
+	var upstreamAssignment: UpstreamAssignment = _
 
-	@BeanProperty var occurrence: String = _
+	var occurrence: String = _
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
+	var submissions: JList[Submission] = ArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BeanProperty var extensions: JList[Extension] = ArrayList()
+	var extensions: JList[Extension] = ArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BeanProperty var feedbacks: JList[Feedback] = ArrayList()
+	var feedbacks: JList[Feedback] = ArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
-	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
+	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
@@ -155,15 +155,15 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@IndexColumn(name = "position")
-	@BeanProperty var fields: JList[FormField] = ArrayList()
+	var fields: JList[FormField] = ArrayList()
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	@BeanProperty var members: UserGroup = new UserGroup
+	var members: UserGroup = new UserGroup
 	
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
-	@BeanProperty var markingWorkflow: MarkingWorkflow = _
+	var markingWorkflow: MarkingWorkflow = _
 
 	/** Map between markers and the students assigned to them */
 	@OneToMany @JoinTable(name="marker_usergroup")
@@ -306,14 +306,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Find a FormField on the Assignment with the given name and type.
 	 * A field with a matching name but not a matching type is ignored.
 	 */
-	def findFieldOfType[A <: FormField](name: String)(implicit m: Manifest[A]): Option[A] =
+	def findFieldOfType[A <: FormField : ClassTag](name: String): Option[A] =
 		findField(name) match {
-			case Some(field) if m.erasure.isInstance(field) => Some(field.asInstanceOf[A])
+			case Some(field) if classTag[A].runtimeClass.isInstance(field) => Some(field.asInstanceOf[A])
 			case _ => None
 		}
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
-	def fullFeedback = feedbacks.filterNot(_.isPlaceholder)
+	def fullFeedback = feedbacks.filterNot(_.isPlaceholder).toSeq
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countFullFeedback = feedbackService.countFullFeedback(this)
 	def hasFullFeedback = countFullFeedback > 0
@@ -324,11 +324,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * assumes all feedback has already been published.
 	 */
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
+
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)
 	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
 	def hasReleasedFeedback = countReleasedFeedback > 0
 	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
+	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
 
 
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
@@ -412,11 +414,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+	def getStudentsFirstMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
 		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) =>
+			val mapEntry = Option(markerMap) flatMap {_.find{p:(String,UserGroup) =>
 				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
-			}
+			}}
 			mapEntry match {
 				case Some((markerId, students)) => Some(markerId)
 				case _ => None
@@ -432,9 +434,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			case None => None
 		}
 		case _ => None
-	}
+	}}
 
-	def getStudentsSecondMarker(submission: Submission): Option[String] = markingWorkflow.markingMethod match {
+	def getStudentsSecondMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
 		case SeenSecondMarking =>  {
 			val mapEntry = markerMap.find{p:(String,UserGroup) =>
 				p._2.includes(submission.userId) && markingWorkflow.secondMarkers.includes(p._1)
@@ -445,14 +447,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			}
 		}
 		case _ => None
-	}
+	}}
 
 		/**
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
 	def getMarkersSubmissions(marker: User): Seq[Submission] = {
-		if (markingWorkflow != null)	markingWorkflow.getSubmissions(this, marker)
+		if (markingWorkflow != null) markingWorkflow.getSubmissions(this, marker)
 		else Seq()
 	}
 
@@ -464,7 +466,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	@BeanProperty var grantedRoles:JList[AssignmentGrantedRole] = ArrayList()
+	var grantedRoles:JList[AssignmentGrantedRole] = ArrayList()
 
 	def toStringProps = Seq(
 		"id" -> id,

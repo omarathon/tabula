@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.util
+import language.implicitConversions
 
 object Stopwatches {
 

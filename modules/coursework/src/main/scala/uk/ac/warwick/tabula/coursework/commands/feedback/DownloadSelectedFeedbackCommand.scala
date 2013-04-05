@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
 import org.springframework.beans.factory.annotation.Autowired
-import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -30,9 +29,9 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 	var zipService = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 	
-    @BeanProperty var filename: String = _
+    var filename: String = _
 
-    @BeanProperty var students: JList[String] = ArrayList()
+    var students: JList[String] = ArrayList()
     
     var feedbacks: JList[Feedback] = _
     

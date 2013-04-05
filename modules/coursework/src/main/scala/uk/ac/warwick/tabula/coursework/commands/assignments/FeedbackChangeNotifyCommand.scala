@@ -12,6 +12,7 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.userlookup.User
+import language.implicitConversions
 
 class FeedbackChangeNotifyCommand(val module: Module, val assignment: Assignment, val recipient: User)
 	extends Command[Boolean] with ReadOnly with FreemarkerRendering with UnicodeEmails {

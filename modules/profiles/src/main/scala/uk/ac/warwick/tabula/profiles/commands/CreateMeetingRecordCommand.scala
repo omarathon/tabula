@@ -14,26 +14,26 @@ import org.joda.time.LocalTime
 
 class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship) extends Command[MeetingRecord] with SelfValidating with FormattedHtml {
 
-	@BeanProperty var title: String = _
-	@BeanProperty var description: String = _
-	@BeanProperty var meetingDate: LocalDate = DateTime.now.toLocalDate
+	var title: String = _
+	var description: String = _
+	var meetingDate: LocalDate = DateTime.now.toLocalDate
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
-	
+
 	var dao = Wire.auto[MeetingRecordDao]
 
 	def applyInternal() = {
 		var meeting = new MeetingRecord(creator, relationship)
 		meeting.title = title
 		meeting.description = formattedHtml(description)
-		meeting.meetingDate = meetingDate.toDateTimeAtMidnight().plusHours(12) // arbitrarily record as noon
+		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(12) // arbitrarily record as noon
 		dao.saveOrUpdate(meeting)
 		meeting
 	}
 
 	def validate(errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		
+
 		meetingDate match {
 			case date:LocalDate => {
 				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {
@@ -42,8 +42,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
 				}
 			}
-			case null => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
-			case _ => errors.rejectValue("meetingDate", "typeMismatch.org.joda.time.DateTime")
+			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
 		}
 	}
 

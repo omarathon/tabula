@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 
-import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -60,7 +59,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	var indexer = Wire.auto[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from: DateTime = _
+	var from: DateTime = _
 
 	def applyInternal() = {
 		indexer.indexFrom(from)
@@ -76,8 +75,8 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	var mdService = Wire.auto[ModuleAndDepartmentService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from: DateTime = _
-	@BeanProperty var deptCode: String = _
+	var from: DateTime = _
+	var deptCode: String = _
 
 	def applyInternal() = {
 		mdService.getDepartmentByCode(deptCode) match {

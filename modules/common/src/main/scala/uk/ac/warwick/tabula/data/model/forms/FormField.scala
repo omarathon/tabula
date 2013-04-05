@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
 import scala.annotation.target.field
-import scala.reflect.BeanProperty
 import collection.JavaConversions._
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -27,6 +26,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
+import scala.reflect._
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -55,10 +55,10 @@ abstract class FormField extends GeneratedId {
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
 
-	@BeanProperty var name: String = _
-	@BeanProperty var label: String = _
-	@BeanProperty var instructions: String = _
-	@BeanProperty var required: Boolean = _
+	var name: String = _
+	var label: String = _
+	var instructions: String = _
+	var required: Boolean = _
 
 	@Basic(optional = false)
 	@Access(AccessType.PROPERTY)
@@ -72,7 +72,7 @@ abstract class FormField extends GeneratedId {
 		propertiesMap = json.readValue(new StringReader(props), classOf[Map[String, Any]])
 	}
 
-	@transient @BeanProperty var propertiesMap: collection.Map[String, Any] = Map()
+	@transient var propertiesMap: collection.Map[String, Any] = Map()
 
 	protected def setProperty(name: String, value: Any) = {
 		propertiesMap += name -> value
@@ -83,9 +83,9 @@ abstract class FormField extends GeneratedId {
 	 * has decided on, so integers come out as java.lang.Integer, and Int
 	 * won't match.
 	 */
-	protected def getProperty[A](name: String, default: A)(implicit m: Manifest[A]) =
+	protected def getProperty[A : ClassTag](name: String, default: A) =
 		propertiesMap.get(name) match {
-			case Some(obj) if m.erasure.isInstance(obj) => obj.asInstanceOf[A]
+			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
 			case _ => default
 		}
 
@@ -93,7 +93,7 @@ abstract class FormField extends GeneratedId {
 	final def readOnly = isReadOnly
 
 	@Type(`type` = "int")
-	@BeanProperty var position: JInteger = 0
+	var position: JInteger = 0
 
 	/** Determines which Freemarker template is used to render it. */
 	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value

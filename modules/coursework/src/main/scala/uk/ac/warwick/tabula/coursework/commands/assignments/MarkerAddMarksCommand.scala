@@ -44,7 +44,6 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 			val markerFeedback:MarkerFeedback = firstMarker match {
 				case true => parentFeedback.retrieveFirstMarkerFeedback
 				case false => parentFeedback.retrieveSecondMarkerFeedback
-				case _ => null
 			}
 
 			markerFeedback.mark = StringUtils.hasText(actualMark) match {

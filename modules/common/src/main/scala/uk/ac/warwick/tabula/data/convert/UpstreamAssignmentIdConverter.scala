@@ -13,6 +13,6 @@ class UpstreamAssignmentIdConverter extends TwoWayConverter[String, UpstreamAssi
 	override def convertRight(id: String) = service.getUpstreamAssignment(id).orNull
 	
 	// Formatter used for generating textual value in template
-	override def convertLeft(assignment: UpstreamAssignment) = Option(assignment) map { _.id } orNull
+	override def convertLeft(assignment: UpstreamAssignment) = (Option(assignment) map { _.id }).orNull
 
 }

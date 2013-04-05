@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.validators
 import javax.validation.Validation
 import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
-import scala.reflect.BeanProperty
 
 
 class CustomValidationTest extends TestBase {

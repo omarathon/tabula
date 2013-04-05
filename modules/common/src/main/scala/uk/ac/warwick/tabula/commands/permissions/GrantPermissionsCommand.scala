@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -21,17 +20,18 @@ import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.RequestInfo
+import scala.reflect.ClassTag
 
-class GrantPermissionsCommand[A <: PermissionsTarget : Manifest](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
+class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
 	
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 	
 	var permissionsService = Wire.auto[PermissionsService]
 	var securityService = Wire.auto[SecurityService]
 	
-	@BeanProperty var permission: Permission = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
-	@BeanProperty var overrideType: Boolean = _
+	var permission: Permission = _
+	var usercodes: JList[String] = ArrayList()
+	var overrideType: Boolean = _
 	
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 	

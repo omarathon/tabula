@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.web.controllers
 
 import scala.collection.JavaConverters._
 import java.io.Writer
-import scala.reflect.BeanProperty
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -53,8 +52,8 @@ object UserPickerController {
 		
 		var userLookup = Wire.auto[UserLookupService]
 	
-		@BeanProperty var firstName: String = ""
-		@BeanProperty var lastName: String = ""
+		var firstName: String = ""
+		var lastName: String = ""
 			
 		def applyInternal() = {
 			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq

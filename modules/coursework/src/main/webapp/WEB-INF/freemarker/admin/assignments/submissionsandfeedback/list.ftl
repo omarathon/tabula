@@ -17,9 +17,9 @@
 				<ul><#list stillToDownload as student>
 					<li>
 						<#if module.department.showStudentName>
-							${student.fullName}
+							${student.user.fullName}
 						<#else>
-							${student.uniId}
+							${student.user.warwickId}
 						</#if>
 					</li>
 				</#list></ul>
@@ -68,55 +68,19 @@
 
 </#macro>
 
+<#function hasSubmissionOrFeedback students>
+	<#local result = [] />
+	<#list students as student>
+		<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
+			<#local result = result + [student] />
+		</#if>
+	</#list>
+	<#return result />
+</#function>
 
-<#macro unSubmitted student extension="" withinExtension=false approved=false rejected=false>
-	<tr class="itemContainer awaiting-submission">
-		<td></td>
-		<td>
-			<#if module.department.showStudentName>
-				${student.fullName}
-			<#else>
-				${student.warwickId}
-			</#if>
-		</td>
-		<td></td>
-		<td></td>
-		<td>
-			<#if extension?has_content>
-				<span class="label label-info">Unsubmitted</span>
-				<#if approved && !rejected>
-					<#assign date>
-						<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-					</#assign>
-				</#if>
-				<#if withinExtension>
-					<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
-				<#elseif rejected>
-					<span class="label label-info use-tooltip" >Extension Rejected</span>
-				<#elseif !approved>
-					<span class="label label-info use-tooltip" >Extension Requested</span>
-				<#else>
-					<span class="label label-info use-tooltip" title="${date}">Extension Expired</span>
-				</#if>
-			<#else>
-				<span class="label label-info">Unsubmitted</span>
-			</#if>
-		</td>
-		<#if assignment.wordCountField??><td></td></#if>
-		<#if assignment.markingWorkflow??><td></td><td></td></#if>
-		
-		<#if hasOriginalityReport><td></td></#if>
-		
-		<td></td><td></td>
-		<#if assignment.collectMarks><td></td><td></td></#if>
-		<td></td>
-	</tr>
-</#macro>
-
-
-<#if students?size = 0>
+<#if hasSubmissionOrFeedback(students)?size = 0>
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
-<#else>
+</#if>
 
 <!-- Extra junk that most people probably won't care about -->
 <div class="btn-group" id="assignment-extra-dropdown" style="float:right">
@@ -127,10 +91,13 @@
 	</a>
 	<ul class="dropdown-menu pull-right">
 		<li>
-			<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.xml'/>">XML</a>
+			<a title="Export submissions info as XLSX, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel (XSLX)</a>
 		</li>
 		<li>
-			<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.csv'/>">CSV</a>
+			<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">CSV</a>
+		</li>
+		<li>
+			<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">XML</a>
 		</li>
 	</ul>
 </div>
@@ -272,104 +239,110 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list awaitingSubmissionWithinExtension as pair>
-				<#assign student=pair._1 />
-				<#assign extension=pair._2 />
-				<@unSubmitted student extension true true false/>
-			</#list>
-			<#list awaitingSubmissionExtensionExpired as pair>
-				<#assign student=pair._1 />
-				<#assign extension=pair._2 />
-				<@unSubmitted student extension false/>
-			</#list>
-			<#list awaitingSubmissionExtensionRejected as pair>
-				<#assign student=pair._1 />
-				<#assign extension=pair._2 />
-				<@unSubmitted student extension false false true/>
-			</#list>
-			<#list awaitingSubmissionExtensionRequested as pair>
-				<#assign student=pair._1 />
-				<#assign extension=pair._2 />
-				<@unSubmitted student extension false false false/>
-			</#list>
-			<#list awaitingSubmissionNoExtension as student>
-				<@unSubmitted student />
-			</#list>
-			<#list students as student>
-				<#assign enhancedSubmission=student.enhancedSubmission>
-				<#assign submission=enhancedSubmission.submission>
-
-				<#if submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-					<#assign lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
-				<#else>
-					<#assign lateness = "" />
+			<#macro row student>
+				<#if student.coursework.enhancedSubmission??>
+					<#local enhancedSubmission=student.coursework.enhancedSubmission>
+					<#local submission=enhancedSubmission.submission>
 				</#if>
 
-				<tr class="itemContainer" <#if submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-					<td><@form.selector_check_row "students" student.uniId /></td>
+				<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
+					<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
+				<#else>
+					<#local lateness = "" />
+				</#if>
+
+				<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
+					<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
 					<td class="id">
 					<#if module.department.showStudentName>
-						${student.fullName}
+						${student.user.fullName}
 					<#else>
-						${student.uniId}
+						${student.user.warwickId}
 					</#if>
 					</td>
 					
 					<td class="files">
-						<#assign attachments=submission.allAttachments />
-						<#if attachments?size gt 0>
-							<#if attachments?size == 1> 
-								<#assign filename = "${attachments[0].name}">
-							<#else>
-								<#assign filename = "submission-${submission.universityId}.zip">
-							</#if>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
-								${attachments?size}
-								<#if attachments?size == 1> file
-								<#else> files
+						<#if submission??>
+							<#local attachments=submission.allAttachments />
+							<#if attachments?size gt 0>
+								<#if attachments?size == 1> 
+									<#local filename = "${attachments[0].name}">
+								<#else>
+									<#local filename = "submission-${submission.universityId}.zip">
 								</#if>
-							</a>
+								<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
+									${attachments?size}
+									<#if attachments?size == 1> file
+									<#else> files
+									</#if>
+								</a>
+							</#if>
 						</#if>
 					</td>
 					<td class="submitted">
-						<#if submission.submittedDate??>
+						<#if submission?? && submission.submittedDate??>
 							<span class="date use-tooltip" title="${lateness!''}">
 								<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 							</span>
 						</#if>
 					</td>
 					<td class="submission-status">
-						<#if submission.late>
-							<span class="label label-important use-tooltip" title="${lateness!''}">Late</span>
-						<#elseif  submission.authorisedLate>
-							<span class="label label-info use-tooltip" title="${lateness!''}">Within Extension</span>
-						</#if>
-						<#if enhancedSubmission.downloaded>
-							<span class="label label-success">Downloaded</span>
-						</#if>
-						<!-- ignore placeholder submissions -->
-						<#if submission.assignment?? && submission.releasedForMarking>
-							<span class="label label-success">Markable</span>
-						</#if>
-						<#if submission.suspectPlagiarised>
-							<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
+						<#if submission??>
+							<#if submission.late>
+								<span class="label label-important use-tooltip" title="${lateness!''}">Late</span>
+							<#elseif  submission.authorisedLate>
+								<span class="label label-info use-tooltip" title="${lateness!''}">Within Extension</span>
+							</#if>
+							<#if enhancedSubmission.downloaded>
+								<span class="label label-success">Downloaded</span>
+							</#if>
+							<!-- ignore placeholder submissions -->
+							<#if submission.assignment?? && submission.releasedForMarking>
+								<span class="label label-success">Markable</span>
+							</#if>
+							<#if submission.suspectPlagiarised>
+								<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
+							</#if>
+						<#elseif !student.coursework.enhancedFeedback??>
+							<#if student.coursework.enhancedExtension?has_content>
+								<#local enhancedExtension=student.coursework.enhancedExtension>
+								<#local extension=enhancedExtension.extension>
+							
+								<span class="label label-info">Unsubmitted</span>
+								<#if extension.approved && !extension.rejected>
+									<#local date>
+										<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+									</#local>
+								</#if>
+								<#if enhancedExtension.within>
+									<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
+								<#elseif extension.rejected>
+									<span class="label label-info use-tooltip" >Extension Rejected</span>
+								<#elseif !extension.approved>
+									<span class="label label-info use-tooltip" >Extension Requested</span>
+								<#else>
+									<span class="label label-info use-tooltip" title="${date}">Extension Expired</span>
+								</#if>
+							<#else>
+								<span class="label label-info">Unsubmitted</span>
+							</#if>
 						</#if>
 					</td>
 					<#if assignment.wordCountField??>
 						<td>
-							<#if submission.valuesByFieldName[assignment.defaultWordCountName]??>
+							<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
 								${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
 							</#if>
 						</td>
 					</#if>
 					<#if assignment.markingWorkflow??>
 						<td>
-							<#if submission.assignment?? && submission.firstMarker?has_content>
+							<#if submission?? && submission.assignment?? && submission.firstMarker?has_content>
 								${submission.firstMarker.fullName}
 							</#if>
 						</td>
 						<td>
-							<#if submission.assignment?? && submission.secondMarker?has_content>
+							<#if submission?? && submission.assignment?? && submission.secondMarker?has_content>
 								${submission.secondMarker.fullName}
 							</#if>
 						</td>
@@ -377,25 +350,27 @@
 
 					<#if hasOriginalityReport>
 						<td class="originality-report">
-							<#list submission.allAttachments as attachment>
-								<!-- Checking originality report for ${attachment.name} ... -->
-								<#if attachment.originalityReport??>
-									<@originalityReport attachment />
-								</#if>
-							</#list>
+							<#if submission??>
+								<#list submission.allAttachments as attachment>
+									<!-- Checking originality report for ${attachment.name} ... -->
+									<#if attachment.originalityReport??>
+										<@originalityReport attachment />
+									</#if>
+								</#list>
+							</#if>
 						</td>
 					</#if>
 					
 					<td class="download">
-						<#if student.enhancedFeedback??>
-							<#assign attachments=student.enhancedFeedback.feedback.attachments />
+						<#if student.coursework.enhancedFeedback??>
+							<#local attachments=student.coursework.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
 							<#if attachments?size == 1> 
-								<#assign attachmentExtension = student.enhancedFeedback.feedback.attachments[0].fileExt>
+								<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
 							<#else>
-								<#assign attachmentExtension = "zip">
+								<#local attachmentExtension = "zip">
 							</#if>
-							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
+							<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
 								${attachments?size}
 								<#if attachments?size == 1> file
 								<#else> files
@@ -404,20 +379,20 @@
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.enhancedFeedback??><@fmt.date date=student.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
+					<td class="uploaded"><#if student.coursework.enhancedFeedback??><@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
 					
 					 <#if assignment.collectMarks>
 						<td class="mark">
-							${(student.enhancedFeedback.feedback.actualMark)!''}
+							${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
 						</td>
 						<td class="grade">
-							${(student.enhancedFeedback.feedback.actualGrade)!''}
+							${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
 					<td class="feedbackReleased">
-						<#if student.enhancedFeedback??>
-							<#if student.enhancedFeedback.feedback.released>
-								<#if student.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
+						<#if student.coursework.enhancedFeedback??>
+							<#if student.coursework.enhancedFeedback.feedback.released>
+								<#if student.coursework.enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
 								<#else><span class="label label-info">Published</span>
 								</#if>
 							<#else><span class="label label-warning">Not yet published</span>
@@ -425,6 +400,10 @@
 						</#if>
 					</td>
 				</tr>
+			</#macro>
+		
+			<#list students as student>
+				<@row student />
 			</#list>
 		</tbody>
 	</table>
@@ -435,5 +414,4 @@
 		})(jQuery);
 	</script>
 </div>
-</#if>
 </#escape>

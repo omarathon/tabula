@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import scala.reflect.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.context.MessageSource
@@ -101,7 +100,7 @@ abstract class BaseController extends ControllerMethods
 	@Required @Resource(name = "validator") var globalValidator: Validator = _
 
 	@Autowired
-	@BeanProperty var securityService: SecurityService = _
+	var securityService: SecurityService = _
 
 	@Autowired private var messageSource: MessageSource = _
 

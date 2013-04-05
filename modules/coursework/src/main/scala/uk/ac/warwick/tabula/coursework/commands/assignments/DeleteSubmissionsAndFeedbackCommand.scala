@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.reflect.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -35,9 +34,9 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
 	
-    @BeanProperty var students: JList[String] = ArrayList()
-    @BeanProperty var submissionOrFeedback: String = ""
-	@BeanProperty var confirm: Boolean = false
+    var students: JList[String] = ArrayList()
+    var submissionOrFeedback: String = ""
+	var confirm: Boolean = false
 
 	var submissionsDeleted = 0
 	var feedbacksDeleted = 0

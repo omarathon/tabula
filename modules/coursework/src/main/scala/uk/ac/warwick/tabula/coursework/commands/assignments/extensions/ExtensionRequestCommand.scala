@@ -28,14 +28,14 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
 
-	@BeanProperty var reason:String =_
+	var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var requestedExpiryDate:DateTime =_
-	@BeanProperty var file:UploadedFile = new UploadedFile
-	@BeanProperty var attachedFiles:JSet[FileAttachment] =_
-	@BeanProperty var readGuidelines:JBoolean =_
+	var requestedExpiryDate:DateTime =_
+	var file:UploadedFile = new UploadedFile
+	var attachedFiles:JSet[FileAttachment] =_
+	var readGuidelines:JBoolean =_
 	// true if this command is modifying an existing extension. False otherwise
-	@BeanProperty var modified:JBoolean = false
+	var modified:JBoolean = false
 
 	def validate(errors:Errors){
 		if (!readGuidelines){

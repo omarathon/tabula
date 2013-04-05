@@ -19,14 +19,14 @@
 	</#if>
 	<#if assignment.closed>
 		<div class="alert alert-success deadline">
-			Assignment closed: <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
+			Assignment closed: <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
 			<div class="marker-btn btn-group">
 				<a class="btn btn-mini ${class}" href="${href}" data-title="${title}" data-container="body">Manage <i class="icon-cog"></i></a>
 			</div>
 		</div>
 	<#else>
 		<div class="alert alert-info deadline">
-			Assignment closes on <strong><@fmt.date date=assignment.closeDate timezone=true /> (${time_remaining})</strong>
+			Assignment closes on <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
 		</div>
 	</#if>
 </#macro>

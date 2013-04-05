@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.web.Cookie
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import org.hibernate.validator.constraints.NotEmpty
-import scala.reflect.BeanProperty
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
@@ -18,7 +17,7 @@ class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
 	PermissionCheck(Permissions.GodMode)
 	
-	@BeanProperty var action: String = _
+	var action: String = _
 	
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(false))

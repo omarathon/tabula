@@ -70,7 +70,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
     }
 
     override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
-    	val map: Map[String, User] = userIds.toList map { id => (id -> getUserByUserId(id) )} toMap
+    	val map: Map[String, User] = (userIds.toList map { id => (id -> getUserByUserId(id) )}).toMap
     	
     	map
     }

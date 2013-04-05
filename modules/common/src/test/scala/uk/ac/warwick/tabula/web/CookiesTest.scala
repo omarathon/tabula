@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.web
 import uk.ac.warwick.tabula.TestBase
 import javax.servlet.http
 import org.springframework.mock.web.MockHttpServletResponse
+import language.reflectiveCalls
 
 class CookiesTest extends TestBase {
 

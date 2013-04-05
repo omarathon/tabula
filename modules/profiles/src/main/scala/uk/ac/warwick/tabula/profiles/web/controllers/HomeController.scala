@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)) orNull
+		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
 	@RequestMapping(Array("/")) def home() = {
 		if (user.isStaff) {

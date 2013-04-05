@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 
-import scala.reflect.BeanProperty
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -26,19 +25,19 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 
 class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] with Promises {
 
-	@BeanProperty var tutor: Member = _
+	var tutor: Member = _
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
 	val newTutor = promise { tutor }
 	
-	//@BeanProperty var storeTutor: Boolean = false
+	//var storeTutor: Boolean = false
 	
 	var profileService = Wire.auto[ProfileService]
 	
 	def currentTutor = profileService.getPersonalTutor(student)
 	
-	@BeanProperty val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
+	val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
 
 	def applyInternal = {
 		if (!currentTutor.isDefined || !currentTutor.get.equals(tutor)) {
@@ -62,7 +61,7 @@ class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)) orNull
+		restricted(new SearchTutorsCommand(user)).orNull
 
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member) = student match {
