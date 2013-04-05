@@ -26,7 +26,7 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 
 	var userLookup = Wire.auto[UserLookupService]
 	implicit var freemarker = Wire.auto[Configuration]
-	var mailSender = Wire[WarwickMailSender]("mailSender")
+	var mailSender = Wire[WarwickMailSender]("studentMailSender")
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	override def applyInternal() {
