@@ -52,9 +52,7 @@ class FeedbackItem {
 }
 
 // Purely for storing in command to display on the model.
-case class ProblemFile(
-	                      path: String,
-	                      file: FileAttachment) {
+case class ProblemFile(var path: String, var file: FileAttachment) {
 	def this() = this(null, null)
 }
 
