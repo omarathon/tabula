@@ -2,14 +2,11 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
-
 import scala.collection.JavaConversions._
-
 import org.joda.time.LocalDate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
-
 import javax.sql.DataSource
 import uk.ac.warwick.membership.MembershipInterfaceWrapper
 import uk.ac.warwick.spring.Wire
@@ -25,6 +22,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberComman
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.membership.MembershipInterfaceException
 
 case class MembershipInformation(val member: MembershipMember, val photo: Option[Array[Byte]])
 
@@ -63,7 +61,13 @@ class ProfileImporter extends Logging {
 
 	def userIdsAndCategories(department: Department): Seq[MembershipInformation] =
 		membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
-			MembershipInformation(member, Option(membershipInterface.getPhotoById(member.universityId)))
+			val photo = try {
+				Option(membershipInterface.getPhotoById(member.universityId))
+			} catch {
+				case e: MembershipInterfaceException => None
+			}
+			
+			MembershipInformation(member, photo)
 		}
 
 	def userIdAndCategory(member: Member) =

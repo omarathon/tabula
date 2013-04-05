@@ -139,6 +139,7 @@ class MaintenanceModeListener extends QueueListener with InitializingBean with L
 		override def onReceive(item: Any) {	
 				item match {
 						case copy: MaintenanceModeMessage => service.update(copy)
+						case _ =>
 				}
 		}
 		

@@ -28,6 +28,8 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.Features
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
@@ -36,6 +38,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]
+	var features = Wire.auto[Features]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new SubmissionAndFeedbackCommand(module, assignment)
@@ -43,18 +46,22 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	@RequestMapping(Array("/list"))
 	def list(command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
-		val results = command.apply()
 		
-		Mav("admin/assignments/submissionsandfeedback/progress",
-			"assignment" -> assignment,
-			"students" -> results.students,
-			"whoDownloaded" -> results.whoDownloaded,
-			"stillToDownload" -> results.stillToDownload,
-			"hasPublishedFeedback" -> results.hasPublishedFeedback,
-			"hasOriginalityReport" -> results.hasOriginalityReport,
-			"mustReleaseForMarking" -> results.mustReleaseForMarking,
-			"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
-		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+		else {
+			val results = command.apply()
+			
+			Mav("admin/assignments/submissionsandfeedback/progress",
+				"assignment" -> assignment,
+				"students" -> results.students,
+				"whoDownloaded" -> results.whoDownloaded,
+				"stillToDownload" -> results.stillToDownload,
+				"hasPublishedFeedback" -> results.hasPublishedFeedback,
+				"hasOriginalityReport" -> results.hasOriginalityReport,
+				"mustReleaseForMarking" -> results.mustReleaseForMarking,
+				"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
+			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		}
 	}
 	
 	@RequestMapping(Array("/table"))
