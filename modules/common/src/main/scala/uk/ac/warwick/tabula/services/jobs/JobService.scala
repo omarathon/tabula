@@ -24,7 +24,7 @@ class JobService extends HasJobDao with Logging {
 	@Autowired var jobs: Array[Job] = Array()
 
 	def run {
-		jobDao.findOutstandingInstances(RunBatchSize) foreach processInstance
+		jobDao.findOutstandingInstances(RunBatchSize).par foreach processInstance
 	}
 
 	def getInstance(id: String) = jobDao.getById(id)
