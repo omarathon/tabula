@@ -40,10 +40,10 @@
 	</p>
 </#if>
 
-<#macro originalityReport attachment student_index>
+<#macro originalityReport attachment>
 <#local r=attachment.originalityReport />
 
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap - student_index}% similarity</span>
+			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
       <div id="tip-content-${attachment.id}" class="hide">
 				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
 				<p class="similarity-subcategories-tooltip">
@@ -239,7 +239,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#macro row student student_index>
+			<#macro row student>
 				<#if student.coursework.enhancedSubmission??>
 					<#local enhancedSubmission=student.coursework.enhancedSubmission>
 					<#local submission=enhancedSubmission.submission>
@@ -331,7 +331,7 @@
 					<#if assignment.wordCountField??>
 						<td class="word-count">
 							<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
-								${submission.valuesByFieldName[assignment.defaultWordCountName]?number - student_index}
+								${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
 							</#if>
 						</td>
 					</#if>
@@ -354,7 +354,7 @@
 								<#list submission.allAttachments as attachment>
 									<!-- Checking originality report for ${attachment.name} ... -->
 									<#if attachment.originalityReport??>
-										<@originalityReport attachment student_index />
+										<@originalityReport attachment />
 									</#if>
 								</#list>
 							</#if>
@@ -403,10 +403,7 @@
 			</#macro>
 		
 			<#list students as student>
-				<#assign index=(student_index+1)*5 />
-				<@row student index />
-				<@row student index*2 />
-				<@row student index*4 />
+				<@row student />
 			</#list>
 		</tbody>
 	</table>
