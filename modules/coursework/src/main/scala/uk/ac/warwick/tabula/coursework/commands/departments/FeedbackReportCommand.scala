@@ -19,8 +19,8 @@ import scala.reflect.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
-import org.joda.time.ReadableInstant
-//import org.joda.time.format.DateTimeFormat
+import org.apache.poi.ss.usermodel.Cell
+import java.util.Date
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	
@@ -36,34 +36,58 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultEndDate = new DateTime()
-	
-	val csvDateFormatter = DateFormats.CSVDate
 
-	def csvFormat(i: ReadableInstant) = csvDateFormatter print i
-	
-	
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	var workingDaysHelper = new WorkingDaysHelperImpl
 
-	var dateCellStyle : XSSFCellStyle = null
-	var percentageCellStyle : XSSFCellStyle = null
-	
+	lazy val workbook = new XSSFWorkbook()
+
+	lazy val dateCellStyle : XSSFCellStyle = {
+		val createHelper = workbook.getCreationHelper
+		val cellStyle = workbook.createCellStyle
+		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yy"))
+		cellStyle
+	}
+
+	lazy val percentageCellStyle : XSSFCellStyle = {
+		val cellStyle = workbook.createCellStyle
+		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"))
+		cellStyle
+	}
+
+	lazy val headerStyle : XSSFCellStyle = {
+		val cellStyle = workbook.createCellStyle
+		val font = workbook.createFont()
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+		cellStyle.setFont(font)
+		cellStyle
+	}
+
+	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
+	lazy val trimmedDeptName = {
+		if (department.name.length > 20)
+			department.name.substring(0, 20)
+		else
+			department.name
+	}
+
+	// replace unsafe characters with spaces
+	lazy val safeDeptName = WorkbookUtil.createSafeSheetName(trimmedDeptName)
+
 	var assignmentData : List[AssignmentInfo] = List()
 	var moduleData: List[ModuleInfo] = List()
-	
+
 	def applyInternal() = {
-		val workbook = new XSSFWorkbook()
-		dateCellStyle = createDateCellStyle(workbook)
-		percentageCellStyle = createPercentageCellStyle(workbook)
-		buildAssignmentData
-		
 		val assignmentSheet = generateAssignmentSheet(department, workbook)
 		val moduleSheet = generateModuleSheet(department, workbook)
 
+		buildAssignmentData()
+
 		populateAssignmentSheet(assignmentSheet)
+		formatWorksheet(assignmentSheet)
 		populateModuleSheet(moduleSheet)
 		
 		formatWorksheet(assignmentSheet)
@@ -71,60 +95,71 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		workbook
 	}
 
-	def addCell(value: String, row: XSSFRow) : Int = {
-		val cellNum = if(row.getLastCellNum == -1) 0 else row.getLastCellNum 	// if row has no cells, getLastCellNum() returns -1. aargh.
-		row.createCell(cellNum).setCellValue(value)
-		cellNum
-	}
-	
-	
-	def addCell(value: String, row: XSSFRow, style: XSSFCellStyle) : Int = {
-		var cellNum = addCell(value, row)
-		var cell = row.getCell(cellNum)
-		cell.setCellStyle(style)
-		cellNum
+	def getNextCellNum(row: XSSFRow):Short = if(row.getLastCellNum == -1) 0 else row.getLastCellNum
+
+	def addCell(row: XSSFRow, cellType: Int) = {
+		val cell = row.createCell(getNextCellNum(row))
+		cell.setCellType(cellType)
+		cell
 	}
 
-	def createDateCellStyle(workbook: XSSFWorkbook) = {
-		val createHelper = workbook.getCreationHelper
-		val cellStyle = workbook.createCellStyle
-		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yy"))
-		cellStyle
+	def addStringCell(value: String, row: XSSFRow) {
+		val cell = addCell(row, Cell.CELL_TYPE_STRING)
+		cell.setCellValue(value)
+	}
+
+	def addStringCell(value: String, row: XSSFRow, style: XSSFCellStyle) {
+		val cell = addCell(row, Cell.CELL_TYPE_STRING)
+		cell.setCellStyle(style)
+		cell.setCellValue(value)
+	}
+
+	def addNumericCell(value: Double, row: XSSFRow) {
+		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+		cell.setCellValue(value)
 	}
 	
-	def createPercentageCellStyle(workbook: XSSFWorkbook) = {
-		val createHelper = workbook.getCreationHelper
-		val cellStyle = workbook.createCellStyle
-		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
-		cellStyle
+	def addNumericCell(value: Double, row: XSSFRow, style: XSSFCellStyle) {
+		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+		cell.setCellStyle(style)
+		cell.setCellValue(value)
 	}
-	
-	
-	def generateAssignmentSheet(dept: Department, workbook: XSSFWorkbook) = {		
-		val sheet = workbook.createSheet("Assignment report for " + safeDeptName(dept))
+
+	def addDateCell(value: Date, row: XSSFRow, style: XSSFCellStyle) {
+		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+		cell.setCellStyle(style)
+		cell.setCellValue(value)
+	}
+
+	def addPercentageCell(num:Double, total:Double, row: XSSFRow) {
+		if (total == 0)
+			addStringCell("N/A", row)
+		else
+			addNumericCell((num / total), row, percentageCellStyle)
+	}
+
+	def formatWorksheet(sheet: XSSFSheet) {
+		(0 to 11).map(sheet.autoSizeColumn(_))
+	}
+
+	def generateAssignmentSheet(dept: Department, workbook: XSSFWorkbook) = {
+		val sheet = workbook.createSheet("Report for " + safeDeptName)
 
 		// add header row
 		val header = sheet.createRow(0)
-		addCell("Assignment name", header)
-		addCell("Module code", header)
-		addCell("Close date", header)
-		addCell("Expected submissions", header)
-		addCell("Actual submissions", header)
-		addCell("Late submissions - within extension", header)
-		addCell("Late submissions - without extension", header)
-		addCell("On-time feedback", header)
-		addCell("On-time feedback %", header)
-		addCell("Late feedback", header)
-		addCell("Late feedback %", header)
-		
-		// set header style
-		var headerStyle = workbook.createCellStyle();
-		var font = workbook.createFont()
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
-		font.setFontName("Arial")
-    	headerStyle.setFont(font)
-    	header.setRowStyle(headerStyle)
-    	
+
+		addStringCell("Assignment name", header, headerStyle)
+		addStringCell("Module code", header, headerStyle)
+		addStringCell("Close date", header, headerStyle)
+		addStringCell("Expected submissions", header, headerStyle)
+		addStringCell("Actual submissions", header, headerStyle)
+		addStringCell("Late submissions - within extension", header, headerStyle)
+		addStringCell("Late submissions - without extension", header, headerStyle)
+		addStringCell("On-time feedback", header, headerStyle)
+		addStringCell("On-time feedback %", header, headerStyle)
+		addStringCell("Late feedback", header, headerStyle)
+		addStringCell("Late feedback %", header, headerStyle)
+
 		sheet
 	}
 
@@ -134,36 +169,29 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 			val assignment = assignmentInfo.assignment
 			
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
-			addCell(assignment.name, row)
-			addCell(assignment.module.code.toUpperCase, row)
-			addCell(csvFormat(assignment.closeDate), row, dateCellStyle)
-			addCell(assignmentInfo.membership.toString, row)
-			addCell(assignmentInfo.numberOfSubmissions.toString, row)
-			addCell(assignmentInfo.submissionsLateWithExt.toString, row)
-			addCell(assignmentInfo.submissionsLateWithoutExt.toString, row)
-			
-			val onTimePercentage = calcTimelinessPercentage(assignmentInfo.onTimeFeedback, assignmentInfo.totalPublished)
-			val latePercentage = calcTimelinessPercentage(assignmentInfo.lateFeedback, assignmentInfo.totalPublished)
-			
-			addCell(assignmentInfo.onTimeFeedback.toString, row)
-			addCell(onTimePercentage.toString, row, percentageCellStyle)
-			addCell(assignmentInfo.lateFeedback.toString, row)
-			addCell(latePercentage.toString, row, percentageCellStyle)
+			addStringCell(assignment.name, row)
+			addStringCell(assignment.module.code.toUpperCase, row)
+			addDateCell(assignment.closeDate.toDate, row, dateCellStyle)
+			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
+			addNumericCell(numberOfStudents, row)
+			addNumericCell(assignment.submissions.size, row)
+			addNumericCell(assignment.submissions.filter(submission => submission.isAuthorisedLate).size, row)
+			addNumericCell(assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size, row)
+			val (onTime, late) = getFeedbackCounts(assignment)
+			val totalPublished = onTime + late
+			addNumericCell(onTime, row)
+			addPercentageCell(onTime, totalPublished, row)
+			addNumericCell(late, row)
+			addPercentageCell(late, totalPublished, row)
 		}
 	}
 	
-	def calcTimelinessPercentage(number: Int, totalPublished: Int) = {
-		if (totalPublished == 0) "N/A" else ((number / totalPublished)*100)
-	}
-	
-	
-	
-	def buildAssignmentData {
+	def buildAssignmentData() {
 		for (module <- department.modules;
-			 assignment <- module.assignments.filter( a => a.collectSubmissions && a.submissions.size > 0 
-					 								   && a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate))) {
-			
-			var assignmentInfo = new AssignmentInfo
+				assignment <- module.assignments.filter( a => a.collectSubmissions && a.submissions.size > 0
+				&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate))) {
+
+			val assignmentInfo = new AssignmentInfo
 			assignmentInfo.numberOfSubmissions = assignment.submissions.size
 			assignmentInfo.membership =  assignmentMembershipService.determineMembershipUsers(assignment).size
 			assignmentInfo.submissionsLateWithExt = assignment.submissions.filter(submission => submission.isAuthorisedLate).size
@@ -175,89 +203,60 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 			assignmentInfo.moduleCode = assignment.module.code
 			assignmentInfo.moduleName = assignment.module.name
 			assignmentInfo.assignment = assignment
-			
+
 			assignmentData = assignmentData ++ List(assignmentInfo)
 		}
 	}
 	
-
-
-	
 	def generateModuleSheet(dept: Department, workbook: XSSFWorkbook) = {		
-		val sheet = workbook.createSheet("Module report for " + safeDeptName(dept))
+		val sheet = workbook.createSheet("Module report for " + safeDeptName)
 		
 		// add header row
 		val header = sheet.createRow(0)
-		addCell("Module name", header)
-		addCell("Module code", header)
-		addCell("Number of assignments", header)
-		addCell("Expected submissions", header)
-		addCell("Actual submissions", header)
-		addCell("Late submissions - within extension", header)
-		addCell("Late submissions - without extension", header)
-		addCell("On-time feedback", header)
-		addCell("On-time feedback %", header)
-		addCell("Late feedback", header)
-		addCell("Late feedback %", header)	
-		
-		// set header style
-		var headerStyle = workbook.createCellStyle();
-		var font = workbook.createFont()
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
-		font.setFontName("Arial")
-    	headerStyle.setFont(font)
-    	header.setRowStyle(headerStyle)
-    	
-    	sheet
+		addStringCell("Module name", header, headerStyle)
+		addStringCell("Module code", header, headerStyle)
+		addStringCell("Number of assignments", header, headerStyle)
+		addStringCell("Expected submissions", header, headerStyle)
+		addStringCell("Actual submissions", header, headerStyle)
+		addStringCell("Late submissions - within extension", header, headerStyle)
+		addStringCell("Late submissions - without extension", header, headerStyle)
+		addStringCell("On-time feedback", header, headerStyle)
+		addStringCell("On-time feedback %", header, headerStyle)
+		addStringCell("Late feedback", header, headerStyle)
+		addStringCell("Late feedback %", header, headerStyle)
+
+		sheet
 	}
-	
-	
+
+
 	def populateModuleSheet(sheet: XSSFSheet) {	
 		val modules = assignmentData.groupBy(_.assignment.module.code)
 		for (module <- modules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			val moduleCode = module._1
 			val assignmentInfoList= module._2
-			
-			addCell(assignmentInfoList(0).moduleName, row)
-			addCell(moduleCode, row)
-			addCell(assignmentInfoList.groupBy(_.assignment.name).size.toString, row)
 
-			val expectedSubmissions = assignmentInfoList.map(a => a.membership).sum			
-			addCell(expectedSubmissions.toString, row)
-			val numberOfSubmissions = assignmentInfoList.map(a => a.numberOfSubmissions).sum			
-			addCell(numberOfSubmissions.toString, row)
-			val submissionsLateWithExt = assignmentInfoList.map(a => a.submissionsLateWithExt).sum
-			addCell(submissionsLateWithExt.toString, row)
-			val submissionsLateWithoutExt = assignmentInfoList.map(a => a.submissionsLateWithoutExt).sum
-			addCell(submissionsLateWithoutExt.toString, row)
-			val totalPublished = assignmentInfoList.map(a => a.totalPublished).sum
-			val ontime = assignmentInfoList.map(a => a.onTimeFeedback).sum
-			addCell(ontime.toString, row)
-			addCell(calcTimelinessPercentage(ontime, totalPublished).toString, row)
-			val late = assignmentInfoList.map(a => a.lateFeedback).sum
-			addCell(late.toString, row)
-			addCell(calcTimelinessPercentage(late, totalPublished).toString, row)	
+			addStringCell(assignmentInfoList(0).moduleName, row)
+			addStringCell(moduleCode, row)
+			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
+
+			val expectedSubmissions = assignmentInfoList.map(_.membership).sum
+			addNumericCell(expectedSubmissions, row)
+			val numberOfSubmissions = assignmentInfoList.map(_.numberOfSubmissions).sum
+			addNumericCell(numberOfSubmissions, row)
+			val submissionsLateWithExt = assignmentInfoList.map(_.submissionsLateWithExt).sum
+			addNumericCell(submissionsLateWithExt, row)
+			val submissionsLateWithoutExt = assignmentInfoList.map(_.submissionsLateWithoutExt).sum
+			addNumericCell(submissionsLateWithoutExt, row)
+			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
+			val ontime = assignmentInfoList.map(_.onTimeFeedback).sum
+			addNumericCell(ontime, row)
+			addPercentageCell(ontime, totalPublished, row)
+			val late = assignmentInfoList.map(_.lateFeedback).sum
+			addNumericCell(late, row)
+			addPercentageCell(late, totalPublished, row)
 		}
 	}
-	
-	
-	
-	def formatWorksheet(sheet: XSSFSheet) {
-		val dimension = sheet.getCTWorksheet.getDimension
-		(0 to 11).map(sheet.autoSizeColumn(_))
-	}
-
-	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
-	def trimmedDeptName(dept: Department) = {
-		if (dept.name.length > 20)
-			dept.name.substring(0, 20)
-		else
-			dept.name
-	}
-
-	// util to replace unsafe characters with spaces
-	def safeDeptName(dept: Department) = WorkbookUtil.createSafeSheetName(trimmedDeptName(dept))
 	
 	// returns a pair - first is number of on time feedback, second is number of late
 	def getFeedbackCounts(assignment: Assignment) : (Int, Int) =  {
@@ -308,4 +307,3 @@ class ModuleInfo {
 	var lateFeedback: Int = _
 	var totalPublished: Int = _
 }
-
