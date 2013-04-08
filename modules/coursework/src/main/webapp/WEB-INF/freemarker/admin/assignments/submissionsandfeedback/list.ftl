@@ -40,10 +40,10 @@
 	</p>
 </#if>
 
-<#macro originalityReport attachment>
+<#macro originalityReport attachment student_index>
 <#local r=attachment.originalityReport />
 
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap - student_index}% similarity</span>
       <div id="tip-content-${attachment.id}" class="hide">
 				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
 				<p class="similarity-subcategories-tooltip">
@@ -239,7 +239,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#macro row student>
+			<#macro row student student_index>
 				<#if student.coursework.enhancedSubmission??>
 					<#local enhancedSubmission=student.coursework.enhancedSubmission>
 					<#local submission=enhancedSubmission.submission>
@@ -329,9 +329,9 @@
 						</#if>
 					</td>
 					<#if assignment.wordCountField??>
-						<td>
+						<td class="word-count">
 							<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
-								${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
+								${submission.valuesByFieldName[assignment.defaultWordCountName]?number - student_index}
 							</#if>
 						</td>
 					</#if>
@@ -354,7 +354,7 @@
 								<#list submission.allAttachments as attachment>
 									<!-- Checking originality report for ${attachment.name} ... -->
 									<#if attachment.originalityReport??>
-										<@originalityReport attachment />
+										<@originalityReport attachment student_index />
 									</#if>
 								</#list>
 							</#if>
@@ -403,14 +403,33 @@
 			</#macro>
 		
 			<#list students as student>
-				<@row student />
+				<#assign index=(student_index+1)*5 />
+				<@row student index />
+				<@row student index*2 />
+				<@row student index*4 />
 			</#list>
 		</tbody>
 	</table>
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
 		(function($) {
-			$("#submission-table").sortableTable();
+			$("#submission-table").sortableTable({
+				textExtraction: function(node) { 
+					var $el = $(node);
+					if ($el.hasClass('originality-report')) {
+						var $tooltip = $el.find('.similarity-tooltip').first();
+						if ($tooltip.length) {
+							return parseInt($tooltip.text().substring(0, $tooltip.text().indexOf('%')));
+						} else {
+							return 0;
+						}
+					} else if ($el.hasClass('word-count')) {
+						return parseInt($el.text().trim().replace(',',''));
+					} else {				
+						return $el.text().trim();
+					} 
+				}
+			});
 		})(jQuery);
 	</script>
 </div>

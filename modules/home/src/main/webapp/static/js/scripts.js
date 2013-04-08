@@ -12,6 +12,8 @@
 
 	// Tabula-specific rendition of tablesorter plugin for sortable tables
 	jQuery.fn.sortableTable = function(settings) {
+		settings = settings || {};
+	
 		var $table = $(this);
 		if ($table.tablesorter) {
 			var headerSettings = {};
@@ -21,7 +23,7 @@
 					headerSettings[index] = {sorter: false};
 				}
 			});
-			$table.tablesorter({headers: headerSettings});
+			$table.tablesorter($.extend({headers: headerSettings}, settings));
 			return this;
 		}
 	};	
