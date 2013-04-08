@@ -666,17 +666,17 @@
 				
 				// Add differing amounts for info, success, warning and danger so that they are sorted in the right order. 
 				// info is the default, so == 0
-				if ($el.hasClass('progress-success')) {
-					width += 1;
-				} else if ($el.hasClass('progress-warning')) {
-					width += 2;
-				} else if ($el.hasClass('progress-danger')) {
+				if ($el.find('.progress').hasClass('progress-success')) {
 					width += 3;
+				} else if ($el.find('.progress').hasClass('progress-warning')) {
+					width += 2;
+				} else if ($el.find('.progress').hasClass('progress-danger')) {
+					width += 1;
 				}
 								
 				return width;
 			} else {
-				return node.innerHTML;
+				return $el.text().trim();
 			}
 		},
 		widgets: ['repositionWorkflowBoxes']
