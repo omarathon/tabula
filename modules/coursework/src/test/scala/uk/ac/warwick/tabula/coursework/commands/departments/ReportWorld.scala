@@ -26,6 +26,8 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	val moduleOne = new Module("IN101", department)
 	val moduleTwo = new Module("IN102", department)
 
+	department.modules = List(moduleOne, moduleTwo)
+	
 	var auditEvents: List[AuditEvent] = List()
 	
 	val assignmentOne = addAssignment("1001", "test one", dateTime(2013, 3, 10), 10, 5, moduleOne)
@@ -105,6 +107,7 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 		assignment.id = id
 		assignment.name = name
 		assignment.closeDate = closeDate
+		assignment.collectSubmissions = true
 		for (i <- 1 to numberOfStudents) {
 			generateSubmission(assignment, i, lateModNumber)
 			addFeedback(assignment)

@@ -43,22 +43,22 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 
 	var workingDaysHelper = new WorkingDaysHelperImpl
 
-	lazy val workbook = new XSSFWorkbook()
+	val workbook = new XSSFWorkbook()
 
-	lazy val dateCellStyle : XSSFCellStyle = {
+	val dateCellStyle : XSSFCellStyle = {
 		val createHelper = workbook.getCreationHelper
 		val cellStyle = workbook.createCellStyle
 		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yy"))
 		cellStyle
 	}
 
-	lazy val percentageCellStyle : XSSFCellStyle = {
+	val percentageCellStyle : XSSFCellStyle = {
 		val cellStyle = workbook.createCellStyle
 		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"))
 		cellStyle
 	}
 
-	lazy val headerStyle : XSSFCellStyle = {
+	val headerStyle : XSSFCellStyle = {
 		val cellStyle = workbook.createCellStyle
 		val font = workbook.createFont()
 		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
@@ -78,10 +78,9 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 	lazy val safeDeptName = WorkbookUtil.createSafeSheetName(trimmedDeptName)
 
 	var assignmentData : List[AssignmentInfo] = List()
-	var moduleData: List[ModuleInfo] = List()
 
 	def applyInternal() = {
-		val assignmentSheet = generateAssignmentSheet(department, workbook)
+		val assignmentSheet = generateAssignmentSheet(department)
 		val moduleSheet = generateModuleSheet(department, workbook)
 
 		buildAssignmentData()
@@ -142,7 +141,7 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		(0 to 11).map(sheet.autoSizeColumn(_))
 	}
 
-	def generateAssignmentSheet(dept: Department, workbook: XSSFWorkbook) = {
+	def generateAssignmentSheet(dept: Department) = {
 		val sheet = workbook.createSheet("Report for " + safeDeptName)
 
 		// add header row
@@ -295,15 +294,4 @@ class AssignmentInfo {
 	var lateFeedback: Int = _
 	var totalPublished: Int = _
 	var assignment: Assignment = _
-}
-
-class ModuleInfo {
-	var moduleCode: String = _
-	var moduleName: String = _
-	var numberOfSubmissions: Int = _
-	var submissionsLateWithExt: Int = _ 
-	var submissionsLateWithoutExt: Int = _
-	var onTimeFeedback: Int = _
-	var lateFeedback: Int = _
-	var totalPublished: Int = _
 }

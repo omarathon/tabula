@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.userlookup.User
 import org.junit.Ignore
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
 
 class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 	@Test
@@ -12,6 +13,8 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 		userOne.setWarwickId(idFormat(1))
 		val submissions = auditEventQueryMethods.submissionForStudent(assignmentOne, userOne)
 		submissions.size should be (1)
+		
+		
 	}
 
 	@Test
@@ -24,7 +27,7 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 
 	@Test
 	def feedbackCountsTest() {
-		val command = new FeedbackReportCommand(department)
+		val command = getTestCommand()
 		command.assignmentMembershipService = assignmentMembershipService
 		command.auditEventQueryMethods = auditEventQueryMethods
 
@@ -44,15 +47,28 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 
 	@Test
 	def assignmentSheetTest() {
-		val command = new FeedbackReportCommand(department)
+		val command = getTestCommand()
 		command.assignmentMembershipService = assignmentMembershipService
-		command.auditEventQueryMethods = auditEventQueryMethods
+		command.auditEventQueryMethods = auditEventQueryMethods		
+		command.buildAssignmentData()
+		
+		val sheet = command.generateAssignmentSheet(department)
+		command.populateAssignmentSheet(sheet)		
+		
+		val row = sheet.getRow(1)
+		row.getCell(0).getStringCellValue() should be ("test one")
+		
+		val thing = sheet
+		
+		
+	}
 
-		val workbook = new XSSFWorkbook()
-		val sheet = command.generateAssignmentSheet(department, workbook)
-		command.populateAssignmentSheet(sheet)
-
-
+	
+	def getTestCommand() = {
+		val command = new FeedbackReportCommand(department)
+		command.startDate = dateTime(2013, 3, 1)
+		command.endDate = dateTime(2013, 9, 30)
+		command
 	}
 
 }
