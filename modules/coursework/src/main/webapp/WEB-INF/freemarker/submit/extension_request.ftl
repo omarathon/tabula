@@ -4,7 +4,7 @@
 	<h1>Request an extension for <strong>${assignment.name}</strong></h1>
 	<#if isClosed && !isModification>
 		<p>
-			This assignment closed on <@fmt.date date=assignment.closeDate /> (${time_remaining}).
+			This assignment closed <@fmt.date date=assignment.closeDate /> (${time_remaining}).
 			You cannot request an extension after the close date has passed.
 		</p>
 	<#else>
@@ -45,13 +45,13 @@
 			</#if>
 			<#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
 			<p>
-				You requested an extension for this assignment on <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
+				You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
 				Use the form below to update the details of your extension request. If you have been asked to provide
 				additional information about your request or for supporting documentation you can add them here.
 			</p>
 		<#else>
 			<p>
-				This assignment closes on  <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
+				This assignment closes <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
 				To request an extension for this assignment please read the Extension Guidelines below and submit this form.
 				You will receive a notification when your application has been processed.
 			</p>
