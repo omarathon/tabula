@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-
 import org.joda.time.DateTime
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -16,11 +14,17 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.HashMap
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService, AuditEventIndexService}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.SelfValidating
+import org.springframework.validation.Errors
+import org.hibernate.validator.NotNull
 
-class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly {
+class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) 
+	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
+	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
@@ -31,7 +35,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	
-	var filter: CourseworkFilter = CourseworkFilters.AllStudents
+	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
+	var filterParameters: JMap[String, String] = HashMap()
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
@@ -133,13 +138,17 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		val stillToDownload = membersWithPublishedFeedback filterNot { item => item.coursework.enhancedFeedback map { _.downloaded } getOrElse(false) }
 		
 		SubmissionAndFeedbackResults(
-			students=(unsubmitted ++ submitted).filter(filter.predicate),
+			students=(unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap)),
 			whoDownloaded=whoDownloaded,
 			stillToDownload=stillToDownload,
 			hasPublishedFeedback=hasPublishedFeedback,
 			hasOriginalityReport=hasOriginalityReport,
 			mustReleaseForMarking=mustReleaseForMarking
 		)
+	}
+	
+	def validate(errors: Errors) {
+		Option(filter) map { _.validate(filterParameters.asScala.toMap)(errors) }
 	}
 }
 

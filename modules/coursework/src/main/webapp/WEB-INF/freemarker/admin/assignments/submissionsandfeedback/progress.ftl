@@ -4,23 +4,70 @@
 <#assign module=assignment.module />
 <#assign department=module.department />
 
-<@f.form method="get" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
+<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
 	<div class="filter">
 		<label for="filter"><i class="icon-filter"></i> Show all</label>
 		&nbsp;
 		<@f.select path="filter" cssClass="span4">
 			<@f.options items=allFilters itemValue="name" itemLabel="description" />
 		</@f.select>
+		
+		<#list allFilters as filter>
+			<#if filter.parameters?size gt 0>
+				<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
+					<#list filter.parameters as param>
+						<@form.labelled_row "filterParameters[${param._1()}]" param._2()>
+							<#if param._3() == 'datetime'>
+								<@f.input path="filterParameters[${param._1()}]" cssClass="date-time-picker" />
+							<#elseif param._3() == 'percentage'>
+								<div class="input-append">
+									<@f.input path="filterParameters[${param._1()}]" type="number" min="0" max="100" cssClass="input-small" />
+									<span class="add-on">%</span>
+								</div>
+							<#else>
+								<@f.input path="filterParameters[${param._1()}]" type=param._3() />
+							</#if>
+						</@form.labelled_row>
+					</#list>
+					
+					<@form.row>
+						<@form.field>
+							<button class="btn btn-primary" type="submit"><i class="icon-filter icon-white"></i> Filter</button>
+						</@form.field>
+					</@form.row>
+				</fieldset>
+			</#if>
+		</#list>
 	</div>
 	
 	<script type="text/javascript">
 		jQuery(function($) {
 			$('#filter').on('keyup change', function() {
-				$(this).closest('form').submit();
+				var $select = $(this);
+				var val = $select.val();
+				
+				var $options = $select.closest('.filter').find('fieldset[data-filter="' + val + '"]');
+				var $openOptions = $select.closest('.filter').find('.filter-options:visible');
+				
+				var cb = function() {
+					if ($options.length) {
+						$options.slideDown();
+					} else {
+						$select.closest('form').submit();
+					}
+				};
+				
+				if ($openOptions.length) {
+					$openOptions.slideUp('fast', cb);
+				} else {
+					cb();
+				}
 			});
 		});
 	</script>
 </@f.form>
+
+<#if students??>
 
 <#macro originalityReport attachment>
 <#local r=attachment.originalityReport />
@@ -118,7 +165,7 @@
 		</#if>
 		
 		<#if assignment.collectSubmissions && features.markingWorkflows>
-			<#if mustReleaseForMarking>
+			<#if mustReleaseForMarking?default(false)>
 				<div class="btn-group">	
 					<a class="btn dropdown-toggle" data-toggle="dropdown">
 						Marking
@@ -546,7 +593,14 @@
 	<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
 		<p>There are no submissions or feedbacks yet for this assignment.</p>
 	<#else>
-		<p>There are no ${submissionAndFeedbackCommand.filter.description} for this assignment.</p>
+		<#macro filterDescription filter filterParameters><#compress>
+			${filter.description}
+			<#if filter.parameters?size gt 0>(<#compress>
+				<#list filter.parameters as param>${param._1()}=${filterParameters[param._1()]}<#if param_has_next>, </#if></#list>
+			</#compress>)</#if>
+		</#compress></#macro>
+	
+		<p>There are no <@filterDescription submissionAndFeedbackCommand.filter submissionAndFeedbackCommand.filterParameters /> for this assignment.</p>
 	</#if>
 </#if>
 
@@ -673,7 +727,7 @@
 				} else if ($el.find('.progress').hasClass('progress-danger')) {
 					width += 1;
 				}
-								
+
 				return width;
 			} else {
 				return $el.text().trim();
@@ -683,5 +737,6 @@
 	});
 })(jQuery);
 </script>
+</#if>
 
 </#escape>

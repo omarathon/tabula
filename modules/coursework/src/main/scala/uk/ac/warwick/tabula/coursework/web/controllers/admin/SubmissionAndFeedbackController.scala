@@ -30,6 +30,8 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.Features
+import javax.validation.Valid
+import org.springframework.validation.Errors
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
@@ -40,49 +42,66 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	var userLookup = Wire.auto[UserLookupService]
 	var features = Wire.auto[Features]
 	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+	validatesSelf[SubmissionAndFeedbackCommand]
+	
+	@ModelAttribute("assignment") 
+	def assignment(@PathVariable("assignment") assignment: Assignment) = assignment
+	
+	@ModelAttribute("submissionAndFeedbackCommand")
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
 		new SubmissionAndFeedbackCommand(module, assignment)
+	
+	@ModelAttribute("allFilters") 
+	def allFilters(@PathVariable("assignment") assignment: Assignment) =
+		CourseworkFilters.AllFilters.filter(_.applies(assignment))
 
 	@RequestMapping(Array("/list"))
-	def list(command: SubmissionAndFeedbackCommand) = {
+	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
 		
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
+			if (errors.hasErrors) {
+				Mav("admin/assignments/submissionsandfeedback/progress")
+					.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			} else {
+				val results = command.apply()
+				
+				Mav("admin/assignments/submissionsandfeedback/progress",
+					"students" -> results.students,
+					"whoDownloaded" -> results.whoDownloaded,
+					"stillToDownload" -> results.stillToDownload,
+					"hasPublishedFeedback" -> results.hasPublishedFeedback,
+					"hasOriginalityReport" -> results.hasOriginalityReport,
+					"mustReleaseForMarking" -> results.mustReleaseForMarking
+				).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			}
+		}
+	}
+	
+	@RequestMapping(Array("/table"))
+	def table(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
+		val (assignment, module) = (command.assignment, command.module)
+
+		if (errors.hasErrors) {
+			Mav("admin/assignments/submissionsandfeedback/list")
+				.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		} else {
 			val results = command.apply()
-			
-			Mav("admin/assignments/submissionsandfeedback/progress",
-				"assignment" -> assignment,
+		
+			Mav("admin/assignments/submissionsandfeedback/list",
 				"students" -> results.students,
 				"whoDownloaded" -> results.whoDownloaded,
 				"stillToDownload" -> results.stillToDownload,
 				"hasPublishedFeedback" -> results.hasPublishedFeedback,
 				"hasOriginalityReport" -> results.hasOriginalityReport,
-				"mustReleaseForMarking" -> results.mustReleaseForMarking,
-				"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
+				"mustReleaseForMarking" -> results.mustReleaseForMarking
 			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 		}
 	}
 	
-	@RequestMapping(Array("/table"))
-	def table(command: SubmissionAndFeedbackCommand) = {
-		val (assignment, module) = (command.assignment, command.module)
-		val results = command.apply()
-
-		Mav("admin/assignments/submissionsandfeedback/list",
-			"assignment" -> assignment,
-			"students" -> results.students,
-			"whoDownloaded" -> results.whoDownloaded,
-			"stillToDownload" -> results.stillToDownload,
-			"hasPublishedFeedback" -> results.hasPublishedFeedback,
-			"hasOriginalityReport" -> results.hasOriginalityReport,
-			"mustReleaseForMarking" -> results.mustReleaseForMarking,
-			"allFilters" -> CourseworkFilters.AllFilters.filter(_.applies(assignment))
-		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-	}
-	
 	@RequestMapping(Array("/export.csv"))
-	def csv(command: SubmissionAndFeedbackCommand) = {
+	def csv(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
 		
@@ -101,7 +120,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 	
 	@RequestMapping(Array("/export.xml"))
-	def xml(command: SubmissionAndFeedbackCommand) = {
+	def xml(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
 		
@@ -111,7 +130,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 	
 	@RequestMapping(Array("/export.xlsx"))
-	def xlsx(command: SubmissionAndFeedbackCommand) = {
+	def xlsx(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
 		
