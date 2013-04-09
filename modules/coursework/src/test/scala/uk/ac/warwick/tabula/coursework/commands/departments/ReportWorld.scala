@@ -24,7 +24,9 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	department.name = "Test Department"
 		
 	val moduleOne = new Module("IN101", department)
+	moduleOne.name = "Module One"
 	val moduleTwo = new Module("IN102", department)
+	moduleTwo.name = "Module Two"
 
 	department.modules = List(moduleOne, moduleTwo)
 	
@@ -36,7 +38,7 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	
 	val assignmentFour = addAssignment("1004", "test four", dateTime(2013, 5, 31), 35, 5, moduleTwo)
 	val assignmentFive = addAssignment("1005", "test five", dateTime(2013, 8, 23), 100, 50, moduleTwo)
-	val assignmentSix:Assignment = addAssignment("1006", "test six", dateTime(2013, 7, 1), 73, 3, moduleTwo)
+	val assignmentSix = addAssignment("1006", "test six", dateTime(2013, 7, 1), 73, 3, moduleTwo)
 	
 	
 	createPublishEvent(assignmentOne, 15, studentData(1, 10)) 	// all on time
@@ -108,6 +110,8 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 		assignment.name = name
 		assignment.closeDate = closeDate
 		assignment.collectSubmissions = true
+		assignment.module = module
+
 		for (i <- 1 to numberOfStudents) {
 			generateSubmission(assignment, i, lateModNumber)
 			addFeedback(assignment)
@@ -115,6 +119,8 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 		
 		val userIds = (1 to numberOfStudents).map(idFormat(_)) 
 		assignment.members = makeUserGroup(userIds)
+		module.assignments = module.assignments + assignment
+
 		assignment
 	}
 	
@@ -141,10 +147,11 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 		} else {
 			assignment.closeDate.minusDays(1)
 		}
-		withFakeTime(submissionDate) {		
+		withFakeTime(submissionDate) {
 			val submission = new Submission()
 			submission.assignment = assignment
 			submission.universityId = idFormat(num)
+			submission.submittedDate = submissionDate
 			assignment.submissions.add(submission)
 			
 			val event = AuditEvent(

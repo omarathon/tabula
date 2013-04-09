@@ -21,6 +21,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
 import org.apache.poi.ss.usermodel.Cell
 import java.util.Date
+import collection.immutable.TreeMap
 
 class FeedbackReportCommand (val department:Department) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	
@@ -81,7 +82,7 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 
 	def applyInternal() = {
 		val assignmentSheet = generateAssignmentSheet(department)
-		val moduleSheet = generateModuleSheet(department, workbook)
+		val moduleSheet = generateModuleSheet(department)
 
 		buildAssignmentData()
 
@@ -207,7 +208,7 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 		}
 	}
 	
-	def generateModuleSheet(dept: Department, workbook: XSSFWorkbook) = {		
+	def generateModuleSheet(dept: Department) = {
 		val sheet = workbook.createSheet("Module report for " + safeDeptName)
 		
 		// add header row
@@ -228,15 +229,16 @@ class FeedbackReportCommand (val department:Department) extends Command[XSSFWork
 	}
 
 
-	def populateModuleSheet(sheet: XSSFSheet) {	
+	def populateModuleSheet(sheet: XSSFSheet) {
 		val modules = assignmentData.groupBy(_.assignment.module.code)
-		for (module <- modules) {
+		val sortedModules = TreeMap(modules.toSeq:_*)
+		for (module <- sortedModules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			val moduleCode = module._1
 			val assignmentInfoList= module._2
 
 			addStringCell(assignmentInfoList(0).moduleName, row)
-			addStringCell(moduleCode, row)
+			addStringCell(moduleCode.toUpperCase, row)
 			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
 
 			val expectedSubmissions = assignmentInfoList.map(_.membership).sum
