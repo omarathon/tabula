@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
+
 import org.springframework.stereotype.Controller
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
@@ -10,7 +11,6 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.services.ActivityService
 import uk.ac.warwick.tabula.JavaImports._

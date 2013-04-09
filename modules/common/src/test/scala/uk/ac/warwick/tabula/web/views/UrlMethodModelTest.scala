@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.views
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import org.junit.Before
 import java.util.Properties
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import freemarker.core.Environment
 import freemarker.template.Template
 import java.io.StringReader
@@ -23,15 +23,15 @@ class UrlMethodModelTest extends TestBase with Mockito {
 	}
 	
 	@Test def fn() {
-		model.exec(ArrayList("/module/yes", "/")).toString should be ("/module/yes")
-		model.exec(ArrayList("/module/yes")).toString should be ("/courses/module/yes")
-		model.exec(ArrayList("/module/yes", "/profiles")).toString should be ("/profiles/module/yes")
+		model.exec(JArrayList("/module/yes", "/")).toString should be ("/module/yes")
+		model.exec(JArrayList("/module/yes")).toString should be ("/courses/module/yes")
+		model.exec(JArrayList("/module/yes", "/profiles")).toString should be ("/profiles/module/yes")
 	}
 	
 	@Test def encoding() {
 		val input = "/download/greek \u03a7\u03a8\u03a9.doc"
 		val expected = "/courses/download/greek%20%CE%A7%CE%A8%CE%A9.doc"
-		model.exec(ArrayList(input)).toString should be (expected)
+		model.exec(JArrayList(input)).toString should be (expected)
 	}
 	
 	@Test def tagPageAndContext() {

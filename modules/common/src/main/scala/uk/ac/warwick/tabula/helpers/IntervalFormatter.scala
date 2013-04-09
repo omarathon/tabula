@@ -76,7 +76,7 @@ class IntervalFormatter extends TemplateMethodModelEx {
 	import IntervalFormatter.format
 
 	/** Two-argument method taking a start and end date. */
-	override def exec(list: java.util.List[_]) = {
+	override def exec(list: JList[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(start: DateTime) => format(start)

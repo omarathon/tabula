@@ -53,7 +53,7 @@ class PhoneNumberFormatter extends TemplateMethodModelEx {
 	import PhoneNumberFormatter.format
 
 	/** Single argument method */
-	override def exec(list: java.util.List[_]) = {
+	override def exec(list: JList[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(unformatted: String) => format(unformatted)

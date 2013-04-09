@@ -3,7 +3,6 @@ import scala.collection.JavaConversions._
 
 import org.apache.commons.lang3.StringUtils._
 
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.Group
@@ -20,7 +19,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 	}
   
 	var users: Map[String, User] = Map()
-	var filterUserResult: JList[User] = ArrayList()
+	var filterUserResult: JList[User] = JArrayList()
 	
 	var findUsersEnabled: Boolean = false
 	
@@ -61,7 +60,7 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 
     override def findUsersWithFilter(filterValues: JMap[String, String]) = {
         if (findUsersEnabled) {
-            val list: JList[User] = ArrayList()
+            val list: JList[User] = JArrayList()
             list.addAll(filterUserResult)
             list
         } else {

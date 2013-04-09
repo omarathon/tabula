@@ -8,7 +8,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
@@ -120,7 +119,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	var grantedRoles:JList[MemberGrantedRole] = ArrayList()
+	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
 
 	def asSsoUser = {
 		val u = new User
@@ -322,7 +321,7 @@ trait StudentProperties {
 	var termtimeAddress: Address = null
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
-	var nextOfKins:JList[NextOfKin] = ArrayList()
+	var nextOfKins:JList[NextOfKin] = JArrayList()
 }
 
 trait StaffProperties {

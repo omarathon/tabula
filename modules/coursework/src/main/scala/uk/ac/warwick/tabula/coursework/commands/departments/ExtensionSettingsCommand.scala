@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
@@ -23,7 +23,7 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	var allowExtensionRequests:Boolean = department.allowExtensionRequests
 	var extensionGuidelineSummary:String = department.extensionGuidelineSummary
 	var extensionGuidelineLink:String = department.extensionGuidelineLink
-	var extensionManagers: JList[String] = ArrayList()
+	var extensionManagers: JList[String] = JArrayList()
 	
 	extensionManagers.addAll(department.extensionManagers.includeUsers)
 

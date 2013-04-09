@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 class PublishFeedbackCommandTest extends TestBase {
 	
@@ -48,7 +48,7 @@ class PublishFeedbackCommandTest extends TestBase {
 		val errors = new BindException(command, "command")
 		val feedback = new Feedback()
 		feedback.actualMark = Some(41)
-		assignment.feedbacks = ArrayList( feedback )
+		assignment.feedbacks = JArrayList( feedback )
 	}
 	
 }

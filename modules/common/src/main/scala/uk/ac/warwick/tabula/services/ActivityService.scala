@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.Module
 import org.apache.lucene.search.FieldDoc
+import uk.ac.warwick.tabula.JavaImports._
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
  *  and specifically is only noticing new submission events.
@@ -47,7 +48,7 @@ class ActivityService {
 	// following pages
 	def getNoteworthySubmissions(user: CurrentUser, doc: Int, field: Long, token: Long): PagedActivities = {
 		// slightly ugly implicit cast required, as we need a FieldDoc whose constructor expects a java Object[]
-		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:java.lang.Long))
+		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:JLong))
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
 		
 		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last, events.token, events.total)

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -18,8 +18,8 @@ abstract class ModifyMarkingWorkflowCommand(
 	val department: Department) extends Command[MarkingWorkflow] with Daoisms with SelfValidating {
 
 	var name: String = _
-	var firstMarkers: JList[String] = ArrayList()
-	var secondMarkers: JList[String] = ArrayList()
+	var firstMarkers: JList[String] = JArrayList()
+	var secondMarkers: JList[String] = JArrayList()
 	var markingMethod: MarkingMethod = _
 
 	// Subclasses can provide the "current" markingWorkflow if one applies, for validation.

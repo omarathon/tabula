@@ -24,7 +24,6 @@ import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.HashMap
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
 class CourseworkFiltersTest extends TestBase {
@@ -89,7 +88,7 @@ class CourseworkFiltersTest extends TestBase {
 		)
 		
 	class SampleFilteringCommand(elems: (String, String)*) {
-		var filter: JMap[String, String] = HashMap()
+		var filter: JMap[String, String] = JHashMap()
 		elems foreach { case (key, value) => filter.put(key, value) }
 	}
 	

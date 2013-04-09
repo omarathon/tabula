@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.TemplateModel
 import freemarker.template.SimpleHash
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -16,7 +16,7 @@ class PermissionFunctionTest extends TestBase with Mockito {
 	fn.securityService = securityService
 	
 	@Test def can = withUser("cuscav") {
-		val args: java.util.List[TemplateModel] = ArrayList()
+		val args: JList[TemplateModel] = JArrayList()
 		
 		val dept = Fixtures.department("in")
 		
@@ -30,11 +30,11 @@ class PermissionFunctionTest extends TestBase with Mockito {
 		
 		securityService.can(currentUser, Permissions.Module.Create, dept) returns (true)
 		
-		fn.exec(args).asInstanceOf[java.lang.Boolean] should be (java.lang.Boolean.TRUE)
+		fn.exec(args).asInstanceOf[JBoolean] should be (java.lang.Boolean.TRUE)
 	}
 	
 	@Test def cannot = withUser("cuscav") {
-		val args: java.util.List[TemplateModel] = ArrayList()
+		val args: JList[TemplateModel] = JArrayList()
 		
 		val dept = Fixtures.department("in")
 		
@@ -48,7 +48,7 @@ class PermissionFunctionTest extends TestBase with Mockito {
 		
 		securityService.can(currentUser, Permissions.Module.Create, dept) returns (false)
 		
-		fn.exec(args).asInstanceOf[java.lang.Boolean] should be (java.lang.Boolean.FALSE)
+		fn.exec(args).asInstanceOf[JBoolean] should be (java.lang.Boolean.FALSE)
 	}
 
 }

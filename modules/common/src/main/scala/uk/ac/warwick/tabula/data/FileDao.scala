@@ -127,7 +127,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			criteria.add(Is.lt("dateUploaded", date))
 		}
 		
-		criteria.untypedList.asInstanceOf[java.util.List[String]].toSet[String]
+		criteria.untypedList.asInstanceOf[JList[String]].toSet[String]
 	}
 
 	/**

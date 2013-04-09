@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.Zips
 import uk.ac.warwick.tabula.AppContextTestBase
 import collection.JavaConversions._
@@ -47,7 +46,7 @@ class DownloadSubmissionsCommandTest extends AppContextTestBase with Mockito {
 		
 		val cmd = new DownloadSubmissionsCommand(assignment.module, assignment)
 		
-		cmd.submissions = ArrayList(
+		cmd.submissions = JArrayList(
 			newSubmission(cmd.assignment),
 			newSubmission(cmd.assignment),
 			newSubmission(cmd.assignment)
