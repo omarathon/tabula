@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers
 
 import scala.collection.JavaConverters._
 import java.io.Writer
-import scala.beans.BeanProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller

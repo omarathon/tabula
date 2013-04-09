@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller

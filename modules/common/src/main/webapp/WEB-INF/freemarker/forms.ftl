@@ -73,11 +73,9 @@ Include by default as "form", e.g.
 </div>
 </#macro>
 
-<#macro selector_check_row name value>
-<div class="checkbox">
+<#macro selector_check_row name value><div class="checkbox"><#compress>
 	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
-</div>
-</#macro>
+</#compress></div></#macro>
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import java.util.ArrayList
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import scala.util.matching.Regex
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
@@ -53,9 +52,7 @@ class FeedbackItem {
 }
 
 // Purely for storing in command to display on the model.
-case class ProblemFile(
-	                      path: String,
-	                      file: FileAttachment) {
+case class ProblemFile(var path: String, var file: FileAttachment) {
 	def this() = this(null, null)
 }
 

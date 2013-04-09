@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.beans.BeanProperty
 
 /**
  * Trait marking a Hibernate entity that has a deleted flag.

@@ -19,21 +19,21 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	var meetingDate: LocalDate = DateTime.now.toLocalDate
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
-	
+
 	var dao = Wire.auto[MeetingRecordDao]
 
 	def applyInternal() = {
 		var meeting = new MeetingRecord(creator, relationship)
 		meeting.title = title
 		meeting.description = formattedHtml(description)
-		meeting.meetingDate = meetingDate.toDateTimeAtMidnight().plusHours(12) // arbitrarily record as noon
+		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(12) // arbitrarily record as noon
 		dao.saveOrUpdate(meeting)
 		meeting
 	}
 
 	def validate(errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		
+
 		meetingDate match {
 			case date:LocalDate => {
 				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {

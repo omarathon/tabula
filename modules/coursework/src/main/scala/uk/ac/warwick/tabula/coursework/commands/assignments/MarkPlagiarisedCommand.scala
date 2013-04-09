@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.helpers.ArrayList
-import scala.beans.BeanProperty
 import collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FeedbackDao

@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import javax.validation.Valid
 import org.springframework.format.annotation.DateTimeFormat

@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.validators
-import scala.beans.BeanProperty
 import annotation.target.field
 import org.hibernate.validator.constraints.NotEmpty
 

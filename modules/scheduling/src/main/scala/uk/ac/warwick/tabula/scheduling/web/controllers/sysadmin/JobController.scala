@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.jobs.TestingJob
-import scala.beans.BeanProperty
 
 class JobQuery {
 	var page: Int = 0
@@ -41,7 +40,7 @@ class JobController extends BaseController {
 			"endIndex" -> end)
 	}
 
-	@RequestMapping(value = Array("/create-test"), method = Array(POST))
+	@RequestMapping(value = Array("/create-test"))
 	def test = {
 		val id = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay)).id
 		testStatus(id)

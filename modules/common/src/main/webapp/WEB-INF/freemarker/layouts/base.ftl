@@ -21,16 +21,15 @@
 					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/admin/masquerade" context="/"/>">Change</a>
 				</div>
 			</#if>
-			<!-- Change this to header-medium or header-large as necessary - large is for homepages only -->
+			<#-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="<#if jumbotron?? && jumbotron>header-medium<#else>header-small</#if>" data-type="image">
-			
 				<div id="masthead">
 					<div class="access-info">
-      					<a href="#main-content" accesskey="c" title="Skip to content [c]">Skip to content</a>
-      					<a href="#navigation" accesskey="n" title="Skip to navigation [n]">Skip to navigation</a>
-    				</div>
+						<a href="#main-content" accesskey="c" title="Skip to content [c]">Skip to content</a>
+						<a href="#navigation" accesskey="n" title="Skip to navigation [n]">Skip to navigation</a>
+					</div>
 				
-					<!-- The on-hover class here specifies that the links should only be displayed on hover -->
+					<#-- The on-hover class here specifies that the links should only be displayed on hover -->
 					<div id="warwick-logo-container" class="on-hover">
 						<a id="warwick-logo-link" href="http://www.warwick.ac.uk" title="University of Warwick homepage">
 							<img id="warwick-logo" src="<@url resource="/static/images/logo.png" />" alt="University of Warwick">
@@ -100,43 +99,43 @@
 			</div>
 			
 			<div id="navigation-and-content">
-			
-				<#if !component.nonav>	
-					<div id="navigation" class="horizontal">
-						<div id="primary-navigation-wrapper">
-							<div id="before-primary-navigation"></div>
-				
-							<div id="primary-navigation-container" >
-								<ul id="primary-navigation" >
-									<li class="section rendered-link">
-										<div class="link-content">
-											<div class="title rendered-link-content">
-												<#assign homeUrl><@url page="/" /></#assign>
-												<#if (info.requestedUri != homeUrl)!false>
-													<a href="${homeUrl}">${component.title?default('Tabula')}</a>
-												<#else>
-													<span>${component.title?default('Tabula')}</span>	
-												</#if>
+				<#if !component.nonav>
+					<div id="navigation-wrapper">
+						<div id="navigation" class="horizontal">
+							<div id="primary-navigation-wrapper">
+								<div id="before-primary-navigation"></div>
+					
+								<div id="primary-navigation-container" >
+									<ul id="primary-navigation">
+										<li class="section rendered-link">
+											<div class="link-content">
+												<div class="title rendered-link-content">
+													<#assign homeUrl><@url page="/" /></#assign>
+													<#if (info.requestedUri != homeUrl)!false>
+														<a href="${homeUrl}">${component.title?default('Tabula')}</a>
+													<#else>
+														<span>${component.title?default('Tabula')}</span>
+													</#if>
+												</div>
 											</div>
-										</div>
-									</li>
-									<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
-										<div class="link-content">
-											<div class="title rendered-link-content">
-												<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
+										</li>
+										<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
+											<div class="link-content">
+												<div class="title rendered-link-content">
+													<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
+												</div>
 											</div>
-										</div>
-									</li></#list></#if>
-								</ul>
+										</li></#list></#if>
+									</ul>
+								</div>
+					
+								<div id="after-primary-navigation"></div>
 							</div>
-				
-				
-							<div id="after-primary-navigation"></div>
 						</div>
 					</div>
 				</#if>
 		
-				<div id="content-wrapper">					     
+				<div id="content-wrapper">
 					<div id="main-content">
 						<#--
 						<div id="page-title">
@@ -149,7 +148,7 @@
 						</div>
 						-->
 			
-						<!-- column-1 and column-2 may not stick around as IDs - don't use them in a site design -->
+						<#-- column-1 and column-2 may not stick around as IDs - don't use them in a site design -->
 						<div id="column-1"><div id="column-1-content">
 						
 						<@tiles.insertAttribute name="body" />
@@ -168,7 +167,7 @@
 			<div id="footer">
 				<div class="content">
 					<div id="custom-footer">
-						<!-- Enter any custom footer content here (like contact details et al) -->
+						<#-- Enter any custom footer content here (like contact details et al) -->
 					</div>
 					
 					<div style="clear:both;"></div>

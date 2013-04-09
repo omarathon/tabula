@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import org.hibernate.validator.constraints.Length
 import org.hibernate.validator.constraints.NotEmpty

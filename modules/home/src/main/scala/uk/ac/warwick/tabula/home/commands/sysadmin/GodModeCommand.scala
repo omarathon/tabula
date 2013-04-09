@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.web.Cookie
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import org.hibernate.validator.constraints.NotEmpty
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire

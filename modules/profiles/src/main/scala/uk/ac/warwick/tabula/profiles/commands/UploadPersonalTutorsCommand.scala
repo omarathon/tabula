@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.beans.BeanProperty
-import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire

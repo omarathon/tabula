@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 
 import org.hibernate.annotations.{Type, AccessType}
 import org.joda.time.DateTime

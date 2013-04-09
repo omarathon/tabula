@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.markingworkflows
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.SelfValidating

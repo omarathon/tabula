@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 import java.io._
 import com.google.common.io.Files
-import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime

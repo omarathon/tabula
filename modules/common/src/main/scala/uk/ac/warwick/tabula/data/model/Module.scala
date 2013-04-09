@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import scala.util.matching.Regex
 import org.hibernate.annotations.AccessType
 import javax.persistence._

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.validator.constraints.NotEmpty
 import org.joda.time.DateTime

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.Date
 import java.sql.ResultSet
-import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.springframework.beans.BeanWrapper

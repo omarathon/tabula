@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.validators.ClassValidator
 import uk.ac.warwick.tabula.commands.SelfValidating
 import scala.reflect.ClassTag

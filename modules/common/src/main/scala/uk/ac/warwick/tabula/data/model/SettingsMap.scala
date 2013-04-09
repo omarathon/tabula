@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
 import javax.persistence._
-import scala.beans.BeanProperty
 
 trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 	

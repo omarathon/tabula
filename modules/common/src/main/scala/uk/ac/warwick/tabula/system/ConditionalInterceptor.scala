@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.system
-import scala.beans.BeanProperty
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest

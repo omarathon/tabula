@@ -13,7 +13,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.Member
-import scala.beans.BeanProperty
 import scala.annotation.target.field
 import uk.ac.warwick.userlookup.UserLookupAdapter
 

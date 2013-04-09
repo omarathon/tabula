@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 object Fixtures {
 	
@@ -16,6 +17,13 @@ object Fixtures {
 		val f = new Feedback
 		f.universityId = universityId
 		f
+	}
+	
+	def extension(universityId: String = "0123456", userId: String = "cuspxp") = {
+		val e = new Extension
+		e.universityId = universityId
+		e.userId = userId
+		e
 	}
 	
 	def markerFeedback(parent: Feedback) = {

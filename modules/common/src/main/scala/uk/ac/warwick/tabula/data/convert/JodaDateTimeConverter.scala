@@ -1,5 +1,4 @@
 package uk.ac.warwick.tabula.data.convert
-import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.FileAttachment

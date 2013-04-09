@@ -19,14 +19,14 @@ import uk.ac.warwick.tabula.data.model.Feedback
 
 
 class DownloadFeedbackCommandTest extends AppContextTestBase {
-	
+
 	@Transactional
 	@Test def applyCommand = withUser("custard") {
 		val feedback = session.load(classOf[Feedback], MyFixtures().feedback.id).asInstanceOf[Feedback]
 
 		feedback.assignment.feedbacks.size should be (1)
 		session.isDirty should be (false)
-		
+
 		// check that we can dirty and un-dirty it harmlessly
 		feedback.assignment.fileExtensions = Seq(".doc")
 		session.isDirty should be (true)
@@ -42,17 +42,17 @@ class DownloadFeedbackCommandTest extends AppContextTestBase {
 		session.isDirty should be (false) // BECAUSE THIS IS A READ-OP
 }
 
-	case class MyFixtures {
+	case class MyFixtures() {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
 		val module = Fixtures.module(code="ls101")
 		val assignment = new Assignment
 		val feedback = new Feedback("0123456")
-		
+
 		department.postLoad // force legacy settings
 		module.department = department
 		assignment.module = module
 		assignment.addFeedback(feedback)
-		
+
 		session.save(department)
 		session.save(module)
 		session.save(assignment)
