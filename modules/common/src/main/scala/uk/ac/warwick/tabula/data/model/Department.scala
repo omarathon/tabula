@@ -20,6 +20,7 @@ import org.hibernate.annotations.JoinColumnOrFormula
 import org.hibernate.annotations.JoinFormula
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import org.hibernate.annotations.ForeignKey
+import scala.annotation.tailrec
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
@@ -101,9 +102,23 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	@BeanProperty var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
+	var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
 	
-	def permissionsParents = Seq()
+	/**
+	 * Although a department may have a parent, we don't actually
+	 * want to inherit permissions from it. We can add users explicitly
+	 * to the child department if they need access there.
+	 * 
+	 * This is open to discussion and change.
+	 */
+	def permissionsParents = Nil // Option(parent).toSeq
+	
+	/** The 'top' ancestor of this department, or itself if
+	    it has no parent. */
+	@tailrec
+	final def rootDepartment: Department = 
+		if (parent == null) this
+		else parent.rootDepartment
 
 	override def toString = "Department(" + code + ")"
 

@@ -96,7 +96,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * This includes their home department, and the department running their course.
 	 */
 	def affiliatedDepartments =
-		Set(Option(homeDepartment)).flatten.toSeq
+		Option(homeDepartment).toSeq
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
@@ -105,7 +105,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		val moduleDepts = registeredModules.map(x => x.department)
 
-		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
 	}
 
 	def permissionsParents = touchedDepartments

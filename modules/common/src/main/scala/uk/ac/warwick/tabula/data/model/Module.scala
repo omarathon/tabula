@@ -44,7 +44,7 @@ class Module extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 	
-	def permissionsParents = Seq(Option(department)).flatten
+	def permissionsParents = Option(department).toSeq
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assignments: java.util.List[Assignment] = ArrayList()
