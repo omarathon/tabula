@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
@@ -25,7 +26,7 @@ class AddAssignment extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
 
-	@ModelAttribute("academicYearChoices") def academicYearChoices: java.util.List[AcademicYear] = {
+	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 	}
 

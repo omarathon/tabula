@@ -5,9 +5,7 @@ import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports.JBoolean
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType
@@ -100,7 +98,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY)
-	var attachments: JList[FileAttachment] = ArrayList()
+	var attachments: JList[FileAttachment] = JArrayList()
 	
 	def mostRecentAttachmentUpload = attachments.maxBy {
 		_.dateUploaded
@@ -117,7 +115,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		for(attachment <- attachments){
 			attachment.feedback = null
 		}
-		attachments = ArrayList()
+		attachments = JArrayList()
 	}
 
 	/**

@@ -10,7 +10,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
@@ -119,12 +118,12 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 //	@JoinTable(name="assignment_assessmentgroup",
 //		joinColumns=Array(new JoinColumn(name="assignment_id")),
 //		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-//	var assessmentGroups :JList[UpstreamAssessmentGroup] = ArrayList()
+//	var assessmentGroups :JList[UpstreamAssessmentGroup] = JArrayList()
 //
 //	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	var assessmentGroups: JList[AssessmentGroup] = ArrayList()
+	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 
 	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
@@ -136,13 +135,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
-	var submissions: JList[Submission] = ArrayList()
+	var submissions: JList[Submission] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	var extensions: JList[Extension] = ArrayList()
+	var extensions: JList[Extension] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	var feedbacks: JList[Feedback] = ArrayList()
+	var feedbacks: JList[Feedback] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
@@ -155,7 +154,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@IndexColumn(name = "position")
-	var fields: JList[FormField] = ArrayList()
+	var fields: JList[FormField] = JArrayList()
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
@@ -466,7 +465,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	var grantedRoles:JList[AssignmentGrantedRole] = ArrayList()
+	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
 
 	def toStringProps = Seq(
 		"id" -> id,

@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.{Logging, ArrayList}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire

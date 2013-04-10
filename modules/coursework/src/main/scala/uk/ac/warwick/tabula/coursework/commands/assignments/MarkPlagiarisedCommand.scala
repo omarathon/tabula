@@ -6,7 +6,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.helpers.ArrayList
 import collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FeedbackDao
@@ -28,8 +27,8 @@ class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) ext
 
 	var submissionService = Wire.auto[SubmissionService]
 
-	//var submissions: JList[Submission] = ArrayList()
-    var students: JList[String] = ArrayList()
+	//var submissions: JList[Submission] = JArrayList()
+    var students: JList[String] = JArrayList()
 	var confirm: Boolean = false
 	var markPlagiarised: Boolean = true
 	

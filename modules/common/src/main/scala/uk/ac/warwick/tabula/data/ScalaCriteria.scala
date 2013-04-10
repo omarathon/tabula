@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion._
 import collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * Nice wrapper for a Criteria object. You usually won't create
@@ -24,7 +25,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	def seq: Seq[A] = list.asScala
 
 	/** Returns a typed list of the results.*/
-	def list: java.util.List[A] = c.list().asInstanceOf[java.util.List[A]]
+	def list: JList[A] = c.list().asInstanceOf[JList[A]]
 
 	def scroll() = c.scroll()
 
@@ -32,7 +33,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	 * Return an untyped list of the results, in case you've
 	 * set the projection for the Criteria to return something else.
 	 */
-	def untypedList: java.util.List[_] = c.list()
+	def untypedList: JList[_] = c.list()
 
 	/** Return Some(result), or None if no row matched. */
 	def uniqueResult: Option[A] = Option(c.uniqueResult().asInstanceOf[A])

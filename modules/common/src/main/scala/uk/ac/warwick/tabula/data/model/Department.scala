@@ -7,7 +7,6 @@ import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -30,16 +29,16 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	var name:String = null
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	var modules:JList[Module] = ArrayList()
+	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	var feedbackTemplates:JList[FeedbackTemplate] = ArrayList()
+	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	var markingWorkflows:JList[MarkingWorkflow] = ArrayList()
+	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	var customRoleDefinitions:JList[CustomRoleDefinition] = ArrayList()
+	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
@@ -90,7 +89,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	var grantedRoles:JList[DepartmentGrantedRole] = ArrayList()
+	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
 	def permissionsParents = Seq()
 

@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
-import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, FileAttachment}
@@ -80,7 +79,7 @@ abstract class FormField extends GeneratedId {
 	/**
 	 * Fetch a property out of the property map if it matches the type.
 	 * Careful with types as they are generally the ones that the JSON library
-	 * has decided on, so integers come out as java.lang.Integer, and Int
+	 * has decided on, so integers come out as JInteger, and Int
 	 * won't match.
 	 */
 	protected def getProperty[A : ClassTag](name: String, default: A) =
@@ -198,7 +197,7 @@ class FileField extends FormField {
 	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)
 
 	// List of extensions.
-	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
+	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", JArrayList())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: JList[String])
 	
 	// This is after onBind is called, so any multipart files have been persisted as attachments

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringReader
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 
 class JsonTest extends TestBase {
 	
@@ -19,7 +18,7 @@ class JsonTest extends TestBase {
 		m.writeValueAsString(Map()) should be("{}")
 		
 		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
-		m.writeValueAsString(Map("animals" -> ArrayList("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
+		m.writeValueAsString(Map("animals" -> JArrayList("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
 		
 //		m.writeValueAsString(Map("animals" -> List("cat","dog"))) should be("{\"animals\":[\"cat\",\"dog\"]}")
 	}

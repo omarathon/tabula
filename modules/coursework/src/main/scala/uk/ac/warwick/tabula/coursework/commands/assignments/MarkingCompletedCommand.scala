@@ -4,7 +4,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{Description, SelfValidating, Command}
 import uk.ac.warwick.tabula.data.Daoisms
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
@@ -18,12 +18,12 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 	var stateService = Wire.auto[StateService]
 
-	var students: JList[String] = ArrayList()
-	var markerFeedbacks: JList[MarkerFeedback] = ArrayList()
+	var students: JList[String] = JArrayList()
+	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
 
-	var noMarks: JList[MarkerFeedback] = ArrayList()
-	var noFeedback: JList[MarkerFeedback] = ArrayList()
-	var releasedFeedback: JList[MarkerFeedback] = ArrayList()
+	var noMarks: JList[MarkerFeedback] = JArrayList()
+	var noFeedback: JList[MarkerFeedback] = JArrayList()
+	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
 
 	var confirm: Boolean = false
 

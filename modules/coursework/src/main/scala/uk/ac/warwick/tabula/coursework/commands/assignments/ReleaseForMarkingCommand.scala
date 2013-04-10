@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Command}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService}
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
@@ -22,9 +22,9 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]
 
-	var students: JList[String] = ArrayList()
+	var students: JList[String] = JArrayList()
 	var confirm: Boolean = false
-	var invalidFeedback: JList[Feedback] = ArrayList()
+	var invalidFeedback: JList[Feedback] = JArrayList()
 
 	var feedbacksUpdated = 0
 

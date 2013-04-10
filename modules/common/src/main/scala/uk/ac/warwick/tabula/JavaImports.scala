@@ -40,6 +40,30 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJInteger(b: Option[Int]) = (b map (b => b: JInteger)).orNull
+	
+	/**
+	 * Allows you to create an empty Java ArrayList, useful as an initial
+	 * value for a variable that needs a mutable JList.
+	 */
+	object JArrayList {
+		def apply[A](elements: A*): java.util.ArrayList[A] = {
+			val list = new java.util.ArrayList[A]()
+			if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
+			list
+		}
+	}
+	
+	/**
+	 * Allows you to create an empty Java HashMap, useful as an initial
+	 * value for a variable that needs a mutable JMap.
+	 */
+	object JHashMap {
+		def apply[A, B](elements: (A, B)*): java.util.HashMap[A, B] = {
+			val map = new java.util.HashMap[A, B]()
+			elements foreach { case (key, value) => map.put(key, value) }
+			map
+		}
+	}
 }
 
 object JavaImports extends JavaImports

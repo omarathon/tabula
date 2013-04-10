@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework.web.views
 import uk.ac.warwick.tabula.JavaImports._
 import org.junit.Test
 import org.springframework.web.servlet.support.BindStatus
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.TestBase
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.support.RequestContext

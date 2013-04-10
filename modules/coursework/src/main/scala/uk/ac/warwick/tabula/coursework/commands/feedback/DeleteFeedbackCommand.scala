@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FeedbackDao
@@ -24,7 +24,7 @@ class DeleteFeedbackCommand(val module: Module, val assignment: Assignment) exte
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	var feedbacks: JList[Feedback] = ArrayList()
+	var feedbacks: JList[Feedback] = JArrayList()
 	var confirm: Boolean = false
 
 	def applyInternal() = {

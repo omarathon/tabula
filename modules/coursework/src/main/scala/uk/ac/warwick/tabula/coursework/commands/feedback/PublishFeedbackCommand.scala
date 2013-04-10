@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
@@ -42,8 +42,8 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 	case class MissingUser(universityId: String)
 	case class BadEmail(user: User, exception: Exception = null)
 
-	var missingUsers: JList[MissingUser] = ArrayList()
-	var badEmails: JList[BadEmail] = ArrayList()
+	var missingUsers: JList[MissingUser] = JArrayList()
+	var badEmails: JList[BadEmail] = JArrayList()
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {

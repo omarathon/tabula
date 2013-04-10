@@ -19,7 +19,6 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.File
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.events.EventListener

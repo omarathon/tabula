@@ -9,13 +9,12 @@ import org.apache.poi.hssf.record.NumberRecord
 import org.apache.poi.hssf.record.Record
 import org.apache.poi.hssf.record.RowRecord
 import org.apache.poi.hssf.record.SSTRecord
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 
 class XslSheetHandler extends HSSFListener with Logging {
 
-	val markItems: JList[MarkItem] = ArrayList();
+	val markItems: JList[MarkItem] = JArrayList()
 	var sstrec: SSTRecord = null
 	val formatListener = new FormatTrackingHSSFListener(this)
 

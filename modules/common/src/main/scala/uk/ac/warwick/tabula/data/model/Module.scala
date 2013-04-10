@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
@@ -47,13 +46,13 @@ class Module extends GeneratedId with PermissionsTarget {
 	def permissionsParents = Option(department).toSeq
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	var assignments: java.util.List[Assignment] = ArrayList()
+	var assignments: JList[Assignment] = JArrayList()
 
 	var active: Boolean = _
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
+	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
 
 	override def toString = "Module[" + code + "]"
 }

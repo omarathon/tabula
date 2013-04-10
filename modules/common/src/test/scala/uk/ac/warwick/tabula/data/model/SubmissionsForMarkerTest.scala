@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import forms.MarkerSelectField
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.{AppContextTestBase, RequestInfo}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
@@ -36,7 +35,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 			submissionValue(Assignment.defaultMarkerSelectorName, "cusebr")
 		)
 
-		assignment.submissions = ArrayList(
+		assignment.submissions = JArrayList(
 			newSubmission(assignment, values1),
 			newSubmission(assignment, values2),
 			newSubmission(assignment, values3)

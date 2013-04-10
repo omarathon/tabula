@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.FeedbackDao
@@ -31,7 +31,7 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 	
     var filename: String = _
 
-    var students: JList[String] = ArrayList()
+    var students: JList[String] = JArrayList()
     
     var feedbacks: JList[Feedback] = _
     

@@ -28,6 +28,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.RelationshipType
+import uk.ac.warwick.tabula.JavaImports._
 
 class MemberDaoTest extends AppContextTestBase {
 
@@ -40,7 +41,7 @@ class MemberDaoTest extends AppContextTestBase {
 	@After def tidyUp: Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 		
-		session.createCriteria(classOf[Member]).list().asInstanceOf[java.util.List[Member]].asScala map { session.delete(_) }
+		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
 
 	@Test def crud = transactional { tx =>

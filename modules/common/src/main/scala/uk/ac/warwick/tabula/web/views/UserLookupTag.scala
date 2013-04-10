@@ -26,7 +26,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 	@Autowired var userLookup: UserLookupService = _
 
 	override def execute(env: Environment,
-		params: java.util.Map[_, _],
+		params: JMap[_, _],
 		loopVars: Array[TemplateModel],
 		body: TemplateDirectiveBody) = {
 
