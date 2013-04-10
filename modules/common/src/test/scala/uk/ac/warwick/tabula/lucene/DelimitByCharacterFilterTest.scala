@@ -9,7 +9,6 @@ import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
 import java.io.StringReader
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
-import java.lang.Boolean
 
 class DelimitByCharacterFilterTest extends TestBase {
 	
@@ -19,16 +18,16 @@ class DelimitByCharacterFilterTest extends TestBase {
 		val tokenStream = analyzer.tokenStream("name", new StringReader("sarah o'toole"))
 		val attribute = tokenStream.addAttribute(classOf[CharTermAttribute])
 		
-		tokenStream.incrementToken() should be (Boolean.TRUE)
+		tokenStream.incrementToken() should be (true)
 		term(attribute) should be ("sarah")
 		
-		tokenStream.incrementToken() should be (Boolean.TRUE)
+		tokenStream.incrementToken() should be (true)
 		term(attribute) should be ("o")
 		
-		tokenStream.incrementToken() should be (Boolean.TRUE)
+		tokenStream.incrementToken() should be (true)
 		term(attribute) should be ("toole")
 		
-		tokenStream.incrementToken() should be (Boolean.FALSE)
+		tokenStream.incrementToken() should be (false)
 	}
 	
 	private def term(term: CharTermAttribute) = new String(term.buffer, 0, term.length)

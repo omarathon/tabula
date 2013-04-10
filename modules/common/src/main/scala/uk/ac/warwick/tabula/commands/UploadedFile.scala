@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
 
@@ -33,10 +32,10 @@ class UploadedFile extends BindListener {
 	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 		
 	// files bound from an upload request, prior to being persisted
-	var upload: JList[MultipartFile] = ArrayList()
+	var upload: JList[MultipartFile] = JArrayList()
 
 	// files that have been persisted - can be represented in forms by ID
-	var attached: JList[FileAttachment] = ArrayList() //LazyLists.simpleFactory()
+	var attached: JList[FileAttachment] = JArrayList() //LazyLists.simpleFactory()
 
 	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
 	def attachedFileNames: Seq[String] = attached.map(file => file.getName)
@@ -50,14 +49,14 @@ class UploadedFile extends BindListener {
 		else if (hasUploads) permittedUploads.size
 		else 0
 
-	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse ArrayList()
+	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse JArrayList()
 	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
 	def hasAttachments = attached != null && !attached.isEmpty()
 	def hasUploads = !permittedUploads.isEmpty
 	
 	def permittedUploads: JList[MultipartFile] = {
-		Option(upload).getOrElse(ArrayList()).filterNot { s => s.isEmpty || (disallowedFilenames.split(",").toList contains s.getOriginalFilename()) || disallowedPrefixes.split(",").toList.exists(s.getOriginalFilename().startsWith)}
+		Option(upload).getOrElse(JArrayList()).filterNot { s => s.isEmpty || (disallowedFilenames.split(",").toList contains s.getOriginalFilename()) || disallowedPrefixes.split(",").toList.exists(s.getOriginalFilename().startsWith)}
 	}
 		
 	def isUploaded = hasUploads

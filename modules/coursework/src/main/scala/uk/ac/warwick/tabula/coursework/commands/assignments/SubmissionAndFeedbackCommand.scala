@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.HashMap
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService, AuditEventIndexService}
 import uk.ac.warwick.userlookup.User
@@ -36,7 +36,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
-	var filterParameters: JMap[String, String] = HashMap()
+	var filterParameters: JMap[String, String] = JHashMap()
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded

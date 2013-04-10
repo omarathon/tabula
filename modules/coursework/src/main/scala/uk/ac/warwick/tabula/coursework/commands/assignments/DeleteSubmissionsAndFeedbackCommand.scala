@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
@@ -34,7 +34,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
 	
-    var students: JList[String] = ArrayList()
+    var students: JList[String] = JArrayList()
     var submissionOrFeedback: String = ""
 	var confirm: Boolean = false
 
@@ -87,7 +87,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	
 	
 	def getStudentsAsUsers(): JList[User] = {
-		val studentsAsUsers: JList[User] = ArrayList()
+		val studentsAsUsers: JList[User] = JArrayList()
 		for (student <- students)  {
 			val user: User = userLookup.getUserByWarwickUniId(student)
 			studentsAsUsers.add(user)

@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Command
 import data.model._
 import forms.AssessmentGroup
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -61,8 +60,8 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	/** linked SITS assignment. Optional. */
 	var upstreamAssignment: UpstreamAssignment = _
 
-	var assessmentGroups: JList[AssessmentGroup] = ArrayList()
-	var assessmentGroupItems: JList[AssessmentGroupItem] = ArrayList()
+	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+	var assessmentGroupItems: JList[AssessmentGroupItem] = JArrayList()
 
 	/**
 	 * If copying from existing Assignment, this must be a DEEP COPY
@@ -77,10 +76,10 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	var members: UserGroup = new UserGroup
 
 	// items added here are added to members.includeUsers.
-	var includeUsers: JList[String] = ArrayList()
+	var includeUsers: JList[String] = JArrayList()
 
 	// items added here are either removed from members.includeUsers or added to members.excludeUsers.
-	var excludeUsers: JList[String] = ArrayList()
+	var excludeUsers: JList[String] = JArrayList()
 
 	// bind property for the big free-for-all textarea of usercodes/uniIDs to add.
 	// These are first resolved to userIds and then added to includeUsers

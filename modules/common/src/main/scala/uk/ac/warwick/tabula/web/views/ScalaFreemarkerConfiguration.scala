@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.web.views
+
 import freemarker.ext.beans.BeansWrapper
 import freemarker.template.TemplateDateModel
 import freemarker.template.Configuration
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import collection.mutable
 import org.springframework.web.servlet.tags.form.FormTag
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * Adapted from http://code.google.com/p/sweetscala
@@ -38,7 +40,7 @@ class ScalaFreemarkerConfiguration extends Configuration with ServletContextAwar
 	setClassForTemplateLoading(getClass(), "/")
 
 	@Required
-	def setSharedVariables(vars: java.util.Map[String, Any]) {
+	def setSharedVariables(vars: JMap[String, Any]) {
 		this.setSharedVariable("commandVarName", FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME)
 		for ((key, value) <- vars) this.setSharedVariable(key, value)
 	}

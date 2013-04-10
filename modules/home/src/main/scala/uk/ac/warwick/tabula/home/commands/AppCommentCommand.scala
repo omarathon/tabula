@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.home.commands
 
-import java.lang.Boolean
 import java.util.concurrent.Future
-
 
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.validation.Errors
@@ -11,6 +9,7 @@ import org.springframework.validation.ValidationUtils
 import freemarker.template.Configuration
 import freemarker.template.Template
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
@@ -19,7 +18,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.mail.WarwickMailSender
 
-class AppCommentCommand(user: CurrentUser) extends Command[Future[Boolean]] with FreemarkerRendering with UnicodeEmails with SelfValidating with Public {
+class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] with FreemarkerRendering with UnicodeEmails with SelfValidating with Public {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
 	var adminMailAddress = Wire.property("${mail.admin.to}")

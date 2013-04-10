@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.TemplateModel
 import freemarker.template.SimpleHash
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -51,7 +51,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val ids: java.util.List[String] = ArrayList()
+		val ids: JList[String] = JArrayList()
 		ids.add("cuscav")
 		ids.add("cusebr")
 		

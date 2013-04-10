@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import org.joda.time.{DateTime, Interval}
 import freemarker.template.TemplateModel
 import freemarker.template.SimpleHash
+import uk.ac.warwick.tabula.JavaImports._
 
 class IntervalFormatterTest extends TestBase {
 	import IntervalFormatter.format
@@ -42,7 +43,7 @@ class IntervalFormatterTest extends TestBase {
 	@Test def freemarker {
 		val formatter = new IntervalFormatter
 		
-		val args: java.util.List[TemplateModel] = ArrayList()
+		val args: JList[TemplateModel] = JArrayList()
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
 		val model = new SimpleHash

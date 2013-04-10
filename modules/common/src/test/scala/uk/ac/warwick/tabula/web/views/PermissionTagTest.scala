@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.TemplateModel
 import freemarker.template.SimpleHash
 import uk.ac.warwick.tabula.permissions.Permissions

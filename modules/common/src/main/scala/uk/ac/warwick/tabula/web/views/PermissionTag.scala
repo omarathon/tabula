@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.web.views
+
 import org.springframework.beans.factory.annotation.Autowired
 import freemarker.core.Environment
 import freemarker.template.utility.DeepUnwrap
@@ -11,6 +12,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * Freemarker directive to show the contents of the tag
@@ -20,10 +22,10 @@ class PermissionTag extends TemplateDirectiveModel with Logging {
 	@Autowired var securityService: SecurityService = _
 
 	override def execute(env: Environment,
-		_params: java.util.Map[_, _],
+		_params: JMap[_, _],
 		loopVars: Array[TemplateModel],
 		body: TemplateDirectiveBody) = {
-		val params = _params.asInstanceOf[java.util.Map[String, TemplateModel]]
+		val params = _params.asInstanceOf[JMap[String, TemplateModel]]
 
 		val request = RequestInfo.fromThread.get
 		val currentUser = request.user

@@ -123,7 +123,7 @@ class SavedSubmissionValue extends GeneratedId {
 }
 
 object SavedSubmissionValue {
-	def withAttachments(submission: Submission, name: String, attachments: java.util.Set[FileAttachment]) = {
+	def withAttachments(submission: Submission, name: String, attachments: JSet[FileAttachment]) = {
 		val value = new SavedSubmissionValue()
 		value.submission = submission
 		value.name = name

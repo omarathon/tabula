@@ -6,7 +6,6 @@ import org.joda.time.DateTime
 
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId {
@@ -35,7 +34,7 @@ class MarkerFeedback extends GeneratedId {
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
 	@Fetch(FetchMode.JOIN)
-	var attachments: JList[FileAttachment] = ArrayList()
+	var attachments: JList[FileAttachment] = JArrayList()
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

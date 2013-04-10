@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField, WordCountField }
 import org.springframework.validation.Errors
@@ -65,7 +64,7 @@ trait SharedAssignmentProperties {
 
 	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
 
-	var fileAttachmentTypes: JList[String] = ArrayList()
+	var fileAttachmentTypes: JList[String] = JArrayList()
 
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added

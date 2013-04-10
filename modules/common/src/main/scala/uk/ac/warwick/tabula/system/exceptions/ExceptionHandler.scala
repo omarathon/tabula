@@ -19,6 +19,7 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
+import uk.ac.warwick.tabula.JavaImports._
 
 case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None)
 
@@ -35,7 +36,7 @@ trait ExceptionHandler {
 	def exception(context: ExceptionContext)
 }
 
-class CompositeExceptionHandler(handlers: java.util.List[ExceptionHandler]) extends ExceptionHandler {
+class CompositeExceptionHandler(handlers: JList[ExceptionHandler]) extends ExceptionHandler {
 	private val _handlers = handlers.toList
 	override def exception(context: ExceptionContext) =
 		for (handler <- _handlers) handler.exception(context)
