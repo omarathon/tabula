@@ -73,12 +73,11 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	var lastUpdatedDate = DateTime.now
 
 	def fullName: Option[String] = {
-		List(Option(firstName), Option(lastName)).flatten match {
+		(Option(firstName) ++ Option(lastName)).toList match {
 			case Nil => None
 			case names => Some(names.mkString(" "))
 		}
 	}
-	def getFullName = fullName // need this for a def, as reference to fullName within Spring tag requires a getter
 
 	def officialName = title + " " + fullFirstName + " " + lastName
 	def description = {
@@ -95,8 +94,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments =
-		Set(Option(homeDepartment)).flatten.toSeq
+	def affiliatedDepartments = Option(homeDepartment).toSeq
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
@@ -170,6 +168,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		this.universityId = id
 	}
 
+	// FIXME this belongs as a Freemarker macro or helper
 	def statusString: String = {
 		var statusString = ""
 		if (studyDetails != null && studyDetails.sprStatus!= null)
@@ -203,13 +202,12 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = {
-		val affDepts = Set(Option(homeDepartment),
-				Option(studyDetails.studyDepartment),
-				Option(studyDetails.route).map(x => x.department)
-		)
-
-		affDepts.flatten.toSeq
+	override def affiliatedDepartments = { 
+		(
+			Option(homeDepartment) ++ 
+			Option(studyDetails.studyDepartment) ++ 
+			Option(studyDetails.route).map(_.department)
+		).toSeq.distinct
 	}
 
 	override def personalTutor =

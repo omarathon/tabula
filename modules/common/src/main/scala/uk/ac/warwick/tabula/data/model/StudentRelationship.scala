@@ -56,20 +56,17 @@ class StudentRelationship extends GeneratedId {
 		case false => None
 	}
 	
-	def agentParsed = agentMember match {
-		case None => agent
-		case Some(m) => m
-	}
+	/**
+	 * If the agent matches a University ID, the Member is returned.
+	 * Otherwise the agent string is returned.
+	 * 
+	 * TODO wildcard return types are bad practice
+	 */
+	def agentParsed: Any = agentMember.getOrElse(agent)
 	
-	def agentName = agentMember match {
-		case None => agent
-		case Some(m) => m.fullName.getOrElse("[Unknown]")
-	}
+	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
 	
-	def agentLastName = agentMember match {
-		case None => agent // can't reliably resolve further for external names
-		case Some(m) => m.lastName
-	}
+	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 	
 	def studentMember = profileService.getStudentBySprCode(targetSprCode)	
 	def studentId = SprCode.getUniversityId(targetSprCode)

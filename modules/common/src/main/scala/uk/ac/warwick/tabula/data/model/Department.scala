@@ -41,32 +41,27 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = ArrayList()
 
-	def isCollectFeedbackRatings = collectFeedbackRatings
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
 
 	// settings for extension requests
-	def isAllowExtensionRequests = allowExtensionRequests
 	def allowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse(false)
 	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
 
-	def getExtensionGuidelineSummary = extensionGuidelineSummary
 	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
 	def extensionGuidelineSummary_= (summary: String) = settings += (Settings.ExtensionGuidelineSummary -> summary)
 
-	def getExtensionGuidelineLink = extensionGuidelineLink
 	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink).orNull
 	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
 
-	def isShowStudentName = showStudentName
 	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
 	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
 
-	def isPlagiarismDetectionEnabled = plagiarismDetectionEnabled
 	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
 
-	def formattedGuidelineSummary:String = Option(getExtensionGuidelineSummary) map { raw =>
+	// FIXME belongs in Freemarker
+	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
 		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
 		(NodeSeq fromSeq nodes).toString()
@@ -83,7 +78,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def addOwner(owner:String) = owners.addUser(owner)
 	def removeOwner(owner:String) = owners.removeUser(owner)
 
-	def canRequestExtension = isAllowExtensionRequests
+	def canRequestExtension = allowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)

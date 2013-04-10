@@ -31,7 +31,6 @@ abstract class AbstractBasicUserType[A <: Object: ClassTag, B: ClassTag] extends
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 
-	@SuppressWarnings(Array("deprecation"))
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
 		basicType.nullSafeGet(resultSet, names(0)) match {
 			case s: Any if s == nullValue => nullObject
@@ -40,7 +39,6 @@ abstract class AbstractBasicUserType[A <: Object: ClassTag, B: ClassTag] extends
 		}
 	}
 
-	@SuppressWarnings(Array("deprecation"))
 	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) =
 		basicType.nullSafeSet(stmt, toValue(value), index)
 
