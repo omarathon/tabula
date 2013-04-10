@@ -94,7 +94,9 @@ class RoleServiceTest extends TestBase with Mockito {
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 	}
 	
-	/** Test that permissions checking goes up from a department to its parent if it has one */
+	/** Test that permissions checking DOESN'T go up from a department to its parent if it has one.
+	 *  This is the current behaviour though subject to change.
+	 */
 	@Test def parentDepartments = withUser("cuscav", "0672089") {
 
 		val in = Fixtures.department("in")
@@ -111,7 +113,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
 
-		service.getRolesFor(currentUser, insub1).toList should equal (List(DepartmentalAdministrator(in)))
+		service.getRolesFor(currentUser, insub1).toList should equal (List())
 
 	}
 
