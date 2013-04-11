@@ -48,7 +48,7 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 		
 		val assignmentSheet = report.generateAssignmentSheet(department)
 		report.populateAssignmentSheet(assignmentSheet)
-		
+
 		val row1 = assignmentSheet.getRow(1)
 		val row1Iterator = row1.cellIterator()
 		row1Iterator.next().getStringCellValue should be ("test one")
@@ -113,7 +113,7 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 		row4Iterator.next().getNumericCellValue should be (28)
 		row4Iterator.next().getNumericCellValue should be (0.8)
 
-		val row5 = assignmentSheet.getRow(5)
+		val row5 = assignmentSheet.getRow(6)
 		val row5Iterator = row5.cellIterator()
 		row5Iterator.next().getStringCellValue should be ("test five")
 		row5Iterator.next().getStringCellValue should be ("IN102")
@@ -129,7 +129,7 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 		row5Iterator.next().getNumericCellValue should be (98)
 		row5Iterator.next().getNumericCellValue should be (0.98)
 
-		val row6 = assignmentSheet.getRow(6)
+		val row6 = assignmentSheet.getRow(5)
 		val row6Iterator = row6.cellIterator()
 		row6Iterator.next().getStringCellValue should be ("test six")
 		row6Iterator.next().getStringCellValue should be ("IN102")

@@ -101,19 +101,25 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 			val report = new FeedbackReport(department, startDate, endDate)
 
+			updateStatus("Generating base worksheets")
 			val assignmentSheet = report.generateAssignmentSheet(department)
 			val moduleSheet = report.generateModuleSheet(department)
+			updateProgress(5)
 
+			updateStatus("Building assignment data")
 			report.buildAssignmentData()
+			updateProgress(60)
 
+			updateStatus("Populating worksheets")
 			report.populateAssignmentSheet(assignmentSheet)
+			updateProgress(70)
 			report.populateModuleSheet(moduleSheet)
+			updateProgress(80)
 
+			updateStatus("Formatting worksheets")
 			report.formatWorksheet(assignmentSheet, report.assignmentSheetSize)
 			report.formatWorksheet(moduleSheet, report.moduleSheetSize)
-
-			updateStatus("Generated a report.")
-			job.succeeded = true
+			updateProgress(85)
 
 			// Adapter stuff to go from XSSF to the writer without having to save the spreadsheet to disk
 			val out = new ByteArrayOutputStream()
@@ -121,6 +127,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			out.close()
 			val in = new ByteArrayResource(out.toByteArray)
 
+			updateStatus("Sending emails")
 			if (sendEmails) {
 				debug("Sending an email to " + job.user.email)
 				val mime = mailer.createMimeMessage()
@@ -134,6 +141,10 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 				mailer.send(mime)
 			}
+
+			updateProgress(100)
+			updateStatus("Generated report and sent to user")
+			job.succeeded = true
 		}
 	}
 

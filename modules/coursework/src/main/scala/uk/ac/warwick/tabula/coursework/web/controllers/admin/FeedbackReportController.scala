@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.CurrentUser
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, PathVariable}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
 import scala.Array
 import org.springframework.validation.Errors
@@ -13,15 +13,20 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
 import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.coursework.web.Routes
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.jobs.JobService
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
+
+	@Autowired var jobService: JobService = _
 	
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
 		new FeedbackReportCommand(dept, user)
 
-	@RequestMapping(method=Array(HEAD, GET))
+	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
 	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
 		val dateFormat = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
 		val model = Mav("admin/assignments/feedbackreport/report_range",
@@ -32,30 +37,19 @@ class FeedbackReportController extends CourseworkController {
 		model
 	}
 
-	//TODO-RITCHIE Take this out before merging back to develop
-	@RequestMapping(method = Array(POST), params = Array("test"))
-	def generateTestReport(cmd: FeedbackReportCommand) = {
-		val report = new FeedbackReport(cmd.department, cmd.startDate, cmd.endDate)
 
-		val assignmentSheet = report.generateAssignmentSheet(cmd.department)
-		val moduleSheet = report.generateModuleSheet(cmd.department)
-
-		report.buildAssignmentData()
-
-		report.populateAssignmentSheet(assignmentSheet)
-		report.formatWorksheet(assignmentSheet, 11)
-		report.populateModuleSheet(moduleSheet)
-
-		report.formatWorksheet(assignmentSheet, 11)
-		report.formatWorksheet(moduleSheet, 11)
-
-		new ExcelView(cmd.department.getName + " feedback report.xlsx", report.workbook)
-	}
-
-	@RequestMapping(method = Array(POST), params = Array("!test"))
+	@RequestMapping(method = Array(POST), params = Array("!jobId"))
 	def generateReport(cmd: FeedbackReportCommand) = {
 		val jobId = cmd.apply().id
-		Mav("admin/assignments/feedbackreport/progress")
+		Redirect(Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId)
 	}
+
+	@RequestMapping(params = Array("jobId"))
+	def checkProgress(@RequestParam jobId: String) = {
+		val job = jobService.getInstance(jobId)
+		val mav = Mav("admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		mav
+	}
+
 
 }
