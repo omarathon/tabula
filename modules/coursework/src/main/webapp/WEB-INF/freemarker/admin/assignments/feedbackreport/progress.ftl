@@ -6,9 +6,11 @@
 
 	<#assign jobId=job.id/>
 
-	<h1>Job status</h1>
+	<h1>Feedback report status</h1>
 	
-	<p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
+	<p>This page will update itself automatically.</p>
+
+    <p>You'll be sent an email containing the report when it completes so you don't have to keep this page open.</p>
 
 	<!-- <p>Job ID ${jobId}</p> -->
 	
