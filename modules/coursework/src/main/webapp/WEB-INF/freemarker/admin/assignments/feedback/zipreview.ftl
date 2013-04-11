@@ -105,11 +105,11 @@
 			</@spring.bind>
 			<@f.errors path="uniNumber" cssClass="error" />
 			<#-- If there is nothing to upload hide these errors -->
-			<#if item.isModified>
+			<#if item.modified>
 				<#if item.submissionExists>
 					<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
 				</#if>
-				<#if item.isPublished>
+				<#if item.published>
 					<span class="warning">Feedback for this student has already been published. They will be notified that their feedback has changed.</span>
 				</#if>
 			</#if>

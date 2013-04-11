@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import javax.validation.constraints.{ Max, Min }
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import org.hibernate.validator.constraints.Length
 import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField, WordCountField }
 import org.springframework.validation.Errors
@@ -33,39 +32,39 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
 trait SharedAssignmentProperties {
 
 
-	@BeanProperty var openEnded: JBoolean = false
-	@BeanProperty var collectMarks: JBoolean = false
-	@BeanProperty var collectSubmissions: JBoolean = true
-	@BeanProperty var restrictSubmissions: JBoolean = false
-	@BeanProperty var allowLateSubmissions: JBoolean = true
-	@BeanProperty var allowResubmission: JBoolean = false
-	@BeanProperty var displayPlagiarismNotice: JBoolean = false
-	@BeanProperty var allowExtensions: JBoolean = false
-	@BeanProperty var allowExtensionRequests: JBoolean = false
+	var openEnded: JBoolean = false
+	var collectMarks: JBoolean = false
+	var collectSubmissions: JBoolean = true
+	var restrictSubmissions: JBoolean = false
+	var allowLateSubmissions: JBoolean = true
+	var allowResubmission: JBoolean = false
+	var displayPlagiarismNotice: JBoolean = false
+	var allowExtensions: JBoolean = false
+	var allowExtensionRequests: JBoolean = false
 	
 	@Min(0)
-	@BeanProperty var wordCountMin: JInteger = _
+	var wordCountMin: JInteger = _
 	@Max(Assignment.MaximumWordCount)
-	@BeanProperty var wordCountMax: JInteger = _
+	var wordCountMax: JInteger = _
 	@Length(max = 600)
-	@BeanProperty var wordCountConventions: String = "Exclude any bibliography or appendices."
+	var wordCountConventions: String = "Exclude any bibliography or appendices."
 	
 	// linked feedback template (optional)
-	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
+	var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
 
-	@BeanProperty var markingWorkflow: MarkingWorkflow = _
+	var markingWorkflow: MarkingWorkflow = _
 
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
-	@BeanProperty var fileAttachmentLimit: Int = 1
+	var fileAttachmentLimit: Int = 1
 
-	@BeanProperty val maxFileAttachments: Int = 10
+	val maxFileAttachments: Int = 10
 
 	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
 
-	@BeanProperty var fileAttachmentTypes: JList[String] = ArrayList()
+	var fileAttachmentTypes: JList[String] = JArrayList()
 
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added
@@ -73,7 +72,7 @@ trait SharedAssignmentProperties {
 	 * a full blown field editor.
 	 */
 	@Length(max = 2000)
-	@BeanProperty var comment: String = _
+	var comment: String = _
 	
 	def validateShared(errors: Errors) {
 		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){

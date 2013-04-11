@@ -154,7 +154,7 @@ object AssignmentImporter {
 	class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			val ag = new UpstreamAssessmentGroup()
 			ag.moduleCode = rs.getString("module_code")
 			ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
@@ -167,7 +167,7 @@ object AssignmentImporter {
 	class AllAssessmentGroupMembers(ds: DataSource) extends MappingSqlQueryWithParameters[String](ds, GetAllAssessmentGroupMembers) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			SprCode.getUniversityId(rs.getString("spr_code"))
 		}
 	}
@@ -178,7 +178,7 @@ object AssignmentImporter {
 		this.declareParameter(new SqlParameter("mav_occurrence", Types.VARCHAR))
 		this.declareParameter(new SqlParameter("assessment_group", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			SprCode.getUniversityId(rs.getString("spr_code"))
 		}
 	}

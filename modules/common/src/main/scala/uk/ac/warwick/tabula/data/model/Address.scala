@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.beans.BeanProperty
 import org.springframework.util.StringUtils
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -24,15 +23,15 @@ object AddressType {
 
 @Entity
 class Address extends GeneratedId with ToString {
-	@BeanProperty var line1: String = _
-	@BeanProperty var line2: String = _
-	@BeanProperty var line3: String = _
-	@BeanProperty var line4: String = _
-	@BeanProperty var line5: String = _
-	@BeanProperty var postcode: String = _
-	@BeanProperty var telephone: String = _
+	var line1: String = _
+	var line2: String = _
+	var line3: String = _
+	var line4: String = _
+	var line5: String = _
+	var postcode: String = _
+	var telephone: String = _
 	
-	@transient @BeanProperty var addressType: AddressType = null
+	@transient var addressType: AddressType = null
 	
 	def isEmpty = {
 		!(StringUtils.hasText(line1) || StringUtils.hasText(line2) || StringUtils.hasText(line3) ||

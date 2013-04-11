@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
 
-import scala.beans.BeanProperty
 
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
@@ -27,9 +26,9 @@ class ImportSingleSitsStatusCommand(resultSet: ResultSet) extends Command[SitsSt
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 
 	// A couple of intermediate properties that will be transformed later
-	@BeanProperty var code: String = _
-	@BeanProperty var shortName: String = _
-	@BeanProperty var fullName: String = _
+	var code: String = _
+	var shortName: String = _
+	var fullName: String = _
 	
 	this.code = resultSet.getString("sta_code")
 	this.shortName = resultSet.getString("sta_snam")

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.events
 import uk.ac.warwick.tabula.commands.Describable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire

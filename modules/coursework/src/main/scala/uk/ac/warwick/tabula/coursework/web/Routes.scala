@@ -56,7 +56,8 @@ object Routes {
 			}
 			
 			object submissionsandfeedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/list"				
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/list"
+				def table(assignment: Assignment) = assignmentroot(assignment) + "/table"
 			}
 
 			object turnitin {

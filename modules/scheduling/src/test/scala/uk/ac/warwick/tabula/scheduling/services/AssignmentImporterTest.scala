@@ -11,7 +11,7 @@ import javax.annotation.Resource
 import javax.sql.DataSource
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 
@@ -24,7 +24,7 @@ class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 		// question marks.
 		val paramMap = Map(
 				"module_code" -> "md101",
-				"academic_year_code" -> ArrayList("10/11","11/12"),
+				"academic_year_code" -> JArrayList("10/11","11/12"),
 				"mav_occurrence" -> "A",
 				"assessment_group" -> "A"
 		)

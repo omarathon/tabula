@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import javax.persistence._
@@ -29,15 +28,15 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")
-	@BeanProperty var users: UserGroup = new UserGroup
+	var users: UserGroup = new UserGroup
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionUserType")
-	@BeanProperty var permission: Permission = _
+	var permission: Permission = _
 	
 	/*
 	 * TODO Deny not currently supported by SecurityService because the value isn't passed through!
 	 */
-	@BeanProperty var overrideType: OverrideType = _
+	var overrideType: OverrideType = _
 	
 	var scope: A
 	
@@ -88,7 +87,7 @@ object GrantedPermission {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
-	@BeanProperty var scope: Department = _
+	var scope: Department = _
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedPermission extends GrantedPermission[Module] {
 	def this(module: Module, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
@@ -101,7 +100,7 @@ object GrantedPermission {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
-	@BeanProperty var scope: Module = _
+	var scope: Module = _
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedPermission extends GrantedPermission[Member] {
 	def this(member: Member, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
@@ -114,7 +113,7 @@ object GrantedPermission {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
-	@BeanProperty var scope: Member = _
+	var scope: Member = _
 }
 @Entity @DiscriminatorValue("Assignment") class AssignmentGrantedPermission extends GrantedPermission[Assignment] {
 	def this(assignment: Assignment, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
@@ -127,5 +126,5 @@ object GrantedPermission {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
-	@BeanProperty var scope: Assignment = _
+	var scope: Assignment = _
 }

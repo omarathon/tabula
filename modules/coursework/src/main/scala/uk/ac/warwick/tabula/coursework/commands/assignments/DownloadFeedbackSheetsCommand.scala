@@ -23,7 +23,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 
-	@BeanProperty var members: Seq[User] = _
+	var members: Seq[User] = _
 
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

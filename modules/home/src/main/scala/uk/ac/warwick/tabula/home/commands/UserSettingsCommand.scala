@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.home.commands
 
-import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -11,7 +10,6 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserSettingsService
-import scala.beans.BeanProperty
 
 class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Command[Unit] with SelfValidating  {
 
@@ -19,7 +17,7 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	
 	var service = Wire.auto[UserSettingsService]
 	
-	@BeanProperty var alertsSubmission = settings.alertsSubmission
+	var alertsSubmission = settings.alertsSubmission
 		
 	override def applyInternal() {
 		transactional() {

@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import java.util.HashSet
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 
 import org.hibernate.annotations.{AccessType, Type}
 import org.joda.time.DateTime
@@ -35,20 +34,20 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
 	@JoinColumn(name = "assignment_id")
-	@BeanProperty var assignment: Assignment = _
-	
+	var assignment: Assignment = _
+
 	def permissionsParents = Seq(Option(assignment)).flatten
 
-	@BeanProperty var submitted: Boolean = false
+	var submitted: Boolean = false
 
 	@Column(name = "submitted_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var submittedDate: DateTime = _
+	var submittedDate: DateTime = _
 
 	@NotNull
-	@BeanProperty var userId: String = _
+	var userId: String = _
 
-	@BeanProperty var suspectPlagiarised: JBoolean = false
+	var suspectPlagiarised: JBoolean = false
 
 	/**
 	 * It isn't essential to record University ID as their user ID
@@ -59,14 +58,14 @@ class Submission extends GeneratedId with PermissionsTarget {
 	 * it entirely.
 	 */
 	@NotNull
-	@BeanProperty var universityId: String = _
-	
+	var universityId: String = _
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
-	@BeanProperty var state : MarkingState = _
+	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
-	@BeanProperty var values: JSet[SavedSubmissionValue] = new HashSet
-	
+	var values: JSet[SavedSubmissionValue] = new HashSet
+
 	def getValue(field: FormField): Option[SavedSubmissionValue] = {
 		values.find( _.name == field.name )
 	}
@@ -75,12 +74,12 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(userLookup.getUserByUserId(_))
 
-	def valuesByFieldName = (values map { v => (v.getName, v.getValue) }).toMap
+	def valuesByFieldName = (values map { v => (v.name, v.value) }).toMap
 
 	def valuesWithAttachments = values.filter(_.hasAttachments)
 
 	def allAttachments = valuesWithAttachments.toSeq flatMap { _.attachments }
-	
+
 	def hasOriginalityReport: JBoolean = allAttachments.exists( _.originalityReport != null )
 
 	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
@@ -89,13 +88,13 @@ class Submission extends GeneratedId with PermissionsTarget {
 	def zipFileName(attachment: FileAttachment) = {
 		assignment.module.code + " - " + universityId + " - " + attachment.name
 	}
-	
-	def zipFilename(attachment: FileAttachment, name: String) = { 
+
+	def zipFilename(attachment: FileAttachment, name: String) = {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def isReleasedForMarking: JBoolean = assignment.isReleasedForMarking(this)
-	def isReleasedToSecondMarker: JBoolean = assignment.isReleasedToSecondMarker(this)
+	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
+	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
 }
 
 /**
@@ -107,24 +106,24 @@ class SavedSubmissionValue extends GeneratedId {
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "submission_id")
-	@BeanProperty var submission: Submission = _
+	var submission: Submission = _
 
 	// matches with assignment field name
-	@BeanProperty var name: String = _
+	var name: String = _
 
 	/**
 	 * Optional, only for file fields
 	 */
 	@OneToMany(mappedBy = "submissionValue", fetch = LAZY)
-	@BeanProperty var attachments: JSet[FileAttachment] = _
+	var attachments: JSet[FileAttachment] = _
 
 	def hasAttachments = attachments != null && !attachments.isEmpty
 
-	@BeanProperty var value: String = _
+	var value: String = _
 }
 
 object SavedSubmissionValue {
-	def withAttachments(submission: Submission, name: String, attachments: java.util.Set[FileAttachment]) = {
+	def withAttachments(submission: Submission, name: String, attachments: JSet[FileAttachment]) = {
 		val value = new SavedSubmissionValue()
 		value.submission = submission
 		value.name = name

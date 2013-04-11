@@ -3,11 +3,10 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentService
@@ -25,9 +24,9 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	var zipService = Wire.auto[ZipService]
 	var submissionService = Wire.auto[SubmissionService]
 
-	@BeanProperty var filename: String = _
-	@BeanProperty var submissions: JList[Submission] = ArrayList()
-	@BeanProperty var students: JList[String] = ArrayList()
+	var filename: String = _
+	var submissions: JList[Submission] = JArrayList()
+	var students: JList[String] = JArrayList()
 
 	override def applyInternal(): RenderableZip = {
 		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException

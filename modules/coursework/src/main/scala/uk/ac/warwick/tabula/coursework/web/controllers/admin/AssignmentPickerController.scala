@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -57,7 +56,7 @@ class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] w
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	
-	@BeanProperty var searchTerm: String = ""
+	var searchTerm: String = ""
 		
 	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.department)
 }

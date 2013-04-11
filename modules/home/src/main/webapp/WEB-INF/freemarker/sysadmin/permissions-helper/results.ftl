@@ -21,7 +21,7 @@
 				<li><@debugRole role=subRole /></li>
 			</#list>
 			<#list role.explicitPermissionsAsList as permission>
-				<li><@debugPermission permission=permission._1 scope=permission._2 /></li>
+				<li><@debugPermission permission=permission._1() scope=permission._2() /></li>
 			</#list>
 		</ul>
 	</#if>

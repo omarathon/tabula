@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports.JBoolean
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType
@@ -23,7 +20,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@BeanProperty var assignment: Assignment = _
+	var assignment: Assignment = _
 	
 	def permissionsParents = Seq(Option(assignment)).flatten
 
@@ -53,11 +50,11 @@ class Feedback extends GeneratedId with PermissionsTarget {
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
-	@BeanProperty var firstMarkerFeedback: MarkerFeedback = _
+	var firstMarkerFeedback: MarkerFeedback = _
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "second_marker_feedback")
-	@BeanProperty var secondMarkerFeedback: MarkerFeedback = _
+	var secondMarkerFeedback: MarkerFeedback = _
 
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
@@ -101,7 +98,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY)
-	var attachments: JList[FileAttachment] = ArrayList()
+	var attachments: JList[FileAttachment] = JArrayList()
 	
 	def mostRecentAttachmentUpload = attachments.maxBy {
 		_.dateUploaded
@@ -118,7 +115,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		for(attachment <- attachments){
 			attachment.feedback = null
 		}
-		attachments = ArrayList()
+		attachments = JArrayList()
 	}
 
 	/**
@@ -126,7 +123,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	 * Doesn't take into account whether the ratings feature is enabled, so you
 	 * need to check that separately.
 	 */
-	def collectRatings: Boolean = assignment.module.department.isCollectFeedbackRatings
+	def collectRatings: Boolean = assignment.module.department.collectFeedbackRatings
 
 	/**
 	 * Whether marks are being collected for this feedback.

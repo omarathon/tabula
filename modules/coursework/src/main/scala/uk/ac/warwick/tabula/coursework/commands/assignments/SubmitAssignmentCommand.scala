@@ -11,7 +11,6 @@ import org.springframework.validation.Errors
 import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import scala.beans.BeanProperty
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
@@ -33,13 +32,13 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
-	@BeanProperty var fields = buildEmptyFields
+	var fields = buildEmptyFields
 
 	// used as a hint to the view.
-	@transient @BeanProperty var justSubmitted: Boolean = false
+	@transient var justSubmitted: Boolean = false
 
 	// just used as a hint to the view.
-	@transient @BeanProperty var plagiarismDeclaration: Boolean = false
+	@transient var plagiarismDeclaration: Boolean = false
 
 	override def onBind(result:BindingResult) {
 		for ((key, field) <- fields) field.onBind(result)

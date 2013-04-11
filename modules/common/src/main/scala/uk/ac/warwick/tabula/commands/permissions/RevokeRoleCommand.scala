@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 
 import org.springframework.validation.Errors
 
@@ -11,7 +10,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -30,8 +29,8 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 	
 	var permissionsService = Wire.auto[PermissionsService]
 	
-	@BeanProperty var roleDefinition: RoleDefinition = _
-	@BeanProperty var usercodes: JList[String] = ArrayList()
+	var roleDefinition: RoleDefinition = _
+	var usercodes: JList[String] = JArrayList()
 	
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 	

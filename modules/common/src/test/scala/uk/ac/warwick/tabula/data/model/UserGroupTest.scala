@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import org.junit.Test
 import uk.ac.warwick.tabula._
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import collection.JavaConverters._
 import uk.ac.warwick.userlookup.Group
 import uk.ac.warwick.userlookup.GroupImpl

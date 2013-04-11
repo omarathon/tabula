@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.views
 
 import scala.collection.mutable.Buffer
-import scala.beans.BeanProperty
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
@@ -9,6 +8,7 @@ import org.scalatest.junit.JUnitSuite
 import org.scalatest.junit.ShouldMatchersForJUnit
 
 import freemarker.template.SimpleSequence
+import uk.ac.warwick.tabula.JavaImports._
 
 class MyObject {
   var name = "text"
@@ -69,14 +69,14 @@ class ScalaBeansWrapperTest extends JUnitSuite with ShouldMatchersForJUnit {
 	      hash.get("grotto").toString should be("Santa's")
 	    }
 	  }
-	  val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
+	  val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
 	  wrapper.wrap(list) match {
 	 	  case listy:SimpleSequence => 
 	 	  case nope => fail("nope" + nope.getClass().getName())
 	  }
 	   
 	  class ListHolder {
-	 	  @BeanProperty val list:java.util.List[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
+	 	  val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
 	  }
 	   
 	  new ListHolder().list.size should be (2)

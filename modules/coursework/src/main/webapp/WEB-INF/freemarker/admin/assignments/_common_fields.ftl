@@ -44,6 +44,15 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
+<#if features.collectMarks>
+	<@form.labelled_row "collectMarks" "Marks">
+		<label class="checkbox">
+			<@f.checkbox path="collectMarks" id="collectMarks" />
+			Collect marks
+		</label>
+	</@form.labelled_row>
+</#if>
+
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
 		<label class="checkbox">
@@ -53,18 +62,6 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 	<fieldset id="submission-options">
 		<legend>Submission options</legend>
-
-		<#if features.collectMarks>
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<label class="checkbox">
-						<@f.checkbox path="collectMarks" />
-						Collect marks
-					</label>
-				</@form.field>
-			</@form.row>
-		</#if>
 
 		<@form.row>
 			<@form.label></@form.label>

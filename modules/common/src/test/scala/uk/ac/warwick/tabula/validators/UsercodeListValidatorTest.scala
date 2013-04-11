@@ -4,12 +4,11 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.MockUserLookup
 import org.springframework.validation.BindException
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 
 class UsercodeListValidatorTest extends TestBase {
 	
 	class ValidateMe {
-		@BeanProperty var usercodes: List[String] = _
+		var usercodes: List[String] = _
 	}
 	
 	@Test def passes {

@@ -5,7 +5,6 @@ import org.hibernate.annotations.Type
 import javax.persistence.Basic
 import javax.persistence.Column
 import javax.persistence.JoinColumn
-import scala.beans.BeanProperty
 import javax.persistence.OneToOne
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -35,7 +34,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "membersgroup_id")
-	@BeanProperty var members: UserGroup = UserGroup.emptyUniversityIds
+	var members: UserGroup = UserGroup.emptyUniversityIds
 
 	override def preSave(newRecord: Boolean) {
 		if (!members.universityIds) throw new IllegalStateException

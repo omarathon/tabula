@@ -6,18 +6,16 @@ import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReade
 import org.springframework.stereotype.Service
 import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.InputStream
-import scala.beans.BeanProperty
 
 class MarkItem {
 
-	@BeanProperty var universityId: String = _
-	@BeanProperty var actualMark: String = _
-	@BeanProperty var actualGrade: String = _
-	@BeanProperty var isValid = true
-	@BeanProperty var isModified = false
-	@BeanProperty var isPublished = false
+	var universityId: String = _
+	var actualMark: String = _
+	var actualGrade: String = _
+	var isValid = true
+	var isModified = false
+	var isPublished = false
 
 	def this(universityId: String, actualMark: String, actualGrade: String) = {
 		this()
@@ -38,7 +36,7 @@ class MarksExtractor {
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
-		val markItems: JList[MarkItem] = ArrayList()
+		val markItems: JList[MarkItem] = JArrayList()
 		val sheetHandler = new XslxSheetHandler(styles, sst, markItems)
 		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {

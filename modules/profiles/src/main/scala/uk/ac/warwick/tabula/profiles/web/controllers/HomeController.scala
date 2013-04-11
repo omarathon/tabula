@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.ModelAttribute

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.reflect.BeanProperty
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,27 +13,27 @@ import uk.ac.warwick.tabula.DateFormats
 class MeetingRecord extends GeneratedId with ToString {
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var creationDate: DateTime = DateTime.now
+	var creationDate: DateTime = DateTime.now
 	
 	@Column(name="last_updated_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	@BeanProperty var lastUpdatedDate: DateTime = creationDate
+	var lastUpdatedDate: DateTime = creationDate
 	
 	@ManyToOne
 	@JoinColumn(name = "relationship_id")
-	@BeanProperty var relationship: StudentRelationship = _
+	var relationship: StudentRelationship = _
 	
 	@Column(name="meeting_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var meetingDate: DateTime = _
+	var meetingDate: DateTime = _
 	
 	@ManyToOne
 	@JoinColumn(name="creator_id")
-	@BeanProperty var creator: Member = _
+	var creator: Member = _
 	
-	@BeanProperty var title: String = _
-	@BeanProperty var description: String = _
+	var title: String = _
+	var description: String = _
 	
 	def this(creator: Member, relationship: StudentRelationship) {
 		this()

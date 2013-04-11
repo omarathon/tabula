@@ -14,7 +14,7 @@ trait GeneratedId {
 	@GeneratedValue(generator = "system-uuid")
 	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 	var id: String = null
-	
+
 	override final def hashCode = id match {
 		case null => super.hashCode
 		case str => getClass.hashCode + (41 * str.hashCode)
@@ -25,6 +25,6 @@ trait GeneratedId {
 			else id == that.id
 		case _ => false
 	}
-	
+
 	override def toString = getClass.getSimpleName + "[" + (if (id != null) id else "(transient " + hashCode + ")") + "]"
 }

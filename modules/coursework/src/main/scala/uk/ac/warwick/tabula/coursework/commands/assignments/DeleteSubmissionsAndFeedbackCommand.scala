@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.beans.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -9,7 +8,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
@@ -35,9 +34,9 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
 	
-    @BeanProperty var students: JList[String] = ArrayList()
-    @BeanProperty var submissionOrFeedback: String = ""
-	@BeanProperty var confirm: Boolean = false
+    var students: JList[String] = JArrayList()
+    var submissionOrFeedback: String = ""
+	var confirm: Boolean = false
 
 	var submissionsDeleted = 0
 	var feedbacksDeleted = 0
@@ -88,7 +87,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	
 	
 	def getStudentsAsUsers(): JList[User] = {
-		val studentsAsUsers: JList[User] = ArrayList()
+		val studentsAsUsers: JList[User] = JArrayList()
 		for (student <- students)  {
 			val user: User = userLookup.getUserByWarwickUniId(student)
 			studentsAsUsers.add(user)

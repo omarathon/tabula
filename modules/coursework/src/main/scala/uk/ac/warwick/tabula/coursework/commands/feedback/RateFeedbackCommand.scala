@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Feedback
-import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.Features
@@ -19,8 +18,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
  * we want it to be null. This is because Spring won't bind null
  * to a value, it will leave it with its existing value.
  */
-case class NullableBoolean(@BeanProperty var value: JBoolean) {
-	@BeanProperty var unset: Boolean = _
+case class NullableBoolean(var value: JBoolean) {
+	var unset: Boolean = _
 	def toBoolean: Option[Boolean] = if (unset) None else Option(value)
 
 	def update {
@@ -38,15 +37,15 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 	
 	var features = Wire.auto[Features]
 
-	//	@BeanProperty var rating:JInteger = _ 
+	//	var rating:JInteger = _ 
 
-	@BeanProperty var wasPrompt: NullableBoolean =
+	var wasPrompt: NullableBoolean =
 		NullableBoolean(Option(feedback).flatMap(_.ratingPrompt))
 
-	@BeanProperty var wasHelpful: NullableBoolean =
+	var wasHelpful: NullableBoolean =
 		NullableBoolean(Option(feedback).flatMap(_.ratingHelpful))
 
-	//	@BeanProperty var unset:Boolean = false
+	//	var unset:Boolean = false
 	//	
 	//	def effectiveRating:JInteger = 
 	//		if (unset) null

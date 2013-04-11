@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model;
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.beans.BeanProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Column
@@ -11,7 +10,6 @@ import javax.persistence.Entity
 import javax.persistence.JoinTable
 import javax.persistence.JoinColumn
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 
@@ -40,24 +38,24 @@ class UserGroup extends GeneratedId {
 	@transient var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
 
-	@BeanProperty var baseWebgroup: String = _
+	var baseWebgroup: String = _
 
 	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var includeUsers: JList[String] = ArrayList()
+	var includeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var staticIncludeUsers: JList[String] = ArrayList()
+	var staticIncludeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	@BeanProperty var excludeUsers: JList[String] = ArrayList()
+	var excludeUsers: JList[String] = JArrayList()
 
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {

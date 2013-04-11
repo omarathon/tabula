@@ -7,7 +7,6 @@ import uk.ac.warwick.userlookup.User
 import scala.{Array, Some}
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import reflect.BeanProperty
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -57,7 +56,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	var secondMarkers = new UserGroup()
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingMethodUserType")
-	@BeanProperty var markingMethod: MarkingMethod = _
+	var markingMethod: MarkingMethod = _
 
 	/** If true, the submitter chooses their first marker from a dropdown */
 	def studentsChooseMarker = markingMethod == StudentsChooseMarker

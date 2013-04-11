@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import scala.util.matching.Regex
 import org.hibernate.annotations.AccessType
 import javax.persistence._
@@ -11,7 +10,6 @@ import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
@@ -28,8 +26,8 @@ class Module extends GeneratedId with PermissionsTarget {
 		this.department = department
 	}
 
-	@BeanProperty var code: String = _
-	@BeanProperty var name: String = _
+	var code: String = _
+	var name: String = _
 
 	// The managers are markers/moderators who upload feedback. 
 	// They can also publish feedback.
@@ -43,18 +41,18 @@ class Module extends GeneratedId with PermissionsTarget {
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
-	@BeanProperty var department: Department = _
+	var department: Department = _
 	
-	def permissionsParents = Seq(Option(department)).flatten
+	def permissionsParents = Option(department).toSeq
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BeanProperty var assignments: java.util.List[Assignment] = ArrayList()
+	var assignments: JList[Assignment] = JArrayList()
 
-	@BeanProperty var active: Boolean = _
+	var active: Boolean = _
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	@BeanProperty var grantedRoles:JList[ModuleGrantedRole] = ArrayList()
+	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
 
 	override def toString = "Module[" + code + "]"
 }

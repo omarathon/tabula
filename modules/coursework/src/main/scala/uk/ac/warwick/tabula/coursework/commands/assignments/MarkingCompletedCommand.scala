@@ -4,7 +4,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{Description, SelfValidating, Command}
 import uk.ac.warwick.tabula.data.Daoisms
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
@@ -18,14 +18,14 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 
 	var stateService = Wire.auto[StateService]
 
-	@BeanProperty var students: JList[String] = ArrayList()
-	@BeanProperty var markerFeedbacks: JList[MarkerFeedback] = ArrayList()
+	var students: JList[String] = JArrayList()
+	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
 
-	@BeanProperty var noMarks: JList[MarkerFeedback] = ArrayList()
-	@BeanProperty var noFeedback: JList[MarkerFeedback] = ArrayList()
-	@BeanProperty var releasedFeedback: JList[MarkerFeedback] = ArrayList()
+	var noMarks: JList[MarkerFeedback] = JArrayList()
+	var noFeedback: JList[MarkerFeedback] = JArrayList()
+	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
 
-	@BeanProperty var confirm: Boolean = false
+	var confirm: Boolean = false
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Create, assignment)

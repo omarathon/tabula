@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.services
+
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.helpers.Logging
 import javax.sql.DataSource
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.data.model.DegreeType
 import javax.annotation.Resource
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)
@@ -87,7 +89,7 @@ object ModuleImporter {
 	class ModuleInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[ModuleInfo](ds, GetModulesSql) {
 		declareParameter(new SqlParameter("dept", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			val moduleCode = rs.getString("code").toLowerCase
 			val deptCode = params(0).toString.toLowerCase
 			ModuleInfo(
@@ -100,7 +102,7 @@ object ModuleImporter {
 	class RouteInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[RouteInfo](ds, GetRoutesSql) {
 		declareParameter(new SqlParameter("dept", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: java.util.Map[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			val routeCode = rs.getString("code").toLowerCase
 			RouteInfo(
 				rs.getString("name"),

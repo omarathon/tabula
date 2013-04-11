@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>32-SNAPSHOT</version>
+		<version>33-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -483,6 +483,11 @@
 			<groupId>uk.ac.warwick.membership</groupId>
 			<artifactId>membership-rmi</artifactId>
 			<version>2.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.scala</groupId>
+			<artifactId>spring-scala</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->

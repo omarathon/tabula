@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{StateService, AssignmentService, ZipServic
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.CurrentUser
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 
 /**
@@ -22,7 +22,7 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	@BeanProperty var submissions:JList[Submission] = ArrayList()
+	var submissions:JList[Submission] = JArrayList()
 	
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]

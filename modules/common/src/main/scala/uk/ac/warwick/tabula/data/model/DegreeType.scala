@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class DegreeType(val dbValue: String, @BeanProperty val description: String)
+sealed abstract class DegreeType(val dbValue: String, val description: String)
 
 object DegreeType {
 	case object Undergraduate extends DegreeType("UG", "Undergraduate")

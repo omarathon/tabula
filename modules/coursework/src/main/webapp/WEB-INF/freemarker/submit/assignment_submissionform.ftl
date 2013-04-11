@@ -160,7 +160,7 @@
 			This assignment doesn't allow late submissions.
 		</div>
 	<#elseif !assignment.opened>
-		<p>This assignment isn't open yet - it will open on <@fmt.date date=assignment.openDate at=true />.</p>
+		<p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true />.</p>
 	<#else>
 		<p>
 			

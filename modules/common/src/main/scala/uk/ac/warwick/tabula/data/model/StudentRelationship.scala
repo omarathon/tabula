@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
-import scala.beans.BeanProperty
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
@@ -25,14 +24,14 @@ class StudentRelationship extends GeneratedId {
 	@transient var profileService = Wire.auto[ProfileService]
 
 	// "agent" is the the actor in the relationship, e.g. tutor
-	@BeanProperty var agent: String = _
+	var agent: String = _
 	
 	@Column(name="relationship_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType")
-	@BeanProperty var relationshipType: RelationshipType = RelationshipType.PersonalTutor
+	var relationshipType: RelationshipType = RelationshipType.PersonalTutor
 	
 	@Column(name="target_sprcode")
-	@BeanProperty var targetSprCode: String = new String("")
+	var targetSprCode: String = new String("")
 	
 	@Column(name = "uploaded_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
@@ -57,20 +56,17 @@ class StudentRelationship extends GeneratedId {
 		case false => None
 	}
 	
-	def agentParsed = agentMember match {
-		case None => agent
-		case Some(m) => m
-	}
+	/**
+	 * If the agent matches a University ID, the Member is returned.
+	 * Otherwise the agent string is returned.
+	 * 
+	 * TODO wildcard return types are bad practice
+	 */
+	def agentParsed: Any = agentMember.getOrElse(agent)
 	
-	def agentName = agentMember match {
-		case None => agent
-		case Some(m) => m.fullName.getOrElse("[Unknown]")
-	}
+	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
 	
-	def agentLastName = agentMember match {
-		case None => agent // can't reliably resolve further for external names
-		case Some(m) => m.lastName
-	}
+	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 	
 	def studentMember = profileService.getStudentBySprCode(targetSprCode)	
 	def studentId = SprCode.getUniversityId(targetSprCode)
@@ -102,7 +98,7 @@ object StudentRelationship {
 
 
 
-sealed abstract class RelationshipType(val dbValue: String, @BeanProperty val description: String)
+sealed abstract class RelationshipType(val dbValue: String, val description: String)
 
 object RelationshipType {
 	case object PersonalTutor extends RelationshipType("personalTutor", "Personal Tutor")

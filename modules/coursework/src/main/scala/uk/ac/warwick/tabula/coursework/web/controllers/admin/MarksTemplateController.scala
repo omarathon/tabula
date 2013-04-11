@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.beans.BeanProperty
 import org.apache.poi.ss.usermodel.{IndexedColors, ComparisonOperator}
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.ss.util.WorkbookUtil
@@ -27,7 +26,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
-	@BeanProperty var members:Seq[String] =_
+	var members:Seq[String] =_
 	var feedbackService = Wire.auto[FeedbackService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 

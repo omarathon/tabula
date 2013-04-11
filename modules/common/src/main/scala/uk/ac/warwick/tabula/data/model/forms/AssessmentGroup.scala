@@ -9,12 +9,12 @@ class AssessmentGroup extends GeneratedId {
 
 	@ManyToOne
 	@JoinColumn(name = "assignment_id")
-	@BeanProperty var assignment: Assignment = _
+	var assignment: Assignment = _
 
 	@ManyToOne
 	@JoinColumn(name = "upstream_id")
-	@BeanProperty var upstreamAssignment: UpstreamAssignment = _
+	var upstreamAssignment: UpstreamAssignment = _
 
-	@BeanProperty var occurrence: String = _
+	var occurrence: String = _
 
 }

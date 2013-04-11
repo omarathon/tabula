@@ -14,12 +14,12 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Command
 
 
-class AddModuleCommand(val department: Department) extends Command[Module] with Daoisms with SelfValidating {
+class AddModuleCommand(@BeanProperty val department: Department) extends Command[Module] with Daoisms with SelfValidating {
 	
 	PermissionCheck(Permissions.Module.Create, department)
 
-	@BeanProperty var code: String = _
-	@BeanProperty var name: String = _
+	var code: String = _
+	var name: String = _
 
 	def sanitisedCode = Option(code).map(_.toLowerCase).orNull
 
@@ -43,10 +43,10 @@ class AddModuleCommand(val department: Department) extends Command[Module] with 
 		// check for duplicate name or code
 		if (department != null) {
 			if (code != null && department.modules.exists { _.code == code.toLowerCase }) {
-				errors.rejectValue("code", "code.duplicate.module")
+				errors.rejectValue("code", "code.duplicate.module", Array(code.toUpperCase()), "")
 			}
 			if (name != null && department.modules.exists { _.name equalsIgnoreCase name }) {
-				errors.rejectValue("name", "name.duplicate.module")
+				errors.rejectValue("name", "name.duplicate.module", Array(name), "")
 			}
 		}
 

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection._
 import scala.collection.JavaConversions._
-import scala.beans.BeanProperty
 import org.hibernate.annotations.Type
 import javax.persistence._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -11,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 class UserSettings extends GeneratedId with SettingsMap[UserSettings] with PermissionsTarget {
 	import UserSettings._
 	
-	@BeanProperty var userId: String = _
+	var userId: String = _
 	
 	def getAlertsSubmission = alertsSubmission
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull

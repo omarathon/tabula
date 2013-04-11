@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 
-import scala.beans.BeanProperty
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -9,7 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAssignmentsCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
@@ -45,7 +44,7 @@ abstract class BaseSysadminController extends BaseController {
 
 	def redirectToHome = {
 		// Redirect cross-context
-		Redirect(urlRewriter.exec(ArrayList("/sysadmin/", "/", true)).toString())
+		Redirect(urlRewriter.exec(JArrayList("/sysadmin/", "/", true)).toString())
 	}
 }
 
@@ -60,7 +59,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	var indexer = Wire.auto[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from: DateTime = _
+	var from: DateTime = _
 
 	def applyInternal() = {
 		indexer.indexFrom(from)
@@ -76,8 +75,8 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	var mdService = Wire.auto[ModuleAndDepartmentService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	@BeanProperty var from: DateTime = _
-	@BeanProperty var deptCode: String = _
+	var from: DateTime = _
+	var deptCode: String = _
 
 	def applyInternal() = {
 		mdService.getDepartmentByCode(deptCode) match {
@@ -160,7 +159,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 		command.refresh(member)
 		
 		// Redirect cross-context
-		Redirect(urlRewriter.exec(ArrayList("/view/" + member.universityId, "/profiles", true)).toString())
+		Redirect(urlRewriter.exec(JArrayList("/view/" + member.universityId, "/profiles", true)).toString())
 	}
 }
 

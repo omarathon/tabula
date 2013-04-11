@@ -12,7 +12,7 @@ class ExtensionGrantedMessage(extension: Extension, userId: String)
 		baseMessage.setSubject(encodeSubject(getSubjectPrefix + "Extension granted"))
 		baseMessage.setText(renderToString("/WEB-INF/freemarker/emails/new_manual_extension.ftl", Map(
 			"extension" -> extension,
-			"newExpiryDate" -> dateFormatter.print(extension.getExpiryDate),
+			"newExpiryDate" -> dateFormatter.print(extension.expiryDate),
 			"assignment" -> assignment,
 			"module" -> module,
 			"user" -> recipient,

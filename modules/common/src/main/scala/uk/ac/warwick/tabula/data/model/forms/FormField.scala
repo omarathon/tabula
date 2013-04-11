@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
 import scala.annotation.target.field
-import scala.beans.BeanProperty
 import collection.JavaConversions._
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
@@ -19,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
-import uk.ac.warwick.tabula.helpers.ArrayList
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, FileAttachment}
@@ -27,7 +25,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
-import scala.reflect.ClassTag
+import scala.reflect._
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -56,10 +54,10 @@ abstract class FormField extends GeneratedId {
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
 
-	@BeanProperty var name: String = _
-	@BeanProperty var label: String = _
-	@BeanProperty var instructions: String = _
-	@BeanProperty var required: Boolean = _
+	var name: String = _
+	var label: String = _
+	var instructions: String = _
+	var required: Boolean = _
 
 	@Basic(optional = false)
 	@Access(AccessType.PROPERTY)
@@ -73,7 +71,7 @@ abstract class FormField extends GeneratedId {
 		propertiesMap = json.readValue(new StringReader(props), classOf[Map[String, Any]])
 	}
 
-	@transient @BeanProperty var propertiesMap: collection.Map[String, Any] = Map()
+	@transient var propertiesMap: collection.Map[String, Any] = Map()
 
 	protected def setProperty(name: String, value: Any) = {
 		propertiesMap += name -> value
@@ -81,12 +79,12 @@ abstract class FormField extends GeneratedId {
 	/**
 	 * Fetch a property out of the property map if it matches the type.
 	 * Careful with types as they are generally the ones that the JSON library
-	 * has decided on, so integers come out as java.lang.Integer, and Int
+	 * has decided on, so integers come out as JInteger, and Int
 	 * won't match.
 	 */
-	protected def getProperty[A](name: String, default: A)(implicit tag: ClassTag[A]) =
+	protected def getProperty[A : ClassTag](name: String, default: A) =
 		propertiesMap.get(name) match {
-			case Some(obj) if tag.runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
+			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
 			case _ => default
 		}
 
@@ -94,7 +92,7 @@ abstract class FormField extends GeneratedId {
 	final def readOnly = isReadOnly
 
 	@Type(`type` = "int")
-	@BeanProperty var position: JInteger = 0
+	var position: JInteger = 0
 
 	/** Determines which Freemarker template is used to render it. */
 	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value
@@ -199,7 +197,7 @@ class FileField extends FormField {
 	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)
 
 	// List of extensions.
-	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", ArrayList())
+	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", JArrayList())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: JList[String])
 	
 	// This is after onBind is called, so any multipart files have been persisted as attachments

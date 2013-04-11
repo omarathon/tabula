@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.beans.BeanProperty
 
 import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
 import org.joda.time.DateTime
 
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId {
@@ -19,7 +17,7 @@ class MarkerFeedback extends GeneratedId {
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
-	@BeanProperty var feedback: Feedback = _
+	var feedback: Feedback = _
 
 	@Column(name = "uploaded_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
@@ -32,11 +30,11 @@ class MarkerFeedback extends GeneratedId {
 	var grade: Option[String] = None
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
-	@BeanProperty var state : MarkingState = _
+	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
 	@Fetch(FetchMode.JOIN)
-	var attachments: JList[FileAttachment] = ArrayList()
+	var attachments: JList[FileAttachment] = JArrayList()
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

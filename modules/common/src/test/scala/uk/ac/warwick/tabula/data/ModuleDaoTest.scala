@@ -30,19 +30,21 @@ class ModuleDaoTest extends AppContextTestBase {
 	
 	var cs108: Module = _
 	var cs240: Module = _
+	var cs241: Module = _
 	
 	@Before def setupWithBaseData = transactional { tx => 
 		cs108 = dao.getByCode("cs108").get
 		cs240 = dao.getByCode("cs240").get
+		cs241 = dao.getByCode("cs241").get
 	} 
 	
 	@Test def crud = transactional { tx => 
-		dao.allModules should be (Seq(cs108, cs240))
+		dao.allModules should be (Seq(cs108, cs240, cs241))
 		
 		val cs333 = Fixtures.module("cs333")
 		dao.saveOrUpdate(cs333)
 		
-		dao.allModules should be (Seq(cs108, cs240, cs333))
+		dao.allModules should be (Seq(cs108, cs240, cs241, cs333))
 		
 		dao.getByCode("cs333") should be (Some(cs333))
 		dao.getByCode("wibble") should be (None)

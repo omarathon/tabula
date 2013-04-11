@@ -26,7 +26,7 @@
 		</div>
 	<#else>
 		<div class="alert alert-info deadline">
-			Assignment closes on <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
+			Assignment closes <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
 		</div>
 	</#if>
 </#macro>

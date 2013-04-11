@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.{Logging, ArrayList}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
@@ -19,7 +20,7 @@ import org.springframework.validation.BindingResult
 abstract class FeedbackTemplateCommand(val department:Department)
 	extends Command[Unit] with Daoisms with BindListener {
 
-	@BeanProperty var file:UploadedFile = new UploadedFile
+	var file:UploadedFile = new UploadedFile
 
 	override def onBind(result:BindingResult) {
 		transactional() {
@@ -61,9 +62,9 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 
 	var zipService = Wire.auto[ZipService]
 
-	@BeanProperty var id:String = _
-	@BeanProperty var name:String = _
-	@BeanProperty var description:String = _
+	var id:String = _
+	var name:String = _
+	var description:String = _
 
 	override def applyInternal() {
 		transactional() {
@@ -88,7 +89,7 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Delete, template)
 
-	@BeanProperty var id:String = _
+	var id:String = _
 
 	override def applyInternal() {
 		transactional() {
