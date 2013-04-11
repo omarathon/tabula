@@ -27,7 +27,7 @@ object DateFormats {
 	final val CSVDateTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
 	
 	/** Date format used in feedback report spreadsheet */
-	final val CSVDate = DateTimeFormat.forPattern("dd/MM/yyyy")
+	final val FeedbackReportDate = DateTimeFormat.forPattern("dd/MM/yyyy")
 	
 }
 

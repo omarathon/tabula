@@ -88,7 +88,7 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 
 	def studentData(start:Int, end:Int) = (start to end).map(idFormat(_)).toList 
 	
-	def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) = {
+	def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) {
 		val date = assignment.closeDate.plusDays(daysAfter)
 		val event = AuditEvent(
 				eventId="event", eventType="PublishFeedback", userId="cuslat", eventDate=date,
@@ -122,10 +122,10 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 			generateSubmission(assignment, i, lateModNumber)
 			addFeedback(assignment)
 		}
-		
+
 		val userIds = (1 to numberOfStudents).map(idFormat(_)) 
 		assignment.members = makeUserGroup(userIds)
-		module.assignments = module.assignments + assignment
+		module.assignments.add(assignment)
 
 		assignment
 	}
