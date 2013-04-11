@@ -53,8 +53,8 @@ class ViewProfileController extends ProfilesController {
 		    "profile" -> profiledStudentMember,
 		    "viewer" -> currentMember,
 		    "isSelf" -> isSelf,
+		    "hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment,
 		    "meetings" -> meetings)
 		   .crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
-
