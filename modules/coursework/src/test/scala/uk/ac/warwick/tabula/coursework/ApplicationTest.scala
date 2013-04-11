@@ -95,7 +95,7 @@ class ApplicationTest extends AppContextTestBase {
     
     @Transactional @Test def getModules = {
       val modules = session.createCriteria(classOf[Module]).list
-      modules.size should be (2)
+      modules.size should be (3)
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
     }
     
