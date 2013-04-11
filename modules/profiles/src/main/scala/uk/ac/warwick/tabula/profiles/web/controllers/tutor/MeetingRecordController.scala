@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
 class MeetingRecordController extends ProfilesController {
-	
+
 	validatesSelf[CreateMeetingRecordCommand]
 
 	@ModelAttribute("createMeetingRecordCommand")
@@ -30,13 +30,13 @@ class MeetingRecordController extends ProfilesController {
 		}
 		case _ => throw new ItemNotFoundException
 	}
-	
+
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("student") member: Member) = member match {
 		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
 		case _ => None
 	}
-	
+
 	// blank async form
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
 	def showModalForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
@@ -47,7 +47,7 @@ class MeetingRecordController extends ProfilesController {
 			"tutorName" -> createCommand.relationship.agentName,
 			"creator" -> createCommand.creator).noLayout()
 	}
-	
+
 	// submit async
 	@RequestMapping(method = Array(POST), params = Array("modal"))
 	def saveModalMeetingRecord(@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, errors: Errors, @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[ViewMeetingRecordCommand], @PathVariable("student") student: Member) = {
@@ -60,7 +60,7 @@ class MeetingRecordController extends ProfilesController {
 					case None => Seq()
 					case Some(cmd) => cmd.apply
 				}
-				
+
 				Mav("tutor/meeting/list",
 					"profile" -> student,
 					"meetings" -> meetingList,
@@ -78,13 +78,13 @@ class MeetingRecordController extends ProfilesController {
 			"tutorName" -> createCommand.relationship.agentName,
 			"creator" -> createCommand.creator)
 	}
-	
+
 	// cancel sync
 	@RequestMapping(method = Array(POST), params = Array("!submit", "!modal"))
 	def cancel(@PathVariable("student") student: Member) = {
 		Redirect(Routes.profile.view(student))
 	}
-		
+
 	// submit sync
 	@RequestMapping(method = Array(POST), params = Array("submit"))
 	def saveMeetingRecord(@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, errors: Errors, @PathVariable("student") student: Member) = {

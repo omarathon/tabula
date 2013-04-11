@@ -14,30 +14,32 @@
 <#else>
 	${heading}
 </#if>
-	
-<@f.form method="post" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal">
+
+<@f.form method="post" enctype="multipart/form-data"  action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal">
 	<#if modal??>
 		<div class="modal-body">
 	</#if>
-	
+
 	<@form.labelled_row "title" "Title">
 		<@f.input type="text" path="title" cssClass="input-block-level" maxlength="255" placeholder="Subject of meeting" />
 	</@form.labelled_row>
-	
+
 	<@form.labelled_row "meetingDate" "Date of meeting">
 		<div class="input-append">
 			<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
 			<span class="add-on"><i class="icon-calendar"></i></span>
 		</div>
 	</@form.labelled_row>
-	
+
 	<#-- TODO: TinyMCE editor, bleh -->
 	<@form.labelled_row "description" "Description (optional)">
 		<@f.textarea rows="6" path="description" cssClass="input-block-level" />
 	</@form.labelled_row>
-	
-	<#-- TODO: file upload to follow in TAB-359 -->
-	
+
+	<#-- file upload (TAB-359) -->
+	<#assign fileTypes=command.attachmentTypes />
+	<@form.filewidget basename="file" types=fileTypes />
+
 	<#if modal??>
 		</div>
 		<div class="modal-footer">
