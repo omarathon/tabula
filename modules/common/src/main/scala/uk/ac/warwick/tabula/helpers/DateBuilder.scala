@@ -96,7 +96,7 @@ class DateBuilder extends TemplateMethodModelEx {
 	import DateBuilder.format
 
 	/** For Freemarker */
-	override def exec(list: java.util.List[_]) = {
+	override def exec(list: JList[_]) = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
 		
 		val date = args.head match {

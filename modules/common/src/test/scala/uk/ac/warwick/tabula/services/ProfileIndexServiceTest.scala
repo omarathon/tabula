@@ -18,7 +18,6 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.File
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.events.EventListener
@@ -28,7 +27,6 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
-import java.lang.Boolean
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.data.MemberDao
@@ -112,7 +110,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		
 		for (item <- items) dao.saveOrUpdate(item)
 		session.flush
-		dao.getByUniversityId("1").isDefined should be (Boolean.TRUE)
+		dao.getByUniversityId("1").isDefined should be (true)
 		
 		dao.listUpdatedSince(new DateTime(2000,1,1,0,0,0), 10).size should be (10)
 		dao.listUpdatedSince(new DateTime(1999,6,1,0,0,0), 25).size should be (25)

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.fileserver._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 
 
@@ -25,7 +25,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	var filename: String = _
-    var students: JList[String] = ArrayList()
+    var students: JList[String] = JArrayList()
     
 	private var fileFound: Boolean = _
 

@@ -3,15 +3,13 @@
 <#escape x as x?html>
 <#compress>
 
-<h1>Create module</h1>
+<h1>Create module in ${department.name}</h1>
 <#assign commandName="addModuleCommand" />
 <#assign command=addModuleCommand />
 <@f.form method="post" action="${url('/admin/module/new')}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
-	<@form.labelled_row "department" "Department code">
-		<@f.input path="department" cssClass="text" />
-	</@form.labelled_row>
+	<@f.hidden path="department" />
 
 	<@form.labelled_row "code" "Module code">
 		<@f.input path="code" cssClass="text" />

@@ -19,7 +19,6 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.File
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.events.EventListener
@@ -29,7 +28,6 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Member
-import java.lang.Boolean
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.data.MemberDao
@@ -88,7 +86,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	@After def tidyUp: Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 		
-		session.createCriteria(classOf[Member]).list().asInstanceOf[java.util.List[Member]].asScala map { session.delete(_) }
+		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
 
 	@Test def crud = transactional { tx =>

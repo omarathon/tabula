@@ -15,6 +15,7 @@ import freemarker.ext.beans.BeanModel
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * A implemenation of BeansWrapper that support native Scala basic and collection types
@@ -33,7 +34,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case None => null
 			//      case long:Long => superWrap(long:JLong)
 			case jcol: java.util.Collection[_] => superWrap(jcol)
-			case jmap: java.util.Map[_, _] => superWrap(jmap)
+			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)

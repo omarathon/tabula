@@ -31,33 +31,33 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 
 		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)
-				mailSender send messageFor(
+				mailSender.send(messageFor(
 					"/WEB-INF/freemarker/emails/tutor_change_tutee_notification.ftl",
 					student.email,
 					student,
 					oldTutor,
 					newTutor,
-					Routes.profile.view(student))
+					Routes.profile.view(student)))
 		}
 		if (notifyOldTutor && oldTutor.isDefined) {
 			logger.debug("Notifying old tutor: " + oldTutor)
-			mailSender send messageFor(
+			mailSender.send(messageFor(
 					"/WEB-INF/freemarker/emails/old_tutor_notification.ftl",
 					oldTutor.get.email,
 					student,
 					oldTutor,
 					newTutor,
-					Routes.profile.view(student))
+					Routes.profile.view(student)))
 		}
 		if (notifyNewTutor) {
 			logger.debug("Notifying new tutor: " + newTutor)
-			mailSender send messageFor(
+			mailSender.send(messageFor(
 					"/WEB-INF/freemarker/emails/new_tutor_notification.ftl",
 					newTutor.email,
 					student,
 					oldTutor,
 					newTutor,
-					Routes.profile.view(student))
+					Routes.profile.view(student)))
 		}
 	}
 

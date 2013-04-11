@@ -37,7 +37,6 @@
 		var percent = $value.data('progress');
 		$progress.find('.bar').css('width', Math.floor(5+(percent*0.95))+'%');
 		if ($value.data('finished')) {
-			console.log($progress);
 			$progress.removeClass('active');
 			if ($value.data('succeeded') == false) {
 				$progress.addClass('progress-warning');

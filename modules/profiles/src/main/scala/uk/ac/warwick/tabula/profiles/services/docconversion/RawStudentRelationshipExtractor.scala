@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.FileInputStream
 import java.io.InputStream
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
@@ -56,7 +55,7 @@ class RawStudentRelationshipExtractor {
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
-		val rawStudentRelationships: JList[RawStudentRelationship] = ArrayList()
+		val rawStudentRelationships: JList[RawStudentRelationship] = JArrayList()
 		val handler = new XslxParser(styles, sst, rawStudentRelationships)
 		val parser = handler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {

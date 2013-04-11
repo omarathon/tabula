@@ -6,7 +6,6 @@ import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReade
 import org.springframework.stereotype.Service
 import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import java.io.InputStream
 
 class MarkItem {
@@ -37,7 +36,7 @@ class MarksExtractor {
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
-		val markItems: JList[MarkItem] = ArrayList()
+		val markItems: JList[MarkItem] = JArrayList()
 		val sheetHandler = new XslxSheetHandler(styles, sst, markItems)
 		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {

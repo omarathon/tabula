@@ -17,19 +17,6 @@ class TutorTemplateCommand(val department: Department) extends Command[ExcelView
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(department, workbook)
 
-//		// populate the mark sheet with ids
-//		for ((member, i) <- members.zipWithIndex) {
-//			val row = sheet.createRow(i + 1)
-//			row.createCell(0).setCellValue(member.getWarwickId)
-//			val marksCell = row.createCell(1)
-//			val gradesCell = row.createCell(2)
-//			val feedbacks = assignmentService.getStudentFeedback(assignment, member.getWarwickId)
-//			feedbacks.foreach { feedback =>
-//			  feedback.actualMark.foreach(marksCell.setCellValue(_))
-//			  feedback.actualGrade.foreach(gradesCell.setCellValue(_))
-//			}
-//		}
-
 		new ExcelView(safeDepartmentName(department) + " tutors.xlsx", workbook)
 	}
 

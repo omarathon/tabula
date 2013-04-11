@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import java.lang.Boolean
 import java.util.concurrent.Future
 import org.springframework.mail.SimpleMailMessage
 import javax.mail.internet.MimeMessage
@@ -8,6 +7,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.concurrency.ImmediateFuture
 import uk.ac.warwick.util.mail.WarwickMailSender
 import collection.JavaConversions._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.Features
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -25,7 +25,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 
 	override def createMimeMessage() = delegate.createMimeMessage()
 
-	override def send(message: MimeMessage): Future[Boolean] = {
+	override def send(message: MimeMessage): Future[JBoolean] = {
 		val messageToSend = if (!features.emailStudents) {
 			prepareMessage(message) { helper =>
 				val oldTo = message.getRecipients(RecipientType.TO).map({_.toString}).mkString(", ")
@@ -52,7 +52,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 		def orEmpty: Array[A] = Option(a).getOrElse(Array.empty)
 	}
 
-	override def send(simpleMessage: SimpleMailMessage): Future[Boolean] = send(createMessage(delegate) { message =>
+	override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
 		Option(simpleMessage.getFrom) map {message.setFrom(_)}
 		Option(simpleMessage.getReplyTo) map {message.setReplyTo(_)}
 		

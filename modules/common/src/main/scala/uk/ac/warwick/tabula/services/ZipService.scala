@@ -52,7 +52,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-	def showStudentName(assignment: Assignment): Boolean = assignment.module.department.isShowStudentName
+	def showStudentName(assignment: Assignment): Boolean = assignment.module.department.showStudentName
 
 	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))

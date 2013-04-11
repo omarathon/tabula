@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.permissions
 
+import collection.JavaConversions._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.Fixtures
@@ -14,6 +15,7 @@ import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 
 class RoleServiceTest extends TestBase with Mockito {
 
@@ -92,6 +94,29 @@ class RoleServiceTest extends TestBase with Mockito {
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 	}
 	
+	/** Test that permissions checking DOESN'T go up from a department to its parent if it has one.
+	 *  This is the current behaviour though subject to change.
+	 */
+	@Test def parentDepartments = withUser("cuscav", "0672089") {
+
+		val in = Fixtures.department("in")
+		val insub1 = Fixtures.department("in-sub1")
+		val insub2 = Fixtures.department("in-sub2")
+		in.children.addAll(Seq(insub1, insub2))
+		insub1.parent = in
+		insub2.parent = in
+
+		val provider = mock[RoleProvider]
+		when(provider.getRolesFor(currentUser, insub1)) thenReturn(Nil)
+		when(provider.getRolesFor(currentUser, in)) thenReturn(Seq(DepartmentalAdministrator(in)))
+
+		val service = new RoleServiceImpl()
+		service.roleProviders = Array(provider)
+
+		service.getRolesFor(currentUser, insub1).toList should equal (List())
+
+	}
+
 	@Test def hasRole() = withUser("cuscav", "0672089") {
 		val provider1 = mock[ScopelessRoleProvider]
 		provider1.rolesProvided returns (Set(classOf[Sysadmin]))

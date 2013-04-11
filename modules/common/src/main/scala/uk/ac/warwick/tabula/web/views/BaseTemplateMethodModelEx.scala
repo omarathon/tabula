@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.views
 
-import java.util.List
 import freemarker.template.TemplateMethodModelEx
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
