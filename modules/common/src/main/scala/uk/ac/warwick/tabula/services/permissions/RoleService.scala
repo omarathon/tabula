@@ -102,7 +102,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		val targetClass = role.getClass
 		
 		// Go through the list of RoleProviders and get any that provide this role
-		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap { 
+		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap {
 			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user)
 			case provider if role.scope.isDefined => provider.getRolesFor(user, role.scope.get)
 			case _ => Seq()

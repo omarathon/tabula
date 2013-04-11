@@ -19,15 +19,22 @@ import org.hibernate.annotations.JoinColumnOrFormula
 import org.hibernate.annotations.JoinFormula
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import org.hibernate.annotations.ForeignKey
+import scala.annotation.tailrec
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
 	import Department._
-
+  
 	var code:String = null
-
+	
 	var name:String = null
-
+	
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	var children:JList[Department] = JArrayList();
+	
+	@ManyToOne(fetch = FetchType.LAZY, optional=true)
+	var parent:Department = null;
+	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var modules:JList[Module] = JArrayList()
 
@@ -90,8 +97,25 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
-
-	def permissionsParents = Seq()
+	
+	/**
+	  * Although a department may have a parent, we don't actually
+	  * want to inherit permissions from it. We can add users explicitly
+	  * to the child department if they need access there.
+	  * 
+	  * This is open to discussion and change.
+	  */
+	def permissionsParents = Nil // Option(parent).toSeq
+	
+	/** The 'top' ancestor of this department, or itself if
+	  * it has no parent. 
+	  */
+	@tailrec
+	final def rootDepartment: Department = 
+		if (parent == null) this
+		else parent.rootDepartment
+		
+	def isUpstream = (parent == null)
 
 	override def toString = "Department(" + code + ")"
 

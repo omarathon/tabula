@@ -102,7 +102,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		val moduleDepts = registeredModules.map(x => x.department)
 
-		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
 	}
 
 	def permissionsParents = touchedDepartments
