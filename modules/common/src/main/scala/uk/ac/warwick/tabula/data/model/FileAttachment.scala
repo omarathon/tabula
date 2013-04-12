@@ -36,6 +36,11 @@ class FileAttachment extends GeneratedId {
 	@JoinColumn(name="extension_id")
 	var extension:Extension =_
 
+	// optional link to Meeting Record
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "meetingrecord_id")
+	var meetingrecord: MeetingRecord = _
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
 		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
@@ -96,7 +101,7 @@ class FileAttachment extends GeneratedId {
 			""
 		}
 	}
-	
+
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.

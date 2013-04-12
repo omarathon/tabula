@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.data.model.MeetingRecord
 
 
 /**
@@ -29,8 +30,8 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
-	
-	
+
+
 	val idSplitSize = 4
 
 	logger.info("Creating ZipService")
@@ -69,11 +70,15 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
 
+	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
+		meetingRecord.attachments.map { (attachment) =>
+			new ZipFileItem(attachment.name, attachment.dataStream)
+		}
+
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.map { (attachment) =>
 			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
-
 
 	/**
 	 * A zip of feedback with a folder for each student.
@@ -89,20 +94,20 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * TODO This doesn't check for duplicate file names
 	 */
 	def getSubmissionZipItems(submission: Submission): Seq[ZipItem] = {
-		val allAttachments = submission.allAttachments	
+		val allAttachments = submission.allAttachments
 		val user = userLookup.getUserByUserId(submission.userId)
 		val assignment = submission.assignment
-		val code = assignment.module.code	
-		
-		val submissionZipItems: Seq[ZipItem] = for (attachment <- allAttachments) yield { 
+		val code = assignment.module.code
+
+		val submissionZipItems: Seq[ZipItem] = for (attachment <- allAttachments) yield {
 			val userIdentifier = if(!showStudentName(assignment) || (user==null || user.isInstanceOf[AnonymousUser])) {
 				submission.universityId
-			} else 
+			} else
 				user.getFullName()
-			
-			new ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream)	
+
+			new ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream)
 		}
-		
+
 		if (features.feedbackTemplates){
 			val feedbackSheets = generateFeedbackSheet(submission)
 			feedbackSheets ++ submissionZipItems
@@ -117,6 +122,9 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 */
 	def getSomeSubmissionsZip(submissions: Seq[Submission]): File =
 		createUnnamedZip(submissions flatMap getSubmissionZipItems)
+
+	def getSomeMeetingRecordAttachmentsZip(meetingRecord: MeetingRecord): File =
+		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
 
 	/**
 		* Get a zip containing these feedbacks.
@@ -168,7 +176,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
  */
 class ZipEntryInputStream(val zip: InputStream, val entry: ZipEntry)
 	extends BoundedInputStream(zip, entry.getSize) {
-	// don't close input stream - we'll close it when we're finished reading the whole file 
+	// don't close input stream - we'll close it when we're finished reading the whole file
 	setPropagateClose(false)
 }
 

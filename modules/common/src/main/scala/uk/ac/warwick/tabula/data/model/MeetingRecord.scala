@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 import org.hibernate.annotations.Type
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 class MeetingRecord extends GeneratedId with ToString {
@@ -33,8 +33,8 @@ class MeetingRecord extends GeneratedId with ToString {
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	var files:JList[FileAttachment] = ArrayList()
+	@OneToMany(mappedBy = "meetingrecord", fetch = FetchType.LAZY)
+	var attachments: JList[FileAttachment] = JArrayList()
 
 	var title: String = _
 	var description: String = _

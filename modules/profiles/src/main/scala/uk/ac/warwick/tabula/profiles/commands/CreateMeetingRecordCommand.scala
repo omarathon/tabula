@@ -47,7 +47,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 				attachment.temporary = false
 				fileDao.makePermanent(attachment)
 			}
-			meeting.files.addAll(file.attached)
+			meeting.attachments.addAll(file.attached)
 		}
 
 		var meeting = new MeetingRecord(creator, relationship)
