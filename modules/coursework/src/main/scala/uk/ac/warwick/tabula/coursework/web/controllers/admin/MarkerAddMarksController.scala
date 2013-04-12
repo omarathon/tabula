@@ -29,8 +29,8 @@ class MarkerAddMarksController extends CourseworkController {
 		new MarkerAddMarksCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def viewMarkUploadForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
-												 @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors): Mav = {
+	def showForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
+	             @ModelAttribute cmd: MarkerAddMarksCommand): Mav = {
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedback(s.universityId, user.apparentUser))
@@ -70,12 +70,8 @@ class MarkerAddMarksController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def confirmBatchUpload(@PathVariable module: Module,  @PathVariable(value = "assignment") assignment: Assignment,
 	                       @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors) = {
-		if (errors.hasErrors)
-			viewMarkUploadForm(module, assignment, cmd, errors)
-		else{
-			bindAndValidate(assignment, cmd, errors)
-			Mav("admin/assignments/markerfeedback/markspreview")
-		}
+		bindAndValidate(assignment, cmd, errors)
+		Mav("admin/assignments/markerfeedback/markspreview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))

@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
@@ -33,8 +34,7 @@ class AddMarksController extends CourseworkController {
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def viewMarkUploadForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
-	                       @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AdminAddMarksCommand): Mav = {
 		val members = assignmentMembershipService.determineMembershipUsers(cmd.assignment)
 
 		val marksToDisplay = members.map { member =>
@@ -68,19 +68,13 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
-	                       @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
-		if (errors.hasErrors)
-			viewMarkUploadForm(module, assignment, cmd, errors)
-		else{
-			bindAndValidate(module, cmd, errors)
-			crumbed(Mav("admin/assignments/marks/markspreview"), module)
-		}
+	def confirmBatchUpload(@PathVariable module: Module, @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+		bindAndValidate(module, cmd, errors)
+		crumbed(Mav("admin/assignments/marks/markspreview"), module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
-	             @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+	def doUpload(@PathVariable module: Module, @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.module(module))
