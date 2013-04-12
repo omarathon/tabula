@@ -111,9 +111,8 @@
 					if ($this.is('.spinner-auto')) {
 						// spin only after 500ms
 						$this.click(function(e) {
-							$.proxy(setTimeout(function() {
-								$this.data('spinContainer').spin('small');
-							}, 500));
+							var $container = $this.data('spinContainer');
+							setTimeout(function() { $container.spin('small'); }, 500);
 						});
 					}
 				}
