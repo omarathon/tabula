@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.util.LuceneTestCase
-import org.junit.{Ignore, Test, After, Before}
+import org.junit.{Test, After, Before}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
@@ -55,7 +55,6 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.stripTitles("Prof.Mathew Mannion") should be ("Mathew Mannion")
 	}
 
-	@Ignore
 	@Transactional
 	@Test def find = withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")
