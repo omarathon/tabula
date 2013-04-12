@@ -91,6 +91,7 @@
 						// reload into modal
 						$m.html(data);
 						$m.find("input.date-picker").tabulaDatePicker();
+						$m.find('form.double-submit-protection').tabulaSubmitOnce();
 					} else {
 						// reload meeting data
 						$("section.meetings").replaceWith(data);
