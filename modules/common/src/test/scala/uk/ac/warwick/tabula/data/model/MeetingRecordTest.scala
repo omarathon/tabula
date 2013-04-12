@@ -19,6 +19,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.creator should be (null)
 		meeting.relationship should be (null)
 		meeting.meetingDate should be (null)
+		meeting.format should be (null)
 		meeting should not be ('approved)
 	}
 	
@@ -34,6 +35,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.creator should be (creator)
 		meeting.relationship should be (relationship)
 		meeting.meetingDate should be (null)
+		meeting.format should be (null)
 		meeting should not be ('approved)
 	}
 }

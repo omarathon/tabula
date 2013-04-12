@@ -31,6 +31,13 @@
 		</div>
 	</@form.labelled_row>
 	
+	<@form.labelled_row "format" "Format">
+		<@f.select path="format" cssClass="input-large">
+			<@f.option disabled="true" selected="true" label="Please select one..." />
+			<@f.options items=formats />
+		</@f.select>
+	</@form.labelled_row>
+	
 	<#-- TODO: TinyMCE editor, bleh -->
 	<@form.labelled_row "description" "Description (optional)">
 		<@f.textarea rows="6" path="description" cssClass="input-block-level" />

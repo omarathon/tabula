@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
+import uk.ac.warwick.tabula.data.model.MeetingFormat
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
@@ -40,12 +41,15 @@ class MeetingRecordController extends ProfilesController {
 	// blank async form
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
 	def showModalForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		val formats = MeetingFormat.members
+		
 		Mav("tutor/meeting/edit",
 			"modal" -> true,
 			"command" -> createCommand,
 			"student" -> student,
 			"tutorName" -> createCommand.relationship.agentName,
-			"creator" -> createCommand.creator).noLayout()
+			"creator" -> createCommand.creator,
+			"formats" -> formats).noLayout()
 	}
 	
 	// submit async
@@ -72,11 +76,14 @@ class MeetingRecordController extends ProfilesController {
 	// blank sync form
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		val formats = MeetingFormat.members
+		
 		Mav("tutor/meeting/edit",
 			"command" -> createCommand,
 			"student" -> student,
 			"tutorName" -> createCommand.relationship.agentName,
-			"creator" -> createCommand.creator)
+			"creator" -> createCommand.creator,
+			"formats" -> formats)
 	}
 	
 	// cancel sync
