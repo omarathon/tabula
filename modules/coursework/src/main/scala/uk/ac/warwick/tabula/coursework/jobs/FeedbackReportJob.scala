@@ -49,11 +49,12 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 		new Runner(job).run()
 	}
 
+
 	def renderJobDoneEmailText(user: CurrentUser, department: Department, startDate: DateTime, endDate: DateTime) = {
 		renderToString("/WEB-INF/freemarker/emails/feedback_report_done.ftl", Map(
 			"department" -> department,
-			"startDate" -> startDate,
-			"endDate" -> endDate,
+			"startDate" -> DateFormats.FeedbackReportDate.print(startDate),
+			"endDate" -> DateFormats.FeedbackReportDate.print(endDate),
 			"user" -> user
 		))
 	}
@@ -132,6 +133,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 				debug("Sending an email to " + job.user.email)
 				val mime = mailer.createMimeMessage()
 
+
 				val helper = new MimeMessageHelper(mime, true)
 				helper.setFrom(replyAddress)
 				helper.setTo(job.user.email)
@@ -143,9 +145,11 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			}
 
 			updateProgress(100)
-			updateStatus("Generated report and sent to user")
+			updateStatus("Generated report and sent to your inbox")
 			job.succeeded = true
 		}
 	}
 
 }
+
+
