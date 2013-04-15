@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.system.CustomDataBinder
+import uk.ac.warwick.tabula.system.BindListenerBinding
 
 class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	
@@ -40,32 +42,36 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	
 	val dept = Fixtures.department("in", "IT Services")
 	
+	class Binder(obj:Any, name:String, val securityService:SecurityService) 
+		extends CustomDataBinder(obj, name) 
+		with PermissionsBinding
+	
 	@Test def basicCheck = withUser("cuscav", "0672089") { 		
-		new PermissionsCheckingDataBinder(BasicCommand(dept), "command", securityService)
+		new Binder(BasicCommand(dept), "command", securityService)
 	}
 	
 	@Test(expected=classOf[PermissionDeniedException]) def basicCheckWithFailure = withUser("cuscav", "0672089") { 
 		securityService.check(currentUser, Permissions.Module.Create, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Create, dept))
 		
-		new PermissionsCheckingDataBinder(BasicCommand(dept), "command", securityService)
+		new Binder(BasicCommand(dept), "command", securityService)
 	}
 	
 	@Test def multipleChecks = withUser("cuscav", "0672089") { 		
-		new PermissionsCheckingDataBinder(MultipleCommand(dept), "command", securityService)		
+		new Binder(MultipleCommand(dept), "command", securityService)
 	}
 	
 	@Test(expected=classOf[PermissionDeniedException]) def multipleChecksWithFailure = withUser("cuscav", "0672089") { 
 		securityService.check(currentUser, Permissions.Module.Delete, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Delete, dept))
 
-		new PermissionsCheckingDataBinder(MultipleCommand(dept), "command", securityService)
+		new Binder(MultipleCommand(dept), "command", securityService)
 	}
 	
 	@Test(expected=classOf[IllegalArgumentException]) def noChecksThrowsException = withUser("cuscav", "0672089") { 
-		new PermissionsCheckingDataBinder(AccidentallyPublicCommand(), "command", securityService)
+		new Binder(AccidentallyPublicCommand(), "command", securityService) with PermissionsBinding
 	}
 	
 	@Test def noChecksButPublic = withUser("cuscav", "0672089") { 
-		new PermissionsCheckingDataBinder(PublicCommand(), "command", securityService)
+		new Binder(PublicCommand(), "command", securityService)
 	}
 	
 	class BindTestCommand() extends TestCommand with Public with BindListener {
@@ -75,12 +81,13 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 		}
 	}
 	
-	@Test def binding = withUser("cuscav", "0672089") { 
+	// FIXME this is in the wrong test class
+	@Test def bindListener = withUser("cuscav", "0672089") { 
 		val cmd = new BindTestCommand
 		
 		cmd.bound should be (false)
 		
-		val binder = new PermissionsCheckingDataBinder(cmd, "command")
+		val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
 		binder.bind(new MockHttpServletRequest)
 		
 		cmd.bound should be (true)
