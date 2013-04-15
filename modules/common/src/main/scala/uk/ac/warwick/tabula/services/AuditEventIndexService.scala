@@ -72,7 +72,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("department", dept.code)))
 			.transform{ toParsedAuditEvent(_) }
 			.filterNot { _.hadError }
-		
+
 		searchResults
 	}
 		
@@ -91,6 +91,31 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
+
+	def submissionsForAssignment(assignment: Assignment): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "SubmitAssignment"),
+			termQuery("assignment", assignment.id))
+	).transform{ toParsedAuditEvent(_) }
+
+	
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "PublishFeedback"),
+			termQuery("students", student.getWarwickId()),
+			termQuery("assignment", assignment.id)), 
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "SubmitAssignment"),
+			termQuery("masqueradeUserId", student.getUserId()),
+			termQuery("assignment", assignment.id)),
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	
 
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)

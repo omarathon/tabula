@@ -24,8 +24,8 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 
 	override def delete(feedback: Feedback) = {
 		// We need to delete any markerfeedback first
-		Option(feedback.firstMarkerFeedback) map { session.delete(_) }
-		Option(feedback.secondMarkerFeedback) map { session.delete(_) }
+		Option(feedback.firstMarkerFeedback) foreach { session.delete(_) }
+		Option(feedback.secondMarkerFeedback) foreach { session.delete(_) }
 		
 		session.delete(feedback)
 	}

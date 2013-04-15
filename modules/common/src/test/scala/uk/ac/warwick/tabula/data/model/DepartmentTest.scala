@@ -13,14 +13,14 @@ class DepartmentTest extends TestBase with Mockito {
 	
 	@Test def settings {
 		val department = new Department
-		department.isCollectFeedbackRatings should be (false)
-		department.isAllowExtensionRequests should be (false)
+		department.collectFeedbackRatings should be (false)
+		department.allowExtensionRequests should be (false)
 		department.canRequestExtension should be (false)
-		department.getExtensionGuidelineSummary should be (null)
+		department.extensionGuidelineSummary should be (null)
 		department.formattedGuidelineSummary should be ("")
-		department.getExtensionGuidelineLink should be (null)
-		department.isShowStudentName should be (false)
-		department.isPlagiarismDetectionEnabled should be (true)
+		department.extensionGuidelineLink should be (null)
+		department.showStudentName should be (false)
+		department.plagiarismDetectionEnabled should be (true)
 		
 		department.collectFeedbackRatings = true
 		department.allowExtensionRequests = true
@@ -29,14 +29,14 @@ class DepartmentTest extends TestBase with Mockito {
 		department.showStudentName = true
 		department.plagiarismDetectionEnabled = false
 		
-		department.isCollectFeedbackRatings should be (true)
-		department.isAllowExtensionRequests should be (true)
+		department.collectFeedbackRatings should be (true)
+		department.allowExtensionRequests should be (true)
 		department.canRequestExtension should be (true)
-		department.getExtensionGuidelineSummary should be ("Here is my magic summary.\n\n    Do everything good!")
+		department.extensionGuidelineSummary should be ("Here is my magic summary.\n\n    Do everything good!")
 		department.formattedGuidelineSummary should be ("<p>Here is my magic summary.</p><p>Do everything good!</p>")
-		department.getExtensionGuidelineLink should be ("http://warwick.ac.uk")
-		department.isShowStudentName should be (true)
-		department.isPlagiarismDetectionEnabled should be (false)
+		department.extensionGuidelineLink should be ("http://warwick.ac.uk")
+		department.showStudentName should be (true)
+		department.plagiarismDetectionEnabled should be (false)
 	}
 	
 	@Test def groups {

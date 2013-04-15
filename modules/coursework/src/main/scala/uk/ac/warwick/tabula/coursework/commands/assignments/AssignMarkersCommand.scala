@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Assignment}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -45,7 +45,7 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 					}
 					new Student(displayValue, student)
 				}
-				case None => ArrayList()
+				case None => JArrayList()
 			}
 			val user = Option(userLookup.getUserByUserId(marker))
 			val fullName = user match{

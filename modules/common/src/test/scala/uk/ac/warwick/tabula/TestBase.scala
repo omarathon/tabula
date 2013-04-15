@@ -25,6 +25,7 @@ import org.springframework.util.FileCopyUtils
 import freemarker.cache.ClassTemplateLoader
 import freemarker.cache.MultiTemplateLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -74,7 +75,8 @@ trait TestFixtures {
 	def testResponse = new MockHttpServletResponse
 
 	/** Returns midnight on the first day of this year and month. */
-	def dateTime(year: Int, month: Int) = new DateTime(year, month, 1, 0, 0, 0)
+	def dateTime(year: Int, month: Int): DateTime = dateTime(year, month, 1)
+	def dateTime(year: Int, month: Int, day: Int): DateTime = new DateTime(year, month, day, 0, 0, 0, 0)
 	
 	def newSSOConfiguration = {
 		val config = new PropertiesConfiguration()
@@ -90,7 +92,7 @@ trait TestFixtures {
 trait TestHelpers extends TestFixtures {
 	lazy val json = new JsonObjectMapperFactory().createInstance
 
-	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[java.util.Map[String, Any]]).toMap
+	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[JMap[String, Any]]).toMap
 
 	var currentUser: CurrentUser = null
   

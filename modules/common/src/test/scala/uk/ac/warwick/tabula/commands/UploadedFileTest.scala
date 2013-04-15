@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
 import org.springframework.mock.web.MockMultipartFile
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.AppContextTestBase
@@ -20,7 +20,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	def ignoreEmptyMultipartFiles {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
-		uploadedFile.upload = ArrayList(multi1, multiEmpty)
+		uploadedFile.upload = JArrayList(multi1, multiEmpty)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
@@ -30,17 +30,17 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	@Test
 	def hasUploads {
 		val uploadedFile = new UploadedFile
-		uploadedFile.upload = ArrayList()
+		uploadedFile.upload = JArrayList()
 		uploadedFile.hasUploads should be (false)
-		uploadedFile.uploadOrEmpty should be (ArrayList())
+		uploadedFile.uploadOrEmpty should be (JArrayList())
 		
-		uploadedFile.upload = ArrayList(multiEmpty)
+		uploadedFile.upload = JArrayList(multiEmpty)
 		uploadedFile.hasUploads should be (false)
-		uploadedFile.uploadOrEmpty should be (ArrayList())
+		uploadedFile.uploadOrEmpty should be (JArrayList())
 		
-		uploadedFile.upload = ArrayList(multi1)
+		uploadedFile.upload = JArrayList(multi1)
 		uploadedFile.hasUploads should be (true)
-		uploadedFile.uploadOrEmpty should be (ArrayList(multi1))
+		uploadedFile.uploadOrEmpty should be (JArrayList(multi1))
 	}
 
 
@@ -48,7 +48,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	def ignoreSystemFiles {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
-		uploadedFile.upload = ArrayList(multi1, multiSystemFile)
+		uploadedFile.upload = JArrayList(multi1, multiSystemFile)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
@@ -60,7 +60,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	def ignoreAppleDouble {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
-		uploadedFile.upload = ArrayList(multi1, multiAppleDouble)
+		uploadedFile.upload = JArrayList(multi1, multiAppleDouble)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)

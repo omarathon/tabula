@@ -11,12 +11,16 @@ insert into usergroupinclude (group_id, usercode) values ('1', 'cusebr');
 insert into usergroupinclude (group_id, usercode) values ('1', 'cusfal');
 
 insert into department (id,code,name) values ('1','cs','Computer Science');
-insert into grantedrole (id,hib_version,usergroup_id,builtInRoleDefinition,scope_type,scope_id) values ('1',0,'1','DepartmentalAdministratorRoleDefinition','Department','1');
+insert into grantedrole (id,hib_version,usergroup_id,builtInRoleDefinition,scope_type,scope_id) 
+	values ('1',0,'1','DepartmentalAdministratorRoleDefinition','Department','1');
 
 insert into department (id,code,name) values ('2','ch','Chemistry');
 
+insert into department (id,code,name,parent_id) values('3', 'cs-subsidiary', 'Computer Science Subsidiary', 1);
+
 insert into module (id,department_id,code,name,active) values ('1','1','cs108','Introduction to Programming',1);
 insert into module (id,department_id,code,name,active) values ('2','1','cs240','History of Computing',1);
+insert into module (id,department_id,code,name,active) values ('3','3','cs241','Mystery of Computing',1);
 
 -- set up an assignment for the "Intro to Programming" module
 insert into assignment(id, name, module_id, academicyear, active, attachmentlimit, 

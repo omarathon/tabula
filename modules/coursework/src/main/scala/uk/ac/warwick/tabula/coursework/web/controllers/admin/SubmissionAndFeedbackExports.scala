@@ -33,7 +33,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 			val seq = for( (n,v) <- attrs ) yield new UnprefixedAttribute(n, toXMLString(Some(v)), Null)
 			(elem /: seq) ( _ % _ )
 		}
-    }
+  }
 	
 	def toXMLString(value: Option[Any]) = value match {
 		case Some(i: ReadableInstant) => isoFormat(i)

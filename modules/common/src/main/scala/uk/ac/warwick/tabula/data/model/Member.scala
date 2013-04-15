@@ -8,7 +8,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
@@ -73,12 +72,11 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	var lastUpdatedDate = DateTime.now
 
 	def fullName: Option[String] = {
-		List(Option(firstName), Option(lastName)).flatten match {
+		(Option(firstName) ++ Option(lastName)).toList match {
 			case Nil => None
 			case names => Some(names.mkString(" "))
 		}
 	}
-	def getFullName = fullName // need this for a def, as reference to fullName within Spring tag requires a getter
 
 	def officialName = title + " " + fullFirstName + " " + lastName
 	def description = {
@@ -95,8 +93,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments =
-		Set(Option(homeDepartment)).flatten.toSeq
+	def affiliatedDepartments = Option(homeDepartment).toSeq
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
@@ -105,7 +102,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		val moduleDepts = registeredModules.map(x => x.department)
 
-		(affiliatedDepartments ++ moduleDepts).toSet.toSeq
+		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
 	}
 
 	def permissionsParents = touchedDepartments
@@ -120,7 +117,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
-	var grantedRoles:JList[MemberGrantedRole] = ArrayList()
+	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
 
 	def asSsoUser = {
 		val u = new User
@@ -170,6 +167,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		this.universityId = id
 	}
 
+	// FIXME this belongs as a Freemarker macro or helper
 	def statusString: String = {
 		var statusString = ""
 		if (studyDetails != null && studyDetails.sprStatus!= null)
@@ -203,13 +201,12 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = {
-		val affDepts = Set(Option(homeDepartment),
-				Option(studyDetails.studyDepartment),
-				Option(studyDetails.route).map(x => x.department)
-		)
-
-		affDepts.flatten.toSeq
+	override def affiliatedDepartments = { 
+		(
+			Option(homeDepartment) ++ 
+			Option(studyDetails.studyDepartment) ++ 
+			Option(studyDetails.route).map(_.department)
+		).toSeq.distinct
 	}
 
 	override def personalTutor =
@@ -322,7 +319,7 @@ trait StudentProperties {
 	var termtimeAddress: Address = null
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
-	var nextOfKins:JList[NextOfKin] = ArrayList()
+	var nextOfKins:JList[NextOfKin] = JArrayList()
 }
 
 trait StaffProperties {

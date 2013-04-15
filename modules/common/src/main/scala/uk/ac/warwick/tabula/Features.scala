@@ -22,8 +22,7 @@ import uk.ac.warwick.util.queue.conversion.ItemType
  *
  * ==Adding a new feature==
  *
- * Define a new boolean variable here (with `@BeanProperty` so that it's
- * a valid JavaBean property), and then to set it to a different value in
+ * Define a new boolean variable here and FeaturesMessages, and then to set it to a different value in
  * `tabula.properties` add a line such as 
  *
  * {{{

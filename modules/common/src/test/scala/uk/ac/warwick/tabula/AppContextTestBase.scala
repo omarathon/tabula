@@ -33,13 +33,7 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 			.getSubTypesOf(classOf[Command[_]])
 			.asScala.toList
 			.filter { clz => !Modifier.isAbstract(clz.getModifiers) }
-			.sortWith((c1, c2) => {
-				val p1 = c1.getPackage.getName
-				val p2 = c2.getPackage.getName
-				
-				if (p1 == p2) c1.getName < c2.getName
-				else p1 < p2
-			})
+			.sortBy { _.getPackage.getName }
 	}
 }
 

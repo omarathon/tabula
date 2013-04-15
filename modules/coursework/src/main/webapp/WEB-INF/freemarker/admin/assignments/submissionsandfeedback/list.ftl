@@ -329,7 +329,7 @@
 						</#if>
 					</td>
 					<#if assignment.wordCountField??>
-						<td>
+						<td class="word-count">
 							<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
 								${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
 							</#if>
@@ -410,7 +410,23 @@
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
 		(function($) {
-			$("#submission-table").sortableTable();
+			$("#submission-table").sortableTable({
+				textExtraction: function(node) { 
+					var $el = $(node);
+					if ($el.hasClass('originality-report')) {
+						var $tooltip = $el.find('.similarity-tooltip').first();
+						if ($tooltip.length) {
+							return parseInt($tooltip.text().substring(0, $tooltip.text().indexOf('%')));
+						} else {
+							return 0;
+						}
+					} else if ($el.hasClass('word-count')) {
+						return parseInt($el.text().trim().replace(',',''));
+					} else {				
+						return $el.text().trim();
+					} 
+				}
+			});
 		})(jQuery);
 	</script>
 </div>

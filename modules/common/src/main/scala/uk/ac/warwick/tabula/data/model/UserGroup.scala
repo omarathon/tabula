@@ -10,7 +10,6 @@ import javax.persistence.Entity
 import javax.persistence.JoinTable
 import javax.persistence.JoinColumn
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ArrayList
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 
@@ -46,17 +45,17 @@ class UserGroup extends GeneratedId {
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var includeUsers: JList[String] = ArrayList()
+	var includeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var staticIncludeUsers: JList[String] = ArrayList()
+	var staticIncludeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var excludeUsers: JList[String] = ArrayList()
+	var excludeUsers: JList[String] = JArrayList()
 
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {

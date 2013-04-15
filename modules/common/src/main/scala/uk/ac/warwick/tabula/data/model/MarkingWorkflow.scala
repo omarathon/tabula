@@ -7,7 +7,6 @@ import uk.ac.warwick.userlookup.User
 import scala.{Array, Some}
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import reflect.BeanProperty
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService

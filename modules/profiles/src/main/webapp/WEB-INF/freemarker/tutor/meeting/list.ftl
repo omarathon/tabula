@@ -23,7 +23,7 @@
 							<div class="description"><#noescape>${meeting.description}</#noescape></div>
 						</#if>
 						
-						<small class="muted">Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+						<small class="muted">${(meeting.format.description)!"Unknown format"}. Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 					</details>
 				</#list>
 			</#if>

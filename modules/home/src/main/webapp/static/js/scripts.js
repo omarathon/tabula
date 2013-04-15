@@ -12,6 +12,8 @@
 
 	// Tabula-specific rendition of tablesorter plugin for sortable tables
 	jQuery.fn.sortableTable = function(settings) {
+		settings = settings || {};
+	
 		var $table = $(this);
 		if ($table.tablesorter) {
 			var headerSettings = {};
@@ -21,7 +23,7 @@
 					headerSettings[index] = {sorter: false};
 				}
 			});
-			$table.tablesorter({headers: headerSettings});
+			$table.tablesorter($.extend({headers: headerSettings}, settings));
 			return this;
 		}
 	};	
@@ -61,11 +63,119 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 	
+	/*
+	 * Prepare a spinner and store reference in data store.
+	 * Add spinner-* classes to control positioning and automatic spinning
+	 * 
+	 * Otherwise methods from spin.js to instantiate, eg:
+	 * $(el).data('spinContainer').spin('small');
+	 * $(el).data('spinContainer').spin(false);
+	 */
+	jQuery.fn.tabulaPrepareSpinners = function(selector) {
+		selector = selector || '.spinnable';
+		
+		// filter selector and descendants
+		var $spinnable = $(this).find(selector).add($(this).filter(selector));
+		
+		if ($spinnable.length) {
+			$spinnable.each(function() {
+				var $this = $(this);
+
+				if ($this.data('spinContainer')) {
+					// turn off any existing spinners
+					$this.data('spinContainer').spin(false);
+				} else {
+					// create new spinner element
+					var $spinner = $('<div class="spinner-container" />');
+					
+					// position new spinner
+					if ($this.is('.spinner-prepend')) {
+						$this.prepend($spinner);
+					} else if ($this.is('.spinner-append')) {
+						$this.append($spinner);
+					} else if ($this.is('.spinner-before')) {
+						$this.before($spinner);
+					} else if ($this.is('.spinner-after')) {
+						$this.after($spinner);
+					} else {
+						// default centred on element itself
+						$spinner.remove();
+						$this.data('spinContainer', $this);
+					}
+					
+					if (!$this.data('spinContainer')) {
+						// if not yet stored...
+						$this.data('spinContainer', $spinner);
+					}
+					
+					if ($this.is('.spinner-auto')) {
+						// spin only after 500ms
+						$this.click(function(e) {
+							var $container = $this.data('spinContainer');
+							setTimeout(function() { $container.spin('small'); }, 500);
+						});
+					}
+				}
+			});
+		}
+	};
+	
+	/*
+	 * .double-submit-protection class on a form will detect submission
+	 * and prevent submitting twice. It will also visually disable any
+	 * .btn items in a .submit-buttons container.
+	 * 
+	 * Obviously this won't make it impossible to submit twice, if JS is
+	 * disabled or altered.
+	 */
+	jQuery.fn.tabulaSubmitOnce = function() {
+		var $this = $(this);
+		
+		if ($this.is('form') && !$this.data('submitOnce')) {
+			$this.data('submitOnce', 'true');
+			
+			$(this).on('submit', function(event) {
+				var $this = $(event.target),
+					submitted = $this.data('already-submitted');
+				
+				if (!submitted) {
+					var $buttons = $this.find('.submit-buttons .btn').not('.disabled');
+					$buttons.addClass('disabled');
+					$this.data('already-submitted', true);
+					// For FF and other browsers with BFCache/History Cache,
+					// re-enable the form if you click Back.
+					$(window).on('pageshow', function() {
+						$buttons.removeClass('disabled');
+						$this.removeData('already-submitted');
+					});
+					return true;
+				} else {
+					event.preventDefault();
+					return false;
+				}
+			});
+		}
+	};
+	
 	// on ready
 	$(function() {
+		// form behavioural hooks
 		$('input.date-time-picker').tabulaDateTimePicker();	
 		$('input.date-picker').tabulaDatePicker();
-	
+		$('form.double-submit-protection').tabulaSubmitOnce();
+
+		// prepare spinnable elements
+		$('body').tabulaPrepareSpinners();
+				
+		// repeat these hooks for modals when shown
+		$('body').on('shown', '.modal', function() {
+			var $m = $(this);
+			$m.find('input.date-time-picker').tabulaDateTimePicker();
+			$m.find('input.date-picker').tabulaDatePicker();
+			$m.find('form.double-submit-protection').tabulaSubmitOnce();
+			$m.tabulaPrepareSpinners();
+		});
+
 		/* When a .long-running link is clicked it will be
 		 * replaced with "Please wait" text, to tell the user to expect to
 		 * wait a few seconds.
@@ -78,35 +188,6 @@
 				setTimeout(function(){
 					$this.removeClass('clicked').css({opacity:1}).html(originalText);
 				}, 5000);
-				return true;
-			} else {
-				event.preventDefault();
-				return false;
-			}
-		});
-		
-		/*
-		 * .double-submit-protection class on a form will detect submission
-		 * and prevent submitting twice. It will also visually disable any
-		 * .btn items in a .submit-buttons container. 
-		 * 
-		 * Obviously this won't make it impossible to submit twice, if JS is
-		 * disabled or altered.
-		 */
-		$('form.double-submit-protection').on('submit', function(event) {
-			var $this = $(event.target),
-			    submitted = $this.data('already-submitted');
-			
-			if (!submitted) {
-				var $buttons = $this.find('.submit-buttons .btn').not('.disabled');
-				$buttons.addClass('disabled');
-				$this.data('already-submitted', true);
-				// For FF and other browsers with BFCache/History Cache,
-				// re-enable the form if you click Back.
-				$(window).on('pageshow', function() {
-					$buttons.removeClass('disabled');
-					$this.removeData('already-submitted');
-				});
 				return true;
 			} else {
 				event.preventDefault();
@@ -179,5 +260,10 @@
 				$title.trigger('click');
 			}
 		});
+		
+		// sticky table headers
+		//$('table.sticky-table-headers').stickyTableHeaders({
+		//	fixedOffset: $('#navigation')
+		//});
 	}); // on ready
 })(jQuery);

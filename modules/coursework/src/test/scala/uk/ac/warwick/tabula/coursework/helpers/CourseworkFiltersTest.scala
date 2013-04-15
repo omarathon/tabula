@@ -2,11 +2,8 @@ package uk.ac.warwick.tabula.coursework.helpers
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-
 import org.joda.time.DateTime
-
 import uk.ac.warwick.tabula.Fixtures
-
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.Student
@@ -23,6 +20,11 @@ import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.forms.MarkerSelectField
+import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
+import org.joda.time.DateTimeConstants
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
 class CourseworkFiltersTest extends TestBase {
 	
@@ -84,6 +86,101 @@ class CourseworkFiltersTest extends TestBase {
 			stages=ListMap.empty,
 			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, extension, withinExtension)
 		)
+		
+	class SampleFilteringCommand(elems: (String, String)*) {
+		var filter: JMap[String, String] = JHashMap()
+		elems foreach { case (key, value) => filter.put(key, value) }
+	}
+	
+	@Test def SubmittedBetweenDates {
+		val filter = CourseworkFilters.SubmittedBetweenDates
+		
+		// Only applies to assignments that collect submissions
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+		
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (true)
+		
+		val converter = new JodaDateTimeConverter
+		
+		// Validation - start and end date must be defined and end must be after start
+		{
+			val cmd = new SampleFilteringCommand()		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (2)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[startDate]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[endDate]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+		}
+		
+		{
+			val startDate = new DateTime(2013, DateTimeConstants.MARCH, 1, 0, 0, 0, 0)
+			val endDate = new DateTime(2013, DateTimeConstants.APRIL, 1, 0, 0, 0, 0)
+			
+			val cmd = new SampleFilteringCommand(
+				"startDate" -> converter.convertLeft(endDate),
+				"endDate" -> converter.convertLeft(startDate)
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (1)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[endDate]")
+			errors.getFieldErrors.asScala(0).getCode should be ("filters.SubmittedBetweenDates.end.beforeStart")
+		}
+		
+		{
+			val startDate = new DateTime(2013, DateTimeConstants.MARCH, 1, 0, 0, 0, 0)
+			val endDate = new DateTime(2013, DateTimeConstants.APRIL, 1, 0, 0, 0, 0)
+			
+			val cmd = new SampleFilteringCommand(
+				"startDate" -> converter.convertLeft(startDate),
+				"endDate" -> converter.convertLeft(endDate)
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.hasErrors should be (false)
+		}
+		
+		// Valid where there is a submission, and the submission is in March
+		val startDate = new DateTime(2013, DateTimeConstants.MARCH, 1, 0, 0, 0, 0)
+		val endDate = new DateTime(2013, DateTimeConstants.APRIL, 1, 0, 0, 0, 0)
+		
+		val params = Map(
+			"startDate" -> converter.convertLeft(startDate),
+			"endDate" -> converter.convertLeft(endDate)
+		)
+		
+		filter.predicate(params)(student(submission=None)) should be (false)
+		
+		val submission = Fixtures.submission("0672089", "cuscav")
+		submission.assignment = assignment
+		
+		// Submission in February
+		submission.submittedDate = startDate.minusDays(1)
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		// Submission in April
+		submission.submittedDate = endDate.plusDays(1)
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		// Submission exactly on start date
+		submission.submittedDate = startDate
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		// Submission exactly on end date
+		submission.submittedDate = endDate
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		// Submission inbetween
+		submission.submittedDate = startDate.plusDays(1)
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+	} 
 	
 	@Test def OnTime {
 		val filter = CourseworkFilters.OnTime
@@ -203,6 +300,110 @@ class CourseworkFiltersTest extends TestBase {
 		submission.isLate should be (false)
 		submission.isAuthorisedLate should be (true)
 		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (true)
+	} 
+	
+	@Test def WithWordCount {
+		val filter = CourseworkFilters.WithWordCount
+		
+		// Only applies to assignments that collect submissions and have a word count field defined
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+		
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (false)
+		
+		val wordCountField = new WordCountField
+		wordCountField.name = Assignment.defaultWordCountName
+		assignment.addField(wordCountField)
+		
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+		
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (true)
+		
+		// Validation - min and max must be defined, in range, and max must be >= min
+		{
+			val cmd = new SampleFilteringCommand()		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (2)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[minWords]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minWords" -> 50.toString,
+				"maxWords" -> "steve"
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (1)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("typeMismatch")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minWords" -> -15.toString,
+				"maxWords" -> -200.toString
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (3)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithWordCount.max.lessThanMin")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[minWords]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithWordCount.min.lessThanZero")
+			errors.getFieldErrors.asScala(2).getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithWordCount.max.lessThanZero")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minWords" -> "0",
+				"maxWords" -> "100"
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.hasErrors should be (false)
+		}
+		
+		// Valid where there is a submission, and the word count is between 40 and 60
+		val params = Map(
+			"minWords" -> "40",
+			"maxWords" -> "60"
+		)
+		
+		filter.predicate(params)(student(submission=None)) should be (false)
+		
+		val submission = Fixtures.submission("0672089", "cuscav")
+		submission.assignment = assignment
+			
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		val v = new SavedSubmissionValue
+		v.name = wordCountField.name
+		v.value = "30"
+		submission.values.add(v)
+				
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		v.value = "40"
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		v.value = "50"
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		v.value = "60"
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 	} 
 	
 	@Test def Unsubmitted {
@@ -421,7 +622,6 @@ class CourseworkFiltersTest extends TestBase {
 		
 		filter.predicate(student(submission=Some(submission))) should be (false)
 		
-		// Release for marking, no longer fits
 		val a = new FileAttachment
 		a.originalityReport = new OriginalityReport
 		submission.values.add(SavedSubmissionValue.withAttachments(submission, "Turnitin", Seq(a).toSet.asJava))
@@ -430,6 +630,114 @@ class CourseworkFiltersTest extends TestBase {
 		
 		filter.predicate(student(submission=Some(submission))) should be (true)
 	} 
+	
+	@Test def WithOverlapPercentage {
+		val filter = CourseworkFilters.WithOverlapPercentage
+		
+		// Only applies to assignments that collect submissions and the department has plagiarism detection enabled
+		department.plagiarismDetectionEnabled = false
+		
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+		
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (false)
+		
+		department.plagiarismDetectionEnabled = true
+		
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+		
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (true)
+		
+		// Validation - min and max must be defined, in range, and max must be >= min
+		{
+			val cmd = new SampleFilteringCommand()		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (2)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[minOverlap]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minOverlap" -> 50.toString,
+				"maxOverlap" -> "steve"
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (1)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("typeMismatch")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minOverlap" -> 1500.toString,
+				"maxOverlap" -> 200.toString
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.getErrorCount should be (3)
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithOverlapPercentage.max.lessThanMin")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[minOverlap]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithOverlapPercentage.min.notInRange")
+			errors.getFieldErrors.asScala(2).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithOverlapPercentage.max.notInRange")
+		}
+		
+		{			
+			val cmd = new SampleFilteringCommand(
+				"minOverlap" -> "0",
+				"maxOverlap" -> "100"
+			)		
+			val errors = new BindException(cmd, "cmd")
+			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
+			
+			errors.hasErrors should be (false)
+		}
+		
+		// Valid where there is a submission, and the overlap percentage is between 40 and 60
+		val params = Map(
+			"minOverlap" -> "40",
+			"maxOverlap" -> "60"
+		)
+		
+		filter.predicate(params)(student(submission=None)) should be (false)
+		
+		val submission = Fixtures.submission("0672089", "cuscav")
+		submission.assignment = assignment
+		
+		submission.hasOriginalityReport.booleanValue() should be (false)
+		
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		val a = new FileAttachment
+		a.originalityReport = new OriginalityReport
+		a.originalityReport.overlap = Some(30)
+		submission.values.add(SavedSubmissionValue.withAttachments(submission, "Turnitin", Seq(a).toSet.asJava))
+		
+		submission.hasOriginalityReport.booleanValue() should be (true)
+		
+		filter.predicate(params)(student(submission=Some(submission))) should be (false)
+		
+		a.originalityReport.overlap = Some(40)
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		a.originalityReport.overlap = Some(50)
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+		
+		a.originalityReport.overlap = Some(60)
+		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+	}
 	
 	@Test def NotCheckedForPlagiarism {
 		val filter = CourseworkFilters.NotCheckedForPlagiarism
@@ -461,7 +769,7 @@ class CourseworkFiltersTest extends TestBase {
 		
 		filter.predicate(student(submission=Some(submission))) should be (true)
 		
-		// Release for marking, no longer fits
+		// Checked for plagiarism, no longer fits
 		val a = new FileAttachment
 		a.originalityReport = new OriginalityReport
 		submission.values.add(SavedSubmissionValue.withAttachments(submission, "Turnitin", Seq(a).toSet.asJava))

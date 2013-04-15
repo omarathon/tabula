@@ -13,8 +13,8 @@ class DisplaySettingsCommand (val department:Department) extends Command[Unit] w
 	
 	PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
 
-	var showStudentName:Boolean = department.isShowStudentName
-	var plagiarismDetection:Boolean = department.isPlagiarismDetectionEnabled
+	var showStudentName:Boolean = department.showStudentName
+	var plagiarismDetection:Boolean = department.plagiarismDetectionEnabled
 
 	override def applyInternal() {
 		transactional() {
@@ -26,11 +26,8 @@ class DisplaySettingsCommand (val department:Department) extends Command[Unit] w
 	}
 
 	// describe the thing that's happening.
-	override def describe(d:Description) {
-		d.properties("department" -> department.code)
-	}
+	override def describe(d:Description) =
+		d.department(department)
 
-	override def validate(errors:Errors){
-
-	}
+	override def validate(errors:Errors) {}
 }

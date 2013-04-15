@@ -21,12 +21,20 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 		
 		val ch = service.getDepartmentByCode("ch").get
 		val cs = service.getDepartmentByCode("cs").get
+		val cssub = service.getDepartmentByCode("cs-subsidiary").get
 		
 		val cs108 = service.getModuleByCode("cs108").get
 		val cs240 = service.getModuleByCode("cs240").get
+		val cs241 = service.getModuleByCode("cs241").get
 		
-		service.allDepartments should be (Seq(ch, cs))
-		service.allModules should be (Seq(cs108, cs240))
+		service.allDepartments should be (Seq(ch, cs, cssub))
+		service.allModules should be (Seq(cs108, cs240, cs241))
+		
+		// behaviour of child/parent departments
+		cs.children.toArray should be (Array(cssub))
+		cssub.parent should be (cs)
+		ch.children.isEmpty should be (true)
+		cs241.department should be (cssub)
 		
 		service.getDepartmentByCode("ch") should be (Some(ch))
 		service.getDepartmentById(ch.id) should be (Some(ch))
@@ -69,6 +77,7 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 		service.modulesManagedBy("cuscav") should be (Seq(cs108))
 		service.modulesManagedBy("cuscav", cs) should be (Seq(cs108))
 		service.modulesManagedBy("cuscav", ch) should be (Seq())
+		
 	}
 
 }

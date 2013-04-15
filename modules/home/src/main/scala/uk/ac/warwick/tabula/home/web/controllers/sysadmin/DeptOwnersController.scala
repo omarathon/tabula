@@ -19,7 +19,7 @@ class DeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping
 	def departments = Mav("sysadmin/departments/list",
-		"departments" -> moduleService.allDepartments)
+		"departments" -> moduleService.allDepartments.sortBy{ _.name })
 
 	@RequestMapping(Array("/{dept}/"))
 	def department(@PathVariable("dept") dept: Department) = {

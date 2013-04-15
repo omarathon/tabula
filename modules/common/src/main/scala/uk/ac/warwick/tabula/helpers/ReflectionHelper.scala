@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
 
+// TODO review this class with the new Reflection API in 2.10
 object ReflectionHelper {
 	
 	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType)

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.views
 
-import java.util.List
 import freemarker.template.TemplateMethodModel
 import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateDirectiveBody
@@ -12,6 +11,7 @@ import javax.annotation.Resource
 import freemarker.template.SimpleScalar
 import java.net.URLEncoder
 import uk.ac.warwick.util.web.EscapingUriParser
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  *
@@ -35,7 +35,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 		contextNoRoot + path
 	}
 	
-	override def exec(args: java.util.List[_]): TemplateModel = {
+	override def exec(args: JList[_]): TemplateModel = {
 		if (args.size >= 1) {
 			val contextOverridden = 
 				if (args.size > 1) Option(args.get(1).toString())
@@ -59,7 +59,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
 	}
 
 	override def execute(env: Environment,
-		params: java.util.Map[_, _],
+		params: JMap[_, _],
 		loopVars: Array[TemplateModel],
 		body: TemplateDirectiveBody) {
 

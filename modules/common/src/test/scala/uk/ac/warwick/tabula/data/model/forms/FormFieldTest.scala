@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.commands.UploadedFile
 import org.springframework.validation.BindException
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.ArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
 class FormFieldTest extends TestBase with Mockito {
@@ -147,7 +147,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.attachmentLimit = 2
 		field.attachmentTypes = Seq("doc", "txt")
 		
-		val expectedTypes: java.util.List[String] = ArrayList()
+		val expectedTypes: JList[String] = JArrayList()
 		expectedTypes.add("doc")
 		expectedTypes.add("txt")
 			
@@ -156,7 +156,7 @@ class FormFieldTest extends TestBase with Mockito {
 			
 		val value = field.blankSubmissionValue
 		value.file = new UploadedFile
-		value.file.attached = ArrayList()
+		value.file.attached = JArrayList()
 		
 		var errors = new BindException(value, "value")
 		field.validate(value, errors)
@@ -165,7 +165,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("file")
 		errors.getFieldError.getCode should be ("file.missing")
 		
-		value.file.attached = ArrayList()
+		value.file.attached = JArrayList()
 		
 		var attachment = new FileAttachment
 		attachment.name = "file.doc"
@@ -182,7 +182,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("file")
 		errors.getFieldError.getCode should be ("file.toomany")
 		
-		value.file.attached = ArrayList()
+		value.file.attached = JArrayList()
 		
 		attachment = new FileAttachment
 		attachment.name = "file.doc"
@@ -198,7 +198,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("file")
 		errors.getFieldError.getCode should be ("file.duplicate")
 		
-		value.file.attached = ArrayList()
+		value.file.attached = JArrayList()
 		
 		// wrong type
 		attachment = new FileAttachment
@@ -212,7 +212,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("file")
 		errors.getFieldError.getCode should be ("file.wrongtype.one")
 		
-		value.file.attached = ArrayList()
+		value.file.attached = JArrayList()
 		
 		// wrong type
 		attachment = new FileAttachment

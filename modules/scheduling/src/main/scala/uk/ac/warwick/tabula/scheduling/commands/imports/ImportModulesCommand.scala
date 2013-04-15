@@ -105,7 +105,7 @@ object ImportModulesCommand {
 		val module = new Module
 		module.code = m.code
 		module.name = m.name
-		//      module.members.baseWebgroup = m.group
+		// TODO TAB-87 check child department rules and maybe sort it into a child department instead
 		module.department = dept
 		module
 	}

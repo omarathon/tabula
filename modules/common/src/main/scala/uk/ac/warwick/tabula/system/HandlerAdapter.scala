@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataB
  * to replace them entirely.
  */
 class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter {
-	var customPreReturnValueHandlers: java.util.List[HandlerMethodReturnValueHandler] = Nil
+	var customPreReturnValueHandlers: JList[HandlerMethodReturnValueHandler] = Nil
 
 	/*
 	 * There used to be a protected method we could override but now it's all private, so

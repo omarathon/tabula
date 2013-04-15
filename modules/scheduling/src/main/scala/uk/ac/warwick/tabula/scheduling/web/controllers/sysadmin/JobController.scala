@@ -40,7 +40,7 @@ class JobController extends BaseController {
 			"endIndex" -> end)
 	}
 
-	@RequestMapping(value = Array("/create-test"), method = Array(POST))
+	@RequestMapping(value = Array("/create-test"))
 	def test = {
 		val id = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay)).id
 		testStatus(id)

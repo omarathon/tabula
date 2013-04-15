@@ -1,209 +1,279 @@
 <#escape x as x?html>
-<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
-
-<#assign module=assignment.module />
-<#assign department=module.department />
-
-<@f.form method="get" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
-	<div class="filter">
-		<label for="filter"><i class="icon-filter"></i> Show all</label>
-		&nbsp;
-		<@f.select path="filter" cssClass="span4">
-			<@f.options items=allFilters itemValue="name" itemLabel="description" />
-		</@f.select>
-	</div>
+<div class="fixed-on-scroll">
+	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 	
-	<script type="text/javascript">
-		jQuery(function($) {
-			$('#filter').on('keyup change', function() {
-				$(this).closest('form').submit();
-			});
-		});
-	</script>
-</@f.form>
-
-<#macro originalityReport attachment>
-<#local r=attachment.originalityReport />
-
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-      <div id="tip-content-${attachment.id}" class="hide">
-				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-				<p class="similarity-subcategories-tooltip">
-					Web: ${r.webOverlap}%<br>
-					Student papers: ${r.studentOverlap}%<br>
-					Publications: ${r.publicationOverlap}%
-				</p>
-				<p>
-					<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
-				</p>
-      </div>
-      <script type="text/javascript">
-        jQuery(function($){
-          $("#tool-tip-${attachment.id}").popover({
-            placement: 'right',
-            html: true,
-            content: function(){return $('#tip-content-${attachment.id}').html();},
-            title: 'Turnitin report summary'
-          });
-        });
-      </script>
-
-</#macro>
-
-<div class="btn-toolbar">
-	<div class="btn-group-group">
-		<div class="btn-group">
-			<a class="btn hover"><i class="icon-cog"></i> Actions:</a>
+	<#if assignment.openEnded>
+		<p class="dates">
+			<@fmt.interval assignment.openDate />, never closes
+			(open-ended)
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+		</p>
+	<#else>
+		<p class="dates">
+			<@fmt.interval assignment.openDate assignment.closeDate />
+			<#if assignment.closed>
+				<span class="label label-warning">Closed</span>
+			</#if>
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+								
+		</p>
+	</#if>
+	
+	<#assign module=assignment.module />
+	<#assign department=module.department />
+	
+	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
+		<div class="filter">
+			<label for="filter">Show all</label>
+			&nbsp;
+			<@f.select path="filter" cssClass="span4">
+				<@f.options items=allFilters itemValue="name" itemLabel="description" />
+			</@f.select>
+			
+			<#list allFilters as filter>
+				<#if filter.parameters?size gt 0>
+					<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
+						<#list filter.parameters as param>
+							<@form.labelled_row "filterParameters[${param._1()}]" param._2()>
+								<#if param._3() == 'datetime'>
+									<@f.input path="filterParameters[${param._1()}]" cssClass="date-time-picker" />
+								<#elseif param._3() == 'percentage'>
+									<div class="input-append">
+										<@f.input path="filterParameters[${param._1()}]" type="number" min="0" max="100" cssClass="input-small" />
+										<span class="add-on">%</span>
+									</div>
+								<#else>
+									<@f.input path="filterParameters[${param._1()}]" type=param._3() />
+								</#if>
+							</@form.labelled_row>
+						</#list>
+						
+						<@form.row>
+							<@form.field>
+								<button class="btn btn-primary" type="submit">Filter</button>
+							</@form.field>
+						</@form.row>
+					</fieldset>
+				</#if>
+			</#list>
 		</div>
 		
-		<#if assignment.collectSubmissions>
-			<div class="btn-group">	
-				<a class="btn dropdown-toggle" data-toggle="dropdown">
-					Submission
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
-					<li class="must-have-selected">
-						<a class="long-running use-tooltip form-post" 
-							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" 
-							 title="Download the submission files for the selected students as a ZIP file." 
-							 data-container="body"><i class="icon-download"></i> Download submission
-						</a>
-					</li>
-					<li class="must-have-selected">
-						<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete submission</a>
-					</li>
-				</ul>
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('#filter').on('keyup change', function() {
+					var $select = $(this);
+					var val = $select.val();
+					
+					var $options = $select.closest('.filter').find('fieldset[data-filter="' + val + '"]');
+					var $openOptions = $select.closest('.filter').find('.filter-options:visible');
+					
+					var cb = function() {
+						if ($options.length) {
+							$options.slideDown();
+						} else {
+							$select.closest('form').submit();
+						}
+					};
+					
+					if ($openOptions.length) {
+						$openOptions.slideUp('fast', cb);
+					} else {
+						cb();
+					}
+				});
+			});
+		</script>
+	</@f.form>
+
+	<#if students??>
+	
+	<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+	
+				<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+	      <div id="tip-content-${attachment.id}" class="hide">
+					<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+					<p class="similarity-subcategories-tooltip">
+						Web: ${r.webOverlap}%<br>
+						Student papers: ${r.studentOverlap}%<br>
+						Publications: ${r.publicationOverlap}%
+					</p>
+					<p>
+						<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+					</p>
+	      </div>
+	      <script type="text/javascript">
+	        jQuery(function($){
+	          $("#tool-tip-${attachment.id}").popover({
+	            placement: 'right',
+	            html: true,
+	            content: function(){return $('#tip-content-${attachment.id}').html();},
+	            title: 'Turnitin report summary'
+	          });
+	        });
+	      </script>
+	
+	</#macro>
+	
+	<div class="btn-toolbar">
+		<div class="btn-group-group">
+			<div class="btn-group">
+				<a class="btn hover"><i class="icon-cog"></i> Actions:</a>
 			</div>
-		<#else>
-			<div class="btn-group">	
-				<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
-					Submission
-					<span class="caret"></span>
-				</a>
-			</div>
-		</#if>
-		
-		<#if department.plagiarismDetectionEnabled && assignment.collectSubmissions>
-			<div class="btn-group">	
-				<a class="btn dropdown-toggle" data-toggle="dropdown">
-					Plagiarism
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
-					<#if features.turnitin>
-						<li>
-							<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />"><i class="icon-book"></i> Check for plagiarism</a>
-						</li>
-					</#if>
-					<li class="must-have-selected">
-						<a class="use-tooltip" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button" title="Toggle whether the selected students' submissions are possibly plagiarised." data-container="body"><i class="icon-exclamation-sign"></i> Mark plagiarised</a>
-					</li>
-				</ul>
-			</div>
-		<#elseif assignment.collectSubmissions>
-			<div class="btn-group">	
-				<a class="btn dropdown-toggle disabled use-tooltip" title="Your department does not use plagiarism detection in Tabula" data-container="body">
-					Plagiarism
-					<span class="caret"></span>
-				</a>
-			</div>
-		<#else>
-			<div class="btn-group">	
-				<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
-					Plagiarism
-					<span class="caret"></span>
-				</a>
-			</div>
-		</#if>
-		
-		<#if assignment.collectSubmissions && features.markingWorkflows>
-			<#if mustReleaseForMarking>
+			
+			<#if assignment.collectSubmissions>
 				<div class="btn-group">	
 					<a class="btn dropdown-toggle" data-toggle="dropdown">
-						Marking
+						Submission
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
-							<a class="use-tooltip form-post" data-container="body" 
-							   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
-							   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
-							   id="release-submissions-button"><i class="icon-inbox"></i> Release for marking</a>
+							<a class="long-running use-tooltip form-post" 
+								 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" 
+								 title="Download the submission files for the selected students as a ZIP file." 
+								 data-container="body"><i class="icon-download"></i> Download submission
+							</a>
+						</li>
+						<li class="must-have-selected">
+							<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete submission</a>
 						</li>
 					</ul>
 				</div>
 			<#else>
 				<div class="btn-group">	
-					<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not use a marking workflow that requires assignments to be released for marking" data-container="body">
-						Marking
+					<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
+						Submission
 						<span class="caret"></span>
 					</a>
 				</div>
 			</#if>
-		</#if>
+			
+			<#if department.plagiarismDetectionEnabled && assignment.collectSubmissions>
+				<div class="btn-group">	
+					<a class="btn dropdown-toggle" data-toggle="dropdown">
+						Plagiarism
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<#if features.turnitin>
+							<li>
+								<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />"><i class="icon-book"></i> Check for plagiarism</a>
+							</li>
+						</#if>
+						<li class="must-have-selected">
+							<a class="use-tooltip" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button" title="Toggle whether the selected students' submissions are possibly plagiarised." data-container="body"><i class="icon-exclamation-sign"></i> Mark plagiarised</a>
+						</li>
+					</ul>
+				</div>
+			<#elseif assignment.collectSubmissions>
+				<div class="btn-group">	
+					<a class="btn dropdown-toggle disabled use-tooltip" title="Your department does not use plagiarism detection in Tabula" data-container="body">
+						Plagiarism
+						<span class="caret"></span>
+					</a>
+				</div>
+			<#else>
+				<div class="btn-group">	
+					<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
+						Plagiarism
+						<span class="caret"></span>
+					</a>
+				</div>
+			</#if>
+			
+			<#if assignment.collectSubmissions && features.markingWorkflows>
+				<#if mustReleaseForMarking?default(false)>
+					<div class="btn-group">	
+						<a class="btn dropdown-toggle" data-toggle="dropdown">
+							Marking
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<li class="must-have-selected">
+								<a class="use-tooltip form-post" data-container="body" 
+								   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
+								   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
+								   id="release-submissions-button"><i class="icon-inbox"></i> Release for marking</a>
+							</li>
+						</ul>
+					</div>
+				<#else>
+					<div class="btn-group">	
+						<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not use a marking workflow that requires assignments to be released for marking" data-container="body">
+							Marking
+							<span class="caret"></span>
+						</a>
+					</div>
+				</#if>
+			</#if>
+			
+			<div class="btn-group">	
+				<a class="btn dropdown-toggle" data-toggle="dropdown">
+					Feedback
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+						<li>
+							<a class="long-running use-tooltip" 
+								 href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>" 
+								 title="Download feedback templates for all students as a ZIP file." 
+								 data-container="body"><i class="icon-download"></i> Download templates
+							</a>
+						</li>
+						<li class="divider"></li>
+					</#if>
+					<li>
+						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />"><i class="icon-check"></i> Add marks</a>
+					</li>
+					<li class="divider"></li>
+					<li>
+						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
+					</li>
+					<li class="must-have-selected">
+						<a class="long-running use-tooltip form-post" 
+							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" 
+							 title="Download the feedback files for the selected students as a ZIP file." 
+							 data-container="body"><i class="icon-download"></i> Download feedback
+						</a>
+					</li>
+					<li>
+						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />"><i class="icon-share"></i> Publish feedback</a>
+					</li>
+					<li class="must-have-selected">
+						<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete feedback</a>
+					</li>
+				</ul>
+			</div>
+		</div>
 		
-		<div class="btn-group">	
+		<div class="btn-group">
 			<a class="btn dropdown-toggle" data-toggle="dropdown">
-				Feedback
+				Save As
 				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu">
-				<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
-					<li>
-						<a class="long-running use-tooltip" 
-							 href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>" 
-							 title="Download feedback templates for all students as a ZIP file." 
-							 data-container="body"><i class="icon-download"></i> Download templates
-						</a>
-					</li>
-					<li class="divider"></li>
-				</#if>
 				<li>
-					<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />"><i class="icon-check"></i> Add marks</a>
-				</li>
-				<li class="divider"></li>
-				<li>
-					<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
-				</li>
-				<li class="must-have-selected">
-					<a class="long-running use-tooltip form-post" 
-						 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" 
-						 title="Download the feedback files for the selected students as a ZIP file." 
-						 data-container="body"><i class="icon-download"></i> Download feedback
-					</a>
+					<a title="Export submissions info as XLSX, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel</a>
 				</li>
 				<li>
-					<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />"><i class="icon-share"></i> Publish feedback</a>
+					<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">Text (CSV)</a>
 				</li>
-				<li class="must-have-selected">
-					<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete feedback</a>
+				<li>
+					<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
 				</li>
 			</ul>
 		</div>
 	</div>
-	
-	<div class="btn-group">
-		<a class="btn dropdown-toggle" data-toggle="dropdown">
-			Save As
-			<span class="caret"></span>
-		</a>
-		<ul class="dropdown-menu">
-			<li>
-				<a title="Export submissions info as XLSX, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel</a>
-			</li>
-			<li>
-				<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">Text (CSV)</a>
-			</li>
-			<li>
-				<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
-			</li>
-		</ul>
-	</div>
 </div>
 
 <#if students?size gt 0>
-	<table id="coursework-progress-table" class="students table table-bordered table-striped tabula-greenLight">
+	<table id="coursework-progress-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
 		<thead>
 			<tr>
 				<th class="check-col" style="padding-right: 0px;"><input type="checkbox" class="collection-check-all"></th>
@@ -315,7 +385,7 @@
 							</div>
 							
 							<#-- If the current action is in this section, then add the next action blowout here -->
-							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString)>
+							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString) && student.progress.messageCode != 'workflow.Submission.unsubmitted.failedToSubmit'>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
@@ -512,7 +582,7 @@
 						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
 					</#if>
 					<td class="progress-col">	
-						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission'>
+						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
 							<#local progressTooltip><@spring.message code=student.stages['Submission'].messageCode />. <@spring.message code=student.progress.messageCode /></#local>
 						<#else>
 							<#local progressTooltip><@spring.message code=student.progress.messageCode /></#local>
@@ -529,7 +599,11 @@
 					</td>
 					<td class="action-col">
 						<#if student.nextStage??>
-							<@action student.nextStage.actionCode student />
+							<#if student.progress.messageCode == 'workflow.Submission.unsubmitted.failedToSubmit'>
+								Failed to submit
+							<#else>
+								<@action student.nextStage.actionCode student />
+							</#if>
 						<#elseif student.progress.percentage == 100>
 							Complete
 						</#if>
@@ -546,7 +620,14 @@
 	<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
 		<p>There are no submissions or feedbacks yet for this assignment.</p>
 	<#else>
-		<p>There are no ${submissionAndFeedbackCommand.filter.description} for this assignment.</p>
+		<#macro filterDescription filter filterParameters><#compress>
+			${filter.description}
+			<#if filter.parameters?size gt 0>(<#compress>
+				<#list filter.parameters as param>${param._1()}=${filterParameters[param._1()]}<#if param_has_next>, </#if></#list>
+			</#compress>)</#if>
+		</#compress></#macro>
+	
+		<p>There are no <@filterDescription submissionAndFeedbackCommand.filter submissionAndFeedbackCommand.filterParameters /> for this assignment.</p>
 	</#if>
 </#if>
 
@@ -666,22 +747,25 @@
 				
 				// Add differing amounts for info, success, warning and danger so that they are sorted in the right order. 
 				// info is the default, so == 0
-				if ($el.hasClass('progress-success')) {
-					width += 1;
-				} else if ($el.hasClass('progress-warning')) {
-					width += 2;
-				} else if ($el.hasClass('progress-danger')) {
+				if ($el.find('.progress').hasClass('progress-success')) {
 					width += 3;
+				} else if ($el.find('.progress').hasClass('progress-warning')) {
+					width += 2;
+				} else if ($el.find('.progress').hasClass('progress-danger')) {
+					width += 1;
 				}
-								
+
 				return width;
 			} else {
-				return node.innerHTML;
+				return $el.text().trim();
 			}
 		},
 		widgets: ['repositionWorkflowBoxes']
 	});
 })(jQuery);
 </script>
+<#else>
+</div>
+</#if>
 
 </#escape>

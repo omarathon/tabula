@@ -18,6 +18,7 @@ import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.FeaturesMessage
+import uk.ac.warwick.tabula.JavaImports._
 
 case class FeatureItem(val name: String, val value: Boolean)
 
@@ -42,7 +43,7 @@ final class FeaturesController extends BaseController with InitializingBean {
 	}
 
 	def currentValues = properties.map { (property) =>
-		new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[java.lang.Boolean])
+		new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[JBoolean])
 	}
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

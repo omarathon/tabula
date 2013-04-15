@@ -27,17 +27,17 @@ class SSOMaintenanceModeListener extends QueueListener with Observing with Initi
 	var maintenanceModeService = Wire.auto[MaintenanceModeService]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
-	lazy val config = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
+	def config = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
 		case config: SSOConfiguration => Some(config)
 		case _ => None
 	}
-	lazy val cache = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
+	def cache = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
 		case cache: DatabaseUserCache => Some(cache)
 		case _ => None
 	}
 	
 	def switchToOldMode {
-		config map { config => 
+		config map { config => 			
 			if ("new".equals(config.getString("mode"))) {
 				config.setProperty("mode", "old")
 				config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/slogin")
@@ -51,6 +51,8 @@ class SSOMaintenanceModeListener extends QueueListener with Observing with Initi
 	def switchToNewMode {
 		config map { config => 
 			if ("old".equals(config.getString("mode"))) {
+				logger.info("Detected maintenance mode disabled; switching SSO config to 'new' mode")
+				
 				config.setProperty("mode", "new")
 				config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/hs")
 			}
@@ -77,6 +79,8 @@ class SSOMaintenanceModeListener extends QueueListener with Observing with Initi
 			else switchToNewMode
 			true
 		}
+		
+		if (maintenanceModeService.enabled) switchToOldMode
 	}
 	
 	private var servletContext: ServletContext = _
