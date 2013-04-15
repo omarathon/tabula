@@ -11,13 +11,14 @@ import scala.collection.JavaConversions._
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
 	def list(rel: Set[StudentRelationship]): Seq[MeetingRecord]
+	def get(id: String): Option[MeetingRecord]
 }
 
 @Repository
 class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
-	
+
 	def list(rel: Set[StudentRelationship]): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
@@ -27,5 +28,11 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 					.addOrder(Order.desc("meetingDate"))
 					.addOrder(Order.desc("lastUpdatedDate"))
 					.seq
+	}
+
+	def get(id: String): Option[MeetingRecord] = {
+			session.newCriteria[MeetingRecord]
+					.add(Restrictions.eq("id", id))
+					.uniqueResult
 	}
 }

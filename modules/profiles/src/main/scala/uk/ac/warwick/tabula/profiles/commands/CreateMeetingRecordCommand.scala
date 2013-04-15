@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.FileDao
+import org.springframework.web.multipart.MultipartFile
 
 class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
@@ -32,6 +33,8 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	var meetingDate: LocalDate = DateTime.now.toLocalDate
 
 	var file: UploadedFile = new UploadedFile
+
+	var xxx: MultipartFile = _
 
 	var attachmentTypes = Seq[String]()
 
@@ -43,11 +46,11 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	def applyInternal() = {
 
 		def doFiling(meeting: MeetingRecord) {
-			for (attachment <- file.attached) {
-				attachment.temporary = false
+			file.attached map(attachment => {
+				attachment.meetingRecord = meeting
+				meeting.attachments.add(attachment)
 				fileDao.makePermanent(attachment)
-			}
-			meeting.attachments.addAll(file.attached)
+			})
 		}
 
 		var meeting = new MeetingRecord(creator, relationship)

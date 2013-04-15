@@ -33,7 +33,7 @@ class MeetingRecord extends GeneratedId with ToString {
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-	@OneToMany(mappedBy = "meetingrecord", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "meetingRecord", fetch = FetchType.LAZY)
 	var attachments: JList[FileAttachment] = JArrayList()
 
 	var title: String = _

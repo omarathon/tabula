@@ -23,15 +23,20 @@
 							<div class="description"><#noescape>${meeting.description}</#noescape></div>
 						</#if>
 
-						<#if meeting.attachments?size gt 0>
-							Files to download!
-						<a class="long-running use-tooltip form-post" 
-							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" 
-							 title="Download the files for this meeting record." 
-							 data-container="body"><i class="icon-download"></i> Download files
-						</a>							
-						<#else>
-							No files.
+						<#if meeting.attachments?size == 1>
+							<div class="attachments">
+								<a class="long-running use-tooltip"
+									href="<@url page='/tutor/meeting/${meeting.id}/attachment/${meeting.attachments?first.name}'/>"
+									title="Download the file for this meeting record"><i class="icon-download"></i> Download file
+								</a>
+							</div>
+						<#elseif meeting.attachments?size gt 1>
+							<div class="attachments">
+								<a class="long-running use-tooltip"
+									href="<@url page='/tutor/meeting/${meeting.id}/attachments/${meeting.title}.zip'/>"
+									title="Download the files for this meeting record"><i class="icon-download"></i> Download files
+								</a>
+							</div>
 						</#if>
 
 						<small class="muted">Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>

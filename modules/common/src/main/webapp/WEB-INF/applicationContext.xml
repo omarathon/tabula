@@ -22,7 +22,7 @@
 
 	<import resource="properties-context.xml" />
 	<import resource="persistence-context.xml" />
-	
+
 	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
 	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
 
@@ -32,13 +32,13 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
-	
+
 	<!-- For sub-modules to implement their own component scanning -->
 	<import resource="spring-component-scan-context.xml" />
-	
+
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
 		p:basename="messages" />
-		
+
 	<bean id="defaultEventListener" class="uk.ac.warwick.tabula.events.CompositeEventListener" abstract="true">
 		<constructor-arg index="0">
 			<list>
@@ -47,11 +47,11 @@
 			</list>
 		</constructor-arg>
 	</bean>
-		
+
 	<import resource="event-listener-context.xml" />
-	
+
 	<bean id="json" class="uk.ac.warwick.tabula.JsonObjectMapperFactory" />
-	
+
 	<!-- Catches all exceptions that go through Spring.
 		If an exception escapes Spring, it will go to the handler in web.xml,
 		which is served by the ErrorController at /error/, which delegates to this.
@@ -67,10 +67,10 @@
 				<entry key="uk.ac.warwick.tabula.system.exceptions.FileUploadException" value="errors/fileUpload" />
 			</map>
 		</property>
-	</bean> 
-	
+	</bean>
+
 	<import resource="exception-resolver-context.xml" />
-	 	
+
 	<bean id="defaultExceptionHandler" class="uk.ac.warwick.tabula.system.exceptions.CompositeExceptionHandler" abstract="true">
 		<constructor-arg index="0">
 			<list>
@@ -79,13 +79,13 @@
 			</list>
 		</constructor-arg>
 	</bean>
-	
+
 	<import resource="exception-handler-context.xml" />
-	
+
 	<!-- validation -->
-	<bean id="validatorFactory" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" 
+	<bean id="validatorFactory" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"
 		p:validationMessageSource-ref="messageSource" />
-		
+
 	<bean id="validator" class="uk.ac.warwick.tabula.validators.CompositeValidator">
 		<constructor-arg>
 			<list>
@@ -93,21 +93,22 @@
 			</list>
 		</constructor-arg>
 	</bean>
-	
+
 	<bean id="defaultTypeConverter"
       class="org.springframework.format.support.FormattingConversionServiceFactoryBean" abstract="true">
       <description>
       	Converts arguments in various places.
       	Useful to convert @PathVariable arguments from String to the object it represents.
-      	
+
       	Converters are used when binding request values to command.
-      	Formatters are used for displaying command values as a string in views. spring.bind uses formatters.   
+      	Formatters are used for displaying command values as a string in views. spring.bind uses formatters.
       </description>
 	    <property name="converters">
 	        <list>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
@@ -138,12 +139,12 @@
 	</bean>
 
 	<import resource="type-converter-context.xml"/>
-	
+
 	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
 	<bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor" />
-	
+
 	<bean id="requestInfoInterceptor" class="uk.ac.warwick.tabula.system.RequestInfoInterceptor" />
-	
+
 	<mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
@@ -166,17 +167,17 @@
 			<bean class="uk.ac.warwick.tabula.system.ControllerPreRequestInterceptor" />
 		</mvc:interceptor>
 	</mvc:interceptors>
-	
+
 	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.tabula.system.CommonPropertyEditors" />
-	
+
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
 		p:order="1"
 		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
-	
-	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer" 
+
+	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer"
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
-		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" /> 
+		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" />
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.tabula.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">
@@ -193,23 +194,23 @@
 	</bean>
 
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
-	
+
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
-	
+
 	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter"
 		p:encoding="UTF-8" p:forceEncoding="true" />
-		
+
 	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
-	
+
 	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
 		<constructor-arg value="4" type="int" />
 	</bean>
-	
+
 	<bean id="studentMailSender" class="uk.ac.warwick.tabula.services.RedirectingMailSender">
 		<constructor-arg ref="mailSender" />
 	</bean>
-	
+
 	<bean id="mailSender"
 		class="uk.ac.warwick.util.mail.AsynchronousWarwickMailSender">
 		<constructor-arg index="0" ref="priorityTaskExecutionService" />
@@ -220,7 +221,7 @@
 			</bean>
 		</constructor-arg>
 	</bean>
-	
+
 	<filter-stack id="commonFilters" abstract="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping name="all">
 			<filter ref="characterEncodingFilter" />
@@ -245,41 +246,41 @@
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
-	
+
 	<import resource="filters-context.xml" />
-	
+
 	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
 		p:detectAnonymousOnCampusUsers="true"
 		p:userLookup-ref="userLookup"
 		p:configLocation="/tabula-sso-config.xml" />
-		
+
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
-	
+
 	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
 		p:group="${permissions.admin.group}"
 		p:groupService="#{realUserLookup.groupService}" />
 		<!-- FIXME groupservice wont be switched out for a maintenance version -->
-	
+
 	<bean id="userLookup" class="uk.ac.warwick.tabula.services.SwappableUserLookupService">
 		<constructor-arg ref="realUserLookup" />
 	</bean>
-	
+
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
 		<constructor-arg ref="userLookupDelegate" />
 	</bean>
-	
+
 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
 		p:templateLoaderPath="/WEB-INF/freemarker/"
 		p:configuration-ref="freemarkerConfiguration" />
-	
+
 	<bean id="dateTimeFormatter" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTimeNoMillis" />
-	
+
 	<bean id="urlMethodModel" class="uk.ac.warwick.tabula.web.views.UrlMethodModel" />
 	<bean id="defaultFreemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration" abstract="true">
 		<property name="sharedVariables">
 			<map>
 				<entry key="url" value-ref="urlMethodModel" />
-				<entry key="rootUrl" value="${toplevel.url}${module.context}" />				
+				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.tabula.web.views.TheYear" /></entry>
@@ -295,16 +296,16 @@
 			</map>
 		</property>
 	</bean>
-	
+
 	<import resource="freemarker-configuration-context.xml" />
-	
+
 	<bean class="org.springframework.web.context.support.ServletContextAttributeExporter">
 		<property name="attributes"><map>
 			<entry key="freemarkerConfiguration" value-ref="freemarkerConfiguration" />
 		</map></property>
 	</bean>
-			
-	<bean id="redirectViewResolver" class="uk.ac.warwick.tabula.web.views.RedirectViewResolver" 
+
+	<bean id="redirectViewResolver" class="uk.ac.warwick.tabula.web.views.RedirectViewResolver"
 		p:toplevelUrl="${toplevel.url}"
 		p:context="${module.context}"
 		p:order="1" />
@@ -314,20 +315,20 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
-	
+
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
-	
+
 	<bean id="settingsSyncTopic" parent="abstractQueue">
 		<constructor-arg value="SynchronisedSettings" />
-		
+
 		<!-- We don't need this to be persistent, it's for setting feature flags, maintenance mode etc -->
 		<property name="persistent" value="false" />
-		
+
 		<!-- This isn't a Queue, it's a Topic - we are effectively broadcasting -->
 		<property name="pubSub" value="true" />
 		<property name="pubSubNoLocal" value="true" />
-		
+
 		<property name="messageConverter">
 			<bean class="uk.ac.warwick.util.queue.conversion.JsonMessageConverter">
 				<property name="annotatedClasses">
@@ -339,7 +340,7 @@
 			</bean>
 		</property>
 	</bean>
-	
+
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
@@ -349,57 +350,57 @@
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
-	
+
 	<beans profile="dev,production">
-		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false" 
+		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 				p:ssosUrl="${ssoclient.ssos.url}"
 				p:groupServiceLocation="${ssoclient.webgroups.url}" />
-				
-		<!-- This may still be an embedded broker (i.e. for dev) but probably has JMX enabled -->	
+
+		<!-- This may still be an embedded broker (i.e. for dev) but probably has JMX enabled -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider">
 			<constructor-arg value="${activemq.broker}" />
 			<constructor-arg value="${activemq.user}" />
 			<constructor-arg value="${activemq.pass}" />
 		</bean>
 	</beans>
-	
+
 	<beans profile="scheduling">
 		<!-- @Scheduled -->
 		<task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
 		<task:executor id="taskExecutor" pool-size="5"/>
 		<task:scheduler id="taskScheduler" pool-size="10"/>
 	</beans>
-	
+
 	<beans profile="web">
-		
+
 	</beans>
-	
+
 	<beans profile="dev">
 	</beans>
-	
+
 	<beans profile="production">
 	</beans>
-	
+
 	<beans profile="dev,production,console">
-		
+
 	</beans>
-	
+
 	<beans profile="dev,production">
-	
+
 			<!-- JMX -->
-	
-			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer 
+
+			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer
 		       when there is a choice of MBeanServers (such as when jconsole
 		       support is installed). -->
 		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
-		
+
 		  <!-- ## auto exported beans ## -->
-		  
-		  
+
+
 		  <!-- ## auto exporters ## -->
-		  
+
 		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
-		  
+
 		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
 		    <property name="attributeSource" ref="jmxAttributeSource" />
 		  </bean>
@@ -408,15 +409,15 @@
 		  </bean>
 		  <bean id="autoExporter" class="org.springframework.jmx.export.MBeanExporter">
 		  	<description>Exports beans annotated with @ManagedResource</description>
-		  	<property name="autodetect" value="true" />  
+		  	<property name="autodetect" value="true" />
 		  	<property name="assembler" ref="jmxAssembler"/>
 		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
 		    <property name="server" ref="jmxServerLocator" />
 		  </bean>
-		  
+
 		    <!-- ## manually exported beans ## -->
 
-		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" 
+		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
 		  		lazy-init="false"
 		  		autowire="no"> <!-- don't autowire the Annotation assembler below. -->
 		    <property name="server" ref="jmxServerLocator" />
@@ -426,7 +427,7 @@
 		      </map>
 		    </property>
 		  </bean>
-		  
+
 		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
 			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory" abstract="true">
 			<property name="definitions">
@@ -442,7 +443,7 @@
 				</props>
 			</property>
 		</bean>
-	
+
 		<import resource="tiles-context.xml" />
 	</beans>
 

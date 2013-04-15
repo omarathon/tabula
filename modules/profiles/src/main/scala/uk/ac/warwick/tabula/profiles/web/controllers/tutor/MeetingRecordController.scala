@@ -13,6 +13,11 @@ import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
+import javax.servlet.http.HttpServletRequest
+import java.io.File
+import org.springframework.web.multipart.MultipartRequest
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest
+
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
@@ -37,23 +42,38 @@ class MeetingRecordController extends ProfilesController {
 		case _ => None
 	}
 
-	// blank async form
+	// modal chrome
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
-	def showModalForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+	def showModalChrome(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
 		Mav("tutor/meeting/edit",
 			"modal" -> true,
 			"command" -> createCommand,
 			"student" -> student,
+			"tutorName" -> createCommand.relationship.agentName).noLayout()
+	}
+
+	// modal iframe form
+	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
+	def showIframeForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		Mav("tutor/meeting/edit",
+			"iframe" -> true,
+			"command" -> createCommand,
+			"student" -> student,
 			"tutorName" -> createCommand.relationship.agentName,
-			"creator" -> createCommand.creator).noLayout()
+			"creator" -> createCommand.creator).noNavigation()
 	}
 
 	// submit async
 	@RequestMapping(method = Array(POST), params = Array("modal"))
-	def saveModalMeetingRecord(@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, errors: Errors, @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[ViewMeetingRecordCommand], @PathVariable("student") student: Member) = {
+	def saveModalMeetingRecord(
+			@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand,
+			errors: Errors, @ModelAttribute("viewMeetingRecordCommand")
+			viewCommand: Option[ViewMeetingRecordCommand],
+			@PathVariable("student") student: Member,
+			request: HttpServletRequest) = {
 		transactional() {
 			if (errors.hasErrors) {
-				showModalForm(createCommand, student)
+				showIframeForm(createCommand, student)
 			} else {
 				val newMeeting = createCommand.apply()
 				val meetingList = viewCommand match {
@@ -97,5 +117,4 @@ class MeetingRecordController extends ProfilesController {
 			}
 		}
 	}
-
 }

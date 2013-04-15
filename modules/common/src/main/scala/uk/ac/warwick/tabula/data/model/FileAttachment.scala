@@ -39,7 +39,7 @@ class FileAttachment extends GeneratedId {
 	// optional link to Meeting Record
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "meetingrecord_id")
-	var meetingrecord: MeetingRecord = _
+	var meetingRecord: MeetingRecord = _
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
