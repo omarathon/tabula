@@ -288,13 +288,13 @@ class AssignmentMembershipServiceImpl
 
 trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem] = {
-
-		val sitsUsers = upstream flatMap { upstream =>
-			upstream.members.members map { id =>
-				id -> userLookup.getUserByWarwickUniId(id)
-			}
-		}
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[MembershipItem] = {	
+		val sitsUsers = 
+			upstream.flatMap { _.members.members } 
+							.distinct 
+							.map { id =>
+								id -> userLookup.getUserByWarwickUniId(id)
+							}
 
 		val includes = others map { _.includeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 		val excludes = others map { _.excludeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
