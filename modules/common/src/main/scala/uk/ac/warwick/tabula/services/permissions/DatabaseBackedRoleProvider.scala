@@ -8,11 +8,16 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.userlookup.GroupService
 
 @Component
 class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
 	var service = Wire.auto[PermissionsService]
+	
+	private def getGrantedRolesFor(user: CurrentUser) = ???
+	
+	private def getGrantedPermissionsFor(user: CurrentUser) = ???
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = 
 		service.getGrantedRolesFor(user, scope) map { _.build() }

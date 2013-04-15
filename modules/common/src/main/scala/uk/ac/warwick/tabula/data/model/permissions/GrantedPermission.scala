@@ -57,7 +57,7 @@ object GrantedPermission {
 	val Allow: OverrideType = true
 	val Deny: OverrideType = false
 	
-	def init[A <: PermissionsTarget](scope: A, permission: Permission, overrideType: OverrideType): GrantedPermission[A] =
+	def apply[A <: PermissionsTarget](scope: A, permission: Permission, overrideType: OverrideType): GrantedPermission[A] =
 		(scope match {
 			case dept: Department => new DepartmentGrantedPermission(dept, permission, overrideType)
 			case module: Module => new ModuleGrantedPermission(module, permission, overrideType)

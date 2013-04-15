@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.userlookup.User
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -21,6 +22,12 @@ trait PermissionsDao {
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[A]]
 	
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
+	
+	def getGrantedRolesForUser(user: User): Seq[GrantedRole[_]]
+	def getGrantedRolesForWebgroup(groupName: String): Seq[GrantedRole[_]]
+	
+	def getGrantedPermissionsForUser(user: User): Seq[GrantedPermission[_]]
+	def getGrantedPermissionsForWebgroup(groupName: String): Seq[GrantedPermission[_]]
 }
 
 @Repository
@@ -58,7 +65,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 					 .seq.headOption
 	}
 					 
-	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] = canDefinePermission(scope) {
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean) = canDefinePermission(scope) {
 		session.newCriteria[GrantedPermission[A]]
 					 .add(is("scope", scope))
 					 .add(is("permission", permission))
@@ -85,5 +92,60 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		if (GrantedRole.canDefineFor(scope)) f
 		else None
 	}
+	
+	def getGrantedRolesForUser(user: User) =
+		session.newQuery[GrantedRole[_]]("""
+				select distinct r
+				from GrantedRole r
+				where 
+					(
+						r.users.universityIds = false and 
+						((:userId in elements(r.users.staticIncludeUsers)
+						or :userId in elements(r.users.includeUsers))
+						and :userId not in elements(r.users.excludeUsers))
+					) or (
+						r.users.universityIds = true and 
+						((:universityId in elements(r.users.staticIncludeUsers)
+						or :universityId in elements(r.users.includeUsers))
+						and :universityId not in elements(r.users.excludeUsers))
+					)
+		""")
+			.setString("universityId", user.getWarwickId())
+			.setString("userId", user.getUserId())
+			.seq
+	
+	def getGrantedRolesForWebgroup(groupName: String) =
+		session.newCriteria[GrantedRole[_]]
+			.createAlias("users", "users")
+			.add(is("users.baseWebgroup", groupName))
+			.seq
+	
+	def getGrantedPermissionsForUser(user: User) =
+		session.newQuery[GrantedPermission[_]]("""
+				select distinct r
+				from GrantedPermission r
+				where 
+					(
+						r.users.universityIds = false and 
+						((:userId in elements(r.users.staticIncludeUsers)
+						or :userId in elements(r.users.includeUsers))
+						and :userId not in elements(r.users.excludeUsers))
+					) or (
+						r.users.universityIds = true and 
+						((:universityId in elements(r.users.staticIncludeUsers)
+						or :universityId in elements(r.users.includeUsers))
+						and :universityId not in elements(r.users.excludeUsers))
+					)
+		""")
+			.setString("universityId", user.getWarwickId())
+			.setString("userId", user.getUserId())
+			.seq
+	
+	
+	def getGrantedPermissionsForWebgroup(groupName: String) =
+		session.newCriteria[GrantedPermission[_]]
+			.createAlias("users", "users")
+			.add(is("users.baseWebgroup", groupName))
+			.seq
 					
 }

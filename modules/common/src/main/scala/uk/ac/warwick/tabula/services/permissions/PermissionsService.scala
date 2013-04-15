@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.userlookup.GroupService
+import scala.collection.JavaConverters._
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -27,6 +29,9 @@ trait PermissionsService {
 	def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]]
 	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]]
 	
+	def getGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]]
+	def getGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]]
+	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup
 }
 
@@ -34,6 +39,7 @@ trait PermissionsService {
 class PermissionsServiceImpl extends PermissionsService with Logging {
 	
 	var dao = Wire.auto[PermissionsDao]
+	var groupService = Wire.auto[GroupService]
 	
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = dao.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = dao.saveOrUpdate(permission)
@@ -61,11 +67,39 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 		dao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
 	}
 	
+	def getGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]] = transactional(readOnly = true) {
+		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
+		
+		(
+			// Get all roles where usercode is included,
+			dao.getGrantedRolesForUser(user.apparentUser)
+			
+			// Get all roles backed by one of the webgroups, 		
+			++ (groupNames flatMap { dao.getGrantedRolesForWebgroup(_) })
+		)
+			// For sanity's sake, filter by the users including the user
+			.filter { _.users.includes(user.apparentId) }
+	}
+	
+	def getGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]] = transactional(readOnly = true) {
+		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
+		
+		(
+			// Get all permissions where usercode is included,
+			dao.getGrantedPermissionsForUser(user.apparentUser)
+			
+			// Get all permissions backed by one of the webgroups, 		
+			++ (groupNames flatMap { dao.getGrantedPermissionsForWebgroup(_) })
+		)
+			// For sanity's sake, filter by the users including the user
+			.filter { _.users.includes(user.apparentId) }
+	}
+	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup = transactional() {
 		getGrantedRole(scope, roleDefinition) match {
 			case Some(role) => role.users
 			case _ => {
-				val role = GrantedRole.init(scope, roleDefinition)
+				val role = GrantedRole(scope, roleDefinition)
 				
 				dao.saveOrUpdate(role)
 				role.users

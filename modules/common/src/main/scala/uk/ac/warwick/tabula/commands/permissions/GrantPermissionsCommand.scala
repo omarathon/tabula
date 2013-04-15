@@ -36,7 +36,7 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 	
 	def applyInternal() = transactional() {
-		val granted = grantedPermission getOrElse GrantedPermission.init(scope, permission, overrideType)
+		val granted = grantedPermission getOrElse GrantedPermission(scope, permission, overrideType)
 		
 		for (user <- usercodes) granted.users.addUser(user)
 		

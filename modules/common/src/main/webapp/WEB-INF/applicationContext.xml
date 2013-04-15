@@ -258,12 +258,13 @@
 	
 	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
 		p:group="${permissions.admin.group}"
-		p:groupService="#{realUserLookup.groupService}" />
+		p:groupService-ref="groupService" />
 		<!-- FIXME groupservice wont be switched out for a maintenance version -->
 	
 	<bean id="userLookup" class="uk.ac.warwick.tabula.services.SwappableUserLookupService">
 		<constructor-arg ref="realUserLookup" />
 	</bean>
+	<bean id="groupService" factory-bean="userLookup" factory-method="getGroupService" />
 	
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
 		<constructor-arg ref="userLookupDelegate" />
@@ -347,6 +348,7 @@
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
+		
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>

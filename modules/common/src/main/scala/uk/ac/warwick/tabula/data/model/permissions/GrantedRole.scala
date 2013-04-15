@@ -70,7 +70,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 }
 
 object GrantedRole {
-	def init[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
+	def apply[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
 		(scope match {
 			case dept: Department => new DepartmentGrantedRole(dept, definition)
 			case module: Module => new ModuleGrantedRole(module, definition)
