@@ -25,6 +25,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
+import org.apache.commons.codec.digest.DigestUtils
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -144,11 +145,18 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
-			
+			// TAB-489 - Check to see that this isn't a blank copy of the feedback template
+			else if (assignment.hasFeedbackTemplate && assignment.feedbackTemplate.attachment.actualDataLength == f.actualDataLength){
+				val fileHash = DigestUtils.shaHex(f.dataStream)
+				val templateHash = DigestUtils.shaHex(assignment.feedbackTemplate.attachment.dataStream)
+				if(fileHash == templateHash)
+					errors.rejectValue("file.attached[" + i + "]", "file.duplicate.template")
+			}
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
 				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
+
 		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
@@ -159,7 +167,6 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				}
 				
 				validateExisting(item, errors)
-
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
