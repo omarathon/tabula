@@ -25,5 +25,10 @@ object DateFormats {
 	
 	/** Date-time format used in Formsbuilder-style CSV export */
 	final val CSVDateTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+
+	/** Date format used in spreadsheets */
+	final val CSVDate = DateTimeFormat.forPattern(CSVDatePattern)
+	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
+
 }
 

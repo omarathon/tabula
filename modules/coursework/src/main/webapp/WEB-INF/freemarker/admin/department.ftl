@@ -1,6 +1,6 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
- 
+
 <#macro longDateRange start end>
 	<#assign openTZ><@warwick.formatDate value=start pattern="z" /></#assign>
 	<#assign closeTZ><@warwick.formatDate value=end pattern="z" /></#assign>
@@ -14,8 +14,12 @@
 	<#return "module-${module.code}" />
 </#function>
 
-
 <#if department??>
+
+<script>
+
+	</script>
+
 
 <#-- TODO change this to a role check -->
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
@@ -42,7 +46,7 @@
 			<#if features.markingWorkflows>
 				<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
 			</#if>
-			<li><a href="reports/feedback"><i class="icon-book"></i> Feedback report</a></li>
+			<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
 		</ul>
 	</div>
@@ -282,7 +286,7 @@
 	
 </div>
 </#list>
-
+<div id="feedback-report-modal" class="modal fade"></div>
 <#else>
 <p>No department.</p>
 </#if>

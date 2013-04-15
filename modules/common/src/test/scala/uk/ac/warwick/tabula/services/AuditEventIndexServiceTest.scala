@@ -337,7 +337,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		// check pager for noteworthy submissions
 		val paged2 = indexer.noteworthySubmissionsForModules(Seq(module), None, None, 100)
 		paged2.docs.length should be (70)
-		
+
 		// Find by user ID
 		indexer.findByUserId("bob").size should be (140)
 		indexer.findByUserId("fred").size should be (0)

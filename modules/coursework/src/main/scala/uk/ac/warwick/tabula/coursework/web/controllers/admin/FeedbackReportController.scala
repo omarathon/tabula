@@ -2,42 +2,63 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.Features
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
+import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
 import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.commands.departments.FeedbackReportCommand
-import org.apache.poi.xssf.usermodel.{ XSSFSheet, XSSFWorkbook }
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.poi.ss.usermodel.{ IndexedColors, ComparisonOperator }
-import org.apache.poi.ss.util.CellRangeAddress
-import uk.ac.warwick.tabula.web.views.ExcelView
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.data.model.Submission
-import java.util.ArrayList
 import org.joda.time.format.DateTimeFormat
-import org.apache.poi.xssf.usermodel.XSSFFont
-import uk.ac.warwick.tabula.data.model.AuditEvent
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.services.jobs.JobService
+import org.hibernate.validator.Valid
+import uk.ac.warwick.spring.Wire
+
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department) =
-		new FeedbackReportCommand(dept)
+	validatesSelf[FeedbackReportCommand]
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateReport(cmd: FeedbackReportCommand) = {
-		new ExcelView(cmd.department.name + " feedback report.xlsx", cmd.apply())
+	var jobService = Wire.auto[JobService]
+	var context = Wire[String]("${module.context}")
+
+	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
+		new FeedbackReportCommand(dept, user)
+
+	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
+	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
+		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePicker)
+		val model = Mav("admin/assignments/feedbackreport/report_range",
+			"department" -> cmd.department,
+			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),
+			"endDate" ->  formatter.print(new DateTime())
+		).noLayout()
+		model
 	}
+
+
+	@RequestMapping(method = Array(POST), params = Array("!jobId"))
+	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors) = {
+		if(errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val jobId = cmd.apply().id
+			val successUrl = context + Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
+			Mav(new JSONView(Map("status" -> "success", "result" -> successUrl)))
+		}
+	}
+
+	@RequestMapping(params = Array("jobId"))
+	def checkProgress(@RequestParam jobId: String) = {
+		val job = jobService.getInstance(jobId)
+		val mav = Mav("admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		mav
+	}
+
 
 }
