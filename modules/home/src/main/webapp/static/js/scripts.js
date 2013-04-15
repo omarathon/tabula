@@ -260,5 +260,10 @@
 				$title.trigger('click');
 			}
 		});
+		
+		// sticky table headers
+		//$('table.sticky-table-headers').stickyTableHeaders({
+		//	fixedOffset: $('#navigation')
+		//});
 	}); // on ready
 })(jQuery);
