@@ -1,71 +1,94 @@
 <#escape x as x?html>
-<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
-
-<#assign module=assignment.module />
-<#assign department=module.department />
-
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
-	<div class="filter">
-		<label for="filter"><i class="icon-filter"></i> Show all</label>
-		&nbsp;
-		<@f.select path="filter" cssClass="span4">
-			<@f.options items=allFilters itemValue="name" itemLabel="description" />
-		</@f.select>
-		
-		<#list allFilters as filter>
-			<#if filter.parameters?size gt 0>
-				<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
-					<#list filter.parameters as param>
-						<@form.labelled_row "filterParameters[${param._1()}]" param._2()>
-							<#if param._3() == 'datetime'>
-								<@f.input path="filterParameters[${param._1()}]" cssClass="date-time-picker" />
-							<#elseif param._3() == 'percentage'>
-								<div class="input-append">
-									<@f.input path="filterParameters[${param._1()}]" type="number" min="0" max="100" cssClass="input-small" />
-									<span class="add-on">%</span>
-								</div>
-							<#else>
-								<@f.input path="filterParameters[${param._1()}]" type=param._3() />
-							</#if>
-						</@form.labelled_row>
-					</#list>
-					
-					<@form.row>
-						<@form.field>
-							<button class="btn btn-primary" type="submit"><i class="icon-filter icon-white"></i> Filter</button>
-						</@form.field>
-					</@form.row>
-				</fieldset>
-			</#if>
-		</#list>
-	</div>
+<div class="fixed-on-scroll">
+	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 	
-	<script type="text/javascript">
-		jQuery(function($) {
-			$('#filter').on('keyup change', function() {
-				var $select = $(this);
-				var val = $select.val();
-				
-				var $options = $select.closest('.filter').find('fieldset[data-filter="' + val + '"]');
-				var $openOptions = $select.closest('.filter').find('.filter-options:visible');
-				
-				var cb = function() {
-					if ($options.length) {
-						$options.slideDown();
+	<#if assignment.openEnded>
+		<p class="dates">
+			<@fmt.interval assignment.openDate />, never closes
+			(open-ended)
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+		</p>
+	<#else>
+		<p class="dates">
+			<@fmt.interval assignment.openDate assignment.closeDate />
+			<#if assignment.closed>
+				<span class="label label-warning">Closed</span>
+			</#if>
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+								
+		</p>
+	</#if>
+	
+	<#assign module=assignment.module />
+	<#assign department=module.department />
+	
+	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline" commandName="submissionAndFeedbackCommand">
+		<div class="filter">
+			<label for="filter">Show all</label>
+			&nbsp;
+			<@f.select path="filter" cssClass="span4">
+				<@f.options items=allFilters itemValue="name" itemLabel="description" />
+			</@f.select>
+			
+			<#list allFilters as filter>
+				<#if filter.parameters?size gt 0>
+					<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
+						<#list filter.parameters as param>
+							<@form.labelled_row "filterParameters[${param._1()}]" param._2()>
+								<#if param._3() == 'datetime'>
+									<@f.input path="filterParameters[${param._1()}]" cssClass="date-time-picker" />
+								<#elseif param._3() == 'percentage'>
+									<div class="input-append">
+										<@f.input path="filterParameters[${param._1()}]" type="number" min="0" max="100" cssClass="input-small" />
+										<span class="add-on">%</span>
+									</div>
+								<#else>
+									<@f.input path="filterParameters[${param._1()}]" type=param._3() />
+								</#if>
+							</@form.labelled_row>
+						</#list>
+						
+						<@form.row>
+							<@form.field>
+								<button class="btn btn-primary" type="submit">Filter</button>
+							</@form.field>
+						</@form.row>
+					</fieldset>
+				</#if>
+			</#list>
+		</div>
+		
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('#filter').on('keyup change', function() {
+					var $select = $(this);
+					var val = $select.val();
+					
+					var $options = $select.closest('.filter').find('fieldset[data-filter="' + val + '"]');
+					var $openOptions = $select.closest('.filter').find('.filter-options:visible');
+					
+					var cb = function() {
+						if ($options.length) {
+							$options.slideDown();
+						} else {
+							$select.closest('form').submit();
+						}
+					};
+					
+					if ($openOptions.length) {
+						$openOptions.slideUp('fast', cb);
 					} else {
-						$select.closest('form').submit();
+						cb();
 					}
-				};
-				
-				if ($openOptions.length) {
-					$openOptions.slideUp('fast', cb);
-				} else {
-					cb();
-				}
+				});
 			});
-		});
-	</script>
-</@f.form>
+		</script>
+	</@f.form>
+</div>
 
 <#if students??>
 
@@ -362,7 +385,7 @@
 							</div>
 							
 							<#-- If the current action is in this section, then add the next action blowout here -->
-							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString)>
+							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString) && student.progress.messageCode != 'workflow.Submission.unsubmitted.failedToSubmit'>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
@@ -559,7 +582,7 @@
 						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
 					</#if>
 					<td class="progress-col">	
-						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission'>
+						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
 							<#local progressTooltip><@spring.message code=student.stages['Submission'].messageCode />. <@spring.message code=student.progress.messageCode /></#local>
 						<#else>
 							<#local progressTooltip><@spring.message code=student.progress.messageCode /></#local>
@@ -576,7 +599,11 @@
 					</td>
 					<td class="action-col">
 						<#if student.nextStage??>
-							<@action student.nextStage.actionCode student />
+							<#if student.progress.messageCode == 'workflow.Submission.unsubmitted.failedToSubmit'>
+								Failed to submit
+							<#else>
+								<@action student.nextStage.actionCode student />
+							</#if>
 						<#elseif student.progress.percentage == 100>
 							Complete
 						</#if>
