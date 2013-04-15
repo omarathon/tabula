@@ -11,13 +11,12 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.commands.departments.FeedbackReportCommand
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
-import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView, ExcelView}
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
 import org.hibernate.validator.Valid
 import uk.ac.warwick.spring.Wire
+
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
@@ -25,8 +24,8 @@ class FeedbackReportController extends CourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
 
-	@Autowired var jobService: JobService = _
-	val context = "coursework"
+	var jobService = Wire.auto[JobService]
+	var context = Wire[String]("${module.context}")
 
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
 		new FeedbackReportCommand(dept, user)
@@ -49,7 +48,7 @@ class FeedbackReportController extends CourseworkController {
 			Mav(new JSONErrorView(errors))
 		} else {
 			val jobId = cmd.apply().id
-			val successUrl = "/" + context + Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
+			val successUrl = context + Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
 			Mav(new JSONView(Map("status" -> "success", "result" -> successUrl)))
 		}
 	}
