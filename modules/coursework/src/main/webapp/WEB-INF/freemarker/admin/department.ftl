@@ -17,75 +17,7 @@
 <#if department??>
 
 <script>
-		var frameLoad = function(frame){
-			if(jQuery(frame).contents().find("form").length == 0){
-				jQuery("#feedback-report-modal").modal('hide');
-				document.location.reload(true);
-			}
-		}
 
-		jQuery(function($){
-
-			$('#feedback-report-modal').on('click', 'input[type=submit]', function(e){
-				e.preventDefault();
-				$('#feedback-report-modal').find('form').submit();				
-				$('#feedback-report-modal').modal('hide');
-			});
-			
-			
-			// modals use ajax to retrieve their contents
-				$('#feedback-report-button').on('click', function(e){
-					e.preventDefault();
-					$this = $(this);
-					target = $this.attr('data-target');
-					url = $this.attr('href');
-					$(target).load(url);
-				});
-			
-			
-			
-			// any date fields returned by ajax will have datetime pickers bound to them as required
-				$('#feedback-report-modal').on('focus', 'input.date-time-picker', function(e){
-					e.preventDefault();
-					var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
-					
-					if(isPickerHidden) {
-						$(this).datetimepicker('remove').datetimepicker({
-							format: "dd-M-yyyy hh:ii:ss",
-							weekStart: 1,
-							minView: 'day',
-							autoclose: true
-						}).on('show', function(ev){
-							var d = new Date(ev.date.valueOf()),
-								  minutes = d.getUTCMinutes(),
-									seconds = d.getUTCSeconds(),
-									millis = d.getUTCMilliseconds();
-									
-							if (minutes > 0 || seconds > 0 || millis > 0) {
-								d.setUTCMinutes(0);
-								d.setUTCSeconds(0);
-								d.setUTCMilliseconds(0);
-								
-								var DPGlobal = $.fn.datetimepicker.DPGlobal;
-								$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
-								
-								$(this).datetimepicker('update');
-							}
-						});
-					}
-				});		
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-		});
 	</script>
 
 
@@ -114,7 +46,7 @@
 			<#if features.markingWorkflows>
 				<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
 			</#if>
-			<li><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>" id="feedback-report-button" data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
+			<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
 		</ul>
 	</div>

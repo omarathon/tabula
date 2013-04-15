@@ -1,42 +1,32 @@
 package uk.ac.warwick.tabula.coursework.services.feedbackreport
 
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelper
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
 import collection.JavaConversions._
 import collection.immutable.TreeMap
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import org.joda.time.DateTime
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime)
-	extends SpreadsheetHelper {
+	extends SpreadsheetHelpers {
 
 	val assignmentSheetSize = 13
 	val moduleSheetSize = 11
 
 	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var submissionService = Wire.auto[SubmissionService]
 	val workbook = new XSSFWorkbook()
 	var workingDaysHelper = new WorkingDaysHelperImpl
 
-	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
-	lazy val trimmedDeptName = {
-		if (department.name.length > 20)
-			department.name.substring(0, 20)
-		else
-			department.name
-	}
-
-	// replace unsafe characters with spaces
-	lazy val safeDeptName = WorkbookUtil.createSafeSheetName(trimmedDeptName)
-
-	var assignmentData : List[AssignmentInfo] = List()
+		var assignmentData : List[AssignmentInfo] = List()
 
 	def generateAssignmentSheet(dept: Department) = {
-		val sheet = workbook.createSheet("Report for " + safeDeptName)
+		val sheet = workbook.createSheet("Report for " + safeDeptName(department))
 
 		// add header row
 		val header = sheet.createRow(0)
@@ -95,26 +85,27 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		}
 
 		for (assignment <- sortedAssignments) {
-
-			val assignmentInfo = new AssignmentInfo
-			assignmentInfo.numberOfSubmissions = assignment.submissions.size
-			assignmentInfo.membership =  assignmentMembershipService.determineMembershipUsers(assignment).size
-			assignmentInfo.submissionsLateWithExt = assignment.submissions.filter(submission => submission.isAuthorisedLate).size
-			assignmentInfo.submissionsLateWithoutExt = assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size
 			val (onTime, late) = getFeedbackCounts(assignment)
-			assignmentInfo.onTimeFeedback = onTime
-			assignmentInfo.lateFeedback = late
-			assignmentInfo.totalPublished = onTime + late
-			assignmentInfo.moduleCode = assignment.module.code
-			assignmentInfo.moduleName = assignment.module.name
-			assignmentInfo.assignment = assignment
+			val totalPublished = onTime + late
+			val assignmentInfo = new AssignmentInfo(
+				assignment.module.code,
+				assignment.module.name,
+				assignmentMembershipService.determineMembershipUsers(assignment).size,
+				assignment.submissions.size,
+				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
+				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
+				onTime,
+				late,
+			  totalPublished,
+				assignment
+			)
 
 			assignmentData = assignmentData ++ List(assignmentInfo)
 		}
 	}
 
 	def generateModuleSheet(dept: Department) = {
-		val sheet = workbook.createSheet("Module report for " + safeDeptName)
+		val sheet = workbook.createSheet("Module report for " + safeDeptName(department))
 		val style = headerStyle(workbook)
 		// add header row
 		val header = sheet.createRow(0)
@@ -169,9 +160,10 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 		val times:Seq[(Int, Int)] = for (
 			student <- assignmentMembershipService.determineMembershipUsers(assignment);
-			submissionEvent <- auditEventQueryMethods.submissionForStudent(assignment, student).headOption ;
+			//submissionEvent <- auditEventQueryMethods.submissionForStudent(assignment, student).headOption ;
+			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId) ;
 			publishEvent <- auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption;
-			submissionEventDate <- Option(submissionEvent.eventDate);
+			submissionEventDate <- Option(submission.submittedDate);
 			publishEventDate <- Option(publishEvent.eventDate);
 			assignmentCloseDate <- Option(assignment.closeDate)
 			if (!(publishEventDate.isBefore(submissionEventDate) || publishEventDate.isBefore(assignmentCloseDate)))
@@ -190,18 +182,18 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	}
 
 
-	class AssignmentInfo {
-		var moduleCode: String = _
-		var moduleName: String = _
-		var membership: Int = _
-		var numberOfSubmissions: Int = _
-		var submissionsLateWithExt: Int = _
-		var submissionsLateWithoutExt: Int = _
-		var onTimeFeedback: Int = _
-		var lateFeedback: Int = _
-		var totalPublished: Int = _
-		var assignment: Assignment = _
-	}
+	case class AssignmentInfo (
+		var moduleCode: String,
+		var moduleName: String,
+		var membership: Int,
+		var numberOfSubmissions: Int,
+		var submissionsLateWithExt: Int,
+		var submissionsLateWithoutExt: Int,
+		var onTimeFeedback: Int,
+		var lateFeedback: Int,
+		var totalPublished: Int,
+		var assignment: Assignment
+	)
 }
 
 

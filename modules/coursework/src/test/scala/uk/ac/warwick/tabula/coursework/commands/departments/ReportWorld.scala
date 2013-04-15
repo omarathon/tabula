@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.AppContextTestBase
@@ -79,6 +79,14 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 		users
 	}
 
+
+	var submissionService = mock[SubmissionService]
+	submissionService.getSubmissionByUniId(any[Assignment], any[String]) answers { argsObj => {
+		val args = argsObj.asInstanceOf[Array[_]]
+		val assignment = args(0).asInstanceOf[Assignment]
+		val userId = args(1).asInstanceOf[String]
+		assignment.submissions.find(_.universityId == userId)
+	}}
 
 	def studentData(start:Int, end:Int) = (start to end).map(idFormat(_)).toList 
 	

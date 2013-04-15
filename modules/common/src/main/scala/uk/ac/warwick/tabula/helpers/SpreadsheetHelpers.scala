@@ -3,12 +3,28 @@ package uk.ac.warwick.tabula.helpers
 import org.apache.poi.xssf.usermodel.{XSSFWorkbook, XSSFSheet, XSSFCellStyle, XSSFRow}
 import org.apache.poi.ss.usermodel.{Font, Cell}
 import java.util.Date
+import uk.ac.warwick.tabula.DateFormats
+import org.apache.poi.ss.util.WorkbookUtil
+import uk.ac.warwick.tabula.data.model.Department
 
-trait SpreadsheetHelper {
+trait SpreadsheetHelpers {
+
+
+	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
+	def trimmedDeptName(department: Department) = {
+		if (department.name.length > 20)
+			department.name.substring(0, 20)
+		else
+			department.name
+	}
+
+	// replace unsafe characters with spaces
+	def safeDeptName(department: Department)  = WorkbookUtil.createSafeSheetName(trimmedDeptName(department))
+
 
 	def dateCellStyle(workbook: XSSFWorkbook) : XSSFCellStyle = {
 		val cellStyle = workbook.createCellStyle
-		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("dd/MM/yy"))
+		cellStyle.setDataFormat(workbook.createDataFormat().getFormat(DateFormats.CSVDatePattern))
 		cellStyle
 	}
 

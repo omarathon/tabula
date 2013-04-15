@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
 import scala.Array
@@ -12,36 +12,46 @@ import uk.ac.warwick.tabula.coursework.commands.departments.FeedbackReportComman
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
-import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView, ExcelView}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
+import org.hibernate.validator.Valid
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
 
+	validatesSelf[FeedbackReportCommand]
+
 	@Autowired var jobService: JobService = _
+	val context = "coursework"
 
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
 		new FeedbackReportCommand(dept, user)
 
 	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
 	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
-		val dateFormat = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
+		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePicker)
 		val model = Mav("admin/assignments/feedbackreport/report_range",
 			"department" -> cmd.department,
-			"startDate" -> dateFormat.print(DateTime.now.minusMonths(3)),
-			"endDate" -> dateFormat.print(DateTime.now)
+			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),
+			"endDate" ->  formatter.print(new DateTime())
 		).noLayout()
 		model
 	}
 
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
-	def generateReport(cmd: FeedbackReportCommand) = {
-		val jobId = cmd.apply().id
-		Redirect(Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId)
+	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors) = {
+		if(errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val jobId = cmd.apply().id
+			val successUrl = "/" + context + Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
+			Mav(new JSONView(Map("status" -> "success", "result" -> successUrl)))
+		}
 	}
 
 	@RequestMapping(params = Array("jobId"))

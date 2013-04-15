@@ -23,8 +23,8 @@ object FeedbackReportJob {
 	val identifier = "feedback-report"
 	def apply(department: Department, start: DateTime, end: DateTime) = JobPrototype(identifier, Map(
 		"department" -> department.id ,
-		"startDate" -> DateFormats.FeedbackReportDate.print(start),
-		"endDate" -> DateFormats.FeedbackReportDate.print(end)
+		"startDate" -> DateFormats.CSVDate.print(start),
+		"endDate" -> DateFormats.CSVDate.print(end)
 	))
 }
 
@@ -53,8 +53,8 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 	def renderJobDoneEmailText(user: CurrentUser, department: Department, startDate: DateTime, endDate: DateTime) = {
 		renderToString("/WEB-INF/freemarker/emails/feedback_report_done.ftl", Map(
 			"department" -> department,
-			"startDate" -> DateFormats.FeedbackReportDate.print(startDate),
-			"endDate" -> DateFormats.FeedbackReportDate.print(endDate),
+			"startDate" -> DateFormats.CSVDate.print(startDate),
+			"endDate" -> DateFormats.CSVDate.print(endDate),
 			"user" -> user
 		))
 	}
@@ -75,7 +75,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 		val startDate = {
 			val stringDate = job.getString("startDate")
 			try {
-				DateFormats.FeedbackReportDate.parseDateTime(stringDate)
+				DateFormats.CSVDate.parseDateTime(stringDate)
 			} catch {
 				case e:IllegalArgumentException => {
 					updateStatus("Start date format was incorrect")
@@ -83,12 +83,12 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 				}
 			}
 		}
-		val defaultStartDate = new DateTime().minusMonths(3)
+
 
 		val endDate = {
 			val stringDate = job.getString("endDate")
 			try {
-				DateFormats.FeedbackReportDate.parseDateTime(stringDate)
+				DateFormats.CSVDate.parseDateTime(stringDate)
 			} catch {
 				case e:IllegalArgumentException => {
 					updateStatus("End date format was incorrect")
@@ -96,7 +96,6 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 				}
 			}
 		}
-		val defaultEndDate = new DateTime()
 
 		def run() {
 

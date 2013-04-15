@@ -1,3 +1,4 @@
+<#-- TODO refactor this into a macro -->
 <#if info.ajax>
 
     <#include "job-status-fragment.ftl" />

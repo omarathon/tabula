@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.ss.usermodel.Cell
 
-class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
+class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 	@Test
 	def simpleGetSubmissionTest() {
 		val userOne = new User(idFormat(1))
@@ -181,6 +181,7 @@ class FeedbackReportCommandTest extends AppContextTestBase with ReportWorld {
 		val report = new FeedbackReport(department, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
 		report.assignmentMembershipService = assignmentMembershipService
 		report.auditEventQueryMethods = auditEventQueryMethods
+		report.submissionService = submissionService
 		report
 	}
 
