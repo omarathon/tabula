@@ -25,8 +25,6 @@ class DownloadFileController extends BaseController with Logging {
 	
 	@RequestMapping
 	def serve(@RequestParam("id") id: String, @RequestParam("mac") mac: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		println("Expected mac: " + macGenerator.generateMessageAuthenticationCode(id))
-		
 		if (!macGenerator.isValidSalt) {
 			response.setStatus(HttpStatus.SC_BAD_REQUEST)
 			logger.error("Invalid shared secret")
