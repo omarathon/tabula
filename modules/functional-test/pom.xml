@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -15,7 +16,7 @@
 	<description>Runs functional tests against a running server</description>
 
 	<properties>
-		<tabula.basedir>${project.basedir}/../..</tabula.basedir>		
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
 		<!-- Override module context -->
 		<tabula.module.context>/</tabula.module.context>
 	</properties>
@@ -26,37 +27,37 @@
 
 	<profiles>
 		<profile>
-			<!-- This isn't necessary - tests should run fine run by the JUnit runner.
+			<!-- This isn't necessary - tests should run fine run by the JUnit runner. 
 				just messing with getting native scalatest output. -->
 			<id>scalatest</id>
 			<build>
 				<plugins>
 					<plugin>
-					  <groupId>org.apache.maven.plugins</groupId>
-					  <artifactId>maven-surefire-plugin</artifactId>
-					  <version>2.7</version>
-					  <configuration>
-					    <skipTests>true</skipTests>
-					  </configuration>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.7</version>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
 					</plugin>
 					<!-- enable scalatest -->
 					<plugin>
-					  <groupId>org.scalatest</groupId>
-					  <artifactId>maven-scalatest-plugin</artifactId>
-					  <version>1.0-SNAPSHOT</version>
-					  <configuration>
-					    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-					    <junitxml>.</junitxml>
-					    <filereports>WDF TestSuite.txt</filereports>
-					  </configuration>
-					  <executions>
-					    <execution>
-					      <id>test</id>
-					      <goals>
-					        <goal>test</goal>
-					      </goals>
-					    </execution>
-					  </executions>
+						<groupId>org.scalatest</groupId>
+						<artifactId>maven-scalatest-plugin</artifactId>
+						<version>1.0-SNAPSHOT</version>
+						<configuration>
+							<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+							<junitxml>.</junitxml>
+							<filereports>WDF TestSuite.txt</filereports>
+						</configuration>
+						<executions>
+							<execution>
+								<id>test</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
@@ -81,24 +82,119 @@
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>
+		<profile>
+			<id>cucumber</id>
+
+			<build>
+				<defaultGoal>integration-test</defaultGoal>
+
+				<plugins>
+					<!-- Don't run the normal tests -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>cucumber</id>
+								<phase>integration-test</phase>
+								<configuration>
+									<target>
+										<echo message="server.environment is ${server.environment}" />
+										<fail unless="server.environment"
+											message="Expected server.environment to be set to the server to run tests against." />
+
+										<delete dir="${project.build.directory}/cucumber-features"
+											quiet="true" />
+										<copy todir="${project.build.directory}/cucumber-features">
+											<fileset dir="${project.basedir}/src/test/features" />
+										</copy>
+										<replace dir="${project.build.directory}/cucumber-features"
+											replacefilterfile="${project.basedir}/src/test/resources/tokens-${server.environment}.properties" />
+
+										<java classname="org.jruby.Main" fork="true" failonerror="true">
+											<sysproperty key="log4j.disable" value="ERROR" />
+											<classpath refid="maven.plugin.classpath" />
+
+											<arg value="-I" />
+											<arg value="${project.basedir}/cucumber/lib" />
+											<arg value="${project.basedir}/cucumber/bin/cucumber" />
+
+											<arg value="--format" />
+											<arg value="pretty" />
+
+											<arg value="--format" />
+											<arg value="junit" />
+
+											<arg value="--out" />
+											<arg value="${project.build.directory}/test-results" />
+
+											<arg value="--format" />
+											<arg value="html" />
+
+											<arg value="--out" />
+											<arg value="${project.build.directory}/test-results.html" />
+
+											<arg value="${project.build.directory}/cucumber-features" />
+										</java>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.jruby</groupId>
+								<artifactId>jruby-complete</artifactId>
+								<version>1.4.0</version>
+							</dependency>
+							<dependency>
+								<groupId>info.cukes</groupId>
+								<artifactId>cucumber-deps</artifactId>
+								<version>0.6.3</version>
+							</dependency>
+							<dependency>
+								<groupId>org.jruby</groupId>
+								<artifactId>jruby-openssl</artifactId>
+								<version>0.7.1</version>
+							</dependency>
+							<dependency>
+								<groupId>org.jruby</groupId>
+								<artifactId>jopenssl</artifactId>
+								<version>0.7.1</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 
-	<dependencies>	
+	<dependencies>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-server</artifactId>
 			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>

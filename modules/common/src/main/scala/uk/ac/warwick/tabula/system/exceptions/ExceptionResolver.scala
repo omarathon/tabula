@@ -25,6 +25,9 @@ import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.PermissionsError
 import org.springframework.web.multipart.MultipartException
 import org.apache.http.HttpStatus
+import org.springframework.web.bind.MissingServletRequestParameterException
+import uk.ac.warwick.tabula.ParameterMissingException
+import uk.ac.warwick.tabula.ParameterMissingException
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -77,6 +80,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 			
+			// Handle missing servlet param exceptions as 400
+			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
+						
 			// TAB-411 also redirect to signin for submit permission denied if not logged in
 			case permDenied: PermissionsError if !loggedIn => RedirectToSignin()
 			
