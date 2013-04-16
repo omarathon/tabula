@@ -533,6 +533,14 @@ $(function(){
     };
 
 
+	// makes dropdown menus dropup rather than down if they're so
+	// close to the end of the screen that they will drop off it
+	var bodyHeight = $('body').height();
+	$('.module-info:not(.empty) .btn-group').each( function(index) {
+		if(($(this).find('.dropdown-menu').height() +  $(this).offset().top) > bodyHeight) {
+			$(this).addClass("dropup");
+		}
+	});
 
 });
 
