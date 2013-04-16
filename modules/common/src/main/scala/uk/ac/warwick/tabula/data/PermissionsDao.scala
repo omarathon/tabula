@@ -23,11 +23,11 @@ trait PermissionsDao {
 	
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
 	
-	def getGrantedRolesForUser(user: User): Seq[GrantedRole[_]]
-	def getGrantedRolesForWebgroup(groupName: String): Seq[GrantedRole[_]]
+	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedRole[A]]
+	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedRole[A]]
 	
-	def getGrantedPermissionsForUser(user: User): Seq[GrantedPermission[_]]
-	def getGrantedPermissionsForWebgroup(groupName: String): Seq[GrantedPermission[_]]
+	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]]
+	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedPermission[A]]
 }
 
 @Repository
@@ -93,10 +93,10 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		else None
 	}
 	
-	def getGrantedRolesForUser(user: User) =
-		session.newQuery[GrantedRole[_]]("""
+	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User) =
+		session.newQuery[GrantedRole[A]]("""
 				select distinct r
-				from GrantedRole r
+				from """ + GrantedRole.className[A] + """ r
 				where 
 					(
 						r.users.universityIds = false and 
@@ -114,16 +114,22 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.setString("userId", user.getUserId())
 			.seq
 	
-	def getGrantedRolesForWebgroup(groupName: String) =
-		session.newCriteria[GrantedRole[_]]
+	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
+		val c = session.newCriteria[GrantedRole[A]]
 			.createAlias("users", "users")
 			.add(is("users.baseWebgroup", groupName))
-			.seq
+			
+			GrantedRole.discriminator[A] map { discriminator => 
+				c.add(is("class", discriminator))
+			}
+			
+			c.seq
+	}
 	
-	def getGrantedPermissionsForUser(user: User) =
-		session.newQuery[GrantedPermission[_]]("""
+	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User) =
+		session.newQuery[GrantedPermission[A]]("""
 				select distinct r
-				from GrantedPermission r
+				from """ + GrantedPermission.className[A] + """ r
 				where 
 					(
 						r.users.universityIds = false and 
@@ -142,10 +148,16 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.seq
 	
 	
-	def getGrantedPermissionsForWebgroup(groupName: String) =
-		session.newCriteria[GrantedPermission[_]]
+	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
+		val c = session.newCriteria[GrantedPermission[A]]
 			.createAlias("users", "users")
 			.add(is("users.baseWebgroup", groupName))
-			.seq
+			
+			GrantedPermission.discriminator[A] map { discriminator => 
+				c.add(is("class", discriminator))
+			}
+			
+			c.seq
+	}
 					
 }

@@ -16,6 +16,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.userlookup.Group
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.RouteDao
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 /**
  * Handles data about modules and departments
@@ -27,6 +28,7 @@ class ModuleAndDepartmentService extends Logging {
 	@Autowired var departmentDao: DepartmentDao = _
 	@Autowired var routeDao: RouteDao = _
 	@Autowired var userLookup: UserLookupService = _
+	@Autowired var permissionsService: PermissionsService = _
 	def groupService = userLookup.getGroupService
 
 	

@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import org.hibernate.annotations.ForeignKey
+import scala.reflect._
 
 @Entity
 @AccessType("field")
@@ -86,6 +87,18 @@ object GrantedRole {
 		case _: Assignment => true
 		case _ => false
 	}
+	
+	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
+		case t if t.runtimeClass.isAssignableFrom(classOf[Department]) => classOf[DepartmentGrantedRole]
+		case t if t.runtimeClass.isAssignableFrom(classOf[Module]) => classOf[ModuleGrantedRole]
+		case t if t.runtimeClass.isAssignableFrom(classOf[Member]) => classOf[MemberGrantedRole]
+		case t if t.runtimeClass.isAssignableFrom(classOf[Assignment]) => classOf[AssignmentGrantedRole]
+		case _ => classOf[GrantedRole[_]]
+	}
+	
+	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag] = 
+		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */

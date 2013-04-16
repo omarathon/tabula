@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -66,7 +67,7 @@ import uk.ac.warwick.tabula.data.model.Submission
 				Map(
 					"assignment" -> assignment,
 					"numSubmissions" -> submissions.size,
-					"isAdmin" -> (ownedDepartments.contains(assignment.module.department) || ownedModules.contains(assignment.module))
+					"isAdmin" -> securityService.can(user, Permissions.Module.Read, assignment)
 				)
 			}
 
