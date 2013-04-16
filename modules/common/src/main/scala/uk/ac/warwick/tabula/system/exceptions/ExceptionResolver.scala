@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoIntercept
 import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.PermissionsError
 import org.springframework.web.multipart.MultipartException
+import org.apache.http.HttpStatus
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -53,7 +54,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		val interceptors = List(userInterceptor, infoInterceptor)
 		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
 		
-		doResolve(e, Some(request)).noLayoutIf(ajax).toModelAndView
+		doResolve(e, Some(request), Some(response)).noLayoutIf(ajax).toModelAndView
 	}
 
 	override def requestInfo = RequestInfo.fromThread
@@ -69,20 +70,20 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Simpler interface for ErrorController to delegate to, which is called when an exception
 	 * happens beyond Spring's grasp.
 	 */
-	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None): Mav = {
+	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
 		def loggedIn = requestInfo.map { _.user.loggedIn }.getOrElse(false)
 
 		e match {
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
-			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request)
+			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 			
 			// TAB-411 also redirect to signin for submit permission denied if not logged in
 			case permDenied: PermissionsError if !loggedIn => RedirectToSignin()
 			
 			// TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
-			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request)
+			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)
 			
-			case exception: Throwable => handle(exception, request)
+			case exception: Throwable => handle(exception, request, response)
 			case _ => handleNull
 		}
 	}
@@ -94,9 +95,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def reportExceptions[A](fn: => A) =
 		try fn
-		catch { case throwable: Throwable => handle(throwable, None); throw throwable }
+		catch { case throwable: Throwable => handle(throwable, None, None); throw throwable }
 
-	private def handle(exception: Throwable, request: Option[HttpServletRequest]) = {
+	private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
 		val token = ExceptionTokens.newToken
 		
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
@@ -119,6 +120,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		viewMappings.get(interestingException.getClass.getName) match {
 			case view: String => { mav.viewName = view }
 			case null => //keep defaultView
+		}
+		
+		interestingException match {
+			case error: UserError => response map { _.setStatus(error.statusCode) }
+			case _ => response map { _.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR) }
 		}
 
 		mav
