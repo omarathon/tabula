@@ -559,11 +559,16 @@
 									</#compress></#if>
 								</#compress></@stage>
 							</#if>
-							
+
 							<#if student.stages?keys?seq_contains('ReleaseFeedback')>
-								<@stage student.stages['ReleaseFeedback'] />
+								<@stage student.stages['ReleaseFeedback']><#compress>
+									<#if feedback?? && feedback.releasedDate??><#compress>
+										: <@fmt.date date=feedback.releasedDate seconds=true capitalise=true shortMonth=true />
+									</#compress></#if>
+								</#compress>
+								</@stage>
 							</#if>
-							
+
 							<#if student.stages?keys?seq_contains('DownloadFeedback')>
 								<@stage student.stages['DownloadFeedback'] />
 							</#if>

@@ -56,6 +56,12 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
+	@Column(name = "released_date")
+	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	var releasedDate: DateTime = _
+
+
+
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
 		Option(firstMarkerFeedback).getOrElse({
