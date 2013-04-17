@@ -21,6 +21,7 @@ class AllowedFieldsBindingTest extends TestBase {
 		request.addParameter("service.value", "sval")
 		request.addParameter("component.value", "compval")
 		request.addParameter("controller.value", "conval")
+		request.addParameter("secretValue", "I have changed your value")
 		binder.bind(request)
 		
 		// These should bind okay
@@ -32,6 +33,7 @@ class AllowedFieldsBindingTest extends TestBase {
 		cmd.service.value should be ("")
 		cmd.component.value should be ("")
 		cmd.controller.value should be ("")
+		cmd.secretValue should be ("secrits")
 	}
 	
 	trait HasValue { var value = "" }
@@ -42,6 +44,7 @@ class AllowedFieldsBindingTest extends TestBase {
 		var component = new TestComponent
 		var controller = new TestController
 		var bean = new RegularBean
+		@NoBind var secretValue = "secrits"
 	}
 	
 	@Repository class TestRepo extends HasValue

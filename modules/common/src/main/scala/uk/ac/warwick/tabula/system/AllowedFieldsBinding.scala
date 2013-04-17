@@ -1,10 +1,13 @@
 package uk.ac.warwick.tabula.system
 
 import scala.collection.JavaConversions._
-import javax.servlet.ServletRequest
-import org.springframework.stereotype
-import java.lang.annotation.Annotation
 import scala.collection.immutable.Stream
+
+import java.lang.annotation.Annotation
+
+import javax.servlet.ServletRequest
+
+import org.springframework.stereotype
 
 /**
  * Data binder mixin that disallows binding to certain classes, such as ones that
@@ -13,7 +16,7 @@ import scala.collection.immutable.Stream
  */
 trait AllowedFieldsBinding extends CustomDataBinder {
 
-	val parentPathPattern = """(.+)\.(.+?)""".r
+	val parentPathPattern = """(.+)\.(.+?)""".r // match (top.part.of.path).(child)
 	
 	// We do not bind to a class if it has one of these annotations.
 	val disallowedAnnotations: Set[Class[_ <: Annotation]] = Set(
@@ -23,8 +26,17 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 			classOf[stereotype.Service]
 		)
 	
+	// Annotation you can add to an individual property to disable binding to it
+	val noBindAnnotation = classOf[NoBind]
+	
 	override def isAllowed(field: String) = {
-		super.isAllowed(field) && !containedWithinDisallowedAnnotation(field)
+		super.isAllowed(field) && 
+			! containedWithinDisallowedAnnotation(field) && 
+			! hasNoBindAnnotation(field)
+	}
+	
+	def hasNoBindAnnotation(field: String) = {
+		propertyAccessor.getPropertyTypeDescriptor(field).getAnnotation(noBindAnnotation) != null
 	}
 	
 	/**
