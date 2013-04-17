@@ -22,6 +22,7 @@ class AllowedFieldsBindingTest extends TestBase {
 		request.addParameter("component.value", "compval")
 		request.addParameter("controller.value", "conval")
 		request.addParameter("secretValue", "I have changed your value")
+		request.addParameter("dept", "this doesn't exist, ignored")
 		binder.bind(request)
 		
 		// These should bind okay

@@ -15,16 +15,17 @@ import uk.ac.warwick.tabula.services.SecurityService
 class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer) 
 	extends ServletRequestDataBinderFactory(binderMethods, initializer) {
 	
+	trait CustomDataBinderDependencies {
+		// dependency for PermissionsBinding
+		val securityService = Wire.auto[SecurityService]
+	}
+	
 	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= { 
 		new CustomDataBinder(target, objectName) 
+				with CustomDataBinderDependencies
 				with PermissionsBinding
 				with AllowedFieldsBinding
-				with BindListenerBinding {
-		
-			// dependency for PermissionsBinding
-			val securityService = Wire.auto[SecurityService]
-			
-		}
+				with BindListenerBinding
 	}
 	
 }

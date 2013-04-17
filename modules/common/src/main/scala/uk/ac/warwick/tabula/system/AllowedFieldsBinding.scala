@@ -36,7 +36,8 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 	}
 	
 	def hasNoBindAnnotation(field: String) = {
-		propertyAccessor.getPropertyTypeDescriptor(field).getAnnotation(noBindAnnotation) != null
+		val descriptor = propertyAccessor.getPropertyTypeDescriptor(field)
+		descriptor != null && descriptor.getAnnotation(noBindAnnotation) != null
 	}
 	
 	/**
@@ -48,7 +49,7 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 	 * Probably not worth caching the results since they are short-lived.
 	 */
 	def containedWithinDisallowedAnnotation(field: String) = {
-		ancestors(field) map toPropertyType exists usesDisallowedAnnotation
+		ancestors(field).flatMap(toPropertyType).exists(usesDisallowedAnnotation)
 	}
 	
 	// A stream of field names, going up through each field's parent.
@@ -61,6 +62,6 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 		disallowedAnnotations.exists { annotation => c.getAnnotation(annotation) != null }
 	}
 	
-	def toPropertyType(field: String) = propertyAccessor.getPropertyType(field)
+	def toPropertyType(field: String): Option[Class[_]] = Option(propertyAccessor.getPropertyType(field))
 	
 }
