@@ -15,7 +15,7 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var name:String = _
 	var description:String = _
 
-	@OneToOne
+	@OneToOne(orphanRemoval=true)
 	@JoinColumn(name="ATTACHMENT_ID")
 	var attachment: FileAttachment = _
 
