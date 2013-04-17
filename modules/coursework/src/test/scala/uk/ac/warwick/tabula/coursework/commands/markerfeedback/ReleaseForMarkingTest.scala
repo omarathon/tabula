@@ -16,8 +16,13 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 	@Test
 	def isReleased = transactional { tx =>
 		withUser("cuslaj") {
-
-			val assignment = newDeepAssignment()
+			val assignment = transactional { tx => 
+				val assignment = newDeepAssignment()
+				session.save(assignment.module.department)
+				session.save(assignment.module)
+				session.save(assignment)
+				assignment
+			}
 			assignment.closeDate = DateTime.parse("2012-08-15T12:00")
 
 			generateSubmission(assignment, "0678022")
@@ -41,6 +46,7 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 		val submission = new Submission()
 		submission.assignment = assignment
 		submission.universityId = uniId
+		submission.userId = uniId
 		assignment.submissions.add(submission)
 	}
 

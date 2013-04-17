@@ -33,7 +33,7 @@ class ApplicationTest extends AppContextTestBase {
     
     lazy val annotationMapper = Wire[RequestMappingHandlerMapping]
     
-    var auditIndexDir = Wire[String]("${filesystem.index.audit.dir}")
+    lazy val auditIndexDir = Wire[String]("${filesystem.index.audit.dir}")
     
     @Test def handlerMappings = {
     	annotationMapper.getHandlerMethods.size should not be (0)

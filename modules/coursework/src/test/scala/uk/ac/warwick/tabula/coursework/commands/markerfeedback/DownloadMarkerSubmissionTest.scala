@@ -13,7 +13,6 @@ import org.apache.velocity.tools.config.SkipSetters
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
 
-
 class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 	@Before

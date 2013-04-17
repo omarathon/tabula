@@ -14,7 +14,7 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 	lazy val stateService = Wire[StateService]
 
 	@Test
-	def firstMarkerFinished = transactional { tx =>
+	def firstMarkerFinished = 
 		withUser("cuslaj"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
@@ -26,11 +26,14 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 			command.noFeedback.size should be (3)
 			command.noMarks.size should be (3)
 
-			command.apply()
+			transactional { tx =>
+				command.apply()
+			}
+			
 			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 		}
-	}
+	
 
 	@Test
 	def secondMarkerFinished = transactional { tx =>

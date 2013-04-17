@@ -46,46 +46,51 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 	 * Check that validation allows either mark or grade to be non-empty
 	 */
 	@Test
-	def gradeButEmptyMarkField = transactional { tx =>
-		withUser("cusebr") {
-			val currentUser = RequestInfo.fromThread.get.user
+	def gradeButEmptyMarkField = withUser("cusebr") {
+		val currentUser = RequestInfo.fromThread.get.user
+		val assignment = transactional { tx => 
 			val assignment = newDeepAssignment()
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser)
-			command.userLookup = mock[UserLookupService]
-			command.userLookup.getUserByWarwickUniId("0672088") answers { id => 
-				currentUser.apparentUser
-			}
-			
-			val errors = new BindException(command, "command")
-			
-			val marks1 = command.marks.get(0)
-			marks1.universityId = "0672088"
-			marks1.actualMark = ""
-			marks1.actualGrade = "EXCELLENT"
-			
-			val marks2 = command.marks.get(1)
-			marks2.universityId = "55555"
-			marks2.actualMark = "65"
-
-			val marks3 = command.marks.get(2)
-			marks3.universityId = "1235"
-			marks3.actualMark = "A"
-
-			val marks4 = command.marks.get(3)
-			marks4.universityId = ""
-			marks4.actualMark = "80"
-			marks4.actualGrade = "EXCELLENT"
-
-			val marks5 = command.marks.get(4)
-			marks5.universityId = "0672088"
-			marks5.actualMark = ""
-			marks5.actualGrade = ""
-
-			command.postExtractValidation(errors)
-			command.marks.filter(_.isValid).size should be (1)
-		
-			command.apply()
+			session.save(assignment.module.department)
+			session.save(assignment.module)
+			session.save(assignment)
+			assignment
 		}
+		
+		val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser)
+		command.userLookup = mock[UserLookupService]
+		command.userLookup.getUserByWarwickUniId("0672088") answers { id => 
+			currentUser.apparentUser
+		}
+		
+		val errors = new BindException(command, "command")
+		
+		val marks1 = command.marks.get(0)
+		marks1.universityId = "0672088"
+		marks1.actualMark = ""
+		marks1.actualGrade = "EXCELLENT"
+		
+		val marks2 = command.marks.get(1)
+		marks2.universityId = "55555"
+		marks2.actualMark = "65"
+
+		val marks3 = command.marks.get(2)
+		marks3.universityId = "1235"
+		marks3.actualMark = "A"
+
+		val marks4 = command.marks.get(3)
+		marks4.universityId = ""
+		marks4.actualMark = "80"
+		marks4.actualGrade = "EXCELLENT"
+
+		val marks5 = command.marks.get(4)
+		marks5.universityId = "0672088"
+		marks5.actualMark = ""
+		marks5.actualGrade = ""
+
+		command.postExtractValidation(errors)
+		command.marks.filter(_.isValid).size should be (1)
+	
+		command.apply()
 	}
 	
 }
