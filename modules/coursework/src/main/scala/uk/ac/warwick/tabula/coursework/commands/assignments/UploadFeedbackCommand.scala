@@ -81,6 +81,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
+	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
+	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
@@ -225,7 +227,12 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			val zip = new ZipArchiveInputStream(archive.getInputStream)
 
 			val bits = Zips.iterator(zip) { (iterator) =>
-				for (entry <- iterator if !entry.isDirectory) yield {
+				for (
+					entry <- iterator
+					if !entry.isDirectory
+					if !(disallowedFilenames.split(",").toList contains  entry.getName)
+					if !(disallowedPrefixes.split(",").toList.exists(entry.getName.startsWith))
+				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
 					// just turn it into an underscore.
