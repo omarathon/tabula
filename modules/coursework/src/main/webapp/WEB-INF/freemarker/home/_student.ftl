@@ -26,6 +26,7 @@
 				<#macro enrolled_assignment info>
 					<#local assignment = info.assignment />
 					<#local extension = info.extension!false />
+					<#local hasExtension = info.hasExtension />
 					<#local isExtended = info.isExtended!false />
 					<#local extensionRequested = info.extensionRequested!false />
 					
@@ -58,26 +59,8 @@
 											</#if>
 										</div>
 									<#elseif info.submittable>
-										<#assign time_remaining = durationFormatter(assignment.closeDate) />
-										
-										<#if isExtended>
-											<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
-											
-											<div class="extended deadline">
-												<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
-												Extension granted until <@fmt.date date=extension.expiryDate />
-											</div>
-										<#elseif assignment.closed>
-											<div class="late deadline">
-												<span class="time-remaining">${time_remaining} <span class="label label-important">Late</span></span>
-												Deadline was <@fmt.date date=assignment.closeDate />
-											</div>
-										<#else>
-											<div class="deadline">
-												<span class="time-remaining">${time_remaining}</span>
-												Deadline <@fmt.date date=assignment.closeDate />
-											</div>
-										</#if>
+										<#local showButtons = false />
+										<#include "/WEB-INF/freemarker/submit/_assignment_deadline.ftl" />
 									</#if>
 								</#if>
 							</div>

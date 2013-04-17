@@ -90,6 +90,7 @@ class AssignmentController extends CourseworkController {
 				"justSubmitted" -> (form map { _.justSubmitted } getOrElse (false)),
 				"canSubmit" -> canSubmit,
 				"canReSubmit" -> canReSubmit,
+				"hasExtension" -> extension.isDefined,
 				"extension" -> extension,
 				"isExtended" -> isExtended,
 				"extensionRequested" -> extensionRequested)
