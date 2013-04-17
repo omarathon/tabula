@@ -29,8 +29,8 @@ import org.springframework.validation.BindingResult
 class UploadedFile extends BindListener {
 	var fileDao = Wire.auto[FileDao]
 
-	@NoBind var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}").split(",").toList
-	@NoBind var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}").split(",").toList
+	@NoBind var disallowedFilenames = commaSeparated( Wire.property("${uploads.disallowedFilenames}") )
+	@NoBind var disallowedPrefixes = commaSeparated( Wire.property("${uploads.disallowedPrefixes}") )
 		
 	// files bound from an upload request, prior to being persisted by `onBind`.
 	var upload: JList[MultipartFile] = JArrayList()
@@ -107,4 +107,8 @@ class UploadedFile extends BindListener {
 		}
 
 	}
+	
+	private def commaSeparated(csv: String) = 
+		if (csv == null) Nil
+		else csv.split(",").toList
 }
