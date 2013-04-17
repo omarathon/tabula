@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.NoBind
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -45,6 +46,8 @@ trait Describable[A] {
  */
 abstract class Command[A] extends Describable[A] with JavaImports with EventHandling with PermissionsChecking {
 	var maintenanceMode = Wire[MaintenanceModeService]
+	
+	import uk.ac.warwick.tabula.system.NoBind
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {

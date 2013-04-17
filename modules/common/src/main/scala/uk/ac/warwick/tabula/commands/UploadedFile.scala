@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.NoBind
 import org.springframework.validation.BindingResult
 
 /**
@@ -28,17 +29,17 @@ import org.springframework.validation.BindingResult
 class UploadedFile extends BindListener {
 	var fileDao = Wire[FileDao]
 
-	var disallowedFilenames = Wire[String]("${uploads.disallowedFilenames}")
-	var disallowedPrefixes = Wire[String]("${uploads.disallowedPrefixes}")
+	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 		
-	// files bound from an upload request, prior to being persisted
+	// files bound from an upload request, prior to being persisted by `onBind`.
 	var upload: JList[MultipartFile] = JArrayList()
 
 	// files that have been persisted - can be represented in forms by ID
-	var attached: JList[FileAttachment] = JArrayList() //LazyLists.simpleFactory()
+	var attached: JList[FileAttachment] = JArrayList()
 
-	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
-	def attachedFileNames: Seq[String] = attached.map(file => file.getName)
+	def uploadedFileNames: Seq[String] = upload.map(_.getOriginalFilename).filterNot(_ == "")
+	def attachedFileNames: Seq[String] = attached.map(_.getName)
 	def fileNames = uploadedFileNames ++ attachedFileNames
 
 	def isMissing = !isExists
@@ -49,14 +50,19 @@ class UploadedFile extends BindListener {
 		else if (hasUploads) permittedUploads.size
 		else 0
 
-	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse JArrayList()
+	def attachedOrEmpty: JList[FileAttachment] = Option(attached).getOrElse(JArrayList())
 	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
 	def hasAttachments = attached != null && !attached.isEmpty()
 	def hasUploads = !permittedUploads.isEmpty
 	
+	/** Uploads excluding those that are empty or have bad names. */
 	def permittedUploads: JList[MultipartFile] = {
-		Option(upload).getOrElse(JArrayList()).filterNot { s => s.isEmpty || (disallowedFilenames.split(",").toList contains s.getOriginalFilename()) || disallowedPrefixes.split(",").toList.exists(s.getOriginalFilename().startsWith)}
+		upload.filterNot { s => 
+			s.isEmpty || 
+			(disallowedFilenames contains s.getOriginalFilename) || 
+			(disallowedPrefixes exists (s.getOriginalFilename.startsWith))
+		}
 	}
 		
 	def isUploaded = hasUploads
@@ -101,4 +107,8 @@ class UploadedFile extends BindListener {
 		}
 
 	}
+	
+	private def commaSeparated(csv: String) = 
+		if (csv == null) Nil
+		else csv.split(",").toList
 }

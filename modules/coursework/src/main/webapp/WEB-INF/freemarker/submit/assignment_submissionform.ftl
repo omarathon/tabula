@@ -1,5 +1,5 @@
 <#if !submission?? && assignment.collectSubmissions>
-	<#include "assignment_deadline.ftl" />
+	<#include "_assignment_deadline.ftl" />
 </#if>
 
 <#if (canSubmit && !submission??) || canReSubmit>

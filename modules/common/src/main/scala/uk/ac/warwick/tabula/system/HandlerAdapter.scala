@@ -7,7 +7,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
 import org.springframework.web.method.support.InvocableHandlerMethod
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingDataBinderFactory
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
 
 /**
@@ -38,6 +37,6 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 	}
 	
 	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory = 
-		new PermissionsCheckingDataBinderFactory(binderMethods.toList, getWebBindingInitializer())
+		new CustomDataBinderFactory(binderMethods.toList, getWebBindingInitializer())
 
 }

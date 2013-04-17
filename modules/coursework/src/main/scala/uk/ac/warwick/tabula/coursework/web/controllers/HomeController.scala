@@ -118,6 +118,7 @@ import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 					"hasSubmission" -> submission.isDefined,
 					"feedback" -> feedback,
 					"hasFeedback" -> feedback.isDefined,
+					"hasExtension" -> extension.isDefined,
 					"extension" -> extension,
 					"isExtended" -> isExtended,
 					"extensionRequested" -> extensionRequested,
