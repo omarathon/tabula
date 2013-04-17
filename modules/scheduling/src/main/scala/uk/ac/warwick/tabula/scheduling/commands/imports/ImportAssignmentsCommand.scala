@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
 import uk.ac.warwick.tabula.data.Transactions._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.SprCode
@@ -19,8 +18,8 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var assignmentImporter = Wire.auto[AssignmentImporter]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentImporter = Wire[AssignmentImporter]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
 
 	def applyInternal() {
 		benchmark("ImportAssignments") {

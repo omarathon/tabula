@@ -5,8 +5,7 @@ import scala.annotation.target.field
 import collection.JavaConversions._
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
 import org.springframework.validation.Errors
 import org.springframework.web.util.HtmlUtils._
 import javax.persistence._
@@ -16,7 +15,6 @@ import uk.ac.warwick.tabula.data.model.Assignment
 
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.FileDao
-import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
@@ -46,8 +44,8 @@ import scala.reflect._
 @DiscriminatorColumn(name = "fieldtype")
 abstract class FormField extends GeneratedId {
 
-	@transient var json = Wire.auto[ObjectMapper]
-	@transient var userLookup = Wire.auto[UserLookupService]
+	@transient var json = Wire.option[ObjectMapper].orNull
+	@transient var userLookup = Wire.option[UserLookupService].orNull
 
 	@BeanProperty
 	@ManyToOne

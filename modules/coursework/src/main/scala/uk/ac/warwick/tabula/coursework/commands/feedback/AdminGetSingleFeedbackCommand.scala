@@ -17,7 +17,7 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, feedback)
 	
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	override def applyInternal() = {
 		val zip = zipService.getFeedbackZip(feedback)
@@ -68,7 +68,7 @@ class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	override def applyInternal() = {
 		val zip = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))

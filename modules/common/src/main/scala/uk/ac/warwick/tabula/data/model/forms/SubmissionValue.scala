@@ -3,11 +3,10 @@ package uk.ac.warwick.tabula.data.model.forms
 /**
  * represents a submitted value.
  */
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
@@ -42,7 +41,7 @@ class BooleanSubmissionValue(val field: FormField) extends SubmissionValue {
 class FileSubmissionValue(val field: FormField) extends SubmissionValue {
 	var file: UploadedFile = new UploadedFile
 
-	lazy val fileDao = Wire.auto[FileDao]
+	lazy val fileDao = Wire[FileDao]
 	override def onBind(result: BindingResult) { file.onBind(result) }
 	def persist(ssv: SavedSubmissionValue) {
 		val savedAttachments = for (attachment <- file.attached) yield {

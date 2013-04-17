@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
 import org.junit.Test
-import org.springframework.transaction.annotation.Transactional
+
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
@@ -15,8 +15,7 @@ import uk.ac.warwick.tabula.CurrentUser
 
 class AddAssignmentsCommandTest extends AppContextTestBase {
 	
-	@Transactional
-	@Test def applyCommand = withUser("cuscav") {
+	@Test def applyCommand = transactional { tx => withUser("cuscav") {
 		val f = MyFixtures()
 		
 		val cmd = new AddAssignmentsCommand(f.department, currentUser)
@@ -56,7 +55,7 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		withClue("Expecting attachment field.") { result2.attachmentField should be ('defined) }
 		withClue("Expecting comment field.") { result2.commentField should be ('defined) }
 		withClue("Expected open ended") { assert(result2.openEnded === true) }
-	} 
+	}}
 	
 	
 	case class MyFixtures() {

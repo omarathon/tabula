@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
@@ -28,8 +27,8 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 	
-	var submissionService = Wire.auto[SubmissionService]
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var submissionService = Wire[SubmissionService]
+	var feedbackDao = Wire[FeedbackDao]
 
 	hideDeletedItems
 

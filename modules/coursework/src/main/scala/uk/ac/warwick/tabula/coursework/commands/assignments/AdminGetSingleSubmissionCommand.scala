@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -17,7 +15,7 @@ class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assign
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, submission)
 	
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	override def applyInternal() = {
 		val zip = zipService.getSubmissionZip(submission)

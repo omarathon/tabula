@@ -17,9 +17,9 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	val assignmentSheetSize = 13
 	val moduleSheetSize = 11
 
-	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-	var submissionService = Wire.auto[SubmissionService]
+	var auditEventQueryMethods = Wire[AuditEventQueryMethods]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var submissionService = Wire[SubmissionService]
 	val workbook = new XSSFWorkbook()
 	var workingDaysHelper = new WorkingDaysHelperImpl
 

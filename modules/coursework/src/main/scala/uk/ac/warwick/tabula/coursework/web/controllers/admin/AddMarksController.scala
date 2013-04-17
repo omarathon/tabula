@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
@@ -24,8 +24,8 @@ import uk.ac.warwick.tabula.services.FeedbackService
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks"))
 class AddMarksController extends CourseworkController {
 
-	@Autowired var feedbackService: FeedbackService = _
-	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
+	var feedbackService = Wire[FeedbackService]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AdminAddMarksCommand(module, assignment, user)

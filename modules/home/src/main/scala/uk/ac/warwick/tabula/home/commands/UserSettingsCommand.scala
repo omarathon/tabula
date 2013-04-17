@@ -15,7 +15,7 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 
 	PermissionCheck(Permissions.UserSettings.Update, settings)
 	
-	var service = Wire.auto[UserSettingsService]
+	var service = Wire[UserSettingsService]
 	
 	var alertsSubmission = settings.alertsSubmission
 		

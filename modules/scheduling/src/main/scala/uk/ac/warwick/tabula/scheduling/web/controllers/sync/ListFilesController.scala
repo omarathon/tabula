@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils
 class ListFilesController extends BaseController {
 	import ListFilesController._		
 	
-	var fileDao = Wire.auto[FileDao]
+	var fileDao = Wire[FileDao]
 	
 	@RequestMapping
 	def list(@RequestParam("start") startDateMillis: Long, @RequestParam(value="startFromId", required=false) startingId: String) = {

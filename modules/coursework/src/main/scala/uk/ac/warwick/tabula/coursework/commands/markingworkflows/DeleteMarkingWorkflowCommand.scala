@@ -14,7 +14,7 @@ class DeleteMarkingWorkflowCommand(val department: Department, val markingWorkfl
 	mustBeLinked(markingWorkflow, department)
 	PermissionCheck(Permissions.MarkingWorkflow.Delete, markingWorkflow)
 	
-	var dao = Wire.auto[MarkingWorkflowDao]
+	var dao = Wire[MarkingWorkflowDao]
 	
 	override def applyInternal() {
 		transactional() {

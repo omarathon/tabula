@@ -4,7 +4,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.transaction.TransactionConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import org.hibernate.SessionFactory
 import org.hibernate.Transaction
 import org.springframework.transaction._
@@ -21,11 +21,19 @@ import org.reflections.Reflections
 import uk.ac.warwick.tabula.commands.Command
 import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
+import org.springframework.test.context.TestExecutionListeners
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener
+import org.junit.After
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode._
+import org.junit.AfterClass
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @ActiveProfiles(Array("test"))
-abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
+abstract class AppContextTestBase extends TestBase with TransactionalTesting {
 	protected def allCommandsInSystem(packageBase: String) = {
 		val reflections = new Reflections(packageBase)
 
@@ -38,26 +46,18 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 }
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/spring-scala-glue-support-context.xml","/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
-abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
+abstract class PersistenceTestBase extends TestBase with TransactionalTesting {
 	
 	
 	
-}
-
-trait ContextSetup {
-	@Autowired var beans: AbstractAutowireCapableBeanFactory =_
-	
-	@Before def setupCtx {
-		
-	}
 }
 
 trait TransactionalTesting {
-	@Autowired var sessionFactory:SessionFactory =_
-	@Autowired var dataSource:DataSource =_
-	@Autowired var transactionManager:PlatformTransactionManager =_
+	lazy val sessionFactory = Wire[SessionFactory]
+	lazy val dataSource = Wire[DataSource]("dataSource")
+	lazy val transactionManager = Wire[PlatformTransactionManager]
 	
 	def session = sessionFactory.getCurrentSession
 	

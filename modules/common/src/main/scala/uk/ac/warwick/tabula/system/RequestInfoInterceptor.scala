@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.services.SecurityService
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.web.Uri
 import collection.JavaConversions._
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	import RequestInfoInterceptor._
   
-	@Autowired var maintenance: MaintenanceModeService = _
+	var maintenance = Wire[MaintenanceModeService]
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 		implicit val req = request

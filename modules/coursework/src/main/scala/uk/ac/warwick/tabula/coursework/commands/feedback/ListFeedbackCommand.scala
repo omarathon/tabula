@@ -12,7 +12,7 @@ class ListFeedbackCommand(val module: Module, val assignment: Assignment) extend
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
-	var auditIndexService = Wire.auto[AuditEventIndexService]
+	var auditIndexService = Wire[AuditEventIndexService]
 	
 	override def applyInternal() = {
 		auditIndexService.whoDownloadedFeedback(assignment)

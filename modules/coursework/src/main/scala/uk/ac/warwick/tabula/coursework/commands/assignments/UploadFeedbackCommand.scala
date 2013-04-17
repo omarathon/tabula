@@ -82,11 +82,11 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
 
-	var zipService = Wire.auto[ZipService]
-	var userLookup = Wire.auto[UserLookupService]
-	var fileDao = Wire.auto[FileDao]
-	var assignmentService = Wire.auto[AssignmentService]
-	var stateService = Wire.auto[StateService]
+	var zipService = Wire[ZipService]
+	var userLookup = Wire[UserLookupService]
+	var fileDao = Wire[FileDao]
+	var assignmentService = Wire[AssignmentService]
+	var stateService = Wire[StateService]
 
 	/* for single upload */
 	var uniNumber: String = _

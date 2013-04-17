@@ -22,7 +22,7 @@ class PermissionsCheckingDataBinder(val target: Any, val objectName: String, val
 	
 	// Autowired third parameter. Done in a skewiff way for testing purposes
 	def this(target: Any, objectName: String) = {
-		this(target, objectName, Wire.auto[SecurityService])
+		this(target, objectName, Wire[SecurityService])
 	}
 	
 	def requestInfo = RequestInfo.fromThread

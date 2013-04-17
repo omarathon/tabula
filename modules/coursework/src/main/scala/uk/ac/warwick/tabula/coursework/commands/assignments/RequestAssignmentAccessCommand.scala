@@ -24,10 +24,10 @@ class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit] wi
 	var module: Module = _
 	var assignment: Assignment = _
 
-	var userLookup = Wire.auto[UserLookupService]
-	implicit var freemarker = Wire.auto[Configuration]
+	var userLookup = Wire[UserLookupService]
+	implicit var freemarker = Wire[Configuration]
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var fromAddress = Wire[String]("${mail.exceptions.to}")
 
 	override def applyInternal() {
 		val admins = module.department.owners

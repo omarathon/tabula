@@ -16,7 +16,7 @@ import uk.ac.warwick.userlookup.UserLookupAdapter
 
 trait UserLookupService extends UserLookupInterface
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with Daoisms {
+class UserLookupServiceImpl(d: UserLookupService) extends UserLookupServiceAdapter(d) with UserLookupService with Daoisms {
 
 	override def getUserByWarwickUniId(id: String) =
 		getUserByWarwickUniId(id, true)

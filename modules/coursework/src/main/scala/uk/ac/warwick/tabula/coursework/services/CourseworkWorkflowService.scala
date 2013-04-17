@@ -19,7 +19,7 @@ class CourseworkWorkflowService {
 	import WorkflowStages._
 	
 	final val MaxPower = 100
-	var features = Wire.auto[Features]
+	var features = Wire[Features]
 	
 	def getStagesFor(assignment: Assignment) = {
 		var stages = Seq[WorkflowStage]()

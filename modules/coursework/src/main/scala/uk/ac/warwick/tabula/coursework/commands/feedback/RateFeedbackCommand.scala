@@ -35,7 +35,7 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Rate, feedback)
 	
-	var features = Wire.auto[Features]
+	var features = Wire[Features]
 
 	//	var rating:JInteger = _ 
 

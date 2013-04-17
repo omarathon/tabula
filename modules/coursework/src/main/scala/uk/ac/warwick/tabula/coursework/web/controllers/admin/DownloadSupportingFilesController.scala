@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping}
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import scala.Array
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadSupportingFilesCommand, DownloadAttachmentCommand}
@@ -23,7 +23,7 @@ class DownloadSupportingFilesController extends CourseworkController{
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(user.universityId)), filename)
 	}
 
-	@Autowired var fileServer:FileServer =_
+	var fileServer = Wire[FileServer]
 
 	@RequestMapping(value=Array("/supporting-file/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
@@ -42,7 +42,7 @@ class AdminDownloadSupportingFilesController extends CourseworkController{
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(universityId)), filename)
 	}
 
-	@Autowired var fileServer:FileServer =_
+	var fileServer = Wire[FileServer]
 
 	@RequestMapping(value=Array("/supporting-file/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) = {

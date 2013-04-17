@@ -28,11 +28,11 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	PermissionCheck(Permissions.Feedback.Delete, assignment)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
-	var submissionService = Wire.auto[SubmissionService]
-	var feedbackService = Wire.auto[FeedbackService]
+	var submissionService = Wire[SubmissionService]
+	var feedbackService = Wire[FeedbackService]
 	
-	var zipService = Wire.auto[ZipService]
-	var userLookup = Wire.auto[UserLookupService]
+	var zipService = Wire[ZipService]
+	var userLookup = Wire[UserLookupService]
 	
     var students: JList[String] = JArrayList()
     var submissionOrFeedback: String = ""

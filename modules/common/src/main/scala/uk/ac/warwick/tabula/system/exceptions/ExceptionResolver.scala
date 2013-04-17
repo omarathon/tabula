@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Required
+import uk.ac.warwick.spring.Wire
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
@@ -27,7 +26,7 @@ import org.springframework.web.multipart.MultipartException
 import org.apache.http.HttpStatus
 import org.springframework.web.bind.MissingServletRequestParameterException
 import uk.ac.warwick.tabula.ParameterMissingException
-import uk.ac.warwick.tabula.ParameterMissingException
+import org.springframework.beans.factory.annotation.Required
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -40,10 +39,10 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 	@Required var defaultView: String = _
 
-	@Autowired var exceptionHandler: ExceptionHandler = _
+	var exceptionHandler = Wire[ExceptionHandler]
 	
-	@Autowired var userInterceptor: CurrentUserInterceptor = _
-	@Autowired var infoInterceptor: RequestInfoInterceptor = _
+	var userInterceptor = Wire[CurrentUserInterceptor]
+	var infoInterceptor = Wire[RequestInfoInterceptor]
 
 	/**
 	 * If the interesting exception matches one of these exceptions then

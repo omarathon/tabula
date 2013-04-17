@@ -26,10 +26,10 @@ import org.springframework.validation.BindingResult
  * multipart/form-data encoding type on your form.
  */
 class UploadedFile extends BindListener {
-	var fileDao = Wire.auto[FileDao]
+	var fileDao = Wire[FileDao]
 
-	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
-	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
+	var disallowedFilenames = Wire[String]("${uploads.disallowedFilenames}")
+	var disallowedPrefixes = Wire[String]("${uploads.disallowedPrefixes}")
 		
 	// files bound from an upload request, prior to being persisted
 	var upload: JList[MultipartFile] = JArrayList()

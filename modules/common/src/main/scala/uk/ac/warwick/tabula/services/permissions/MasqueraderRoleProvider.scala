@@ -13,8 +13,8 @@ import uk.ac.warwick.tabula.roles.Masquerader
 @Component
 class MasqueraderRoleProvider extends ScopelessRoleProvider {
 	
-	var userLookup = Wire.auto[UserLookupService]
-	var masqueradeGroup: String = Wire.property("${permissions.masquerade.group}")
+	var userLookup = Wire[UserLookupService]
+	var masqueradeGroup: String = Wire[String]("${permissions.masquerade.group}")
 	
 	def groupService = userLookup.getGroupService
 

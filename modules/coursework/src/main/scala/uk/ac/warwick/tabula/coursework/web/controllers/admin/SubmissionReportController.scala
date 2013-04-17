@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
@@ -29,8 +29,8 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/submissions-report"))
 class SubmissionReportController extends CourseworkController {
 
-	@Autowired var features: Features = _
-	@Autowired var userLookup: UserLookupInterface = _
+	var features = Wire[Features]
+	var userLookup = Wire[UserLookupInterface]
 	
 	@ModelAttribute def command(@PathVariable("module") module:Module, @PathVariable("assignment") assignment: Assignment) =
 		new SubmissionReportCommand(module, assignment)

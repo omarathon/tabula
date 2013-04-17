@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.home.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._

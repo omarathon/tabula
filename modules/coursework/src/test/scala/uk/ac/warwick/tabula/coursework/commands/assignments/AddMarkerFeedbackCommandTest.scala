@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.FileDao
 
 class AddMarkerFeedbackCommandTest extends TestBase with Mockito {

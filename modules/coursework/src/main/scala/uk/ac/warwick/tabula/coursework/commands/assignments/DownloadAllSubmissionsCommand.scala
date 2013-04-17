@@ -3,12 +3,11 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.ZipService
-import org.springframework.beans.factory.annotation.Autowired
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
@@ -18,7 +17,7 @@ class DownloadAllSubmissionsCommand(val module: Module, val assignment: Assignme
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	override def applyInternal() = {
 		val zip = zipService.getAllSubmissionsZip(assignment)

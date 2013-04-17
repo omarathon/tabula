@@ -21,8 +21,8 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment)
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 	
-	var zipService = Wire.auto[ZipService]
-	var submissionService = Wire.auto[SubmissionService]
+	var zipService = Wire[ZipService]
+	var submissionService = Wire[SubmissionService]
 
 	var filename: String = _
 	var submissions: JList[Submission] = JArrayList()

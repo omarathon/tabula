@@ -3,9 +3,9 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentCommand
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.ModuleDao
-import org.springframework.transaction.annotation.Transactional
+
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.User
@@ -14,17 +14,15 @@ import uk.ac.warwick.tabula.data.model._
 
 class AddAssignmentCommandContextTest extends AppContextTestBase {
 	
-	@Autowired var modules:ModuleDao =_
+	lazy val modules = Wire[ModuleDao]
 	
-	@Transactional
-	@Test def edit() {
+	@Test def edit = transactional { tx =>
 		withUser("abc") {
 			
 		}
 	}
 	
-	@Transactional
-	@Test def add() {
+	@Test def add = transactional { tx =>
 
 		withUser("abc") {
 			

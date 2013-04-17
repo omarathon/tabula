@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.home
 
 import org.junit.Test
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.home.web.controllers.sysadmin.SysadminController
 
 class ApplicationTest extends AppContextTestBase {
     
-    @Autowired var sysadminController:SysadminController = _
+    lazy val sysadminController = Wire[SysadminController]
        
     @Test def itWorks = {
-    	assert(beans.containsBean("userLookup"))
+    	assert(Wire.named("userLookup") != null)
     }
     
     // Can resolve message codes from any controller
