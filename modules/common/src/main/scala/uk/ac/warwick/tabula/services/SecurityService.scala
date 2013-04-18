@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services
 import uk.ac.warwick.userlookup.GroupService
-import org.springframework.beans.factory.annotation.{Autowired,Value}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
@@ -26,7 +25,7 @@ import scala.annotation.tailrec
 @Service
 class SecurityService extends Logging {
 
-	var roleService = Wire.auto[RoleService]
+	var roleService = Wire[RoleService]
 
 	type Response = Option[Boolean]
 	type PermissionChecker = (CurrentUser, Permission, PermissionsTarget) => Response

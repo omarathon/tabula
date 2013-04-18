@@ -5,9 +5,8 @@ import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateModel
 import freemarker.core.Environment
-import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.spring.Wire
 import java.util.Properties
-import javax.annotation.Resource
 import freemarker.template.SimpleScalar
 import java.net.URLEncoder
 import uk.ac.warwick.util.web.EscapingUriParser
@@ -18,11 +17,11 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
   
-	@Value("${module.context}") var context: String = _
+	var context = Wire[String]("${module.context}")
 
-	@Value("${toplevel.url}") var toplevelUrl: String = _
+	var toplevelUrl = Wire[String]("${toplevel.url}")
 
-	@Resource(name = "staticHashes") var staticHashes: Properties = _
+	var staticHashes = Wire[Properties]("staticHashes")
 	
 	val parser = new EscapingUriParser
 	

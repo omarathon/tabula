@@ -369,4 +369,184 @@ $(function(){
 	});
 });
 
+
+
+
+
+var frameLoad = function(frame){
+    if(jQuery(frame).contents().find("form").length == 0){
+        jQuery("#feedback-report-modal").modal('hide');
+        document.location.reload(true);
+    }
+}
+
+$(function(){
+
+
+
+
+// Ajax specific modal start
+
+// modals use ajax to retrieve their contents
+    $('#feedback-report-button, #extension-list').on('click', 'a[data-toggle=modal]', function(e){
+        e.preventDefault();
+        var $this = $(this);
+        var target = $this.attr('data-target');
+        var url = $this.attr('href');
+        $(target).load(url);
+    });
+
+
+
+// any date fields returned by ajax will have datetime pickers bound to them as required
+    $('#feedback-report-modal, #extension-list').on('focus', 'input.date-time-picker', function(e){
+        e.preventDefault();
+        var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
+
+        if(isPickerHidden) {
+            $(this).datetimepicker('remove').datetimepicker({
+                format: "dd-M-yyyy hh:ii:ss",
+                weekStart: 1,
+                minView: 'day',
+                autoclose: true
+            }).on('show', function(ev){
+                var d = new Date(ev.date.valueOf()),
+                      minutes = d.getUTCMinutes(),
+                        seconds = d.getUTCSeconds(),
+                        millis = d.getUTCMilliseconds();
+
+                if (minutes > 0 || seconds > 0 || millis > 0) {
+                    d.setUTCMinutes(0);
+                    d.setUTCSeconds(0);
+                    d.setUTCMilliseconds(0);
+
+                    var DPGlobal = $.fn.datetimepicker.DPGlobal;
+                    $(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+
+                    $(this).datetimepicker('update');
+                }
+            });
+        }
+    });
+
+    //$('#feedback-report-modal, #extension-list')
+    var submitAjaxModal = function(selector, successCallback) {
+         $(selector).on('submit', 'form', function(e){
+                e.preventDefault();
+                var $form = $(this);
+                $.post($form.attr('action'), $form.serialize(), function(data){
+                    if(data.status == "error"){
+                        // delete any old errors
+                        $("span.error").remove();
+                        $('.error').removeClass('error');
+                        var error;
+                        for(error in data.result){
+                            addError(error, data.result[error]);
+                        }
+                    } else {
+                        successCallback(data)
+                        // hide the model
+                        jQuery("#extension-model").modal('hide');
+                    }
+                });
+            });
+
+    }
+
+    var addError = function(field, message){
+        var $field = $("input[name='"+field+"']");
+        $field.closest(".control-group").addClass("error");
+        // insert error message
+        $field.after('<span class="error help-inline">'+message+'</span>');
+    };
+
+
+// Ajax specific modal end
+
+
+    // feedback report
+
+    submitAjaxModal("#feedback-report-modal", function(data) {
+    	window.location = data.result;
+    })
+
+   // extensions admin
+
+   submitAjaxModal("#extension-list", function(data) {
+        var action = data.action;
+        $.each(data.result, function() {
+            modifyRow(this, action);
+        });
+    });
+
+    var highlightId = "${highlightId}";
+    if (highlightId != "") {
+        var container = $("#extension-list");
+        var highlightRow = $("#row"+highlightId);
+        if(highlightRow.length > 0){
+            container.animate({
+                scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
+            }, 1000);
+        }
+    }
+
+    // set reject and approved flags
+    $("#extension-model").on('click', '#approveButton', function(){
+        $(".approveField").val("1");
+        $(".rejectField").val("0");
+    });
+
+    $("#extension-model").on('click', '#rejectButton', function(){
+        $(".approveField").val("0");
+        $(".rejectField").val("1");
+    });
+
+    var modifyRow = function(results, action){
+        var $row =  $("#extension-list").find("#row"+results.id);
+        if(action === "add"){
+            updateRowUI(results, $row);
+            $(".new-extension", $row).hide();
+            $(".modify-extension", $row).show();
+            $(".revoke-extension", $row).show();
+        } else if (action === "edit"){
+            updateRowUI(results, $row);
+        } else if (action === "delete"){
+            $("td.expiryDate", $row).html("");
+            $("td.status", $row).html("");
+            $(".new-extension", $row).show();
+            $(".modify-extension", $row).hide();
+            $(".revoke-extension", $row).hide();
+        }
+    };
+
+    var updateRowUI = function(json, $row){
+    	var prop;
+        for(prop in json){
+            $row.find('.'+prop).html(json[prop]);
+        }
+        $('.status').each(function(){
+            if ($(this).html() === "Approved")
+                $(this).html('<span class="label label-success">Approved</span>');
+            else if ($(this).html() === "Rejected")
+                $(this).html('<span class="label label-important">Rejected</span>');
+        });
+    };
+
+
+	// makes dropdown menus dropup rather than down if they're so
+	// close to the end of the screen that they will drop off it
+	var bodyHeight = $('body').height();
+	$('.module-info:not(.empty) .btn-group').each( function(index) {
+		if(($(this).find('.dropdown-menu').height() +  $(this).offset().top) > bodyHeight) {
+			$(this).addClass("dropup");
+		}
+	});
+
+});
+
+
+
+
 }(jQuery));
+
+

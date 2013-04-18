@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.permissions._
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/picker"))
 class AssignmentPickerController extends CourseworkController {
-	@Autowired var json: ObjectMapper = _
+	var json = Wire[ObjectMapper]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module) = new AssignmentPickerCommand(module)
 
@@ -54,7 +54,7 @@ class AssignmentPickerController extends CourseworkController {
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
 	PermissionCheck(Permissions.Assignment.Read, module)
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire[AssignmentService]
 	
 	var searchTerm: String = ""
 		

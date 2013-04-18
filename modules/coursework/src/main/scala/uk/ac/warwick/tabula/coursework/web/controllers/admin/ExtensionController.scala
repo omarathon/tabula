@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.CurrentUser
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,8 +22,8 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
 
 abstract class ExtensionController extends CourseworkController {
-	@Autowired var json:ObjectMapper =_
-	@Autowired var userLookup: UserLookupService = _
+	var json = Wire[ObjectMapper]
+	var userLookup = Wire[UserLookupService]
 	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)

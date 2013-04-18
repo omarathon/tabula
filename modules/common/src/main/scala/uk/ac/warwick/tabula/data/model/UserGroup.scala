@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.data.model;
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
 import javax.persistence.Column
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
@@ -35,7 +34,7 @@ import uk.ac.warwick.spring.Wire
 @Entity
 class UserGroup extends GeneratedId {
 
-	@transient var userLookup = Wire.auto[UserLookupService]
+	@transient var userLookup = Wire.option[UserLookupService].orNull
 	def groupService = userLookup.getGroupService
 
 	var baseWebgroup: String = _

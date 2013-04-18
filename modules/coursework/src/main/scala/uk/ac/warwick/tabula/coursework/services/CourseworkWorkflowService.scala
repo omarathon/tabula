@@ -19,7 +19,7 @@ class CourseworkWorkflowService {
 	import WorkflowStages._
 	
 	final val MaxPower = 100
-	var features = Wire.auto[Features]
+	var features = Wire[Features]
 	
 	def getStagesFor(assignment: Assignment) = {
 		var stages = Seq[WorkflowStage]()
@@ -147,12 +147,15 @@ object WorkflowStages {
 			
 			case None if !assignment.isClosed => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withinDeadline")
 			
-			// Not submitted
+			// Not submitted, check extension
 			case _ => unsubmittedProgress(assignment)(coursework)
 		}
 		
 		private def unsubmittedProgress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedExtension match {
 			case Some(extension) if extension.within => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withinExtension")
+			
+			case _ if assignment.isClosed && !assignment.allowLateSubmissions =>
+				StageProgress(Submission, true, "workflow.Submission.unsubmitted.failedToSubmit", Danger, false)
 			
 			case _ => StageProgress(Submission, true, "workflow.Submission.unsubmitted.late", Danger, false)
 		} 

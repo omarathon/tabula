@@ -19,7 +19,7 @@ import scala.collection.JavaConversions._
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
-	@transient var fileDao = Wire.auto[FileDao]
+	@transient var fileDao = Wire.option[FileDao].orNull
 
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)

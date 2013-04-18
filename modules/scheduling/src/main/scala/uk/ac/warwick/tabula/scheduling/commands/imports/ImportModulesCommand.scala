@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
@@ -20,8 +19,8 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var moduleImporter = Wire.auto[ModuleImporter]
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var moduleImporter = Wire[ModuleImporter]
+	var moduleService = Wire[ModuleAndDepartmentService]
 
 	def applyInternal() {
 		transactional() {

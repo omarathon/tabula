@@ -8,10 +8,10 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.NoBind
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -45,7 +45,9 @@ trait Describable[A] {
  * change name too. Careful now!
  */
 abstract class Command[A] extends Describable[A] with JavaImports with EventHandling with PermissionsChecking {
-	var maintenanceMode = Wire.auto[MaintenanceModeService]
+	var maintenanceMode = Wire[MaintenanceModeService]
+	
+	import uk.ac.warwick.tabula.system.NoBind
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {

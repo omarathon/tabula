@@ -24,7 +24,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	/** Returns a typed Seq of the results. */
 	def seq: Seq[A] = list.asScala
 
-	/** Returns a typed list of the results.*/
+	/** Returns a typed list of the results. */
 	def list: JList[A] = c.list().asInstanceOf[JList[A]]
 
 	def scroll() = c.scroll()
@@ -34,6 +34,12 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	 * set the projection for the Criteria to return something else.
 	 */
 	def untypedList: JList[_] = c.list()
+	
+	/**
+	 * Returns a Java List of the given type. If the result of the query
+	 * doesn't match the requested type you will get a runtime error.
+	 */
+	def listOf[A]: JList[A] = c.list.asInstanceOf[JList[A]]
 
 	/** Return Some(result), or None if no row matched. */
 	def uniqueResult: Option[A] = Option(c.uniqueResult().asInstanceOf[A])

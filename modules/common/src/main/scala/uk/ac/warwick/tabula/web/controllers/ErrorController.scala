@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,7 +14,7 @@ class ErrorController extends BaseController {
 
 	override val loggerName = "Exceptions"
 
-	@Autowired var exceptionResolver: ExceptionResolver = _
+	var exceptionResolver = Wire[ExceptionResolver]
 
 	@RequestMapping(Array("/error"))
 	def generalError(request: HttpServletRequest): Mav = {

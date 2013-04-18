@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 
 class PermissionsDaoTest extends AppContextTestBase {
 	
-	@Autowired var dao: PermissionsDao = _
+	lazy val dao = Wire[PermissionsDao]
 	
 	@Test def crud = transactional { t =>
 		val dept1 = Fixtures.department("dp1")

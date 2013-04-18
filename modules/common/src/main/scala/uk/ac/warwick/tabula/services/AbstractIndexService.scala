@@ -16,7 +16,6 @@ import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.util.Version
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
@@ -36,6 +35,7 @@ import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import scala.collection.GenTraversableOnce
+import uk.ac.warwick.tabula.JavaImports._
 import language.implicitConversions
 
 trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
@@ -102,7 +102,7 @@ abstract class AbstractIndexService[A]
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	val IncrementalBatchSize: Int
 		
-	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	var createMissingDirectories = Wire[JBoolean]("${filesystem.create.missing:false}")
 	
 	// Are we indexing now?
 	var indexing: Boolean = false

@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.services
 
-import org.springframework.beans.factory.annotation.Autowired
-
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.data.model.UserSettings
 
 class UserSettingsServiceTest extends AppContextTestBase {
 	
-	@Autowired var service: UserSettingsService = _
+	lazy val service = Wire[UserSettingsService]
 	
 	@Test def itWorks = transactional { tx =>
 		service.getByUserId("cuscav") should be (None)

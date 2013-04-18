@@ -25,6 +25,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
+import org.apache.commons.codec.digest.DigestUtils
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -80,12 +81,14 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
+	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
+	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
 
-	var zipService = Wire.auto[ZipService]
-	var userLookup = Wire.auto[UserLookupService]
-	var fileDao = Wire.auto[FileDao]
-	var assignmentService = Wire.auto[AssignmentService]
-	var stateService = Wire.auto[StateService]
+	var zipService = Wire[ZipService]
+	var userLookup = Wire[UserLookupService]
+	var fileDao = Wire[FileDao]
+	var assignmentService = Wire[AssignmentService]
+	var stateService = Wire[StateService]
 
 	/* for single upload */
 	var uniNumber: String = _
@@ -144,11 +147,18 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
-			
+			// TAB-489 - Check to see that this isn't a blank copy of the feedback template
+			else if (assignment.hasFeedbackTemplate && assignment.feedbackTemplate.attachment.actualDataLength == f.actualDataLength){
+				val fileHash = DigestUtils.shaHex(f.dataStream)
+				val templateHash = DigestUtils.shaHex(assignment.feedbackTemplate.attachment.dataStream)
+				if(fileHash == templateHash)
+					errors.rejectValue("file.attached[" + i + "]", "file.duplicate.template")
+			}
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
 				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
+
 		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
@@ -159,7 +169,6 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				}
 				
 				validateExisting(item, errors)
-
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
@@ -218,7 +227,12 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			val zip = new ZipArchiveInputStream(archive.getInputStream)
 
 			val bits = Zips.iterator(zip) { (iterator) =>
-				for (entry <- iterator if !entry.isDirectory) yield {
+				for (
+					entry <- iterator
+					if !entry.isDirectory
+					if !(disallowedFilenames.split(",").toList contains  entry.getName)
+					if !(disallowedPrefixes.split(",").toList.exists(entry.getName.startsWith))
+				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
 					// just turn it into an underscore.

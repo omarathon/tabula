@@ -5,7 +5,6 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Component
 import org.apache.lucene.util.Version
 import uk.ac.warwick.spring.Wire
-import org.springframework.beans.factory.annotation.Value
 import java.io.File
 import java.util.concurrent.ScheduledExecutorService
 import org.joda.time.Duration
@@ -124,9 +123,9 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	final override val IncrementalBatchSize = 1000
 	
-	var dao = Wire.auto[MemberDao]
+	var dao = Wire[MemberDao]
 	
-	@Value("${filesystem.index.profiles.dir}") override var indexPath: File = _
+	override var indexPath = Wire[File]("${filesystem.index.profiles.dir}")
 	
 	// Fields that will be tokenised as names
 	val nameFields = Set(

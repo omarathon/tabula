@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
@@ -22,7 +21,7 @@ class DeleteFeedbackCommand(val module: Module, val assignment: Assignment) exte
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Delete, assignment)
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao = Wire[FeedbackDao]
 
 	var feedbacks: JList[Feedback] = JArrayList()
 	var confirm: Boolean = false

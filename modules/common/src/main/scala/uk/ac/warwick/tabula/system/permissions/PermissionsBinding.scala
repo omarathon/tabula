@@ -15,15 +15,19 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.system.CustomDataBinder
 
-class PermissionsCheckingDataBinder(val target: Any, val objectName: String, val securityService: SecurityService) 
-	extends ExtendedServletRequestDataBinder(target, objectName) 
+/**
+ * Trait that is added to the data binder to check permissions on the command.
+ * Ensures that there some permissions on the command (or that it is set to public).
+ * 
+ * Mixed into the data binder by CustomDataBinderFactory. 
+ */
+trait PermissionsBinding
+		extends CustomDataBinder 
 		with Logging {
 	
-	// Autowired third parameter. Done in a skewiff way for testing purposes
-	def this(target: Any, objectName: String) = {
-		this(target, objectName, Wire.auto[SecurityService])
-	}
+	val securityService: SecurityService // abstract dependency
 	
 	def requestInfo = RequestInfo.fromThread
 	def user = requestInfo.get.user
@@ -46,21 +50,5 @@ class PermissionsCheckingDataBinder(val target: Any, val objectName: String, val
 				throw new ItemNotFoundException()
 		}
 	}
-
-	override def bind(request: ServletRequest) {
-		super.bind(request)
-		
-		// Custom onBind methods
-		if (target.isInstanceOf[BindListener])
-			target.asInstanceOf[BindListener].onBind(super.getBindingResult)
-	}
-	
-}
-
-class PermissionsCheckingDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer) 
-	extends ServletRequestDataBinderFactory(binderMethods, initializer) {
-	
-	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= 
-		new PermissionsCheckingDataBinder(target, objectName)
 	
 }

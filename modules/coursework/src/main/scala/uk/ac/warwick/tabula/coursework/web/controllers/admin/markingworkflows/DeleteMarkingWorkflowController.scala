@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.markingworkflows
 
 import javax.validation.Valid
 
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._

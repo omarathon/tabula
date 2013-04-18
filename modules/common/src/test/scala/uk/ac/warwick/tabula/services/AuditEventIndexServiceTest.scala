@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.services
-
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.util.LuceneTestCase
 import org.junit.Test
@@ -25,8 +25,8 @@ import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
+
+
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
@@ -36,7 +36,7 @@ import uk.ac.warwick.tabula.Fixtures
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	var indexer:AuditEventIndexService = _
-	@Autowired var service:AuditEventService = _
+	lazy val service = Wire[AuditEventService]
 	var TEMP_DIR:File = _
 	
 	@Before def setup {		
@@ -47,7 +47,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.afterPropertiesSet
 	}
 	
-	@After def tearDown {
+	@After def tearDown = transactional { tx =>
 		session.createSQLQuery("delete from auditevent").executeUpdate()
 		
 		FileUtils.deleteDirectory(TEMP_DIR)
@@ -57,8 +57,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	 * Check that when you download submissions, they are shown
 	 * by adminDownloadedSubmissions(Assignment).
 	 */
-	@Transactional
-	@Test def downloadedSubmissions = withFakeTime(dateTime(2001, 6)) {
+	@Test def downloadedSubmissions = transactional { tx => withFakeTime(dateTime(2001, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()
 			a.id = "12345"
@@ -84,11 +83,9 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
 		indexer.index
 		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
-		
-	}
-	
-	@Transactional 
-	@Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
+	}}
+	 
+	@Test def individuallyDownloadedSubmissions  = transactional { tx => withFakeTime(dateTime(1999, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()
 			a.id = "54321"
@@ -118,7 +115,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
 		indexer.index
 		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
-	}
+	}}
 	
 	def recordAudit(command:Command[_]) = {
 		val event = Event.fromDescribable(command)
@@ -131,8 +128,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		event
 	}
 
-	@Transactional
-	@Test def createdDate = withFakeTime(dateTime(2000, 6)) {
+	@Test def createdDate = transactional { tx => withFakeTime(dateTime(2000, 6)) {
 
 		val eventId = "a"
 		val eventType = "AddAssignment"
@@ -159,10 +155,9 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		if (maybeDate.isEmpty) fail("No date found")
 		else for (date <- maybeDate) date should be (d)
 
-	}
+	}}
 	
-	@Transactional
-	@Test def index = withFakeTime(dateTime(2000, 6)) {
+	@Test def index = transactional { tx => withFakeTime(dateTime(2000, 6)) {
 		val stopwatch = new StopWatch
 		
 		val jsonData = Map(
@@ -239,10 +234,9 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		// index again to check that it doesn't do any once-only stuff
 		indexer.index
 		
-	}
+	}}
 	
-	@Transactional
-	@Test def pagingSearch = withFakeTime(dateTime(2010, 6)) {
+	@Test def pagingSearch = transactional { tx => withFakeTime(dateTime(2010, 6)) {
 		val stopwatch = new StopWatch
 		
 		val dept = new Department
@@ -337,7 +331,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		// check pager for noteworthy submissions
 		val paged2 = indexer.noteworthySubmissionsForModules(Seq(module), None, None, 100)
 		paged2.docs.length should be (70)
-		
+
 		// Find by user ID
 		indexer.findByUserId("bob").size should be (140)
 		indexer.findByUserId("fred").size should be (0)
@@ -376,6 +370,6 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		
 		indexer.findPublishFeedbackEvents(dept).length should be (0)
 		indexer.findPublishFeedbackEvents(Fixtures.department("in")).length should be (0)
-	}
+	}}
 
 }

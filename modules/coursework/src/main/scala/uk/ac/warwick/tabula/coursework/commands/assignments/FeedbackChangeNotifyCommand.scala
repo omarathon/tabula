@@ -20,11 +20,11 @@ class FeedbackChangeNotifyCommand(val module: Module, val assignment: Assignment
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
 
-	implicit var freemarker = Wire.auto[Configuration]
+	implicit var freemarker = Wire[Configuration]
 
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
-	var replyAddress = Wire.property("${mail.noreply.to}")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var replyAddress = Wire[String]("${mail.noreply.to}")
+	var fromAddress = Wire[String]("${mail.exceptions.to}")
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
 	def applyInternal() = {

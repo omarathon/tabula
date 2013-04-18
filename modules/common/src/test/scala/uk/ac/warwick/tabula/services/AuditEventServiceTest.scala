@@ -3,19 +3,17 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.events.Event
-import org.springframework.transaction.annotation.Transactional
+
 import org.joda.time.DateTime
 import org.hibernate.dialect.HSQLDialect
 
 class AuditEventServiceTest extends AppContextTestBase {
 	
-	@Autowired var service:AuditEventService =_
+	lazy val service = Wire[AuditEventService]
 	
-	
-	@Transactional
-	@Test def listEvents {
+	@Test def listEvents = transactional { tx =>
 		
 		val now = new DateTime()
 		for (i <- Range(1,30)) {

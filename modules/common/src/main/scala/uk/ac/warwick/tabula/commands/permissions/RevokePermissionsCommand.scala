@@ -22,7 +22,7 @@ class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) exten
 
 	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
 	
 	var permission: Permission = _
 	var usercodes: JList[String] = JArrayList()

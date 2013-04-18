@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.ByteArrayInputStream
@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -33,8 +33,8 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 
 class MeetingRecordDaoTest extends AppContextTestBase {
 
-	@Autowired var memberDao: MemberDao =_
-	@Autowired var meetingDao :MeetingRecordDao =_
+	lazy val memberDao = Wire[MemberDao]
+	lazy val meetingDao = Wire[MeetingRecordDao]
 	
 	@Test def createAndList = transactional { tx =>
 		

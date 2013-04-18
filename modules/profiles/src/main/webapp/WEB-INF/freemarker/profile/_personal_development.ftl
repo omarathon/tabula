@@ -63,7 +63,6 @@
 			e.preventDefault();
 			
 			$m.load($(this).attr("href") + "?modal", function() {
-				$m.find("input.date-picker").tabulaDatePicker();
 				$m.modal("show");
 				$m.on("shown", function() {
 					$m.find("[name='title']").focus();
@@ -74,7 +73,6 @@
 		// ajaxify form submission
 		$m.on("submit", "form", function(e) {
 			e.preventDefault();
-			
 			var $form = $(this);
 			
 			$.ajax({
@@ -93,6 +91,7 @@
 						// reload into modal
 						$m.html(data);
 						$m.find("input.date-picker").tabulaDatePicker();
+						$m.find('form.double-submit-protection').tabulaSubmitOnce();
 					} else {
 						// reload meeting data
 						$("section.meetings").replaceWith(data);
@@ -100,6 +99,7 @@
 						$m.modal("hide");
 						scrollToOpenDetails();
 					}
+					$m.tabulaPrepareSpinners();
 				}
 			});
 			

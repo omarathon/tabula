@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.turnitin
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinJob
@@ -24,7 +23,7 @@ class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, va
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 
-	var jobService = Wire.auto[JobService]
+	var jobService = Wire[JobService]
 
 	def applyInternal() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 

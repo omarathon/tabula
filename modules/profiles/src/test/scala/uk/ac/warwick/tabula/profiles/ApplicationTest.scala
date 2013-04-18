@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.profiles
 
 import org.junit.Test
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services.UserLookupService
 
 class ApplicationTest extends AppContextTestBase {
     
-    @Autowired var annotationMapper:RequestMappingHandlerMapping =_
+    lazy val annotationMapper = Wire[RequestMappingHandlerMapping]
        
     @Test def itWorks = {
-    	assert(beans.containsBean("userLookup"))
+    	assert(Wire[UserLookupService] != null)
     }
 
 }

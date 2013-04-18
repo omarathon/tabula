@@ -27,9 +27,9 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 
 	final val userTypes = Set(firstUserType) ++ otherUserTypes
 
-	var profileService = Wire.auto[ProfileService]
-	var securityService = Wire.auto[SecurityService]
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var profileService = Wire[ProfileService]
+	var securityService = Wire[SecurityService]
+	var moduleService = Wire[ModuleAndDepartmentService]
 
 	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
 	var query: String = _

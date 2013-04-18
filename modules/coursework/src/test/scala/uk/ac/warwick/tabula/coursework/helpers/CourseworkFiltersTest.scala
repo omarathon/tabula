@@ -631,8 +631,8 @@ class CourseworkFiltersTest extends TestBase {
 		filter.predicate(student(submission=Some(submission))) should be (true)
 	} 
 	
-	@Test def WithSimilarityPercentage {
-		val filter = CourseworkFilters.WithSimilarityPercentage
+	@Test def WithOverlapPercentage {
+		val filter = CourseworkFilters.WithOverlapPercentage
 		
 		// Only applies to assignments that collect submissions and the department has plagiarism detection enabled
 		department.plagiarismDetectionEnabled = false
@@ -658,46 +658,46 @@ class CourseworkFiltersTest extends TestBase {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 			
 			errors.getErrorCount should be (2)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[minSimilarity]")
+			errors.getFieldErrors.asScala(0).getField should be ("filter[minOverlap]")
 			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
-			errors.getFieldErrors.asScala(1).getField should be ("filter[maxSimilarity]")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[maxOverlap]")
 			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
 		}
 		
 		{			
 			val cmd = new SampleFilteringCommand(
-				"minSimilarity" -> 50.toString,
-				"maxSimilarity" -> "steve"
+				"minOverlap" -> 50.toString,
+				"maxOverlap" -> "steve"
 			)		
 			val errors = new BindException(cmd, "cmd")
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 			
 			errors.getErrorCount should be (1)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxSimilarity]")
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
 			errors.getFieldErrors.asScala(0).getCodes() should contain ("typeMismatch")
 		}
 		
 		{			
 			val cmd = new SampleFilteringCommand(
-				"minSimilarity" -> 1500.toString,
-				"maxSimilarity" -> 200.toString
+				"minOverlap" -> 1500.toString,
+				"maxOverlap" -> 200.toString
 			)		
 			val errors = new BindException(cmd, "cmd")
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 			
 			errors.getErrorCount should be (3)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxSimilarity]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithSimilarityPercentage.max.lessThanMin")
-			errors.getFieldErrors.asScala(1).getField should be ("filter[minSimilarity]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithSimilarityPercentage.min.notInRange")
-			errors.getFieldErrors.asScala(2).getField should be ("filter[maxSimilarity]")
-			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithSimilarityPercentage.max.notInRange")
+			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithOverlapPercentage.max.lessThanMin")
+			errors.getFieldErrors.asScala(1).getField should be ("filter[minOverlap]")
+			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithOverlapPercentage.min.notInRange")
+			errors.getFieldErrors.asScala(2).getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithOverlapPercentage.max.notInRange")
 		}
 		
 		{			
 			val cmd = new SampleFilteringCommand(
-				"minSimilarity" -> "0",
-				"maxSimilarity" -> "100"
+				"minOverlap" -> "0",
+				"maxOverlap" -> "100"
 			)		
 			val errors = new BindException(cmd, "cmd")
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
@@ -705,10 +705,10 @@ class CourseworkFiltersTest extends TestBase {
 			errors.hasErrors should be (false)
 		}
 		
-		// Valid where there is a submission, and the similarity percentage is between 40 and 60
+		// Valid where there is a submission, and the overlap percentage is between 40 and 60
 		val params = Map(
-			"minSimilarity" -> "40",
-			"maxSimilarity" -> "60"
+			"minOverlap" -> "40",
+			"maxOverlap" -> "60"
 		)
 		
 		filter.predicate(params)(student(submission=None)) should be (false)
@@ -722,22 +722,22 @@ class CourseworkFiltersTest extends TestBase {
 		
 		val a = new FileAttachment
 		a.originalityReport = new OriginalityReport
-		a.originalityReport.similarity = Some(30)
+		a.originalityReport.overlap = Some(30)
 		submission.values.add(SavedSubmissionValue.withAttachments(submission, "Turnitin", Seq(a).toSet.asJava))
 		
 		submission.hasOriginalityReport.booleanValue() should be (true)
 		
 		filter.predicate(params)(student(submission=Some(submission))) should be (false)
 		
-		a.originalityReport.similarity = Some(40)
+		a.originalityReport.overlap = Some(40)
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 		
-		a.originalityReport.similarity = Some(50)
+		a.originalityReport.overlap = Some(50)
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 		
-		a.originalityReport.similarity = Some(60)
+		a.originalityReport.overlap = Some(60)
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
-	} 
+	}
 	
 	@Test def NotCheckedForPlagiarism {
 		val filter = CourseworkFilters.NotCheckedForPlagiarism

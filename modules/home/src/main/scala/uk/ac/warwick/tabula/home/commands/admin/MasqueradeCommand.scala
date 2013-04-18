@@ -16,7 +16,7 @@ class MasqueradeCommand extends Command[Option[Cookie]] with ReadOnly {
 	
 	PermissionCheck(Permissions.Masquerade)
 	
-	var userLookup = Wire.auto[UserLookupInterface]
+	var userLookup = Wire[UserLookupInterface]
 	
 	var usercode: String = _	
 	var action: String = _

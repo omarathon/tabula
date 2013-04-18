@@ -4,13 +4,13 @@ package uk.ac.warwick.tabula
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.beans.factory.annotation.Value
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.tabula.JavaImports._
 
 
 /**
@@ -32,22 +32,20 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 abstract class Features {
 	private val defaults = new FeaturesMessage
 	
-	// FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
-	
-	@Value("${features.emailStudents:false}") var emailStudents = defaults.emailStudents
-	@Value("${features.collectRatings:true}") var collectRatings = defaults.collectRatings
-	@Value("${features.submissions:true}") var submissions = defaults.submissions
-	@Value("${features.privacyStatement:true}") var privacyStatement = defaults.privacyStatement
-	@Value("${features.collectMarks:true}") var collectMarks = defaults.collectMarks
-	@Value("${features.turnitin:true}") var turnitin = defaults.turnitin
-	@Value("${features.assignmentMembership:true}") var assignmentMembership = defaults.assignmentMembership
-	@Value("${features.extensions:true}") var extensions = defaults.extensions
-	@Value("${features.combinedForm:true}") var combinedForm = defaults.combinedForm
-	@Value("${features.feedbackTemplates:true}") var feedbackTemplates = defaults.feedbackTemplates
-	@Value("${features.markingWorkflows:true}") var markingWorkflows = defaults.markingWorkflows
-	@Value("${features.markerFeedback:true}") var markerFeedback = defaults.markerFeedback
-	@Value("${features.profiles:true}") var profiles = defaults.profiles
-	@Value("${features.assignmentProgressTable:false}") var assignmentProgressTable = defaults.assignmentProgressTable
+	var emailStudents = Wire[JBoolean]("${features.emailStudents:false}")
+	var collectRatings = Wire[JBoolean]("${features.collectRatings:true}")
+	var submissions = Wire[JBoolean]("${features.submissions:true}")
+	var privacyStatement = Wire[JBoolean]("${features.privacyStatement:true}")
+	var collectMarks = Wire[JBoolean]("${features.collectMarks:true}")
+	var turnitin = Wire[JBoolean]("${features.turnitin:true}")
+	var assignmentMembership = Wire[JBoolean]("${features.assignmentMembership:true}")
+	var extensions = Wire[JBoolean]("${features.extensions:true}")
+	var combinedForm = Wire[JBoolean]("${features.combinedForm:true}")
+	var feedbackTemplates = Wire[JBoolean]("${features.feedbackTemplates:true}")
+	var markingWorkflows = Wire[JBoolean]("${features.markingWorkflows:true}")
+	var markerFeedback = Wire[JBoolean]("${features.markerFeedback:true}")
+	var profiles = Wire[JBoolean]("${features.profiles:true}")
+	var assignmentProgressTable = Wire[JBoolean]("${features.assignmentProgressTable:false}")
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -76,27 +74,27 @@ class FeaturesMessage {
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 	}
 	
-	var emailStudents = false
-	var collectRatings = true
-	var submissions = true
-	var privacyStatement = true
-	var collectMarks = true
-	var turnitin = true
-	var assignmentMembership = true
-	var extensions = true
-	var combinedForm = true
-	var feedbackTemplates = true
-	var markingWorkflows = true
-	var markerFeedback = true
-	var profiles = true
-	var assignmentProgressTable = false
+	var emailStudents: Boolean = _
+	var collectRatings: Boolean = _
+	var submissions: Boolean = _
+	var privacyStatement: Boolean = _
+	var collectMarks: Boolean = _
+	var turnitin: Boolean = _
+	var assignmentMembership: Boolean = _
+	var extensions: Boolean = _
+	var combinedForm: Boolean = _
+	var feedbackTemplates: Boolean = _
+	var markingWorkflows: Boolean = _
+	var markerFeedback: Boolean = _
+	var profiles: Boolean = _
+	var assignmentProgressTable: Boolean = _
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
 	
-		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var features = Wire.auto[Features]
-		var context = Wire.property("${module.context}")
+		var queue = Wire[Queue]("settingsSyncTopic")
+		var features = Wire[Features]
+		var context = Wire[String]("${module.context}")
 		
 		override def isListeningToQueue = true
 		override def onReceive(item: Any) {

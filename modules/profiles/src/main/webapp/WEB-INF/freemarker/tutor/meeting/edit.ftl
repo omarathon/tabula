@@ -15,7 +15,7 @@
 	${heading}
 </#if>
 	
-<@f.form method="post" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal">
+<@f.form method="post" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal double-submit-protection">
 	<#if modal??>
 		<div class="modal-body">
 	</#if>
@@ -31,6 +31,13 @@
 		</div>
 	</@form.labelled_row>
 	
+	<@form.labelled_row "format" "Format">
+		<@f.select path="format" cssClass="input-large">
+			<@f.option disabled="true" selected="true" label="Please select one..." />
+			<@f.options items=formats />
+		</@f.select>
+	</@form.labelled_row>
+	
 	<#-- TODO: TinyMCE editor, bleh -->
 	<@form.labelled_row "description" "Description (optional)">
 		<@f.textarea rows="6" path="description" cssClass="input-block-level" />
@@ -40,16 +47,16 @@
 	
 	<#if modal??>
 		</div>
-		<div class="modal-footer">
+		<div class="modal-footer submit-buttons">
 			<input type="hidden" name="modal" value="true" />
-			<button class="btn btn-primary" type="submit" name="submit">
+			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 				Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
 			</button>
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 		</div>
 	<#else>
-		<div class="form-actions">
-			<button class="btn btn-primary" type="submit" name="submit">
+		<div class="submit-buttons">
+			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 				Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
 			</button>
 			<a class="btn" href="<@routes.profile student />">Cancel</a>

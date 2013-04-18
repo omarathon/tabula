@@ -16,7 +16,6 @@ import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.util.Version
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
@@ -72,7 +71,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("department", dept.code)))
 			.transform{ toParsedAuditEvent(_) }
 			.filterNot { _.hadError }
-		
+
 		searchResults
 	}
 		
@@ -91,6 +90,31 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
+
+	def submissionsForAssignment(assignment: Assignment): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "SubmitAssignment"),
+			termQuery("assignment", assignment.id))
+	).transform{ toParsedAuditEvent(_) }
+
+	
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "PublishFeedback"),
+			termQuery("students", student.getWarwickId()),
+			termQuery("assignment", assignment.id)), 
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+		query = all(
+			termQuery("eventType", "SubmitAssignment"),
+			termQuery("masqueradeUserId", student.getUserId()),
+			termQuery("assignment", assignment.id)),
+			sort = reverseDateSort
+	).transform{ toParsedAuditEvent(_) }
+	
+	
 
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
@@ -166,7 +190,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		.flatMap(assignmentService.getAssignmentById)
 
 	/**
-	 * Return the most recently created assignment for this moodule
+	 * Return the most recently created assignment for this module
 	 */
 	def recentAssignment(module: Module): Option[Assignment] = {
 		mapToAssignments(search(query = all(
@@ -235,10 +259,10 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		"feedbacks",
 		"submissions")
 
-	@Autowired var service: AuditEventService = _
-	@Autowired var assignmentService: AssignmentService = _
-	@Value("${filesystem.index.audit.dir}") override var indexPath: File = _
-	@Value("${audit.index.weeksbacklog}") var weeksBacklog: Int = _
+	var service = Wire[AuditEventService]
+	lazy val assignmentService = Wire[AssignmentService]
+	override var indexPath = Wire[File]("${filesystem.index.audit.dir}")
+	var weeksBacklog = Wire[JInteger]("${audit.index.weeksbacklog:0}")
 
 	override val analyzer = {
 		//val standard = new StandardAnalyzer(LuceneVersion)

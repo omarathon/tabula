@@ -24,8 +24,8 @@ class Activity[A](val title: String, val date: DateTime, val agent: User, val me
  *  drawing its data from other types.
  */
 object Activity {
-	var userLookup = Wire.auto[UserLookupService]
-	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
+	var submissionService = Wire[SubmissionService]
 
 	// given an AuditEvent...
 	def apply(event: AuditEvent): Option[Activity[Any]] = {
