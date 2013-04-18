@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.SprCode
+import org.springframework.dao.DataRetrievalFailureException
 
 @Entity
 @AccessType("field")
@@ -68,7 +69,11 @@ class StudentRelationship extends GeneratedId {
 	
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 	
-	def studentMember = profileService.getStudentBySprCode(targetSprCode)	
+	def studentMember = profileService.getStudentBySprCode(targetSprCode) match {
+		case None => throw new DataRetrievalFailureException("No matching Member for SprCode, " + targetSprCode)
+		case Some(student) => student
+	}
+	
 	def studentId = SprCode.getUniversityId(targetSprCode)
 }
 

@@ -20,7 +20,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	var meetingDate: LocalDate = DateTime.now.toLocalDate
 	var format: MeetingFormat = _
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
 
 	var dao = Wire.auto[MeetingRecordDao]
 
