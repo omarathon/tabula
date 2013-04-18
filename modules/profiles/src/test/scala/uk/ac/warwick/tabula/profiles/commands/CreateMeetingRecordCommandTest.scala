@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.joda.time.DateTimeConstants
+import org.joda.time.LocalDate
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.BindException
+import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
+import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
-import org.springframework.validation.BindException
-import org.springframework.transaction.annotation.Transactional
-import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
@@ -72,6 +74,18 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// add some text and apply
 		cmd.description = "Lovely words"
+
+		// try adding a file
+		var uploadedFile =  new UploadedFile
+		var mpFile = mock[MultipartFile]
+		uploadedFile.upload.add(mpFile)
+
+		var fileAttach = new FileAttachment
+		fileAttach.name = "Beltane"
+		uploadedFile.attached.add(fileAttach)
+
+		cmd.file = uploadedFile
+
 		val meeting = cmd.apply()
 
 		meeting.creator should be (creator)
@@ -80,5 +94,6 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting.title should be ("A good title")
 		meeting.description should be ("<p>Lovely words</p>")
 		meeting.meetingDate.toLocalDate should be (marchHare)
+		meeting.attachments.get(0).name should be ("Beltane")
 	}}
 }

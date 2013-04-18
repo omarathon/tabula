@@ -34,8 +34,6 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 
 	var file: UploadedFile = new UploadedFile
 
-	var xxx: MultipartFile = _
-
 	var attachmentTypes = Seq[String]()
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
