@@ -78,7 +78,7 @@ class SecurityService extends Logging {
 	
 	def checkPermissions(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
 		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
-		if (explicitPermissions == null) Continue
+		if (explicitPermissions == null || explicitPermissions.isEmpty) Continue
 		else {
 			val (allow, deny) = explicitPermissions.partition(_.permissionType)
 			
