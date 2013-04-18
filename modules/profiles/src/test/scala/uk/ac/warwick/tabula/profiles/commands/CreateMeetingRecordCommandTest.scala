@@ -21,14 +21,27 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
 	@Test
-	def validMeeting = transactional { tx => withUser("cuscav") { withFakeTime(aprilFool) {
+	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val ps = mock[ProfileService]
-		val creator = new StaffMember("9876543")
+		
+		val creator = transactional { tx => 
+			val m = new StaffMember("9876543")
+			m.userId = "staffmember"
+			session.save(m)
+			m
+		}
+		
 		val student = mock[StudentMember]
-		val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
-		relationship.profileService = ps
-		ps.getStudentBySprCode("0123456/1") returns (Some(student))
+		
+		val relationship = transactional { tx => 
+			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+			relationship.profileService = ps
+			ps.getStudentBySprCode("0123456/1") returns (Some(student))
+			
+			session.save(relationship)
+			relationship
+		}
 		
 		val cmd = new CreateMeetingRecordCommand(creator, relationship)
 		cmd.title = "A title"
@@ -84,7 +97,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// add some text and apply
 		cmd.description = "Lovely words"
-		val meeting = cmd.apply()
+			
+		val meeting = transactional { tx => cmd.apply() }
 
 		meeting.creator should be (creator)
 		meeting.creationDate should be (aprilFool)
@@ -93,5 +107,5 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting.description should be ("<p>Lovely words</p>")
 		meeting.meetingDate.toLocalDate should be (marchHare)
 		meeting.format should be (Email)
-	}}}
+	}}
 }
