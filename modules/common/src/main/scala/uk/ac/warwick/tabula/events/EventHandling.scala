@@ -16,7 +16,9 @@ object EventHandling {
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	var listener = Wire[EventListener]
+	var listener = 
+		if (EventHandling.enabled) Wire[EventListener]
+		else null
 
 	/**
 	 * Records the various stages of an event: before, and either

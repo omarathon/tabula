@@ -21,7 +21,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
 import java.sql.ResultSetMetaData
 
-class ProfileImporterTest extends PersistenceTestBase with Mockito {
+class ProfileImporterTest extends AppContextTestBase with Mockito {
 
 	EventHandling.enabled = false
   
