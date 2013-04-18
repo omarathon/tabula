@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile

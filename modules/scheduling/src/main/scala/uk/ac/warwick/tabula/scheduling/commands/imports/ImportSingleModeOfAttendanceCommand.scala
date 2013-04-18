@@ -23,7 +23,7 @@ class ImportSingleModeOfAttendanceCommand(resultSet: ResultSet) extends Command[
 	
 	PermissionCheck(Permissions.ImportSystemData)
 	
-	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
+	var modeOfAttendanceDao = Wire[ModeOfAttendanceDao]
 
 	// A couple of intermediate properties that will be transformed later
 	var code: String = _

@@ -28,10 +28,10 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var auditIndexService = Wire.auto[AuditEventIndexService]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-	var userLookup = Wire.auto[UserLookupService]
-	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
+	var auditIndexService = Wire[AuditEventIndexService]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var userLookup = Wire[UserLookupService]
+	var courseworkWorkflowService = Wire[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	

@@ -4,14 +4,14 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.springframework.validation.Errors
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.context.MessageSource
 import uk.ac.warwick.spring.Wire
 
 
 class JSONErrorView(var errors: Errors)  extends JSONView {
 
-	var messageSource = Wire.auto[MessageSource]
+	var messageSource = Wire[MessageSource]
 
 	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
 		response.setContentType(getContentType)

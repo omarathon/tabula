@@ -4,7 +4,6 @@ import java.io.FileInputStream
 import java.util.zip.ZipInputStream
 import org.hibernate.annotations.AccessType
 import org.junit.Test
-import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Assignment

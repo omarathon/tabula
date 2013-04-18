@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.SprCode
  */
 class StudentRelationship extends GeneratedId {
 	
-	@transient var profileService = Wire.auto[ProfileService]
+	@transient var profileService = Wire.option[ProfileService].orNull
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	var agent: String = _
@@ -73,7 +73,7 @@ class StudentRelationship extends GeneratedId {
 }
 
 object StudentRelationship {
-	@transient var profileService = Wire.auto[ProfileService]
+	@transient var profileService = Wire[ProfileService]
 
 	def apply(agent: String, relType: RelationshipType, targetSprCode: String) = {
 		

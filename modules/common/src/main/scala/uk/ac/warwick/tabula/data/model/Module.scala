@@ -33,7 +33,7 @@ class Module extends GeneratedId with PermissionsTarget {
 	// They can also publish feedback.
 	// Module assistants can't publish feedback
 	@transient 
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire.option[PermissionsService].orNull
 	@transient 
 	lazy val managers = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
 	@transient 

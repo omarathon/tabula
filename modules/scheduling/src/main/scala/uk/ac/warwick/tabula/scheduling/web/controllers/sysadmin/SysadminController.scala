@@ -38,9 +38,9 @@ import uk.ac.warwick.tabula.data.model.Department
  */
 
 abstract class BaseSysadminController extends BaseController {
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var userLookup = Wire.auto[UserLookupInterface]
-	var urlRewriter = Wire.auto[UrlMethodModel]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var userLookup = Wire[UserLookupInterface]
+	var urlRewriter = Wire[UrlMethodModel]
 
 	def redirectToHome = {
 		// Redirect cross-context
@@ -56,7 +56,7 @@ class HomeController extends BaseSysadminController {
 class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 	
-	var indexer = Wire.auto[AuditEventIndexService]
+	var indexer = Wire[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
@@ -71,8 +71,8 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 	
-	var indexer = Wire.auto[ProfileIndexService]
-	var mdService = Wire.auto[ModuleAndDepartmentService]
+	var indexer = Wire[ProfileIndexService]
+	var mdService = Wire[ModuleAndDepartmentService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
@@ -127,7 +127,7 @@ class SysadminController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
-	var importer = Wire.auto[AssignmentImporter]
+	var importer = Wire[AssignmentImporter]
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
@@ -140,7 +140,7 @@ class ImportSitsController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[ProfileImporter]
+	var importer = Wire[ProfileImporter]
 	
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
@@ -166,7 +166,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/sync"))
 class SyncFilesystemController extends BaseSysadminController {
-	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
+	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 	
 	@RequestMapping
 	def sync() = {

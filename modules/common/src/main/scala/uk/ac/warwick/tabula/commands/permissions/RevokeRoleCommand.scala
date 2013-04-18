@@ -27,7 +27,7 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 
 	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
 	
 	var roleDefinition: RoleDefinition = _
 	var usercodes: JList[String] = JArrayList()

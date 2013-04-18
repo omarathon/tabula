@@ -5,16 +5,16 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedComm
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.spring.Wire
+
 
 
 class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld {
 
-	@Autowired var stateService:StateService =_
+	lazy val stateService = Wire[StateService]
 
-	@Transactional @Test
-	def firstMarkerFinished(){
+	@Test
+	def firstMarkerFinished = 
 		withUser("cuslaj"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
@@ -26,14 +26,17 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 			command.noFeedback.size should be (3)
 			command.noMarks.size should be (3)
 
-			command.apply()
+			transactional { tx =>
+				command.apply()
+			}
+			
 			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 		}
-	}
+	
 
-	@Transactional @Test
-	def secondMarkerFinished(){
+	@Test
+	def secondMarkerFinished = transactional { tx =>
 		withUser("cuday"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)

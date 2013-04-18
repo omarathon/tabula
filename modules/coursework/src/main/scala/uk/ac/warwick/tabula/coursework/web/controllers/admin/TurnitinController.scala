@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.hibernate.annotations._
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.persistence._
@@ -9,7 +8,7 @@ import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.services.jobs.JobService
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.model.Module
@@ -19,8 +18,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/turnitin"))
 class TurnitinController extends CourseworkController {
 
-	@Autowired var jobService: JobService = _
-	@Autowired var assignmentService: AssignmentService = _
+	var jobService = Wire[JobService]
+	var assignmentService = Wire[AssignmentService]
 
 	@ModelAttribute def model(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = new SubmitToTurnitinCommand(module, assignment, user)
 

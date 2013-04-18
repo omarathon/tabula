@@ -2,11 +2,8 @@ package uk.ac.warwick.tabula.data
 
 import org.junit.Test
 import org.scalatest.junit.ShouldMatchersForJUnit
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.annotation.Transactional
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Module
@@ -15,11 +12,10 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.helpers.Logging
 
 class DaoTests extends AppContextTestBase with ShouldMatchersForJUnit with Logging {
-	@Autowired var deptDao:DepartmentDao =_
-	@Autowired var memberDao:MemberDao =_
+	lazy val deptDao = Wire[DepartmentDao]
+	lazy val memberDao = Wire[MemberDao]
 	
-	@Transactional(readOnly=true)
-	@Test def findDeptOwners {
+	@Test def findDeptOwners = transactional { tx =>
 	  val jeffsDepts = deptDao.getByOwner("cusfal")
 	  jeffsDepts.size should be (1)
 	  jeffsDepts.head.name should be ("Computer Science")
@@ -28,8 +24,8 @@ class DaoTests extends AppContextTestBase with ShouldMatchersForJUnit with Loggi
 	  ronsDepts should be ('empty)
 	}
 	
-/*	@Transactional
-	@Test def testSomething {
+/*	
+	@Test def testSomething = transactional { tx =>
 		val group = new UserGroup()
 		group.addUser("1112939")
 		group.universityIds = true
@@ -53,8 +49,8 @@ class DaoTests extends AppContextTestBase with ShouldMatchersForJUnit with Loggi
 	  modules.size should be (1)
 	}	
 	*/
-	@Transactional
-	@Test def findRegisteredModules {
+	
+	@Test def findRegisteredModules = transactional { tx =>
 		val group = new UserGroup()
 
 		group.staticIncludeUsers.add("1112939")

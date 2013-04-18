@@ -12,11 +12,12 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.StateService
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.Transactions._
 
 class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
 	extends Command[Unit] with SelfValidating with Daoisms {
 
-	var stateService = Wire.auto[StateService]
+	var stateService = Wire[StateService]
 
 	var students: JList[String] = JArrayList()
 	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
@@ -35,7 +36,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, currentUser.apparentUser))
 	}
 
-	def applyInternal() {
+	def applyInternal() = transactional() {
 		// do not update previously released feedback
 		val feedbackForRelease = markerFeedbacks -- releasedFeedback
 		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))

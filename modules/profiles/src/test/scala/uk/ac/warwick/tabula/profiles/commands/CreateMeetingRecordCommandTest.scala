@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.services.ProfileService
 import org.springframework.validation.BindException
-import org.springframework.transaction.annotation.Transactional
+
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 
@@ -20,16 +20,28 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
-	@Transactional
 	@Test
 	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val ps = mock[ProfileService]
-		val creator = new StaffMember("9876543")
+		
+		val creator = transactional { tx => 
+			val m = new StaffMember("9876543")
+			m.userId = "staffmember"
+			session.save(m)
+			m
+		}
+		
 		val student = mock[StudentMember]
-		val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
-		relationship.profileService = ps
-		ps.getStudentBySprCode("0123456/1") returns (Some(student))
+		
+		val relationship = transactional { tx => 
+			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+			relationship.profileService = ps
+			ps.getStudentBySprCode("0123456/1") returns (Some(student))
+			
+			session.save(relationship)
+			relationship
+		}
 		
 		val cmd = new CreateMeetingRecordCommand(creator, relationship)
 		cmd.title = "A title"
@@ -85,7 +97,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// add some text and apply
 		cmd.description = "Lovely words"
-		val meeting = cmd.apply()
+			
+		val meeting = transactional { tx => cmd.apply() }
 
 		meeting.creator should be (creator)
 		meeting.creationDate should be (aprilFool)

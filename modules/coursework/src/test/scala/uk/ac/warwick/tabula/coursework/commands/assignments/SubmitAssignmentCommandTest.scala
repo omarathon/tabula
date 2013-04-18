@@ -5,7 +5,7 @@ import java.io.File
 import org.joda.time.DateTime
 import org.junit.Test
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.RequestInfo
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.data.model.Module
 
 class SubmitAssignmentCommandTest extends AppContextTestBase {
 
-	@Autowired var dao: FileDao = _
+	lazy val dao = Wire[FileDao]
 
 	@Test def multipleSubmissions = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment

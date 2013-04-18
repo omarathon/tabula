@@ -16,7 +16,7 @@ class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: Ma
 	mustBeLinked(markingWorkflow, department)
 	PermissionCheck(Permissions.MarkingWorkflow.Update, markingWorkflow)
 
-	var dao = Wire.auto[MarkingWorkflowDao]
+	var dao = Wire[MarkingWorkflowDao]
 
 	def hasExistingSubmissions: Boolean = dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).exists(!_.submissions.isEmpty)
 

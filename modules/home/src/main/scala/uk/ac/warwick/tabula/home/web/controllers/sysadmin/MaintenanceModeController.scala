@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.Features
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.stereotype.Controller
 import org.springframework.beans.BeanWrapperImpl
 import collection.JavaConversions._
@@ -36,7 +36,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 	
 	PermissionCheck(Permissions.ManageMaintenanceMode)
 	
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue = Wire[Queue]("settingsSyncTopic")
 	
 	var enable: Boolean = service.enabled
 
@@ -66,7 +66,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 @Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
-	var service = Wire.auto[MaintenanceModeService]
+	var service = Wire[MaintenanceModeService]
 
 	validatesSelf[MaintenanceModeCommand]
 

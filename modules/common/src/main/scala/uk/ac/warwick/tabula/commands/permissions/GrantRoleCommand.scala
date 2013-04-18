@@ -29,8 +29,8 @@ class GrantRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends C
 	
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
-	var securityService = Wire.auto[SecurityService]
+	var permissionsService = Wire[PermissionsService]
+	var securityService = Wire[SecurityService]
 	
 	var roleDefinition: RoleDefinition = _
 	var usercodes: JList[String] = JArrayList()

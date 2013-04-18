@@ -37,10 +37,10 @@ import org.springframework.validation.Errors
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
 class SubmissionAndFeedbackController extends CourseworkController {
 
-	var auditIndexService = Wire.auto[AuditEventIndexService]
-	var assignmentService = Wire.auto[AssignmentService]
-	var userLookup = Wire.auto[UserLookupService]
-	var features = Wire.auto[Features]
+	var auditIndexService = Wire[AuditEventIndexService]
+	var assignmentService = Wire[AssignmentService]
+	var userLookup = Wire[UserLookupService]
+	var features = Wire[Features]
 	
 	validatesSelf[SubmissionAndFeedbackCommand]
 	

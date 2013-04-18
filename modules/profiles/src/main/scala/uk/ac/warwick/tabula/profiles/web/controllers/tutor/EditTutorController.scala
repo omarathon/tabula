@@ -33,7 +33,7 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 	
 	//var storeTutor: Boolean = false
 	
-	var profileService = Wire.auto[ProfileService]
+	var profileService = Wire[ProfileService]
 	
 	def currentTutor = profileService.getPersonalTutor(student)
 	
@@ -58,7 +58,7 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 @Controller
 @RequestMapping(Array("/tutor/{student}/edit"))
 class EditTutorController extends BaseController {
-	var profileService = Wire.auto[ProfileService]
+	var profileService = Wire[ProfileService]
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
 		restricted(new SearchTutorsCommand(user)).orNull

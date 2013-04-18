@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import org.hibernate.criterion._
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Service
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.jobs.Job
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.data.Transactions
@@ -14,14 +14,15 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.jobs.FailedJobException
 
 @Service
-class JobService extends HasJobDao with Logging {
+class JobService extends Logging {
 	import Transactions._
 	
 	// How many jobs to load and run each time
 	val RunBatchSize = 10
 
 	/** Spring should wire in all beans that extend Job */
-	@Autowired var jobs: Array[Job] = Array()
+	var jobDao = Wire[JobDao]
+	var jobs = Wire.all[Job]
 
 	def run {
 		jobDao.findOutstandingInstances(RunBatchSize).par foreach processInstance

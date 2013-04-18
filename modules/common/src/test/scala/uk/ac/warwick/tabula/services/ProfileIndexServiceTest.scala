@@ -22,8 +22,8 @@ import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.spring.Wire
+
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
@@ -36,8 +36,8 @@ import java.util.concurrent.Callable
 
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
-	@Autowired var indexer:ProfileIndexService = _
-	@Autowired var dao:MemberDao = _
+	lazy val indexer = Wire[ProfileIndexService]
+	lazy val dao = Wire[MemberDao]
 	var TEMP_DIR:File = _
 	
 	@Before def setup {
@@ -55,8 +55,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.stripTitles("Prof.Mathew Mannion") should be ("Mathew Mannion")
 	}
 
-	@Transactional
-	@Test def find = withFakeTime(dateTime(2000, 6)) {
+	@Test def find = transactional { tx => withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")
 		session.save(dept)
 		
@@ -87,10 +86,9 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department"), dept), Set(Student, Staff), false).head should be (m)
 		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), false) should be ('empty)
 		indexer.find("m m", Seq(dept), Set(Staff), false) should be ('empty)
-	}
+	}}
 	
-	@Transactional
-	@Test def index = withFakeTime(dateTime(2000, 6)) {
+	@Test def index = transactional { tx => withFakeTime(dateTime(2000, 6)) {
 		val stopwatch = new StopWatch
 		stopwatch.start("creating items")
 		
@@ -154,7 +152,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		// index again to check that it doesn't do any once-only stuff
 		indexer.index
 		
-	}
+	}}
 	
 	@Test def threading {
 		val dept = Fixtures.department("CS", "Computer Science")

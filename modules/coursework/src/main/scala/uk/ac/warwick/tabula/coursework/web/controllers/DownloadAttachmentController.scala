@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.services.fileserver.FileServer
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -23,12 +23,12 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
 class DownloadAttachmentController extends CourseworkController {
 	
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService = Wire[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) 
 		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)))
 
-	@Autowired var fileServer: FileServer = _
+	var fileServer = Wire[FileServer]
 
 	@RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAttachment(command: DownloadAttachmentCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {

@@ -15,7 +15,7 @@ class MarkerFeedback extends GeneratedId {
 		feedback = parent
 	}
 
-	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
+	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
 	var feedback: Feedback = _
 

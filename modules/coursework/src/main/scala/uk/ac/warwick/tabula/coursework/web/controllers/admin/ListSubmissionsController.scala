@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import collection.JavaConversions._
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.fileserver.FileServer

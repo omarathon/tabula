@@ -22,7 +22,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
 
-	var dao = Wire.auto[MeetingRecordDao]
+	var dao = Wire[MeetingRecordDao]
 
 	def applyInternal() = {
 		var meeting = new MeetingRecord(creator, relationship)

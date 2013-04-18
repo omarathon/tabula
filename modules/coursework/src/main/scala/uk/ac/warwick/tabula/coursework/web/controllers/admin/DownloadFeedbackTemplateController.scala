@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, ModelAttribute}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import scala.Array
 import javax.servlet.http.HttpServletResponse
@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 @RequestMapping(Array("/admin/department/{department}/settings/feedback-templates/download/{template}/{filename}"))
 class DownloadFeedbackTemplateController extends CourseworkController {
 	
-	@Autowired var fileServer:FileServer =_
+	var fileServer = Wire[FileServer]
 
 	@ModelAttribute def command(
 		@PathVariable("department") department: Department, 

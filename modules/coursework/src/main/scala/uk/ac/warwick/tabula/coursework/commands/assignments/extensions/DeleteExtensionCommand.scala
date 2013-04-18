@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
 import uk.ac.warwick.tabula.commands.{ Description, Command }
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{ LazyLists, Logging }
@@ -25,7 +24,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 	mustBeLinked(assignment,module)
 	PermissionCheck(Permissions.Extension.Delete, module)
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire[UserLookupService]
 	
 	override def applyInternal(): List[String] = transactional() {
 

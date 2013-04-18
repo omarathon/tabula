@@ -3,7 +3,7 @@ import org.springframework.stereotype.Repository
 import org.hibernate.SessionFactory
 import model.Module
 import org.hibernate.`type`._
-import org.springframework.beans.factory.annotation.Autowired
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import model.Department

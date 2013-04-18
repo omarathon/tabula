@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
-import org.springframework.transaction.annotation.Transactional
+
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
@@ -60,7 +59,7 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Update, template)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	var id:String = _
 	var name:String = _

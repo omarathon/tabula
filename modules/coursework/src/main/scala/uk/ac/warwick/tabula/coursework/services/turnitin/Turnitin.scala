@@ -8,7 +8,6 @@ import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import dispatch.classic._
 import dispatch.classic.Request.toRequestVerbs
@@ -23,6 +22,7 @@ import org.apache.http.client.params.CookiePolicy
 import uk.ac.warwick.tabula.data.model.Assignment
 import scala.util.matching.Regex
 import dispatch.classic.thread.ThreadSafeHttpClient
+import uk.ac.warwick.spring.Wire
 
 case class FileData(val file: File, val name: String)
 
@@ -70,18 +70,18 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 
 	/** The top level account ID (usually for University of Warwick account) */
-	@Value("${turnitin.aid}") var aid: String = null
+	var aid = Wire[String]("${turnitin.aid}")
 	/** Sub-account ID underneath University of Warwick */
-	@Value("${turnitin.said}") var said: String = null
+	var said = Wire[String]("${turnitin.said}")
 	/** Shared key as set up on the University of Warwick account's Open API settings */
-	@Value("${turnitin.key}") var sharedSecretKey: String = null
+	var sharedSecretKey = Wire[String]("${turnitin.key}")
 
-	@Value("${turnitin.url}") var apiEndpoint: String = _
+	var apiEndpoint = Wire[String]("${turnitin.url}")
 
 	// Warwick's API version
-	@Value("${turnitin.integration}") var integrationId: String = _
+	var integrationId = Wire[String]("${turnitin.integration}")
 	
-	@Value("${turnitin.class.prefix}") var classPrefix: String =_
+	var classPrefix = Wire[String]("${turnitin.class.prefix}")
 
 	/**
 	 * If this is set to true, responses are returned with HTML debug info,

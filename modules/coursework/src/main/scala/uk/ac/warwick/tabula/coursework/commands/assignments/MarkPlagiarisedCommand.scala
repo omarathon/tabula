@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Feedback
 import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.services.ZipService
@@ -25,7 +24,7 @@ class MarkPlagiarisedCommand(val module: Module, val assignment: Assignment) ext
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ManagePlagiarismStatus, assignment)
 
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService = Wire[SubmissionService]
 
 	//var submissions: JList[Submission] = JArrayList()
     var students: JList[String] = JArrayList()

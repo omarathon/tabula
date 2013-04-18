@@ -26,7 +26,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	import MarkingMethod._
 	
 	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
+	var userLookup = Wire.option[UserLookupService].orNull
 
 	def this(dept: Department) = {
 		this()

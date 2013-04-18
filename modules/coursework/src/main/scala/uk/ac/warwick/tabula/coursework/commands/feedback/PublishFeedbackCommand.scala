@@ -31,12 +31,12 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 	PermissionCheck(Permissions.Feedback.Publish, assignment)
 	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
-	var feedbackService = Wire.auto[FeedbackService]
-	var userLookup = Wire.auto[UserLookupService]
-	implicit var freemarker = Wire.auto[Configuration]
+	var feedbackService = Wire[FeedbackService]
+	var userLookup = Wire[UserLookupService]
+	implicit var freemarker = Wire[Configuration]
 
-	var replyAddress = Wire.property("${mail.noreply.to}")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var replyAddress = Wire[String]("${mail.noreply.to}")
+	var fromAddress = Wire[String]("${mail.exceptions.to}")
 	
 	var confirm: Boolean = false
 
