@@ -23,9 +23,10 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.tabula.data.model.Module
 import org.apache.commons.codec.digest.DigestUtils
+import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -81,8 +82,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
-	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
-	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
+	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
 	var zipService = Wire[ZipService]
 	var userLookup = Wire[UserLookupService]
@@ -230,8 +231,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				for (
 					entry <- iterator
 					if !entry.isDirectory
-					if !(disallowedFilenames.split(",").toList contains  entry.getName)
-					if !(disallowedPrefixes.split(",").toList.exists(entry.getName.startsWith))
+					if !(disallowedFilenames contains entry.getName)
+					if !(disallowedPrefixes.exists(entry.getName.startsWith))
 				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
@@ -267,6 +268,10 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		}
 
 	}
+
+	private def commaSeparated(csv: String) =
+		if (csv == null) Nil
+		else csv.split(",").toList
 
 }
 
