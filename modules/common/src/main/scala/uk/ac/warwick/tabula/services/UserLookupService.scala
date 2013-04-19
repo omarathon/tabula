@@ -1,18 +1,9 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConversions._
-import scala.collection.immutable
-import scala.reflect.BeanInfo
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.userlookup.GroupService
-import uk.ac.warwick.userlookup.OnCampusService
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.Member
-import scala.annotation.target.field
-import uk.ac.warwick.userlookup.UserLookupAdapter
+
 
 trait UserLookupService extends UserLookupInterface
 
@@ -25,11 +16,7 @@ class UserLookupServiceImpl(d: UserLookupService) extends UserLookupServiceAdapt
 	 * When looking up a user by University ID, check our internal database first.
 	 */
 	override def getUserByWarwickUniId(id: String, ignored: Boolean) = {
-		getById[Member](id) map { member =>
-			member.asSsoUser
-		} getOrElse {
-			super.getUserByWarwickUniId(id, ignored)
-		}
+		super.getUserByWarwickUniId(id, ignored)
 	}
 
 }
