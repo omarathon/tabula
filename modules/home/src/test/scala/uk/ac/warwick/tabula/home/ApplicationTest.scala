@@ -5,14 +5,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.home.web.controllers.sysadmin.SysadminController
-import uk.ac.warwick.tabula.services.UserLookupService
 
 class ApplicationTest extends AppContextTestBase {
     
     lazy val sysadminController = Wire[SysadminController]
        
     @Test def itWorks = {
-    	assert(Wire[UserLookupService] != null)
+    	assert(Wire.named("userLookup") != null)
     }
     
     // Can resolve message codes from any controller
