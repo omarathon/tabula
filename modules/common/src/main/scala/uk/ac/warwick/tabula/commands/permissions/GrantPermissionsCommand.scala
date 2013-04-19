@@ -26,8 +26,8 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 	
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 	
-	var permissionsService = Wire[PermissionsService]
-	var securityService = Wire[SecurityService]
+	var permissionsService = Wire.auto[PermissionsService]
+	var securityService = Wire.auto[SecurityService]
 	
 	var permission: Permission = _
 	var usercodes: JList[String] = JArrayList()

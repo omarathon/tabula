@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.events
 
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import org.springframework.beans.factory.annotation.Value
 import java.io.File
 import java.io.FilenameFilter
 import uk.ac.warwick.tabula.helpers.Logging
@@ -17,14 +18,13 @@ import java.util.UUID
 import java.io.ObjectOutputStream
 import java.io.FileOutputStream
 import scala.react.Observing
-import uk.ac.warwick.tabula.JavaImports._
 
 class DatabaseEventListener extends EventListener with Daoisms with InitializingBean with Observing with Logging {
 
-	var auditEventService = Wire[AuditEventService]
-	var maintenanceModeService = Wire[MaintenanceModeService]
-	var auditDirectory = Wire[File]("${filesystem.auditlog.dir}")
-	var createMissingDirs = Wire[JBoolean]("${filesystem.create.missing:false}")
+	@Autowired var auditEventService: AuditEventService = _
+	@Autowired var maintenanceModeService: MaintenanceModeService = _
+	@Value("${filesystem.auditlog.dir}") var auditDirectory: File = _
+	@Value("${filesystem.create.missing}") var createMissingDirs: Boolean = false
 
 	def save(event: Event, stage: String) {
 		if (maintenanceModeService.enabled) {

@@ -27,7 +27,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 
 	PermissionCheck(Permissions.ReplicaSyncing)
 
-	var fileDao = Wire[FileDao]
+	var fileDao = Wire.auto[FileDao]
 
 	var dataDir = Wire[String]("${base.data.dir}")
 

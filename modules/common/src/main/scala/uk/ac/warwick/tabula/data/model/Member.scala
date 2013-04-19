@@ -47,7 +47,7 @@ object Member {
 abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget {
 
 	@transient
-	var profileService = Wire.option[ProfileService].orNull
+	var profileService = Wire.auto[ProfileService]
 
 	def this(user: CurrentUser) = {
 		this()

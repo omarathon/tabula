@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.hibernate.criterion.Restrictions
 import com.fasterxml.jackson.databind.JsonMappingException
 import org.codehaus.jackson.JsonParseException
-
+import org.springframework.beans.factory.annotation.Autowired
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.CurrentUser
 import scala.util.parsing.json.JSONObject
@@ -25,7 +25,7 @@ trait UserSettingsService {
 @Service(value = "userSettingsService")
 class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logging {
 
-	val json = Wire[ObjectMapper]
+	val json = Wire.auto[ObjectMapper]
 	
 	def getByUserId(userId: String) : Option[UserSettings] = {
 		session.newCriteria[UserSettings]

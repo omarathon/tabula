@@ -4,7 +4,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
 import uk.ac.warwick.tabula.services.AuditEventIndexService
@@ -21,17 +20,17 @@ import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 @Service
 class ScheduledJobs {
 	
-	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
+	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
 
-	var exceptionResolver = Wire[ExceptionResolver]
+	var exceptionResolver = Wire.auto[ExceptionResolver]
 	
-	var maintenanceModeService = Wire[MaintenanceModeService]
+	var maintenanceModeService = Wire.auto[MaintenanceModeService]
 
-	var auditIndexingService = Wire[AuditEventIndexService]
+	var auditIndexingService = Wire.auto[AuditEventIndexService]
 	
-	var profileIndexingService = Wire[ProfileIndexService]
+	var profileIndexingService = Wire.auto[ProfileIndexService]
 
-	var jobService = Wire[JobService]
+	var jobService = Wire.auto[JobService]
 	
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 	

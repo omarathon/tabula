@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,12 +22,12 @@ import uk.ac.warwick.spring.Wire
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
 class DownloadFeedbackController extends CourseworkController {
 	
-	var feedbackDao = Wire[FeedbackDao]
+	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) 
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 
-	var fileServer = Wire[FileServer]
+	@Autowired var fileServer: FileServer = _
 
 	@RequestMapping(value = Array("/all/feedback.zip"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAll(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {

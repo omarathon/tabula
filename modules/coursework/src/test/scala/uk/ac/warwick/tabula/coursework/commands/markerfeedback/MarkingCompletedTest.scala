@@ -5,16 +5,16 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedComm
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.spring.Wire
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 
 
 class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld {
 
-	lazy val stateService = Wire[StateService]
+	@Autowired var stateService:StateService =_
 
-	@Test
-	def firstMarkerFinished = transactional { tx =>
+	@Transactional @Test
+	def firstMarkerFinished(){
 		withUser("cuslaj"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
@@ -32,8 +32,8 @@ class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld 
 		}
 	}
 
-	@Test
-	def secondMarkerFinished = transactional { tx =>
+	@Transactional @Test
+	def secondMarkerFinished(){
 		withUser("cuday"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.views
 
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import freemarker.core.Environment
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateDirectiveBody
@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 class PermissionTag extends TemplateDirectiveModel with Logging {
 
-	var securityService = Wire[SecurityService]
+	@Autowired var securityService: SecurityService = _
 
 	override def execute(env: Environment,
 		_params: JMap[_, _],

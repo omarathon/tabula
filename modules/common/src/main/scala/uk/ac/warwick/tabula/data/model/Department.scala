@@ -74,7 +74,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	} getOrElse("")
 
 	@transient
-	var permissionsService = Wire.option[PermissionsService].orNull
+	var permissionsService = Wire.auto[PermissionsService]
 	@transient
 	lazy val owners = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
 	@transient

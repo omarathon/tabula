@@ -25,8 +25,8 @@ import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Member
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
@@ -44,9 +44,10 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 
 class ProfileServiceTest extends AppContextTestBase with Mockito {
 	
-	lazy val profileService = Wire[ProfileServiceImpl]
+	@Autowired var profileService:ProfileServiceImpl = _
 	
-	@Test def findingRelationships = transactional { tx => withFakeTime(dateTime(2000, 6)) {
+	@Transactional
+	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
 		profileService.findCurrentRelationship(PersonalTutor, "1250148/1") should be (None)
 		
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "1234567")
@@ -76,7 +77,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "1234567").size should be (0)
 		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").size should be (1)
 		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").head.targetSprCode should be ("1250148/1")
-	}}
+	}
 	
 	@Before def setup: Unit = transactional { tx =>
 		session.enableFilter(Member.ActiveOnlyFilter)

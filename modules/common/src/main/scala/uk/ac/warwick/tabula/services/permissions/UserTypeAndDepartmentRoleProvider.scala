@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.data.model.Member
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	
-	var profileService = Wire[ProfileService]
-	var departmentService = Wire[ModuleAndDepartmentService]
+	var profileService = Wire.auto[ProfileService]
+	var departmentService = Wire.auto[ModuleAndDepartmentService]
 	
 	private def getRolesForMembers(members: Seq[Member]) = members flatMap { member =>
 		Seq(UniversityMemberRole(member)) ++ (member.userType match {

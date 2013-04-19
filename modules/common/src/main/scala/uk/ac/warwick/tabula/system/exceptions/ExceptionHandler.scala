@@ -5,11 +5,13 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import scala.collection.JavaConversions.asScalaBuffer
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.mail.MailException
 import freemarker.template.{ Configuration => FreemarkerConfiguration }
 import freemarker.template.Template
+import javax.annotation.Resource
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.RequestInfo
@@ -49,11 +51,11 @@ class LoggingExceptionHandler extends ExceptionHandler with Logging {
 }
 
 class EmailingExceptionHandler extends ExceptionHandler with Logging with InitializingBean with FreemarkerRendering with UnicodeEmails {
-	var mailSender = Wire[WarwickMailSender]("mailSender")
-	var recipient = Wire[String]("${mail.exceptions.to}")
-	var production = Wire[JBoolean]("${environment.production:false}")
-	var standby = Wire[JBoolean]("${environment.standby:false}")
-	var freemarker = Wire[FreemarkerConfiguration]
+	@Resource(name = "mailSender") var mailSender: WarwickMailSender = _
+	@Value("${mail.exceptions.to}") var recipient: String = _
+	@Value("${environment.production}") var production: Boolean = _
+	@Value("${environment.standby}") var standby: Boolean = _
+	@Autowired var freemarker: FreemarkerConfiguration = _
 	var template: Template = _
 
 	// Check for this exception without needing it on the classpath

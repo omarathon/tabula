@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
-
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
@@ -16,7 +16,7 @@ class AdminGetAllFeedbackCommand(module: Module, assignment: Assignment) extends
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
-	var zipService = Wire[ZipService]
+	var zipService = Wire.auto[ZipService]
 
 	override def applyInternal() = {
 		val zip = zipService.getAllFeedbackZips(assignment)

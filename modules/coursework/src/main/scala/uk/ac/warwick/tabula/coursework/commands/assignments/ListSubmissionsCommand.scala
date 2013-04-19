@@ -13,7 +13,7 @@ class ListSubmissionsCommand(val module: Module, val assignment: Assignment) ext
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var auditIndex = Wire[AuditEventIndexService]
+	var auditIndex = Wire.auto[AuditEventIndexService]
 	var checkIndex = true
 
 	def applyInternal() = {

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.services.turnitin._
 import org.springframework.web.servlet.ModelAndView
 import uk.ac.warwick.tabula.web.Mav
@@ -24,7 +24,7 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, assignment)
 	
-	var turnitinService = Wire[Turnitin]
+	var turnitinService = Wire.auto[Turnitin]
 	
 	def applyInternal() = {
 		debug("Getting document viewer URL for FileAttachment %s", fileId)

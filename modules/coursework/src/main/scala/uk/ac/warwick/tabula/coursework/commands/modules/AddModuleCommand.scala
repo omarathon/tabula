@@ -9,6 +9,7 @@ import data.model._
 import collection.JavaConversions._
 import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Command
 

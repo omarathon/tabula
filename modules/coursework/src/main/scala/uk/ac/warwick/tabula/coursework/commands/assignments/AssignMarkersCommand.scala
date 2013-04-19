@@ -25,7 +25,7 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 	var assignmentService = Wire[AssignmentService]("assignmentService")
 	@transient
 	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
-	var userLookup = Wire[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	var firstMarkerUnassignedStudents: JList[Student] = _
 	var secondMarkerUnassignedStudents: JList[Student] = _

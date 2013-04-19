@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 
 class PermissionsServiceTest extends AppContextTestBase {
 	
-	lazy val service = Wire[PermissionsService]
+	@Autowired var service: PermissionsService = _
 	
 	@Test def crud = transactional { t =>
 		val dept1 = Fixtures.department("dp1")

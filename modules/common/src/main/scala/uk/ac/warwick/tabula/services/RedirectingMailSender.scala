@@ -9,7 +9,8 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import javax.mail.Message.RecipientType
 import javax.mail.internet.MimeMultipart
@@ -18,9 +19,9 @@ import language.implicitConversions
 
 final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMailSender with Logging with UnicodeEmails {
 
-	var features = Wire[Features]
+	@Autowired var features: Features = _
 
-	var testEmailTo = Wire[String]("${redirect.test.emails.to}")
+	@Value("${redirect.test.emails.to}") var testEmailTo: String = _
 
 	override def createMimeMessage() = delegate.createMimeMessage()
 

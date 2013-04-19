@@ -24,7 +24,7 @@ class FeedbackReportController extends CourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
 
-	var jobService = Wire[JobService]
+	var jobService = Wire.auto[JobService]
 	var context = Wire[String]("${module.context}")
 
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =

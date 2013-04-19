@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.SessionFactory
 import scala.reflect.Manifest
-
+import org.springframework.beans.factory.annotation.Autowired
 import scala.annotation.target.field
 import javax.sql.DataSource
 import org.hibernate.Session
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
+import javax.annotation.Resource
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
@@ -29,19 +30,8 @@ trait Daoisms {
 	import org.hibernate.criterion.Restrictions._
 	def is = org.hibernate.criterion.Restrictions.eq _
 
-	// FIXME This is a shitty hack to get around the fact that Wire[] doesn't resolve circular dependencies, 
-	// and we want to inject this as if it's a var at runtime rather than a lazy val
-	private var _testDataSource: DataSource = _
-	private var _testSessionFactory: SessionFactory = _
-	lazy private val _dataSource = Wire[DataSource]("dataSource")
-	lazy private val _sessionFactory = Wire[SessionFactory]
-	
-	def dataSource = Option(_testDataSource) getOrElse (_dataSource)
-	def dataSource_=(ds: DataSource) { _testDataSource = ds }
-	
-	def sessionFactory = Option(_testSessionFactory) getOrElse (_sessionFactory)
-	def sessionFactory_=(sf: SessionFactory) { _testSessionFactory = sf }
-	// End FIXME
+	var dataSource = Wire[DataSource]("dataSource")
+	var sessionFactory = Wire.auto[SessionFactory]
 
 	protected def session = sessionFactory.getCurrentSession
 

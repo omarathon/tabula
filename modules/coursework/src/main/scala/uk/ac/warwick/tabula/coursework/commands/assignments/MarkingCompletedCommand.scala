@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
 	extends Command[Unit] with SelfValidating with Daoisms {
 
-	var stateService = Wire[StateService]
+	var stateService = Wire.auto[StateService]
 
 	var students: JList[String] = JArrayList()
 	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()

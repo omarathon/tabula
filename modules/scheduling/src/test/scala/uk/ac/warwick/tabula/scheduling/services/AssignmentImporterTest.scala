@@ -1,19 +1,21 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import scala.collection.JavaConversions.mapAsJavaMap
+
 import org.junit.Test
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils
 import org.springframework.stereotype.Service
+
+import javax.annotation.Resource
 import javax.sql.DataSource
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
 
 class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 
-	lazy val ads = Wire[DataSource]("academicDataStore")
+	@Resource(name="academicDataStore") var ads:DataSource =_
 	
 	@Test def groupImportSql {
 		// Not really testing AssignmentImporter but the behaviour of the query class for IN(..)

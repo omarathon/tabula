@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.coursework.jobs
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMailMessage
 import org.springframework.stereotype.Component
 import freemarker.template.Configuration
+import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
@@ -48,13 +50,13 @@ abstract class DescribableJob(instance: JobInstance) extends Describable[Nothing
 class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with FreemarkerRendering {
 	val identifier = SubmitToTurnitinJob.identifier
 
-	implicit var freemarker = Wire[Configuration]
-	var assignmentService = Wire[AssignmentService]
-	var originalityReportService = Wire[OriginalityReportService]
-	var mailer = Wire[WarwickMailSender]("mailSender")
+	@Autowired implicit var freemarker: Configuration = _
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var originalityReportService: OriginalityReportService = _
+	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 
-	var replyAddress = Wire[String]("${mail.noreply.to}")
-	var fromAddress = Wire[String]("${mail.exceptions.to}")
+	@Value("${mail.noreply.to}") var replyAddress: String = _
+	@Value("${mail.exceptions.to}") var fromAddress: String = _
 
 	val WaitingRetries = 50
 	val WaitingSleep = 20000

@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula
 import org.specs.mock.JMocker._
 import org.specs.mock.JMocker.{expect => expecting}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services._
 import org.junit.Before
 
 trait LenientUserLookup {
 
-	var userLookup = Wire[SwappableUserLookupService]
+	@Autowired var userLookup:SwappableUserLookupService =_
 	
 	@Before def setup {
 		userLookup.delegate = lenientUserLookup

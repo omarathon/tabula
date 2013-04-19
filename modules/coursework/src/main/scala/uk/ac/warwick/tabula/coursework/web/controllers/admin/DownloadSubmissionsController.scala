@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
 class DownloadSubmissionsController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
+	var fileServer = Wire.auto[FileServer]
 
 	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DownloadSubmissionsCommand(module, assignment)
@@ -43,7 +43,7 @@ class DownloadSubmissionsController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
 class DownloadMarkerSubmissionsController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
+	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute def getMarkersSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new DownloadMarkersSubmissionsCommand(module, assignment, user)
@@ -75,7 +75,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
 class DownloadAllSubmissionsController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
+	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("filename") filename: String) = 
 		new DownloadAllSubmissionsCommand(module, assignment, filename)
@@ -93,8 +93,8 @@ class DownloadAllSubmissionsController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}.zip"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
-	var submissionService = Wire[SubmissionService]
+	var fileServer = Wire.auto[FileServer]
+	var submissionService = Wire.auto[SubmissionService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
 		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
@@ -111,8 +111,8 @@ class DownloadSingleSubmissionController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
 class DownloadSingleSubmissionFileController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
-	var submissionService = Wire[SubmissionService]
+	var fileServer = Wire.auto[FileServer]
+	var submissionService = Wire.auto[SubmissionService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
 		new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
@@ -132,8 +132,8 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}"))
 class DownloadFeedbackSheetsController extends CourseworkController {
 
-	var fileServer = Wire[FileServer]
-	var userLookup = Wire[UserLookupService]
+	var fileServer = Wire.auto[FileServer]
+	var userLookup = Wire.auto[UserLookupService]
 		
 	@ModelAttribute def feedbackSheetsCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DownloadFeedbackSheetsCommand(module, assignment)

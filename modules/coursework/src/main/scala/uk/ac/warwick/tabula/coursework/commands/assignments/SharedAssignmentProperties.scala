@@ -52,7 +52,7 @@ trait SharedAssignmentProperties {
 	// linked feedback template (optional)
 	var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
-	var zipService: ZipService = Wire[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
 	var markingWorkflow: MarkingWorkflow = _
 

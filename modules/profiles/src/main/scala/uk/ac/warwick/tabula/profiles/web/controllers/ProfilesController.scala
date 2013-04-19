@@ -12,7 +12,7 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	activeProfilesOnly
 	studentProfilesOnly
 	
-	var profileService = Wire[ProfileService]
+	var profileService = Wire.auto[ProfileService]
 
 	/**
 	 * Enables the Hibernate filter for this session to exclude

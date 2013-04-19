@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import scala.collection.JavaConversions._
+import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
@@ -49,7 +50,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	
 	mustBeLinked(assignment,module)
 		
-	var userLookup = Wire[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 	
 	var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
 	var extensions:JList[Extension] = LazyLists.simpleFactory()

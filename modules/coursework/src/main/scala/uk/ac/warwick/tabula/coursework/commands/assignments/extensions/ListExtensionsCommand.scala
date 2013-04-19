@@ -16,8 +16,8 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 	mustBeLinked(assignment,module)
 	PermissionCheck(Permissions.Extension.Read, assignment)
 
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
-	var userLookup = Wire[UserLookupService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var userLookup = Wire.auto[UserLookupService]
 
 	def applyInternal() = {
 		val assignmentUsers = assignmentMembershipService.determineMembershipUsers(assignment)

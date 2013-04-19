@@ -28,8 +28,8 @@ import org.springframework.validation.BindingResult
 abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
 	with Daoisms with Logging with BindListener {
 
-	var userLookup = Wire[UserLookupService]
-	var marksExtractor = Wire[MarksExtractor]
+	var userLookup = Wire.auto[UserLookupService]
+	var marksExtractor = Wire.auto[MarksExtractor]
   
 	var file: UploadedFile = new UploadedFile
 	var marks: JList[MarkItem] = LazyLists.simpleFactory()

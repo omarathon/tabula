@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.services
-import uk.ac.warwick.spring.Wire
+
 import java.io.StringWriter
 import java.sql.Clob
 import scala.collection.JavaConversions.asScalaBuffer
@@ -8,10 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.codehaus.jackson.JsonParseException
 import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.util.FileCopyUtils
+import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.data.Daoisms
@@ -35,9 +36,9 @@ trait AuditEventService {
 @Component
 class AuditEventServiceImpl extends Daoisms with AuditEventService {
 
-	var json = Wire[ObjectMapper]
+	@Autowired var json: ObjectMapper = _
 
-	var dialect = Wire[Dialect]("mainDatabaseDialect")
+	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
 
 	private val baseSelect = """select 
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id

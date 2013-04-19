@@ -22,7 +22,7 @@ import uk.ac.warwick.userlookup.User
 class Submission extends GeneratedId with PermissionsTarget {
 
 	@transient
-	var userLookup = Wire.option[UserLookupService].orNull
+	var userLookup = Wire[UserLookupService]("userLookup")
 
 	def this(universityId: String = null) {
 		this()

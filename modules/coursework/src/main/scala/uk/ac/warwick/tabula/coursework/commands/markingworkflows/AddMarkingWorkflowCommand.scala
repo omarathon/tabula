@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.permissions._
 
 class AddMarkingWorkflowCommand(department: Department) extends ModifyMarkingWorkflowCommand(department) {

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	import ImportModulesCommand._
 
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	def applyInternal() {
 		setupDepartmentAndModules()

@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.scheduling
 
 import org.junit.Test
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin.SysadminController
 import org.junit.Test
-
+import org.springframework.beans.factory.annotation.Autowired
 
 class ApplicationTest extends AppContextTestBase {
     
-    lazy val sysadminController = Wire[SysadminController]
+    @Autowired var sysadminController:SysadminController = _
        
     @Test def itWorks = {
-    	assert(Wire.named("userLookup") != null)
+    	assert(beans.containsBean("userLookup"))
     }
     
     // Can resolve message codes from any controller

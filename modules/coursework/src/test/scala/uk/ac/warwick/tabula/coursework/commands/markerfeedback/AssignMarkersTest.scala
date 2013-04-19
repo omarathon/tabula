@@ -5,13 +5,13 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.coursework.commands.assignments.AssignMarkersCommand
 import java.util.HashMap
-
+import org.springframework.transaction.annotation.Transactional
 
 
 class AssignMarkersTest extends AppContextTestBase with MarkingWorkflowWorld {
 
-	@Test
-	def assignMarkers = transactional { tx =>
+	@Transactional @Test
+	def assignMarkers(){
 		val command = new AssignMarkersCommand(assignment.module, assignment)
 		command.onBind()
 

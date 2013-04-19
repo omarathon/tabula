@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Required
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.RequestMethod
+import javax.annotation.Resource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.RequestInfo
@@ -95,11 +97,12 @@ abstract class BaseController extends ControllerMethods
 	with ControllerImports
 	with PreRequestHandler {
 
-	var globalValidator = Wire[Validator]("validator")
+	@Required @Resource(name = "validator") var globalValidator: Validator = _
 
-	var securityService = Wire[SecurityService]
+	@Autowired
+	var securityService: SecurityService = _
 
-	private var messageSource = Wire[MessageSource]
+	@Autowired private var messageSource: MessageSource = _
 
 	/**
 	 * Resolve a message from messages.properties. This is the same way that

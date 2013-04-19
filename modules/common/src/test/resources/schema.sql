@@ -9,6 +9,4 @@ create table auditevent (
 	masquerade_user_id varchar(255),
 	data varchar(4000) not null
 );
-
-DROP SEQUENCE AUDITEVENT_SEQ IF EXISTS;
 create sequence auditevent_seq increment by 1 minvalue 1 maxvalue 999999999 start with 1;

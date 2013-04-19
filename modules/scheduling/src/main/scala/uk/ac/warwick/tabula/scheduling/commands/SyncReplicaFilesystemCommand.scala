@@ -49,9 +49,9 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	
 	var dataDir = Wire[String]("${base.data.dir}")
 	
-	var macGenerator = Wire[MessageAuthenticationCodeGenerator]
+	var macGenerator = Wire.auto[MessageAuthenticationCodeGenerator]
 	
-	var fileDao = Wire[FileDao]
+	var fileDao = Wire.auto[FileDao]
 	
 	lazy val listFilesUrl = Uri.parse(replicaMaster + "/scheduling/sync/listFiles.json")
 	lazy val getFileUrl = Uri.parse(replicaMaster + "/scheduling/sync/getFile")

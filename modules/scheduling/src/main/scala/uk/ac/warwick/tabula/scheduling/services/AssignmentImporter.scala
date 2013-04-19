@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import org.springframework.stereotype.Service
+import javax.annotation.Resource
 import javax.sql.DataSource
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.FunctionConversions._
@@ -18,14 +19,14 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import javax.annotation.Resource
 import org.springframework.stereotype.Service
-import uk.ac.warwick.spring.Wire
 
 @Service
 class AssignmentImporter extends InitializingBean {
 	import AssignmentImporter._
 
-	var ads = Wire[DataSource]("academicDataStore")
+	@Resource(name = "academicDataStore") var ads: DataSource = _
 	var assessmentGroupMemberQuery: AssessmentGroupMembersQuery = _
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
 	var upstreamAssignmentQuery: UpstreamAssignmentQuery = _

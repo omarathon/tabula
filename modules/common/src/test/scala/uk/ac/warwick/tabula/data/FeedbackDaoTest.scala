@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.ByteArrayInputStream
@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.Fixtures
 
 class FeedbackDaoTest extends AppContextTestBase {
 
-	lazy val dao = Wire[FeedbackDao]
+	@Autowired var dao:FeedbackDao =_
 
 	@Test def crud = transactional { tx =>
 		val f1 = Fixtures.feedback("0205225")

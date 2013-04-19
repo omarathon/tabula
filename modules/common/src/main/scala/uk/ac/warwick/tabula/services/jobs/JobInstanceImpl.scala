@@ -4,12 +4,13 @@ import scala.collection.mutable
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Lob
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.CurrentUser
@@ -36,13 +37,13 @@ object JobInstanceImpl {
  * does not need subclassing.
  */
 @Entity(name = "Job")
-class JobInstanceImpl extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
+class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
 	private type JsonMap = Map[String, Any]
 
-	@transient var jsonMapper = Wire.option[ObjectMapper].orNull
-	@transient var userLookup = Wire.option[UserLookupInterface].orNull
-	@transient var currentUserFinder = Wire.option[CurrentUserInterceptor].orNull
+	@transient var jsonMapper = Wire.auto[ObjectMapper]
+	@transient var userLookup = Wire.auto[UserLookupInterface]
+	@transient var currentUserFinder = Wire.auto[CurrentUserInterceptor]
 
 	/** Human-readable status of the job */
 	var status: String = _

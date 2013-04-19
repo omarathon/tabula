@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
@@ -22,13 +22,13 @@ import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 
 @Controller class HomeController extends CourseworkController {
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var assignmentService = Wire[AssignmentService]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
-	var activityService = Wire[ActivityService]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var activityService = Wire.auto[ActivityService]
 
-	var userLookup = Wire[UserLookupService]
-	var features = Wire[Features]
+	var userLookup = Wire.auto[UserLookupService]
+	var features = Wire.auto[Features]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems

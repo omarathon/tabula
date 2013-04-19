@@ -5,6 +5,7 @@ import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import scala.collection.JavaConversions.asScalaBuffer
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Feedback, Submission}
@@ -16,8 +17,7 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
+
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -25,10 +25,10 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 @Service
 class ZipService extends InitializingBean with ZipCreator with Logging {
-	var zipDir = Wire[File]("${filesystem.zip.dir}")
-	var createMissingDirectories = Wire[JBoolean]("${filesystem.create.missing:false}")
-	var features = Wire[Features]
-	var userLookup = Wire[UserLookupService]
+	@Value("${filesystem.zip.dir}") var zipDir: File = _
+	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	@Autowired var features: Features = _
+	@Autowired var userLookup: UserLookupService = _
 	
 	
 	val idSplitSize = 4

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{AppContextTestBase, TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.UserLookupService
-
+import org.springframework.transaction.annotation.Transactional
 
 class AddMarksCommandTest extends AppContextTestBase with Mockito {
 
@@ -16,8 +16,8 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 	 * so that the apply method skips it.
 	 */
 
-	@Test
-	def emptyMarkField = transactional { tx =>
+	@Transactional @Test
+	def emptyMarkField {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()
@@ -45,8 +45,8 @@ class AddMarksCommandTest extends AppContextTestBase with Mockito {
 	/**
 	 * Check that validation allows either mark or grade to be non-empty
 	 */
-	@Test
-	def gradeButEmptyMarkField = transactional { tx =>
+	@Transactional @Test
+	def gradeButEmptyMarkField {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()

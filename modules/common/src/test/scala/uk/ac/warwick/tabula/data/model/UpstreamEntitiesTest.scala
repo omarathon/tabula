@@ -7,14 +7,17 @@ import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
 import org.junit.Before
 import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
-import uk.ac.warwick.tabula.AppContextTestBase
 
-class UpstreamEntitiesTest extends AppContextTestBase {
+class UpstreamEntitiesTest extends PersistenceTestBase {
 
 	@Test def associations() {
 		transactional { t =>
+
 			val assignmentService = new AssignmentServiceImpl
+			assignmentService.sessionFactory = sessionFactory
+			
 			val assignmentMembershipService = new AssignmentMembershipServiceImpl
+			assignmentMembershipService.sessionFactory = sessionFactory
 
 			val law = new UpstreamAssignment
 			law.moduleCode = "la155-10"

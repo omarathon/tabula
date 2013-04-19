@@ -22,7 +22,7 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Pers
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
 
-	var profileService = Wire[ProfileService]
+	var profileService = Wire.auto[ProfileService]
 	
 	override def applyInternal(): PersonalTutorGraph = transactional(readOnly = true) {
 		// get all tutor/tutee relationships by dept
@@ -47,7 +47,7 @@ class MissingPersonalTutorsCommand(val department: Department) extends Command[(
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
 
-	var profileService = Wire[ProfileService]
+	var profileService = Wire.auto[ProfileService]
 	
 	override def applyInternal(): (Int, Seq[Member]) = transactional(readOnly = true) {
 		val studentCount = profileService.countStudentsByDepartment(department)
@@ -62,7 +62,7 @@ class ViewPersonalTuteesCommand(val currentMember: Member) extends Command[Seq[S
 	
 	PermissionCheck(Permissions.Profiles.Read.PersonalTutees, currentMember)
 
-	var profileService = Wire[ProfileService]
+	var profileService = Wire.auto[ProfileService]
 	
 	override def applyInternal(): Seq[StudentRelationship] = transactional(readOnly = true) {
 		profileService.listStudentRelationshipsWithMember(PersonalTutor, currentMember)

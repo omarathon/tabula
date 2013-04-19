@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleModeOfAttend
 class ModeOfAttendanceImporter extends Logging {
 	import ModeOfAttendanceImporter._
 
-	var modeOfAttendanceDao = Wire[ModeOfAttendanceDao]
+	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 	
 	var sits = Wire[DataSource]("sitsDataSource")
 	

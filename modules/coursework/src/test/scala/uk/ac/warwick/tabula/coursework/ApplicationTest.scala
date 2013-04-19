@@ -15,25 +15,26 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.test.context.support.AnnotationConfigContextLoader
 import org.springframework.context.annotation.Configuration
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ComponentScan
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.test.context.transaction.TransactionConfiguration
-
+import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Module
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
 import org.junit.Ignore
 
 class ApplicationTest extends AppContextTestBase {
     
-    lazy val annotationMapper = Wire[RequestMappingHandlerMapping]
+    @Autowired var annotationMapper:RequestMappingHandlerMapping =_
     
-    var auditIndexDir = Wire[String]("${filesystem.index.audit.dir}")
+    @Value("${filesystem.index.audit.dir}") var auditIndexDir:String =_
     
     @Test def handlerMappings = {
     	annotationMapper.getHandlerMethods.size should not be (0)
@@ -55,7 +56,7 @@ class ApplicationTest extends AppContextTestBase {
     	auditIndexDir should be ("target/test-tmp/index/audit")
     }
     
-    @Test def hibernatePersistence = transactional { tx =>
+    @Transactional @Test def hibernatePersistence = {
 	  val assignment = new Assignment
 	  assignment.name = "Cake Studies 1"
 	  assignment.academicYear = new AcademicYear(2009)
@@ -74,7 +75,7 @@ class ApplicationTest extends AppContextTestBase {
      * A post-load event in Department makes sure that a null settings
      * property is replaced with a new empty group on load.
      */
-    @Test def departmentLoadEvent = transactional { tx =>
+    @Transactional @Test def departmentLoadEvent {
       val dept = new Department
       dept.code = "ch"
       dept.settings = null
@@ -92,7 +93,7 @@ class ApplicationTest extends AppContextTestBase {
       
     }    
     
-    @Test def getModules = transactional { tx =>
+    @Transactional @Test def getModules = {
       val modules = session.createCriteria(classOf[Module]).list
       modules.size should be (3)
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")

@@ -15,8 +15,8 @@ class ViewMeetingRecordCommand(val student: StudentMember) extends Command[Seq[M
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Read, student)
 	
-	var dao = Wire[MeetingRecordDao]
-	var profileService = Wire[ProfileService]
+	var dao = Wire.auto[MeetingRecordDao]
+	var profileService = Wire.auto[ProfileService]
 
 	def applyInternal() = {
 		val rels = profileService.getRelationships(PersonalTutor, student)

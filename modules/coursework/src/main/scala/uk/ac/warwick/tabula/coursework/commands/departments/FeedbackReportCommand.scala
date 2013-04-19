@@ -23,7 +23,7 @@ class FeedbackReportCommand (val department:Department, val user: CurrentUser) e
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var endDate:DateTime = _
 
-	var jobService = Wire[JobService]
+	var jobService = Wire.auto[JobService]
 
 	def applyInternal() = jobService.add(Option(user), FeedbackReportJob(department, startDate, endDate))
 

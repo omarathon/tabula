@@ -18,9 +18,9 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.RuntimeMember
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
-	var roleService = Wire[RoleService]
-	var userLookup = Wire[UserLookupInterface]
-	var profileService = Wire[ProfileService]
+	var roleService = Wire.auto[RoleService]
+	var userLookup = Wire.auto[UserLookupInterface]
+	var profileService = Wire.auto[ProfileService]
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
