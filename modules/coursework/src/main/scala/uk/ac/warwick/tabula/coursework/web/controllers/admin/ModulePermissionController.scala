@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import org.springframework.beans.factory.annotation.Configurable
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
-
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable

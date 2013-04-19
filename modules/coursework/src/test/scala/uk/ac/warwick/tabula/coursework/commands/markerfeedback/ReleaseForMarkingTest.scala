@@ -5,24 +5,19 @@ import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.StateService
-
-import uk.ac.warwick.spring.Wire
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
 
 class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 
-	lazy val stateService = Wire[StateService]
+	@Autowired var stateService:StateService =_
 
-	@Test
-	def isReleased = transactional { tx =>
+	@Transactional @Test
+	def isReleased {
 		withUser("cuslaj") {
-			val assignment = transactional { tx => 
-				val assignment = newDeepAssignment()
-				session.save(assignment.module.department)
-				session.save(assignment.module)
-				session.save(assignment)
-				assignment
-			}
+
+			val assignment = newDeepAssignment()
 			assignment.closeDate = DateTime.parse("2012-08-15T12:00")
 
 			generateSubmission(assignment, "0678022")
@@ -46,7 +41,6 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 		val submission = new Submission()
 		submission.assignment = assignment
 		submission.universityId = uniId
-		submission.userId = uniId
 		assignment.submissions.add(submission)
 	}
 

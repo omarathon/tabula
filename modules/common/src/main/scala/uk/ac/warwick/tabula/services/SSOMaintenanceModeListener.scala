@@ -24,8 +24,8 @@ import scala.react.Observing
  */
 class SSOMaintenanceModeListener extends QueueListener with Observing with InitializingBean with Logging with ServletContextAware {
 	
-	var maintenanceModeService = Wire[MaintenanceModeService]
-	var queue = Wire[Queue]("settingsSyncTopic")
+	var maintenanceModeService = Wire.auto[MaintenanceModeService]
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
 	def config = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
 		case config: SSOConfiguration => Some(config)

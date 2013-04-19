@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorPhotoCommand
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
 	
-	var fileServer = Wire[FileServer]
+	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = new ViewProfilePhotoCommand(member)
 
@@ -32,7 +32,7 @@ class PhotoController extends ProfilesController {
 @RequestMapping(value = Array("/view/photo/{member}/tutor.jpg"))
 class PersonalTutorPhotoController extends ProfilesController {
 	
-	var fileServer = Wire[FileServer]
+	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute("viewPersonalTutorPhotoCommand") def command(@PathVariable("member") member: Member) = new ViewPersonalTutorPhotoCommand(member)
 

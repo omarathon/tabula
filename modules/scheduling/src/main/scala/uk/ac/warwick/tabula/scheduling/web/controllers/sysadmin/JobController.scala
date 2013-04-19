@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 
 import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.stereotype._
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
@@ -16,7 +16,7 @@ class JobQuery {
 @RequestMapping(value = Array("/sysadmin/jobs"))
 class JobController extends BaseController {
 
-	var jobService = Wire[JobService]
+	@Autowired var jobService: JobService = _
 	
 	val pageSize = 100
 

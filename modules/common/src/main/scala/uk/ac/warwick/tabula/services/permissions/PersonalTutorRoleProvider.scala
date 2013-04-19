@@ -13,7 +13,7 @@ import uk.ac.warwick.spring.Wire
 @Component
 class PersonalTutorRoleProvider extends RoleProvider {
 	
-	var profileService = Wire[ProfileService]
+	var profileService = Wire.auto[ProfileService]
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = scope match {
 		case member: model.Member => {

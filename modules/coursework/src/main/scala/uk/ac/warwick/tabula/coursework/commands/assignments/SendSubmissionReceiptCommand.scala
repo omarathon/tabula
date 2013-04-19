@@ -27,10 +27,10 @@ class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 
-	implicit var freemarker = Wire[Configuration]
+	implicit var freemarker = Wire.auto[Configuration]
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
-	var replyAddress = Wire[String]("${mail.noreply.to}")
-	var fromAddress = Wire[String]("${mail.exceptions.to}")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 

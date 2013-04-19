@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.data.model.{ Department, UpstreamAssignment }
 import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.springframework.validation.Errors
 import com.google.common.collect.Maps
@@ -16,6 +17,7 @@ import org.springframework.validation.ValidationUtils
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.ModuleDao
 import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.beans.factory.annotation.Configurable
 import scala.collection.mutable.HashMap
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
@@ -38,7 +40,7 @@ class AssignmentItem(
 	
     def this() = this(true, null, null)
     
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
 	var assessmentGroup: Option[UpstreamAssessmentGroup] = _
@@ -69,9 +71,9 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	
 	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
 
-	var assignmentService = Wire[AssignmentService]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
-	var moduleDao = Wire[ModuleDao]
+	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var moduleDao = Wire.auto[ModuleDao]
 
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
 	// months, which means it will start defaulting to next year from about May (under the assumption that

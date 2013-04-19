@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.ByteArrayInputStream
@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -32,7 +32,7 @@ import uk.ac.warwick.tabula.JavaImports._
 
 class MemberDaoTest extends AppContextTestBase {
 
-	lazy val dao = Wire[MemberDao]
+	@Autowired var dao:MemberDao =_
 	
 	@Before def setup: Unit = transactional { tx =>
 		session.enableFilter(Member.ActiveOnlyFilter)

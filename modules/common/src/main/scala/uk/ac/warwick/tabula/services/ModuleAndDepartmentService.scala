@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -23,10 +23,10 @@ import uk.ac.warwick.tabula.data.RouteDao
 @Service
 class ModuleAndDepartmentService extends Logging {
 
-	var moduleDao = Wire[ModuleDao]
-	var departmentDao = Wire[DepartmentDao]
-	var routeDao = Wire[RouteDao]
-	var userLookup = Wire[UserLookupService]
+	@Autowired var moduleDao: ModuleDao = _
+	@Autowired var departmentDao: DepartmentDao = _
+	@Autowired var routeDao: RouteDao = _
+	@Autowired var userLookup: UserLookupService = _
 	def groupService = userLookup.getGroupService
 
 	

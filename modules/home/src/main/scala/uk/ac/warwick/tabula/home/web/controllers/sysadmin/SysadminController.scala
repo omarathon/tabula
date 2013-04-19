@@ -26,8 +26,8 @@ import uk.ac.warwick.userlookup.UserLookupInterface
  */
 
 abstract class BaseSysadminController extends BaseController {
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var userLookup = Wire[UserLookupInterface]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var userLookup = Wire.auto[UserLookupInterface]
 
 	def redirectToHome = Redirect("/sysadmin/")
 }
@@ -43,7 +43,7 @@ class ReindexForm {
 @RequestMapping(Array("/sysadmin"))
 class SysadminController extends BaseSysadminController {
 
-	var maintenanceService = Wire[MaintenanceModeService]
+	var maintenanceService = Wire.auto[MaintenanceModeService]
 
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
 

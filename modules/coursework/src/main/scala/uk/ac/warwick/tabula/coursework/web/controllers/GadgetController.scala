@@ -13,7 +13,7 @@ import java.util.Collections
 class GadgetController extends CourseworkController {
 	
 	// Jump on the back of the home page controller.
-	var homeController = Wire[HomeController]
+	var homeController = Wire.auto[HomeController]
 
 	@RequestMapping(value = Array("/api/gadget.xml"))
 	def xml = Mav("gadgets/coursework/xml",

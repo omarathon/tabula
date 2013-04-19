@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import javax.mail.internet.InternetAddress
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
@@ -9,7 +10,8 @@ import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.userlookup.User
 import javax.mail.MessagingException
 import uk.ac.warwick.tabula.data.model.Module
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
@@ -39,7 +41,7 @@ class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignme
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 
-	var feedbackService = Wire[FeedbackService]
+	var feedbackService = Wire.auto[FeedbackService]
 
 	override def applyInternal() = {
 		val items: Seq[RecipientReportItem] =

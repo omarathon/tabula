@@ -52,19 +52,19 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	import Assignment._
 
 	@transient
-	var assignmentService = Wire.option[AssignmentService].orNull
+	var assignmentService = Wire[AssignmentService]("assignmentService")
 	
 	@transient
-	var assignmentMembershipService = Wire.option[AssignmentMembershipService].orNull
+	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
 	
 	@transient
-	var feedbackService = Wire.option[FeedbackService].orNull
+	var feedbackService = Wire[FeedbackService]("feedbackService")
 
 	@transient
-	var extensionService = Wire.option[ExtensionService].orNull
+	var extensionService = Wire[ExtensionService]("extensionService")
 
 	@transient
-	var userLookup = Wire.option[UserLookupService].orNull
+	var userLookup = Wire[UserLookupService]("userLookup")
 
 	def this(_module: Module) {
 		this()

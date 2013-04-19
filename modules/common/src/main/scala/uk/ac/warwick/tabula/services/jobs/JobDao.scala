@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.jobs
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.Transactions._
 
 /**
@@ -15,6 +15,10 @@ trait JobDao {
 	def unfinishedInstances: Seq[JobInstance]
 	def listRecent(start: Int, count: Int): Seq[JobInstance]
 	def update(instance: JobInstance): Unit
+}
+
+trait HasJobDao {
+	@Autowired var jobDao: JobDao = _
 }
 
 @Service

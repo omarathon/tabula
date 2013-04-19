@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.Assignment
-
+import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.data.model.Department
@@ -23,23 +23,23 @@ import uk.ac.warwick.tabula.Fixtures
 
 class AssignmentServiceTest extends AppContextTestBase {
 	
-	lazy val assignmentService = Wire[AssignmentServiceImpl]
-	lazy val assignmentMembershipService = Wire[AssignmentMembershipServiceImpl]
-	lazy val feedbackService = Wire[FeedbackServiceImpl]
-	lazy val submissionService = Wire[SubmissionServiceImpl]
-	lazy val originalityReportService = Wire[OriginalityReportServiceImpl]
-	lazy val extensionService = Wire[ExtensionServiceImpl]
+	@Autowired var assignmentService:AssignmentServiceImpl =_
+	@Autowired var assignmentMembershipService:AssignmentMembershipServiceImpl =_
+	@Autowired var feedbackService:FeedbackServiceImpl =_
+	@Autowired var submissionService:SubmissionServiceImpl =_
+	@Autowired var originalityReportService:OriginalityReportServiceImpl =_
+	@Autowired var extensionService:ExtensionServiceImpl =_
 	
-  lazy val modAndDeptService = Wire[ModuleAndDepartmentService]
+  @Autowired var modAndDeptService:ModuleAndDepartmentService =_
   var userLookup:MockUserLookup = _
     
   @Before def getUserLookup {
 		// We can't just Autowire this because it has autowire-candidate="false"
-		userLookup = Wire[SwappableUserLookupService].delegate.asInstanceOf[UserLookupServiceImpl].delegate.asInstanceOf[MockUserLookup]
+		userLookup = beans.getBean("userLookupDelegate").asInstanceOf[MockUserLookup]
 		userLookup.defaultFoundUser = true
 	}
 	
-	@Test def recentAssignment = transactional { tx =>
+	@Transactional @Test def recentAssignment {
 		val assignment = newDeepAssignment()
 		val department = assignment.module.department
 
@@ -53,7 +53,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 	/**
 	 * The Hibernate filter that adds deleted != 0
 	 */
-	@Test def notDeletedFilter = transactional { tx =>
+	@Transactional @Test def notDeletedFilter {
 		val module = new Module
 		session.save(module)
 		val assignment = new Assignment
@@ -74,34 +74,29 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be ('empty)
 	}
 	
-	@Test def findDuplicateAssignmentNames = {
-		val module = transactional { tx =>
-			val module = new Module
-			session.save(module)
-			
-			assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('empty)
-			
-			val assignment = new Assignment
-			assignment.name = "Essay"
-			assignment.module = module
-			assignment.academicYear = new AcademicYear(2009)
-			assignmentService.save(assignment)
-			
-			module
-		}
+	@Transactional @Test def findDuplicateAssignmentNames {
+		val module = new Module
+		session.save(module)
 		
-		transactional { tx =>
-			assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
-			assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
-			assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
-		}
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('empty)
+		
+		val assignment = new Assignment
+		assignment.name = "Essay"
+		assignment.module = module
+		assignment.academicYear = new AcademicYear(2009)
+		assignmentService.save(assignment)
+		session.flush()
+		
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
 	
-	@Test def getAssignmentsByNameTest = transactional { tx =>
+	@Transactional @Test def getAssignmentsByNameTest {    
 	    val compSciDept = modAndDeptService.getDepartmentByCode("cs")
 	    compSciDept should be ('defined)
 	    
-	    compSciDept.foreach(dept => {
+	    compSciDept.foreach(dept => {    
 	        assignmentService.getAssignmentsByName("Test", dept) should have size(2)
             assignmentService.getAssignmentsByName("Computing", dept) should have size(1)	        
 	        assignmentService.getAssignmentsByName("Assignment", dept) should have size(3) 
@@ -114,7 +109,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 	 *     1. have feedback associated with that assignment which has not been released
 	 *     2. have a submission associated with that assignment which is not suspected plagiarised.
 	 */
-	@Test def getUsersForFeedbackTest = transactional { tx =>
+	@Transactional @Test def getUsersForFeedbackTest {
 		val assignment = assignmentService.getAssignmentById("1");
 		assignment should be('defined)
 
@@ -167,7 +162,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 	}
 	
-	@Test def updateUpstreamAssignment = transactional { tx =>
+	@Transactional @Test def updateUpstreamAssignment {
 		val upstream = new UpstreamAssignment
 		upstream.departmentCode = "ch"
 		upstream.moduleCode = "ch101"
@@ -184,12 +179,10 @@ class AssignmentServiceTest extends AppContextTestBase {
         upstream2.assessmentGroup = "A"
         upstream2.name = "Greg's plants"
 		
-    assignmentMembershipService.save(upstream2)
-    
-    ()
+        assignmentMembershipService.save(upstream2)
 	}
 	
-	@Test def findAssignmentsWithFeedback = transactional { tx =>
+	@Transactional @Test def findAssignmentsWithFeedback {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 		
@@ -234,7 +227,7 @@ class AssignmentServiceTest extends AppContextTestBase {
 		assignments(0) should be (assignment1)
 	}
 	
-	@Test def findAssignmentsWithSubmission = transactional { tx =>
+	@Transactional @Test def findAssignmentsWithSubmission {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 		

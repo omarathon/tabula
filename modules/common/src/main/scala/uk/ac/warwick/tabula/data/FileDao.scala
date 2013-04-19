@@ -9,6 +9,7 @@ import org.joda.time.DateTime.now
 import org.joda.time.ReadableInstant
 import uk.ac.warwick.tabula.data.model.Feedback
 import java.io.File
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
@@ -25,13 +26,12 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Projections
 import org.hibernate.`type`.StringType
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.spring.Wire
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
 
-	var attachmentDir = Wire[File]("${filesystem.attachment.dir}")
-	var createMissingDirectories = Wire[JBoolean]("${filesystem.create.missing:false}")
+	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
+	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 
 	val idSplitSize = 2
 	val idSplitSizeCompat = 4 // for existing paths split by 4 chars

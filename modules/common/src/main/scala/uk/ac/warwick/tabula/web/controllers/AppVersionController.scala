@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import uk.ac.warwick.spring.Wire
-
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 class AppVersionController {
 
-	var buildTime = Wire[String]("${build.time}")
+	@Value("${build.time}") var buildTime: String = _
 
 	@RequestMapping(Array("/api/version"))
 	def showTime = new ResponseEntity(buildTime, plainTextHeaders, HttpStatus.OK)

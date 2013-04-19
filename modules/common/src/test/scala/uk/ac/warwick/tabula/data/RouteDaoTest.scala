@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.Fixtures
 
 class RouteDaoTest extends AppContextTestBase {
 	
-	lazy val dao = Wire[RouteDao]
+	@Autowired var dao:RouteDao =_
 	
 	@Test def crud = transactional { tx =>
 		val route = Fixtures.route("g503")

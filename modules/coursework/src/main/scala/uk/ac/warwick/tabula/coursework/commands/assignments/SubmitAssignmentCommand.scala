@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.MarkingState._
@@ -28,8 +29,8 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
 	
-	var service = Wire[SubmissionService]
-	var zipService = Wire[ZipService]
+	var service = Wire.auto[SubmissionService]
+	var zipService = Wire.auto[ZipService]
 
 	var fields = buildEmptyFields
 

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Value
 import org.joda.time.DateTime
 import scala.react.EventSource
 import uk.ac.warwick.tabula.system.exceptions.HandledException
@@ -12,7 +13,6 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
 import org.springframework.beans.BeanWrapperImpl
-import uk.ac.warwick.tabula.JavaImports._
 
 trait MaintenanceStatus {
 	def enabled: Boolean
@@ -66,7 +66,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 
 @Service
 class MaintenanceModeServiceImpl extends MaintenanceModeService {
-	var _enabled = Wire[JBoolean]("${environment.standby:false}")
+	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	def enabled: Boolean = _enabled
 	var until: Option[DateTime] = None
@@ -132,8 +132,8 @@ class MaintenanceModeMessage {
 
 class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
 	
-		var queue = Wire[Queue]("settingsSyncTopic")
-		var service = Wire[MaintenanceModeService]
+		var queue = Wire.named[Queue]("settingsSyncTopic")
+		var service = Wire.auto[MaintenanceModeService]
 		
 		override def isListeningToQueue = true
 		override def onReceive(item: Any) {	

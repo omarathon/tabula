@@ -8,7 +8,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.Expression
 import org.springframework.expression.ParserContext
@@ -27,8 +27,8 @@ import scala.beans.BeanProperty
 class SysadminREPL extends BaseController with BeanFactoryAware {
 
 	@BeanProperty var beanFactory: BeanFactory = _
-	var assignmentService = Wire[AssignmentService]
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
 	val spel: SpelExpressionParser = new SpelExpressionParser
 

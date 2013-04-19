@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.ByteArrayInputStream
@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.junit.Test
 import org.junit.runner.RunWith
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.data.model.Department
 
 class ModuleDaoTest extends AppContextTestBase {
 
-	lazy val dao = Wire[ModuleDao]
+	@Autowired var dao:ModuleDao =_
 	
 	var cs108: Module = _
 	var cs240: Module = _

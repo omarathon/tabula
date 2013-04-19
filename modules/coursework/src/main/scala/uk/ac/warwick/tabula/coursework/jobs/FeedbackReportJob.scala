@@ -11,7 +11,9 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssignmentServ
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.spring.Wire
 import org.springframework.mail.javamail.{MimeMessageHelper, MimeMailMessage}
+import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender
+import org.springframework.beans.factory.annotation.Value
 import java.io.ByteArrayOutputStream
 import org.springframework.core.io.ByteArrayResource
 import freemarker.template.Configuration
@@ -31,13 +33,13 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 	val identifier = FeedbackReportJob.identifier
 
-	implicit var freemarker: Configuration = Wire[Configuration]
-	var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	var assignmentService = Wire[AssignmentService]
+	implicit var freemarker: Configuration = Wire.auto[Configuration]
+	var departmentService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+	var assignmentService = Wire.auto[AssignmentService]
 
-	var mailer = Wire[WarwickMailSender]("mailSender")
+	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 
-	var replyAddress = Wire[String]("${mail.noreply.to}")
+	@Value("${mail.noreply.to}") var replyAddress: String = _
 	val excelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	val WaitingRetries = 50
 	val WaitingSleep = 20000

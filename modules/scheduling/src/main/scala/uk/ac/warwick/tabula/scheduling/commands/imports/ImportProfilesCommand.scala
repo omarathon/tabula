@@ -20,14 +20,14 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var madService = Wire[ModuleAndDepartmentService]
-	var profileImporter = Wire[ProfileImporter]
-	var profileService = Wire[ProfileService]
-	var userLookup = Wire[UserLookupService]
-	var sitsStatusesImporter = Wire[SitsStatusesImporter]
-	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var madService = Wire.auto[ModuleAndDepartmentService]
+	var profileImporter = Wire.auto[ProfileImporter]
+	var profileService = Wire.auto[ProfileService]
+	var userLookup = Wire.auto[UserLookupService]
+	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
-	var features = Wire[Features]
+	var features = Wire.auto[Features]
 
 	def applyInternal() {
 		if (features.profiles) {

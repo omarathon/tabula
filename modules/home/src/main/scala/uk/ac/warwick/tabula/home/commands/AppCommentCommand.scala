@@ -21,8 +21,8 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] with FreemarkerRendering with UnicodeEmails with SelfValidating with Public {
 
 	var mailSender = Wire[WarwickMailSender]("mailSender")
-	var adminMailAddress = Wire[String]("${mail.admin.to}")
-	var freemarker = Wire[Configuration]
+	var adminMailAddress = Wire.property("${mail.admin.to}")
+	var freemarker = Wire.auto[Configuration]
 	
 	lazy val template: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 

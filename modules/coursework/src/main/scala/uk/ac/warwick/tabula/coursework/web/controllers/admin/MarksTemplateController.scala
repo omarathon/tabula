@@ -27,8 +27,8 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
 
 	var members:Seq[String] =_
-	var feedbackService = Wire[FeedbackService]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var feedbackService = Wire.auto[FeedbackService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	def applyInternal() = {
 
@@ -85,7 +85,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 class MarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
@@ -103,7 +103,7 @@ class MarksTemplateController extends CourseworkController {
 class MarkerMarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire.auto[AssignmentService]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)

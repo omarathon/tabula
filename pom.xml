@@ -545,7 +545,6 @@
 						<failOnWarning>false</failOnWarning>
 						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
-						<includeTestSourceDirectory>false</includeTestSourceDirectory>
 						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>
 					</configuration>
 					<executions>

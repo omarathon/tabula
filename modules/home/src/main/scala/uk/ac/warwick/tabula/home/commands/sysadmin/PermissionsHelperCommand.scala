@@ -24,10 +24,10 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	
 	PermissionCheck(RolesAndPermissions.Read, null)
 	
-	var securityService = Wire[SecurityService]
-	var roleService = Wire[RoleService]
+	var securityService = Wire.auto[SecurityService]
+	var roleService = Wire.auto[RoleService]
 	
-	var conversionService = Wire[ConversionService]
+	var conversionService = Wire.auto[ConversionService]
 	
 	var user: User = null
 	var scopeType: Class[_ <: PermissionsTarget] = null

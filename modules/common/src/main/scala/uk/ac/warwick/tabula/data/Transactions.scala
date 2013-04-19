@@ -4,6 +4,7 @@ import org.springframework.transaction._
 import org.springframework.transaction.support._
 import org.springframework.transaction.annotation._
 import org.springframework.transaction.interceptor._
+import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import scala.annotation.target.field
 import uk.ac.warwick.spring.Wire
 
@@ -12,7 +13,7 @@ object Transactions extends TransactionAspectSupport {
 	// unused as we skip the method that calls it, but it checks that an attribute source is set.
 	setTransactionAttributeSource(new MatchAlwaysTransactionAttributeSource)
 	
-	var transactionManager = Wire[PlatformTransactionManager]
+	var transactionManager = Wire.auto[PlatformTransactionManager]
 	override def getTransactionManager() = transactionManager
 	
 	private var enabled = true

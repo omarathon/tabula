@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.spring.Wire
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import org.springframework.validation.Errors
@@ -20,8 +20,8 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks"))
 class MarkerAddMarksController extends CourseworkController {
 
-	var assignmentService = Wire[AssignmentService]
-	var userLookup = Wire[UserLookupService]
+	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var userLookup: UserLookupService = _
 
 	@ModelAttribute def command(@PathVariable("module") module: Module,
 	                            @PathVariable("assignment") assignment: Assignment,

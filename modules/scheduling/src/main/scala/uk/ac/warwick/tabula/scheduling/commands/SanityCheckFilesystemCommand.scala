@@ -25,9 +25,9 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	
 	PermissionCheck(Permissions.ReplicaSyncing)
 	
-	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
+	var fileSyncEnabled = Option(Wire.property("${environment.standby}")) map { _.toBoolean } getOrElse (false)
 	var dataDir = Wire[String]("${base.data.dir}")
-	var fileDao = Wire[FileDao]
+	var fileDao = Wire.auto[FileDao]
 	
 	lazy val lastSanityCheckJobDetailsFile = new File(new File(dataDir), LastSanityCheckJobDetailsFilename)
 	

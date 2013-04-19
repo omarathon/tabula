@@ -5,13 +5,13 @@ import extensions.DeleteExtensionCommand
 import uk.ac.warwick.tabula.{AppContextTestBase, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.joda.time.DateTime
-
+import org.springframework.transaction.annotation.Transactional
 
 
 class RevokeExtensionTest extends AppContextTestBase with Mockito {
 
-	@Test
-	def revokeExtension = transactional { tx =>
+	@Transactional @Test
+	def revokeExtension(){
 		withUser("cuslaj") {
 			val assignment = newDeepAssignment()
 			val extension = new Extension()

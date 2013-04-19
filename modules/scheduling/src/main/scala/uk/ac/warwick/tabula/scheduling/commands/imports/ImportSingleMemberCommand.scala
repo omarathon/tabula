@@ -46,9 +46,9 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var memberDao = Wire[MemberDao]
-	var fileDao = Wire[FileDao]
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var memberDao = Wire.auto[MemberDao]
+	var fileDao = Wire.auto[FileDao]
+	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: Option[Array[Byte]] = _

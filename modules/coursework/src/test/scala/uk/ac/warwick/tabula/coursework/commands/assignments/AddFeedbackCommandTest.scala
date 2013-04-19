@@ -9,7 +9,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.mock.web.MockMultipartFile
 import uk.ac.warwick.tabula.data.FileDao
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.Mockito
 

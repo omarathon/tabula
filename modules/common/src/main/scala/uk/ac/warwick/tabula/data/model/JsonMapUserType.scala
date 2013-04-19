@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] with Logging {
 	
 	/** Sad face, Hibernate user types are instantiated in a weird way that make dependency injection hard */
-	var jsonMapper = Wire.option[ObjectMapper]
+	lazy val jsonMapper = Wire.auto[ObjectMapper]
 	
 	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
@@ -21,20 +21,18 @@ class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] wi
 	val nullValue = null
 	val nullObject = null
 	
-	override def convertToObject(string: String) = jsonMapper match {
-		case Some(jsonMapper) => jsonMapper.readValue(string, classOf[Map[String, Any]])
-		case _ => {
+	override def convertToObject(string: String) = 
+		if (jsonMapper != null) jsonMapper.readValue(string, classOf[Map[String, Any]])
+		else {
 			logger.warn("No JSON mapper defined. This should only happen in unit tests!")
 			nullObject
 		} 
-	}
 			
-	override def convertToValue(map: Map[String, Any]) = jsonMapper match {
-		case Some(jsonMapper) => jsonMapper.writeValueAsString(map)
-		case _ => {
+	override def convertToValue(map: Map[String, Any]) = 
+		if (jsonMapper != null) jsonMapper.writeValueAsString(map)
+		else {
 			logger.warn("No JSON mapper defined. This should only happen in unit tests!")
 			nullValue
 		} 
-	}
 
 }

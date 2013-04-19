@@ -14,12 +14,13 @@ import uk.ac.warwick.spring.Wire
 import scala.Some
 import java.util
 import scala.collection.JavaConversions._
+import org.springframework.beans.factory.annotation.Autowired
 
 @Entity @AccessType("field")
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
-	@transient var fileDao = Wire.option[FileDao].orNull
+	@transient var fileDao = Wire.auto[FileDao]
 
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)

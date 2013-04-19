@@ -1,25 +1,25 @@
 package uk.ac.warwick.tabula.data
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Test
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.ByteArrayInputStream
-
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import java.io.InputStream
 import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.junit.Test
 import org.junit.runner.RunWith
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
+import org.springframework.transaction.annotation.Transactional
 
 class FileAttachmentTest extends AppContextTestBase {
-	lazy val dao = Wire[FileDao]
+	@Autowired var dao:FileDao =_
 	
 	/** 
 	 * HFC-136 
@@ -34,7 +34,8 @@ class FileAttachmentTest extends AppContextTestBase {
 		new FileAttachment(""" \Fun: good or bad? <You|decide>/.docx""").name should be ("Fun good or bad Youdecide.docx")
 	}
 	
-	@Test def save = transactional { tx =>
+	@Transactional
+	@Test def save {
 		val attachment = new FileAttachment("file.txt")
 		val string = "Doe, a deer, a female deer"
 		val bytes = string.getBytes("UTF-8")

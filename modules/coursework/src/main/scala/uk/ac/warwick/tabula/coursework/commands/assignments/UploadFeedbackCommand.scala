@@ -26,7 +26,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.tabula.data.model.Module
 import org.apache.commons.codec.digest.DigestUtils
-import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -85,11 +84,11 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
 	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
-	var zipService = Wire[ZipService]
-	var userLookup = Wire[UserLookupService]
-	var fileDao = Wire[FileDao]
-	var assignmentService = Wire[AssignmentService]
-	var stateService = Wire[StateService]
+	var zipService = Wire.auto[ZipService]
+	var userLookup = Wire.auto[UserLookupService]
+	var fileDao = Wire.auto[FileDao]
+	var assignmentService = Wire.auto[AssignmentService]
+	var stateService = Wire.auto[StateService]
 
 	/* for single upload */
 	var uniNumber: String = _

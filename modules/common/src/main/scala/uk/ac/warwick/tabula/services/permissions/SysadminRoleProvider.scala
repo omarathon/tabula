@@ -13,8 +13,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Component
 class SysadminRoleProvider extends ScopelessRoleProvider {
 	
-	var userLookup = Wire[UserLookupService]
-	var adminGroup: String = Wire[String]("${permissions.admin.group}")
+	var userLookup = Wire.auto[UserLookupService]
+	var adminGroup: String = Wire.property("${permissions.admin.group}")
 	
 	def groupService = userLookup.getGroupService
 

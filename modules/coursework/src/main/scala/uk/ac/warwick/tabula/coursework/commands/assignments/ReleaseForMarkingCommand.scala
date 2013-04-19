@@ -19,8 +19,8 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
 	
-	var assignmentService = Wire[AssignmentService]
-	var stateService = Wire[StateService]
+	var assignmentService = Wire.auto[AssignmentService]
+	var stateService = Wire.auto[StateService]
 
 	var students: JList[String] = JArrayList()
 	var confirm: Boolean = false

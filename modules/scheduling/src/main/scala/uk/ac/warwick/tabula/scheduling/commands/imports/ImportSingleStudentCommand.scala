@@ -42,8 +42,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
 	
-	var sitsStatusesImporter = Wire[SitsStatusesImporter]
-	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
 	// A few intermediate properties that will be transformed later
 	var studyDepartmentCode: String = _

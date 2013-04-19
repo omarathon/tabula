@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.scheduling.jobs
 import collection.mutable
 import uk.ac.warwick.tabula._
 import org.junit.Test
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
 import org.hibernate.Session
 import uk.ac.warwick.tabula.services.jobs.JobInstanceImpl
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.jobs.JobPrototype
 
 class JobContextTests extends AppContextTestBase {
 
-	lazy val jobService = Wire[JobService]
+	@Autowired var jobService: JobService = _
 	
 	@Test def containsTurnitin {
 		jobService.jobs.size should (be > 1)
@@ -19,7 +19,7 @@ class JobContextTests extends AppContextTestBase {
 	}
 	
 	@Test def unknownJobType {
-		jobService.jobs.toArray map (_.identifier) should not contain ("unknown-job-type")
+		jobService.jobs map (_.identifier) should not contain ("unknown-job-type")
 		
 		val instance = JobInstanceImpl.fromPrototype(JobPrototype("unknown", Map()))
 		

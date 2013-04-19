@@ -21,10 +21,10 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 	var notifyOldTutor: Boolean = false
 	var notifyNewTutor: Boolean = false
 
-	implicit var freemarker = Wire[Configuration]
+	implicit var freemarker = Wire.auto[Configuration]
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")
-	var replyAddress = Wire[String]("${mail.noreply.to}")
-	var fromAddress = Wire[String]("${mail.exceptions.to}")
+	var replyAddress = Wire.property("${mail.noreply.to}")
+	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	def applyInternal() {
 		val newTutor = newTutorPromise.fulfilPromise

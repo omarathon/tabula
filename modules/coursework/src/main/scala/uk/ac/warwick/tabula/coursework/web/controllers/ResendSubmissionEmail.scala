@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -18,7 +19,7 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @RequestMapping(value = Array("/module/{module}/{assignment}/resend-receipt"))
 class ResendSubmissionEmail extends CourseworkController {
 	
-	var submissionService = Wire[SubmissionService]
+	var submissionService = Wire.auto[SubmissionService]
 
 	hideDeletedItems
 	

@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services
-import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
@@ -85,7 +85,7 @@ class AssignmentServiceImpl
 		with Logging {
 	import Restrictions._
 	
-	var auditEventIndexService = Wire[AuditEventIndexService]
+	@Autowired var auditEventIndexService: AuditEventIndexService = _
 
 	def getAssignmentById(id: String) = getById[Assignment](id)
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
@@ -155,7 +155,7 @@ class AssignmentMembershipServiceImpl
 		with Daoisms 
 		with Logging {
 
-	var userLookup = Wire[UserLookupService]
+	@Autowired var userLookup: UserLookupService = _
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select distinct a 

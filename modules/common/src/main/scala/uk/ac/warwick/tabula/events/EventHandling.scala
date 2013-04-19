@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.events
 import uk.ac.warwick.tabula.commands.Describable
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
@@ -16,9 +17,7 @@ object EventHandling {
  * Gives a class the ability to record events from a Describable object.
  */
 trait EventHandling extends Logging {
-	var listener = 
-		if (EventHandling.enabled) Wire[EventListener]
-		else null
+	var listener = Wire.auto[EventListener]
 
 	/**
 	 * Records the various stages of an event: before, and either

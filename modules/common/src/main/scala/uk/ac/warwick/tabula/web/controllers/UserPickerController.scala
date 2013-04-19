@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers
 import scala.collection.JavaConverters._
 import java.io.Writer
 import com.fasterxml.jackson.databind.ObjectMapper
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import UserPickerController.UserPickerCommand
@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.permissions._
 
 @Controller
 class UserPickerController extends BaseController {
-	var json = Wire[ObjectMapper]
+	var json = Wire.auto[ObjectMapper]
 
 	@RequestMapping(value = Array("/api/userpicker/form"))
 	def form: Mav = Mav("api/userpicker/form").noLayout()
@@ -50,7 +50,7 @@ object UserPickerController {
 	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
 		PermissionCheck(Permissions.UserPicker)
 		
-		var userLookup = Wire[UserLookupService]
+		var userLookup = Wire.auto[UserLookupService]
 	
 		var firstName: String = ""
 		var lastName: String = ""

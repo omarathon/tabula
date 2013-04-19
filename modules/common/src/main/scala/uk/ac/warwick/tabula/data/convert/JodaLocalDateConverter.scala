@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
 import scala.reflect.BeanProperty
-
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.system.TwoWayConverter

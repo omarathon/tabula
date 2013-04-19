@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Features
@@ -19,8 +19,8 @@ import org.hibernate.validator.Valid
 @RequestMapping(Array("/admin/department/{dept}/settings/extensions"))
 class ExtensionSettingsController extends CourseworkController {
 
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var features = Wire[Features]
+	@Autowired var moduleService: ModuleAndDepartmentService = _
+	@Autowired var features: Features = _
 	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(dept, features)
 	
 	validatesSelf[ExtensionSettingsCommand]

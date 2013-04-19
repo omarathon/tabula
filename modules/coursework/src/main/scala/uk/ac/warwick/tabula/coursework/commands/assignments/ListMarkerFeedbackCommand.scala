@@ -18,7 +18,7 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
-	var userLookup = Wire[UserLookupService]
+	var userLookup = Wire.auto[UserLookupService]
 	var completedFeedback:Seq[MarkerFeedbackItem] = _
 
 	def applyInternal():Seq[MarkerFeedbackItem] = {

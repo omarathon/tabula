@@ -24,9 +24,9 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 
 	var submissions:JList[Submission] = JArrayList()
 	
-	var zipService = Wire[ZipService]
-	var assignmentService = Wire[AssignmentService]
-	var stateService = Wire[StateService]
+	var zipService = Wire.auto[ZipService]
+	var assignmentService = Wire.auto[AssignmentService]
+	var stateService = Wire.auto[StateService]
 
 	override def applyInternal(): RenderableZip = {
 		submissions = assignment.getMarkersSubmissions(user.apparentUser)

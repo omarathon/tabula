@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 @Component
 class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
-	var service = Wire[PermissionsService]
+	var service = Wire.auto[PermissionsService]
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = 
 		service.getGrantedRolesFor(user, scope) map { _.build() }

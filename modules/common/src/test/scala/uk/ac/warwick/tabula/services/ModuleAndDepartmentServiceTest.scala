@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.MockUserLookup
 import org.junit.Before
 import uk.ac.warwick.tabula.Fixtures
 
 class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 	
-	lazy val service = Wire[ModuleAndDepartmentService]
+	@Autowired var service: ModuleAndDepartmentService = _
 	
 	val userLookup = new MockUserLookup
 	

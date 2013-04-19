@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.hibernate.SessionFactory
 import uk.ac.warwick.tabula.data.model.Department

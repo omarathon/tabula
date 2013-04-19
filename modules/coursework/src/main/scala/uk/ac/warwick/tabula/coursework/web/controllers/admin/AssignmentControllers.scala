@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import scala.collection.JavaConversions._
 import javax.validation.Valid
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Errors
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.JavaImports._
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
 class AddAssignment extends CourseworkController {
 
-	var assignmentService = Wire[AssignmentService]
+	@Autowired var assignmentService: AssignmentService = _
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)

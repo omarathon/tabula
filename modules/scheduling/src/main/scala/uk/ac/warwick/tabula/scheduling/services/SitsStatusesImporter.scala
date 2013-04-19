@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 class SitsStatusesImporter extends Logging {
 	import SitsStatusesImporter._
 
-	var sitsStatusDao = Wire[SitsStatusDao]
+	var sitsStatusDao = Wire.auto[SitsStatusDao]
 	
 	var sits = Wire[DataSource]("sitsDataSource")
 	

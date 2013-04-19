@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import scala.collection.JavaConversions._
-
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 @Controller
 @RequestMapping(Array("/admin/"))
 class AdminHomeController extends CourseworkController {
-		var moduleService = Wire[ModuleAndDepartmentService]
+		@Autowired var moduleService: ModuleAndDepartmentService = _
 	
 		@RequestMapping(method=Array(GET, HEAD))
 		def homeScreen(user: CurrentUser) = {
@@ -55,8 +55,8 @@ class AdminDepartmentHomeController extends CourseworkController {
 
 class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
 	
-	var securityService = Wire[SecurityService]
-	var moduleService = Wire[ModuleAndDepartmentService]
+	var securityService = Wire.auto[SecurityService]
+	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	val modules: JList[Module] = 
 		if (securityService.can(user, Permissions.Module.Read, mandatory(department))) {

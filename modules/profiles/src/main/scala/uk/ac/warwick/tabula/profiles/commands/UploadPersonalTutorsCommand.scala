@@ -40,11 +40,11 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 	val acceptedExtensions = Seq(".xlsx")
 
-	val userLookup = Wire[UserLookupService]
-	var profileService = Wire[ProfileService]
-	var personalTutorExtractor = Wire[RawStudentRelationshipExtractor]
+	val userLookup = Wire.auto[UserLookupService]
+	var profileService = Wire.auto[ProfileService]
+	var personalTutorExtractor = Wire.auto[RawStudentRelationshipExtractor]
 
-	var extractWarning = Wire[String]("${profiles.relationship.upload.warning}")
+	var extractWarning = Wire.property("${profiles.relationship.upload.warning}")
 
 	var file: UploadedFile = new UploadedFile
 	var rawStudentRelationships: JList[RawStudentRelationship] = LazyLists.simpleFactory()

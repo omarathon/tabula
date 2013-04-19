@@ -32,7 +32,7 @@ class ProfileImporter extends Logging {
 
 	var sits = Wire[DataSource]("sitsDataSource")
 	var membership = Wire[DataSource]("membershipDataSource")
-	var membershipInterface = Wire[MembershipInterfaceWrapper]
+	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
 	lazy val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
 
