@@ -46,7 +46,6 @@ class MeetingRecordController extends ProfilesController {
 
 	// modal chrome
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
-
 	def showModalChrome(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
 		val formats = MeetingFormat.members
 
@@ -60,6 +59,9 @@ class MeetingRecordController extends ProfilesController {
 	// modal iframe form
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
 	def showIframeForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+
+		val formats = MeetingFormat.members
+
 		Mav("tutor/meeting/edit",
 			"iframe" -> true,
 			"command" -> createCommand,

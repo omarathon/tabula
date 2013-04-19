@@ -115,8 +115,6 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		cmd.file = uploadedFile
 
-		val meeting = cmd.apply()
-
 		val meeting = transactional { tx => cmd.apply() }
 
 		meeting.creator should be (creator)

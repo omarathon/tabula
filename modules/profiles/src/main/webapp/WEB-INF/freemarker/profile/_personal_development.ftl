@@ -90,7 +90,6 @@
 		// load form into modal, with picker enabled
 		$("#personal-development").on("click", "section.meetings .new", function(e) {
 			e.preventDefault();
-<<<<<<< HEAD
 			var target = $(this).attr("href");
 
 			$m.load(target + "?modal", function() {
@@ -101,22 +100,11 @@
 					})
 					.attr("src", target + "?iframe")
 					.appendTo($mb);
-=======
-			
-			$m.load($(this).attr("href") + "?modal", function() {
-				$m.modal("show");
-				$m.on("shown", function() {
-					$m.find("[name='title']").focus();
-				});
->>>>>>> develop
 			});
 		});
 
 		$m.on('click', 'button[type=submit]', function(e){
 			e.preventDefault();
-<<<<<<< HEAD
-			$m.find('iframe').contents().find('form').submit();
-=======
 			var $form = $(this);
 			
 			$.ajax({
@@ -146,8 +134,6 @@
 					$m.tabulaPrepareSpinners();
 				}
 			});
-			
->>>>>>> develop
 		});
 	});
 	</script>
