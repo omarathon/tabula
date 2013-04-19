@@ -26,7 +26,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.tabula.data.model.Module
 import org.apache.commons.codec.digest.DigestUtils
-import uk.ac.warwick.tabula.coursework.commands.assignments.ProblemFile
 
 class FeedbackItem {
 	var uniNumber: String = _

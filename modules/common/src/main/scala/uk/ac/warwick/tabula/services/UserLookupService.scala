@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.userlookup.UserLookupAdapter
 
 
 trait UserLookupService extends UserLookupInterface
