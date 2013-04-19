@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
-import org.springframework.beans.factory.annotation.Autowired
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.TwoWayConverter
@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
  */
 class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
 
-	@Autowired var service: ModuleAndDepartmentService = _
+	var service = Wire[ModuleAndDepartmentService]
 
 	override def convertRight(code: String) = {
 		service.getDepartmentByCode(sanitise(code)).getOrElse {

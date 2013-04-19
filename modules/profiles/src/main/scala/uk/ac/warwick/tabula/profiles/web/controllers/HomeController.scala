@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller class HomeController extends ProfilesController {
 	
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var moduleService = Wire[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull

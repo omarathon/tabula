@@ -27,15 +27,15 @@ abstract class ExtensionMessage(var extension: Extension, var assignment: Assign
 	def this(extension:Extension, uniId:String) = this(extension, extension.assignment, uniId)
 	def this() = this(null, null, null)
 
-	var userLookup = Wire.auto[UserLookupService]
-	implicit var freemarker= Wire.auto[Configuration]
+	var userLookup = Wire[UserLookupService]
+	implicit var freemarker= Wire[Configuration]
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
 
 	var module: Module = Option(assignment).map { _.module }.orNull
 
 	// email constants
-	var replyAddress: String = Wire.property("${mail.noreply.to}")
-	var fromAddress: String = Wire.property("${mail.exceptions.to}")
+	var replyAddress: String = Wire[String]("${mail.noreply.to}")
+	var fromAddress: String = Wire[String]("${mail.exceptions.to}")
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 

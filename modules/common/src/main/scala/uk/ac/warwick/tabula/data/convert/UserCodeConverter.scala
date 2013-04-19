@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 
 class UserCodeConverter extends TwoWayConverter[String, User] {
 	
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire[UserLookupService]
   	
 	override def convertRight(userId: String) = userLookup.getUserByUserId(userId)
 	override def convertLeft(user: User) = (Option(user) map { _.getUserId }).orNull 

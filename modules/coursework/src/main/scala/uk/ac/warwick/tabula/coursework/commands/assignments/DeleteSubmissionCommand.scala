@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.services.ZipService
@@ -26,8 +25,8 @@ class DeleteSubmissionCommand(val module: Module, val assignment: Assignment) ex
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
-	var submissionService = Wire.auto[SubmissionService]
-	var zipService = Wire.auto[ZipService]
+	var submissionService = Wire[SubmissionService]
+	var zipService = Wire[ZipService]
 
 	var submissions: JList[Submission] = JArrayList()
 	var confirm: Boolean = false

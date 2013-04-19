@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServletRequest
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
 class DownloadSelectedFeedbackController extends CourseworkController {
-	var feedbackDao = Wire.auto[FeedbackDao]
-	var fileServer = Wire.auto[FileServer]
+	var feedbackDao = Wire[FeedbackDao]
+	var fileServer = Wire[FileServer]
 	
 	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
 		new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
@@ -37,8 +37,8 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
-	var feedbackDao = Wire.auto[FeedbackDao]
-	var fileServer = Wire.auto[FileServer]
+	var feedbackDao = Wire[FeedbackDao]
+	var fileServer = Wire[FileServer]
 	
 	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
 		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
@@ -57,7 +57,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
 class DownloadAllFeedbackController extends CourseworkController {
 
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 
 	@ModelAttribute def selectedFeedbacksCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DownloadSelectedFeedbackCommand(module, assignment)
@@ -75,8 +75,8 @@ class DownloadAllFeedbackController extends CourseworkController {
 @RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
 class DownloadMarkerFeedbackController extends CourseworkController {
 
-	var fileServer = Wire.auto[FileServer]
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var fileServer = Wire[FileServer]
+	var feedbackDao = Wire[FeedbackDao]
 
 	@RequestMapping
 	def getMarkerFeedback(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
@@ -94,7 +94,7 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/firstmarker/feedbacks.zip"))
 class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 
 	@ModelAttribute def downloadFirstMarkersFeedbackCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, currentUser:CurrentUser) =
 		new DownloadFirstMarkersFeedbackCommand(module, assignment, currentUser)
@@ -110,7 +110,7 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
 class DownloadAllFeedback extends CourseworkController {
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new AdminGetAllFeedbackCommand(module, assignment)

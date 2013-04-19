@@ -33,7 +33,7 @@ trait PermissionsService {
 @Service(value = "permissionsService")
 class PermissionsServiceImpl extends PermissionsService with Logging {
 	
-	var dao = Wire.auto[PermissionsDao]
+	var dao = Wire[PermissionsDao]
 	
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = dao.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = dao.saveOrUpdate(permission)

@@ -4,7 +4,7 @@ import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateModel
 import freemarker.core.Environment
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
@@ -23,7 +23,7 @@ import collection.JavaConversions._
  */
 class UserLookupTag extends TemplateDirectiveModel {
 
-	@Autowired var userLookup: UserLookupService = _
+	var userLookup = Wire[UserLookupService]
 
 	override def execute(env: Environment,
 		params: JMap[_, _],

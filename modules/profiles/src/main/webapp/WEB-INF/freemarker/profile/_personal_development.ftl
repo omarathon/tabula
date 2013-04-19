@@ -90,6 +90,7 @@
 		// load form into modal, with picker enabled
 		$("#personal-development").on("click", "section.meetings .new", function(e) {
 			e.preventDefault();
+<<<<<<< HEAD
 			var target = $(this).attr("href");
 
 			$m.load(target + "?modal", function() {
@@ -100,12 +101,53 @@
 					})
 					.attr("src", target + "?iframe")
 					.appendTo($mb);
+=======
+			
+			$m.load($(this).attr("href") + "?modal", function() {
+				$m.modal("show");
+				$m.on("shown", function() {
+					$m.find("[name='title']").focus();
+				});
+>>>>>>> develop
 			});
 		});
 
 		$m.on('click', 'button[type=submit]', function(e){
 			e.preventDefault();
+<<<<<<< HEAD
 			$m.find('iframe').contents().find('form').submit();
+=======
+			var $form = $(this);
+			
+			$.ajax({
+				type: $form.attr("method"),
+				url: $form.attr("action"),
+				data: $form.serialize(),
+				
+				error: function() {
+					// just close
+					$m.modal("hide");
+				},
+				
+				success: function(data, status) {
+					thing = data;
+					if (data.indexOf("modal-header") > -1) {
+						// reload into modal
+						$m.html(data);
+						$m.find("input.date-picker").tabulaDatePicker();
+						$m.find('form.double-submit-protection').tabulaSubmitOnce();
+					} else {
+						// reload meeting data
+						$("section.meetings").replaceWith(data);
+						$('details').details();
+						$m.modal("hide");
+						scrollToOpenDetails();
+					}
+					$m.tabulaPrepareSpinners();
+				}
+			});
+			
+>>>>>>> develop
 		});
 	});
 	</script>

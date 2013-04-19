@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.permissions
 
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.stereotype.Service
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
@@ -48,10 +48,10 @@ trait RoleService {
 class RoleServiceImpl extends RoleService with Logging {
 	
 	/** Spring should wire in all beans that extend RoleProvider */
-	@Autowired var roleProviders: Array[RoleProvider] = Array()
+	var roleProviders = Wire.all[RoleProvider]
 	
 	/** Spring should wire in all beans that extend PermissionsProvider */
-	@Autowired var permissionsProviders: Array[PermissionsProvider] = Array()
+	var permissionsProviders = Wire.all[PermissionsProvider]
 	
 	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = {
 		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {

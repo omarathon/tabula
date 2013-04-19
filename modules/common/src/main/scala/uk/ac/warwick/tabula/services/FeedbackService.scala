@@ -5,9 +5,9 @@ import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.hibernate.criterion.{Projections, Restrictions, Order}
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
 
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FeedbackDao
@@ -31,8 +31,8 @@ trait FeedbackService {
 class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	import Restrictions._
 
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var dao: FeedbackDao = _
+	var userLookup = Wire[UserLookupService]
+	var dao = Wire[FeedbackDao]
 
 	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */

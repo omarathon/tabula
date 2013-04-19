@@ -16,17 +16,17 @@
 <#else>
 	${heading}
 </#if>
-
 <#if modal??>
 	<div class="modal-body"></div>
-	<div class="modal-footer">
-		<button class="btn btn-primary" type="submit" name="submit">
+	<div class="modal-footer submit-buttons">
+		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 			Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
 		</button>
 		<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 	</div>
 <#else>
-	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal">
+
+	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal double-submit-protection">
 		<@form.labelled_row "title" "Title">
 			<@f.input type="text" path="title" cssClass="input-block-level" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
@@ -36,6 +36,13 @@
 				<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
 				<span class="add-on"><i class="icon-calendar"></i></span>
 			</div>
+		</@form.labelled_row>
+
+		<@form.labelled_row "format" "Format">
+			<@f.select path="format" cssClass="input-large">
+				<@f.option disabled="true" selected="true" label="Please select one..." />
+				<@f.options items=formats />
+			</@f.select>
 		</@form.labelled_row>
 
 		<#-- TODO: TinyMCE editor, bleh -->
@@ -50,9 +57,9 @@
 		<#if iframe??>
 			<input type="hidden" name="modal" value="true" />
 		<#else>
-			<div class="form-actions">
-				<button class="btn btn-primary" type="submit" name="submit">
-					Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
+		<div class="submit-buttons">
+			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+				Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
 				</button>
 				<a class="btn" href="<@routes.profile student />">Cancel</a>
 			</div>
@@ -63,3 +70,4 @@
 <#if iframe??>
 	</div> <#--container -->
 </#if>
+

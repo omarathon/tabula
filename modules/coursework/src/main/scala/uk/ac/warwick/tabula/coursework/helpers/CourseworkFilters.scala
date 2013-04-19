@@ -42,7 +42,7 @@ object CourseworkFilters {
 	lazy val AllFilters = Seq(
 		AllStudents, SubmittedBetweenDates, OnTime, WithExtension, WithinExtension, WithWordCount, Unsubmitted,
 		NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
-		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithSimilarityPercentage,
+		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage,
 		NoFeedback, FeedbackNotReleased, FeedbackNotDownloaded
 	)
 	
@@ -275,49 +275,49 @@ object CourseworkFilters {
 		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
-	case object WithSimilarityPercentage extends CourseworkFilter {
+	case object WithOverlapPercentage extends CourseworkFilter {
 		private def toInt(text: String) = 
 			if (text.hasText) try {	Some(text.toInt) } catch { case e: NumberFormatException => None }
 			else None
 		
-		def getDescription = "submissions with a plagiarism similarity percentage between..."
+		def getDescription = "submissions with a plagiarism overlap percentage between..."
 			
 		def parameters = Seq(
-			("minSimilarity", "Min similarity %", "percentage"),
-			("maxSimilarity", "Max similarity %", "percentage")
+			("minOverlap", "Min overlap %", "percentage"),
+			("maxOverlap", "Max overlap %", "percentage")
 		)	
 		def predicate(parameters: Map[String, String])(item: Student) = {
-			val min = toInt(parameters("minSimilarity")).get
-			val max = toInt(parameters("maxSimilarity")).get
+			val min = toInt(parameters("minOverlap")).get
+			val max = toInt(parameters("maxOverlap")).get
 			
 			(item.coursework.enhancedSubmission map { item => 
 				item.submission.allAttachments flatMap { 
-					a => Option(a.originalityReport) flatMap { _.similarity } 
-				} map { similarity => 
-					(similarity >= min && similarity <= max)
+					a => Option(a.originalityReport) flatMap { _.overlap } 
+				} map { overlap => 
+					(overlap >= min && overlap <= max)
 				} exists { b => b }
 			}) getOrElse(false)
 		}
 		def validate(parameters: Map[String, String], fieldName: String = "filterParameters")(errors: Errors) {
-			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[minSimilarity]".format(fieldName), "NotEmpty")
-			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[maxSimilarity]".format(fieldName), "NotEmpty")
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[minOverlap]".format(fieldName), "NotEmpty")
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[maxOverlap]".format(fieldName), "NotEmpty")
 			
 			if (!errors.hasErrors) {
-				val min = toInt(parameters("minSimilarity"))
-				if (min.isEmpty) errors.rejectValue("%s[minSimilarity]".format(fieldName), "typeMismatch")
+				val min = toInt(parameters("minOverlap"))
+				if (min.isEmpty) errors.rejectValue("%s[minOverlap]".format(fieldName), "typeMismatch")
 				
-				val max = toInt(parameters("maxSimilarity"))
-				if (max.isEmpty) errors.rejectValue("%s[maxSimilarity]".format(fieldName), "typeMismatch")
+				val max = toInt(parameters("maxOverlap"))
+				if (max.isEmpty) errors.rejectValue("%s[maxOverlap]".format(fieldName), "typeMismatch")
 				
 				if (min.isDefined && max.isDefined) {
 					if (max.get < min.get)
-						errors.rejectValue("%s[maxSimilarity]".format(fieldName), "filters.WithSimilarityPercentage.max.lessThanMin")
+						errors.rejectValue("%s[maxOverlap]".format(fieldName), "filters.WithOverlapPercentage.max.lessThanMin")
 						
 					if (min.get < 0 || min.get > 100)
-						errors.rejectValue("%s[minSimilarity]".format(fieldName), "filters.WithSimilarityPercentage.min.notInRange")
+						errors.rejectValue("%s[minOverlap]".format(fieldName), "filters.WithOverlapPercentage.min.notInRange")
 						
 					if (max.get < 0 || max.get > 100)
-						errors.rejectValue("%s[maxSimilarity]".format(fieldName), "filters.WithSimilarityPercentage.max.notInRange")
+						errors.rejectValue("%s[maxOverlap]".format(fieldName), "filters.WithOverlapPercentage.max.notInRange")
 				}
 			}
 		}

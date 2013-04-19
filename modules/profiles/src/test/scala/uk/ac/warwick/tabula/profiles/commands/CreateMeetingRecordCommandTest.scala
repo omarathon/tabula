@@ -15,25 +15,43 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import org.springframework.validation.BindException
+import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.data.model.MeetingFormat._
+import uk.ac.warwick.tabula.AppContextTestBase
+
 
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
-	@Transactional
 	@Test
 	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val ps = mock[ProfileService]
-		val creator = new StaffMember("9876543")
+
+		val creator = transactional { tx =>
+			val m = new StaffMember("9876543")
+			m.userId = "staffmember"
+			session.save(m)
+			m
+		}
+
 		val student = mock[StudentMember]
-		val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
-		relationship.profileService = ps
-		ps.getStudentBySprCode("0123456/1") returns (Some(student))
+
+		val relationship = transactional { tx =>
+			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+			relationship.profileService = ps
+			ps.getStudentBySprCode("0123456/1") returns (Some(student))
+
+			session.save(relationship)
+			relationship
+		}
 
 		val cmd = new CreateMeetingRecordCommand(creator, relationship)
 		cmd.title = "A title"
+		cmd.format = FaceToFace
 		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
 
 		// check invalid future date
@@ -66,6 +84,17 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		errors.getFieldError.getCode should be ("NotEmpty")
 
 		cmd.title = "A good title"
+		cmd.format = null
+
+		// check invalid empty format
+		errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("format")
+		errors.getFieldError.getCode should be ("NotEmpty")
+
+		cmd.format = Email
 
 		// check valid
 		errors = new BindException(cmd, "command")
@@ -88,6 +117,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		val meeting = cmd.apply()
 
+		val meeting = transactional { tx => cmd.apply() }
+
 		meeting.creator should be (creator)
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)
@@ -95,5 +126,6 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting.description should be ("<p>Lovely words</p>")
 		meeting.meetingDate.toLocalDate should be (marchHare)
 		meeting.attachments.get(0).name should be ("Beltane")
+		meeting.format should be (Email)
 	}}
 }

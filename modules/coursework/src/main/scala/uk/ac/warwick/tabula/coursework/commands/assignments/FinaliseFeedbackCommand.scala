@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JList[MarkerFeedback])
 	extends Command[Unit] with Daoisms {
 
-	var fileDao = Wire.auto[FileDao]
+	var fileDao = Wire[FileDao]
 
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 

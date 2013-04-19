@@ -33,9 +33,9 @@ case class UpstreamGroupOption(
  */
 abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment] with SharedAssignmentProperties with SelfValidating {
 
-	var service = Wire.auto[AssignmentService]
-	var membershipService = Wire.auto[AssignmentMembershipService]
-	var userLookup = Wire.auto[UserLookupService]
+	var service = Wire[AssignmentService]
+	var membershipService = Wire[AssignmentMembershipService]
+	var userLookup = Wire[UserLookupService]
 
 	def assignment: Assignment
 

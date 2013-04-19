@@ -24,9 +24,9 @@ class ActivityService {
 	
 	private val StreamSize = 8
 	
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssignmentService]
-	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var assignmentService = Wire[AssignmentService]
+	var auditIndexService = Wire[AuditEventNoteworthySubmissionsService]
 
 	/** wrapper class to turn ScoreDoc plus searcher id token into a
 	 *  tuple of simple values ready to pass as parameters

@@ -24,6 +24,9 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.web.multipart.MultipartFile
+import org.joda.time.LocalDate
+import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.data.model.MeetingFormat
 
 class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
@@ -31,6 +34,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 	var title: String = _
 	var description: String = _
 	var meetingDate: LocalDate = DateTime.now.toLocalDate
+	var format: MeetingFormat = _
 
 	var file: UploadedFile = new UploadedFile
 
@@ -56,9 +60,11 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 		meeting.description = formattedHtml(description)
 		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(12) // arbitrarily record as noon
 
+		meeting.format = format
 		doFiling(meeting)
 
 		meetingRecordDao.saveOrUpdate(meeting)
+
 		meeting
 	}
 
@@ -68,6 +74,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 
 	def validate(errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
+		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		meetingDate match {
 			case date:LocalDate => {

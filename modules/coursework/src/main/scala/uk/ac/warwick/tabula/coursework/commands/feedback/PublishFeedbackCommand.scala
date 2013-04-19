@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
+import org.joda.time.DateTime
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
@@ -30,12 +31,12 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 	PermissionCheck(Permissions.Feedback.Publish, assignment)
 	
 	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
-	var feedbackService = Wire.auto[FeedbackService]
-	var userLookup = Wire.auto[UserLookupService]
-	implicit var freemarker = Wire.auto[Configuration]
+	var feedbackService = Wire[FeedbackService]
+	var userLookup = Wire[UserLookupService]
+	implicit var freemarker = Wire[Configuration]
 
-	var replyAddress = Wire.property("${mail.noreply.to}")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
+	var replyAddress = Wire[String]("${mail.noreply.to}")
+	var fromAddress = Wire[String]("${mail.exceptions.to}")
 	
 	var confirm: Boolean = false
 
@@ -66,8 +67,10 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 			val users = getUsersForFeedback
 			for ((studentId, user) <- users) {
 				val feedbacks = assignment.fullFeedback.find { _.universityId == studentId }
-				for (feedback <- feedbacks)
+				for (feedback <- feedbacks) {
 					feedback.released = true
+					feedback.releasedDate = new DateTime
+				}
 			}
 			for (info <- users) email(info)
 		}

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.Features
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.stereotype.Controller
 import org.springframework.beans.BeanWrapperImpl
 import collection.JavaConversions._
@@ -29,8 +29,8 @@ case class FeatureItem(val name: String, val value: Boolean)
 @RequestMapping(value = Array("/sysadmin/features"))
 final class FeaturesController extends BaseController with InitializingBean {
 
-	var features = Wire.auto[Features]
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var features = Wire[Features]
+	var queue = Wire[Queue]("settingsSyncTopic")
 
 	private var wrapper: BeanWrapper = _
 	private var properties: List[PropertyDescriptor] = _

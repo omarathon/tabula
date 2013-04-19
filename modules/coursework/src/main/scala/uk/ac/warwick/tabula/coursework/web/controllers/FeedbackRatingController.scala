@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.Features
-import org.springframework.beans.factory.annotation.Autowired
+
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
@@ -22,7 +22,7 @@ import uk.ac.warwick.spring.Wire
 @Controller
 class FeedbackRatingController extends CourseworkController {
 	
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao = Wire[FeedbackDao]
 
 	hideDeletedItems
 

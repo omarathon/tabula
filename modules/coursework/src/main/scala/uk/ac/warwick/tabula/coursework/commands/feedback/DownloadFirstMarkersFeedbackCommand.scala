@@ -15,7 +15,7 @@ class DownloadFirstMarkersFeedbackCommand(val module: Module, val assignment: As
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService = Wire[ZipService]
 
 	protected def applyInternal() = {
 		val markersSubs = assignment.getMarkersSubmissions(currentUser.apparentUser)

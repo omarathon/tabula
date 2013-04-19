@@ -40,7 +40,7 @@ object ListMarkingWorkflowController {
 	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited with Daoisms {
 		PermissionCheck(Permissions.MarkingWorkflow.Read, department)
 	
-		var dao = Wire.auto[MarkingWorkflowDao]
+		var dao = Wire[MarkingWorkflowDao]
 
 		def applyInternal() = {
 			val markingWorkflows = session.newCriteria[MarkingWorkflow]

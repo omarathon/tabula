@@ -17,7 +17,9 @@ import javax.servlet.http.HttpServletRequest
 import java.io.File
 import org.springframework.web.multipart.MultipartRequest
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest
-
+import uk.ac.warwick.tabula.data.model.MeetingFormat
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
@@ -44,7 +46,10 @@ class MeetingRecordController extends ProfilesController {
 
 	// modal chrome
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
+
 	def showModalChrome(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		val formats = MeetingFormat.members
+
 		Mav("tutor/meeting/edit",
 			"modal" -> true,
 			"command" -> createCommand,
@@ -60,7 +65,8 @@ class MeetingRecordController extends ProfilesController {
 			"command" -> createCommand,
 			"student" -> student,
 			"tutorName" -> createCommand.relationship.agentName,
-			"creator" -> createCommand.creator).noNavigation()
+			"creator" -> createCommand.creator,
+			"formats" -> formats).noNavigation()
 	}
 
 	// submit async
@@ -92,11 +98,14 @@ class MeetingRecordController extends ProfilesController {
 	// blank sync form
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, @PathVariable("student") student: Member) = {
+		val formats = MeetingFormat.members
+
 		Mav("tutor/meeting/edit",
 			"command" -> createCommand,
 			"student" -> student,
 			"tutorName" -> createCommand.relationship.agentName,
-			"creator" -> createCommand.creator)
+			"creator" -> createCommand.creator,
+			"formats" -> formats)
 	}
 
 	// cancel sync

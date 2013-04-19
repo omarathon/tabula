@@ -46,8 +46,8 @@ trait ProfileService {
 @Service(value = "profileService")
 class ProfileServiceImpl extends ProfileService with Logging {
 	
-	var memberDao = Wire.auto[MemberDao]
-	var profileIndexService = Wire.auto[ProfileIndexService]
+	var memberDao = Wire[MemberDao]
+	var profileIndexService = Wire[ProfileIndexService]
 	
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)

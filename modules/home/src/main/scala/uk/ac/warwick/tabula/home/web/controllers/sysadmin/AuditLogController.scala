@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 
@@ -21,7 +20,7 @@ class AuditLogQuery {
 }
 
 case class UserLookupQuery() {
-	var userLookup = Wire.auto[UserLookupInterface]
+	var userLookup = Wire[UserLookupInterface]
 	var userId: String = _
 	var uniId: String = _
 
@@ -33,9 +32,9 @@ case class UserLookupQuery() {
 @Controller
 class AuditLogController extends BaseController {
 
-	var auditEventService = Wire.auto[AuditEventService]
-	var auditEventIndexService = Wire.auto[AuditEventIndexService]
-	var json = Wire.auto[ObjectMapper]
+	var auditEventService = Wire[AuditEventService]
+	var auditEventIndexService = Wire[AuditEventIndexService]
+	var json = Wire[ObjectMapper]
 
 	val pageSize = 100
 

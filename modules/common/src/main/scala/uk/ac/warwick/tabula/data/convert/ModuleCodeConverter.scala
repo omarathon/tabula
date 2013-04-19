@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.convert
-import org.springframework.beans.factory.annotation.Autowired
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class ModuleCodeConverter extends TwoWayConverter[String, Module] {
 
-	@Autowired var service: ModuleAndDepartmentService = _
+	var service = Wire[ModuleAndDepartmentService]
 
 	override def convertRight(code: String) = 
 		service.getModuleByCode(sanitise(code)).getOrElse {

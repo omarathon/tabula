@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions.asScalaBuffer
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
@@ -21,8 +21,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, feedback)
 	
-	var zip = Wire.auto[ZipService]
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var zip = Wire[ZipService]
+	var feedbackDao = Wire[FeedbackDao]
 
 	var filename: String = _
     var students: JList[String] = JArrayList()

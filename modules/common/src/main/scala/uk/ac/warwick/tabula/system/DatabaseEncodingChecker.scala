@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.system
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.StatementCallback
@@ -18,7 +18,7 @@ import org.hibernate.SessionFactory
  *
  * The select query is currently Oracle specific, so this isn't loaded in tests.
  */
-class DatabaseEncodingChecker @Autowired() (val sessionFactory: SessionFactory) extends InitializingBean with Logging {
+class DatabaseEncodingChecker(val sessionFactory: SessionFactory = Wire[SessionFactory]) extends InitializingBean with Logging {
 
 	val testString = "a-\u01ee"
 	val hibernate: HibernateTemplate = new HibernateTemplate(sessionFactory)

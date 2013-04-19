@@ -23,7 +23,7 @@ class ImportSingleSitsStatusCommand(resultSet: ResultSet) extends Command[SitsSt
 	
 	PermissionCheck(Permissions.ImportSystemData)
 	
-	var sitsStatusDao = Wire.auto[SitsStatusDao]
+	var sitsStatusDao = Wire[SitsStatusDao]
 
 	// A couple of intermediate properties that will be transformed later
 	var code: String = _

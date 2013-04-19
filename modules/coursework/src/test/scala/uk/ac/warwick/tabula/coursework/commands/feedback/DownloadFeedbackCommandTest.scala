@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.transaction.annotation.Transactional
+
 import org.springframework.validation.BindException
 import javax.persistence.Entity
 import javax.persistence.NamedQueries
@@ -20,8 +20,7 @@ import uk.ac.warwick.tabula.data.model.Feedback
 
 class DownloadFeedbackCommandTest extends AppContextTestBase {
 
-	@Transactional
-	@Test def applyCommand = withUser("custard") {
+	@Test def applyCommand = transactional { tx => withUser("custard") {
 		val feedback = session.load(classOf[Feedback], MyFixtures().feedback.id).asInstanceOf[Feedback]
 
 		feedback.assignment.feedbacks.size should be (1)
@@ -40,7 +39,7 @@ class DownloadFeedbackCommandTest extends AppContextTestBase {
 		withClue(errors) { errors.hasErrors should be (false) }
 		command.apply should be (None)
 		session.isDirty should be (false) // BECAUSE THIS IS A READ-OP
-}
+	}}
 
 	case class MyFixtures() {
 		val department = Fixtures.department(code="ls", name="Life Sciences")

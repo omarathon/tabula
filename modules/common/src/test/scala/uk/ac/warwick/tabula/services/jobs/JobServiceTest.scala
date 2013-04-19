@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.services.jobs
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.jobs.TestingJob
 import uk.ac.warwick.tabula.Mockito
@@ -7,72 +7,37 @@ import uk.ac.warwick.tabula.data.Transactions
 
 class JobServiceTest extends AppContextTestBase with Mockito {
 	
-	@Autowired var service: JobService = _
+	lazy val service = Wire[JobService]
 	
-	@Test def crud = transactional { t =>
-		var inst = service.add(None, TestingJob("job"))
+	@Test def crud {
+		var inst = transactional { t => service.add(None, TestingJob("job")) }
 		
-		session.flush()
-		session.clear()
-		
-		service.getInstance(inst.id) should be (Some(inst))
-		
-		inst = service.getInstance(inst.id).get
-				
-		service.unfinishedInstances.length should be (1)
-		service.unfinishedInstances.contains(inst) should be (true)
-		service.listRecent(0, 5).length should be (0)
-		service.listRecent(0, 5).contains(inst) should be (false)
-		
-		inst.finished = true
-		service.update(inst)
-		
-		service.unfinishedInstances.length should be (0)
-		service.unfinishedInstances.contains(inst) should be (false)
-		service.listRecent(0, 5).length should be (1)
-		service.listRecent(0, 5).contains(inst) should be (true)
-	}
-	
-	@Test def run = withUser("cuscav") {
-		val service = new JobService
-		val jobDao = mock[JobDao]
-		
-		val job = new TestingJob
-		job.jobService = service
-		
-		service.jobDao = jobDao
-		service.jobs = Array(job)
-		
-		val inst = service.add(Some(currentUser), TestingJob("job", 50))
-		there was one(jobDao).saveJob(inst)
-		
-		jobDao.findOutstandingInstances(10) returns (Seq(inst))
-		
-		Transactions.disable {
-			service.run
+		transactional { t =>
+			service.getInstance(inst.id) should be (Some(inst))
+			
+			inst = service.getInstance(inst.id).get
+					
+			service.unfinishedInstances.length should be (1)
+			service.unfinishedInstances.contains(inst) should be (true)
+			service.listRecent(0, 5).length should be (0)
+			service.listRecent(0, 5).contains(inst) should be (false)
+			
+			inst.finished = true
+			service.update(inst)
 		}
 		
-		there was atLeastOne(jobDao).update(inst)
-		
-		inst.finished should be (true)
-		inst.progress should be (100)
-		inst.started should be (true)
-		inst.status should be ("Finished the job!")
-		inst.succeeded should be (true)
-		inst.updatedDate should not be (null)
-		
-		// If we try and kill the instance now, then nothing will happen
-		
+		transactional { t =>
+			service.unfinishedInstances.length should be (0)
+			service.unfinishedInstances.contains(inst) should be (false)
+			service.listRecent(0, 5).length should be (1)
+			service.listRecent(0, 5).contains(inst) should be (true)
+		}
 	}
 	
-	
-	
 	@Test def kill = withUser("cuscav") {
-		val service = new JobService
 		val jobDao = mock[JobDao]
 		
 		val job = new TestingJob
-		job.jobService = service
 		
 		service.jobDao = jobDao
 		service.jobs = Array(job)

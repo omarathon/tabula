@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.JavaImports._
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.spring.Wire
 import freemarker.core.Environment
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateDirectiveBody
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 class PermissionFunction extends TemplateMethodModelEx with Logging {
 
-	@Autowired var securityService: SecurityService = _
+	var securityService = Wire[SecurityService]
 
 	override def exec(args: JList[_]): Object = {
 		val arguments = args.asInstanceOf[JList[TemplateModel]]
