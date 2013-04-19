@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import freemarker.ext.beans.BeansWrapper
 import freemarker.template.TemplateException
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.helpers.Promises._
 
 /**
  * Accepts either id="abc" or ids=["abc","def"] as attributes.
@@ -24,7 +23,7 @@ import uk.ac.warwick.tabula.helpers.Promises._
  */
 class UserLookupTag extends TemplateDirectiveModel {
 
-	val userLookup = promise { Wire[UserLookupService] }
+	var userLookup = Wire[UserLookupService]
 
 	override def execute(env: Environment,
 		params: JMap[_, _],
@@ -41,9 +40,9 @@ class UserLookupTag extends TemplateDirectiveModel {
 		}
 		
 		if (user != null) {
-			env.getCurrentNamespace().put("returned_user", wrapper.wrap(userLookup.get.getUserByUserId(user)))
+			env.getCurrentNamespace().put("returned_user", wrapper.wrap(userLookup.getUserByUserId(user)))
 		} else if (users != null) {
-			val map = userLookup.get.getUsersByUserIds(users)
+			val map = userLookup.getUsersByUserIds(users)
 			val missingUserIds = map.values.filterNot(_.isFoundUser()).map(_.getUserId)
 			env.getCurrentNamespace().put("returned_users", wrapper.wrap(map))
 			env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))

@@ -11,7 +11,7 @@ class MemberUniversityIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new MemberUniversityIdConverter
 	var service = mock[ProfileService]
-	converter.service.set(service)
+	converter.service = service
 	
 	@Test def validInput {
 		val member = new StaffMember

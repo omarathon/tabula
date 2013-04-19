@@ -10,7 +10,7 @@ class FileAttachmentIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new FileAttachmentIdConverter
 	var service = mock[FileDao]
-	converter.fileDao.set(service)
+	converter.fileDao = service
 	
 	@Test def validInput {
 		val file = new FileAttachment

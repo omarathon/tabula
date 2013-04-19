@@ -13,7 +13,7 @@ class PermissionFunctionTest extends TestBase with Mockito {
 	val fn = new PermissionFunction
 	
 	val securityService = mock[SecurityService]
-	fn.securityService.set(securityService)
+	fn.securityService = securityService
 	
 	@Test def can = withUser("cuscav") {
 		val args: JList[TemplateModel] = JArrayList()

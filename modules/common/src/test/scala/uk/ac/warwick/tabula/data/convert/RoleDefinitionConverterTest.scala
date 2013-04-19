@@ -18,7 +18,7 @@ class RoleDefinitionConverterTest extends TestBase with Mockito {
 	
 	sessionFactory.getCurrentSession() returns (session)
 	
-	converter.promisedSessionFactory.set(sessionFactory)
+	converter.sessionFactory = sessionFactory
 	
 	@Test def validBuiltInInput {
 		converter.convertRight("DepartmentalAdministratorRoleDefinition") should be (DepartmentalAdministratorRoleDefinition)

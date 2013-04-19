@@ -10,7 +10,7 @@ class FeedbackIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new FeedbackIdConverter
 	var service = mock[FeedbackDao]
-	converter.service.set(service)
+	converter.service = service
 	
 	@Test def validInput {
 		val feedback = new Feedback

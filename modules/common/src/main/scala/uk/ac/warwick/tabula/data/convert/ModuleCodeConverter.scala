@@ -4,15 +4,14 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.TwoWayConverter
-import uk.ac.warwick.tabula.helpers.Promises._
 
 class ModuleCodeConverter extends TwoWayConverter[String, Module] {
 
-	val service = promise { Wire[ModuleAndDepartmentService] }
+	var service = Wire[ModuleAndDepartmentService]
 
 	override def convertRight(code: String) = 
-		service.get.getModuleByCode(sanitise(code)).getOrElse {
-			service.get.getModuleById(code).orNull
+		service.getModuleByCode(sanitise(code)).getOrElse {
+			service.getModuleById(code).orNull
 		}
 	
 	override def convertLeft(module: Module) = (Option(module) map { _.code }).orNull

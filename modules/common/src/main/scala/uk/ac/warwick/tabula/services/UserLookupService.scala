@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 
 trait UserLookupService extends UserLookupInterface
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupServiceAdapter(d) with UserLookupService with Daoisms {
+class UserLookupServiceImpl(d: UserLookupService) extends UserLookupServiceAdapter(d) with UserLookupService with Daoisms {
 
 	override def getUserByWarwickUniId(id: String) =
 		getUserByWarwickUniId(id, true)
@@ -21,9 +21,9 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupServiceAda
 
 }
 
-class SwappableUserLookupService(d: UserLookupInterface) extends UserLookupServiceAdapter(d)
+class SwappableUserLookupService(d: UserLookupService) extends UserLookupServiceAdapter(d)
 
-abstract class UserLookupServiceAdapter(var delegate: UserLookupInterface) extends UserLookupService {
+abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends UserLookupService {
 
 	def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
 	def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)

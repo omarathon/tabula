@@ -13,7 +13,7 @@ class JobServiceRunTest extends TestBase with Mockito {
 		val jobDao = mock[JobDao]
 		
 		val job = new TestingJob
-		job.promisedJobService.set(service)
+		job.jobService = service
 		
 		service.jobDao = jobDao
 		service.jobs = Array(job)

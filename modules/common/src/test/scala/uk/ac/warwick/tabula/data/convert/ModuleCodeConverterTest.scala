@@ -10,7 +10,7 @@ class ModuleCodeConverterTest extends TestBase with Mockito {
 	
 	val converter = new ModuleCodeConverter
 	val service = mock[ModuleAndDepartmentService]
-	converter.service.set(service)
+	converter.service = service
 	
 	@Test def validInput {
 		val module = new Module

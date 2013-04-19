@@ -10,7 +10,7 @@ class UpstreamAssignmentIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new UpstreamAssignmentIdConverter
 	val service = mock[AssignmentMembershipService]
-	converter.service.set(service)
+	converter.service = service
 	
 	@Test def validInput {
 		val assignment = new UpstreamAssignment

@@ -16,7 +16,7 @@ class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 	
 	sessionFactory.getCurrentSession() returns (session)
 	
-	converter.promisedSessionFactory.set(sessionFactory)
+	converter.sessionFactory = sessionFactory
 	
 	@Test def validInput {
 		val workflow = new MarkingWorkflow

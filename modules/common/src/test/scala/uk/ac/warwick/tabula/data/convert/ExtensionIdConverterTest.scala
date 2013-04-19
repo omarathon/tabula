@@ -10,7 +10,7 @@ class ExtensionIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new ExtensionIdConverter
 	val service = mock[ExtensionService]
-	converter.service.set(service)
+	converter.service = service
 	
 	@Test def validInput {
 		val extension = new Extension

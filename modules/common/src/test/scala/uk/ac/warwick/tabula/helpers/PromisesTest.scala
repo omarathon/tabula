@@ -9,13 +9,13 @@ class PromisesTest extends TestBase with Promises {
 		val p = promise[String]
 		
 		try {
-			p.get
+			p.fulfilPromise()
 			fail("expected exception")
 		} catch { case e: UnfulfilledPromiseException => }
 		
-		p.set("steve")
+		p.setValue("steve")
 		
-		p.get should be ("steve")
+		p.fulfilPromise() should be ("steve")
 	}
 	
 	@Test def functional {
@@ -26,9 +26,9 @@ class PromisesTest extends TestBase with Promises {
 		}
 		
 		timesRun should be (0)
-		p.get should be ("steve")
+		p.fulfilPromise() should be ("steve")
 		timesRun should be (1)
-		p.get should be ("steve")
+		p.fulfilPromise() should be ("steve")
 		timesRun should be (1)
 	}
 	
@@ -40,9 +40,9 @@ class PromisesTest extends TestBase with Promises {
 		}
 		
 		timesRun should be (0)
-		p1.get should be ("steve")
+		p1.fulfilPromise() should be ("steve")
 		timesRun should be (1)
-		p1.get should be ("steve")
+		p1.fulfilPromise() should be ("steve")
 		timesRun should be (1)
 		
 		timesRun = 0
@@ -54,13 +54,13 @@ class PromisesTest extends TestBase with Promises {
 		timesRun should be (0)
 		
 		try {
-			p2.get
+			p2.fulfilPromise()
 			fail("expected exception")
 		} catch { case e: UnfulfilledPromiseException => }
 		timesRun should be (1)
 		
 		try {
-			p2.get
+			p2.fulfilPromise()
 			fail("expected exception")
 		} catch { case e: UnfulfilledPromiseException => }
 		timesRun should be (2) // we keep running until it returns the right value!
