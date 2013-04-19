@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.ProfileIndexService
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -20,7 +21,7 @@ import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 @Service
 class ScheduledJobs {
 	
-	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
+	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 
 	var exceptionResolver = Wire.auto[ExceptionResolver]
 	
