@@ -108,27 +108,31 @@ class SecurityService extends Logging {
 	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
-	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
-		
-		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
-		val result: Response = checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
-
-		result.map { canDo =>
-			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
-			canDo
-		} getOrElse {
-			throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
+	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = scope match {
+		case Some(ignored: RuntimeMember) => false
+		case _ => transactional(readOnly=true) {
+			// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
+			val result: Response = checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+	
+			result.map { canDo =>
+				if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
+				canDo
+			} getOrElse {
+				throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
+			}
 		}
-
 	}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
 	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
 
-	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
-		(permission, scope) match {
-			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
-			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
+	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = scope match {
+		case Some(ignored: RuntimeMember) => //do nothing
+		case _ => if (!_can(user, permission, scope)) {
+			(permission, scope) match {
+				case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
+				case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
+			}
 		}
 	}
 }
