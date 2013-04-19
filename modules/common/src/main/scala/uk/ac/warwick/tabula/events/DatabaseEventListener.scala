@@ -18,11 +18,14 @@ import java.io.ObjectOutputStream
 import java.io.FileOutputStream
 import scala.react.Observing
 import uk.ac.warwick.tabula.JavaImports._
+import org.springframework.beans.factory.annotation.Autowired
 
 class DatabaseEventListener extends EventListener with Daoisms with InitializingBean with Observing with Logging {
 
-	var auditEventService = Wire[AuditEventService]
-	var maintenanceModeService = Wire[MaintenanceModeService]
+	// TODO FIXME Need to make Wire cleverer and wire placeholders here to get around the need for @Autowired
+	// We can't just change to Wire because it's called in afterPropertiesSet, which happens before the other beans exist
+	@Autowired var auditEventService: AuditEventService = _
+	@Autowired var maintenanceModeService: MaintenanceModeService = _
 	var auditDirectory = Wire[File]("${filesystem.auditlog.dir}")
 	var createMissingDirs = Wire[JBoolean]("${filesystem.create.missing:false}")
 

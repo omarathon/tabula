@@ -14,6 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
+import uk.ac.warwick.tabula.helpers.Promises._
 
 /**
  * A trait for DAO classes to mix in to get useful things
@@ -29,19 +30,11 @@ trait Daoisms {
 	import org.hibernate.criterion.Restrictions._
 	def is = org.hibernate.criterion.Restrictions.eq _
 
-	// FIXME This is a shitty hack to get around the fact that Wire[] doesn't resolve circular dependencies, 
-	// and we want to inject this as if it's a var at runtime rather than a lazy val
-	private var _testDataSource: DataSource = _
-	private var _testSessionFactory: SessionFactory = _
-	lazy private val _dataSource = Wire[DataSource]("dataSource")
-	lazy private val _sessionFactory = Wire[SessionFactory]
+	val promisedDataSource = promise { Wire[DataSource]("dataSource") }
+	val promisedSessionFactory = promise { Wire[SessionFactory] }
 	
-	def dataSource = Option(_testDataSource) getOrElse (_dataSource)
-	def dataSource_=(ds: DataSource) { _testDataSource = ds }
-	
-	def sessionFactory = Option(_testSessionFactory) getOrElse (_sessionFactory)
-	def sessionFactory_=(sf: SessionFactory) { _testSessionFactory = sf }
-	// End FIXME
+	lazy val dataSource = promisedDataSource.get
+	lazy val sessionFactory = promisedSessionFactory.get
 
 	protected def session = sessionFactory.getCurrentSession
 

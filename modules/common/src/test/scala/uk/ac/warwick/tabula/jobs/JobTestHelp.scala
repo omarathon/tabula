@@ -10,7 +10,7 @@ trait JobTestHelp {
 		val s = new JobService
 		s.jobDao = dao
 		s.jobs = allJobs
-		s.jobs foreach { _.jobService = s }
+		s.jobs foreach { _.promisedJobService.set(s) }
 		s
 	}
 	

@@ -5,26 +5,30 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.userlookup.User
+import org.junit.Before
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula.services.SwappableUserLookupService
+import uk.ac.warwick.tabula.services.UserLookupServiceImpl
 
-class UserCodeConverterTest extends TestBase with Mockito {
+class UserCodeConverterTest extends AppContextTestBase with Mockito {
 	
 	val converter = new UserCodeConverter
-	val userLookup = mock[UserLookupService]
-	converter.userLookup = userLookup
+	var userLookup: MockUserLookup = _
+    
+  @Before def getUserLookup {
+		// We can't just Autowire this because it has autowire-candidate="false"
+		userLookup = Wire[SwappableUserLookupService].delegate.asInstanceOf[UserLookupServiceImpl].delegate.asInstanceOf[MockUserLookup]
+		userLookup.registerUsers("cuscav")
+	}
 	
-	@Test def validInput {
-		val user = new User
-		user.setUserId("cuscav")
-			
-		userLookup.getUserByUserId("cuscav") returns (user)
-		
-		converter.convertRight("cuscav") should be (user)
+	@Test def validInput {		
+		converter.convertRight("cuscav").isFoundUser() should be (true)
 	}
 	
 	@Test def invalidInput {
-		userLookup.getUserByUserId("20X6") returns (new AnonymousUser)
-		
-		converter.convertRight("20X6") should be (new AnonymousUser)
+		converter.convertRight("20X6").isFoundUser() should be (false)
 	}
 	
 	@Test def formatting {

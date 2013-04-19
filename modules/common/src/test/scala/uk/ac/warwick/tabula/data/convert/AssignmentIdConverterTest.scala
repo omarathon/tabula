@@ -9,7 +9,7 @@ class AssignmentIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new AssignmentIdConverter
 	val service = mock[AssignmentService]
-	converter.service = service
+	converter.service.set(service)
 	
 	@Test def validInput {
 		val assignment = new Assignment

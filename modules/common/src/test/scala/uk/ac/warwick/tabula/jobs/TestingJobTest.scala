@@ -16,7 +16,7 @@ class TestingJobTest extends TestBase with Mockito {
 		instance.status should be (null)
 		
 		val job = new TestingJob()
-		job.jobService = mock[JobService]
+		job.promisedJobService.set(mock[JobService])
 		
 		job.run(instance)
 		

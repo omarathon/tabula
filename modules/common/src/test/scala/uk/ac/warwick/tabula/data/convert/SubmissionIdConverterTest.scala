@@ -9,7 +9,7 @@ class SubmissionIdConverterTest extends TestBase with Mockito {
 	
 	val converter = new SubmissionIdConverter
 	val service = mock[SubmissionService]
-	converter.service = service
+	converter.service.set(service)
 	
 	@Test def validInput {
 		val submission = new Submission

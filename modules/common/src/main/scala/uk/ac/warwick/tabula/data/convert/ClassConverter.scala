@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
 
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.TwoWayConverter

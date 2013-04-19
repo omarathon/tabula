@@ -21,7 +21,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 	val tag = new UserLookupTag
 	
 	val userLookup = new MockUserLookup
-	tag.userLookup = userLookup
+	tag.userLookup.set(userLookup)
 	
 	userLookup.registerUsers("cuscav", "cusebr")
 	

@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.services.jobs._
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.Promises._
 
 /**
  * A Job is a task that is added to a queue and processed in the
@@ -28,13 +29,8 @@ abstract class Job extends Logging {
 	/** Identifies the specific Job in the database. */
 	val identifier: String
 
-	// FIXME This is a shitty hack to get around the fact that Wire[] doesn't resolve circular dependencies, 
-	// and we want to inject this as if it's a var at runtime rather than a lazy val
-	lazy val _jobService = Wire[JobService]
-	private var testJobService: JobService = _
-	def jobService = Option(testJobService) getOrElse (_jobService)
-	def jobService_=(js: JobService) { testJobService = js }
-	// End FIXME
+	val promisedJobService = promise { Wire[JobService] }
+	lazy val jobService = promisedJobService.get
 
 	/**
 	 * Run the job. Job itself is stateless so
