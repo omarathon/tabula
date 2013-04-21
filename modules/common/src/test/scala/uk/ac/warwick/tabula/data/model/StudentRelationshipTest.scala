@@ -39,7 +39,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
 		val student = Fixtures.student()
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 		
-		rel.studentMember should be (Some(student))
+		rel.studentMember should be (student)
 	}
   
 	@Test def convertToObject() {

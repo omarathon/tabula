@@ -261,7 +261,9 @@ class OtherMember extends Member with AlumniProperties {
 	}
 }
 
-class RuntimeMember(user: CurrentUser) extends Member(user)
+class RuntimeMember(user: CurrentUser) extends Member(user) {
+	override def permissionsParents = Nil
+}
 
 trait MemberProperties {
 	@Id var universityId: String = _

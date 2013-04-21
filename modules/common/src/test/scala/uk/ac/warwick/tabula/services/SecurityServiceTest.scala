@@ -7,7 +7,7 @@ import org.mockito.Matchers._
 import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
-import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.data.model.{Department, Module, StaffMember, RuntimeMember}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles._
@@ -186,6 +186,25 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.checkPermissions(
 				permissions, currentUser, Permissions.ImportSystemData, null
 		) should be (securityService.Continue)
+	}
+	
+	@Test def runtimeMemberDenied {
+		val currentUser = new CurrentUser(user, user)
+		val securityService = new SecurityService
+		val runtimeMember = new RuntimeMember(currentUser)
+		val realMember = new StaffMember
+		
+		securityService.checkRuntimeMember(
+				currentUser, Permissions.Profiles.Read.PersonalTutees, runtimeMember
+		) should be (securityService.Deny)
+		
+		securityService.checkRuntimeMember(
+				currentUser, Permissions.Department.DownloadFeedbackReport, realMember
+		) should be (securityService.Continue)
+		
+		securityService.checkRuntimeMember(
+				currentUser, Permissions.Department.ManageDisplaySettings, runtimeMember
+		) should be (securityService.Deny)
 	}
 	
 	/*
