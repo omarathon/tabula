@@ -20,7 +20,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.relationship should be (null)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
-		meeting should not be ('approved)
+		meeting should be ('approved)
 	}
 	
 	@Test def everydayConstructor = withFakeTime(aprilFool) {
@@ -36,6 +36,6 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.relationship should be (relationship)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
-		meeting should not be ('approved)
+		meeting should be ('approved)
 	}
 }
