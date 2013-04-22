@@ -50,8 +50,8 @@ class MeetingRecord extends GeneratedId with ToString {
 		this.creator = creator
 		this.relationship = relationship
 	}
-
-	def isApproved = false
+	
+	def isApproved = true
 
 	def toStringProps = Seq(
 		"creator" -> creator,

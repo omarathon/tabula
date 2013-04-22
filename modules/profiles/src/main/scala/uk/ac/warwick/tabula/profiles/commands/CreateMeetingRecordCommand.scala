@@ -40,7 +40,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 
 	var attachmentTypes = Seq[String]()
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember.getOrElse(null))
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
 
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
