@@ -34,8 +34,10 @@ import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.data.model.OtherMember
 
-class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, resultSet)
+class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet) 
+  extends ImportSingleMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms with StudentProperties with StudyDetailsProperties with Unaudited {
 	import ImportMemberHelpers._
 	
@@ -81,12 +83,15 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
 		
-		val isTransient = !memberExisting.isDefined
-		
-		val member = memberExisting match {
-			case Some(member: StudentMember) => member
+		val (isTransient, member) = memberExisting match {
+			case Some(member: StudentMember) => (false, member)
+			case Some(member: OtherMember) => {
+				// TAB-692 delete the existing member, then return a brand new one
+				memberDao.delete(member)
+				(true, new StudentMember(universityId))
+			}
 			case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
-			case _ => new StudentMember(universityId)
+			case _ => (true, new StudentMember(universityId))
 		}
 		
 		val commandBean = new BeanWrapperImpl(this)
