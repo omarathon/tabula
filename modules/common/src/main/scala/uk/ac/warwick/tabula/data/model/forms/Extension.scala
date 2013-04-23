@@ -43,7 +43,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 
 	var reason:String =_
 
-	@OneToMany(mappedBy="extension", fetch=LAZY)
+	@OneToMany(mappedBy="extension", fetch=LAZY, cascade=Array(ALL))
 	var attachments:JSet[FileAttachment] = JSet()
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)

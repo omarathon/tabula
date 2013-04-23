@@ -1,13 +1,10 @@
 package uk.ac.warwick.tabula.data.model
-import org.junit.Test
-
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
-
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.ProfileService
 
-class MemberTest extends TestBase with Mockito {
+class MemberTest extends PersistenceTestBase with Mockito {
 	
 	val profileService = mock[ProfileService]
 	
@@ -161,5 +158,49 @@ class MemberTest extends TestBase with Mockito {
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 		
 		student.personalTutor should be (staff)
+	}
+	
+	@Test def deleteFileAttachmentOnDelete {
+		// TAB-667
+		val orphanAttachment = transactional { tx =>
+			val attachment = new FileAttachment
+			
+			session.save(attachment)
+			attachment
+		}
+		
+		val (member, memberAttachment) = transactional { tx => 
+			val member = new StudentMember
+			member.universityId = "01234567"
+			member.userId = "steve"
+			
+			val attachment = new FileAttachment
+			member.photo = attachment
+			
+			session.save(member)
+			(member, attachment)
+		}
+		
+		// Ensure everything's been persisted
+		orphanAttachment.id should not be (null)
+		member.id should not be (null)
+		memberAttachment.id should not be (null)
+		
+		// Can fetch everything from db
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			// Can't do an exact equality check because of Hibernate polymorphism
+			session.get(classOf[Member], member.id).asInstanceOf[Member].universityId should be (member.universityId)
+			session.get(classOf[FileAttachment], memberAttachment.id).asInstanceOf[FileAttachment].id should be (memberAttachment.id)
+		}
+		
+		transactional { tx => session.delete(member) }
+		
+		// Ensure we can't fetch the FeedbackTemplate or attachment, but all the other objects are returned
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Member], member.id) should be (null)
+			session.get(classOf[FileAttachment], memberAttachment.id) should be (null)
+		}
 	}
 }

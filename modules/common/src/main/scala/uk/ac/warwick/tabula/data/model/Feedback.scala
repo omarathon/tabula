@@ -8,7 +8,7 @@ import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence.CascadeType
+import javax.persistence.CascadeType._
 
 
 @Entity @AccessType("field")
@@ -19,7 +19,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		this.universityId = universityId
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE), optional = false)
 	var assignment: Assignment = _
 	
 	def permissionsParents = Seq(Option(assignment)).flatten
@@ -48,11 +48,11 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
 
-	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
 	var firstMarkerFeedback: MarkerFeedback = _
 
-	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
@@ -103,7 +103,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		case None => false
 	}
 
-	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	var attachments: JList[FileAttachment] = JArrayList()
 	
 	def mostRecentAttachmentUpload = attachments.maxBy {
