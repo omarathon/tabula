@@ -30,7 +30,7 @@ class MeetingRecord extends GeneratedId with ToString {
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var meetingDate: DateTime = _
-	
+
 	@Column(name="meeting_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MeetingFormatUserType")
 	var format: MeetingFormat = _
@@ -40,6 +40,7 @@ class MeetingRecord extends GeneratedId with ToString {
 	var creator: Member = _
 
 	@OneToMany(mappedBy = "meetingRecord", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var attachments: JList[FileAttachment] = JArrayList()
 
 	var title: String = _
@@ -50,7 +51,7 @@ class MeetingRecord extends GeneratedId with ToString {
 		this.creator = creator
 		this.relationship = relationship
 	}
-	
+
 	def isApproved = true
 
 	def toStringProps = Seq(
@@ -69,17 +70,17 @@ object MeetingFormat {
 	case object VideoConference extends MeetingFormat("video", "Video conference")
 	case object PhoneCall extends MeetingFormat("phone", "Telephone call")
 	case object Email extends MeetingFormat("email", "Email conversation")
-	
+
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Set(FaceToFace, VideoConference, PhoneCall, Email)
-	
+
 	def fromCode(code: String) =
 		if (code == null) null
 		else members.find{_.code == code} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
-	
+
 	def fromDescription(description: String) =
 		if (description == null) null
 		else members.find{_.description == description} match {
