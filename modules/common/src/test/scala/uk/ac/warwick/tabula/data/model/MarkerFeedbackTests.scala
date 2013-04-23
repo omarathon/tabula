@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model
+import scala.util.Random
 
-import uk.ac.warwick.tabula.TestBase
-import util.Random
+import uk.ac.warwick.tabula.PersistenceTestBase
 
-class MarkerFeedbackTests extends TestBase {
+class MarkerFeedbackTests extends PersistenceTestBase {
 
 	@Test def fields() {
 
@@ -29,6 +29,62 @@ class MarkerFeedbackTests extends TestBase {
 		feedback.firstMarkerFeedback.id should be (firstMarkerFeedback.id)
 		feedback.secondMarkerFeedback.id should be (secondMarkerFeedback.id)
 
+	}
+	
+	@Test def deleteFileAttachmentOnDelete {
+		// TAB-667
+		val orphanAttachment = transactional { tx =>
+			val attachment = new FileAttachment
+			
+			session.save(attachment)
+			attachment
+		}
+		
+		val feedback = transactional { tx => 
+			val feedback = new Feedback(universityId = idFormat(1))
+			
+			val assignment = new Assignment
+			session.save(assignment)
+			
+			feedback.assignment = assignment
+			
+			session.save(feedback)
+			feedback
+		}
+		
+		val (markerFeedback, markerFeedbackAttachment) = transactional { tx =>
+			val mf = new MarkerFeedback(feedback)
+			
+			val attachment = new FileAttachment
+			mf.addAttachment(attachment)
+			
+			session.save(mf)
+			(mf, attachment)
+		}
+		
+		// Ensure everything's been persisted
+		orphanAttachment.id should not be (null)
+		feedback.id should not be (null)
+		markerFeedback.id should not be (null)
+		markerFeedbackAttachment.id should not be (null)
+		
+		// Can fetch everything from db
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Feedback], feedback.id) should be (feedback)
+			session.get(classOf[MarkerFeedback], markerFeedback.id) should be (markerFeedback)
+			session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (markerFeedbackAttachment)
+		}
+		
+		transactional { tx => session.delete(markerFeedback) }
+		
+		// Ensure we can't fetch the markerFeedback or attachment, but all the other objects are returned
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Feedback], feedback.id) should be (feedback)
+			session.get(classOf[MarkerFeedback], markerFeedback.id) should be (null)
+			session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (null)
+		}
 	}
 
 

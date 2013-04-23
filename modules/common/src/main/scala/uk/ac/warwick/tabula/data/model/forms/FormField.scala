@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, FileAttachment}
+import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User

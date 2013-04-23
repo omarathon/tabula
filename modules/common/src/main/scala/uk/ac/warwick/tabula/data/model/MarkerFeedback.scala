@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-
 import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
 import org.joda.time.DateTime
 
 import javax.persistence._
+import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity @AccessType("field")
@@ -32,7 +32,7 @@ class MarkerFeedback extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
 	var state : MarkingState = _
 
-	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@Fetch(FetchMode.JOIN)
 	var attachments: JList[FileAttachment] = JArrayList()
 

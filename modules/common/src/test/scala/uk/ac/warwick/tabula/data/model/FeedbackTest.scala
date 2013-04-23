@@ -1,15 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import scala.util.Random
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.junit.Test
+import uk.ac.warwick.tabula.PersistenceTestBase
 
-class FeedbackTest extends TestBase {
+class FeedbackTest extends PersistenceTestBase {
 	
 	@Test def fields {
 	  
@@ -33,6 +27,52 @@ class FeedbackTest extends TestBase {
 	    assignment.feedbacks add feedback
 	  }
 	  assignment.feedbacks.size should be (10)
+	}
+	
+	@Test def deleteFileAttachmentOnDelete {
+		// TAB-667
+		val orphanAttachment = transactional { tx =>
+			val attachment = new FileAttachment
+			
+			session.save(attachment)
+			attachment
+		}
+		
+		val (feedback, feedbackAttachment) = transactional { tx => 
+			val feedback = new Feedback(universityId = idFormat(1))
+			
+			val assignment = new Assignment
+			session.save(assignment)
+			
+			feedback.assignment = assignment
+			
+			val attachment = new FileAttachment
+			feedback.addAttachment(attachment)
+			
+			session.save(feedback)
+			(feedback, attachment)
+		}
+		
+		// Ensure everything's been persisted
+		orphanAttachment.id should not be (null)
+		feedback.id should not be (null)
+		feedbackAttachment.id should not be (null)
+		
+		// Can fetch everything from db
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Feedback], feedback.id) should be (feedback)
+			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (feedbackAttachment)
+		}
+		
+		transactional { tx => session.delete(feedback) }
+		
+		// Ensure we can't fetch the feedback or attachment, but all the other objects are returned
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Feedback], feedback.id) should be (null)
+			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (null)
+		}
 	}
 	
 		
