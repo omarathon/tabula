@@ -27,6 +27,8 @@
 	<#assign department=module.department />
 	
 	<#include "_filter.ftl" />
+	
+	<#assign currentView = "summary" />
 	<#include "_action-bar.ftl" />
 
 	<#if students??>

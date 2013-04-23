@@ -33,6 +33,14 @@ object Assignment {
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
+	
+	object Settings {
+		object InfoViewType {
+			val Default = "default"
+			val Table = "table"
+			val Summary = "summary"
+		}
+	}
 }
 
 /**

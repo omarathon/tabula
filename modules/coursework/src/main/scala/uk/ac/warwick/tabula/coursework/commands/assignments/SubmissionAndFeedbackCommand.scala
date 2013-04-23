@@ -21,6 +21,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import org.hibernate.validator.NotNull
+import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) 
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
@@ -28,12 +29,12 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
+	val enhancedFeedbacksCommand = new ListFeedbackCommand(module, assignment)
 	
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
@@ -44,6 +45,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
+		val whoDownloaded = enhancedFeedbacksCommand.apply()
+		
 		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
 		val moduleMembers = assignmentMembershipService.determineMembershipUsers(assignment)
@@ -53,8 +56,6 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 		val mustReleaseForMarking = assignment.markingWorkflow != null
-		
-		val whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
 		
 		val unsubmitted = for (user <- unsubmittedMembers) yield {			
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == user.getWarwickId)

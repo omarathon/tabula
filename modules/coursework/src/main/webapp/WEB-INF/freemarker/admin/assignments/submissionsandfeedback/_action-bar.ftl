@@ -1,5 +1,37 @@
 <#if students??>
 	<div class="btn-toolbar">
+		<div class="pull-right view-selector">
+			<form class="form-inline">
+				<label class="radio">View as:</label>
+				<label class="radio">
+					<input type="radio" name="view" value="summary" data-href="<@routes.assignmentsubmissionsandfeedbacksummary assignment />" <#if currentView == 'summary'>checked="checked"</#if> />
+					Summary
+				</label>
+				<label class="radio">
+					<input type="radio" name="view" value="table" data-href="<@routes.assignmentsubmissionsandfeedbacktable assignment />" <#if currentView == 'table'>checked="checked"</#if> />
+					Table
+				</label>
+			</form>
+		</div>
+		
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('.view-selector input[name="view"]').on('change', function() {
+					var $this = $(this);
+				
+					if ($this.is(':checked')) {
+						var $form = $('<form></form>').attr({method:'POST',action:$this.data('href')}).hide();
+                                       
+        		var $inputs = $(':input', '.filter-form');
+        		$form.append($inputs.clone());
+            
+            $(document.body).append($form);
+            $form.submit();
+					}
+				});
+			});
+		</script>
+	
 		<div class="btn-group-group">
 			<div class="btn-group">
 				<a class="btn hover"><i class="icon-cog"></i> Actions:</a>

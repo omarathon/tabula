@@ -120,18 +120,3 @@ class DownloadAllFeedback extends CourseworkController {
 		fileServer.serve(cmd.apply())
 	}
 }
-
-@Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/list"))
-class ListFeedback extends CourseworkController {	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new ListFeedbackCommand(module, assignment)
-
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: ListFeedbackCommand) = {
-		Mav("admin/assignments/feedback/list",
-			"whoDownloaded" -> cmd.apply())
-			.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
-	}
-}
-

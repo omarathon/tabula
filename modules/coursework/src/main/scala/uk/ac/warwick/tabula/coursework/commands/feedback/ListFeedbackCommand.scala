@@ -6,17 +6,20 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.services.UserLookupService
+import org.joda.time.DateTime
+import uk.ac.warwick.userlookup.User
 
 
-class ListFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Seq[String]] with ReadOnly with Unaudited {
+class ListFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Seq[(User, DateTime)]] with ReadOnly with Unaudited {
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
-	var auditIndexService = Wire.auto[AuditEventIndexService]
+	var auditIndexService = Wire[AuditEventIndexService]
+	var userLookup = Wire[UserLookupService]
 	
-	override def applyInternal() = {
-		auditIndexService.whoDownloadedFeedback(assignment)
-	}
+	override def applyInternal() =
+		auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
 
 	override def describe(d: Description) =	d.assignment(assignment)
 }

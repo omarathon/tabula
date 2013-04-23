@@ -1,4 +1,4 @@
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/list')}" cssClass="form-inline filter-form" commandName="submissionAndFeedbackCommand">
+<@f.form method="post" action="" cssClass="form-inline filter-form" commandName="submissionAndFeedbackCommand">
 	<div class="filter">
 		<label for="filter">Show all</label>
 		&nbsp;
