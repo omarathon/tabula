@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.SecurityService
 import org.joda.time.DateTimeConstants
 
-
+// scalastyle:off magic.number
 class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	/**
 	 * Check the dates are formatted correctly in the XML.

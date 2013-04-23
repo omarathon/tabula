@@ -36,12 +36,14 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 	
 	PermissionCheck(Permissions.ManageMaintenanceMode)
 	
+	val DefaultMaintenanceMinutes = 30
+	
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
 	var enable: Boolean = service.enabled
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(30)
+	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(DefaultMaintenanceMinutes)
 
 	var message: String = service.message.orNull
 	

@@ -31,36 +31,39 @@ final class SurnamePunctuationFilter(val source: TokenStream) extends TokenFilte
 			case StrippingPunctuation => wholeWordText
 		}
 		
-		if (!text.hasText) return false
+		if (text.hasText) {
 		
-		if (state == StrippingPunctuation) {
-			for (c <- Apostrophes) text = text.replace(c.toString, "")
+			if (state == StrippingPunctuation) {
+				for (c <- Apostrophes) text = text.replace(c.toString, "")
+				
+				state = AwaitingInput
+				setTermBuffer(text)
+			} else {
 			
-			state = AwaitingInput
-			setTermBuffer(text)
-			return true
+				var minPoz: Int = -1
+				for (c <- Apostrophes if (text.indexOf(c) != -1)) 
+					minPoz = if (minPoz == -1) text.indexOf(c) else scala.math.min(text.indexOf(c), minPoz)
+				
+				if (minPoz != -1) {
+					val firstToken = text.substring(0, minPoz)
+					val secondToken = text.substring(minPoz + 1, text.length)
+					
+					remainingText = secondToken
+					
+					state = ParsingWords
+					
+					setTermBuffer(firstToken)
+				} else if (state == ParsingWords) {
+					state = StrippingPunctuation
+					
+					setTermBuffer(text)
+				}
+			}
+				
+			true
+		} else {
+			false
 		}
-		
-		var minPoz: Int = -1
-		for (c <- Apostrophes if (text.indexOf(c) != -1)) 
-			minPoz = if (minPoz == -1) text.indexOf(c) else scala.math.min(text.indexOf(c), minPoz)
-		
-		if (minPoz != -1) {
-			val firstToken = text.substring(0, minPoz)
-			val secondToken = text.substring(minPoz + 1, text.length)
-			
-			remainingText = secondToken
-			
-			state = ParsingWords
-			
-			setTermBuffer(firstToken)
-		} else if (state == ParsingWords) {
-			state = StrippingPunctuation
-			
-			setTermBuffer(text)
-		}
-			
-		true
 	}
 	
 	private def setTermBuffer(buffer: String) = {

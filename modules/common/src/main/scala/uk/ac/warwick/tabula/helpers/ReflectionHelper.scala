@@ -152,6 +152,8 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 		
 		throw new ReflectionsException("Unable to identify the real zip file in path '" + path + "'.")
 	}
+	
+	val ExtensionLength = 4
 
 	private def findFirstMatchOfDeployableExtention(path: String, pos: Int) = {
         val p = Pattern.compile("\\.[ejprw]ar/")
@@ -167,7 +169,7 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
         var numSubs = 1
         for (ext <- ReplaceExtension) {
             while (zipPath.contains(ext)) {
-        		zipPath = zipPath.replace(ext, ext.substring(0, 4) + "!")
+        		zipPath = zipPath.replace(ext, ext.substring(0, ExtensionLength) + "!")
         		numSubs += 1
             }
         }

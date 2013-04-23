@@ -543,6 +543,7 @@
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>
+            <includeTestSourceDirectory>false</includeTestSourceDirectory>
 						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>

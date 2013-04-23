@@ -45,14 +45,17 @@ trait Logging {
 	 * if it takes longer than minMillis.
 	 */
 	def benchmark[A](description: String, level: Priority = Info, minMillis: Int = 0)(fn: => A): A = {
-		if (!Logging.benchmarking) return fn
-		val s = StopWatch()
-		try s.record(description) {
-			fn
-		} finally {
-			if (s.getTotalTimeMillis > minMillis) {
-				logger.log(level, s.prettyPrint)
+		if (Logging.benchmarking) {
+			val s = StopWatch()
+			try s.record(description) {
+				fn
+			} finally {
+				if (s.getTotalTimeMillis > minMillis) {
+					logger.log(level, s.prettyPrint)
+				}
 			}
+		} else {
+			fn
 		}
 	}
 	

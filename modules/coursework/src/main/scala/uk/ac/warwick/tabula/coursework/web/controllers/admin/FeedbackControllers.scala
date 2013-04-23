@@ -40,13 +40,20 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
+	@ModelAttribute def singleFeedbackCommand(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("feedbackId") feedbackId: String) = 
 		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def get(
+			cmd: AdminGetSingleFeedbackFileCommand, 
+			@PathVariable("filename") filename: String,
+			req: HttpServletRequest, 
+			res: HttpServletResponse) {
 		//fileServer.serve(cmd.apply())
-		cmd.callback = { (renderable) => fileServer.serve(renderable) }
+		cmd.callback = { (renderable) => fileServer.serve(renderable)(req, res) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 }
@@ -79,11 +86,17 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@RequestMapping
-	def getMarkerFeedback(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def getMarkerFeedback(
+			@PathVariable module: Module, 
+			@PathVariable assignment: Assignment, 
+			@PathVariable feedbackId: String, 
+			@PathVariable filename: String,
+			req: HttpServletRequest, 
+			res: HttpServletResponse) {
 		feedbackDao.getMarkerFeedback(feedbackId) match {
 			case Some(markerFeedback) => {
 				val renderable = new AdminGetSingleMarkerFeedbackCommand(module, assignment, markerFeedback).apply()
-				fileServer.serve(renderable)
+				fileServer.serve(renderable)(req, res)
 			}
 			case None => throw new ItemNotFoundException
 		}
@@ -116,7 +129,9 @@ class DownloadAllFeedback extends CourseworkController {
 		new AdminGetAllFeedbackCommand(module, assignment)
 	
 	@RequestMapping
-	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def download(
+			cmd: AdminGetAllFeedbackCommand, 
+			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}
 }

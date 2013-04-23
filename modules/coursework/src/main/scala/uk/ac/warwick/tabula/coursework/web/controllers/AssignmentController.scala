@@ -47,12 +47,22 @@ class AssignmentController extends CourseworkController {
 	 * Sitebuilder-embeddable view.
 	 */
 	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
-	def embeddedView(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+	def embeddedView(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			user: CurrentUser, 
+			formOrNull: SubmitAssignmentCommand, 
+			errors: Errors) = {
 		view(module, assignment, user, formOrNull, errors).embedded
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
-	def view(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+	def view(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			user: CurrentUser, 
+			formOrNull: SubmitAssignmentCommand, 
+			errors: Errors) = {
 		val form = Option(formOrNull)
 		
 		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
@@ -100,7 +110,12 @@ class AssignmentController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser, @Valid formOrNull: SubmitAssignmentCommand, errors: Errors) = {
+	def submit(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			user: CurrentUser, 
+			@Valid formOrNull: SubmitAssignmentCommand, 
+			errors: Errors) = {
 		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
 			throw new SubmitPermissionDeniedException(assignment)
 		}

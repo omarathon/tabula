@@ -7,6 +7,7 @@ import org.joda.time.DateTimeZone
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 
+// scalastyle:off magic.number
 class DateBuilderTest extends TestBase with FreemarkerRendering {
 	
 	import DateBuilder._

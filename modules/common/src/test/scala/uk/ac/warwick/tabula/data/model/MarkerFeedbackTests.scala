@@ -3,6 +3,7 @@ import scala.util.Random
 
 import uk.ac.warwick.tabula.PersistenceTestBase
 
+// scalastyle:off magic.number
 class MarkerFeedbackTests extends PersistenceTestBase {
 
 	@Test def fields() {

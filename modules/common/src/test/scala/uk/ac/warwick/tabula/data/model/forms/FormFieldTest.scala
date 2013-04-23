@@ -10,6 +10,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
+// scalastyle:off magic.number
 class FormFieldTest extends TestBase with Mockito {
 	
 	val userLookup = new MockUserLookup

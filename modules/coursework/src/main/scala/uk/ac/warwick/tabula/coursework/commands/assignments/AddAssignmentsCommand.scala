@@ -70,6 +70,9 @@ class AssignmentItem(
 class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
 	
 	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
+	
+	val DEFAULT_OPEN_HOUR = 12
+	val DEFAULT_WEEKS_LENGTH = 4
 
 	var assignmentService = Wire.auto[AssignmentService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
@@ -93,11 +96,11 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	// just for prepopulating the date form fields.
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
-	val defaultOpenDate = new DateTime().withTime(12, 0, 0, 0)
+	val defaultOpenDate = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
-	val defaultCloseDate = defaultOpenDate.plusWeeks(4)
+	val defaultCloseDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 	
 	@BeanProperty
 	val defaultOpenEnded = false

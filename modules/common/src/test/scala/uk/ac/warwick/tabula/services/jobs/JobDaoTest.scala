@@ -5,6 +5,7 @@ import uk.ac.warwick.spring.Wire
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.jobs.TestingJob
 
+// scalastyle:off magic.number
 class JobDaoTest extends AppContextTestBase with HasJobDao {
 	
 	@Autowired var service: JobService = _

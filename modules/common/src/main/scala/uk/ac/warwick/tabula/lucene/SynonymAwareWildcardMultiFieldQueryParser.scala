@@ -12,7 +12,10 @@ import org.apache.lucene.search.WildcardQuery
 import org.apache.lucene.util.Version
 import org.apache.lucene.queryparser.classic.QueryParser.Operator
 
-class SynonymAwareWildcardMultiFieldQueryParser(fields: Traversable[String], analyzer: Analyzer) extends MultiFieldQueryParser(Version.LUCENE_40, fields.toArray[String], analyzer) {
+class SynonymAwareWildcardMultiFieldQueryParser(
+		fields: Traversable[String], 
+		analyzer: Analyzer) 
+		extends MultiFieldQueryParser(Version.LUCENE_40, fields.toArray[String], analyzer) {
 	
 	setDefaultOperator(Operator.AND)
 	

@@ -326,12 +326,14 @@ trait TurnitinMethods { self: Session =>
 		else resolveError(response)
 	}
 
+	// scalastyle:off magic.number
 	def resolveError(response: TurnitinResponse): Response = response.code match {
 		case 419 => AlreadyExists()
 		case 204 => ClassNotFound()
 		case 206 => AssignmentNotFound()
 		case _ => Failed(response.code, response.message)
 	}
+	// scalastyle:on magic.number
 
 }
 

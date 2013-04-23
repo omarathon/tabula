@@ -8,6 +8,7 @@ import javax.persistence.Entity
 import org.junit.Test
 import uk.ac.warwick.tabula.services.AssignmentService
 
+// scalastyle:off magic.number
 class FormFieldTest extends TestBase with Mockito {
 	@Test def commentFieldFormatting {
 		val comment = new CommentField

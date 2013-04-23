@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.util.Random
 import uk.ac.warwick.tabula.PersistenceTestBase
 
+// scalastyle:off magic.number
 class FeedbackTest extends PersistenceTestBase {
 	
 	@Test def fields {

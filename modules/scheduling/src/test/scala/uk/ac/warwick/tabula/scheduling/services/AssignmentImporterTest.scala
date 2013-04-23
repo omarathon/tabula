@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.JavaImports._
 
+// scalastyle:off magic.number
 class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 
 	@Resource(name="academicDataStore") var ads:DataSource =_

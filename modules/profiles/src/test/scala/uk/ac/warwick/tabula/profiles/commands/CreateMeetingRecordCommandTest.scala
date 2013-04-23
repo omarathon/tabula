@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 
+// scalastyle:off magic.number
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)

@@ -83,27 +83,29 @@ class UploadedFile extends BindListener {
 		}
 		
 		// Early exit if we've failed binding
-		if (bindResult.find(_ == false).isDefined) return
+		if (!bindResult.contains(false)) {
 		
-		if (hasUploads) {
-			// convert MultipartFiles into FileAttachments
-			transactional() {
-				val newAttachments = for (item <- permittedUploads) yield {
-					val a = new FileAttachment
-					a.name = new File(item.getOriginalFilename()).getName
-					a.uploadedData = item.getInputStream
-					a.uploadedDataLength = item.getSize
-					fileDao.saveTemporary(a)
-					a
+			if (hasUploads) {
+				// convert MultipartFiles into FileAttachments
+				transactional() {
+					val newAttachments = for (item <- permittedUploads) yield {
+						val a = new FileAttachment
+						a.name = new File(item.getOriginalFilename()).getName
+						a.uploadedData = item.getInputStream
+						a.uploadedDataLength = item.getSize
+						fileDao.saveTemporary(a)
+						a
+					}
+					// remove converted files from upload to avoid duplicates
+					upload.clear
+					attached.addAll(newAttachments)
 				}
-				// remove converted files from upload to avoid duplicates
-				upload.clear
-				attached.addAll(newAttachments)
+			} else {
+				// sometimes we manually add FileAttachments with uploaded data to persist
+				for (item <- attached if item.uploadedData != null)
+					fileDao.saveTemporary(item)
 			}
-		} else {
-			// sometimes we manually add FileAttachments with uploaded data to persist
-			for (item <- attached if item.uploadedData != null)
-				fileDao.saveTemporary(item)
+		
 		}
 
 	}

@@ -21,7 +21,8 @@ import uk.ac.warwick.tabula.data.model.Module
 class DeleteSubmissionsAndFeedback extends CourseworkController {
 
 	@ModelAttribute
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = new DeleteSubmissionsAndFeedbackCommand(module, assignment)
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+		new DeleteSubmissionsAndFeedbackCommand(module, assignment)
 
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 

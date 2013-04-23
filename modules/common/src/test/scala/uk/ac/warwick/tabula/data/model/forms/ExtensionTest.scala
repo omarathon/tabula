@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
+// scalastyle:off magic.number
 class ExtensionTest extends PersistenceTestBase {
 
   @Test def testExtension {

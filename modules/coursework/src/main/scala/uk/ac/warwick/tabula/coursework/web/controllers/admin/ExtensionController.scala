@@ -129,7 +129,11 @@ class AddExtensionController extends ExtensionController {
 class EditExtensionController extends ExtensionController {
 	
 	@ModelAttribute("modifyExtensionCommand")
-	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
+	def editCommand(
+			@PathVariable("module") module:Module,
+			@PathVariable("assignment") assignment:Assignment, 
+			@PathVariable("universityId") universityId:String, 
+			user:CurrentUser) =
 		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
 	validatesSelf[EditExtensionCommand]
@@ -176,7 +180,11 @@ class EditExtensionController extends ExtensionController {
 class ReviewExtensionRequestController extends ExtensionController {
 	
 	@ModelAttribute("modifyExtensionCommand")
-	def editCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) = 
+	def editCommand(
+			@PathVariable("module") module:Module, 
+			@PathVariable("assignment") assignment:Assignment, 
+			@PathVariable("universityId") universityId:String, 
+			user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
 	validatesSelf[ReviewExtensionRequestCommand]

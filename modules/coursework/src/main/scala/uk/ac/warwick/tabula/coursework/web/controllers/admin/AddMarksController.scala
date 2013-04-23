@@ -34,7 +34,11 @@ class AddMarksController extends CourseworkController {
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadZipForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, @ModelAttribute cmd: AdminAddMarksCommand): Mav = {
+	def uploadZipForm(
+			@PathVariable module: Module, 
+			@PathVariable(value = "assignment") assignment: Assignment, 
+			@ModelAttribute cmd: AdminAddMarksCommand): Mav = {
+		
 		val members = assignmentMembershipService.determineMembershipUsers(cmd.assignment)
 
 		val marksToDisplay = members.map { member =>

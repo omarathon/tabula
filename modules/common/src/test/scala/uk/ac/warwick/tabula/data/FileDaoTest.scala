@@ -19,6 +19,7 @@ import java.io.File
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
 
+// scalastyle:off magic.number
 class FileDaoTest extends AppContextTestBase {
 
 	@Autowired var dao:FileDao =_

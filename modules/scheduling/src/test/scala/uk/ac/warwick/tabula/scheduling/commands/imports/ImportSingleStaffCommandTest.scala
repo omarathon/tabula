@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StaffProperties
 import java.sql.ResultSetMetaData
 
+// scalastyle:off magic.number
 class ImportSingleStaffCommandTest extends TestBase with Mockito {
 	
 	trait Environment {

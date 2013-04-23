@@ -24,7 +24,11 @@ import org.springframework.util.Assert
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.SubmissionService
 
-class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[Submission] with SelfValidating with BindListener {
+class SubmitAssignmentCommand(
+		val module: Module, 
+		val assignment: Assignment, 
+		val user: CurrentUser) 
+		extends Command[Submission] with SelfValidating with BindListener {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
@@ -34,11 +38,10 @@ class SubmitAssignmentCommand(val module: Module, val assignment: Assignment, va
 
 	var fields = buildEmptyFields
 
+	var plagiarismDeclaration: Boolean = false
+	
 	// used as a hint to the view.
-	@transient var justSubmitted: Boolean = false
-
-	// just used as a hint to the view.
-	@transient var plagiarismDeclaration: Boolean = false
+	var justSubmitted: Boolean = false
 
 	override def onBind(result:BindingResult) {
 		for ((key, field) <- fields) field.onBind(result)

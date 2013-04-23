@@ -68,46 +68,48 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			breakable { while (true) {
 				logger.debug("Getting list of files: " + listFilesUrl + " : " + startDate.getMillis)
 				
-				val json = listFiles(startDate).orNull
+				val jsonOption = listFiles(startDate)
 				
 				// We return here because this is a fault. We should not continue to write the sync log at the end of execution
-				if (json == null) return null
+				jsonOption.foreach { json => 
 				
-				try {
-					lastRetrievedCreationDate = new DateTime(json.getLong("lastFileReceived"))
-				} catch {
-					case e: Throwable => {
-						logger.debug("No files received")
+					try {
+						lastRetrievedCreationDate = new DateTime(json.getLong("lastFileReceived"))
+					} catch {
+						case e: Throwable => {
+							logger.debug("No files received")
+							break
+						}
+					}
+					
+					if (json.getJSONArray("files") == files && lastRetrievedCreationDate != startDate) {
+						logger.debug("We're getting the same files again - stop!")
 						break
 					}
-				}
-				
-				if (json.getJSONArray("files") == files && lastRetrievedCreationDate != startDate) {
-					logger.debug("We're getting the same files again - stop!")
-					break
-				}
-				
-				files = json.getJSONArray("files")
-				
-				val allFiles = for (i <- 0 to files.length - 1) yield files.getJSONObject(i)
-				copyMissingFiles(allFiles, startDate, result)
-				
-				val maxResponses = json.getInt("maxResponses")
-				if (files.length < maxResponses) {
-					logger.debug("There should be no more files, as the number returned: " + files.length + " is lower than the maxResponses: " + maxResponses)
-					break
-				}
-				
-				if (lastRetrievedCreationDate == startDate) {
-					// We've already got the initial set, now need to get those onwards (on this date)
-					syncSameDateFiles(allFiles, startDate, result)
 					
-					// Once we've got all of the same-date files, increment the date by one millisecond, so we don't get the same files all over again
-					lastRetrievedCreationDate = lastRetrievedCreationDate.plusMillis(1)
+					files = json.getJSONArray("files")
+					
+					val allFiles = for (i <- 0 to files.length - 1) yield files.getJSONObject(i)
+					copyMissingFiles(allFiles, startDate, result)
+					
+					val maxResponses = json.getInt("maxResponses")
+					if (files.length < maxResponses) {
+						logger.debug("There should be no more files, as the number returned: " + files.length + " is lower than the maxResponses: " + maxResponses)
+						break
+					}
+					
+					if (lastRetrievedCreationDate == startDate) {
+						// We've already got the initial set, now need to get those onwards (on this date)
+						syncSameDateFiles(allFiles, startDate, result)
+						
+						// Once we've got all of the same-date files, increment the date by one millisecond, so we don't get the same files all over again
+						lastRetrievedCreationDate = lastRetrievedCreationDate.plusMillis(1)
+					}
+					
+					// There are more left to fetch
+					startDate = lastRetrievedCreationDate
+					
 				}
-				
-				// There are more left to fetch
-				startDate = lastRetrievedCreationDate
 			} }
 			
 			// Store the last created date of the last updated file
@@ -215,36 +217,39 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	
 	private def syncSameDateFiles(theLastFiles: Seq[JSONObject], startDate: DateTime, result: SyncReplicaResult) {
 		var lastFiles = theLastFiles
-		breakable { while(true) {
-            // we've got a whole list of hashes with the same date
-            // so now get the ones with this date, from a certain hash onwards
-			logger.debug("Found a whole list of hashes with the last created date:" + startDate);
-			
-			val lastId = lastFiles.last.getString("id")
-			
-			val json = listFiles(startDate, lastId).orNull
+		breakable { 
+			while(true) {
+				// we've got a whole list of hashes with the same date
+				// so now get the ones with this date, from a certain hash onwards
+				logger.debug("Found a whole list of hashes with the last created date:" + startDate);
 				
-			// We return here because this is a fault. We should not continue to write the sync log at the end of execution
-			if (json == null) return
-			
-			val theseFilesJSON = json.getJSONArray("files")
-			val theseFiles = for (i <- 0 to theseFilesJSON.length - 1) yield theseFilesJSON.getJSONObject(i)
-			
-			if (theseFiles == lastFiles) {
-				logger.debug("we're getting the same files again; break!")
-				break
-			}
-			
-			lastFiles = theseFiles
-			
-			val maxResponses = json.getInt("maxResponses")
-			copyMissingFiles(lastFiles, startDate, result)
-			
-			// Break when there's no more to fetch
-			if (lastFiles.length < maxResponses) {
-				logger.debug("There should be no more hashes with this date: " + startDate + " as the number returned: " + lastFiles.length + " is lower than the maxResponses: " + maxResponses)
-			}
-		} }
+				val lastId = lastFiles.last.getString("id")
+				
+				val jsonOption = listFiles(startDate, lastId)
+				
+				jsonOption.foreach { json => 
+				
+					val theseFilesJSON = json.getJSONArray("files")
+					val theseFiles = for (i <- 0 to theseFilesJSON.length - 1) yield theseFilesJSON.getJSONObject(i)
+					
+					if (theseFiles == lastFiles) {
+						logger.debug("we're getting the same files again; break!")
+						break
+					}
+					
+					lastFiles = theseFiles
+					
+					val maxResponses = json.getInt("maxResponses")
+					copyMissingFiles(lastFiles, startDate, result)
+					
+					// Break when there's no more to fetch
+					if (lastFiles.length < maxResponses) {
+						logger.debug("There should be no more hashes with this date: " + startDate + " as the number returned: " + lastFiles.length + " is lower than the maxResponses: " + maxResponses)
+					}
+					
+				}
+			} 
+		}
 	}
 	
 	private def copyMissingFiles(files: Seq[JSONObject], startDate: DateTime, result: SyncReplicaResult) {

@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model.forms.AssessmentGroup
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.Fixtures
 
+// scalastyle:off magic.number
 class AssignmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var assignmentService:AssignmentServiceImpl =_
@@ -582,16 +583,18 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		session.flush
 		
-		withUser("manual1", "0000006") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-		withUser("manual2", "0000007") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("manual3", "0000008") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("manual4", "0000009") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		val ams = assignmentMembershipService
 		
-		withUser("student1", "0000001") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("student2", "0000002") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("student3", "0000003") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student4", "0000004") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student5", "0000005") { assignmentMembershipService.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
+		withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("manual4", "0000009") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		
+		withUser("student1", "0000001") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+		withUser("student2", "0000002") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		withUser("student3", "0000003") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+		withUser("student4", "0000004") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+		withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
 	}
 	
 	@Test def getAssignmentWhereMarker = transactional { tx =>

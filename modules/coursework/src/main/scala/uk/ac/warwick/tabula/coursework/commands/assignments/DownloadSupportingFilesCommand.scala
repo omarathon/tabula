@@ -11,7 +11,12 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions._
 
-class DownloadSupportingFilesCommand(val module: Module, val assignment: Assignment, val extension: Extension, val filename: String) extends Command[Option[RenderableFile]] with ReadOnly{
+class DownloadSupportingFilesCommand(
+		val module: Module, 
+		val assignment: Assignment, 
+		val extension: Extension, 
+		val filename: String) 
+		extends Command[Option[RenderableFile]] with ReadOnly{
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.Read, extension)

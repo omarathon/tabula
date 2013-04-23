@@ -52,7 +52,7 @@ abstract class ExtensionMessage(var extension: Extension, var assignment: Assign
 			true
 		}
 		else {
-			logger.error("Unable to send extension message to "+recipient.getUserId+". No email address is specified.")
+			logger.error(s"Unable to send extension message to ${recipient.getUserId}. No email address is specified.")
 			false
 		}
 	}

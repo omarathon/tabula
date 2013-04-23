@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import org.joda.time.PeriodType
 import org.joda.time.Interval
 
+// scalastyle:off magic.number
 class DurationFormatterTest extends TestBase {
 	@Test def format {		
 		implicit val start = dateTime(2012, 5)

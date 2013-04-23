@@ -9,6 +9,7 @@ import org.joda.time.DateTimeConstants
 import org.springframework.util.FileCopyUtils
 import java.io.FileReader
 
+// scalastyle:off magic.number
 class SanityCheckFilesystemCommandTest extends TestBase with Mockito {
 	
 	val dao = mock[FileDao]

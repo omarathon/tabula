@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.ss.usermodel.Cell
 
+// scalastyle:off
 class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 	@Test
 	def simpleGetSubmissionTest() {
