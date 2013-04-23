@@ -148,14 +148,30 @@ $(function(){
 
             $('.form-post').click(function(event){
                 event.preventDefault();
-                var $checkedBoxes = $(".collection-checkbox:checked", $container);
+                
+                var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                var doFormSubmit = false;                
+                
                 if ($container.data('checked') != 'none') {
-                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                    var $checkedBoxes = $(".collection-checkbox:checked", $container);
                     $form.append($checkedBoxes.clone());
-                    $(document.body).append($form);
-                    $form.submit();
+                    
+                    doFormSubmit = true;
                 }
-                return false;
+                                
+                if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
+                		var $inputs = $(':input', '.filter-form');
+                		$form.append($inputs.clone());
+                
+                		doFormSubmit = true;
+                }
+                               
+                if (doFormSubmit) {
+                	$(document.body).append($form);
+                  $form.submit();
+                } else {
+                	return false;
+                }
             });
             
         },

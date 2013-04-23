@@ -55,7 +55,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	def allFilters(@PathVariable("assignment") assignment: Assignment) =
 		CourseworkFilters.AllFilters.filter(_.applies(assignment))
 
-	@RequestMapping(Array("/list"))
+	@RequestMapping(Array("/list", "/summary"))
 	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
 		

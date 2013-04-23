@@ -37,6 +37,9 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
+	
+	// When we call export commands, we may want to further filter by a subset of student IDs
+	var students: JList[String] = JArrayList()
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
@@ -137,8 +140,13 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		
 		val stillToDownload = membersWithPublishedFeedback filterNot { item => item.coursework.enhancedFeedback map { _.downloaded } getOrElse(false) }
 		
+		val allStudents = (unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap))
+		val studentsFiltered = 
+			if (students.isEmpty) allStudents
+			else allStudents.filter { student => students.contains(student.user.getWarwickId) }
+		
 		SubmissionAndFeedbackResults(
-			students=(unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap)),
+			students=studentsFiltered,
 			whoDownloaded=whoDownloaded,
 			stillToDownload=stillToDownload,
 			hasPublishedFeedback=hasPublishedFeedback,
