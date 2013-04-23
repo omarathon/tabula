@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model._
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
+	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
 	def getBySprCode(sprCode: String): Option[StudentMember]
@@ -37,9 +38,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	import Order._
 	
 	def saveOrUpdate(member: Member) = member match {
-			case ignore: RuntimeMember => // shouldn't ever get here, but making sure
-			case _ => session.saveOrUpdate(member)
-		}
+		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+		case _ => session.saveOrUpdate(member)
+	}
+	
+	def delete(member: Member) = member match {
+		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+		case _ => session.delete(member)
+	}
 	
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
 	
