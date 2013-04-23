@@ -68,6 +68,12 @@ class DurationFormatterTest extends TestBase {
 		check(start, end, "3 hours")
 	}
 	
+	@Test def tagHandlesBagArgs {
+		// TAB-688
+		checkTag(null, null)
+		checkTag(null, null, null)
+	}
+	
 	def check(start:DateTime, end:DateTime, expected:String) { 
 		DurationFormatter.format(start, end) should be (expected)
 	}
