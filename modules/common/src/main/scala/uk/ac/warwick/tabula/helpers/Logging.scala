@@ -10,6 +10,8 @@ trait Logging {
 	@transient lazy val logger = Logger.getLogger(loggerName)
 	@transient lazy val debugEnabled = logger.isDebugEnabled
 
+	@transient val Error = Level.ERROR
+	@transient val Warn = Level.WARN
 	@transient val Info = Level.INFO
 	@transient val Debug = Level.DEBUG
 
@@ -44,32 +46,25 @@ trait Logging {
 	 * Wrap some code in a stopwatch, logging some timing info
 	 * if it takes longer than minMillis.
 	 */
-	def benchmark[A](description: String, level: Priority = Info, minMillis: Int = 0)(fn: => A): A = {
-		if (Logging.benchmarking) {
-			val s = StopWatch()
-			try s.record(description) {
-				fn
-			} finally {
-				if (s.getTotalTimeMillis > minMillis) {
-					logger.log(level, s.prettyPrint)
-				}
-			}
-		} else {
+	def benchmark[A](description: String, level: Priority = Info, minMillis: Int = 0, stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(), logger: Logger = this.logger)(fn: => A): A = 
+		timed(description, level, minMillis, stopWatch, logger) { timer =>
 			fn
 		}
-	}
 	
 	/**
 	 * The same as benchmark, but passes the StopWatch as a callback to the function
 	 */
-	def timed[A](description: String, level: Priority = Info, minMillis: Int = 0)(fn: => (uk.ac.warwick.util.core.StopWatch => A)): A = {
-		val s = StopWatch()
-		try s.record(description) {
-			fn(s)
-		} finally {
-			if (s.getTotalTimeMillis > minMillis) {
-				logger.log(level, s.prettyPrint)
+	def timed[A](description: String, level: Priority = Info, minMillis: Int = 0, stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(), logger: Logger = this.logger)(fn: => (uk.ac.warwick.util.core.StopWatch => A)): A = {
+		if (Logging.benchmarking) {
+			try stopWatch.record(description) {
+				fn(stopWatch)
+			} finally {
+				if (stopWatch.getTotalTimeMillis > minMillis) {
+					logger.log(level, stopWatch.prettyPrint)
+				}
 			}
+		} else {
+			fn(stopWatch)
 		}
 	}
 
