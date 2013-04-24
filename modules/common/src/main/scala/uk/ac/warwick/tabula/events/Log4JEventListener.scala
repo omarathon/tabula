@@ -7,11 +7,9 @@ import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.commands.Description
 
 class Log4JEventListener extends EventListener {
+	import EventDescription._
 
 	val logger = Logger.getLogger("uk.ac.warwick.tabula.AUDIT")
-
-	val QUOTE = "\""
-	val ESCQUOTE = "\\" + QUOTE
 
 	override def beforeCommand(event: Event) {
 		val s = generateMessage(event, "pre-event")
@@ -28,6 +26,12 @@ class Log4JEventListener extends EventListener {
 		logger.info(s.toString)
 	}
 
+}
+
+object EventDescription {
+	val QUOTE = "\""
+	val ESCQUOTE = "\\" + QUOTE
+	
 	def generateMessage(event: Event, eventStage: String = "event") = {
 		val s = new StringBuilder
 		s ++= eventStage ++ "=" ++ event.name
@@ -59,5 +63,4 @@ class Log4JEventListener extends EventListener {
 		else
 			value
 	}
-
 }

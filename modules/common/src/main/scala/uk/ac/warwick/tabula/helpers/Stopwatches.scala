@@ -14,6 +14,8 @@ object Stopwatches {
 				stopwatch.stop();
 			}
 		}
+		
+		def isFinished = !stopwatch.hasRunningTask()
 	}
 
 	implicit def ToEnhancedStopwatch(s: util.core.StopWatch) = new EnhancedStopwatch(s)
