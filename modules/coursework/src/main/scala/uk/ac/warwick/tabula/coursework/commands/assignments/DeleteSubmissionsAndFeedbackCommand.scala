@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -86,14 +86,8 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	}
 	
 	
-	def getStudentsAsUsers(): JList[User] = {
-		val studentsAsUsers: JList[User] = JArrayList()
-		for (student <- students)  {
-			val user: User = userLookup.getUserByWarwickUniId(student)
-			studentsAsUsers.add(user)
-		}
-		studentsAsUsers
-	}
+	def getStudentsAsUsers(): JList[User] =
+		students.par.map { userLookup.getUserByWarwickUniId(_) }.seq
 
 	override def describe(d: Description) = d
 		.assignment(assignment)

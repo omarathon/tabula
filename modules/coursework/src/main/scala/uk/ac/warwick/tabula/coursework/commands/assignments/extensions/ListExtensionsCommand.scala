@@ -34,10 +34,9 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 
 		// all the users that aren't members of this assignment, but have submitted work to it
 		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
-		val nonMembers = Map() ++ (
-			for(extension <- extensionsFromNonMembers)
-				yield (extension.universityId -> userLookup.getUserByWarwickUniId(extension.universityId))
-		)
+		val nonMembers = extensionsFromNonMembers.par.map { extension => 
+			(extension.universityId -> userLookup.getUserByWarwickUniId(extension.universityId))
+		}.seq.toMap
 
 		// build lookup of names from non members of the assignment that have submitted work plus members
 		val students = nonMembers ++ assignmentMembership
