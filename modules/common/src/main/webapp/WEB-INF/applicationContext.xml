@@ -345,6 +345,30 @@
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
+	
+	<!-- Expose EhCache properties as system properties -->
+	<bean
+    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property
+        name="targetObject">
+        <!-- System.getProperties() -->
+        <bean
+            class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <property name="targetClass" value="java.lang.System" />
+            <property name="targetMethod" value="getProperties" />
+        </bean>
+    </property>
+    <property
+        name="targetMethod"
+        value="putAll" />
+    <property
+        name="arguments">
+        <!-- The new Properties -->
+        <util:properties>
+            <prop key="warwick.ehcache.config">/ehcache-config.xml</prop>
+        </util:properties>
+    </property>
+	</bean>
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
