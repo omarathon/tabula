@@ -100,8 +100,9 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedSubmissionForUniId = usersSubmissions.headOption
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption map { feedback =>
-				new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
-						x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+				new FeedbackListItem(feedback, 
+					!feedback.attachments.isEmpty && (whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+						x._2.isAfter(feedback.mostRecentAttachmentUpload))}))
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>

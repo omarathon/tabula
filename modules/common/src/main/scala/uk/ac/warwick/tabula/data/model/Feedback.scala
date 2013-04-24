@@ -100,9 +100,9 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY)
 	var attachments: JList[FileAttachment] = JArrayList()
 	
-	def mostRecentAttachmentUpload = attachments.maxBy {
-		_.dateUploaded
-	}.dateUploaded
+	def mostRecentAttachmentUpload =
+		if (attachments.isEmpty) null
+		else attachments.maxBy { _.dateUploaded }.dateUploaded
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
