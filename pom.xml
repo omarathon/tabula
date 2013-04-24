@@ -540,6 +540,9 @@
 					<artifactId>scalastyle-maven-plugin</artifactId>
 					<version>0.2.0</version>
 					<configuration>
+						<!-- TAB-697 -->
+						<skip>true</skip>
+						
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>
