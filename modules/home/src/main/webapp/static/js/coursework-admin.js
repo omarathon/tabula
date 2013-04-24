@@ -542,9 +542,9 @@ $(function(){
         }
         $('.status').each(function(){
             if ($(this).html() === "Approved")
-                $(this).html('<span class="label label-success">Approved</span>');
+                $(this).html('<span>Granted</span>');
             else if ($(this).html() === "Rejected")
-                $(this).html('<span class="label label-important">Rejected</span>');
+                $(this).html('<span">Rejected</span>');
         });
     };
 

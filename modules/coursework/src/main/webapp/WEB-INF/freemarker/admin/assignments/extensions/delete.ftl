@@ -3,17 +3,17 @@
 <#escape x as x?html>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal">×</button>
-		<h3>Revoke extension for ${universityId}</h3>
+		<h3>Revoke extension for ${userFullName}</h3>
 	</div>
 	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/delete/${universityId}')}" commandName="deleteExtensionCommand">
 		<div class="modal-body">
 			<p>
-				Are you sure that you wish to revoke the extension for ${universityId}?
+				${userFirstName} currently has an extension until <@fmt.date date=extension.expiryDate />
 			</p>
 			<@f.input type="hidden" path="universityIds[0]" />
 		</div>
 		<div class="modal-footer">
-			<input type="submit" class="btn btn-primary" value="Confirm" />
+			<input type="submit" class="btn btn-danger" value="Revoke" />
 			<a href="#" class="close-model btn" data-dismiss="modal">Cancel</a>
 		</div>
 	</@f.form>

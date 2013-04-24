@@ -67,7 +67,7 @@ class ListExtensionRequestsController extends ExtensionController {
 		val extensionsInfo = cmd.apply()
 		
 		val model = Mav("admin/assignments/extensions/list",
-			"studentNameLookup" -> extensionsInfo.studentNames,
+			"studentNameLookup" -> extensionsInfo.students,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
 			"existingExtensions" -> extensionsInfo.manualExtensions,
@@ -97,7 +97,8 @@ class AddExtensionController extends ExtensionController {
 		val model = Mav("admin/assignments/extensions/add",
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"universityId" -> universityId
+			"universityId" -> universityId,
+			"userFullName" -> userLookup.getUserByWarwickUniId(universityId).getFullName
 		).noLayout()
 		model
 	}
@@ -145,7 +146,8 @@ class EditExtensionController extends ExtensionController {
 			"command" -> cmd,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.extension.universityId
+			"universityId" -> cmd.extension.universityId,
+			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName
 		).noLayout()
 		model
 	}
@@ -191,13 +193,14 @@ class ReviewExtensionRequestController extends ExtensionController {
 	
 	// review an extension request
 	@RequestMapping(method=Array(GET))
-	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {		
+	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {
 		val model = Mav("admin/assignments/extensions/review_request",
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.extension.universityId
+			"universityId" -> cmd.extension.universityId,
+			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName
 		).noLayout()
 		model
 	}
@@ -237,10 +240,14 @@ class DeleteExtensionController extends ExtensionController {
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(method=Array(GET))
 	def deleteExtension(@ModelAttribute cmd:DeleteExtensionCommand):Mav = {
+		val student = userLookup.getUserByWarwickUniId(cmd.universityId)
 		val model = Mav("admin/assignments/extensions/delete",
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.universityId
+			"universityId" -> cmd.universityId,
+			"extension" -> cmd.assignment.findExtension(cmd.universityId).getOrElse(""),
+			"userFullName" -> student.getFullName,
+			"userFirstName" -> student.getFirstName
 		).noLayout()
 		model
 	}

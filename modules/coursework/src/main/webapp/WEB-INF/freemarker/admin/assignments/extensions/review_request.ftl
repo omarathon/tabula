@@ -3,7 +3,7 @@
 <#escape x as x?html>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal">×</button>
-		<h3>Review extension request by ${universityId}</h3>
+		<h3>Review extension request by ${userFullName}</h3>
 	</div>
 	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/review-request/${universityId}')}" commandName="modifyExtensionCommand">
 		<div class="modal-body">
@@ -53,7 +53,7 @@
 		<@f.hidden class="approveField" path="extensionItems[0].approved" />
 		<@f.hidden class="rejectField" path="extensionItems[0].rejected" />
 		<div class="modal-footer request-controls">
-			<input id="approveButton" type="submit" class="btn btn-success" value="Approve" />
+			<input id="approveButton" type="submit" class="btn btn-success" value="Grant" />
 			<input id="rejectButton" type="submit" class="btn btn-danger" value="Reject" />
 			<a href="#" class="close-model btn" data-dismiss="modal">Cancel</a>
 		</div>
