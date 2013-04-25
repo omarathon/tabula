@@ -13,7 +13,6 @@ import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.Assignment
-
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.beans.factory.annotation.Configurable
@@ -26,6 +25,7 @@ import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.reflect._
+import uk.ac.warwick.tabula.helpers.Logging
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -44,7 +44,7 @@ import scala.reflect._
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
-abstract class FormField extends GeneratedId {
+abstract class FormField extends GeneratedId with Logging {
 
 	@transient var json = Wire.auto[ObjectMapper]
 	@transient var userLookup = Wire.auto[UserLookupService]
@@ -85,6 +85,11 @@ abstract class FormField extends GeneratedId {
 	protected def getProperty[A : ClassTag](name: String, default: A) =
 		propertiesMap.get(name) match {
 			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
+			case Some(obj) => {
+				// TAB-705 warn when we return an unexpected type
+				logger.warn("Expected property %s of type %s, but was %s".format(name, classTag[A].runtimeClass.getName, obj.getClass.getName))
+				default
+			}
 			case _ => default
 		}
 
@@ -197,8 +202,8 @@ class FileField extends FormField {
 	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)
 
 	// List of extensions.
-	def attachmentTypes: Seq[String] = getProperty[JList[String]]("attachmentTypes", JArrayList())
-	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: JList[String])
+	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
+	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: Seq[String])
 	
 	// This is after onBind is called, so any multipart files have been persisted as attachments
 	override def validate(value: SubmissionValue, errors: Errors) {
