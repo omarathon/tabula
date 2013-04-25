@@ -40,5 +40,17 @@ class ZipCreatorTest extends TestBase {
 		creator.invalidate(name)
 		zip.exists() should be (false)
 	}
+	
+	@Test def trunc {
+		creator.trunc("steve", 100) should be ("steve")
+		creator.trunc("steve", 5) should be ("steve")
+		creator.trunc("steve", 3) should be ("ste")
+		
+		creator.trunc(".htaccess", 3) should be (".ht")
+		
+		// We don't include the extension in length calculations to make it easier
+		creator.trunc("bill.ted", 3) should be ("bil.ted")
+		creator.trunc("bill.ted", 5) should be ("bill.ted")
+	}
 
 }

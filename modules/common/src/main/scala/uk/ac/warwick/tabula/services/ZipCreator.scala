@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.hibernate.id.GUIDGenerator
 import java.util.UUID
 import java.util.zip.Deflater
+import uk.ac.warwick.util.core.spring.FileUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * An item in a Zip file. Can be a file or a folder.
@@ -41,6 +43,7 @@ case class ZipFolderItem(val name: String, startItems: Seq[ZipItem] = Nil) exten
  * than to keep serving half a corrupt file).
  */
 trait ZipCreator extends Logging {
+	import ZipCreator._
 
 	def zipDir: File
 
@@ -106,15 +109,23 @@ trait ZipCreator extends Logging {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
 			for (item <- items) item match {
 				case file: ZipFileItem => {
-					zip.putArchiveEntry(new ZipArchiveEntry(basePath + file.name))
+					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
 					copy(file.input, zip)
 					zip.closeArchiveEntry()
 				}
-				case folder: ZipFolderItem => writeFolder(basePath + folder.name + "/", folder.items)
+				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
 			}
 		}
 		writeFolder("", items)
 	}
+	
+	def trunc(name: String, limit: Int) =
+		if (name.length() <= limit) name
+		else {
+			val ext = FileUtils.getLowerCaseExtension(name)
+			if (ext.hasText) FileUtils.getFileNameWithoutExtension(name).safeSubstring(0, limit) + "." + ext 
+			else name.substring(0, limit)
+		}
 
 	/**
 	 * Opens a zip output stream from this file, and runs the given function.
@@ -154,4 +165,9 @@ trait ZipCreator extends Logging {
 		}
 	}
 
+}
+
+object ZipCreator {
+	val MaxFolderLength = 20
+	val MaxFileLength = 100
 }
