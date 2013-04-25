@@ -44,7 +44,11 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	
 	def delete(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
-		case _ => session.delete(member)
+		case _ => {
+			session.delete(member)
+			// Immediately flush delete
+			session.flush()
+		}
 	}
 	
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
