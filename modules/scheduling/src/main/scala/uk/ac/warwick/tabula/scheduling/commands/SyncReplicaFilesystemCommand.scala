@@ -35,6 +35,7 @@ import uk.ac.warwick.tabula.scheduling.web.controllers.sync.DownloadFileControll
 import uk.ac.warwick.tabula.scheduling.web.controllers.sync.ListFilesController
 import org.json.JSONException
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.util.files.hash.FileHasher
 
 /**
  * This is a ReadOnly command because it runs in Maintenance mode on the replica
@@ -52,6 +53,8 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	var macGenerator = Wire.auto[MessageAuthenticationCodeGenerator]
 	
 	var fileDao = Wire.auto[FileDao]
+	
+	var fileHasher = Wire[FileHasher]
 	
 	lazy val listFilesUrl = Uri.parse(replicaMaster + "/scheduling/sync/listFiles.json")
 	lazy val getFileUrl = Uri.parse(replicaMaster + "/scheduling/sync/getFile")
@@ -255,6 +258,8 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	private def copyMissingFiles(files: Seq[JSONObject], startDate: DateTime, result: SyncReplicaResult) {
 		for (file <- files) try {
 			val id = file.getString("id")
+			val hash = Option(file.optString("hash"))
+			
 			val createdDate = new DateTime(file.getLong("createdDate"))
 			val authCode = macGenerator.generateMessageAuthenticationCode(id)
 			
@@ -276,7 +281,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			} else if ((!outputFile.getParentFile.exists || !outputFile.getParentFile.isDirectory) && !outputFile.getParentFile.mkdirs()) {
 				throw new IllegalStateException("Couldn't create parent directory for " + outputFile)
 			} else {
-				fetchFile(id, createdDate, authCode, outputFile, result)
+				fetchFile(id, hash, createdDate, authCode, outputFile, result)
 			}
 		} catch {
 			case e: IOException => {
@@ -286,7 +291,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 		}
 	}
 	
-	private def fetchFile(id: String, createdDate: DateTime, authCode: String, outputFile: File, result: SyncReplicaResult) {
+	private def fetchFile(id: String, hash: Option[String], createdDate: DateTime, authCode: String, outputFile: File, result: SyncReplicaResult) {
 		val url = 
 			new UriBuilder(getFileUrl)
 			.addQueryParameter(IdParam, id)
@@ -305,29 +310,36 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			successful = ex.execute(handle({ response =>
 				response.getStatusLine.getStatusCode match {
 					case HttpStatus.SC_OK => {
-						val is = response.getEntity.getContent
-						val os = new FileOutputStream(outputFile)
+						val hashMismatch = hash map { _ != fileHasher.hash(response.getEntity.getContent) } getOrElse (false)
 						
-						try {
-							val bytes = FileCopyUtils.copy(is, os)
-							logger.info("New file created: " + id)
+						if (hashMismatch) {
+							logger.info("Error fetching file, hash mismatch - " + outputFile)
+							false
+						} else {
+							val is = response.getEntity.getContent
+							val os = new FileOutputStream(outputFile)
 							
-							result.fileTransferred(bytes)
-							result.lastCreated(createdDate)
-							
-							true
-						} catch {
-							case e: FileNotFoundException => {
-								logger.info("File not found: " + outputFile)
-								false
+							try {
+								val bytes = FileCopyUtils.copy(is, os)
+								logger.info("New file created: " + id)
+								
+								result.fileTransferred(bytes)
+								result.lastCreated(createdDate)
+								
+								true
+							} catch {
+								case e: FileNotFoundException => {
+									logger.info("File not found: " + outputFile)
+									false
+								}
+								case e: IOException => {
+									logger.info("Error copying file: " + e.getMessage + " - " + outputFile)
+									false
+								}
+							} finally {
+								IOUtils.closeQuietly(is);
+								IOUtils.closeQuietly(os);
 							}
-							case e: IOException => {
-								logger.info("Error copying file: " + e.getMessage + " - " + outputFile)
-								false
-							}
-						} finally {
-							IOUtils.closeQuietly(is);
-							IOUtils.closeQuietly(os);
 						}
 					}
 					case code => {

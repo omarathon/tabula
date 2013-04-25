@@ -30,9 +30,11 @@ class FileDaoTest extends AppContextTestBase {
 		val attachments = for (i <- 1 to 10) yield {
 			val attachment = new FileAttachment
 			attachment.dateUploaded = new DateTime(2013, DateTimeConstants.FEBRUARY, i, 1, 0, 0, 0)
-			attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+			attachment.uploadedData = () => new ByteArrayInputStream("This is the best file ever".getBytes)
 			dao.savePermanent(attachment)
-					
+			
+			attachment.hash should be ("f95a27f06df98ba26182c22e277af960c0be9be6")
+
 			attachment
 		}
 		
@@ -58,7 +60,7 @@ class FileDaoTest extends AppContextTestBase {
 			for (i <- Range(0,10)) {
 				val attachment = new FileAttachment
 				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
-				attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+				attachment.uploadedData = () => new ByteArrayInputStream("This is the best file ever".getBytes)
 				dao.saveTemporary(attachment)
 			}
 		}

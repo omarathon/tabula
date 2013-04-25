@@ -20,6 +20,9 @@ class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]
+	
+	@Column(name="file_hash")
+	var hash: String = _
 
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -105,7 +108,7 @@ class FileAttachment extends GeneratedId {
 
 	def hasData = file != null
 
-	@transient var uploadedData: InputStream = null
+	@transient var uploadedData: (() => InputStream) = null
 	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {

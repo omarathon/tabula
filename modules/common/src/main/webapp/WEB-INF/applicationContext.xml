@@ -317,6 +317,8 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
+	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
+	
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
 	
