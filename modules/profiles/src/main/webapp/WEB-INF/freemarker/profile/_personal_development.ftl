@@ -100,40 +100,14 @@
 					})
 					.attr("src", target + "?iframe")
 					.appendTo($mb);
+
 			});
 		});
 
 		$m.on('click', 'button[type=submit]', function(e){
 			e.preventDefault();
-			var $form = $(this);
-			
-			$.ajax({
-				type: $form.attr("method"),
-				url: $form.attr("action"),
-				data: $form.serialize(),
-				
-				error: function() {
-					// just close
-					$m.modal("hide");
-				},
-				
-				success: function(data, status) {
-					thing = data;
-					if (data.indexOf("modal-header") > -1) {
-						// reload into modal
-						$m.html(data);
-						$m.find("input.date-picker").tabulaDatePicker();
-						$m.find('form.double-submit-protection').tabulaSubmitOnce();
-					} else {
-						// reload meeting data
-						$("section.meetings").replaceWith(data);
-						$('details').details();
-						$m.modal("hide");
-						scrollToOpenDetails();
-					}
-					$m.tabulaPrepareSpinners();
-				}
-			});
+			$m.find('iframe').contents().find('form').submit();
+
 		});
 	});
 	</script>

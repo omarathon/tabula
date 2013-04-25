@@ -39,7 +39,6 @@ class MeetingRecord extends GeneratedId with ToString {
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-	@OneToMany(mappedBy = "meetingRecord", fetch = FetchType.LAZY)
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var attachments: JList[FileAttachment] = JArrayList()
 
