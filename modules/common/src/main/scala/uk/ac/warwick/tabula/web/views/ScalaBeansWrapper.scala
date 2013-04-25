@@ -118,7 +118,6 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			}
 		} 
 		
-		// TODO permissions
 		override def get(key: String): TemplateModel = {
 			val x = key
 			getters.get(key) match {
