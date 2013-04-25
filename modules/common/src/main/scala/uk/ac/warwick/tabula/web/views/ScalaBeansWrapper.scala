@@ -16,12 +16,22 @@ import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.ScopelessPermission
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 /**
- * A implemenation of BeansWrapper that support native Scala basic and collection types
+ * A implementation of BeansWrapper that support native Scala basic and collection types
  * in Freemarker template engine.
  */
 class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
+	
+	var securityService = Wire[SecurityService]
 
 	def superWrap(obj: Object): TemplateModel = {
 		super.wrap(obj)
@@ -50,70 +60,94 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
 	}
-
-}
-
-/**
- * A model that will expose all Scala getters that has zero parameters
- * to the FM Hash#get method so can retrieve it without calling with parenthesis.
- */
-
-/**
- * Also understands regular JavaBean getters, useful when a Java bean has been extended
- * in Scala to implement Any. If both getter type is present, one will overwrite
- * the other in the map but this doesn't really matter as they do the same thing
- */
-class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
-	type Getter = () => AnyRef
-
-	val gettersCache = new mutable.HashMap[Class[_], mutable.HashMap[String, Getter]]
-
-	def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
-
-	val getters = {
-		val cls = sobj.getClass
-		gettersCache.synchronized {
-			gettersCache.get(cls) match {
-				case Some(cachedGetters) => cachedGetters
-				case None => {
-					val map = new mutable.HashMap[String, Getter]
-					cls.getMethods.foreach { m =>
-						val n = m.getName
-						if (!n.endsWith("_$eq") && m.getParameterTypes.length == 0) {
-							val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
-							val name = n match {
-								case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
-								case _ => n
+	
+	/**
+	 * A model that will expose all Scala getters that has zero parameters
+	 * to the FM Hash#get method so can retrieve it without calling with parenthesis.
+	 */
+	
+	/**
+	 * Also understands regular JavaBean getters, useful when a Java bean has been extended
+	 * in Scala to implement Any. If both getter type is present, one will overwrite
+	 * the other in the map but this doesn't really matter as they do the same thing
+	 */
+	class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
+		import ScalaHashModel._
+	
+		def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
+	
+		val getters = {
+			val cls = sobj.getClass
+			gettersCache.synchronized {
+				gettersCache.get(cls) match {
+					case Some(cachedGetters) => cachedGetters
+					case None => {
+						val map = new mutable.HashMap[String, (Getter, Seq[Permission])]
+						cls.getMethods.foreach { m =>
+							val n = m.getName
+							if (!n.endsWith("_$eq") && m.getParameterTypes.length == 0) {
+								val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
+								val name = n match {
+									case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
+									case _ => n
+								}
+								val restrictedAnnotation = m.getAnnotation(classOf[Restricted]) 
+								val perms: Seq[Permission] =
+									if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
+									else Nil			
+								
+								map += Pair(name, (m, perms))
 							}
-							map += Pair(name, (() => m.invoke(sobj)))
 						}
+						gettersCache.put(cls, map)
+						map
 					}
-					gettersCache.put(cls, map)
-					map
 				}
 			}
 		}
-	}
-	override def get(key: String): TemplateModel = {
-		val x = key
-		getters.get(key) match {
-			case Some(getter) => wrapper.wrap(getter())
-			case None => checkInnerClasses(key) match {
-				case Some(method) => method
-				case None => super.get(key)
+		
+		def user = RequestInfo.fromThread.get.user
+		
+		def canDo(perms: Seq[Permission]) = perms forall {
+			case permission: ScopelessPermission => securityService.can(user, permission)
+			case permission if classOf[PermissionsTarget].isInstance(sobj) => 
+				securityService.can(user, permission, sobj.asInstanceOf[PermissionsTarget])
+			case permission => {
+				logger.warn("Couldn't check for permission %s against object %s because it isn't a PermissionsTarget".format(permission.toString, sobj.toString))
+				false
+			}
+		} 
+		
+		// TODO permissions
+		override def get(key: String): TemplateModel = {
+			val x = key
+			getters.get(key) match {
+				case Some((getter, permissions)) => 
+					if (canDo(permissions)) wrapper.wrap(getter.invoke(sobj))
+					else null
+				case None => checkInnerClasses(key) match {
+					case Some(method) => method
+					case None => super.get(key)
+				}
 			}
 		}
-	}
-
-	def checkInnerClasses(key: String): Option[TemplateModel] = {
-		try {
-			Some(wrapper.wrap(Class.forName(sobj.getClass.getName + key + "$").getField("MODULE$").get(null)))
-		} catch {
-			case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
-				None
+	
+		def checkInnerClasses(key: String): Option[TemplateModel] = {
+			try {
+				Some(wrapper.wrap(Class.forName(sobj.getClass.getName + key + "$").getField("MODULE$").get(null)))
+			} catch {
+				case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
+					None
+			}
 		}
+	
+		override def isEmpty = false
+	}
+	
+	object ScalaHashModel {
+		type Getter = java.lang.reflect.Method
+		
+		val gettersCache = new mutable.HashMap[Class[_], mutable.HashMap[String, (Getter, Seq[Permission])]]
 	}
 
-	override def isEmpty = false
 }
-

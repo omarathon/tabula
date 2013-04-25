@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
 import scala.annotation.meta.getter
-//import uk.ac.warwick.tabula.system.NoBindInternal
 
 package object system {
 	
