@@ -28,6 +28,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	
 	var features = Wire.auto[Features]
+	
+	val BatchSize = 250
 
 	def applyInternal() {
 		if (features.profiles) {
@@ -66,7 +68,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		benchmark("Import all member details") {
 			for {
 				department <- madService.allDepartments;
-				userIdsAndCategories <- logSize(profileImporter.userIdsAndCategories(department)).grouped(250)
+				userIdsAndCategories <- logSize(profileImporter.userIdsAndCategories(department)).grouped(BatchSize)
 			} {
 				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(userIdsAndCategories.map(x => x.member.usercode)).toMap

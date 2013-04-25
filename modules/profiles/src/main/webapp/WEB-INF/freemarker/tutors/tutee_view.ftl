@@ -18,20 +18,22 @@
 			
 			<tbody>
 				<#list tutees as tuteeRelationship>
-					<#assign student = tuteeRelationship.studentMember />
-					<tr class="tutee">
-						<td>
-							<div class="photo">
-								<img src="<@routes.photo student />" />
-							</div>
-						</td>
-						<td><h6>${student.firstName}</h6></td>
-						<td><h6>${student.lastName}</h6></td>
-						<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
-						<td>${student.groupName}</td>
-						<td>${student.studyDetails.yearOfStudy!""}</td>
-						<td>${student.studyDetails.route.name!""}</td>
-					</tr>
+					<#if tuteeRelationship.studentMember?has_content>
+						<#assign student = tuteeRelationship.studentMember />
+						<tr class="tutee">
+							<td>
+								<div class="photo">
+									<img src="<@routes.photo student />" />
+								</div>
+							</td>
+							<td><h6>${student.firstName}</h6></td>
+							<td><h6>${student.lastName}</h6></td>
+							<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
+							<td>${student.groupName}</td>
+							<td>${student.studyDetails.yearOfStudy!""}</td>
+							<td>${student.studyDetails.route.name!""}</td>
+						</tr>
+					</#if>
 				</#list>
 			</tbody>
 		</table>

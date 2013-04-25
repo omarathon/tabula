@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
+import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -116,6 +118,7 @@ import uk.ac.warwick.tabula.data.model.Submission
 					"hasSubmission" -> submission.isDefined,
 					"feedback" -> feedback,
 					"hasFeedback" -> feedback.isDefined,
+					"hasExtension" -> extension.isDefined,
 					"extension" -> extension,
 					"isExtended" -> isExtended,
 					"extensionRequested" -> extensionRequested,

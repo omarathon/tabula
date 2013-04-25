@@ -39,7 +39,12 @@ class SecurityService extends Logging {
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	val checks: Seq[PermissionChecker] = List(checkGod _, checkPermissions _, checkRoles _)
+	val checks: Seq[PermissionChecker] = List(checkRuntimeMember _, checkGod _, checkPermissions _, checkRoles _)
+	
+	def checkRuntimeMember(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = scope match {
+		case ignore: RuntimeMember => Deny
+		case _ => Continue
+	}
 
 	def checkGod(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = if (user.god) Allow else Continue
 	
@@ -78,7 +83,7 @@ class SecurityService extends Logging {
 	
 	def checkPermissions(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
 		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
-		if (explicitPermissions == null) Continue
+		if (explicitPermissions == null || explicitPermissions.isEmpty) Continue
 		else {
 			val (allow, deny) = explicitPermissions.partition(_.permissionType)
 			
@@ -109,7 +114,6 @@ class SecurityService extends Logging {
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
 		
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
-		
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
 		val result: Response = checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
 
@@ -119,7 +123,6 @@ class SecurityService extends Logging {
 		} getOrElse {
 			throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
 		}
-
 	}
 	
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)

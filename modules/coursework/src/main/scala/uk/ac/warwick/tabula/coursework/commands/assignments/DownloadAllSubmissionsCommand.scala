@@ -13,7 +13,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadAllSubmissionsCommand(val module: Module, val assignment: Assignment, val filename: String) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadAllSubmissionsCommand(
+		val module: Module, 
+		val assignment: Assignment, 
+		val filename: String) 
+		extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)

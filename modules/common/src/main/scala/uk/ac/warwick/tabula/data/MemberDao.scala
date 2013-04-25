@@ -4,24 +4,16 @@ import scala.collection.JavaConversions.asScalaBuffer
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Restrictions.gt
+import org.hibernate.criterion._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.RelationshipType
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import org.hibernate.criterion._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.SitsStatus
+import uk.ac.warwick.tabula.data.model._
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
+	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
 	def getBySprCode(sprCode: String): Option[StudentMember]
@@ -45,7 +37,20 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	import Restrictions._
 	import Order._
 	
-	def saveOrUpdate(member: Member) = session.saveOrUpdate(member)
+	def saveOrUpdate(member: Member) = member match {
+		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+		case _ => session.saveOrUpdate(member)
+	}
+	
+	def delete(member: Member) = member match {
+		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+		case _ => {
+			session.delete(member)
+			// Immediately flush delete
+			session.flush()
+		}
+	}
+	
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
 	
 	def getByUniversityId(universityId: String) = 

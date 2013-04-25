@@ -6,6 +6,7 @@ import org.joda.time.DateTimeConstants
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 
+// scalastyle:off magic.number
 class MeetingRecordTest extends TestBase with Mockito {
 	
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
@@ -20,7 +21,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.relationship should be (null)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
-		meeting should not be ('approved)
+		meeting should be ('approved)
 	}
 	
 	@Test def everydayConstructor = withFakeTime(aprilFool) {
@@ -36,6 +37,6 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.relationship should be (relationship)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
-		meeting should not be ('approved)
+		meeting should be ('approved)
 	}
 }

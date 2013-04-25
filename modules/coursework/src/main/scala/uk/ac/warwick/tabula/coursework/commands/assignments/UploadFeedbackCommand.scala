@@ -23,8 +23,9 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.core.spring.FileUtils
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.tabula.data.model.Module
+import org.apache.commons.codec.digest.DigestUtils
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -80,6 +81,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
+	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
@@ -144,11 +147,18 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
-			
+			// TAB-489 - Check to see that this isn't a blank copy of the feedback template
+			else if (assignment.hasFeedbackTemplate && assignment.feedbackTemplate.attachment.actualDataLength == f.actualDataLength){
+				val fileHash = DigestUtils.shaHex(f.dataStream)
+				val templateHash = DigestUtils.shaHex(assignment.feedbackTemplate.attachment.dataStream)
+				if(fileHash == templateHash)
+					errors.rejectValue("file.attached[" + i + "]", "file.duplicate.template")
+			}
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {
 				errors.rejectValue("file.attached[" + i + "]", "file.url")
 			}
 		}
+
 		if (uniNumber.hasText) {
 			if (!UniversityId.isValid(uniNumber)) {
 				errors.rejectValue("uniNumber", "uniNumber.invalid")
@@ -159,7 +169,6 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				}
 				
 				validateExisting(item, errors)
-
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
@@ -168,57 +177,63 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	
 	def validateExisting(item: FeedbackItem, errors: Errors)
 
-	override def onBind(result:BindingResult) = transactional() {
-		file.onBind(result)
-
+	private def processFiles(bits: Seq[Pair[String, FileAttachment]]) {
+		
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
 				.file.attached.add(file)
+		
+		// go through individual files, extracting the uni number and grouping
+		// them into feedback items.
+		var itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
+		unrecognisedFiles.clear()
 
-		def processFiles(bits: Seq[Pair[String, FileAttachment]]) {
-			// go through individual files, extracting the uni number and grouping
-			// them into feedback items.
-			var itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
-			unrecognisedFiles.clear()
+		for ((filename, file) <- bits) {
+			// match uni numbers found in file path
+			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map { _.subgroups(0) }.toList
 
-			for ((filename, file) <- bits) {
-				// match uni numbers found in file path
-				val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map { _.subgroups(0) }.toList
+			// ignore any numbers longer than 7 characters.
+			val numbers = allNumbers.filter { _.length == 7 }
 
-				// ignore any numbers longer than 7 characters.
-				val numbers = allNumbers.filter { _.length == 7 }
-
-				if (numbers.isEmpty) {
-					// no numbers at all.
-					unrecognisedFiles.add(new ProblemFile(filename, file))
-				} else if (numbers.distinct.size > 1) {
-					// multiple different numbers, ambiguous, reject this.
-					invalidFiles.add(new ProblemFile(filename, file))
-				} else {
-					// one 7 digit number, this one might be okay.
-					store(itemMap, numbers.head, filenameOf(filename), file)
-				}
-				
-				// match potential module codes found in file path
-				val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
-				
-				if(!allModuleCodes.isEmpty){
-					// the potential module code doesn't match this assignment's module code
-					if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
-						moduleMismatchFiles.add(new ProblemFile(filename, file))
-					} 
-				}
-				
+			if (numbers.isEmpty) {
+				// no numbers at all.
+				unrecognisedFiles.add(new ProblemFile(filename, file))
+			} else if (numbers.distinct.size > 1) {
+				// multiple different numbers, ambiguous, reject this.
+				invalidFiles.add(new ProblemFile(filename, file))
+			} else {
+				// one 7 digit number, this one might be okay.
+				store(itemMap, numbers.head, filenameOf(filename), file)
 			}
-			items = itemMap.values.toList
+			
+			// match potential module codes found in file path
+			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
+			
+			if(!allModuleCodes.isEmpty){
+				// the potential module code doesn't match this assignment's module code
+				if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
+					moduleMismatchFiles.add(new ProblemFile(filename, file))
+				} 
+			}
+			
 		}
+		items = itemMap.values.toList
+	}
+	
+	override def onBind(result:BindingResult) = transactional() {
+		file.onBind(result)
 
 		// ZIP has been uploaded. unpack it
 		if (archive != null && !archive.isEmpty()) {
 			val zip = new ZipArchiveInputStream(archive.getInputStream)
 
 			val bits = Zips.iterator(zip) { (iterator) =>
-				for (entry <- iterator if !entry.isDirectory) yield {
+				for (
+					entry <- iterator
+					if !entry.isDirectory
+					if !(disallowedFilenames contains entry.getName)
+					if !(disallowedPrefixes.exists(entry.getName.startsWith))
+				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
 					// just turn it into an underscore.
@@ -253,6 +268,10 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		}
 
 	}
+
+	private def commaSeparated(csv: String) =
+		if (csv == null) Nil
+		else csv.split(",").toList
 
 }
 

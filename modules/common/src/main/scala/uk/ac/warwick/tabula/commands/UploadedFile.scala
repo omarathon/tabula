@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.NoBind
 import org.springframework.validation.BindingResult
 
 /**
@@ -28,17 +29,17 @@ import org.springframework.validation.BindingResult
 class UploadedFile extends BindListener {
 	var fileDao = Wire.auto[FileDao]
 
-	var disallowedFilenames = Wire.property("${uploads.disallowedFilenames}")
-	var disallowedPrefixes = Wire.property("${uploads.disallowedPrefixes}")
+	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 		
-	// files bound from an upload request, prior to being persisted
+	// files bound from an upload request, prior to being persisted by `onBind`.
 	var upload: JList[MultipartFile] = JArrayList()
 
 	// files that have been persisted - can be represented in forms by ID
-	var attached: JList[FileAttachment] = JArrayList() //LazyLists.simpleFactory()
+	var attached: JList[FileAttachment] = JArrayList()
 
-	def uploadedFileNames: Seq[String] = upload.map(file => file.getOriginalFilename()) filter (_ != "")
-	def attachedFileNames: Seq[String] = attached.map(file => file.getName)
+	def uploadedFileNames: Seq[String] = upload.map(_.getOriginalFilename).filterNot(_ == "")
+	def attachedFileNames: Seq[String] = attached.map(_.getName)
 	def fileNames = uploadedFileNames ++ attachedFileNames
 
 	def isMissing = !isExists
@@ -49,14 +50,19 @@ class UploadedFile extends BindListener {
 		else if (hasUploads) permittedUploads.size
 		else 0
 
-	def attachedOrEmpty: JList[FileAttachment] = Option(attached) getOrElse JArrayList()
+	def attachedOrEmpty: JList[FileAttachment] = Option(attached).getOrElse(JArrayList())
 	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
 	def hasAttachments = attached != null && !attached.isEmpty()
 	def hasUploads = !permittedUploads.isEmpty
 	
+	/** Uploads excluding those that are empty or have bad names. */
 	def permittedUploads: JList[MultipartFile] = {
-		Option(upload).getOrElse(JArrayList()).filterNot { s => s.isEmpty || (disallowedFilenames.split(",").toList contains s.getOriginalFilename()) || disallowedPrefixes.split(",").toList.exists(s.getOriginalFilename().startsWith)}
+		upload.filterNot { s => 
+			s.isEmpty || 
+			(disallowedFilenames contains s.getOriginalFilename) || 
+			(disallowedPrefixes exists (s.getOriginalFilename.startsWith))
+		}
 	}
 		
 	def isUploaded = hasUploads
@@ -77,28 +83,34 @@ class UploadedFile extends BindListener {
 		}
 		
 		// Early exit if we've failed binding
-		if (bindResult.find(_ == false).isDefined) return
+		if (!bindResult.contains(false)) {
 		
-		if (hasUploads) {
-			// convert MultipartFiles into FileAttachments
-			transactional() {
-				val newAttachments = for (item <- permittedUploads) yield {
-					val a = new FileAttachment
-					a.name = new File(item.getOriginalFilename()).getName
-					a.uploadedData = item.getInputStream
-					a.uploadedDataLength = item.getSize
-					fileDao.saveTemporary(a)
-					a
+			if (hasUploads) {
+				// convert MultipartFiles into FileAttachments
+				transactional() {
+					val newAttachments = for (item <- permittedUploads) yield {
+						val a = new FileAttachment
+						a.name = new File(item.getOriginalFilename()).getName
+						a.uploadedData = item.getInputStream
+						a.uploadedDataLength = item.getSize
+						fileDao.saveTemporary(a)
+						a
+					}
+					// remove converted files from upload to avoid duplicates
+					upload.clear
+					attached.addAll(newAttachments)
 				}
-				// remove converted files from upload to avoid duplicates
-				upload.clear
-				attached.addAll(newAttachments)
+			} else {
+				// sometimes we manually add FileAttachments with uploaded data to persist
+				for (item <- attached if item.uploadedData != null)
+					fileDao.saveTemporary(item)
 			}
-		} else {
-			// sometimes we manually add FileAttachments with uploaded data to persist
-			for (item <- attached if item.uploadedData != null)
-				fileDao.saveTemporary(item)
+		
 		}
 
 	}
+	
+	private def commaSeparated(csv: String) = 
+		if (csv == null) Nil
+		else csv.split(",").toList
 }

@@ -148,14 +148,30 @@ $(function(){
 
             $('.form-post').click(function(event){
                 event.preventDefault();
-                var $checkedBoxes = $(".collection-checkbox:checked", $container);
+                
+                var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                var doFormSubmit = false;                
+                
                 if ($container.data('checked') != 'none') {
-                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+                    var $checkedBoxes = $(".collection-checkbox:checked", $container);
                     $form.append($checkedBoxes.clone());
-                    $(document.body).append($form);
-                    $form.submit();
+                    
+                    doFormSubmit = true;
                 }
-                return false;
+                                
+                if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
+                		var $inputs = $(':input', '.filter-form');
+                		$form.append($inputs.clone());
+                
+                		doFormSubmit = true;
+                }
+                               
+                if (doFormSubmit) {
+                	$(document.body).append($form);
+                  $form.submit();
+                } else {
+                	return false;
+                }
             });
             
         },
@@ -526,13 +542,21 @@ $(function(){
         }
         $('.status').each(function(){
             if ($(this).html() === "Approved")
-                $(this).html('<span class="label label-success">Approved</span>');
+                $(this).html('<span>Granted</span>');
             else if ($(this).html() === "Rejected")
-                $(this).html('<span class="label label-important">Rejected</span>');
+                $(this).html('<span">Rejected</span>');
         });
     };
 
 
+	// makes dropdown menus dropup rather than down if they're so
+	// close to the end of the screen that they will drop off it
+	var bodyHeight = $('body').height();
+	$('.module-info:not(.empty) .btn-group').each( function(index) {
+		if(($(this).find('.dropdown-menu').height() +  $(this).offset().top) > bodyHeight) {
+			$(this).addClass("dropup");
+		}
+	});
 
 });
 

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.userlookup.User
 
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[ExtensionInformation] with ReadOnly with Unaudited {
 
@@ -24,7 +25,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 
 		val assignmentMembership = Map() ++ (
 			for(assignmentUser <- assignmentUsers)
-				yield (assignmentUser.getWarwickId -> assignmentUser.getFullName())
+				yield (assignmentUser.getWarwickId -> assignmentUser)
 		)
 
 		val manualExtensions = assignment.extensions.filter(_.requestedOn == null)
@@ -33,13 +34,12 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 
 		// all the users that aren't members of this assignment, but have submitted work to it
 		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
-		val nonMembers = Map() ++ (
-			for(extension <- extensionsFromNonMembers)
-				yield (extension.universityId -> userLookup.getUserByWarwickUniId(extension.universityId).getFullName())
-		)
+		val nonMembers = extensionsFromNonMembers.par.map { extension => 
+			(extension.universityId -> userLookup.getUserByWarwickUniId(extension.universityId))
+		}.seq.toMap
 
 		// build lookup of names from non members of the assignment that have submitted work plus members
-		val studentNameLookup = nonMembers ++ assignmentMembership
+		val students = nonMembers ++ assignmentMembership
 
 		// users that are members of the assignment but have not yet requested or been granted an extension
 		val potentialExtensions =
@@ -47,7 +47,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 				(extensionRequests.map(_.universityId).toSet)
 
 		new ExtensionInformation(
-			studentNameLookup,
+			students,
 			manualExtensions,
 			extensionRequests,
 			isExtensionManager,
@@ -58,7 +58,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 }
 
 case class ExtensionInformation(
-	studentNames: Map[String, String],
+	students: Map[String, User],
 	manualExtensions: Seq[Extension],
 	extensionRequests: Seq[Extension],
 	isExtensionManager: Boolean,

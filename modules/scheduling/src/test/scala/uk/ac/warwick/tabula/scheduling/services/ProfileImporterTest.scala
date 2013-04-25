@@ -21,6 +21,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
 import java.sql.ResultSetMetaData
 
+// scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 	EventHandling.enabled = false

@@ -45,7 +45,10 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def getMarkersSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def getMarkersSubmissionCommand(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			user: CurrentUser) = 
 		new DownloadMarkersSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
@@ -77,7 +80,10 @@ class DownloadAllSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def getAllSubmissionsSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("filename") filename: String) = 
+	@ModelAttribute def getAllSubmissionsSubmissionCommand(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("filename") filename: String) = 
 		new DownloadAllSubmissionsCommand(module, assignment, filename)
 
 	@RequestMapping
@@ -96,13 +102,18 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
 	
-	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
+	@ModelAttribute def getSingleSubmissionCommand(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("submissionId") submissionId: String) = 
 		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
 
 	@RequestMapping
-    def downloadSingle(cmd: AdminGetSingleSubmissionCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def downloadSingle(
+			cmd: AdminGetSingleSubmissionCommand, 
+			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
-    }
+	}
 	
 }
 
@@ -114,14 +125,21 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
 	
-	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("submissionId") submissionId: String) = 
+	@ModelAttribute def getSingleSubmissionCommand(
+			@PathVariable("module") module: Module, 
+			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("submissionId") submissionId: String) = 
 		new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
 
 	@RequestMapping
-    def downloadSingle(cmd: DownloadAttachmentCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		cmd.callback = { (renderable) => fileServer.serve(renderable) }
+	def downloadSingle(
+			cmd: DownloadAttachmentCommand, 
+			@PathVariable("filename") filename: String,
+			request: HttpServletRequest, 
+		response: HttpServletResponse) {
+		cmd.callback = { (renderable) => fileServer.serve(renderable)(request, response) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
-    }
+	}
 	
 }
 

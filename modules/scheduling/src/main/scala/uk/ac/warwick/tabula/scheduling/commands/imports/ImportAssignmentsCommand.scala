@@ -21,6 +21,8 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
 	var assignmentImporter = Wire.auto[AssignmentImporter]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	
+	val ImportGroupSize = 100
 
 	def applyInternal() {
 		benchmark("ImportAssignments") {
@@ -45,7 +47,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
 	def doGroups {
 		// Split into chunks so we commit transactions periodically.
-		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(100)) {
+		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
 			saveGroups(groups)
 			transactional() {
 				groups foreach session.evict

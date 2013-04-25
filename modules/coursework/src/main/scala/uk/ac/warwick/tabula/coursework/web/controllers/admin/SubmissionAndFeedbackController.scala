@@ -54,9 +54,26 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	@ModelAttribute("allFilters") 
 	def allFilters(@PathVariable("assignment") assignment: Assignment) =
 		CourseworkFilters.AllFilters.filter(_.applies(assignment))
-
+		
 	@RequestMapping(Array("/list"))
 	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
+		val (assignment, module) = (command.assignment, command.module)
+		
+		module.department.assignmentInfoView match {
+			case Assignment.Settings.InfoViewType.Summary =>
+				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+			case Assignment.Settings.InfoViewType.Table =>
+				Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+			case _ => // default
+				if (features.assignmentProgressTableByDefault)
+					Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+				else
+					Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+		}
+	}
+
+	@RequestMapping(Array("/summary"))
+	def summary(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
 		
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))

@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FileDao
 
+// scalastyle:off magic.number
 class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 
 	var dao: FileDao = mock[FileDao]

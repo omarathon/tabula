@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.jobs.TestingJob
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.Transactions
 
+// scalastyle:off magic.number
 class JobServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var service: JobService = _

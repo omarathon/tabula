@@ -9,6 +9,7 @@ import org.apache.log4j.SimpleLayout
 import org.junit.After
 import org.junit.Before
 
+// scalastyle:off magic.number
 class LoggingTest extends TestBase with Logging {
 	
 	var writer: StringWriter = _

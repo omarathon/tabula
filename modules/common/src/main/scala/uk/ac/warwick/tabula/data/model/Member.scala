@@ -261,7 +261,9 @@ class OtherMember extends Member with AlumniProperties {
 	}
 }
 
-class RuntimeMember(user: CurrentUser) extends Member(user)
+class RuntimeMember(user: CurrentUser) extends Member(user) {
+	override def permissionsParents = Nil
+}
 
 trait MemberProperties {
 	@Id var universityId: String = _
@@ -284,7 +286,7 @@ trait MemberProperties {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	var gender: Gender = _
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
 	@JoinColumn(name = "PHOTO_ID")
 	var photo: FileAttachment = _
 

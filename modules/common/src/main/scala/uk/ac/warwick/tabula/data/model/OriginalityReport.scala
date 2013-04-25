@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
-import javax.persistence.Table
-import javax.persistence.Entity
-import javax.persistence.OneToOne
-import javax.persistence.Column
-import javax.persistence.JoinColumn
+import javax.persistence._
+import javax.persistence.CascadeType._
 import org.joda.time.DateTime
 
 @Entity
 class OriginalityReport() extends GeneratedId {
 
-	@OneToOne(optional = false)
+	// Don't cascade as this is the wrong side of the association
+	@OneToOne(optional = false, cascade=Array())
 	@JoinColumn(name="ATTACHMENT_ID")
     var attachment: FileAttachment = _
 

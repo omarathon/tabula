@@ -19,7 +19,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.permissions._
 
-class DownloadAttachmentCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadAttachmentCommand(
+		val module: Module, 
+		val assignment: Assignment, 
+		val submission: Submission) 
+		extends Command[Option[RenderableFile]] with ReadOnly {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, submission)

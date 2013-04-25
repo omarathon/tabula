@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
+import org.joda.time.DateTime
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
 
@@ -66,8 +67,10 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 			val users = getUsersForFeedback
 			for ((studentId, user) <- users) {
 				val feedbacks = assignment.fullFeedback.find { _.universityId == studentId }
-				for (feedback <- feedbacks)
+				for (feedback <- feedbacks) {
 					feedback.released = true
+					feedback.releasedDate = new DateTime
+				}
 			}
 			for (info <- users) email(info)
 		}

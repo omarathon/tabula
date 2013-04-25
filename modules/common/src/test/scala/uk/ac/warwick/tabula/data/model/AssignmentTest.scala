@@ -11,6 +11,7 @@ import org.junit.Test
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
+// scalastyle:off magic.number
 class AssignmentTest extends TestBase {
 	@Test def academicYear {
 		

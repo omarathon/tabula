@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import org.joda.time.PeriodType
 import org.joda.time.Interval
 
+// scalastyle:off magic.number
 class DurationFormatterTest extends TestBase {
 	@Test def format {		
 		implicit val start = dateTime(2012, 5)
@@ -66,6 +67,12 @@ class DurationFormatterTest extends TestBase {
 		val start = new DateTime(2012, 3, 25, 0, 0, 0)
 		val end = new DateTime(2012, 3, 25, 4, 0, 0)
 		check(start, end, "3 hours")
+	}
+	
+	@Test def tagHandlesBagArgs {
+		// TAB-688
+		checkTag(null, null)
+		checkTag(null, null, null)
 	}
 	
 	def check(start:DateTime, end:DateTime, expected:String) { 

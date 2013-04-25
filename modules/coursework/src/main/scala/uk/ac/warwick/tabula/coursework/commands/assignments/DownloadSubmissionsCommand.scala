@@ -17,7 +17,11 @@ import uk.ac.warwick.tabula.services.SubmissionService
 /**
  * Download one or more submissions from an assignment, as a Zip.
  */
-class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadSubmissionsCommand(
+		val module: Module, 
+		val assignment: Assignment) 
+		extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 	
