@@ -70,12 +70,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		feedback.attachments.map { (attachment) =>
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
-
-	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
-		meetingRecord.attachments.map { (attachment) =>
-			new ZipFileItem(attachment.name, attachment.dataStream)
-		}
-
+	
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.map { (attachment) =>
 			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
@@ -124,9 +119,6 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def getSomeSubmissionsZip(submissions: Seq[Submission]): File =
 		createUnnamedZip(submissions flatMap getSubmissionZipItems)
 
-	def getSomeMeetingRecordAttachmentsZip(meetingRecord: MeetingRecord): File =
-		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
-
 	/**
 		* Get a zip containing these feedbacks.
 	*/
@@ -170,6 +162,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			case None => Seq()
 		}
 	}
+
+	def getSomeMeetingRecordAttachmentsZip(meetingRecord: MeetingRecord): File =
+		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
+	
+	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
+		meetingRecord.attachments.map { (attachment) =>
+			new ZipFileItem(attachment.name, attachment.dataStream)
+		}
 }
 
 /**

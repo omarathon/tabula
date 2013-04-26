@@ -29,4 +29,3 @@ junit*.properties
 *.sublime-workspace
 .ensime*
 
-/modules
