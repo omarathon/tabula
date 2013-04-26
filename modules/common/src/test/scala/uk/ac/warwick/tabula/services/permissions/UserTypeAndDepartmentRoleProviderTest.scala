@@ -18,7 +18,7 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 	val departmentService = mock[ModuleAndDepartmentService]
 	
 	provider.profileService = profileService
-	provider.departmentService = departmentService
+	provider.departmentService.set(departmentService)
 	
 	val dept1 = Fixtures.department("cs")
 	val dept2 = Fixtures.department("en")

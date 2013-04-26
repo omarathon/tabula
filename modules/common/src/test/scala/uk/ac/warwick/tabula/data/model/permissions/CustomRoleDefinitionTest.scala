@@ -44,7 +44,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		
 		val ro1 = new RoleOverride
 		ro1.permission = Permissions.Module.Read
-		ro1.overrideType = ro1.Allow
+		ro1.overrideType = RoleOverride.Allow
 		
 		crd.overrides.add(ro1)
 		
@@ -57,7 +57,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		
 		val ro2 = new RoleOverride
 		ro2.permission = Permissions.Department.ManageExtensionSettings
-		ro2.overrideType = ro2.Deny
+		ro2.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro2)
 		
@@ -72,7 +72,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		
 		val ro3 = new RoleOverride
 		ro3.permission = Permissions.Department.ManageExtensionSettings
-		ro3.overrideType = ro3.Allow
+		ro3.overrideType = RoleOverride.Allow
 		
 		crd2.overrides.add(ro3)
 		

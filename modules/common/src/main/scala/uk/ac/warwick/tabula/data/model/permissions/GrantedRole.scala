@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import org.hibernate.annotations.ForeignKey
 import scala.reflect._
+import uk.ac.warwick.tabula.permissions.Permission
 
 @Entity
 @AccessType("field")
@@ -57,6 +58,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	var scope: A
 
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
+	def mayGrant(target: Permission) = roleDefinition.mayGrant(target)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {

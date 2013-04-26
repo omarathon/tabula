@@ -55,8 +55,8 @@ class ActivityService {
 	}
 	
 	private def getModules(user: CurrentUser): Seq[Module] = {
-		val ownedModules = moduleService.modulesManagedBy(user.idForPermissions).toSet
-		val adminModules = moduleService.modulesAdministratedBy(user.idForPermissions).toSet
+		val ownedModules = moduleService.modulesManagedBy(user)
+		val adminModules = moduleService.modulesAdministratedBy(user)
 		
 		(ownedModules ++ adminModules).toSeq
 	}

@@ -17,6 +17,8 @@ import uk.ac.warwick.userlookup.Group
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.RouteDao
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions.Permissions
 
 /**
  * Handles data about modules and departments
@@ -28,6 +30,7 @@ class ModuleAndDepartmentService extends Logging {
 	@Autowired var departmentDao: DepartmentDao = _
 	@Autowired var routeDao: RouteDao = _
 	@Autowired var userLookup: UserLookupService = _
+	@Autowired var securityService: SecurityService = _
 	@Autowired var permissionsService: PermissionsService = _
 	def groupService = userLookup.getGroupService
 
@@ -59,16 +62,25 @@ class ModuleAndDepartmentService extends Logging {
 		routeDao.getByCode(code)
 	} 
 
-	def departmentsOwnedBy(usercode: String) = departmentDao.getByOwner(usercode)
-
-	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
-	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
+	// We may have a granted role that's overridden later, so we also need to do a security service check as well
+	// as getting the role itself
 	
-	def modulesAdministratedBy(usercode: String) = {
-		departmentsOwnedBy(usercode).toSeq flatMap (dept => dept.modules.asScala)
+	def departmentsOwnedBy(user: CurrentUser): Set[Department] = 
+		permissionsService.getAllPermissionDefinitionsFor[Department](user, Permissions.Module.Read)
+			.filter { department => securityService.can(user, Permissions.Module.Read, department) }
+
+	def modulesManagedBy(user: CurrentUser): Set[Module] = 
+		permissionsService.getAllPermissionDefinitionsFor[Module](user, Permissions.Module.Read)
+			.filter { module => securityService.can(user, Permissions.Module.Read, module) }
+	
+	def modulesManagedBy(user: CurrentUser, dept: Department): Set[Module] = 
+		modulesManagedBy(user).filter { _.department == dept }
+	
+	def modulesAdministratedBy(user: CurrentUser) = {
+		departmentsOwnedBy(user) flatMap (dept => dept.modules.asScala)
 	}
-	def modulesAdministratedBy(usercode: String, dept: Department) = {
-		if (departmentsOwnedBy(usercode) contains dept) dept.modules.asScala else Nil
+	def modulesAdministratedBy(user: CurrentUser, dept: Department) = {
+		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala else Nil
 	}
 
 	def addOwner(dept: Department, owner: String) = transactional() {

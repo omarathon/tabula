@@ -52,32 +52,33 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 		service.getRouteByCode("g503") should be (Some(route))
 		service.getRouteByCode("wibble") should be (None)
 		
-		service.departmentsOwnedBy("cusebr") should be (Seq(cs))
-		service.departmentsOwnedBy("cuscav") should be (Seq())
-		service.modulesAdministratedBy("cuscav") should be (Seq())
-		service.modulesAdministratedBy("cuscav", cs) should be (Seq())
-		service.modulesAdministratedBy("cuscav", ch) should be (Seq())
+		withUser("cusebr") { service.departmentsOwnedBy(currentUser) should be (Seq(cs)) }
+		withUser("cuscav") { 
+			service.departmentsOwnedBy(currentUser) should be (Seq())
+			service.modulesAdministratedBy(currentUser) should be (Seq())
+			service.modulesAdministratedBy(currentUser, cs) should be (Seq())
+			service.modulesAdministratedBy(currentUser, ch) should be (Seq())
 		
-		service.addOwner(cs, "cuscav")
-		service.departmentsOwnedBy("cuscav") should be (Seq(cs))
-		service.modulesAdministratedBy("cuscav") should be (Seq(cs108, cs240))
-		service.modulesAdministratedBy("cuscav", cs) should be (Seq(cs108, cs240))
-		service.modulesAdministratedBy("cuscav", ch) should be (Seq())
-		
-		service.removeOwner(cs, "cuscav")
-		service.departmentsOwnedBy("cuscav") should be (Seq())
-		
-		service.modulesManagedBy("cuscav") should be (Seq())
-		service.modulesManagedBy("cuscav", cs) should be (Seq())
-		service.modulesManagedBy("cuscav", ch) should be (Seq())
-		
-		cs108.managers.addUser("cuscav")
-		session.update(cs108)
-		
-		service.modulesManagedBy("cuscav") should be (Seq(cs108))
-		service.modulesManagedBy("cuscav", cs) should be (Seq(cs108))
-		service.modulesManagedBy("cuscav", ch) should be (Seq())
-		
+			service.addOwner(cs, "cuscav")
+			service.departmentsOwnedBy(currentUser) should be (Seq(cs))
+			service.modulesAdministratedBy(currentUser) should be (Seq(cs108, cs240))
+			service.modulesAdministratedBy(currentUser, cs) should be (Seq(cs108, cs240))
+			service.modulesAdministratedBy(currentUser, ch) should be (Seq())
+			
+			service.removeOwner(cs, "cuscav")
+			service.departmentsOwnedBy(currentUser) should be (Seq())
+			
+			service.modulesManagedBy(currentUser) should be (Seq())
+			service.modulesManagedBy(currentUser, cs) should be (Seq())
+			service.modulesManagedBy(currentUser, ch) should be (Seq())
+			
+			cs108.managers.addUser("cuscav")
+			session.update(cs108)
+			
+			service.modulesManagedBy(currentUser) should be (Seq(cs108))
+			service.modulesManagedBy(currentUser, cs) should be (Seq(cs108))
+			service.modulesManagedBy(currentUser, ch) should be (Seq())
+		}
 	}
 
 }

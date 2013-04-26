@@ -15,10 +15,6 @@ class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {
 	
 	var service = Wire.auto[PermissionsService]
 	
-	private def getGrantedRolesFor(user: CurrentUser) = ???
-	
-	private def getGrantedPermissionsFor(user: CurrentUser) = ???
-	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = 
 		service.getGrantedRolesFor(user, scope) map { _.build() }
 	

@@ -61,7 +61,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			
 			department.modules
 		} else {
-			val managedModules = moduleService.modulesManagedBy(user.idForPermissions, department).toList
+			val managedModules = moduleService.modulesManagedBy(user, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
 			PermissionCheckAll(Permissions.Module.Read, managedModules)

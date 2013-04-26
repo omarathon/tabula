@@ -18,6 +18,8 @@ trait RoleDefinition {
 	 * Return all permissions, resolving sub-roles
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
+	
+	def mayGrant(target: Permission): Boolean
 }
 
 trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinition] with RoleDefinition {
@@ -48,6 +50,12 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 
 	def subRoles(scope: Option[PermissionsTarget]) =
 		subRoleDefinitions map { defn => RoleBuilder.build(defn, scope, defn.getName) }
+	
+	def mayGrant(permission: Permission) =
+		scopedPermissions.contains(permission) ||
+		scopelessPermissions.contains(permission) ||
+		globalPermissions.contains(permission) ||
+		(subRoleDefinitions exists { _.mayGrant(permission) })
 
 	/**
 	 * Return all permissions, resolving sub-roles

@@ -35,6 +35,8 @@ trait PermissionsService {
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedRole[A]]
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedPermission[A]]
 	
+	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A]
+	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup
 }
 
@@ -100,6 +102,20 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 		)
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
+	}
+	
+	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = {
+		val scopesWithGrantedRole = 
+			getGrantedRolesFor[A](user)
+			.filter { _.mayGrant(targetPermission) }
+			.map { _.scope }
+			
+		val scopesWithGrantedPermission =
+			getGrantedPermissionsFor[A](user)
+			.filter { perm => perm.overrideType == GrantedPermission.Allow && perm.permission == targetPermission }
+			.map { _.scope }
+			
+		Set() ++ scopesWithGrantedRole ++ scopesWithGrantedPermission
 	}
 	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup = transactional() {

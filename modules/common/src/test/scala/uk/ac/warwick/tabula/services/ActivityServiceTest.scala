@@ -34,12 +34,12 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val om1 = Fixtures.module("own1")
 		val om2 = Fixtures.module("own2")
 		
-		moduleService.modulesManagedBy("cuscav") returns (Seq(om1, om2))
+		moduleService.modulesManagedBy(currentUser) returns (Set(om1, om2))
 		
 		val am1 = Fixtures.module("admin1")
 		val am2 = Fixtures.module("admin2")
 		
-		moduleService.modulesAdministratedBy("cuscav") returns (Seq(am1, am2, om1))
+		moduleService.modulesAdministratedBy(currentUser) returns (Set(am1, am2, om1))
 		
 		val ae1 = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,
@@ -91,12 +91,12 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val om1 = Fixtures.module("own1")
 		val om2 = Fixtures.module("own2")
 		
-		moduleService.modulesManagedBy("cuscav") returns (Seq(om1, om2))
+		moduleService.modulesManagedBy(currentUser) returns (Set(om1, om2))
 		
 		val am1 = Fixtures.module("admin1")
 		val am2 = Fixtures.module("admin2")
 		
-		moduleService.modulesAdministratedBy("cuscav") returns (Seq(am1, am2, om1))
+		moduleService.modulesAdministratedBy(currentUser) returns (Set(am1, am2, om1))
 		
 		val ae1 = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,
