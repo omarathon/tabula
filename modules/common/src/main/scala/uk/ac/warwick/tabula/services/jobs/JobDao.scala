@@ -35,6 +35,15 @@ class JobDaoImpl extends JobDao with Daoisms {
 		}
 	
 	def findOutstandingInstance(example: JobInstance): Option[JobInstance] = transactional(readOnly = true) {
+		/* 
+		 * TAB-724
+		 * 
+		 * We only check unstarted jobs here because started jobs may take a long time. It's perfectly possible
+		 * that a user genuinely wants to create ANOTHER Turnitin submission job while the other one has been running
+		 * for half an hour, and we don't have to worry about that happening because they will execute in separate
+		 * transactions - the job runner doesn't get any new jobs until it's finished all the ones that it's running.
+		 */
+		
 		session.newCriteria[JobInstanceImpl]
 				.add(is("started", false))
 				.add(is("jobType", example.jobType))

@@ -13,7 +13,7 @@ class MockJobDao extends JobDao {
 	}
 	
 	def findOutstandingInstance(example: JobInstance) = {
-		instances.find { inst =>
+		instances.filterNot( _.started ).find { inst =>
 			inst.jobType == example.jobType &&
 			inst.json == example.json
 		}
