@@ -14,10 +14,10 @@ import uk.ac.warwick.spring.Wire
 import scala.Some
 import java.util
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.helpers.DetectMimeType
 
 @Entity @AccessType("field")
-class FileAttachment extends GeneratedId {
+class FileAttachment extends GeneratedId with DetectMimeType {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]
@@ -122,6 +122,11 @@ class FileAttachment extends GeneratedId {
 			}
 		}
 		case _ => false
+	}
+	
+	@transient lazy val mimeType: String = file match {
+		case null => null
+		case f => detectMimeType(f)
 	}
 }
 

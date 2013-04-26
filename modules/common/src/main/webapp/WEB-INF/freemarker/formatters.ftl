@@ -81,4 +81,61 @@
 --><#else><#--
 	-->${nationality}<#--
 --></#if></#macro>
+
+
+<#--	Macro for handling singleton & multiple attachments using a common filepath root
+		
+		attachments: either a FileAttachment, or Seq[FileAttachment] please
+		page: the URL 'folder' path, for passing to a <@url> macro
+		context: string to append to the 'download files' message
+		zipFilename: filename (excluding extension) to use for zip downloads
+		
+		In the controller, ensure that there are @RequestMappings for the specified 'page', with suffixes of
+		/attachment/{filename} for individual files, and
+		/attachments/{zipfile}.zip (note trailing 's') for collated files
+-->
+<#macro download_attachments attachments page context="" zipFilename="download">
+	<#if !page?ends_with("/")>
+		<#-- ensure page is slash-terminated -->
+		<#assign page = page + "/" />
+	</#if>
+
+	<#if !attachments?is_enumerable>
+		<#-- assume it's a FileAttachment -->
+		<#assign attachment = attachments />
+	<#elseif attachments?size == 1>
+		<#-- take the first and continue as above -->
+		<#assign attachment = attachments?first />
+	</#if>
+	
+	<#if attachment??>
+		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+		<div class="attachment">
+			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+		</div>
+	<#elseif attachments?size gt 1>
+		<details class="attachment">
+			<summary>
+				<#assign title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#assign>
+				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
+			</summary>
+			
+			<#list attachments as attachment>
+				<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+				<div class="attachment">
+					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+				</div>
+			</#list>
+		</details>
+	</#if>
+</#macro>
+
+<#macro download_link filePath mimeType title="Download file" text="">
+	<#if mimeType?matches("^audio/(mpeg|mp3|mp4|ogg|wav)")>
+		<audio controls="controls">
+			<source src="<@url page='${filePath}'/>" type="${mimeType}" />
+		</audio>
+	</#if>
+	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
+</#macro>
 </#compress>

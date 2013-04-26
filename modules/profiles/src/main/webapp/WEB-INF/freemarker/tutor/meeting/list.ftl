@@ -20,27 +20,17 @@
 		<#if can.do("Profiles.MeetingRecord.Read", profile)>
 			<#if meetings??>
 				<#list meetings as meeting>
-					<details<#if openMeeting?? && openMeeting.id == meeting.id> open="open" class="open"</#if>>
+					<details class="meeting<#if openMeeting?? && openMeeting.id == meeting.id> open" open="open"<#else>"</#if>>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title}</summary>
-
+						
 						<#if meeting.description??>
 							<div class="description"><#noescape>${meeting.description}</#noescape></div>
 						</#if>
-						<#if meeting.attachments?size == 1>
-							<div class="attachments">
-								<a class="long-running use-tooltip"
-									href="<@url page='/tutor/meeting/${meeting.id}/attachment/${meeting.attachments?first.name}'/>"
-									title="Download the file for this meeting record"><i class="icon-download"></i> Download file
-								</a>
-							</div>
-						<#elseif meeting.attachments?size gt 1>
-							<div class="attachments">
-								<a class="long-running use-tooltip"
-									href="<@url page='/tutor/meeting/${meeting.id}/attachments/${meeting.title}.zip'/>"
-									title="Download the files for this meeting record"><i class="icon-download"></i> Download files
-								</a>
-							</div>
+						
+						<#if meeting.attachments?size gt 0>
+							<@fmt.download_attachments meeting.attachments "/tutor/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 						</#if>
+						
 						<small class="muted">${(meeting.format.description)!"Unknown format"}. Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 					</details>
 				</#list>
