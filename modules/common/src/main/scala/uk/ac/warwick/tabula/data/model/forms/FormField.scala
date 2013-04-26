@@ -84,6 +84,7 @@ abstract class FormField extends GeneratedId with Logging {
 	 */
 	protected def getProperty[A : ClassTag](name: String, default: A) =
 		propertiesMap.get(name) match {
+			case Some(null) => default
 			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
 			case Some(obj) => {
 				// TAB-705 warn when we return an unexpected type
