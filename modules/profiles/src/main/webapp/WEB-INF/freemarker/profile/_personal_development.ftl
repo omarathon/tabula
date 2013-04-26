@@ -57,10 +57,18 @@
 		};
 
 		frameLoad = function(frame) {
-			var $f = $(frame).contents();
+			// reset slow load spinner
+			$m.tabulaPrepareSpinners();
 
+			var $f = $(frame).contents();
 			if ($f.find("#meeting-record-form").length == 1) {
+				// reset datepicker & submit protection
 				$f.find("input.date-picker").tabulaDatePicker();
+				$form = $m.find('form.double-submit-protection');
+				$form.tabulaSubmitOnce();
+				$form.find(".btn").removeClass('disabled');
+
+				// firefox fix
 				var wait = setInterval(function() {
 					var h = $f.find("body").height();
 					if (h > 0) {
@@ -68,6 +76,8 @@
 						$m.find(".modal-body").animate({ height: h });
 					}
 				}, 50);
+
+				// showtime
 				$m.modal("show");
 				$m.on("shown", function() {
 					$f.find("[name='title']").focus();
@@ -100,14 +110,12 @@
 					})
 					.attr("src", target + "?iframe")
 					.appendTo($mb);
-
 			});
 		});
 
-		$m.on('click', 'button[type=submit]', function(e){
+		$m.on('submit', 'form', function(e){
 			e.preventDefault();
 			$m.find('iframe').contents().find('form').submit();
-
 		});
 	});
 	</script>
