@@ -34,26 +34,6 @@ under the License.
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
-    	
-  <cache name="DepartmentWebsiteCache"
-    maxElementsInMemory="100"
-    maxElementsOnDisk="2000"
-    eternal="true"
-    overflowToDisk="true"
-    diskPersistent="false"
-    diskSpoolBufferSizeMB="20"
-    memoryStoreEvictionPolicy="LFU"
-     />
-	
-  <cache name="DepartmentNameCache"
-    maxElementsInMemory="100"
-    maxElementsOnDisk="2000"
-    eternal="true"
-    overflowToDisk="true"
-    diskPersistent="false"
-    diskSpoolBufferSizeMB="20"
-    memoryStoreEvictionPolicy="LFU"
-     />
      
   <cache name="UserByWarwickIdCache"
     maxElementsInMemory="3000"
