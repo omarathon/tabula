@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.ToString
+import javax.persistence.Basic
 
 object JobInstanceImpl {
 	def fromPrototype(prototype: JobPrototype) = {
@@ -38,8 +39,6 @@ object JobInstanceImpl {
  */
 @Entity(name = "Job")
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
-
-	private type JsonMap = Map[String, Any]
 
 	@transient var jsonMapper = Wire.auto[ObjectMapper]
 	@transient var userLookup = Wire.auto[UserLookupInterface]

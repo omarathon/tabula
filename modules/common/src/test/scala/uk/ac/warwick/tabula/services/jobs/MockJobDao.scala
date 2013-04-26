@@ -11,6 +11,13 @@ class MockJobDao extends JobDao {
 	def findOutstandingInstances(max: Int) = {
 		instances.iterator.filterNot( _.started ).take(max).toSeq
 	}
+	
+	def findOutstandingInstance(example: JobInstance) = {
+		instances.find { inst =>
+			inst.jobType == example.jobType &&
+			inst.json == example.json
+		}
+	}
 
 	def saveJob(instance: JobInstance) = {
 		instance.id = UUID.randomUUID.toString

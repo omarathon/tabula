@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
  */
 trait JobDao {
 	def findOutstandingInstances(max: Int): Seq[JobInstance]
+	def findOutstandingInstance(example: JobInstance): Option[JobInstance]
 	def saveJob(instance: JobInstance): JobInstance
 	def getById(id: String): Option[JobInstance]
 	def unfinishedInstances: Seq[JobInstance]
@@ -32,6 +33,14 @@ class JobDaoImpl extends JobDao with Daoisms {
 				.setMaxResults(max)
 				.seq
 		}
+	
+	def findOutstandingInstance(example: JobInstance): Option[JobInstance] = transactional(readOnly = true) {
+		session.newCriteria[JobInstanceImpl]
+				.add(is("started", false))
+				.add(is("jobType", example.jobType))
+				.seq
+				.find(_.json == example.json) // Do the find in pure Scala because it's a CLOB field and we can't do (Hibernate) queries directly
+	}
 
 	def getById(id: String) = transactional(readOnly = true) {
 		getById[JobInstanceImpl](id)
