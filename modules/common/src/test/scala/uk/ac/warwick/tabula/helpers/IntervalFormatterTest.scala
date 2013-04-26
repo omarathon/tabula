@@ -6,6 +6,7 @@ import freemarker.template.TemplateModel
 import freemarker.template.SimpleHash
 import uk.ac.warwick.tabula.JavaImports._
 
+// scalastyle:off magic.number
 class IntervalFormatterTest extends TestBase {
 	import IntervalFormatter.format
 

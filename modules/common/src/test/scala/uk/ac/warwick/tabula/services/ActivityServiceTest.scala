@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.AuditEvent
 
+//scalastyle:off magic.number
 class ActivityServiceTest extends TestBase with Mockito {
 	
 	val service = new ActivityService

@@ -26,8 +26,12 @@ trait JavaImports {
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
 	
+	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
+	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
+	def JMap[K, V](elems: (K, V)*) = mutable.Map[K, V](elems: _*).asJava
 	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
-	def JMap[K, V]() = mutable.Map[K, V]().asJava
+	def JInteger(i: Option[Int]) = ToJInteger(i)
+	def JLong(l: Option[Long]) = ToJLong(l)
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting
@@ -36,10 +40,16 @@ trait JavaImports {
 	protected implicit def ToJBoolean(b: Option[Boolean]) = (b map (b => b: JBoolean)).orNull
 
 	/**
-	 * Converts an Option[Integer] to a Java Integer, by interpreting
+	 * Converts an Option[Int] to a Java Integer, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJInteger(b: Option[Int]) = (b map (b => b: JInteger)).orNull
+	protected implicit def ToJInteger(i: Option[Int]) = (i map (i => i: JInteger)).orNull
+
+	/**
+	 * Converts an Option[Long] to a Java Long, by interpreting
+	 * None as null.
+	 */
+	protected implicit def ToJLong(l: Option[Long]) = (l map (l => l: JLong)).orNull
 	
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial

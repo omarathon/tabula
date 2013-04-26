@@ -31,7 +31,6 @@ class ModuleAndDepartmentService extends Logging {
 	@Autowired var permissionsService: PermissionsService = _
 	def groupService = userLookup.getGroupService
 
-	
 	def allDepartments = transactional(readOnly = true) {
 		departmentDao.allDepartments
 	}
@@ -78,6 +77,10 @@ class ModuleAndDepartmentService extends Logging {
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
 		dept.owners.removeUser(owner)
+	}
+	
+	def save(dept: Department) = transactional() {
+		departmentDao.save(dept)
 	}
 
 }

@@ -26,12 +26,17 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Projections
 import org.hibernate.`type`.StringType
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
+import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.spring.Wire
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
 
 	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	
+	var fileHasher = Wire[FileHasher]
 
 	val idSplitSize = 2
 	val idSplitSizeCompat = 4 // for existing paths split by 4 chars
@@ -52,9 +57,14 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
 	private def saveAttachment(file: FileAttachment) {
+		if ((!file.id.hasText || !file.hasData) && file.uploadedData != null) {
+			file.hash = fileHasher.hash(file.uploadedData())
+		}
+		
 		session.saveOrUpdate(file)
+		
 		if (!file.hasData && file.uploadedData != null) {
-			persistFileData(file, file.uploadedData)
+			persistFileData(file, file.uploadedData())
 		}
 	}
 	
@@ -67,6 +77,8 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		file.temporary = false
 		saveAttachment(file)
 	}
+	
+	def saveOrUpdate(file: FileAttachment) = session.saveOrUpdate(file)
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
 		val target = targetFile(file.id)
@@ -127,7 +139,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			criteria.add(Is.lt("dateUploaded", date))
 		}
 		
-		criteria.untypedList.asInstanceOf[JList[String]].toSet[String]
+		criteria.listOf[String].toSet
 	}
 
 	/**

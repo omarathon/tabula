@@ -128,11 +128,11 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					}
 				}
 				if (!exists) {
-					debug("Deleting submission that no longer exists in app: title="+info.title+" objectId=" + info.objectId + " " + info.universityId)
+					debug(s"Deleting submission that no longer exists in app: title=${info.title} objectId=${info.objectId} ${info.universityId}")
 					val deleted = session.deleteSubmission(classId, assignmentId, info.objectId)
 					debug(deleted.toString)
 				} else {
-					debug("Submission still exists so not deleting: title/id="+info.title)
+					debug(s"Submission still exists so not deleting: title/id=${info.title}")
 				}
 			}
 		}
@@ -152,10 +152,21 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 					val alreadyUploaded = existingSubmissions.exists(_.matches(attachment))
 					if (alreadyUploaded) {
 						// we don't need to upload it again, probably
-						debug("Not uploading attachment again because it looks like it's been uploaded before: " + attachment.name + "(by " + submission.universityId + ")")
+						debug("Not uploading attachment again because it looks like it's been uploaded before:" +
+								s" ${attachment.name}(by ${submission.universityId})")
 					} else {
-						debug("Uploading attachment: " + attachment.name + " (by " + submission.universityId + "). Paper title: " + attachment.id)
-						val submitResponse = session.submitPaper(classId, className, assignmentId, assignmentName, attachment.id, attachment.name, attachment.file, submission.universityId, "Student")
+						debug(s"Uploading attachment: ${attachment.name} (by ${submission.universityId}). Paper title: ${attachment.id}")
+						val submitResponse = session.submitPaper(
+								classId, 
+								className, 
+								assignmentId, 
+								assignmentName, 
+								attachment.id, 
+								attachment.name, 
+								attachment.file, 
+								submission.universityId, 
+								"Student")
+								
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)

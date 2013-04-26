@@ -1,44 +1,38 @@
 <#escape x as x?html>
-<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+<div class="fixed-on-scroll">
+	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+	
+	<#if assignment.openEnded>
+		<p class="dates">
+			<@fmt.interval assignment.openDate />, never closes
+			(open-ended)
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+		</p>
+	<#else>
+		<p class="dates">
+			<@fmt.interval assignment.openDate assignment.closeDate />
+			<#if assignment.closed>
+				<span class="label label-warning">Closed</span>
+			</#if>
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+								
+		</p>
+	</#if>
+	
+	<#assign module=assignment.module />
+	<#assign department=module.department />
+	
+	<#include "_filter.ftl" />
+	
+	<#assign currentView = "table" />
+	<#include "_action-bar.ftl" />
 
-<#assign module=assignment.module />
-<#assign department = module.department />
-
-<#if hasPublishedFeedback>
-	<p>
-		<#if stillToDownload?has_content>
-			<@fmt.p whoDownloaded?size "student has" "students have" /> downloaded their feedback to date <span class="subtle">(recent downloads may take a couple of minutes to show up.)</span>
-			<@fmt.p stillToDownload?size "student" "students" /> still have not downloaded their feedback.
-			<a id="tool-tip" class="btn btn-mini" data-toggle="button" href="#">
-				<i class="icon-list"></i>
-				List
-			</a>
-			<div id="tip-content" class="hide">
-				<ul><#list stillToDownload as student>
-					<li>
-						<#if module.department.showStudentName>
-							${student.user.fullName}
-						<#else>
-							${student.user.warwickId}
-						</#if>
-					</li>
-				</#list></ul>
-			</div>
-			<script type="text/javascript">
-				jQuery(function($){
-					$("#tool-tip").popover({
-						placement: 'right',
-						html: true,
-						content: function(){return $('#tip-content').html();},
-						title: 'Students that haven\'t downloaded feedback'
-					});
-				});
-			</script>
-		<#else>
-			All students have downloaded their feedback
-		</#if>
-	</p>
-</#if>
+	<#if students??>
+</div>
 
 <#macro originalityReport attachment>
 <#local r=attachment.originalityReport />
@@ -82,76 +76,9 @@
 	<p>There are no submissions or feedbacks yet for this assignment.</p>
 </#if>
 
-<!-- Extra junk that most people probably won't care about -->
-<div class="btn-group" id="assignment-extra-dropdown" style="float:right">
-	<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-		<i class="icon-wrench"></i>
-		Extra
-		<span class="caret"></span>
-	</a>
-	<ul class="dropdown-menu pull-right">
-		<li>
-			<a title="Export submissions info as XLSX, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel (XSLX)</a>
-		</li>
-		<li>
-			<a title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">CSV</a>
-		</li>
-		<li>
-			<a title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">XML</a>
-		</li>
-	</ul>
-</div>
-
-<div class="btn-toolbar">
-	<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
-		<a class="btn long-running use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"><i class="icon-download"></i>
-			Download feedback templates
-		</a>
-	</#if>
-	<a class="btn long-running use-tooltip must-have-selected" title="Download the submission files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" id="download-selected-button"><i class="icon-download"></i>
-		Download submissions
-	</a>
-	<a class="btn long-running use-tooltip must-have-selected" title="Download the feedback files for the selected students as a ZIP file." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" id="download-selected-button"><i class="icon-download"></i>
-		Download feedback
-	</a>
-	<#if features.turnitin && department.plagiarismDetectionEnabled>
-		<a class="btn" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />" id="turnitin-submit-button">Check for Plagiarism</a>
-	</#if>
-	<div class="btn-group">
-		<a id="modify-selected" class="btn dropdown-toggle must-have-selected" data-toggle="dropdown" href="#">
-			Update selected
-			<span class="caret"></span>
-		</a>
-		<ul class="dropdown-menu">
-			<#if department.plagiarismDetectionEnabled>
-				<li>
-					<a class="use-tooltip" data-container="body" data-html="true" title="Toggle whether the selected students'<br>submissions are possibly plagiarised." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button">Mark plagiarised</a>
-				</li>
-			</#if>
-			<#if features.markingWorkflows && mustReleaseForMarking>
-				<li>
-					<a class="use-tooltip form-post" data-container="body" 
-					   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
-					   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
-					   id="release-submissions-button">
-						Release for marking
-					</a>
-				</li>
-			</#if>
-			<li>
-				<a class="" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />" id="delete-selected-button">Delete</a>
-			</li>
-		</ul>
-	</div>
-</div>
-
 <div class="submission-feedback-list">
 	<div class="clearfix">
 		<@form.selector_check_all />
-		<a class="btn btn-mini hide-awaiting-submission" href="#">
-			<span class="hide-label" ><i class="icon-chevron-up"></i> Hide awaiting submission</span>
-			<span class="show-label hide"><i class="icon-chevron-down"></i> Show awaiting submission</span>
-		</a>
 	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<colgroup class="student">
@@ -430,4 +357,9 @@
 		})(jQuery);
 	</script>
 </div>
+
+<#else>
+</div>
+</#if>
+
 </#escape>

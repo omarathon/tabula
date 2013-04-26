@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.data.model.forms
-
-import scala.collection.JavaConversions.asScalaBuffer
-
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
-import uk.ac.warwick.tabula.JavaImports.JList
-
+import scala.collection.JavaConversions._
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
-class ExtensionTest extends TestBase {
+// scalastyle:off magic.number
+class ExtensionTest extends PersistenceTestBase {
 
   @Test def testExtension {
 
@@ -55,6 +53,53 @@ class ExtensionTest extends TestBase {
     lateSubmissions should be ((11 to 15) map idFormat)
 
   }
+	
+	@Test def deleteFileAttachmentOnDelete {
+		// TAB-667
+		val orphanAttachment = transactional { tx =>
+			val attachment = new FileAttachment
+			
+			session.save(attachment)
+			attachment
+		}
+		
+		val (extension, extensionAttachment) = transactional { tx =>
+			val extension = new Extension(universityId = idFormat(1))
+			extension.userId = "steve"
+				
+			val assignment = new Assignment
+			session.save(assignment)
+			
+			extension.assignment = assignment
+			
+			val attachment = new FileAttachment
+			extension.addAttachment(attachment)
+			
+			session.save(extension)
+			(extension, attachment)
+		}
+		
+		// Ensure everything's been persisted
+		orphanAttachment.id should not be (null)
+		extension.id should not be (null)
+		extensionAttachment.id should not be (null)
+		
+		// Can fetch everything from db
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Extension], extension.id) should be (extension)
+			session.get(classOf[FileAttachment], extensionAttachment.id) should be (extensionAttachment)
+		}
+		
+		transactional { tx => session.delete(extension) }
+		
+		// Ensure we can't fetch the extension or attachment, but all the other objects are returned
+		transactional { tx => 
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[Extension], extension.id) should be (null)
+			session.get(classOf[FileAttachment], extensionAttachment.id) should be (null)
+		}
+	}
 
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i:Int) = "%07d" format i

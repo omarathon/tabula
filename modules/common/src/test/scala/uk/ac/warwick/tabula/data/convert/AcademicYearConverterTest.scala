@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.convert
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.AcademicYear
 
+//scalastyle:off magic.number
 class AcademicYearConverterTest extends TestBase {
 	
 	val converter = new AcademicYearConverter

@@ -134,19 +134,19 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		}
 	}
 	
-	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
+	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department) = transactional(readOnly=true) {
 		memberDao.getRelationshipsByDepartment(relationshipType, department)
 	}
 
-	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship] = transactional(readOnly = true) {
+	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member) = transactional(readOnly = true) {
 		memberDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 	}
 
-	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] = transactional(readOnly = true) {
+	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String) = transactional(readOnly = true) {
 		memberDao.getRelationshipsByAgent(relationshipType, agentId)
 	}
 
-  def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member] = transactional(readOnly = true) {
+  def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department) = transactional(readOnly = true) {
 		memberDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department)
 	}
 

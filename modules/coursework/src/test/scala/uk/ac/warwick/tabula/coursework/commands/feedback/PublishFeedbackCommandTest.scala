@@ -6,6 +6,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.JavaImports._
 
+// scalastyle:off magic.number
 class PublishFeedbackCommandTest extends TestBase {
 	
 	@Test

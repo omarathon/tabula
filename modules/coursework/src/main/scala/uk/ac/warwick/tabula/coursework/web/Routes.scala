@@ -21,6 +21,7 @@ object Routes {
 	object admin {
 		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+		def feedbackReports (department: Department) = "/admin/department/%s/reports/feedback/" format (encoded(department.code))
 
 		object markingWorkflow {
 			def list(department: Department) = admin.department(department) + "/markingworkflows"
@@ -49,22 +50,15 @@ object Routes {
 			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
 
 			def delete(assignment: Assignment) = assignmentroot(assignment) + "/delete"
-
-			object submission {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissions/list"
-			}
 			
 			object submissionsandfeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/list"
+				def summary(assignment: Assignment) = assignmentroot(assignment) + "/summary"
 				def table(assignment: Assignment) = assignmentroot(assignment) + "/table"
 			}
 
 			object turnitin {
 				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
-			}
-
-			object feedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/list"
 			}
 
 			object extension {

@@ -1,6 +1,6 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
- 
+
 <#macro longDateRange start end>
 	<#assign openTZ><@warwick.formatDate value=start pattern="z" /></#assign>
 	<#assign closeTZ><@warwick.formatDate value=end pattern="z" /></#assign>
@@ -14,8 +14,12 @@
 	<#return "module-${module.code}" />
 </#function>
 
-
 <#if department??>
+
+<script>
+
+	</script>
+
 
 <#-- TODO change this to a role check -->
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
@@ -42,7 +46,7 @@
 			<#if features.markingWorkflows>
 				<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
 			</#if>
-			<li><a href="reports/feedback"><i class="icon-book"></i> Feedback report</a></li>
+			<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
 			<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
 		</ul>
 	</div>
@@ -147,40 +151,8 @@
 											
 					</div>
 				</#if>
-
-				
-				<#if features.submissions && assignment.collectSubmissions && !features.combinedForm>
-					<div class="submission-count">
-						<#if assignment.submissions?size gt 0>
-							<a href="<@routes.assignmentsubmissions assignment=assignment />" title="View all submissions">
-								<@fmt.p assignment.submissions?size "submission" />
-							</a>
-						<#else>
-							<@fmt.p assignment.submissions?size "submission" />
-						</#if>
-					</div>
-				</#if>
-				<#if !features.combinedForm>
-					<div class="feedback-count">
-						<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-
-						${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> feedback<#if has_feedback></a></#if>
-						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
-												
-						<#if countUnreleasedFeedback gt 0>
-							<span class="has-unreleased-feedback">
-								${countUnreleasedFeedback} 
-								<#if countUnreleasedFeedback gt 1>
-								items of feedback need publishing
-								<#else>
-								item of feedback needs publishing
-								</#if>
-							</span>					
-						</#if>
-					</div>
 					
-				</#if>
-				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
+				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>	
 					<div class="submission-and-feedback-count">							
 						<i class="icon-file"></i> 
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
@@ -282,7 +254,7 @@
 	
 </div>
 </#list>
-
+<div id="feedback-report-modal" class="modal fade"></div>
 <#else>
 <p>No department.</p>
 </#if>

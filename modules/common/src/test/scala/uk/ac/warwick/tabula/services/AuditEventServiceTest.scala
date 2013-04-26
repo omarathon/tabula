@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.joda.time.DateTime
 import org.hibernate.dialect.HSQLDialect
 
+// scalastyle:off magic.number
 class AuditEventServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AuditEventService =_

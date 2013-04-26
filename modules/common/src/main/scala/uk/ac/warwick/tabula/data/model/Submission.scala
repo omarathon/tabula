@@ -114,8 +114,8 @@ class SavedSubmissionValue extends GeneratedId {
 	/**
 	 * Optional, only for file fields
 	 */
-	@OneToMany(mappedBy = "submissionValue", fetch = LAZY)
-	var attachments: JSet[FileAttachment] = _
+	@OneToMany(mappedBy = "submissionValue", fetch = LAZY, cascade=Array(ALL))
+	var attachments: JSet[FileAttachment] = JSet()
 
 	def hasAttachments = attachments != null && !attachments.isEmpty
 

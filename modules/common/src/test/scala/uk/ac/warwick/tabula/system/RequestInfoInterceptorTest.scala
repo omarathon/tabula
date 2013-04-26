@@ -9,6 +9,7 @@ import uk.ac.warwick.util.web.Uri
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.User
 
+// scalastyle:off magic.number
 class RequestInfoInterceptorTest extends TestBase with Mockito {
 	
 	val interceptor = new RequestInfoInterceptor

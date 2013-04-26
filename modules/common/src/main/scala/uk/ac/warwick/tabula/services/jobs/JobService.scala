@@ -72,14 +72,19 @@ class JobService extends HasJobDao with Logging {
 		if (findJob(prototype.identifier).isEmpty) {
 			throw new IllegalArgumentException("No Job found to handle '%s'" format (prototype.identifier))
 		}
+		
 		val instance = JobInstanceImpl.fromPrototype(prototype)
 		user map { u =>
 			instance.realUser = u.realId
 			instance.apparentUser = u.apparentId
 		}
-		jobDao.saveJob(instance)
 		
-		instance
+		// Do we already have an outstanding job with these details? Outstanding; just return that.
+		jobDao.findOutstandingInstance(instance) getOrElse {
+			jobDao.saveJob(instance)
+			
+			instance
+		}
 	}
 
 	def run(instance: JobInstance, job: Job) {

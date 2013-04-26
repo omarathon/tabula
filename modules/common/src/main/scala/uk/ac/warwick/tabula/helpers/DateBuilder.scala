@@ -52,11 +52,11 @@ object DateBuilder {
 			includeTime: Boolean) = {
 				if (includeTime) {
 					val pattern = new StringBuilder
-					if (includeAt) pattern.append(" 'at'")
-					pattern.append(" HH:mm")
+					pattern.append("HH:mm")
 					if (includeSeconds) pattern.append(":ss")
 					if (includeTimezone) pattern.append(" (z)")
-					datePart(date, capitalise, relative, shortMonth) + (if (split) "<br />" else "&#8194;") + (formatterMap(pattern.toString) print date).trim()
+					//if (includeAt) pattern.append(" 'at'")
+					(formatterMap(pattern.toString) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth)
 				}
 				else {
 					datePart(date, capitalise, relative, shortMonth)
@@ -76,7 +76,7 @@ object DateBuilder {
 		val thatDay = new DateMidnight(date.getMillis, date.getChronology)
 
 		lazy val absoluteDate = (dayAndDateFormat print date) +
-			ordinal(date.getDayOfMonth) +
+			"<sup>" + ordinal(date.getDayOfMonth) + "</sup>" +
 			(if (shortMonth) (shortMonthAndYearFormat print date)
 			else (monthAndYearFormat print date))
 

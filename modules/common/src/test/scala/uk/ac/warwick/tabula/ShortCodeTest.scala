@@ -4,7 +4,7 @@ import org.junit.Test
 import scala.collection.immutable.SortedSet
 import scala.math.max
 
-
+// scalastyle:off magic.number
 class ShortCodeTest extends TestBase {
 	@Test def randomShortCode {
 		ShortCode.random() should fullyMatch regex """[a-zA-Z0-9]{5}"""

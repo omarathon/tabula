@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 class DurationFormatterTag extends BaseTemplateMethodModelEx {
 	override def execMethod(args: Seq[_]) = args match {
+		// TAB-688 when passed null values, return a null value
+		case Seq(null) | Seq(null, null) => null
 		case Seq(end: DateTime) => DurationFormatter.format(new DateTime(), end)
 		case Seq(start: DateTime, end: DateTime) => DurationFormatter.format(start, end)
 		case _ => throw new IllegalArgumentException("Bad args")

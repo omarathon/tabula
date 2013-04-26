@@ -48,36 +48,36 @@
 							<th>Preferred name</th>
 							<td>${profile.fullName}</td>
 						</tr>
-						
-						<#if can.do("Profiles.Read.Gender", profile) && profile.gender??>
+											
+						<#if profile.gender??>
 							<tr>
 								<th>Gender</th>
 								<td>${profile.gender.description}</td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.Nationality", profile) && profile.nationality??>
+						<#if profile.nationality??>
 							<tr>
 								<th>Nationality</th>
 								<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
 							</tr>
 						</#if>
 
-						<#if can.do("Profiles.Read.DateOfBirth", profile) && profile.dateOfBirth??>
+						<#if profile.dateOfBirth??>
 							<tr>
 								<th>Date of birth</th>
 								<td><@warwick.formatDate value=profile.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /></td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.TermTimeAddress", profile) && profile.student && profile.termtimeAddress??>
+						<#if profile.student && profile.termtimeAddress??>
 							<tr class="address">
 								<th>Term-time address</th>
 								<td><@address profile.termtimeAddress /></td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.NextOfKin", profile) && profile.student && profile.nextOfKins?size gt 0>
+						<#if profile.student && profile.nextOfKins?size gt 0>
 							<tr>
 								<th>Emergency contacts</th>
 								<td>
@@ -106,42 +106,42 @@
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.HomeEmail", profile) && profile.homeEmail??>
+						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
 								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.TelephoneNumber", profile) && profile.phoneNumber??>
+						<#if profile.phoneNumber??>
 							<tr>
 								<th>Phone number</th>
 								<td>${phoneNumberFormatter(profile.phoneNumber)}</td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.MobileNumber", profile) && profile.mobileNumber??>
+						<#if profile.mobileNumber??>
 							<tr>
 								<th>Mobile phone</th>
 								<td>${phoneNumberFormatter(profile.mobileNumber)}</td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.UniversityId", profile) && profile.universityId??>
+						<#if profile.universityId??>
 							<tr>
 								<th>University number</th>
 								<td>${profile.universityId}</td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.Usercode", profile) && profile.userId??>
+						<#if profile.userId??>
 							<tr>
 								<th>IT code</th>
 								<td>${profile.userId}</td>
 							</tr>
 						</#if>
 						
-						<#if can.do("Profiles.Read.HomeAddress", profile) && profile.student && profile.homeAddress??>
+						<#if profile.student && profile.homeAddress??>
 							<tr class="address">
 								<th>Home address</th>
 								<td><@address profile.homeAddress /></td>

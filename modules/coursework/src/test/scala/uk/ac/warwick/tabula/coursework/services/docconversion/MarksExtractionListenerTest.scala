@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.helpers.Closeables.closeThis
 import uk.ac.warwick.tabula.coursework.services.docconversion.XslSheetHandler
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
 
+// scalastyle:off magic.number
 class MarksExtractionListenerTest extends TestBase with Logging {
 	
     @Test def readOLE2ExcelFile {

@@ -72,6 +72,7 @@ object TurnitinResponse {
 	}
 
 	/** Acquired from http://docs.moodle.org/dev/Turnitin_errors */
+	// scalastyle:off
 	val responseCodes = Map(
 		// Success States 1-99
 
@@ -132,7 +133,8 @@ object TurnitinResponse {
 		129 -> "The class end date parameter is not set. Please make sure that the class enddate is set if you wish to update the class.",
 		130 -> "The web services url is not valid. Please make sure that the web services url is a well-formed url.",
 		131 -> "The grade for the object is missing. Please make sure to include a grade for this",
-		132 -> "The grade for the object is invalid. Please make sure the grade is between 0and max points for the assignment.133 AssignID not allowed if creating an assignment with IDSync on. Please eitherturn IDSync off or remove the assignID eld.",
+		132 -> "The grade for the object is invalid. Please make sure the grade is between 0and max points for the assignment.",
+		133 -> "AssignID not allowed if creating an assignment with IDSync on. Please eitherturn IDSync off or remove the assignID.",
 		134 -> "submit_papers_to parameter needs to be between 0 and 2 inclusive.",
 		140 -> "Undocumented, but appears to occur when assignment title is too long. Should probably return either 2302 or 123 in this situation.",
 		141 -> "The value for the a date parameter is invalid",
@@ -157,22 +159,30 @@ object TurnitinResponse {
 		215 -> "This primary account ID is not authorized to use this product",
 		216 -> "Student limit for this account has been reached. Cannot join student to this class.",
 		217 -> "The product for this account has expired. Please contact your sales agent to renew the product",
-		218 -> "Database Error inserting unique ID into the database (Note: This may happen on a new install of Moodle if the mdl_assignment ID's clash with turnitin assignment ID's in the previous installation. Fix this by increasing the autoincrement for mdl_assignment in the new installation to a number greater than the maximum ID in the old Moodle)",
+		218 -> "Database Error inserting unique ID into the database", 
 		219 -> "Unique user id in the database does not match submitted uid",
 		220 -> "More than one class exists with this title and unique ids must be used in this case",
 		221 -> "More than one assignment exists with this title and unique ids must be used in this case",
-		222 -> "User is associated with a different external uid. If you have another user account with the same email address as the user account you are currently using, that could be the cause of the problem. Please try modifying the email address for your current user account to a unique email address and try again.",
+		222 -> ("User is associated with a different external uid. " +
+				"If you have another user account with the same email address as the user account you are currently using, " +
+				"that could be the cause of the problem. Please try modifying the email address for your current user account " +
+				"to a unique email address and try again."),
 		223 -> "Cannot verify Blackboard user’s identity within Turnitin. Missing Blackboard user id",
 		224 -> "Could not verify user as primary instructor for this course",
 		225 -> "Database error checking if student can view reports",
 		226 -> "The class you are trying to update could not be found. Please check to make sure that the class exists.",
-		227 -> "The class you are trying to update has an assignment which ends after the class end date you have specified. Please change you class end date or modify the assignment.",
-		228 -> "The assignment with the assignment id that you entered does not belong to the class with the class id you entered. Please check to make sure that you are not using a duplicate assignment id.",
+		227 -> ("The class you are trying to update has an assignment which ends after the class end date you have specified. " +
+				"Please change you class end date or modify the assignment."),
+		228 -> ("The assignment with the assignment id that you entered does not belong to the class with the class id you entered. " +
+				"Please check to make sure that you are not using a duplicate assignment id."),
 		229 -> "There was an error creating the rollover assignment.",
-		230 -> "You have been dropped from this class on the Turnitin end by your instructor. Please contact your instructor if you think you are receiving this message in error.",
-		231 -> "There was an error processing your request: please try your action again. Please contact the Turnitin helpdesk if the problem persists.",
+		230 -> ("You have been dropped from this class on the Turnitin end by your instructor. " +
+				"Please contact your instructor if you think you are receiving this message in error."),
+		231 -> ("There was an error processing your request: please try your action again. " +
+				"Please contact the Turnitin helpdesk if the problem persists."),
 		232 -> "Grademark is currently inactive for this account.",
-		233 -> "There was an error accessing this Turnitin Assignment because it was created via Course Copy, Snapshot, or some other process, and the original Turnitin Assignment could not be found.",
+		233 -> ("There was an error accessing this Turnitin Assignment because it was created via Course Copy, " +
+				"Snapshot, or some other process, and the original Turnitin Assignment could not be found."),
 		234 -> "Could not find class with the given unique ID or title.",
 		235 -> "Could not find assignment with the given assignment ID or title.",
 		236 -> "Could not retrieve assignment info with the given information.",

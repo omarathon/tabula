@@ -166,7 +166,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/sync"))
 class SyncFilesystemController extends BaseSysadminController {
-	var fileSyncEnabled = Wire.property("${environment.standby}").toBoolean
+	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 	
 	@RequestMapping
 	def sync() = {

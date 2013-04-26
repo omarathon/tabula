@@ -292,9 +292,9 @@ trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
 		val sitsUsers = 
 			upstream.flatMap { _.members.members } 
 							.distinct 
-							.map { id =>
+							.par.map { id =>
 								id -> userLookup.getUserByWarwickUniId(id)
-							}
+							}.seq
 
 		val includes = others map { _.includeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 		val excludes = others map { _.excludeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil

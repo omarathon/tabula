@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
-import java.io.{File, FileReader, FileWriter, IOException}
-
+import java.io.{File, FileInputStream, FileReader, FileWriter, IOException}
 import org.joda.time.DateTime
 import org.springframework.util.FileCopyUtils
-
 import uk.ac.warwick.spring.Wire
-
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.tabula.services.MaintenanceModeService
 
 /**
  * Job to go through each FileAttachment in the database and alert if there
@@ -25,13 +25,15 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 	
 	PermissionCheck(Permissions.ReplicaSyncing)
 	
-	var fileSyncEnabled = Option(Wire.property("${environment.standby}")) map { _.toBoolean } getOrElse (false)
+	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 	var dataDir = Wire[String]("${base.data.dir}")
-	var fileDao = Wire.auto[FileDao]
+	var fileDao = Wire[FileDao]
+	var fileHasher = Wire[FileHasher]
+	var maintenanceModeService = Wire[MaintenanceModeService]
 	
 	lazy val lastSanityCheckJobDetailsFile = new File(new File(dataDir), LastSanityCheckJobDetailsFilename)
 	
-	override def applyInternal() = transactional(readOnly = true) {
+	override def applyInternal() = transactional(readOnly = maintenanceModeService.enabled) {
 		val startTime = DateTime.now
 		
 		timed("Sanity check filesystem") { timer =>
@@ -39,7 +41,23 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 			val allIds = fileDao.getAllFileIds(lastSyncDate).toSeq
 			
 			val checks = for (id <- allIds) yield fileDao.getData(id) match {
-				case Some(file) => (1, 0)
+				case Some(file) => {
+					// TAB-664 populate file hash if we haven't already
+					fileDao.getFileById(id) map { attachment =>
+						val currentHash = fileHasher.hash(new FileInputStream(file))
+						
+						if (!attachment.hash.hasText && !maintenanceModeService.enabled) {
+							attachment.hash = currentHash
+						
+							fileDao.saveOrUpdate(attachment)
+							
+							(1, 0)
+						} else if (attachment.hash.hasText && attachment.hash != currentHash) {
+							logger.error("Expected hash didn't match! Expected %s but was actually %s".format(attachment.hash, currentHash))
+							(0, 1)
+						} else (1, 0)
+					} getOrElse (1, 0)
+				}
 				case None =>
 					// Check whether the file has since been cleaned up
 					if (!fileDao.getFileById(id).isDefined) (0, 0)

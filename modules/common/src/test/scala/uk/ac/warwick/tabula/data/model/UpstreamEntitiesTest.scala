@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
 import org.junit.Before
 import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
 
+// scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
 
 	@Test def associations() {

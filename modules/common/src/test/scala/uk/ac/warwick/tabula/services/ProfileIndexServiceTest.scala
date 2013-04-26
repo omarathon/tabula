@@ -2,11 +2,9 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.util.LuceneTestCase
-import org.junit.Test
+import org.junit.{Test, After, Before}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
-import org.junit.After
-import org.junit.Before
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import org.apache.lucene.index.IndexReader
@@ -36,6 +34,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Callable
 
+// scalastyle:off magic.number
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var indexer:ProfileIndexService = _
@@ -56,7 +55,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.stripTitles("Mr. Mathew Mannion") should be ("Mathew Mannion")
 		indexer.stripTitles("Prof.Mathew Mannion") should be ("Mathew Mannion")
 	}
-	
+
 	@Transactional
 	@Test def find = withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")

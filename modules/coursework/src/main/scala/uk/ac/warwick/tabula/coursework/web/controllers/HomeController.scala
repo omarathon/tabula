@@ -117,6 +117,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 					"hasSubmission" -> submission.isDefined,
 					"feedback" -> feedback,
 					"hasFeedback" -> feedback.isDefined,
+					"hasExtension" -> extension.isDefined,
 					"extension" -> extension,
 					"isExtended" -> isExtended,
 					"extensionRequested" -> extensionRequested,
