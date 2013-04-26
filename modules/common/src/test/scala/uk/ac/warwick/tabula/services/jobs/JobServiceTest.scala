@@ -37,6 +37,7 @@ class JobServiceTest extends AppContextTestBase with Mockito {
 	@Test def run = withUser("cuscav") {
 		val service = new JobService
 		val jobDao = mock[JobDao]
+		jobDao.findOutstandingInstance(any[JobInstance]) returns (None)
 		
 		val job = new TestingJob
 		job.jobService = service
@@ -71,6 +72,7 @@ class JobServiceTest extends AppContextTestBase with Mockito {
 	@Test def kill = withUser("cuscav") {
 		val service = new JobService
 		val jobDao = mock[JobDao]
+		jobDao.findOutstandingInstance(any[JobInstance]) returns (None)
 		
 		val job = new TestingJob
 		job.jobService = service

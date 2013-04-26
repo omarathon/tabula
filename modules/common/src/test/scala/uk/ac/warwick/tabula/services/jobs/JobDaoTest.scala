@@ -16,12 +16,15 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		val inst3 = service.add(None, TestingJob("job3"))
 		val inst4 = service.add(None, TestingJob("job4"))
 		val inst5 = service.add(None, TestingJob("job5"))
-		
+			
 		session.flush()
 		session.clear()
 		
 		jobDao.getById(inst1.id) should be (Some(inst1))
 		jobDao.getById(inst5.id) should be (Some(inst5))
+		
+		jobDao.findOutstandingInstance(inst1) should be (Some(inst1))
+		jobDao.findOutstandingInstance(inst5) should be (Some(inst5))
 		
 		jobDao.findOutstandingInstances(5).length should be (5)
 		jobDao.findOutstandingInstances(3).length should be (3)
@@ -32,6 +35,8 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		
 		inst.started = true
 		jobDao.update(inst)
+		
+		jobDao.findOutstandingInstance(inst1) should be (None)
 		
 		jobDao.findOutstandingInstances(5).length should be (4)
 		jobDao.findOutstandingInstances(5).contains(inst) should be (false)
