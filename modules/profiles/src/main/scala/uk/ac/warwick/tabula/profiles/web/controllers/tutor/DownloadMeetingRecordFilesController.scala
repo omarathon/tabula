@@ -15,28 +15,27 @@ import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.profiles.commands.DownloadMeetingRecordFilesCommand
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller
 class DownloadMeetingRecordFilesController extends BaseController {
 
-	var zipService = Wire.auto[ZipService]
 	@Autowired var fileServer: FileServer = _
 
-	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachment/{filename}.zip"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachmentsZipped(@PathVariable("meetingRecord") meetingRecord: MeetingRecord, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+	@ModelAttribute def command(@PathVariable("meetingRecord") meetingRecord: MeetingRecord)
+		= new DownloadMeetingRecordFilesCommand(meetingRecord)
 
-		// the zip name, though part of the URL, is not actually used
-		var zip = zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord);
-		val renderable = new RenderableZip(zip)
-		fileServer.serve(renderable)
+	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachments/*"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	def getAll(command: DownloadMeetingRecordFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		getOne(command, null)
 	}
 
 	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getSingleAttachment(@PathVariable("meetingRecord") meetingRecord: MeetingRecord, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-
-		val attachment = meetingRecord.attachments.get(0)
-		val renderable = new RenderableAttachment(attachment)
-		fileServer.serve(renderable)
+	def getOne(command: DownloadMeetingRecordFilesCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		// specify callback so that audit logging happens around file serving
+		command.callback = { (renderable) => fileServer.serve(renderable) }
+		command.apply().orElse { throw new ItemNotFoundException() }
 	}
 }
-
