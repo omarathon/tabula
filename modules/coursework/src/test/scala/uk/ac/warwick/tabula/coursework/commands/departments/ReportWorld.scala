@@ -46,11 +46,11 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	createPublishEvent(assignmentThree, 10, studentData(1, 4))	// for test three - these on time
 	createPublishEvent(assignmentThree, 35, studentData(5, 13))	// ... and these late
 
-	createPublishEvent(assignmentFour, 30, studentData(1, 35))	// on time for the 7 (that is, 35 % 5) that have submitted late, late for the rest
-	createPublishEvent(assignmentFive, 31, studentData(1, 100))	// on time for the 2 (100 % 50) that have submitted late, late for the rest
+	createPublishEvent(assignmentFour, 31, studentData(1, 35))	// on time for the 7 (that is, 35 % 5) that have submitted late, late for the rest
+	createPublishEvent(assignmentFive, 32, studentData(1, 100))	// on time for the 2 (100 % 50) that have submitted late, late for the rest
 	createPublishEvent(assignmentSix, 15, studentData(1, 23))		// on time
 	createPublishEvent(assignmentSix, 20, studentData(24, 65))	// on time
-	createPublishEvent(assignmentSix, 29, studentData(66, 73))	// late
+	createPublishEvent(assignmentSix, 31, studentData(66, 73))	// late
 
 	var auditEventQueryMethods = mock[AuditEventQueryMethods]
 	auditEventQueryMethods.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {
@@ -150,7 +150,7 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	def idFormat(i:Int) = "1" + ("%06d" format i)
 
 	def generateSubmission(assignment:Assignment, num: Int, lateModNumber: Int) {
-		val submissionDate = if(num % lateModNumber == 0){
+		val submissionDate = if(lateModNumber !=0 && num % lateModNumber == 0){
 			assignment.closeDate.plusDays(1)
 		} else {
 			assignment.closeDate.minusDays(1)
