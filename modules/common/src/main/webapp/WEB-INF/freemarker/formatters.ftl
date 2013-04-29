@@ -1,5 +1,6 @@
 <#compress>
 <#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
+<#escape x as x?html>
 
 <#macro module_name module>
 	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
@@ -24,7 +25,9 @@
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
--->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime)}<#--
+	--><#noescape><#--
+		-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime)}<#--
+	--></#noescape><#--
 --></#macro>
 
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
@@ -32,8 +35,10 @@
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
 
 <#macro interval start end=""><#--
---><#if end?has_content>${intervalFormatter(start, end)}<#--
---><#else>${intervalFormatter(start)}</#if><#--
+--><#noescape><#--
+	--><#if end?has_content>${intervalFormatter(start, end)}<#--
+	--><#else>${intervalFormatter(start)}</#if><#--
+--></#noescape><#--
 --></#macro>
 
 <#macro tense date future past><#if date.afterNow>${future}<#else>${past}</#if></#macro>
@@ -81,7 +86,6 @@
 --><#else><#--
 	-->${nationality}<#--
 --></#if></#macro>
-
 
 <#--	Macro for handling singleton & multiple attachments using a common filepath root
 		
@@ -142,4 +146,7 @@
 	</#if>
 	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
+
+</#escape>
+
 </#compress>
