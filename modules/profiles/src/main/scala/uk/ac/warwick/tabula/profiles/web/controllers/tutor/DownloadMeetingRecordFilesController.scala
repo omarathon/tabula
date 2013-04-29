@@ -27,6 +27,8 @@ class DownloadMeetingRecordFilesController extends BaseController {
 	@ModelAttribute def command(@PathVariable("meetingRecord") meetingRecord: MeetingRecord)
 		= new DownloadMeetingRecordFilesCommand(meetingRecord)
 
+	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
+	// attachments plural, the second has attachments singular.
 	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachments/*"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAll(command: DownloadMeetingRecordFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		getOne(command, null)

@@ -56,7 +56,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship)
-		createMeetingRecordCommand.title = "A title"
+		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
 		createMeetingRecordCommand.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
 		createMeetingRecordCommand.description = "Lovely words"
@@ -76,10 +76,14 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
 		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
+
+		// normally for single files the filename is set in the command as it is a path variable (I think!)
 		downloadCommand.filename = "Beltane"
-		val ret = downloadCommand.apply();
-		val rend = ret.get
-		rend.filename should be ("Beltane")
+		val retSingle = downloadCommand.apply();
+		val rendFile = retSingle.get
+		rendFile.filename should be ("Beltane")
+
+
 
 	}}
 }
