@@ -157,7 +157,11 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		}
 	}
 
-	// returns a pair - first is number of on time feedback, second is number of late
+
+	/**
+	 * Returns a pair - first is number of on time feedback, second is number of late
+	 */
+
 	def getFeedbackCounts(assignment: Assignment) : (Int, Int) =  {
 
 		val times:Seq[(Int, Int)] = for (
@@ -176,7 +180,9 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			} else {
 				workingDaysHelper.getNumWorkingDays(assignmentCloseDate.toLocalDate, publishEventDate.toLocalDate)
 			}
-			if(numOfDays > 20) (0,1) // was late
+			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
+			// we want n working days after the close date
+			if(numOfDays > (PUBLISH_DEADLINE_WORKING_DAYS + 1)) (0,1) // was late
 			else (1,0) // on time
 		}
 		// merge our list of pairs into a single pair of (on time, late)
