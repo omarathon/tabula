@@ -10,6 +10,7 @@ class OriginalityReport() extends GeneratedId {
 
 	// Don't cascade as this is the wrong side of the association
 	@OneToOne(optional = false, cascade=Array())
+
 	@JoinColumn(name="ATTACHMENT_ID")
     var attachment: FileAttachment = _
 

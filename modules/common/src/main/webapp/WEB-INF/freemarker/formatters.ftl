@@ -135,12 +135,18 @@
 </#macro>
 
 <#macro download_link filePath mimeType title="Download file" text="">
-	<#if mimeType?matches("^audio/(mpeg|mp3|mp4|ogg|wav)")>
+	<#if mimeType?matches("^audio/(mpeg|mp3|mp4|ogg|wav)$")>
 		<audio controls="controls">
 			<source src="<@url page='${filePath}'/>" type="${mimeType}" />
 		</audio>
+	<#elseif mimeType?matches("^video/(mp4|webm|ogv)$")>
+		<video controls="controls">
+			<source src="<@url page='${filePath}'/>" type="${mimeType}" />
+		</video>
 	</#if>
 	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
+
 </#escape>
+
 </#compress>
