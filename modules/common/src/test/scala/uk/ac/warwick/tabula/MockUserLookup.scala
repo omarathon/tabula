@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula
 import scala.collection.JavaConversions._
-
 import org.apache.commons.lang3.StringUtils._
-
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.Group
@@ -12,6 +10,7 @@ import uk.ac.warwick.userlookup.UserLookupAdapter
 import uk.ac.warwick.userlookup.WebServiceTimeoutConfig
 import uk.ac.warwick.userlookup.webgroups.GroupInfo
 import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
+import uk.ac.warwick.tabula.JavaImports._
 
 class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(null) with UserLookupService with JavaImports {
 	def this() = {
@@ -95,33 +94,27 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
 }
 
 class MockGroupService extends GroupService {
-	val DoItYourselfKevin = "Not implemented - add to mock object if you need it"
 	var groupMap: Map[String, Group] = Map()
 	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue(false)
+	var groupNamesForUserMap: Map[String, Seq[String]] = Map()
 	
 	override def getGroupByName(groupName: String) = groupMap.get(groupName).getOrElse {
 		throw new GroupNotFoundException(groupName)
 	}
 
-    override def getGroupsForDeptCode(deptCode: String) = {
-        throw new UnsupportedOperationException(DoItYourselfKevin)
-    }
+    override def getGroupsForDeptCode(deptCode: String) = ???
 
-    override def getGroupsForQuery(query: String) = {
-        throw new UnsupportedOperationException(DoItYourselfKevin)
-    }
+    override def getGroupsForQuery(query: String) = ???
 
-    override def getGroupsForUser(user: String) = {
-        throw new UnsupportedOperationException(DoItYourselfKevin)
-    }
+    override def getGroupsForUser(user: String) = ???
 
-    override def getGroupsNamesForUser(user: String) = {
-        throw new UnsupportedOperationException(DoItYourselfKevin)
-    }
+    override def getGroupsNamesForUser(user: String) = 
+    	groupNamesForUserMap.get(user) match {
+    		case Some(groups) => groups
+    		case _ => JArrayList[String]()
+    	}
 
-    override def getRelatedGroups(groupName: String) = {
-        throw new UnsupportedOperationException(DoItYourselfKevin)
-    }
+    override def getRelatedGroups(groupName: String) = ???
     
     override def getUserCodesInGroup(groupName: String) = {
         try {

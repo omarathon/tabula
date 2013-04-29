@@ -27,9 +27,9 @@ trait MutablePromise[A] extends Promise[A] {
 
 trait Promises {
 	
-	def promise[A] = new FunctionalPromise(null.asInstanceOf[A])
+	def promise[A]: MutablePromise[A] = new FunctionalPromise(null.asInstanceOf[A])
 	
-	def promise[A](fn: => A) = new FunctionalPromise(fn)
+	def promise[A](fn: => A): MutablePromise[A] = new FunctionalPromise(fn)
 	
 	def optionPromise[A](fn: => Option[A]) = new OptionalPromise(fn)
 	
@@ -37,13 +37,18 @@ trait Promises {
 
 object Promises extends Promises
 
-class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
+private class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
 	
 	private var value: A = _
 	private var defined = false
 	
 	def get = {
-		if (!defined) set(fn)
+		if (!defined) {
+			// eval
+			val value = fn
+			if (value == null) throw new UnfulfilledPromiseException("Promised value was null")
+			else set(value)
+		}
 		
 		value
 	}
@@ -53,6 +58,12 @@ class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
 		this
 	}
 	
+}
+
+private object FunctionalPromise {
+	def empty[A] = {
+		
+	}
 }
 
 class OptionalPromise[A](fn: => Option[A]) extends Promise[A] {

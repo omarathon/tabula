@@ -79,8 +79,8 @@ class ModuleAndDepartmentService extends Logging {
 	def modulesAdministratedBy(user: CurrentUser) = {
 		departmentsOwnedBy(user) flatMap (dept => dept.modules.asScala)
 	}
-	def modulesAdministratedBy(user: CurrentUser, dept: Department) = {
-		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala else Nil
+	def modulesAdministratedBy(user: CurrentUser, dept: Department): Set[Module] = {
+		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala.toSet else Set()
 	}
 
 	def addOwner(dept: Department, owner: String) = transactional() {

@@ -80,7 +80,7 @@ object GrantedPermission {
 		case t if t.runtimeClass.isAssignableFrom(classOf[Module]) => classOf[ModuleGrantedPermission]
 		case t if t.runtimeClass.isAssignableFrom(classOf[Member]) => classOf[MemberGrantedPermission]
 		case t if t.runtimeClass.isAssignableFrom(classOf[Assignment]) => classOf[AssignmentGrantedPermission]
-		case _ => classOf[GrantedRole[_]]
+		case _ => classOf[GrantedPermission[_]]
 	}
 	
 	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
