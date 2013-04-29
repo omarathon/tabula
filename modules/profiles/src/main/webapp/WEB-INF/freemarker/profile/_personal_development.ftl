@@ -62,6 +62,9 @@
 
 			var $f = $(frame).contents();
 			if ($f.find("#meeting-record-form").length == 1) {
+				// unhide the iframe
+				$m.find('.modal-body').slideDown();
+				
 				// reset datepicker & submit protection
 				$f.find("input.date-picker").tabulaDatePicker();
 				$form = $m.find('form.double-submit-protection');
@@ -77,19 +80,25 @@
 					}
 				}, 50);
 
-				// showtime
+				// show-time
 				$m.modal("show");
 				$m.on("shown", function() {
 					$f.find("[name='title']").focus();
 				});
 			} else if ($f.find("section.meetings").length == 1) {
+				// bust the returned content out to the original page, and kill the modal
 				$("section.meetings").replaceWith($f.find("section.meetings"));
 				$('details').details();
 				$m.modal("hide");
 				scrollToOpenDetails();
 			} else {
+				<#--
+				TODO more user-friendly fall-back?
+				This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
+				The default is to reload the original profile page. Not sure if there's something more helpful
+				we could/should do here.
+				-->
 				$m.modal('hide');
-				// TODO more user-friendly fall-back
 				document.location.reload(true);
 			}
 		}
@@ -115,7 +124,11 @@
 
 		$m.on('submit', 'form', function(e){
 			e.preventDefault();
+			// submit the inner form in the iframe
 			$m.find('iframe').contents().find('form').submit();
+			
+			// hide the iframe, so we don't get a FOUC
+			$m.find('.modal-body').slideUp();
 		});
 	});
 	</script>

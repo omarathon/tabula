@@ -78,17 +78,18 @@
 		var $spinnable = $(this).find(selector).add($(this).filter(selector));
 
 		if ($spinnable.length) {
+			// stop any delayed spinner
+			if (window.pendingSpinner != undefined) {
+				clearTimeout(window.pendingSpinner);
+				window.pendingSpinner = null;
+			}
+
 			$spinnable.each(function() {
 				var $this = $(this);
 
 				if ($this.data('spinContainer')) {
 					// turn off any existing spinners
-					var $container = $this.data('spinContainer');
-					var pending = $container.data("spinPending");
-					if (pending != undefined) {
-						clearTimeout(pending);
-					}
-					$container.spin(false);
+					$this.data('spinContainer').spin(false);
 				} else {
 					// create new spinner element
 					var $spinner = $('<div class="spinner-container" />');
@@ -117,7 +118,7 @@
 						// spin only after 500ms
 						$this.click(function(e) {
 							var $container = $this.data('spinContainer');
-							$container.data('spinPending') = setTimeout(function() { $container.spin('small'); }, 500);
+							window.pendingSpinner = setTimeout(function() { $container.spin('small'); }, 500);
 						});
 					}
 				}
