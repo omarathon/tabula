@@ -45,11 +45,11 @@ html.iframe {
 details, summary { display: block; }
 
 // The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
-// However, we�re still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
+// However, we're still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
 // Remember: by default (and probably most of the time), the contents of the <details> element are hidden.
 
 // Hide all direct descendants of every <details> element
-// Note that IE6 doesn�t support the child selector; we�ll work around that using jQuery later
+// Note that IE6 doesn't support the child selector; we'll work around that using jQuery later
 .no-details details > * { display: none; }
 
 // Make sure summary remains visible
@@ -214,6 +214,15 @@ ul {
 		margin: 1px 10px 5px 0;
 		
 		span { white-space: nowrap; }
+	}
+}
+
+.attachment {
+	margin-left: 18px;
+	
+	audio, video {
+		display: block;
+		margin: 12px 0;
 	}
 }
 
@@ -1197,7 +1206,7 @@ h1.with-settings {
 			section.meetings {
 				margin: 12px 0;
 				
-				summary {
+				details.meeting > summary {
 					margin-top: 9px;
 					font-weight: bold;
 					border-bottom: dotted 1px lighten(@grayLight, 35%);
