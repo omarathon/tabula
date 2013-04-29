@@ -32,7 +32,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
 import uk.ac.warwick.tabula.Fixtures
 
-
+// scalastyle:off magic.number
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	var indexer:AuditEventIndexService = _

@@ -65,6 +65,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
+	
+	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
+	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
@@ -130,6 +133,7 @@ object Department {
 		val ExtensionGuidelineLink = "extensionGuidelineLink"
 
 		val ShowStudentName = "showStudentName"
+		val AssignmentInfoView = "assignmentInfoView"
 
 		val PlagiarismDetection = "plagiarismDetection"
 	}

@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.multipart.MultipartException
 
+// scalastyle:off magic.number
 class ExceptionResolverTest extends TestBase {
 	
 	val resolver = new ExceptionResolver {			

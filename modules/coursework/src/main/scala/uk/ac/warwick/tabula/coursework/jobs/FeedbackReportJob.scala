@@ -43,6 +43,14 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 	val excelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	val WaitingRetries = 50
 	val WaitingSleep = 20000
+	
+	val ProgressGeneratedWorksheets = 5
+	val ProgressBuiltAssignmentData = 60
+	val ProgressPopulatedAssignments = 70
+	val ProgressPopulatedModules = 80
+	val ProgressFormattedSheets = 85
+	val ProgressDone = 100
+	
 	var sendEmails = true
 
 	def run(implicit job: JobInstance) {
@@ -104,22 +112,22 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			updateStatus("Generating base worksheets")
 			val assignmentSheet = report.generateAssignmentSheet(department)
 			val moduleSheet = report.generateModuleSheet(department)
-			updateProgress(5)
+			updateProgress(ProgressGeneratedWorksheets)
 
 			updateStatus("Building assignment data")
 			report.buildAssignmentData()
-			updateProgress(60)
+			updateProgress(ProgressBuiltAssignmentData)
 
 			updateStatus("Populating worksheets")
 			report.populateAssignmentSheet(assignmentSheet)
-			updateProgress(70)
+			updateProgress(ProgressPopulatedAssignments)
 			report.populateModuleSheet(moduleSheet)
-			updateProgress(80)
+			updateProgress(ProgressPopulatedModules)
 
 			updateStatus("Formatting worksheets")
 			report.formatWorksheet(assignmentSheet, report.assignmentSheetSize)
 			report.formatWorksheet(moduleSheet, report.moduleSheetSize)
-			updateProgress(85)
+			updateProgress(ProgressFormattedSheets)
 
 			// Adapter stuff to go from XSSF to the writer without having to save the spreadsheet to disk
 			val out = new ByteArrayOutputStream()
@@ -143,7 +151,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 				mailer.send(mime)
 			}
 
-			updateProgress(100)
+			updateProgress(ProgressDone)
 			updateStatus("Generated report and sent to your inbox")
 			job.succeeded = true
 		}

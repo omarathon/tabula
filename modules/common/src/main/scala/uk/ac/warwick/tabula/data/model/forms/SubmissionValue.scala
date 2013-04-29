@@ -50,6 +50,7 @@ class FileSubmissionValue(val field: FormField) extends SubmissionValue {
 			attachment.submissionValue = ssv
 			attachment
 		}
-		ssv.attachments = savedAttachments.toSet[FileAttachment]
+		ssv.attachments.clear()
+		ssv.attachments.addAll(savedAttachments.toSet[FileAttachment])
 	}
 }

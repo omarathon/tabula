@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.data.model
+
 import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -14,6 +15,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import org.hibernate.annotations.ForeignKey
+import uk.ac.warwick.tabula.system.permissions.Restricted
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -159,7 +161,9 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	this.userType = MemberUserType.Student
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
+	@Restricted(Array("Profiles.Read.StudyDetails"))
 	var studyDetails: StudyDetails = new StudyDetails
+	
 	studyDetails.student = this
 
 	def this(id: String) = {
@@ -266,14 +270,18 @@ class RuntimeMember(user: CurrentUser) extends Member(user) {
 }
 
 trait MemberProperties {
-	@Id var universityId: String = _
+	@Id @Restricted(Array("Profiles.Read.UniversityId")) var universityId: String = _
 	def id = universityId
 
-	@Column(nullable = false) var userId: String = _
+	@Column(nullable = false)
+	@Restricted(Array("Profiles.Read.Usercode"))
+	var userId: String = _
+	
 	var firstName: String = _
 	var lastName: String = _
 	var email: String = _
 
+	@Restricted(Array("Profiles.Read.HomeEmail"))
 	var homeEmail: String = _
 
 	var title: String = _
@@ -284,9 +292,10 @@ trait MemberProperties {
 	var userType: MemberUserType = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
+	@Restricted(Array("Profiles.Read.Gender"))
 	var gender: Gender = _
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
 	@JoinColumn(name = "PHOTO_ID")
 	var photo: FileAttachment = _
 
@@ -302,25 +311,34 @@ trait MemberProperties {
 	var homeDepartment: Department = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Restricted(Array("Profiles.Read.DateOfBirth"))
 	var dateOfBirth: LocalDate = _
 
 	var jobTitle: String = _
+	
+	@Restricted(Array("Profiles.Read.TelephoneNumber"))
 	var phoneNumber: String = _
 
+	@Restricted(Array("Profiles.Read.Nationality"))
 	var nationality: String = _
+	
+	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
 }
 
 trait StudentProperties {
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="HOME_ADDRESS_ID")
+	@Restricted(Array("Profiles.Read.HomeAddress"))
 	var homeAddress: Address = null
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
+	@Restricted(Array("Profiles.Read.TermTimeAddress"))
 	var termtimeAddress: Address = null
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
+	@Restricted(Array("Profiles.Read.NextOfKin"))
 	var nextOfKins:JList[NextOfKin] = JArrayList()
 }
 

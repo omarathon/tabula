@@ -13,6 +13,9 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.NoBind
+import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
+import uk.ac.warwick.tabula.events.{Event, EventDescription}
+import org.apache.log4j.Logger
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -52,12 +55,21 @@ abstract class Command[A] extends Describable[A] with JavaImports with EventHand
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {
-			if (maintenanceCheck(this)) recordEvent(this) { applyInternal() }
+			if (maintenanceCheck(this)) recordEvent(this) { benchmarkTask(benchmarkDescription) { applyInternal() } }
 			else throw maintenanceMode.exception()
 		} else {
-			applyInternal()
+			benchmarkTask(benchmarkDescription) { applyInternal() }
 		}
-	} 
+	}
+	
+	protected final def benchmarkTask[A](description: String)(fn: => A): A = Command.timed { timer =>
+		benchmark(description, level=Warn, minMillis=Command.MillisToSlowlog, stopWatch=timer, logger=Command.slowLogger)(fn)
+	}
+	
+	private def benchmarkDescription = {
+		val event = Event.fromDescribable(this)
+		EventDescription.generateMessage(event, "command").toString
+	}
 
 	/** 
 		Subclasses do their work in here.
@@ -73,6 +85,31 @@ abstract class Command[A] extends Describable[A] with JavaImports with EventHand
 
 	private def maintenanceCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled
+	}
+}
+
+object Command {
+	val MillisToSlowlog = 5000
+	val slowLogger = Logger.getLogger("uk.ac.warwick.tabula.Command.SLOW_LOG")
+	
+	// TODO this will break if we start doing stuff in parallols
+	private val threadLocal = new ThreadLocal[Option[uk.ac.warwick.util.core.StopWatch]] {
+		override def initialValue = None
+	}
+	
+	def timed[A](fn: uk.ac.warwick.util.core.StopWatch => A): A = {
+		val currentStopwatch = threadLocal.get
+		if (!currentStopwatch.isDefined) {
+			try {
+				val sw = StopWatch()
+				threadLocal.set(Some(sw))
+				fn(sw)
+			} finally {
+				threadLocal.remove
+			}
+		} else {
+			fn(currentStopwatch.get)
+		}
 	}
 }
 

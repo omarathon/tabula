@@ -21,7 +21,11 @@ import uk.ac.warwick.tabula.permissions._
 /**
  * Download one or more submissions from an assignment, as a Zip.
  */
-class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadSelectedFeedbackCommand(
+		val module: Module, 
+		val assignment: Assignment) 
+		extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	

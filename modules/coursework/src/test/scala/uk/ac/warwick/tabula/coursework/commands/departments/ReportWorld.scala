@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.userlookup.User
 
-
+// scalastyle:off magic.number
 // reusable environment for marking workflow tests
 trait ReportWorld extends AppContextTestBase with Mockito {
 	

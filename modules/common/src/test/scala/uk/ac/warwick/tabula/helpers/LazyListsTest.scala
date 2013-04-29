@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports
 
+// scalastyle:off magic.number
 class LazyListsTest extends TestBase with JavaImports {
 	
 	@Test def lazyList {

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.TestBase
 
-
+// scalastyle:off magic.number
 class LazyMapsTest extends TestBase {
 
 	@Test def lazyMap {

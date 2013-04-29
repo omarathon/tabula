@@ -57,6 +57,6 @@ class DeleteSubmission extends CourseworkController {
 					Breadcrumbs.Department(assignment.module.department), 
 					Breadcrumbs.Module(assignment.module))
 
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submission(assignment))
+	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
 }

@@ -31,6 +31,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 
+// scalastyle:off magic.number
 class MeetingRecordDaoTest extends AppContextTestBase {
 
 	@Autowired var memberDao: MemberDao =_

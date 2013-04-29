@@ -31,12 +31,11 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true
 		def deleteExtension(universityId: String): Boolean = {
-			val extension = assignment.findExtension(universityId).getOrElse({
-				return false
-			})
-			extension.assignment.extensions.remove(extension)
-			session.delete(extension)
-			true
+			assignment.findExtension(universityId).map { extension =>
+				extension.assignment.extensions.remove(extension)
+				session.delete(extension)
+				true
+			}.getOrElse(false)
 		}
 
 		// return the IDs of all the deleted extensions

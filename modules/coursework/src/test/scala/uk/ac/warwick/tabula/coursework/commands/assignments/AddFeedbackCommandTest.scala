@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.Mockito
 
+// scalastyle:off magic.number
 class AddFeedbackCommandTest extends TestBase with Mockito {
 
 	var dao: FileDao = mock[FileDao]

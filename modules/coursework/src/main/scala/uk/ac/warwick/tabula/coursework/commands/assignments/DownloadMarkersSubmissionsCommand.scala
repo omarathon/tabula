@@ -18,7 +18,12 @@ import uk.ac.warwick.tabula.JavaImports._
 /**
  * Download one or more submissions from an assignment, as a Zip, for you as a marker.
  */
-class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+class DownloadMarkersSubmissionsCommand(
+		val module: Module, 
+		val assignment: Assignment, 
+		val user: CurrentUser) 
+		extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
+	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 

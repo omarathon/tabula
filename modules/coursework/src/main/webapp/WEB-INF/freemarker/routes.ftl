@@ -18,8 +18,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#compress></#macro>
 <#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
-<#macro assignmentsubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissions/list"/></#macro>
-<#macro assignmentfeedbacks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/list"/></#macro>
 
 <#macro listmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 <#macro downloadmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/submissions.zip"/></#macro>
@@ -28,6 +26,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markeraddmarks assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/list"/></#macro>
+<#macro assignmentsubmissionsandfeedbacktable assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/table"/></#macro>
+<#macro assignmentsubmissionsandfeedbacksummary assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/summary"/></#macro>
 
 <#macro feedbackadd assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
 <#macro feedbackdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>

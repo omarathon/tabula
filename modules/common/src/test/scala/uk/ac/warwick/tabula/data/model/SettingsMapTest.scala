@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.TestBase
 
+// scalastyle:off magic.number
 class SettingsMapTest extends TestBase {
 	
 	class TestSettingsMap extends SettingsMap[TestSettingsMap]

@@ -30,6 +30,25 @@
 		</@form.field>
 	</@form.row>
 	
+	<@form.row>
+		<@form.label>Assignment detail view</@form.label>
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="assignmentInfoView" value="default" />
+				Let Tabula choose the best view to display for submissions and feedback
+			</@form.label>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="assignmentInfoView" value="table" />
+				Show the expanded table view of submissions and feedback first
+			</@form.label>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="assignmentInfoView" value="summary" />
+				Show the summary view of submissions and feedback first
+			</@form.label>
+			<@f.errors path="assignmentInfoView" cssClass="error" />
+		</@form.field>
+	</@form.row>
+	
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
 	or <a class="btn" href="<@routes.departmenthome department=department />">Cancel</a>

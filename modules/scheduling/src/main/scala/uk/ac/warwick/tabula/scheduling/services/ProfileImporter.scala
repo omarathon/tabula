@@ -168,14 +168,16 @@ object ProfileImporter {
 			where prs.prs_exid in (:usercodes)
 		"""
 
-	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
+	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) 
+		extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
 	}
 
-	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) 
+		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)

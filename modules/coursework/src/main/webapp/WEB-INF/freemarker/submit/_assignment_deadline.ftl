@@ -20,7 +20,7 @@
 
 	<#assign time_remaining = durationFormatter(assignment.closeDate) />
 	<#assign willShowButtons = showButtons!true />
-	<#if hasExtension>
+	<#if hasExtension && isExtended>
 		<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 	</#if>
 
@@ -32,7 +32,7 @@
 		<@extensionButton extensionRequested isExtended assignment.closed />
 	<#elseif assignment.closed>
 		<p class="late deadline">
-			<#if hasExtension>
+			<#if hasExtension && isExtended>
 				<span class="time-remaining">${extension_time_remaining} <span class="label label-important">Late</span></span>
 				Extension deadline was <@fmt.date date=extension.expiryDate />
 			<#else>

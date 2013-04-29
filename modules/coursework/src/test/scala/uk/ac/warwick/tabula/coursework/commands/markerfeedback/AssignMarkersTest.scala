@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.AssignMarkersCommand
 import java.util.HashMap
 import org.springframework.transaction.annotation.Transactional
 
-
+// scalastyle:off magic.number
 class AssignMarkersTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 	@Transactional @Test

@@ -31,7 +31,7 @@ class DeleteFeedback extends CourseworkController {
 		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 
 	@RequestMapping(method = Array(GET))
-	def get(form: DeleteFeedbackCommand) = Redirect(Routes.admin.assignment.feedback(form.assignment))
+	def get(form: DeleteFeedbackCommand) = Redirect(Routes.admin.assignment.submissionsandfeedback(form.assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(form: DeleteFeedbackCommand, errors: Errors) = {
@@ -46,7 +46,7 @@ class DeleteFeedback extends CourseworkController {
 				formView(form.assignment)
 			} else {
 				form.apply()
-				Redirect(Routes.admin.assignment.feedback(form.assignment))
+				Redirect(Routes.admin.assignment.submissionsandfeedback(form.assignment))
 			}
 		}
 	}

@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.data.model.StudentMember
 import java.sql.ResultSetMetaData
 
+// scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends TestBase with Mockito {
 	
 	trait Environment {

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.Transactions
 
+// scalastyle:off magic.number
 class JobTests extends TestBase with Mockito with JobTestHelp {
 	
 	val testingJob = new TestingJob

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import scala.reflect.BeanProperty
+
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.springframework.validation.BindingResult
@@ -28,8 +29,13 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.MeetingFormat
 
-class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentRelationship)
-	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
+class CreateMeetingRecordCommand(
+		val creator: Member,
+		val relationship: StudentRelationship)
+	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener {
+
+	val HOUR = 12 // arbitrary meeting time
+	val PREHISTORIC_YEARS = 5 // number of years to consider as extremely old
 
 	var title: String = _
 	var description: String = _
@@ -58,7 +64,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 		var meeting = new MeetingRecord(creator, relationship)
 		meeting.title = title
 		meeting.description = formattedHtml(description)
-		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(12) // arbitrarily record as noon
+		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(HOUR) // arbitrarily record as noon
 
 		meeting.format = format
 		doFiling(meeting)
@@ -80,7 +86,7 @@ class CreateMeetingRecordCommand(val creator: Member, val relationship: StudentR
 			case date:LocalDate => {
 				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				} else if (meetingDate.isBefore(DateTime.now.minusYears(5).toLocalDate)) {
+				} else if (meetingDate.isBefore(DateTime.now.minusYears(PREHISTORIC_YEARS).toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
 				}
 			}

@@ -119,12 +119,15 @@ object MarksTemplateCommand {
 
 	// util to replace unsafe characters with spaces
 	def safeAssignmentName(assignment: Assignment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assignment))
+	
+	val MaxSpreadsheetNameLength = 31
+	val MaxAssignmentNameLength = MaxSpreadsheetNameLength - "Marks for ".length
 
 	// trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
 	// "Marks for " = 10 chars + assignment name (max 21) = 31
 	def trimmedAssignmentName(assignment: Assignment) = {
-		if (assignment.name.length > 21)
-			assignment.name.substring(0, 21)
+		if (assignment.name.length > MaxAssignmentNameLength)
+			assignment.name.substring(0, MaxAssignmentNameLength)
 		else
 			assignment.name
 	}	

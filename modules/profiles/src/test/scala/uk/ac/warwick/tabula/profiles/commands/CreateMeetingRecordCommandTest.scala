@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.AppContextTestBase
 
 
+// scalastyle:off magic.number
 class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
