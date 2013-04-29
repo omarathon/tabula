@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
+// scalastyle:off magic.number
 object Fixtures {
 	
 	def submission(universityId: String = "0123456", userId: String = "cuspxp") = {

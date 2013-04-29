@@ -10,9 +10,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
 
-
-
-
+//scalastyle:off magic.number
 class AddAssignmentsCommandTest extends AppContextTestBase {
 	
 	@Transactional

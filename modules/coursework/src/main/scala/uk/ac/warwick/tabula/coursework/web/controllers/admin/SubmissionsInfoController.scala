@@ -55,7 +55,11 @@ class SubmissionsInfoController extends CourseworkController {
 		<assignment id={ assignment.id } open-date={ isoFormat(assignment.openDate) } close-date={ isoFormat(assignment.closeDate) }/>
 
 	def submissionElement(item: SubmissionListItem) =
-		<submission id={ item.submission.id } submission-time={ isoFormat(item.submission.submittedDate) } university-id={ item.submission.universityId } downloaded={ item.downloaded.toString }>
+		<submission 
+				id={ item.submission.id } 
+				submission-time={ isoFormat(item.submission.submittedDate) } 
+				university-id={ item.submission.universityId } 
+				downloaded={ item.downloaded.toString }>
 			{ item.submission.values map fieldElement(item) }
 		</submission>
 

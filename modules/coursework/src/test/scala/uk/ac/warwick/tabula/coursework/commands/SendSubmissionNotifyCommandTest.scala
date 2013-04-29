@@ -36,6 +36,7 @@ import javax.servlet.ServletContext
 import javax.mail.internet.MimeMultipart
 import org.junit.Before
 
+// scalastyle:off magic.number
 class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 
 	var submission: Submission = _

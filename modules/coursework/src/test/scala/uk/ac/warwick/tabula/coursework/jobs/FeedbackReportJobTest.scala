@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.commands.departments.ReportWorld
 
-
+// scalastyle:off magic.number
 class FeedbackReportJobTest extends AppContextTestBase with Mockito with JobTestHelp with ReportWorld {
 	val job = new FeedbackReportJob
 	override def createJobs = Array[Job](job)

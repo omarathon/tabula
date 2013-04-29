@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 
+// scalastyle:off magic.number
 class JodaDateTimeConverterTest extends TestBase {
 	
 	val converter = new JodaDateTimeConverter

@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConverters._
 import reflect.BeanProperty
 import javax.persistence._
+import javax.persistence.CascadeType._
 import org.hibernate.annotations.AccessType
 import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-
 
 @Entity @AccessType("field")
 class FeedbackTemplate extends GeneratedId with PermissionsTarget {
@@ -15,7 +15,7 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var name:String = _
 	var description:String = _
 
-	@OneToOne(orphanRemoval=true)
+	@OneToOne(orphanRemoval=true, cascade=Array(ALL))
 	@JoinColumn(name="ATTACHMENT_ID")
 	var attachment: FileAttachment = _
 

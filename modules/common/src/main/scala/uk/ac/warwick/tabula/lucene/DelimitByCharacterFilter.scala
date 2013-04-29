@@ -14,31 +14,34 @@ final class DelimitByCharacterFilter(val source: TokenStream, val character: Cha
 	
 	override def incrementToken(): Boolean = {
 		var text = if (!useRemainingText) {
-			if (!source.incrementToken()) return false
-			
-			new String(term.buffer, 0, term.length)
+			if (!source.incrementToken()) ""
+			else new String(term.buffer, 0, term.length)
 		} else {
 			useRemainingText = false
 			remainingText
 		}
 		
-		if (!text.hasText) return false
+		if (text.hasText) {
 		
-		val matchedLength = text.indexOf(character)
-		if (matchedLength != -1) {
-			useRemainingText = true
+			val matchedLength = text.indexOf(character)
+			if (matchedLength != -1) {
+				useRemainingText = true
+				
+				val firstToken = text.substring(0, matchedLength)
+				val secondToken = text.substring(matchedLength + 1, text.length)
+				
+				remainingText = secondToken
+				
+				setTermBuffer(firstToken)
+			} else {
+				setTermBuffer(text)
+			}
 			
-			val firstToken = text.substring(0, matchedLength)
-			val secondToken = text.substring(matchedLength + 1, text.length)
+			true
 			
-			remainingText = secondToken
-			
-			setTermBuffer(firstToken)
 		} else {
-			setTermBuffer(text)
+			false
 		}
-		
-		true
 	}
 	
 	private def setTermBuffer(buffer: String) = {

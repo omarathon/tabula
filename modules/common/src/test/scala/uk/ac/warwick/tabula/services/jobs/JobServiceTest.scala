@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.jobs.TestingJob
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.Transactions
 
+// scalastyle:off magic.number
 class JobServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var service: JobService = _
@@ -36,6 +37,7 @@ class JobServiceTest extends AppContextTestBase with Mockito {
 	@Test def run = withUser("cuscav") {
 		val service = new JobService
 		val jobDao = mock[JobDao]
+		jobDao.findOutstandingInstance(any[JobInstance]) returns (None)
 		
 		val job = new TestingJob
 		job.jobService = service
@@ -70,6 +72,7 @@ class JobServiceTest extends AppContextTestBase with Mockito {
 	@Test def kill = withUser("cuscav") {
 		val service = new JobService
 		val jobDao = mock[JobDao]
+		jobDao.findOutstandingInstance(any[JobInstance]) returns (None)
 		
 		val job = new TestingJob
 		job.jobService = service

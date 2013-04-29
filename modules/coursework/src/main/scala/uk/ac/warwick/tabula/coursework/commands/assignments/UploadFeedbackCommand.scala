@@ -177,50 +177,51 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	
 	def validateExisting(item: FeedbackItem, errors: Errors)
 
-	override def onBind(result:BindingResult) = transactional() {
-		file.onBind(result)
-
+	private def processFiles(bits: Seq[Pair[String, FileAttachment]]) {
+		
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
 				.file.attached.add(file)
+		
+		// go through individual files, extracting the uni number and grouping
+		// them into feedback items.
+		var itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
+		unrecognisedFiles.clear()
 
-		def processFiles(bits: Seq[Pair[String, FileAttachment]]) {
-			// go through individual files, extracting the uni number and grouping
-			// them into feedback items.
-			var itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
-			unrecognisedFiles.clear()
+		for ((filename, file) <- bits) {
+			// match uni numbers found in file path
+			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map { _.subgroups(0) }.toList
 
-			for ((filename, file) <- bits) {
-				// match uni numbers found in file path
-				val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map { _.subgroups(0) }.toList
+			// ignore any numbers longer than 7 characters.
+			val numbers = allNumbers.filter { _.length == 7 }
 
-				// ignore any numbers longer than 7 characters.
-				val numbers = allNumbers.filter { _.length == 7 }
-
-				if (numbers.isEmpty) {
-					// no numbers at all.
-					unrecognisedFiles.add(new ProblemFile(filename, file))
-				} else if (numbers.distinct.size > 1) {
-					// multiple different numbers, ambiguous, reject this.
-					invalidFiles.add(new ProblemFile(filename, file))
-				} else {
-					// one 7 digit number, this one might be okay.
-					store(itemMap, numbers.head, filenameOf(filename), file)
-				}
-				
-				// match potential module codes found in file path
-				val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
-				
-				if(!allModuleCodes.isEmpty){
-					// the potential module code doesn't match this assignment's module code
-					if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
-						moduleMismatchFiles.add(new ProblemFile(filename, file))
-					} 
-				}
-				
+			if (numbers.isEmpty) {
+				// no numbers at all.
+				unrecognisedFiles.add(new ProblemFile(filename, file))
+			} else if (numbers.distinct.size > 1) {
+				// multiple different numbers, ambiguous, reject this.
+				invalidFiles.add(new ProblemFile(filename, file))
+			} else {
+				// one 7 digit number, this one might be okay.
+				store(itemMap, numbers.head, filenameOf(filename), file)
 			}
-			items = itemMap.values.toList
+			
+			// match potential module codes found in file path
+			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
+			
+			if(!allModuleCodes.isEmpty){
+				// the potential module code doesn't match this assignment's module code
+				if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
+					moduleMismatchFiles.add(new ProblemFile(filename, file))
+				} 
+			}
+			
 		}
+		items = itemMap.values.toList
+	}
+	
+	override def onBind(result:BindingResult) = transactional() {
+		file.onBind(result)
 
 		// ZIP has been uploaded. unpack it
 		if (archive != null && !archive.isEmpty()) {
@@ -238,7 +239,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					// just turn it into an underscore.
 					val name = entry.getName.replace("\uFFFD", "_")
 					f.name = filenameOf(name)
-					f.uploadedData = new ZipEntryInputStream(zip, entry)
+					f.uploadedData = () => new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
 					fileDao.saveTemporary(f)
 					(name, f)

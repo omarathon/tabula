@@ -34,6 +34,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Callable
 
+// scalastyle:off magic.number
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var indexer:ProfileIndexService = _

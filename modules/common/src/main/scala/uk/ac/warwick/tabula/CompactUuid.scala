@@ -18,9 +18,11 @@ object CompactUuid {
 
 	val UuidSplit = new Regex("(.{8})(.{4})(.{4})(.{4})(.{12})")
 
+	val BASE = 16
+	
 	def uncompact(compactUuid: String): Option[String] =
 		try {
-			decode64(compactUuid).toString(16) match {
+			decode64(compactUuid).toString(BASE) match {
 				case UuidSplit(a, b, c, d, e) => Some("%s-%s-%s-%s-%s".format(a, b, c, d, e))
 				case _ => None
 			}
@@ -30,7 +32,7 @@ object CompactUuid {
 
 	def compact(uuid: String): Option[String] =
 		try {
-			Some(encode64(new BigInteger(uuid.replace("-", ""), 16)))
+			Some(encode64(new BigInteger(uuid.replace("-", ""), BASE)))
 		} catch {
 			case e: NumberFormatException => None
 		}

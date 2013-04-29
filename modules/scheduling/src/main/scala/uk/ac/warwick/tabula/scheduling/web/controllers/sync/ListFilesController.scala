@@ -37,7 +37,8 @@ class ListFilesController extends BaseController {
 			"files" -> (files map { 
 				file => Map(
 					"id" -> file.id, 
-					"createdDate" -> file.dateUploaded.getMillis
+					"createdDate" -> file.dateUploaded.getMillis,
+					"hash" -> file.hash
 				) 
 			})
 		)

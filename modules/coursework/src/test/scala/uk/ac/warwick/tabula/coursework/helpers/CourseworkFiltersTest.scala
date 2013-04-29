@@ -26,6 +26,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
 
+// scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase {
 	
 	val department = Fixtures.department("in", "IT Services")

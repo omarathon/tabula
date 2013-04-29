@@ -15,7 +15,3 @@
 </div>
 <@f.hidden path="extensionItems[0].approved" value="true" />
 <@f.hidden path="extensionItems[0].rejected" value="false" />
-<div class="modal-footer">
-	<input type="submit" class="btn btn-primary" value="Save">
-	<a href="#" class="close-model btn" data-dismiss="modal">Cancel</a>
-</div>

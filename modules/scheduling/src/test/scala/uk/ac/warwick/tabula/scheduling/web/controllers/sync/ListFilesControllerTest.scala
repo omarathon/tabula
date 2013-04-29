@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import org.json.JSONObject
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
+// scalastyle:off magic.number
 class ListFilesControllerTest extends TestBase with MockitoSugar {
 	
 	val controller = new ListFilesController

@@ -21,6 +21,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import org.hibernate.validator.NotNull
+import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
+import uk.ac.warwick.tabula.helpers.Stopwatches._
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) 
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
@@ -28,22 +30,27 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var auditIndexService = Wire.auto[AuditEventIndexService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
+	val enhancedFeedbacksCommand = new ListFeedbackCommand(module, assignment)
 	
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
+	
+	// When we call export commands, we may want to further filter by a subset of student IDs
+	var students: JList[String] = JArrayList()
 
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
-		val hasOriginalityReport = enhancedSubmissions.exists(_.submission.hasOriginalityReport)
-		val uniIdsWithSubmissionOrFeedback = assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
-		val moduleMembers = assignmentMembershipService.determineMembershipUsers(assignment)
+		val whoDownloaded = enhancedFeedbacksCommand.apply()
+		
+		val hasOriginalityReport = benchmarkTask("Check for originality reports") { enhancedSubmissions.exists(_.submission.hasOriginalityReport) }
+		val uniIdsWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") { assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted }
+		val moduleMembers = benchmarkTask("Get module membership") { assignmentMembershipService.determineMembershipUsers(assignment) }
 		val unsubmittedMembers = moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
 		val withExtension = unsubmittedMembers.map(member => (member, assignment.findExtension(member.getWarwickId)))
 		
@@ -51,9 +58,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 		val mustReleaseForMarking = assignment.markingWorkflow != null
 		
-		val whoDownloaded = auditIndexService.feedbackDownloads(assignment).map(x =>{(userLookup.getUserByUserId(x._1), x._2)})
-		
-		val unsubmitted = for (user <- unsubmittedMembers) yield {			
+		val unsubmitted = benchmarkTask("Get unsubmitted users") { for (user <- unsubmittedMembers) yield {			
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == user.getWarwickId)
 			
 			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
@@ -80,8 +85,8 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 				stages=progress.stages,
 				coursework=coursework
 			)
-		}
-		val submitted = for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
+		}}
+		val submitted = benchmarkTask("Get submitted users") { for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
 			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
@@ -100,8 +105,9 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedSubmissionForUniId = usersSubmissions.headOption
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption map { feedback =>
-				new FeedbackListItem(feedback, whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
-						x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+				new FeedbackListItem(feedback, 
+					!feedback.attachments.isEmpty && (whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+						x._2.isAfter(feedback.mostRecentAttachmentUpload))}))
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
@@ -126,7 +132,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 				stages=progress.stages,
 				coursework=coursework
 			)
-		}
+		}}
 		
 		val membersWithPublishedFeedback = submitted.filter { student => 
 			student.coursework.enhancedFeedback map { _.feedback.checkedReleased } getOrElse (false)
@@ -137,8 +143,17 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		
 		val stillToDownload = membersWithPublishedFeedback filterNot { item => item.coursework.enhancedFeedback map { _.downloaded } getOrElse(false) }
 		
+		val studentsFiltered = benchmarkTask("Do filtering") { 
+			val allStudents = (unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap))
+			val studentsFiltered = 
+				if (students.isEmpty) allStudents
+				else allStudents.filter { student => students.contains(student.user.getWarwickId) }
+			
+			studentsFiltered
+		}
+		
 		SubmissionAndFeedbackResults(
-			students=(unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap)),
+			students=studentsFiltered,
 			whoDownloaded=whoDownloaded,
 			stillToDownload=stillToDownload,
 			hasPublishedFeedback=hasPublishedFeedback,

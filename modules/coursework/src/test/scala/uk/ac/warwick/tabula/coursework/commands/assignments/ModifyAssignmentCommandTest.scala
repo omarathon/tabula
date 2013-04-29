@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.Transactions._
 
+// scalastyle:off magic.number
 class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 	
 	@Test def validateCloseDate {

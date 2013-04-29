@@ -21,6 +21,10 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
 	var config: Configuration = _
 
 	logger.info("Creating custom freemarker servlet")
+	
+	val MISSING_CONFIG_MESSAGE = 
+		"Couldn't find config in servlet attribute 'freemarkerConfiguration' - " +
+		"should have been exported by ServletContextAttributeExporter"
 
 	/**
 	 * Add items to the model that should be available to every Freemarker view.
@@ -57,7 +61,7 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
 	override def init {
 		config = getServletConfig().getServletContext().getAttribute("freemarkerConfiguration") match {
 			case c: Configuration => c
-			case _ => throw new IllegalStateException("Couldn't find config in servlet attribute 'freemarkerConfiguration' - should have been exported by ServletContextAttributeExporter")
+			case _ => throw new IllegalStateException(MISSING_CONFIG_MESSAGE)
 		}
 		super.init
 	}

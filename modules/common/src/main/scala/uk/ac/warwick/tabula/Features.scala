@@ -42,12 +42,12 @@ abstract class Features {
 	@Value("${features.turnitin:true}") var turnitin = defaults.turnitin
 	@Value("${features.assignmentMembership:true}") var assignmentMembership = defaults.assignmentMembership
 	@Value("${features.extensions:true}") var extensions = defaults.extensions
-	@Value("${features.combinedForm:true}") var combinedForm = defaults.combinedForm
 	@Value("${features.feedbackTemplates:true}") var feedbackTemplates = defaults.feedbackTemplates
 	@Value("${features.markingWorkflows:true}") var markingWorkflows = defaults.markingWorkflows
 	@Value("${features.markerFeedback:true}") var markerFeedback = defaults.markerFeedback
 	@Value("${features.profiles:true}") var profiles = defaults.profiles
-	@Value("${features.assignmentProgressTable:false}") var assignmentProgressTable = defaults.assignmentProgressTable
+	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
+	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -84,12 +84,12 @@ class FeaturesMessage {
 	var turnitin = true
 	var assignmentMembership = true
 	var extensions = true
-	var combinedForm = true
 	var feedbackTemplates = true
 	var markingWorkflows = true
 	var markerFeedback = true
 	var profiles = true
-	var assignmentProgressTable = false
+	var assignmentProgressTable = true
+	var assignmentProgressTableByDefault = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

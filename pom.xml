@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>34-SNAPSHOT</version>
+	<version>35-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -540,9 +540,13 @@
 					<artifactId>scalastyle-maven-plugin</artifactId>
 					<version>0.2.0</version>
 					<configuration>
+						<!-- TAB-697 -->
+						<skip>true</skip>
+						
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>
+            <includeTestSourceDirectory>false</includeTestSourceDirectory>
 						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>

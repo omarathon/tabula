@@ -7,6 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.transaction.annotation.Transactional
 
+// scalastyle:off magic.number
 class AddMarksCommandTest extends AppContextTestBase with Mockito {
 
 	EventHandling.enabled = false

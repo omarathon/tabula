@@ -33,6 +33,14 @@ object Assignment {
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
+	
+	object Settings {
+		object InfoViewType {
+			val Default = "default"
+			val Table = "table"
+			val Summary = "summary"
+		}
+	}
 }
 
 /**
@@ -322,7 +330,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * If the old-style assignment-wide published flag is true, then it
 	 * assumes all feedback has already been published.
 	 */
+	// scalastyle:off
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
+	
+	
+	def unreleaseddFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)

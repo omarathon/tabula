@@ -151,40 +151,8 @@
 											
 					</div>
 				</#if>
-
-				
-				<#if features.submissions && assignment.collectSubmissions && !features.combinedForm>
-					<div class="submission-count">
-						<#if assignment.submissions?size gt 0>
-							<a href="<@routes.assignmentsubmissions assignment=assignment />" title="View all submissions">
-								<@fmt.p assignment.submissions?size "submission" />
-							</a>
-						<#else>
-							<@fmt.p assignment.submissions?size "submission" />
-						</#if>
-					</div>
-				</#if>
-				<#if !features.combinedForm>
-					<div class="feedback-count">
-						<#if has_feedback><a class="list-feedback-link" href="<@routes.assignmentfeedbacks assignment=assignment  />"></#if>
-
-						${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> feedback<#if has_feedback></a></#if>
-						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
-												
-						<#if countUnreleasedFeedback gt 0>
-							<span class="has-unreleased-feedback">
-								${countUnreleasedFeedback} 
-								<#if countUnreleasedFeedback gt 1>
-								items of feedback need publishing
-								<#else>
-								item of feedback needs publishing
-								</#if>
-							</span>					
-						</#if>
-					</div>
 					
-				</#if>
-				<#if (features.combinedForm && ((features.submissions && assignment.collectSubmissions) || has_feedback))>	
+				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>	
 					<div class="submission-and-feedback-count">							
 						<i class="icon-file"></i> 
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">

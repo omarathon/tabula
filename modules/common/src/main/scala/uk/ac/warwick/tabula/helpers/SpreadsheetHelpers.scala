@@ -8,12 +8,13 @@ import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.data.model.Department
 
 trait SpreadsheetHelpers {
-
+	
+	val MaxDepartmentNameLength = 31 - 11
 
 	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
 	def trimmedDeptName(department: Department) = {
-		if (department.name.length > 20)
-			department.name.substring(0, 20)
+		if (department.name.length > MaxDepartmentNameLength)
+			department.name.substring(0, MaxDepartmentNameLength)
 		else
 			department.name
 	}

@@ -39,8 +39,6 @@ object JobInstanceImpl {
 @Entity(name = "Job")
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
-	private type JsonMap = Map[String, Any]
-
 	@transient var jsonMapper = Wire.auto[ObjectMapper]
 	@transient var userLookup = Wire.auto[UserLookupInterface]
 	@transient var currentUserFinder = Wire.auto[CurrentUserInterceptor]

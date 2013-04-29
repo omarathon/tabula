@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
 import org.junit.Ignore
 
+// scalastyle:off magic.number
 class ApplicationTest extends AppContextTestBase {
     
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_

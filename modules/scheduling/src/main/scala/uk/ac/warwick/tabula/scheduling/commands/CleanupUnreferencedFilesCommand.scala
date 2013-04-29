@@ -45,7 +45,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 
 			val (successful, deleted) = checkBucket(fileDao.attachmentDir)
 
-			val logString = "successfulFiles," + successful + ",deletedFiles," + deleted + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
+			val logString = s"successfulFiles,$successful,deletedFiles,$deleted,timeTaken,${timer.getTotalTimeMillis},lastSuccessfulRun,${startTime.getMillis}" 
 			logger.info(logString)
 
 			try {

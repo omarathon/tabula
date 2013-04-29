@@ -42,6 +42,7 @@ import org.joda.time.DateTimeUtils
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.RelationshipType
 
+// scalastyle:off magic.number
 class ProfileServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var profileService:ProfileServiceImpl = _

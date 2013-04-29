@@ -16,6 +16,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 	val assignmentSheetSize = 13
 	val moduleSheetSize = 11
+	
+	val PUBLISH_DEADLINE_WORKING_DAYS = 20
 
 	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
@@ -58,7 +60,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addStringCell(assignment.name, row)
 			addStringCell(assignment.module.code.toUpperCase, row)
 			addDateCell(assignment.closeDate.toDate, row, dateCellStyle(workbook))
-			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, 20)
+			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PUBLISH_DEADLINE_WORKING_DAYS)
 			addDateCell(publishDeadline.toDate, row, dateCellStyle(workbook))
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)

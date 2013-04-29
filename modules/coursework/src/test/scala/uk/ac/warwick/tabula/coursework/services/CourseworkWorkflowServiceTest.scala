@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
+// scalastyle:off magic.number
 class CourseworkWorkflowServiceTest extends TestBase {
 	
 	val department = Fixtures.department("in", "IT Services")
@@ -102,12 +103,15 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		assignment.markingWorkflow = null
 		department.plagiarismDetectionEnabled = false
 		
+		// lines were getting a bit long...
+		import WorkflowStages._
+		
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))
 			p.stages should be (ListMap(
-				"AddFeedback" -> WorkflowStages.StageProgress(WorkflowStages.AddFeedback, false, "workflow.AddFeedback.notUploaded", WorkflowStages.Good, false, true),
-				"ReleaseFeedback" -> WorkflowStages.StageProgress(WorkflowStages.ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased", WorkflowStages.Good, false, false),
-				"DownloadFeedback" -> WorkflowStages.StageProgress(WorkflowStages.DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", WorkflowStages.Good, false, false)
+				"AddFeedback" -> StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded", Good, false, true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased", Good, false, false),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, false)
 			))
 			p.percentage should be (0)
 			p.nextStage should be (None) // no next stage because we haven't started
@@ -121,12 +125,12 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback)))
 			p.stages should be (ListMap(
-				"AddFeedback" -> WorkflowStages.StageProgress(WorkflowStages.AddFeedback, true, "workflow.AddFeedback.uploaded", WorkflowStages.Good, true, true),
-				"ReleaseFeedback" -> WorkflowStages.StageProgress(WorkflowStages.ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", WorkflowStages.Warning, false, true),
-				"DownloadFeedback" -> WorkflowStages.StageProgress(WorkflowStages.DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", WorkflowStages.Good, false, false)
+				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", Warning, false, true),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, false)
 			))
 			p.percentage should be (66)
-			p.nextStage should be (Some(WorkflowStages.ReleaseFeedback))
+			p.nextStage should be (Some(ReleaseFeedback))
 			p.messageCode should be ("workflow.ReleaseFeedback.notReleased")
 			p.cssClass should be ("warning")
 		}
@@ -136,12 +140,12 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback)))
 			p.stages should be (ListMap(
-				"AddFeedback" -> WorkflowStages.StageProgress(WorkflowStages.AddFeedback, true, "workflow.AddFeedback.uploaded", WorkflowStages.Good, true, true),
-				"ReleaseFeedback" -> WorkflowStages.StageProgress(WorkflowStages.ReleaseFeedback, true, "workflow.ReleaseFeedback.released", WorkflowStages.Good, true, true),
-				"DownloadFeedback" -> WorkflowStages.StageProgress(WorkflowStages.DownloadFeedback, true, "workflow.DownloadFeedback.notDownloaded", WorkflowStages.Warning, false, true)
+				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.notDownloaded", Warning, false, true)
 			))
 			p.percentage should be (100)
-			p.nextStage should be (Some(WorkflowStages.DownloadFeedback))
+			p.nextStage should be (Some(DownloadFeedback))
 			p.messageCode should be ("workflow.DownloadFeedback.notDownloaded")
 			p.cssClass should be ("warning")
 		}
@@ -149,9 +153,9 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=true))
 			p.stages should be (ListMap(
-				"AddFeedback" -> WorkflowStages.StageProgress(WorkflowStages.AddFeedback, true, "workflow.AddFeedback.uploaded", WorkflowStages.Good, true, true),
-				"ReleaseFeedback" -> WorkflowStages.StageProgress(WorkflowStages.ReleaseFeedback, true, "workflow.ReleaseFeedback.released", WorkflowStages.Good, true, true),
-				"DownloadFeedback" -> WorkflowStages.StageProgress(WorkflowStages.DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", WorkflowStages.Good, true, true)
+				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", Good, true, true)
 			))
 			p.percentage should be (100)
 			p.nextStage should be (None) // Complete
