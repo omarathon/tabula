@@ -77,8 +77,7 @@ class MeetingRecordController extends ProfilesController {
 			@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand,
 			errors: Errors, @ModelAttribute("viewMeetingRecordCommand")
 			viewCommand: Option[ViewMeetingRecordCommand],
-			@PathVariable("student") student: Member,
-			request: HttpServletRequest) = {
+			@PathVariable("student") student: Member) = {
 		transactional() {
 			if (errors.hasErrors) {
 				showIframeForm(createCommand, student)

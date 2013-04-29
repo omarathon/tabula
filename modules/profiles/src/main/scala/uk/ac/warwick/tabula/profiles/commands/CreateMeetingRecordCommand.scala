@@ -57,7 +57,7 @@ class CreateMeetingRecordCommand(
 			file.attached map(attachment => {
 				attachment.meetingRecord = meeting
 				meeting.attachments.add(attachment)
-				fileDao.makePermanent(attachment)
+				fileDao.savePermanent(attachment)
 			})
 		}
 

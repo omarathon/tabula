@@ -29,10 +29,6 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 					.addOrder(Order.desc("lastUpdatedDate"))
 					.seq
 	}
-
-	def get(id: String): Option[MeetingRecord] = {
-			session.newCriteria[MeetingRecord]
-					.add(Restrictions.eq("id", id))
-					.uniqueResult
-	}
+	
+	def get(id: String) = getById[MeetingRecord](id);
 }

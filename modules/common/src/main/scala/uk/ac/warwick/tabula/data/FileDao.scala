@@ -80,11 +80,6 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	
 	def saveOrUpdate(file: FileAttachment) = session.saveOrUpdate(file)
 
-	def makePermanent(file: FileAttachment) {
-		file.temporary = false
-		session.saveOrUpdate(file)
-	}
-
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
 		val target = targetFile(file.id)
 		val directory = target.getParentFile()

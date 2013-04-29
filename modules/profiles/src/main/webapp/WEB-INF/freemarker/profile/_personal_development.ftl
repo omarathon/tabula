@@ -113,7 +113,7 @@
 
 			$m.load(target + "?modal", function() {
 				var $mb = $m.find(".modal-body").empty();
-				$('<iframe frameBorder="0" scrolling="no" style="height:100%;width:100%;" id="#modal-content"></iframe>')
+				$('<iframe frameBorder="0" scrolling="no" style="height:100%;width:100%;" id="modal-content"></iframe>')
 					.load(function() {
 						frameLoad(this);
 					})
