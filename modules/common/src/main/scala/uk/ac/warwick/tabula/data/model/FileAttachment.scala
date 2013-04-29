@@ -14,9 +14,10 @@ import uk.ac.warwick.spring.Wire
 import scala.Some
 import java.util
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.helpers.DetectMimeType
 
 @Entity @AccessType("field")
-class FileAttachment extends GeneratedId {
+class FileAttachment extends GeneratedId with DetectMimeType {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]
@@ -38,6 +39,11 @@ class FileAttachment extends GeneratedId {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="extension_id")
 	var extension:Extension =_
+
+	// optional link to Meeting Record
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "meetingrecord_id")
+	var meetingRecord: MeetingRecord = _
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
@@ -99,7 +105,7 @@ class FileAttachment extends GeneratedId {
 			""
 		}
 	}
-	
+
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
@@ -119,6 +125,11 @@ class FileAttachment extends GeneratedId {
 			}
 		}
 		case _ => false
+	}
+	
+	@transient lazy val mimeType: String = file match {
+		case null => null
+		case f => detectMimeType(f)
 	}
 }
 

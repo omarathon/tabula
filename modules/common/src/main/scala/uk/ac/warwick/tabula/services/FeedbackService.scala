@@ -62,12 +62,12 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.setEntity("assignment", assignment)
 			.uniqueResult
 			.asInstanceOf[Number].intValue
-	}	
-	
+	}
+
 	def getFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
 		dao.getFeedbackByUniId(assignment, uniId)
 	}
-	
+
 	def delete(feedback: Feedback) = transactional() {
 		dao.delete(feedback)
 	}

@@ -41,7 +41,7 @@ import uk.ac.warwick.util.web.Uri
   */
 abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures {
 	// bring in type so we can be lazy and not have to import @Test
-	type Test = org.junit.Test 
+	type Test = org.junit.Test
 }
 
 /** Various test objects
@@ -54,17 +54,17 @@ trait TestFixtures {
 			)))
 		setAutoIncludes(Nil) // don't use prelude
 	}
-	
+
 	def testRequest(uri: String = null) = {
 		val req = new MockHttpServletRequest
 		req.setRequestURI(uri)
 		req
 	}
-	
+
 	def emptyFeatures = Features.empty
 
 	/** Creates an Assignment with a module and department,
-	  * and a few pre-filled fields. 
+	  * and a few pre-filled fields.
 	  */
 	def newDeepAssignment(moduleCode: String="IN101") = {
 		val department = new Department
@@ -77,14 +77,14 @@ trait TestFixtures {
 	/** Returns midnight on the first day of this year and month. */
 	def dateTime(year: Int, month: Int): DateTime = dateTime(year, month, 1)
 	def dateTime(year: Int, month: Int, day: Int): DateTime = new DateTime(year, month, day, 0, 0, 0, 0)
-	
+
 	def newSSOConfiguration = {
 		val config = new PropertiesConfiguration()
 		config.addProperty("mode", "new")
     config.addProperty("origin.login.location", "https://xebsignon.warwick.ac.uk/origin/hs")
     config.addProperty("shire.location", "https://xabula.warwick.ac.uk/tabula/shire")
     config.addProperty("shire.providerid", "tabula:service")
-    
+
     new SSOConfiguration(config)
 	}
 }
@@ -95,7 +95,7 @@ trait TestHelpers extends TestFixtures {
 	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[JMap[String, Any]]).toMap
 
 	var currentUser: CurrentUser = null
-  
+
 	var temporaryFiles: Set[File] = Set.empty
 
 	// Location of /tmp - best to create a subdir below it.
@@ -105,7 +105,7 @@ trait TestHelpers extends TestFixtures {
 	@Before def emptyTempDirSet = temporaryFiles = Set.empty
 
 	@Before def setupAspects = {
-		
+
 	}
 
 	/** Returns a new temporary directory that will get cleaned up
@@ -129,9 +129,9 @@ trait TestHelpers extends TestFixtures {
 
 	private def findTempFile: File = {
 		def randomTempFile() = new File(IoTmpDir, "JavaTestTmp-" + random.nextLong())
-		
+
 		// Create a Stream that will generate random files forever, then take the first 10.
-		// The Iterator will only calculate its elements on demand so it won't always generate 10 Files. 
+		// The Iterator will only calculate its elements on demand so it won't always generate 10 Files.
 		Iterator.continually( randomTempFile ).take(10)
 			.find(!_.exists)
 			.getOrElse(throw new IllegalStateException("Couldn't find unique filename!"))
@@ -156,10 +156,10 @@ trait TestHelpers extends TestFixtures {
 		} finally {
 			DateTimeUtils.setCurrentMillisSystem
 		}
-		
+
 	/** Sets up a pretend requestinfo context with the given pretend user
-	  * around the callback. 
-	  * 
+	  * around the callback.
+	  *
 	  * Can pass null as the usercode to make an anonymous user.
 	  *
 	  * withUser("cusebr") { /* ... your code */  }
@@ -174,10 +174,10 @@ trait TestHelpers extends TestFixtures {
 			u.setWarwickId(universityId)
 			u
 		}
-		
+
 		withCurrentUser(new CurrentUser(user, user))(fn)
 	}
-	
+
 	def withCurrentUser(user: CurrentUser)(fn: => Unit) {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
@@ -195,7 +195,7 @@ trait TestHelpers extends TestFixtures {
 			RequestInfo.close
 		}
 	}
-	
+
 	def withSSOConfig(ssoConfig: SSOConfiguration = newSSOConfiguration)(fn: => Unit) {
 		try {
 			SSOConfiguration.setConfig(ssoConfig)
@@ -210,7 +210,7 @@ trait TestHelpers extends TestFixtures {
 	def resourceAsString(path: String, encoding: String = "UTF-8"): String = new String(resourceAsBytes(path), encoding)
 	def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
 
-	
+
 	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[Seq[A]] { (v:Seq[A]) =>
 		org.scalatest.matchers.MatchResult(
     		v exists f,
@@ -218,5 +218,5 @@ trait TestHelpers extends TestFixtures {
     		"Contained no matching value"
 		)
 	}
-	
+
 }
