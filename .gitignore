@@ -29,4 +29,5 @@ junit*.properties
 *.sublime-workspace
 
 .ensime*
+*.orig
 
