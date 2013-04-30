@@ -14,9 +14,13 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
-import scala.reflect.ClassTag
+import scala.reflect._
 import uk.ac.warwick.userlookup.GroupService
 import scala.collection.JavaConverters._
+import uk.ac.warwick.util.cache.CacheEntryFactory
+import uk.ac.warwick.util.cache.Caches
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.User
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -41,14 +45,32 @@ trait PermissionsService {
 }
 
 @Service(value = "permissionsService")
-class PermissionsServiceImpl extends PermissionsService with Logging {
+class PermissionsServiceImpl extends PermissionsService with Logging
+	with GrantedRolesForUserCache
+	with GrantedRolesForGroupCache
+	with GrantedPermissionsForUserCache
+	with GrantedPermissionsForGroupCache {
 	
-	var dao = Wire.auto[PermissionsDao]
-	var groupService = Wire.auto[GroupService]
+	var dao = Wire[PermissionsDao]
+	var groupService = Wire[GroupService]
+	
+	private def clearCaches() {
+		// This is monumentally dumb. There's a more efficient way than this!
+		GrantedRolesForUserCache.clear()
+		GrantedRolesForGroupCache.clear()
+		GrantedPermissionsForUserCache.clear()
+		GrantedPermissionsForGroupCache.clear()
+	}
 	
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = dao.saveOrUpdate(roleDefinition)
-	def saveOrUpdate(permission: GrantedPermission[_]) = dao.saveOrUpdate(permission)
-	def saveOrUpdate(role: GrantedRole[_]) = dao.saveOrUpdate(role)
+	def saveOrUpdate(permission: GrantedPermission[_]) = {
+		dao.saveOrUpdate(permission)
+		clearCaches()
+	}
+	def saveOrUpdate(role: GrantedRole[_]) = {
+		dao.saveOrUpdate(role)
+		clearCaches()
+	}
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
 		transactional(readOnly = true) {
@@ -79,12 +101,12 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedRole[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
-		(
+		dao.getGrantedRolesById(
 			// Get all roles where usercode is included,
-			dao.getGrantedRolesForUser[A](user.apparentUser)
+			GrantedRolesForUserCache.get((user.apparentUser, classTag[A])).asScala
 			
 			// Get all roles backed by one of the webgroups, 		
-			++ (groupNames flatMap { dao.getGrantedRolesForWebgroup[A](_) })
+			++ (groupNames flatMap { groupName => GrantedRolesForGroupCache.get((groupName, classTag[A])).asScala })
 		)
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
@@ -93,12 +115,12 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedPermission[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
-		(
+		dao.getGrantedPermissionsById(
 			// Get all permissions where usercode is included,
-			dao.getGrantedPermissionsForUser[A](user.apparentUser)
+			GrantedPermissionsForUserCache.get((user.apparentUser, classTag[A])).asScala
 			
 			// Get all permissions backed by one of the webgroups, 		
-			++ (groupNames flatMap { dao.getGrantedPermissionsForWebgroup[A](_) })
+			++ (groupNames flatMap { groupName => GrantedPermissionsForGroupCache.get((groupName, classTag[A])).asScala })
 		)
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
@@ -130,4 +152,97 @@ class PermissionsServiceImpl extends PermissionsService with Logging {
 		}
 	}
 	
+}
+
+/*
+ * All caches map from a combination of the class tag for the scope, and the user (or webgroup name) 
+ * and map to a list of IDs of the granted roles / permissions.
+ */ 
+
+trait GrantedRolesForUserCache { self: PermissionsServiceImpl =>
+	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
+	final val GrantedRolesForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedRolesForUserCacheMaxSize = 1000
+	
+	final val GrantedRolesForUserCache = 
+		Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs)
+	GrantedRolesForUserCache.setMaxSize(GrantedRolesForUserCacheMaxSize)
+	
+	class GrantedRolesForUserCacheFactory extends CacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
+		def create(cacheKey: (User, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+			case (user, tag) => JArrayList(dao.getGrantedRolesForUser(user)(tag).map { role => role.id }.asJava)
+		}
+		def shouldBeCached(ids: JArrayList[String]) = true
+		
+		override def isSupportsMultiLookups() = false
+		def create(cacheKeys: JList[(User, ClassTag[_ <: PermissionsTarget])]): JMap[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
+			throw new UnsupportedOperationException("Multi lookups not supported")
+		}
+	}
+}
+
+trait GrantedRolesForGroupCache { self: PermissionsServiceImpl =>
+	final val GrantedRolesForGroupCacheName = "GrantedRolesForGroup"
+	final val GrantedRolesForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedRolesForGroupCacheMaxSize = 1000
+	
+	final val GrantedRolesForGroupCache = 
+		Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs)
+	GrantedRolesForGroupCache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
+	
+	class GrantedRolesForGroupCacheFactory extends CacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
+		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+			case (groupName, tag) => JArrayList(dao.getGrantedRolesForWebgroup(groupName)(tag).map { role => role.id }.asJava)
+		}
+		def shouldBeCached(ids: JArrayList[String]) = true
+		
+		override def isSupportsMultiLookups() = false
+		def create(cacheKeys: JList[(String, ClassTag[_ <: PermissionsTarget])]): JMap[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
+			throw new UnsupportedOperationException("Multi lookups not supported")
+		}
+	}
+}
+
+trait GrantedPermissionsForUserCache { self: PermissionsServiceImpl =>
+	final val GrantedPermissionsForUserCacheName = "GrantedPermissionsForUser"
+	final val GrantedPermissionsForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedPermissionsForUserCacheMaxSize = 1000
+	
+	final val GrantedPermissionsForUserCache = 
+		Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs)
+	GrantedPermissionsForUserCache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
+	
+	class GrantedPermissionsForUserCacheFactory extends CacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
+		def create(cacheKey: (User, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+			case (user, tag) => JArrayList(dao.getGrantedPermissionsForUser(user)(tag).map { role => role.id }.asJava)
+		}
+		def shouldBeCached(ids: JArrayList[String]) = true
+		
+		override def isSupportsMultiLookups() = false
+		def create(cacheKeys: JList[(User, ClassTag[_ <: PermissionsTarget])]): JMap[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
+			throw new UnsupportedOperationException("Multi lookups not supported")
+		}
+	}
+}
+
+trait GrantedPermissionsForGroupCache { self: PermissionsServiceImpl =>
+	final val GrantedPermissionsForGroupCacheName = "GrantedPermissionsForGroup"
+	final val GrantedPermissionsForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedPermissionsForGroupCacheMaxSize = 1000
+	
+	final val GrantedPermissionsForGroupCache = 
+		Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs)
+	GrantedPermissionsForGroupCache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
+	
+	class GrantedPermissionsForGroupCacheFactory extends CacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
+		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+			case (groupName, tag) => JArrayList(dao.getGrantedPermissionsForWebgroup(groupName)(tag).map { role => role.id }.asJava)
+		}
+		def shouldBeCached(ids: JArrayList[String]) = true
+		
+		override def isSupportsMultiLookups() = false
+		def create(cacheKeys: JList[(String, ClassTag[_ <: PermissionsTarget])]): JMap[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
+			throw new UnsupportedOperationException("Multi lookups not supported")
+		}
+	}
 }

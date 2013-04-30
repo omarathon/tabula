@@ -129,5 +129,8 @@ class MockGroupService extends GroupService {
     override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
 
     override def getGroupInfo(name: String) = new GroupInfo(getGroupByName(name).getUserCodes().size())
+    
+    override def clearCaches() = ???
+    override def getCaches() = ???
 	
 }

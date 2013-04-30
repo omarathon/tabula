@@ -9,11 +9,18 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+	
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedRole[A]]
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedPermission[A]]
+	
+	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedRole[A]]
+	def getGrantedPermissionsById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedPermission[A]]
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]]
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]]
@@ -38,6 +45,21 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = session.saveOrUpdate(role)
+	
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedRole[A]](id)
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedPermission[A]](id)
+	
+	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]) = 
+		if (ids.isEmpty) Nil
+		else session.newCriteria[GrantedRole[A]]
+					 .add(in("id", ids.asJava))
+					 .seq
+					 
+	def getGrantedPermissionsById[A <: PermissionsTarget: ClassTag](ids: Seq[String]) =
+		if (ids.isEmpty) Nil
+		else session.newCriteria[GrantedPermission[A]]
+					 .add(in("id", ids.asJava))
+					 .seq
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A) = canDefineRoleSeq(scope) {
 		session.newCriteria[GrantedRole[A]]

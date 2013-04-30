@@ -43,6 +43,42 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
+     
+  <cache name="GrantedRolesForUser"
+    maxElementsInMemory="1000"
+    maxElementsOnDisk="5000"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+     />
+     
+  <cache name="GrantedRolesForGroup"
+    maxElementsInMemory="100"
+    maxElementsOnDisk="500"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+     />
+     
+  <cache name="GrantedPermissionsForUser"
+    maxElementsInMemory="1000"
+    maxElementsOnDisk="5000"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+     />
+     
+  <cache name="GrantedPermissionsForGroup"
+    maxElementsInMemory="100"
+    maxElementsOnDisk="500"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+     />
     
   <!-- Piggyback onto the userlookup property -->
   <diskStore path="${warwick.ehcache.disk.store.dir}/tabula"/>
