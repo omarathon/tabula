@@ -35,7 +35,8 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null;
 	
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	// No orphanRemoval as it makes it difficult to move modules between Departments.
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -118,7 +119,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 		if (parent == null) this
 		else parent.rootDepartment
 		
-	def isUpstream = (parent == null)
+	def hasParent = (parent != null)
+
+	def isUpstream = !hasParent
 
 	override def toString = "Department(" + code + ")"
 
