@@ -79,7 +79,6 @@
 	</thead>
 	
 	<#if students?size gt 0>
->>>>>>> develop
 		<tbody>
 			<#macro action actionCode student>
 				<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
@@ -549,8 +548,6 @@
 })(jQuery);
 </script>
 <#else>
-<<<<<<< HEAD
-=======
 	<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
 		<p>There are no submissions or feedbacks yet for this assignment.</p>
 	<#else>
@@ -566,7 +563,6 @@
 </#if>
 
 <#else>
->>>>>>> develop
 </div>
 </#if>
 
