@@ -1,3 +1,0 @@
-alter table fileattachment
-add meetingrecord_id nvarchar2(255);
-
