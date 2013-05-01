@@ -8,11 +8,19 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+	
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedRole[A]]
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedPermission[A]]
+	
+	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedRole[A]]
+	def getGrantedPermissionsById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedPermission[A]]
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]]
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]]
@@ -21,6 +29,12 @@ trait PermissionsDao {
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[A]]
 	
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
+	
+	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedRole[A]]
+	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedRole[A]]
+	
+	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]]
+	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedPermission[A]]
 }
 
 @Repository
@@ -31,6 +45,21 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = session.saveOrUpdate(role)
+	
+	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedRole[A]](id)
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedPermission[A]](id)
+	
+	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]) = 
+		if (ids.isEmpty) Nil
+		else session.newCriteria[GrantedRole[A]]
+					 .add(in("id", ids.asJava))
+					 .seq
+					 
+	def getGrantedPermissionsById[A <: PermissionsTarget: ClassTag](ids: Seq[String]) =
+		if (ids.isEmpty) Nil
+		else session.newCriteria[GrantedPermission[A]]
+					 .add(in("id", ids.asJava))
+					 .seq
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A) = canDefineRoleSeq(scope) {
 		session.newCriteria[GrantedRole[A]]
@@ -58,7 +87,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 					 .seq.headOption
 	}
 					 
-	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] = canDefinePermission(scope) {
+	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean) = canDefinePermission(scope) {
 		session.newCriteria[GrantedPermission[A]]
 					 .add(is("scope", scope))
 					 .add(is("permission", permission))
@@ -84,6 +113,73 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	private def canDefineRole[A <: PermissionsTarget](scope: A)(f: => Option[GrantedRole[A]]) = {
 		if (GrantedRole.canDefineFor(scope)) f
 		else None
+	}
+	
+	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User) =
+		session.newQuery[GrantedRole[A]]("""
+				select distinct r
+				from """ + GrantedRole.className[A] + """ r
+				where 
+					(
+						r.users.universityIds = false and 
+						((:userId in elements(r.users.staticIncludeUsers)
+						or :userId in elements(r.users.includeUsers))
+						and :userId not in elements(r.users.excludeUsers))
+					) or (
+						r.users.universityIds = true and 
+						((:universityId in elements(r.users.staticIncludeUsers)
+						or :universityId in elements(r.users.includeUsers))
+						and :universityId not in elements(r.users.excludeUsers))
+					)
+		""")
+			.setString("universityId", user.getWarwickId())
+			.setString("userId", user.getUserId())
+			.seq
+	
+	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
+		val c = session.newCriteria[GrantedRole[A]]
+			.createAlias("users", "users")
+			.add(is("users.baseWebgroup", groupName))
+			
+			GrantedRole.discriminator[A] map { discriminator => 
+				c.add(is("class", discriminator))
+			}
+			
+			c.seq
+	}
+	
+	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User) =
+		session.newQuery[GrantedPermission[A]]("""
+				select distinct r
+				from """ + GrantedPermission.className[A] + """ r
+				where 
+					(
+						r.users.universityIds = false and 
+						((:userId in elements(r.users.staticIncludeUsers)
+						or :userId in elements(r.users.includeUsers))
+						and :userId not in elements(r.users.excludeUsers))
+					) or (
+						r.users.universityIds = true and 
+						((:universityId in elements(r.users.staticIncludeUsers)
+						or :universityId in elements(r.users.includeUsers))
+						and :universityId not in elements(r.users.excludeUsers))
+					)
+		""")
+			.setString("universityId", user.getWarwickId())
+			.setString("userId", user.getUserId())
+			.seq
+	
+	
+	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
+		val c = session.newCriteria[GrantedPermission[A]]
+			.createAlias("users", "users")
+			.add(is("users.baseWebgroup", groupName))
+			
+			GrantedPermission.discriminator[A] map { discriminator => 
+				c.add(is("class", discriminator))
+			}
+			
+			c.seq
 	}
 					
 }

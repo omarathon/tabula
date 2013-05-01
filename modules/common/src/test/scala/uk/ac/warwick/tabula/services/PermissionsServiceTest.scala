@@ -37,7 +37,7 @@ class PermissionsServiceTest extends AppContextTestBase {
 		
 		val ro = new RoleOverride
 		ro.permission = Permissions.Module.Read
-		ro.overrideType = ro.Deny
+		ro.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro)
 		

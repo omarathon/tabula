@@ -54,7 +54,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
@@ -114,7 +114,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		cmd.usercodes.add("cuscao")
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))

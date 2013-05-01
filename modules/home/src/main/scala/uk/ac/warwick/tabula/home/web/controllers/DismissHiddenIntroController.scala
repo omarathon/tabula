@@ -4,7 +4,7 @@ import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.home.commands.UserSettingsCommand
+import uk.ac.warwick.tabula.home.commands.DismissHiddenIntroCommand
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.services.UserSettingsService
@@ -14,43 +14,43 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.data.ModuleDao
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.views.JSONErrorView
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.PathVariable
 
 @Controller
-@RequestMapping(Array("/settings"))
-class UserSettingsController extends HomeController {
+@RequestMapping(Array("/settings/showIntro/{settingHash}"))
+class DismissHiddenIntroController extends HomeController {
 
-	validatesSelf[UserSettingsCommand]
+	validatesSelf[DismissHiddenIntroCommand]
 	
 	var userSettingsService = Wire.auto[UserSettingsService]
-	var moduleService = Wire[ModuleAndDepartmentService]
 	
 	private def getUserSettings(user: CurrentUser) = 
 		userSettingsService.getByUserId(user.apparentId) 
 		
-		
-	@ModelAttribute def command(user: CurrentUser) = {
+	@ModelAttribute def command(user: CurrentUser, @PathVariable("settingHash") hash: String) = {	
 		val usersettings = getUserSettings(user)
 		usersettings match { 
-			case Some(setting) => new UserSettingsCommand(user, setting)
-			case None => new UserSettingsCommand(user, new UserSettings(user.apparentId))
+			case Some(setting) => new DismissHiddenIntroCommand(user, setting, hash)
+			case None => new DismissHiddenIntroCommand(user, new UserSettings(user.apparentId), hash)
 		}
 	}
 
 	
 	@RequestMapping(method=Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {
-		 Mav("usersettings/form", "moduleRoles" -> moduleService.modulesManagedBy(user))	 		 
+	def viewSettings(user: CurrentUser, command: DismissHiddenIntroCommand, errors:Errors) = {		
+		 Mav(new JSONView(Map("dismiss" -> command.dismiss)))
 	}
 
 	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid command:UserSettingsCommand, errors:Errors) = {
+	def saveSettings(@Valid command: DismissHiddenIntroCommand, errors:Errors) = {
 		if (errors.hasErrors){
-			viewSettings(user, command, errors)
-		}
-		else{
+			Mav(new JSONErrorView(errors))
+		} else {
 			command.apply()
-			Redirect("/home")
+			Mav(new JSONView(Map("status" -> "success")))
 		}
 	}
 }

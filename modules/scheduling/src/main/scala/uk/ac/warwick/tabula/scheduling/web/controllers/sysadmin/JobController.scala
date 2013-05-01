@@ -13,14 +13,14 @@ class JobQuery {
 }
 
 @Controller
-@RequestMapping(value = Array("/sysadmin/jobs"))
+@RequestMapping(Array("/sysadmin/jobs"))
 class JobController extends BaseController {
 
 	@Autowired var jobService: JobService = _
 	
 	val pageSize = 100
 
-	@RequestMapping(value = Array("/list"))
+	@RequestMapping(Array("/list"))
 	def list(query: JobQuery) = {
 		val unfinished = jobService.unfinishedInstances
 		
@@ -40,14 +40,14 @@ class JobController extends BaseController {
 			"endIndex" -> end)
 	}
 
-	@RequestMapping(value = Array("/create-test"))
+	@RequestMapping(Array("/create-test"))
 	def test = {
 		val id = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay)).id
 		testStatus(id)
 		Redirect("/sysadmin/jobs/job-status?id=" + id)
 	}
 
-	@RequestMapping(value = Array("/job-status"))
+	@RequestMapping(Array("/job-status"))
 	def testStatus(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id)
 		Mav("sysadmin/jobs/job-status",
@@ -55,10 +55,19 @@ class JobController extends BaseController {
 			"jobStatus" -> (instance map (_.status) getOrElse (""))).noLayoutIf(ajax)
 	}
 	
-	@RequestMapping(value = Array("/kill"))
+	@RequestMapping(Array("/kill"))
 	def kill(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id)
 		jobService.kill(instance.get)
+		Redirect("/sysadmin/jobs/list")
+	}
+	
+	@RequestMapping(Array("/run"))
+	def run(@RequestParam("id") id: String) = {
+		val instance = jobService.getInstance(id).get
+		val job = jobService.findJob(instance.jobType).get
+		
+		jobService.processInstance(instance, job)
 		Redirect("/sysadmin/jobs/list")
 	}
 

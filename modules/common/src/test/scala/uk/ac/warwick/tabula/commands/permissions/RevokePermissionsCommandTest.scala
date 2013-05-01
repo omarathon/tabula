@@ -46,7 +46,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscao")
@@ -74,7 +74,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscao")
@@ -94,7 +94,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.permission = Permissions.Department.ManageExtensionSettings
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscao")
@@ -120,7 +120,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscao")
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscao")

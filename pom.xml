@@ -430,8 +430,8 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<!-- <recompileMode>incremental</recompileMode> -->
-					<!-- <useZincServer>true</useZincServer> -->
+					<!-- <recompileMode>incremental</recompileMode>
+					<useZincServer>true</useZincServer> -->
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
@@ -441,6 +441,8 @@
 						<arg>-deprecation</arg>
 						<arg>-feature</arg>
 					</args>
+          <source>1.6</source>
+          <target>1.6</target>
 				</configuration>
 			</plugin>
 

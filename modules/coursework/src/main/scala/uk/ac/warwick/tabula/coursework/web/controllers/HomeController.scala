@@ -18,17 +18,19 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
-import uk.ac.warwick.tabula.system.exceptions.FileUploadException
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.data.model.Department
 
 @Controller class HomeController extends CourseworkController {
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssignmentService]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-	var activityService = Wire.auto[ActivityService]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var assignmentService = Wire[AssignmentService]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var activityService = Wire[ActivityService]
+	var permissionsService = Wire[PermissionsService]
 
-	var userLookup = Wire.auto[UserLookupService]
-	var features = Wire.auto[Features]
+	var userLookup = Wire[UserLookupService]
+	var features = Wire[Features]
 	def groupService = userLookup.getGroupService
 
 	hideDeletedItems
@@ -56,8 +58,8 @@ import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
 		if (user.loggedIn) {
-			val ownedDepartments = moduleService.departmentsOwnedBy(user.idForPermissions)
-			val ownedModules = moduleService.modulesManagedBy(user.idForPermissions)
+			val ownedDepartments = moduleService.departmentsOwnedBy(user)
+			val ownedModules = moduleService.modulesManagedBy(user)
 			
 			val pagedActivities = activityService.getNoteworthySubmissions(user)
 
@@ -68,7 +70,7 @@ import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 				Map(
 					"assignment" -> assignment,
 					"numSubmissions" -> submissions.size,
-					"isAdmin" -> (ownedDepartments.contains(assignment.module.department) || ownedModules.contains(assignment.module))
+					"isAdmin" -> securityService.can(user, Permissions.Module.Read, assignment)
 				)
 			}
 
@@ -155,7 +157,7 @@ import uk.ac.warwick.tabula.system.exceptions.FileUploadException
 				"assignmentsForMarking" -> assignmentsForMarkingInfo,
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
-				"ownedModuleDepartments" -> ownedModules.map { _.department }.distinct,
+				"ownedModuleDepartments" -> ownedModules.map { _.department },
 				"activities" -> pagedActivities)
 		} else {
 			Mav("home/view")

@@ -6,11 +6,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.util.concurrency.promise.Promise
 import uk.ac.warwick.util.mail.WarwickMailSender
 import scala.language.implicitConversions
 
@@ -27,7 +27,7 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 	var fromAddress = Wire.property("${mail.exceptions.to}")
 
 	def applyInternal() {
-		val newTutor = newTutorPromise.fulfilPromise
+		val newTutor = newTutorPromise.get
 
 		if (notifyTutee) {
 			logger.debug("Notifying tutee: " + student)
@@ -75,5 +75,5 @@ class TutorChangeNotifierCommand(student: Member, oldTutor: Option[Member], newT
 		)))
 	}
 
-	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> newTutorPromise.fulfilPromise.universityId)
+	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> newTutorPromise.get.universityId)
 }
