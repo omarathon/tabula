@@ -16,10 +16,6 @@
 
 <#if department??>
 
-<script>
-
-	</script>
-
 
 <#-- TODO change this to a role check -->
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
@@ -29,6 +25,26 @@
 	</h1>
 	
 	<div class="btn-toolbar dept-toolbar">
+	
+	<#if department.parent??>
+		<a class="btn btn-medium use-tooltip" href="<@routes.departmenthome department.parent />" data-container="body" title="${department.parent.name}">
+			Parent department
+		</a>
+	</#if>
+	
+	<#if department.children?has_content>
+	<div class="btn-group">
+		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+			Subdepartments
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu pull-right">
+			<#list department.children as child>
+				<li><a href="<@routes.departmenthome child />">${child.name}</a></li>
+			</#list>
+		</ul>
+	</div>
+	</#if>
 	
 	<div class="btn-group dept-settings">
 		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
@@ -62,6 +78,10 @@
 	
 <#else>
 	<h1>${department.name}</h1>
+</#if>
+
+<#if !modules?has_content && department.children?has_content>
+<p>This department doesn't directly contain any modules. Check subdepartments.</p>
 </#if>
 
 <#list modules as module>
