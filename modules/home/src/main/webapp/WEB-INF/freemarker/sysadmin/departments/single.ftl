@@ -13,16 +13,8 @@
 	<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a> (${child.modules?size} modules)</li>
 </#list>
 </ul>
-
-<#if department.children?size gt 0>
-	<h4>Sub-departments</h4>
-	
-	<ul>
-		<#list department.children as child>
-			<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a></li>
-		</#list>
-	</ul>
 </#if>
+
 
 <#if department.hasParent>
 <p>Parent department: <a href='<@url page="/sysadmin/departments/${department.parent.code}/" />'>${department.parent.name}</a></p>
@@ -47,8 +39,9 @@ ${department.modules?size} modules
 </p>
 
 <ul>
-	<#list department.modules as module>
-		<li>${module.code} - ${module.name!"Unknown"}</li>
-	</#list>
+<#list department.modules as module>
+<li>${module.code} - ${module.name!"Unknown"}</li>
+</#list>
 </ul>
+
 </#escape>
