@@ -220,7 +220,7 @@
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
-			<version>1.91</version>
+			<version>1.92</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-codec</artifactId>
