@@ -16,35 +16,35 @@ class GrantedRoleTest extends TestBase {
 	
 	@Test def initDepartment {
 		GrantedRole.canDefineFor(dept) should be (true)
-		val gr = GrantedRole.init(dept, roleDefinition)
+		val gr = GrantedRole(dept, roleDefinition)
 		gr.scope should be (dept)
 		gr.roleDefinition should be (roleDefinition)
 	}
 	
 	@Test def initModule {
 		GrantedRole.canDefineFor(module) should be (true)
-		val gr = GrantedRole.init(module, roleDefinition)
+		val gr = GrantedRole(module, roleDefinition)
 		gr.scope should be (module)
 		gr.roleDefinition should be (roleDefinition)
 	}
 	
 	@Test def initAssignment {
 		GrantedRole.canDefineFor(assignment) should be (true)
-		val gr = GrantedRole.init(assignment, roleDefinition)
+		val gr = GrantedRole(assignment, roleDefinition)
 		gr.scope should be (assignment)
 		gr.roleDefinition should be (roleDefinition)
 	}
 	
 	@Test def initMember {
 		GrantedRole.canDefineFor(member) should be (true)
-		val gr = GrantedRole.init(member, roleDefinition)
+		val gr = GrantedRole(member, roleDefinition)
 		gr.scope should be (member)
 		gr.roleDefinition should be (roleDefinition)
 	}
 	
 	@Test(expected = classOf[IllegalArgumentException]) def initInvalid {
 		GrantedRole.canDefineFor(feedback) should be (false)
-		GrantedRole.init(feedback, roleDefinition)
+		GrantedRole(feedback, roleDefinition)
 	}
 
 }

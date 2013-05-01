@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import org.hibernate.annotations.ForeignKey
+import scala.reflect._
+import uk.ac.warwick.tabula.permissions.Permission
 
 @Entity
 @AccessType("field")
@@ -56,6 +58,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	var scope: A
 
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
+	def mayGrant(target: Permission) = roleDefinition.mayGrant(target)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {
@@ -70,7 +73,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 }
 
 object GrantedRole {
-	def init[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
+	def apply[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
 		(scope match {
 			case dept: Department => new DepartmentGrantedRole(dept, definition)
 			case module: Module => new ModuleGrantedRole(module, definition)
@@ -86,6 +89,18 @@ object GrantedRole {
 		case _: Assignment => true
 		case _ => false
 	}
+	
+	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
+		case t if t <:< classTag[Department] => classOf[DepartmentGrantedRole]
+		case t if t <:< classTag[Module] => classOf[ModuleGrantedRole]
+		case t if t <:< classTag[Member] => classOf[MemberGrantedRole]
+		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedRole]
+		case _ => classOf[GrantedRole[_]]
+	}
+	
+	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag] = 
+		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */

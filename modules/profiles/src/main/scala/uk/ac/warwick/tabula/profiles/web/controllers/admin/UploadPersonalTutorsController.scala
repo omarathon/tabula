@@ -15,7 +15,7 @@ import org.hibernate.validator.Valid
 @Controller
 @RequestMapping(value = Array("/department/{department}/tutors/upload"))
 class UploadPersonalTutorsController extends ProfilesController {
-	// tell @Valid annotation how to validate
+	
 	validatesSelf[UploadPersonalTutorsCommand]
 	
 	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = new UploadPersonalTutorsCommand(department)

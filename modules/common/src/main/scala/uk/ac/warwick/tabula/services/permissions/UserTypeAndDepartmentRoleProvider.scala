@@ -12,12 +12,13 @@ import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.helpers.Promises._
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	
 	var profileService = Wire.auto[ProfileService]
-	var departmentService = Wire.auto[ModuleAndDepartmentService]
+	val departmentService = promise { Wire[ModuleAndDepartmentService] }
 	
 	private def getRolesForMembers(members: Seq[Member]) = members flatMap { member =>
 		Seq(UniversityMemberRole(member)) ++ (member.userType match {
@@ -30,7 +31,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	
 	private def getRolesForSSO(user: CurrentUser) =
 		if (user.departmentCode.hasText) {
-			departmentService.getDepartmentByCode(user.departmentCode.toLowerCase) match {
+			departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 				case Some(department) =>
 					if (user.isStaff) Seq(StaffRole(department))
 					else if (user.isStudent) Seq(StudentRole(department))

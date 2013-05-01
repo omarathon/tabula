@@ -22,32 +22,32 @@
 
 }
 
-.popover {
-	.popover-content {
-		max-height: 300px;
-		overflow-y: auto;
-	}
-
-	p {
-		line-height:130%;
-		margin-bottom: 7px;
-	}
-	
-	ul {
-		padding-left: 10px;
-		
-		li {
-			list-style: inherit;
-			margin-left: 10px;
-			margin-bottom: 6px;
+#container, .tabula-page {
+	.popover {
+		.popover-title {
+			letter-spacing: normal;
 		}
 		
-	}
-	
-}
+		.popover-content {
+			max-height: 350px;
+			overflow-y: auto;
+		}
+		
+		p {
+			line-height: 130%;
+			margin-bottom: 7px;
+		}
 
-.tabula-page .popover-title {
-	letter-spacing: normal;
+		ul {
+			padding-left: 10px;
+			
+			li {
+				list-style: inherit;
+				margin-left: 10px;
+				margin-bottom: 6px;
+			}
+		}
+	}	
 }
 
 // TAB-558 override Bootstrap max-width on tables, so that Chrome will trigger the display the pop-out table link
@@ -57,11 +57,12 @@
 
 // TAB-358 ID6 headings and Bootstrap forms quarrel a bit
 #container {
-	h1 + h2, h1 + h3, h1 + h4, h1 + h5, h1 + h6,
+	h1 + h2, h1 + h3, h1 + h4, h1 + h5, h1 + h6  { margin: -18px 0 20px; }
+	
 	h2 + h3, h2 + h4, h2 + h5, h2 + h6,
 	h3 + h4, h3 + h5, h3 + h6,
 	h4 + h5, h4 + h6,
-	h5 + h6 { margin-top: -8px; }
+	h5 + h6 { margin: -8px 0 12px; }
 	
 	h1 + form, h2 + form, h3 + form, h4 + form, h5 + form, h6 + form { margin-top: 20px; }
 }

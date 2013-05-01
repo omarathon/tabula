@@ -34,8 +34,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null;
-
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	
+	// No orphanRemoval as it makes it difficult to move modules between Departments.
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -87,7 +88,11 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
 	def isOwnedBy(userId:String) = owners.includes(userId)
+	
+	@deprecated("Use ModuleAndDepartmentService.addOwner", "35") 
 	def addOwner(owner:String) = owners.addUser(owner)
+	
+	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35") 
 	def removeOwner(owner:String) = owners.removeUser(owner)
 
 	def canRequestExtension = allowExtensionRequests
@@ -125,7 +130,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 		if (parent == null) this
 		else parent.rootDepartment
 
-	def isUpstream = (parent == null)
+	def hasParent = (parent != null)
+
+	def isUpstream = !hasParent
 
 	override def toString = "Department(" + code + ")"
 

@@ -10,7 +10,7 @@ import scala.reflect.ClassTag
 class CommonPropertyEditors extends PropertyEditorRegistrar {
 
 	// define a neater `register` method for P.E.R.
-	implicit def cleverRegistry(registry: PropertyEditorRegistry) = new {
+	implicit class CleverRegistry(registry: PropertyEditorRegistry) {
 		def register[A](editor: PropertyEditor)(implicit tag: ClassTag[A]) =
 			registry.registerCustomEditor(tag.runtimeClass, editor)
 	}

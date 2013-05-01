@@ -17,7 +17,7 @@ class GrantedPermissionTest extends TestBase {
 	
 	@Test def initDepartment {
 		GrantedPermission.canDefineFor(dept) should be (true)
-		val gp = GrantedPermission.init(dept, permission, overrideType)
+		val gp = GrantedPermission(dept, permission, overrideType)
 		gp.scope should be (dept)
 		gp.permission should be (permission)
 		gp.overrideType should be (overrideType)
@@ -25,7 +25,7 @@ class GrantedPermissionTest extends TestBase {
 	
 	@Test def initModule {
 		GrantedPermission.canDefineFor(module) should be (true)
-		val gp = GrantedPermission.init(module, permission, overrideType)
+		val gp = GrantedPermission(module, permission, overrideType)
 		gp.scope should be (module)
 		gp.permission should be (permission)
 		gp.overrideType should be (overrideType)
@@ -33,7 +33,7 @@ class GrantedPermissionTest extends TestBase {
 	
 	@Test def initAssignment {
 		GrantedPermission.canDefineFor(assignment) should be (true)
-		val gp = GrantedPermission.init(assignment, permission, overrideType)
+		val gp = GrantedPermission(assignment, permission, overrideType)
 		gp.scope should be (assignment)
 		gp.permission should be (permission)
 		gp.overrideType should be (overrideType)
@@ -41,7 +41,7 @@ class GrantedPermissionTest extends TestBase {
 	
 	@Test def initMember {
 		GrantedPermission.canDefineFor(member) should be (true)
-		val gp = GrantedPermission.init(member, permission, overrideType)
+		val gp = GrantedPermission(member, permission, overrideType)
 		gp.scope should be (member)
 		gp.permission should be (permission)
 		gp.overrideType should be (overrideType)
@@ -49,7 +49,7 @@ class GrantedPermissionTest extends TestBase {
 	
 	@Test(expected = classOf[IllegalArgumentException]) def initInvalid {
 		GrantedPermission.canDefineFor(feedback) should be (false)
-		GrantedPermission.init(feedback, permission, overrideType)
+		GrantedPermission(feedback, permission, overrideType)
 	}
 
 }
