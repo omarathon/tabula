@@ -84,7 +84,11 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
 	def isOwnedBy(userId:String) = owners.includes(userId)
+	
+	@deprecated("Use ModuleAndDepartmentService.addOwner", "35") 
 	def addOwner(owner:String) = owners.addUser(owner)
+	
+	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35") 
 	def removeOwner(owner:String) = owners.removeUser(owner)
 
 	def canRequestExtension = allowExtensionRequests

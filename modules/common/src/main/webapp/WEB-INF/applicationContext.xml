@@ -340,6 +340,7 @@
 					<list>
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
+						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
 					</list>
 				</property>
 			</bean>

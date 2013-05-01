@@ -21,6 +21,11 @@ import uk.ac.warwick.util.cache.CacheEntryFactory
 import uk.ac.warwick.util.cache.Caches
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.queue.conversion.ItemType
+import org.codehaus.jackson.annotate.JsonAutoDetect
+import uk.ac.warwick.util.queue.QueueListener
+import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.util.queue.Queue
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -46,6 +51,7 @@ trait PermissionsService {
 
 @Service(value = "permissionsService")
 class PermissionsServiceImpl extends PermissionsService with Logging
+	with QueueListener with InitializingBean
 	with GrantedRolesForUserCache
 	with GrantedRolesForGroupCache
 	with GrantedPermissionsForUserCache
@@ -53,6 +59,19 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	
 	var dao = Wire[PermissionsDao]
 	var groupService = Wire[GroupService]
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	
+	override def isListeningToQueue = true
+	override def onReceive(item: Any) {	
+		item match {
+				case copy: PermissionsCacheBusterMessage => clearCaches()
+				case _ =>
+		}
+	}
+		
+	override def afterPropertiesSet = {
+		queue.addListener(classOf[PermissionsCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
 	
 	private def clearCaches() {
 		// This is monumentally dumb. There's a more efficient way than this!
@@ -66,10 +85,12 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	def saveOrUpdate(permission: GrantedPermission[_]) = {
 		dao.saveOrUpdate(permission)
 		clearCaches()
+		queue.send(new PermissionsCacheBusterMessage)
 	}
 	def saveOrUpdate(role: GrantedRole[_]) = {
 		dao.saveOrUpdate(role)
 		clearCaches()
+		queue.send(new PermissionsCacheBusterMessage)
 	}
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
@@ -246,3 +267,7 @@ trait GrantedPermissionsForGroupCache { self: PermissionsServiceImpl =>
 		}
 	}
 }
+
+@ItemType("PermissionsCacheBuster")
+@JsonAutoDetect
+class PermissionsCacheBusterMessage
