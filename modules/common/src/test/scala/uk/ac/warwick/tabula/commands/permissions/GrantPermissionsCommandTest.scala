@@ -54,7 +54,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
@@ -118,7 +118,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscao")
 		cmd.overrideType = GrantedPermission.Allow
 		
-		val existing = GrantedPermission.init(dept, Permissions.Department.ManageExtensionSettings, true)
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))

@@ -17,8 +17,6 @@ trait ModuleDao {
 	def saveOrUpdate(module: Module)
 	def getByCode(code: String): Option[Module]
 	def getById(id: String): Option[Module]
-	def findByParticipant(userId: String): Seq[Module]
-	def findByParticipant(userId: String, dept: Department): Seq[Module]
 }
 
 @Repository
@@ -35,27 +33,5 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 	
 	def getById(id: String) = getById[Module](id)
-
-	/**
-	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off ModuleManager.
-	 */
-	def findByParticipant(userId: String): Seq[Module] =
-		session.newQuery[Module]("""
-				from Module m 
-				left join fetch m.grantedRoles r
-				where r.builtInRoleDefinition = :def 
-					and :user in elements(r.users.includeUsers)
-				""")
-			.setParameter("def", ModuleManagerRoleDefinition)
-			.setString("user", userId)
-			.seq
-
-	/**
-	 * Find modules managed by this user, in this department.
-	 * 
-	 * TODO This doesn't understand WebGroup-based permissions or custom roles that are based off ModuleManager.
-	 */
-	def findByParticipant(userId: String, dept: Department): Seq[Module] =
-		findByParticipant(userId) filter { _.department == dept }
 
 }

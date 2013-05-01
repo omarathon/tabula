@@ -5,6 +5,8 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import org.joda.time.DateTime
 import javax.annotation.PreDestroy
+import uk.ac.warwick.userlookup.webgroups.GroupServiceAdapter
+import scala.collection.JavaConverters._
 
 trait UserLookupService extends UserLookupInterface
 
@@ -76,6 +78,7 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getGroupService() = delegate.getGroupService
 	def getOnCampusService() = delegate.getOnCampusService
 	def getUserByUserId(id: String) = delegate.getUserByUserId(id)
+	def getCaches() = delegate.getCaches()
 	def clearCaches() = delegate.clearCaches()
 	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
 

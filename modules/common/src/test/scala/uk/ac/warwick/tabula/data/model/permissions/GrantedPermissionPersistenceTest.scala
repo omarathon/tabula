@@ -17,7 +17,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase {
 			session.save(department)
 			session.flush
 			
-			val permission = GrantedPermission.init(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
+			val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
 			permission.users.addUser("cuscav")
 			
 			session.save(permission)

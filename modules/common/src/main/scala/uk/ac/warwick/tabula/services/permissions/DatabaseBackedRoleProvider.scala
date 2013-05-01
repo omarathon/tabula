@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.userlookup.GroupService
 
 @Component
 class DatabaseBackedRoleProvider extends RoleProvider with PermissionsProvider {

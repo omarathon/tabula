@@ -17,17 +17,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 class DaoTests extends AppContextTestBase with ShouldMatchersForJUnit with Logging {
 	@Autowired var deptDao:DepartmentDao =_
 	@Autowired var memberDao:MemberDao =_
-	
-	@Transactional(readOnly=true)
-	@Test def findDeptOwners {
-	  val jeffsDepts = deptDao.getByOwner("cusfal")
-	  jeffsDepts.size should be (1)
-	  jeffsDepts.head.name should be ("Computer Science")
-	  
-	  val ronsDepts = deptDao.getByOwner("cuswizard")
-	  ronsDepts should be ('empty)
-	}
-	
+		
 /*	@Transactional
 	@Test def testSomething {
 		val group = new UserGroup()

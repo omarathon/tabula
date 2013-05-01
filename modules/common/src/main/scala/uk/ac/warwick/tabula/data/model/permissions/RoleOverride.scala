@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.HibernateVersioned
 
 @Entity
 class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsTarget {
+	import RoleOverride._
 	
 	// optional link to some CustomRoleDefinition
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -18,12 +19,14 @@ class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsT
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionUserType")
 	var permission: Permission = _
 	
-	type OverrideType = Boolean
-	@Transient val Allow: OverrideType = true
-	@Transient val Deny: OverrideType = false
-	
 	var overrideType: OverrideType = _
 	
 	def permissionsParents = Seq(Option(customRoleDefinition)).flatten
 
+}
+
+object RoleOverride {
+	type OverrideType = Boolean
+	val Allow: OverrideType = true
+	val Deny: OverrideType = false
 }

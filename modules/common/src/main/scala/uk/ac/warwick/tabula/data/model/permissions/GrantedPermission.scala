@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.hibernate.annotations.ForeignKey
+import scala.reflect._
 
 @Entity
 @AccessType("field")
@@ -57,7 +58,7 @@ object GrantedPermission {
 	val Allow: OverrideType = true
 	val Deny: OverrideType = false
 	
-	def init[A <: PermissionsTarget](scope: A, permission: Permission, overrideType: OverrideType): GrantedPermission[A] =
+	def apply[A <: PermissionsTarget](scope: A, permission: Permission, overrideType: OverrideType): GrantedPermission[A] =
 		(scope match {
 			case dept: Department => new DepartmentGrantedPermission(dept, permission, overrideType)
 			case module: Module => new ModuleGrantedPermission(module, permission, overrideType)
@@ -73,6 +74,18 @@ object GrantedPermission {
 		case _: Assignment => true
 		case _ => false
 	} 
+	
+	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
+		case t if t <:< classTag[Department] => classOf[DepartmentGrantedPermission]
+		case t if t <:< classTag[Module] => classOf[ModuleGrantedPermission]
+		case t if t <:< classTag[Member] => classOf[MemberGrantedPermission]
+		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedPermission]
+		case _ => classOf[GrantedPermission[_]]
+	}
+	
+	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag] = 
+		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedPermissions, create them below with a new discriminator */
