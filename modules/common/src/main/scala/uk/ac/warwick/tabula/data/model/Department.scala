@@ -24,17 +24,17 @@ import scala.annotation.tailrec
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
 	import Department._
-  
+
 	var code:String = null
-	
+
 	var name:String = null
-	
+
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var children:JList[Department] = JArrayList();
-	
+
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null;
-	
+
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var modules:JList[Module] = JArrayList()
 
@@ -65,9 +65,12 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
-	
+
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
+
+	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource).orNull
+	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
@@ -92,6 +95,10 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
+	def canEditPersonalTutors: Boolean = {
+		personalTutorSource == null || personalTutorSource.equals("local")
+	}
+
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureSettings
@@ -100,24 +107,24 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
-	
+
 	/**
 	  * Although a department may have a parent, we don't actually
 	  * want to inherit permissions from it. We can add users explicitly
 	  * to the child department if they need access there.
-	  * 
+	  *
 	  * This is open to discussion and change.
 	  */
 	def permissionsParents = Nil // Option(parent).toSeq
-	
+
 	/** The 'top' ancestor of this department, or itself if
-	  * it has no parent. 
+	  * it has no parent.
 	  */
 	@tailrec
-	final def rootDepartment: Department = 
+	final def rootDepartment: Department =
 		if (parent == null) this
 		else parent.rootDepartment
-		
+
 	def isUpstream = (parent == null)
 
 	override def toString = "Department(" + code + ")"
@@ -136,5 +143,7 @@ object Department {
 		val AssignmentInfoView = "assignmentInfoView"
 
 		val PlagiarismDetection = "plagiarismDetection"
+
+		val PersonalTutorSource = "personalTutorSource"
 	}
 }

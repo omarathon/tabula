@@ -8,7 +8,7 @@
 			<#if !profile.personalTutor?string?starts_with("Not ")>
 				<span class="muted">External to Warwick</span>
 			</#if>
-			<#if can.do("Profiles.PersonalTutor.Update", profile)>
+			<#if can.do("Profiles.PersonalTutor.Update", profile) && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 				<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 			</#if>
 		</p>
@@ -19,7 +19,7 @@
 			</div>
 			<h5>
 				${profile.personalTutor.fullName}
-				<#if can.do("Profiles.PersonalTutor.Update", profile)>
+				<#if can.do("Profiles.PersonalTutor.Update", profile) && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 					<a id="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>
 				</#if>
 			</h5>
@@ -64,7 +64,7 @@
 			if ($f.find("#meeting-record-form").length == 1) {
 				// unhide the iframe
 				$m.find('.modal-body').slideDown();
-				
+
 				// reset datepicker & submit protection
 				$f.find("input.date-picker").tabulaDatePicker();
 				$form = $m.find('form.double-submit-protection');
@@ -126,7 +126,7 @@
 			e.preventDefault();
 			// submit the inner form in the iframe
 			$m.find('iframe').contents().find('form').submit();
-			
+
 			// hide the iframe, so we don't get a FOUC
 			$m.find('.modal-body').slideUp();
 		});

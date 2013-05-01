@@ -26,17 +26,28 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 class EditTutorCommand(val student: StudentMember) extends Command[Option[StudentRelationship]] with Promises {
 
 	var tutor: Member = _
-	
+
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
+	// throw this request out if personal tutors can't be edited in Tabula for this department
+	if (!student.studyDetails.studyDepartment.canEditPersonalTutors) {
+		logger.info("Denying access to EditTutorCommand since student "
+				+ student.studyDetails.sprCode
+				+ " has a study department "
+				+ "( " + student.studyDetails.studyDepartment.name
+				+ ") with a personal tutor source setting of "
+				+ student.studyDetails.studyDepartment.personalTutorSource + ".")
+		throw new ItemNotFoundException()
+	}
+
 	val newTutor = promise { tutor }
-	
+
 	//var storeTutor: Boolean = false
-	
+
 	var profileService = Wire.auto[ProfileService]
-	
+
 	def currentTutor = profileService.getPersonalTutor(student)
-	
+
 	val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
 
 	def applyInternal = {
@@ -59,7 +70,7 @@ class EditTutorCommand(val student: StudentMember) extends Command[Option[Studen
 @RequestMapping(Array("/tutor/{student}/edit"))
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
-	
+
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
 		restricted(new SearchTutorsCommand(user)).orNull
 
@@ -68,7 +79,7 @@ class EditTutorController extends BaseController {
 		case student: StudentMember => new EditTutorCommand(student)
 		case _ => throw new ItemNotFoundException
 	}
-	
+
 	// initial form display
 	@RequestMapping(params = Array("!tutor"))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
@@ -90,9 +101,9 @@ class EditTutorController extends BaseController {
 	@RequestMapping(params=Array("tutor", "storeTutor"), method=Array(POST))
 	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
-		
-		Mav("tutor/edit/view", 
-			"student" -> cmd.student, 
+
+		Mav("tutor/edit/view",
+			"student" -> cmd.student,
 			"tutorToDisplay" -> cmd.currentTutor,
 			"displayOptionToSave" -> false
 		)

@@ -35,54 +35,67 @@ import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.data.model.OtherMember
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 
-class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet) 
+class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
   extends ImportSingleMemberCommand(member, ssoUser, resultSet)
-	with Logging with Daoisms with StudentProperties with StudyDetailsProperties with Unaudited {
+	with Logging
+	with Daoisms
+	with StudentProperties
+	with StudyDetailsProperties
+	with Unaudited {
 	import ImportMemberHelpers._
-	
+
 	implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
-	
+
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
-	
+	var profileService = Wire.auto[ProfileService]
+
 	// A few intermediate properties that will be transformed later
 	var studyDepartmentCode: String = _
 	var routeCode: String = _
 	var sprStatusCode: String = _
 	var enrolmentStatusCode: String = _
 	var modeOfAttendanceCode: String = _
-	
+
+	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
+	var sprTutor1 = rs.getString("spr_tutor1")
+	//var sprTutor2 = rs.getString("spr_tutor2")
+	//var scjTutor1 = rs.getString("scj_tutor1")
+	//var scjTutor2 = rs.getString("scj_tutor2")
+
 	this.sprCode = rs.getString("spr_code")
 	this.sitsCourseCode = rs.getString("sits_course_code")
 	this.routeCode = rs.getString("route_code")
 	this.studyDepartmentCode = rs.getString("study_department")
 	this.yearOfStudy = rs.getInt("year_of_study")
-	
+
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
-	
+
 	this.intendedAward = rs.getString("award_code")
 	this.beginDate = toLocalDate(rs.getDate("begin_date"))
 	this.endDate = toLocalDate(rs.getDate("end_date"))
-	
+
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
-	
+
 	this.fundingSource = rs.getString("funding_source")
 	this.courseYearLength = rs.getString("course_year_length")
-	
+
 	this.sprStatusCode = rs.getString("spr_status_code")
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-	
+
 	this.ugPg = rs.getString("ug_pg")
-	
+
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
-		
+
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
-		
+
 		val (isTransient, member) = memberExisting match {
 			case Some(member: StudentMember) => (false, member)
 			case Some(member: OtherMember) => {
@@ -93,38 +106,38 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
 			case _ => (true, new StudentMember(universityId))
 		}
-		
+
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 		val studyDetailsBean = new BeanWrapperImpl(member.studyDetails)
-		
+
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
-		val hasChanged = 
-			copyMemberProperties(commandBean, memberBean) | 
+		val hasChanged =
+			copyMemberProperties(commandBean, memberBean) |
 			copyStudentProperties(commandBean, memberBean) |
 			copyStudyDetailsProperties(commandBean, studyDetailsBean)
-			
+
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)
-			
+
 			member.lastUpdatedDate = DateTime.now
 			memberDao.saveOrUpdate(member)
 		}
-		
+
 		member
 	}
 
 	private val basicStudentProperties = Set(
 		"nationality", "mobileNumber"
 	)
-	
+
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 
 	private val basicStudyDetailsProperties = Set(
-		"sprCode", 
-		"sitsCourseCode", 
+		"sprCode",
+		"sitsCourseCode",
 		"yearOfStudy",
 		"intendedAward",
 		"beginDate",
@@ -136,9 +149,9 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		"ugPg"
 		//,
 		//"levelCode"
-		
+
 	)
-		
+
 	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) =
 		copyBasicProperties(basicStudyDetailsProperties, commandBean, studyDetailsBean) |
 		copyDepartment("studyDepartment", homeDepartmentCode, studyDetailsBean) |
@@ -146,6 +159,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		copyStatus("sprStatus", sprStatusCode, studyDetailsBean) |
 		copyStatus("enrolmentStatus", enrolmentStatusCode, studyDetailsBean) |
 		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studyDetailsBean)
+		captureTutor(sprTutor1)
 
 	private def copyStatus(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
@@ -169,7 +183,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			true
 		}
 	}
-	
+
 	private def copyModeOfAttendance(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
 			case null => null
@@ -191,15 +205,33 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			memberBean.setPropertyValue(property, toModeOfAttendance(code))
 			true
 		}
-	}	
-	
+	}
+
+	private def captureTutor(tutorPrsCode: String) = {
+		// is this student in a department that is set to import tutor data from SITS?
+		if (studyDepartment.personalTutorSource.equals("SITS")) {
+
+			val tutorUniId = tutorPrsCode.substring(2)
+
+			// only save the personal tutor if we can match the ID with a staff member in Tabula
+			val member = memberDao.getByUniversityId(tutorUniId) match {
+				case Some(mem: Member) => {
+					logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
+					//profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+				}
+				case _ => {
+					logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + tutorPrsCode + " - not importing this personal tutor from SITS")
+				}
+			}
+		}
+	}
 
 	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
 			case null => null
 			case value: Route => value
 		}
-		
+
 		if (oldValue == null && code == null) false
 		else if (oldValue == null) {
 			// From no route to having a route
@@ -216,7 +248,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			true
 		}
 	}
-	
+
 	private def toRoute(routeCode: String) = {
 		if (routeCode == null || routeCode == "") {
 			null
@@ -239,7 +271,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		} else {
 			modeOfAttendanceImporter.modeOfAttendanceMap.get(code).getOrElse(null)
 		}
-	}	
-	
+	}
+
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "student")
 }

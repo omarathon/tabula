@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import scala.collection.JavaConversions.mapAsJavaMap
-
 import org.junit.Test
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils
 import org.springframework.stereotype.Service
-
 import javax.annotation.Resource
 import javax.sql.DataSource
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 
 // scalastyle:off magic.number
 class AssignmentImporterTest extends PersistenceTestBase with Mockito {
