@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.services.UserSettingsService
 
 /**
- * Freemarker directive to confirm whether an introductory popover should show automatically
+ * Freemarker directive to get the hash of a setting on the current page
  */
-class ShowIntroFunction extends TemplateMethodModelEx {
+class IntroHashFunction extends TemplateMethodModelEx {
 
 	@Autowired var userSettings: UserSettingsService = _
 
@@ -21,16 +21,9 @@ class ShowIntroFunction extends TemplateMethodModelEx {
 		
 		if (arguments == null || args.size() != 1) throw new TemplateModelException("Invalid number of arguments")
 		
-		val currentUser = RequestInfo.fromThread.get.user
-		val mappedPage = RequestInfo.mappedPage
-		
+		val mappedPage = RequestInfo.mappedPage		
 		val setting = DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String]
 		
-		val shaHash = UserSettings.Settings.hiddenIntroHash(mappedPage, setting)
-			
-		(userSettings.getByUserId(currentUser.apparentId) match {
-			case Some(settings) if settings.hiddenIntros != null => !(settings.hiddenIntros contains(shaHash))
-			case _ => true
-		}): java.lang.Boolean
+		UserSettings.Settings.hiddenIntroHash(mappedPage, setting)
 	}
 }

@@ -45,7 +45,7 @@ trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 		case _ => None
 	}
 	protected def getStringSeqSetting(key: String) = settings.get(key) match {
-		case Some(value: Seq[String]) => Some(value)
+		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
 	

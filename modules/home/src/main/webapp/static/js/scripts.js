@@ -211,6 +211,11 @@
 			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
 		});
 		
+		$('.use-introductory:not(.auto)').each(function() {
+			var template = $(this).data('popover').options.template;
+			$(this).data('popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
+		});
+		
 		// auto-show introductory popover on load, based on class
 		$('.use-introductory.auto').popover('show');
 
@@ -218,13 +223,14 @@
 		$('#container').on('click', '.introductory .close', function(e) {
 			$(e.target).parents('.introductory').prev().popover('hide');
 		});
-
+		
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
 			// If intro text is changed to reflect new features, change its id to ensure end users see the new version
 			var id = $(e.target).parents('.introductory').prev().prop('id');
-			// TODO use this hook to persist showOnLoad state with some ajax shizzle
-			// console.log('save for id: ' + id + ", with value: " + $(this).is(':checked'));
+			var hash = $(e.target).parents('.introductory').prev().data('hash');
+			// use this hook to persist showOnLoad state with some ajax shizzle
+			$.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
 		});
 
 		// apply details/summary polyfill

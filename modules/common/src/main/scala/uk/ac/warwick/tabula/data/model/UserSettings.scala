@@ -5,6 +5,7 @@ import scala.collection.JavaConversions._
 import org.hibernate.annotations.Type
 import javax.persistence._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import org.apache.commons.codec.digest.DigestUtils
 
 @Entity
 class UserSettings extends GeneratedId with SettingsMap[UserSettings] with PermissionsTarget {
@@ -12,13 +13,11 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	
 	var userId: String = _
 	
-	def getAlertsSubmission = alertsSubmission
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull
 	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
 	
-	def getHiddenIntros = hiddenIntros
-	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros).orNull
-	def hiddenIntros_= (hiddenIntro: String) = settings += (Settings.HiddenIntros -> hiddenIntro)
+	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros) getOrElse(Nil)
+	def hiddenIntros_= (hiddenIntro: Seq[String]) = settings += (Settings.HiddenIntros -> hiddenIntro)
 		
 	def this(userId: String) = {
 		this()
@@ -38,5 +37,12 @@ object UserSettings {
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
+			
+		def hiddenIntroHash(mappedPage: String, setting: String) = {
+			val popover = mappedPage + ":" + setting
+			val shaHash = DigestUtils.shaHex(popover)
+			
+			shaHash
+		}
 	}
 }
