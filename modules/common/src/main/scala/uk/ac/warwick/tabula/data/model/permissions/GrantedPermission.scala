@@ -76,10 +76,10 @@ object GrantedPermission {
 	} 
 	
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
-		case t if t.runtimeClass.isAssignableFrom(classOf[Department]) => classOf[DepartmentGrantedPermission]
-		case t if t.runtimeClass.isAssignableFrom(classOf[Module]) => classOf[ModuleGrantedPermission]
-		case t if t.runtimeClass.isAssignableFrom(classOf[Member]) => classOf[MemberGrantedPermission]
-		case t if t.runtimeClass.isAssignableFrom(classOf[Assignment]) => classOf[AssignmentGrantedPermission]
+		case t if t <:< classTag[Department] => classOf[DepartmentGrantedPermission]
+		case t if t <:< classTag[Module] => classOf[ModuleGrantedPermission]
+		case t if t <:< classTag[Member] => classOf[MemberGrantedPermission]
+		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedPermission]
 		case _ => classOf[GrantedPermission[_]]
 	}
 	

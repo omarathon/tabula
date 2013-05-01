@@ -19,6 +19,12 @@ import uk.ac.warwick.tabula.data.RouteDao
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.RoleDefinition
+import scala.reflect.ClassTag
 
 /**
  * Handles data about modules and departments
@@ -82,13 +88,35 @@ class ModuleAndDepartmentService extends Logging {
 	def modulesAdministratedBy(user: CurrentUser, dept: Department): Set[Module] = {
 		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala.toSet else Set()
 	}
+	
+	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) = 
+		permissionsService.getGrantedRole(target, defn) match {
+			case Some(role) => role
+			case _ => GrantedRole(target, defn)
+		}
 
 	def addOwner(dept: Department, owner: String) = transactional() {
-		dept.owners.addUser(owner)
+		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		role.users.addUser(owner)
+		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
-		dept.owners.removeUser(owner)
+		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		role.users.removeUser(owner)
+		permissionsService.saveOrUpdate(role)
+	}
+
+	def addManager(module: Module, owner: String) = transactional() {
+		val role = getRole(module, ModuleManagerRoleDefinition)
+		role.users.addUser(owner)
+		permissionsService.saveOrUpdate(role)
+	}
+
+	def removeManager(module: Module, owner: String) = transactional() {
+		val role = getRole(module, ModuleManagerRoleDefinition)
+		role.users.removeUser(owner)
+		permissionsService.saveOrUpdate(role)
 	}
 	
 	def save(dept: Department) = transactional() {

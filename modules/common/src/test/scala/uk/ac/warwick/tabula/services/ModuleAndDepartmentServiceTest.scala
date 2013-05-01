@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.MockUserLookup
 import org.junit.Before
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 
 class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 	
@@ -58,7 +59,7 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 			service.modulesAdministratedBy(currentUser) should be (Set())
 			service.modulesAdministratedBy(currentUser, cs) should be (Set())
 			service.modulesAdministratedBy(currentUser, ch) should be (Set())
-		
+			
 			service.addOwner(cs, "cuscav")
 			service.departmentsOwnedBy(currentUser) should be (Set(cs))
 			service.modulesAdministratedBy(currentUser) should be (Set(cs108, cs240))
@@ -72,9 +73,7 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 			service.modulesManagedBy(currentUser, cs) should be (Set())
 			service.modulesManagedBy(currentUser, ch) should be (Set())
 			
-			cs108.managers.addUser("cuscav")
-			session.update(cs108)
-			
+			service.addManager(cs108, "cuscav")
 			service.modulesManagedBy(currentUser) should be (Set(cs108))
 			service.modulesManagedBy(currentUser, cs) should be (Set(cs108))
 			service.modulesManagedBy(currentUser, ch) should be (Set())
