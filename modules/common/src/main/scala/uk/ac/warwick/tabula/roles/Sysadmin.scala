@@ -26,6 +26,8 @@ case object SysadminRoleDefinition extends BuiltInRoleDefinition {
 		Module.Update,
 		Module.Delete,
 		
+		Department.ArrangeModules,
+		
 		// To add department owners, but also global-read is for the permissions helper
 		RolesAndPermissions.Create,
 		RolesAndPermissions.Read,

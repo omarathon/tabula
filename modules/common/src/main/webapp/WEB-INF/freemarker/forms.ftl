@@ -1,10 +1,10 @@
-<#-- 
+<#--
 
 Macros for customised form elements, containers and more complex pickers.
 
 Include by default as "form", e.g.
 
-<@form.userpicker path="users" /> 
+<@form.userpicker path="users" />
 
 -->
 
@@ -127,7 +127,7 @@ To not bind:
 
 <#macro render_userpicker expression value multiple>
 	<#if multiple><div class="user-picker-collection"></#if>
-	
+
 	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 	<#list value as id>
@@ -136,14 +136,14 @@ To not bind:
 		</div>
 	</#list>
 	</#if>
-	
+
 	<#if !value?has_content || multiple>
 	<#-- an empty field for entering new values in any case -->
 	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
 	--><input type="text" class="user-code-picker span2" name="${expression}">
 	</div>
 	</#if>
-	
+
 	<#if multiple></div></#if>
 </#macro>
 
@@ -151,7 +151,7 @@ To not bind:
 	Create a file(s) upload widget, binding to an UploadedFile object.
 	For multiple file support, it will use the HTML5 attribute if available,
 	otherwise it will degrade to other mechanisms.
-	
+
 	basename - bind path to the UploadedFile.
 	multiple - whether it should be possible to upload more than one file.
 -->
@@ -177,11 +177,11 @@ To not bind:
 			${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
 			</div>
 			<div id="upload-${uploadedId}" style="display:none">
-			
+
 			</div>
 		</#list>
 	</#if>
-	
+
 	<#if multiple>
 		<input type="file" id="${basename}.upload" name="${basename}.upload" multiple>
 		<noscript>
@@ -193,23 +193,23 @@ To not bind:
 		<input type="file" id="${basename}.upload" name="${basename}.upload" >
 	</#if>
 	</div>
-	
-	<div class="subtle help-block">
+
+	<small class="subtle help-block">
 		<#if max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
 		<#if types?size &gt; 0>
 			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
 		</#if>
 		<#if max!=1>
-			<span id="multifile-column-description"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
+			<span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
 		</#if>
-	</div>
-	
+	</small>
+
 	<script><!--
-	
+
 	jQuery(function($){
-		var $container = $('#${elementId}'), 
+		var $container = $('#${elementId}'),
 		    $file = $container.find('input[type=file]'),
-		    $addButton; 
+		    $addButton;
 		if (Supports.multipleFiles) {
 			// nothing, already works
 		} else {
@@ -225,19 +225,19 @@ To not bind:
 		    });
 			$file.after($addButton);
 		}
-		
+
 		$container.find('.hidden-attachment a').click(function(ev){
 		    ev.preventDefault();
-		    $(this).parent('.hidden-attachment').remove(); 
+		    $(this).parent('.hidden-attachment').remove();
 		    if ($addButton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
 		       $addButton.show();
 		    }
 		    return false;
 		});
 	});
-	
+
 	//--></script>
-	
+
 	</@spring.bind>
 	</@field>
 	</@row>

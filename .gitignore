@@ -27,6 +27,6 @@ junit*.properties
 .externalToolBuilders
 *.sublime-project
 *.sublime-workspace
-
 .ensime*
 *.orig
+

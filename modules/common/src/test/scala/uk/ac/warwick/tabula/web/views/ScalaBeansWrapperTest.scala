@@ -22,6 +22,8 @@ class MyObject extends PermissionsTarget {
   def getGreeting(name:String) = "Hello %s!" format (name)
   def getGreeting():String = getGreeting("you")
   
+  def departments = "ah" :: List("ch", "cs")
+  
   @Restricted(Array("GodMode")) var permsName = "text"
   @Restricted(Array("Module.Read")) def getPermsMotto() = "do be good, don't be bad"
   @Restricted(Array("Module.Read")) def permsGrotto = "Santa's"
@@ -81,6 +83,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	      hash.get("name").toString should be("text")
 	      hash.get("motto").toString should be("do be good, don't be bad")
 	      hash.get("grotto").toString should be("Santa's")
+	      hash.get("departments").getClass should be (classOf[SimpleSequence])
 	    }
 	  }
 	  val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))

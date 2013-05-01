@@ -67,12 +67,12 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			persistFileData(file, file.uploadedData())
 		}
 	}
-	
+
 	def saveTemporary(file: FileAttachment) {
 		file.temporary = true
 		saveAttachment(file)
 	}
-	
+
 	def savePermanent(file: FileAttachment) {
 		file.temporary = false
 		saveAttachment(file)
@@ -89,7 +89,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	}
 
 	def getFileById(id: String) = getById[FileAttachment](id)
-	
+
 	def getFileByStrippedId(id: String) = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
@@ -106,7 +106,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			case _ => None
 		}
 	}
-	
+
 	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.ge("dateUploaded", createdSince))
@@ -115,30 +115,29 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.addOrder(asc("id"))
 				.list
 	}
-	
+
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
-		val criteria = 
+		val criteria =
 			session.newCriteria[FileAttachment]
 				.add(Is.eq("dateUploaded", createdOn))
-				
+
 		if (startingId.hasText)
 			criteria.add(Is.gt("id", startingId))
-				
+
 		criteria
 			.setMaxResults(maxResults)
 			.addOrder(asc("id"))
 			.list
 	}
-	
+
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
-		val criteria = 
+		val criteria =
 			session.newCriteria[FileAttachment]
 				.setProjection(Projections.id())
-				
+
 		createdBefore.map { date =>
 			criteria.add(Is.lt("dateUploaded", date))
 		}
-		
 		criteria.listOf[String].toSet
 	}
 

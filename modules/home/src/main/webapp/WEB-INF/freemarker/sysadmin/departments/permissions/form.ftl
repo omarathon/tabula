@@ -10,7 +10,7 @@
 	<h3>Department admins</h3>
 	
 	<div class="description">
-		Over-arcing administrators for departments and everything in them. 
+		Overarching administrators for departments and everything in them. 
 	</div>
 	
 	<#assign deptperms_url><@url page="/sysadmin/departments/${department.code}/permissions" /></#assign>
