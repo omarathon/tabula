@@ -110,6 +110,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	var allowLateSubmissions: JBoolean = true
 	var allowResubmission: JBoolean = false
 	var displayPlagiarismNotice: JBoolean = false
+	var summative: JBoolean = true
 
 	var allowExtensions: JBoolean = false
 	// allow students to request extensions via the app

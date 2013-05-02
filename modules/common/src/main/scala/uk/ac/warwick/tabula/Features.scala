@@ -48,6 +48,7 @@ abstract class Features {
 	@Value("${features.profiles:true}") var profiles = defaults.profiles
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
 	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
+	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -90,6 +91,7 @@ class FeaturesMessage {
 	var profiles = true
 	var assignmentProgressTable = true
 	var assignmentProgressTableByDefault = false
+	var summativeFilter = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
