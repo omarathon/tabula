@@ -37,6 +37,8 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.data.model.OtherMember
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.StudentRelationship
 
 class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
   extends ImportSingleMemberCommand(member, ssoUser, resultSet)
@@ -124,6 +126,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			memberDao.saveOrUpdate(member)
 		}
 
+		captureTutor(studyDetailsBean)
+
 		member
 	}
 
@@ -152,14 +156,14 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 
 	)
 
-	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) =
+	private def copyStudyDetailsProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) = {
 		copyBasicProperties(basicStudyDetailsProperties, commandBean, studyDetailsBean) |
 		copyDepartment("studyDepartment", homeDepartmentCode, studyDetailsBean) |
 		copyRoute("route", routeCode, studyDetailsBean) |
 		copyStatus("sprStatus", sprStatusCode, studyDetailsBean) |
 		copyStatus("enrolmentStatus", enrolmentStatusCode, studyDetailsBean) |
 		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studyDetailsBean)
-		captureTutor(sprTutor1)
+	}
 
 	private def copyStatus(property: String, code: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
@@ -207,23 +211,39 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		}
 	}
 
-	private def captureTutor(tutorPrsCode: String) = {
-		// is this student in a department that is set to import tutor data from SITS?
-		if (studyDepartment.personalTutorSource.equals("SITS")) {
+	private def captureTutor(studyDetailsBean: BeanWrapper): Boolean = {
+		var ret = false
 
-			val tutorUniId = tutorPrsCode.substring(2)
+		// first get the department
+		val dept = studyDetailsBean.getPropertyValue("studyDepartment") match {
+			case value: Department => value
+			case _ => null
+		}
+
+		if (dept == null) 
+			logger.info("Trying to capture tutor for " + sprCode + " but department is null :(")
+
+		// is this student in a department that is set to import tutor data from SITS?
+		else if (dept.personalTutorSource != null && dept.personalTutorSource.equals("SITS")) {
+
+			val tutorUniId = sprTutor1.substring(2)
 
 			// only save the personal tutor if we can match the ID with a staff member in Tabula
 			val member = memberDao.getByUniversityId(tutorUniId) match {
 				case Some(mem: Member) => {
 					logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
-					//profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+
+					ret = profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId) match {
+						case rel: StudentRelationship => true
+						case _ => false
+					}
 				}
 				case _ => {
-					logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + tutorPrsCode + " - not importing this personal tutor from SITS")
+					logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
 				}
 			}
 		}
+		ret
 	}
 
 	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
