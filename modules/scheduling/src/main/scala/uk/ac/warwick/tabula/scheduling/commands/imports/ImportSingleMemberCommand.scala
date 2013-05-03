@@ -182,8 +182,8 @@ object ImportMemberHelpers {
 
 	implicit def opt[A](value: A) = Option(value)
 
-	def oneOf[A](head: Option[A], tail: Option[A]*) =
-		((List(head) ++ tail).flatten).headOption
+	/** Return the first Option that has a value, else None. */
+	def oneOf[A](options: Option[A]*) = options.flatten.headOption
 
 	def optString(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[String] =
 		if (hasColumn(columnName)) Some(rs.getString(columnName))
