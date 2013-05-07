@@ -217,11 +217,16 @@ class ReviewExtensionRequestController extends ExtensionController {
 		} else {
 			val extensions = cmd.apply()
 			
-			for (extension <- extensions) 
+			for (extension <- extensions){
 				if (extension.isManual) new ExtensionChangedMessage(extension, extension.userId).apply()
-				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId)
-				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId)
-			
+				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId).apply()
+				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId).apply()
+
+				val approverId = user.apparentId
+				val recipients = extension.assignment.module.department.extensionManagers.includeUsers - approverId
+				recipients.foreach(new ExtensionRequestRespondedMessage(extension, _, approverId).apply())
+			}
+
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "edit", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))

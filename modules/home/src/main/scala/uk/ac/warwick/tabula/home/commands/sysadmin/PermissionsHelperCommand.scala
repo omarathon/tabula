@@ -22,7 +22,8 @@ import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
 class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unaudited with ReadOnly with SelfValidating {
 	
-	PermissionCheck(RolesAndPermissions.Read, null)
+	// This is a global permissions check, but we can't pass null here, so just pass a pretend object
+	PermissionCheck(RolesAndPermissions.Read, PermissionsTarget.Global)
 	
 	var securityService = Wire.auto[SecurityService]
 	var roleService = Wire.auto[RoleService]

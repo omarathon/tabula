@@ -38,7 +38,7 @@ class PermissionsDaoTest extends AppContextTestBase {
 		crd.builtInBaseRoleDefinition = ModuleManagerRoleDefinition
 		
 		val ro = new RoleOverride
-		ro.permission = Permissions.Module.Read
+		ro.permission = Permissions.Module.ManageAssignments
 		ro.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro)
@@ -65,7 +65,7 @@ class PermissionsDaoTest extends AppContextTestBase {
 		
 		dao.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow) should be (Some(gp))
 		dao.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Deny) should be (None)
-		dao.getGrantedPermission(dept1, Permissions.Module.Read, GrantedPermission.Allow) should be (None)
+		dao.getGrantedPermission(dept1, Permissions.Module.ManageAssignments, GrantedPermission.Allow) should be (None)
 		dao.getGrantedPermission(dept2, Permissions.Module.Create, GrantedPermission.Allow) should be (None)
 		
 		dao.getGrantedRolesForUser(new User("cusbruv")).toSet should be (Set(gr1, gr2))

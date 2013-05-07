@@ -9,7 +9,7 @@ case class ModuleAssistant(module: model.Module) extends BuiltInRole(module, Mod
 case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		
 	GrantsScopedPermission( 
-		Module.Read,
+		Module.ManageAssignments,
 		
 		RolesAndPermissions.Read,
 		

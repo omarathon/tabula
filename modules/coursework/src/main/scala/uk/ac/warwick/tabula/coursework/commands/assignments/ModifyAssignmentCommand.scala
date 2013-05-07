@@ -149,7 +149,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 			}
 		}
 
-		val membersUserIds = membershipService.determineMembershipUsers(assignment).map(_.getUserId)
+		val membersUserIds = Option(assignment).map(membershipService.determineMembershipUsers(_).map(_.getUserId)).getOrElse(List())
 
 		// add includeUsers to members.includeUsers
 		((includeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>

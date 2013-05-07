@@ -43,7 +43,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		))
 		
 		val ro1 = new RoleOverride
-		ro1.permission = Permissions.Module.Read
+		ro1.permission = Permissions.Module.ManageAssignments
 		ro1.overrideType = RoleOverride.Allow
 		
 		crd.overrides.add(ro1)
@@ -51,7 +51,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
-			Permissions.Module.Read -> Some(dept),
+			Permissions.Module.ManageAssignments -> Some(dept),
 			Permissions.Masquerade -> None
 		))
 		
@@ -63,7 +63,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Module.Create -> None,
-			Permissions.Module.Read -> Some(dept),
+			Permissions.Module.ManageAssignments -> Some(dept),
 			Permissions.Masquerade -> None
 		))
 		
@@ -79,7 +79,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		crd2.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
-			Permissions.Module.Read -> Some(dept),
+			Permissions.Module.ManageAssignments -> Some(dept),
 			Permissions.Masquerade -> None
 		))
 	}

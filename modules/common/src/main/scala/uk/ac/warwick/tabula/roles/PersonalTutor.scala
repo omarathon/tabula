@@ -8,7 +8,6 @@ case class PersonalTutor(student: model.Member) extends BuiltInRole(student, Per
 object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
 	GrantsScopedPermission(
 		Profiles.Read.Core,
-		Profiles.Read.UniversityId,
 		Profiles.Read.NextOfKin,
 		Profiles.Read.HomeAddress,
 		Profiles.Read.TermTimeAddress,

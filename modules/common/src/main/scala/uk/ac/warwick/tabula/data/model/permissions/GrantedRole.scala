@@ -58,7 +58,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	var scope: A
 
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
-	def mayGrant(target: Permission) = roleDefinition.mayGrant(target)
+	def mayGrant(target: Permission) = Option(roleDefinition) map { _.mayGrant(target) } getOrElse (false)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {

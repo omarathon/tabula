@@ -55,19 +55,19 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	val modules: JList[Module] = 
-		if (securityService.can(user, Permissions.Module.Read, mandatory(department))) {
+		if (securityService.can(user, Permissions.Module.ManageAssignments, mandatory(department))) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
-			PermissionCheck(Permissions.Module.Read, department)
+			PermissionCheck(Permissions.Module.ManageAssignments, department)
 			
 			department.modules
 		} else {
 			val managedModules = moduleService.modulesManagedBy(user, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
-			PermissionCheckAll(Permissions.Module.Read, managedModules)
+			PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)
 			
 			if (managedModules.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.Module.Read, department)
+				throw new PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
 			
 			managedModules
 		}
