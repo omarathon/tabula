@@ -104,7 +104,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
 
-		(affiliatedDepartments #::: moduleDepts)
+		(affiliatedDepartments #::: moduleDepts).distinct
 	}
 
 	def permissionsParents = touchedDepartments
