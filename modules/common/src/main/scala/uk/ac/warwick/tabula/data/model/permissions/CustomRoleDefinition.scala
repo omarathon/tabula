@@ -59,7 +59,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	var overrides:JList[RoleOverride] = JArrayList()
 
 	def permissionsParents =
-		Seq(Option(department)).flatten
+		Option(department).toStream
 
 	/**
 	 * This method eagerly resolves sub-roles, which is why we return

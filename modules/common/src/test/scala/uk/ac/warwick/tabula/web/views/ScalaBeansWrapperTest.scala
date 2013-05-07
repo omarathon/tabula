@@ -32,7 +32,7 @@ class MyObject extends PermissionsTarget {
   @Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
   
   override def id = ""
-	override def permissionsParents = Nil
+	override def permissionsParents = Stream.empty
 }
 
 object World {

@@ -16,6 +16,10 @@ import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.roles.UniversityMemberRole
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 
 class RoleServiceTest extends TestBase with Mockito {
 
@@ -154,7 +158,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		
 		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, dept)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
-		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream())
+		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream.empty)
 		
 		(service.getExplicitPermissionsFor(currentUser, module) exists { 
 			_ == PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow) 
@@ -164,6 +168,30 @@ class RoleServiceTest extends TestBase with Mockito {
 		there was one(provider1).getPermissionsFor(currentUser, module)
 		there was one(provider2).getPermissionsFor(currentUser, dept)
 		there was one(provider2).getPermissionsFor(currentUser, module)
+	}
+	
+	@Test def dontCheckAllParents() = withUser("cuscav", "0672089") {
+		// TAB-755 We should never have to go to the list of registered modules here, because we're looking for something in ITS
+		val dept = Fixtures.department("in")
+		val member = Fixtures.student(universityId = "0672089", department = dept)
+		
+		val profileService = mock[ProfileService]
+		member.profileService = profileService
+		
+		val provider1 = mock[RoleProvider]
+		val provider2 = mock[RoleProvider]
+		
+		val service = new RoleServiceImpl()
+		service.roleProviders = Array(provider1, provider2)
+		
+		when(provider1.getRolesFor(currentUser, member)) thenReturn(Seq())
+		when(provider2.getRolesFor(currentUser, member)) thenReturn(Seq())
+		when(provider1.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
+		when(provider2.getRolesFor(currentUser, dept)) thenReturn(Seq())
+		
+		(service.getRolesFor(currentUser, member) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
+		
+		there was no(profileService).getRegisteredModules("0672089")
 	}
 
 }

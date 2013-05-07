@@ -26,7 +26,7 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 	
 	def toStringProps = Seq("student" -> student)
 	
-	def permissionsParents = Seq(Option(student)).flatten
+	def permissionsParents = Option(student).toStream
 }
 
 trait StudyDetailsProperties {
