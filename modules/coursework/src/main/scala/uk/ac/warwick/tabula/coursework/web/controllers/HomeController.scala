@@ -70,7 +70,7 @@ import uk.ac.warwick.tabula.data.model.Department
 				Map(
 					"assignment" -> assignment,
 					"numSubmissions" -> submissions.size,
-					"isAdmin" -> securityService.can(user, Permissions.Module.Read, assignment)
+					"isAdmin" -> securityService.can(user, Permissions.Module.ManageAssignments, assignment)
 				)
 			}
 

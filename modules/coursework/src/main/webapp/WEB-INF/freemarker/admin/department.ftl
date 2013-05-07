@@ -17,7 +17,6 @@
 <#if department??>
 
 
-<#-- TODO change this to a role check -->
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
 <#if (features.extensions || features.feedbackTemplates) && can_manage_dept>
 	<h1 class="with-settings">
@@ -83,8 +82,7 @@
 </#if>
 
 <#list modules as module>
-	<#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
-	<#assign can_manage=can.do("Module.Read", module) />
+	<#assign can_manage=can.do("Module.ManageAssignments", module) />
 	<#assign has_assignments=(module.assignments!?size gt 0) />
 	<#assign has_archived_assignments=false />
 	<#list module.assignments as assignment>

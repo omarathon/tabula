@@ -72,12 +72,12 @@ class ModuleAndDepartmentService extends Logging {
 	// as getting the role itself
 	
 	def departmentsOwnedBy(user: CurrentUser): Set[Department] = 
-		permissionsService.getAllPermissionDefinitionsFor[Department](user, Permissions.Module.Read)
-			.filter { department => securityService.can(user, Permissions.Module.Read, department) }
+		permissionsService.getAllPermissionDefinitionsFor[Department](user, Permissions.Module.ManageAssignments)
+			.filter { department => securityService.can(user, Permissions.Module.ManageAssignments, department) }
 
 	def modulesManagedBy(user: CurrentUser): Set[Module] = 
-		permissionsService.getAllPermissionDefinitionsFor[Module](user, Permissions.Module.Read)
-			.filter { module => securityService.can(user, Permissions.Module.Read, module) }
+		permissionsService.getAllPermissionDefinitionsFor[Module](user, Permissions.Module.ManageAssignments)
+			.filter { module => securityService.can(user, Permissions.Module.ManageAssignments, module) }
 	
 	def modulesManagedBy(user: CurrentUser, dept: Department): Set[Module] = 
 		modulesManagedBy(user).filter { _.department == dept }

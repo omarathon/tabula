@@ -61,8 +61,10 @@ object Permissions {
 	}
 
 	object Module {
+		// We don't Read a module, we ManageAssignments on it
+		case object ManageAssignments extends Permission
+		
 		case object Create extends Permission
-		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}

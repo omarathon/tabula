@@ -152,7 +152,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.permissionsProviders = Array(provider1, provider2)
 		
-		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Read, Some(module), GrantedPermission.Allow)))
+		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, dept)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream())
 		
