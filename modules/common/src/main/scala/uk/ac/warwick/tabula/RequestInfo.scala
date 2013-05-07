@@ -5,6 +5,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.HandlerMapping
 import org.springframework.web.context.request.RequestAttributes
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 
 /**
  * Stores information about the current request, such as the
@@ -25,7 +26,8 @@ class RequestInfo(
 	val requestedUri: Uri,
 	val requestParameters: Map[String, List[String]],
 	val ajax: Boolean = false,
-	val maintenance: Boolean = false)
+	val maintenance: Boolean = false,
+	val requestLevelCache: RequestLevelCache = new RequestLevelCache)
 
 object RequestInfo {
 	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {
@@ -38,7 +40,10 @@ object RequestInfo {
 		try { open(info); fn }
 		finally close
 
-	def close = threadLocal.remove
+	def close = {
+		fromThread map { _.requestLevelCache.shutdown }
+		threadLocal.remove
+	}
 	
 	def mappedPage = {
 		// get the @RequestMapping (without path variables resolved), so that users don't get the same popup again

@@ -41,8 +41,8 @@ trait PermissionsService {
 	def getAllGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]]
 	def getAllGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]]
 	
-	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedRole[A]]
-	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedPermission[A]]
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]]
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]]
 	
 	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A]
 	
@@ -119,7 +119,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	
 	def getAllGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]] = getGrantedPermissionsFor[PermissionsTarget](user)
 	
-	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedRole[A]] = transactional(readOnly = true) {
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
 		dao.getGrantedRolesById(
@@ -128,12 +128,12 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 			
 			// Get all roles backed by one of the webgroups, 		
 			++ (groupNames flatMap { groupName => GrantedRolesForGroupCache.get((groupName, classTag[A])).asScala })
-		)
+		).toStream
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
 	}
 	
-	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Seq[GrantedPermission[A]] = transactional(readOnly = true) {
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
 		dao.getGrantedPermissionsById(
@@ -142,7 +142,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 			
 			// Get all permissions backed by one of the webgroups, 		
 			++ (groupNames flatMap { groupName => GrantedPermissionsForGroupCache.get((groupName, classTag[A])).asScala })
-		)
+		).toStream
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
 	}

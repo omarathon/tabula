@@ -15,18 +15,18 @@ class PersonalTutorRoleProvider extends RoleProvider {
 	
 	var profileService = Wire.auto[ProfileService]
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = scope match {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = scope match {
 		case member: model.Member => {
 			val tuteeIds = 
-				profileService.listStudentRelationshipsWithUniversityId(model.RelationshipType.PersonalTutor, user.universityId) map { _.studentId }
+				profileService.listStudentRelationshipsWithUniversityId(model.RelationshipType.PersonalTutor, user.universityId).map { _.studentId }.toStream
 			if (tuteeIds.contains(member.universityId))
-				Seq(PersonalTutor(member))
+				Stream(PersonalTutor(member))
 			else
-				Seq()
+				Stream.empty
 		}
 			
 		// We don't need to check for the PersonalTutor role on any other scopes
-		case _ => Seq()
+		case _ => Stream.empty
 	}
 	
 	

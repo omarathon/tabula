@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.roles.Role
 @Component
 class MarkerRoleProvider extends RoleProvider {
 	
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
-		def getRoles(assignments: Seq[Assignment]) = assignments filter { _.isMarker(user.apparentUser) } map {Marker(_)} 
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
+		def getRoles(assignments: Seq[Assignment]) = assignments.toStream filter { _.isMarker(user.apparentUser) } map {Marker(_)} 
 		
 		scope match {
 			case department: Department => 
@@ -28,7 +28,7 @@ class MarkerRoleProvider extends RoleProvider {
 				getRoles(Seq(assignment))
 				
 			// We don't need to check for the marker role on any other scopes
-			case _ => Seq()
+			case _ => Stream.empty
 		}
 	}
 	
