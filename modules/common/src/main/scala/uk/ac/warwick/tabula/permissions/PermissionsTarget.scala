@@ -22,7 +22,7 @@ trait PermissionsTarget {
 	
 	/**
 	 * This should return a sequence of *DIRECT* permission parents. Usually this will 
-	 * return a singleton Stream(parent) or an empty Stream.empty (for a top-level permission element 
+	 * return a singleton Stream(parent) or a Stream.empty (for a top-level permission element 
 	 * such as a Department) but there are some situations (such as for an object that
 	 * exists in multiple departments) where it will return more than one.
 	 */
