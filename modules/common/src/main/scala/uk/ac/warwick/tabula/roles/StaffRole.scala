@@ -12,11 +12,11 @@ case object StaffRoleDefinition extends BuiltInRoleDefinition {
 	)
 	
 	GrantsGlobalPermission(
-		Profiles.Search
+		Profiles.Search,
+		Profiles.Read.Core // As per discussion in TAB-753, anyone at the University can see anyone else's core information
 	)
 	
 	GrantsScopedPermission(
-		Profiles.Read.Core,
 		Profiles.Read.StudyDetails,
 		Profiles.PersonalTutor.Read
 	)

@@ -270,7 +270,7 @@ class RuntimeMember(user: CurrentUser) extends Member(user) {
 }
 
 trait MemberProperties {
-	@Id @Restricted(Array("Profiles.Read.UniversityId")) var universityId: String = _
+	@Id var universityId: String = _
 	def id = universityId
 
 	@Column(nullable = false)

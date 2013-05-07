@@ -139,8 +139,7 @@ object Permissions {
 		case object Search extends ScopelessPermission
 
 		object Read {
-			case object Core extends Permission // Photo, name, course, Warwick email, job title
-			case object UniversityId extends Permission // University number
+			case object Core extends Permission // Photo, name, course, Warwick email, job title, University number
 			case object DateOfBirth extends Permission
 			case object Nationality extends Permission
 			case object Gender extends Permission
