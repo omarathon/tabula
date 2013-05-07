@@ -34,7 +34,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null;
-	
+
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	var modules:JList[Module] = JArrayList()
@@ -70,7 +70,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
 
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource).orNull
+	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceDefault)
 	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
 
 	// FIXME belongs in Freemarker
@@ -88,11 +88,11 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
 	def isOwnedBy(userId:String) = owners.includes(userId)
-	
-	@deprecated("Use ModuleAndDepartmentService.addOwner", "35") 
+
+	@deprecated("Use ModuleAndDepartmentService.addOwner", "35")
 	def addOwner(owner:String) = owners.addUser(owner)
-	
-	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35") 
+
+	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35")
 	def removeOwner(owner:String) = owners.removeUser(owner)
 
 	def canRequestExtension = allowExtensionRequests
@@ -120,7 +120,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	  *
 	  * This is open to discussion and change.
 	  */
-	def permissionsParents = Nil // Option(parent).toSeq
+	def permissionsParents = Option(parent).toSeq
 
 	/** The 'top' ancestor of this department, or itself if
 	  * it has no parent.
@@ -152,5 +152,7 @@ object Department {
 		val PlagiarismDetection = "plagiarismDetection"
 
 		val PersonalTutorSource = "personalTutorSource"
+
+		val PersonalTutorSourceDefault = "local"
 	}
 }
