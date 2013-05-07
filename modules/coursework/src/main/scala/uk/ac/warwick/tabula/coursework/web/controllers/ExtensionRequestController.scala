@@ -32,9 +32,10 @@ class ExtensionRequestController extends CourseworkController{
 	def showForm(cmd:ExtensionRequestCommand):Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 		
-		if (!module.department.canRequestExtension)
+		if (!module.department.canRequestExtension) {
+			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
 			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
-		else {
+		} else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)
 				existingRequest.foreach(cmd.presetValues(_))

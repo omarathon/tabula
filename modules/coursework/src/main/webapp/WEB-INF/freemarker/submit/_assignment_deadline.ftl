@@ -12,7 +12,7 @@
 		<#if willShowButtons>
 			<#if extensionRequested>
 				<@extensionButtonContents "Review extension request" assignment />
-			<#elseif !isExtended && !isClosed>
+			<#elseif !isExtended && !isClosed && assignment.module.department.canRequestExtension>
 				<@extensionButtonContents "Request an extension" assignment />
 			</#if>
 		</#if>
