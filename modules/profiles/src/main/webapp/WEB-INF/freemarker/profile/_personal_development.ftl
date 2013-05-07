@@ -8,7 +8,7 @@
 			<#if !profile.personalTutor?string?starts_with("Not ")>
 				<span class="muted">External to Warwick</span>
 			</#if>
-			<#if can.do("Profiles.PersonalTutor.Update", profile) && profile.studyDetails.studyDepartment.canEditPersonalTutors >
+			<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 				<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 			</#if>
 		</p>
@@ -19,7 +19,7 @@
 			</div>
 			<h5>
 				${profile.personalTutor.fullName}
-				<#if can.do("Profiles.PersonalTutor.Update", profile) && profile.studyDetails.studyDepartment.canEditPersonalTutors >
+				<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 					<a id="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId tutor=profile.personalTutor/>"><i class="icon-edit"></i></a>
 				</#if>
 			</h5>

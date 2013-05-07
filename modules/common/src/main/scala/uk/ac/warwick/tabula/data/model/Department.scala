@@ -101,7 +101,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
 	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource.equals("local")
+		personalTutorSource == null || personalTutorSource == "local"
 	}
 
 	// If hibernate sets owners to null, make a new empty usergroup

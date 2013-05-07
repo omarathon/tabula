@@ -42,11 +42,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 
 class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
   extends ImportSingleMemberCommand(member, ssoUser, resultSet)
-	with Logging
-	with Daoisms
-	with StudentProperties
-	with StudyDetailsProperties
-	with Unaudited {
+	with Logging with Daoisms with StudentProperties with StudyDetailsProperties with Unaudited {
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
@@ -211,8 +207,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		}
 	}
 
-	private def captureTutor(studyDetailsBean: BeanWrapper): Boolean = {
-		var ret = false
+	def captureTutor(studyDetailsBean: BeanWrapper) = {
 
 		// first get the department
 		val dept = studyDetailsBean.getPropertyValue("studyDepartment") match {
@@ -220,30 +215,33 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			case _ => null
 		}
 
-		if (dept == null) 
-			logger.info("Trying to capture tutor for " + sprCode + " but department is null :(")
-
+		if (dept == null)
+			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
+			
 		// is this student in a department that is set to import tutor data from SITS?
-		else if (dept.personalTutorSource != null && dept.personalTutorSource.equals("SITS")) {
+		else if (dept.personalTutorSource != null && dept.personalTutorSource == "SITS") {
+			val pts = dept.personalTutorSource
+			
+			if (sprTutor1 == null)
+				logger.warn("Trying to capture tutor for " + sprCode + " but PRS code on SPR is null in SITS.")
+			else {
+				val tutorUniId = sprTutor1.substring(2)
 
-			val tutorUniId = sprTutor1.substring(2)
-
-			// only save the personal tutor if we can match the ID with a staff member in Tabula
-			val member = memberDao.getByUniversityId(tutorUniId) match {
-				case Some(mem: Member) => {
-					logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
-
-					ret = profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId) match {
-						case rel: StudentRelationship => true
-						case _ => false
+				// only save the personal tutor if we can match the ID with a staff member in Tabula
+				val member = memberDao.getByUniversityId(tutorUniId) match {
+					case Some(mem: Member) => {
+						logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
+						profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
 					}
-				}
-				case _ => {
-					logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
+					case _ => {
+						logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
+					}
 				}
 			}
 		}
-		ret
+		else {
+			val pts = dept.personalTutorSource
+		}
 	}
 
 	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
