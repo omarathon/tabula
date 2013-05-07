@@ -206,10 +206,11 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * This includes their home department, and the department running their course.
 	 */
 	override def affiliatedDepartments =
-		Stream(
-			Option(homeDepartment), 
-			Option(studyDetails.studyDepartment), 
-			Option(studyDetails.route).map(_.department)
+		(
+			Option(homeDepartment) #::
+			Option(studyDetails.studyDepartment) #:: 
+			Option(studyDetails.route).map(_.department) #::
+			Stream.empty
 		).flatten.distinct
 
 	override def personalTutor =
