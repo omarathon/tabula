@@ -31,3 +31,10 @@ trait PermissionsTarget {
 	def id: String
 
 }
+
+object PermissionsTarget {
+	final val Global = new PermissionsTarget {
+		override def permissionsParents = Stream.empty
+		override def id = ???
+	}
+}

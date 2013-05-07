@@ -41,6 +41,7 @@ trait SharedAssignmentProperties {
 	var displayPlagiarismNotice: JBoolean = false
 	var allowExtensions: JBoolean = false
 	var allowExtensionRequests: JBoolean = false
+	var summative: JBoolean = true
 	
 	@Min(0)
 	var wordCountMin: JInteger = _
@@ -98,6 +99,8 @@ trait SharedAssignmentProperties {
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
 		assignment.allowExtensionRequests = allowExtensionRequests
+		assignment.summative = summative
+		
 		assignment.feedbackTemplate = feedbackTemplate
 		if (assignment.id != null) // this is an edit
 			zipService.invalidateSubmissionZip(assignment)
@@ -131,6 +134,7 @@ trait SharedAssignmentProperties {
 		displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
+		summative = assignment.summative
 		feedbackTemplate = assignment.feedbackTemplate
 		markingWorkflow = assignment.markingWorkflow
 		

@@ -20,14 +20,14 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 	@Test def checks {
 		PermissionCheck(Permissions.Module.Create, dept)
 		PermissionCheck(Permissions.Module.Delete, dept)
-		PermissionCheckAll(Permissions.Module.Read, Seq(mod1, mod2))
+		PermissionCheckAll(Permissions.Module.ManageAssignments, Seq(mod1, mod2))
 		PermissionCheck(Permissions.UserPicker)
 		
 		permissionChecks should be (Map(
 			Permissions.Module.Create -> Some(dept),
 			Permissions.Module.Delete -> Some(dept),
-			Permissions.Module.Read -> Some(mod1),
-			Permissions.Module.Read -> Some(mod2),
+			Permissions.Module.ManageAssignments -> Some(mod1),
+			Permissions.Module.ManageAssignments -> Some(mod2),
 			Permissions.UserPicker -> None
 		))
 	}

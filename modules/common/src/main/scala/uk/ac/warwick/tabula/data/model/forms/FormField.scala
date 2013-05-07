@@ -151,9 +151,11 @@ class WordCountField extends FormField with SimpleValue[Int] {
 
 	override def validate(value: SubmissionValue, errors: Errors) {
 		value match {
-			case i:StringSubmissionValue if !i.value.matches("\\d+") => errors.rejectValue("value", "assignment.submit.wordCount.missing")
-			case i:StringSubmissionValue if (i.value.toInt < min || i.value.toInt > max) => errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
-			case _ => // valid
+			case i:StringSubmissionValue => {
+				 if (i.value == null || !i.value.matches("\\d+")) errors.rejectValue("value", "assignment.submit.wordCount.missing")
+				 else if (i.value.toInt < min || i.value.toInt > max) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
+			}
+			case _ => errors.rejectValue("value", "assignment.submit.wordCount.missing") // value was null or wrong type
 		}
 	}
 }

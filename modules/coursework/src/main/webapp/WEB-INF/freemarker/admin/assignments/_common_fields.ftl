@@ -53,6 +53,25 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
+<#if features.summativeFilter>
+	<@form.row>
+			<@form.label>Credit bearing</@form.label>
+			<@form.field>
+				<label class="radio">
+					<@f.radiobutton path="summative" value="true" />
+					Summative (counts towards final mark)
+				</label>
+				<label class="radio">
+					<@f.radiobutton path="summative" value="false" />
+					Formative (does not count towards final mark)
+				</label>
+				<div class="help-block">
+					This field only affects feedback reports.
+				</div>
+			</@form.field>
+		</@form.row>
+</#if>
+
 <#if features.submissions>
 	<@form.labelled_row "collectSubmissions" "Submissions">
 		<label class="checkbox">

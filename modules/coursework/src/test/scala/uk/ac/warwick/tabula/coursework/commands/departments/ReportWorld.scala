@@ -36,6 +36,8 @@ trait ReportWorld extends AppContextTestBase with Mockito {
 	val assignmentTwo = addAssignment("1002", "test two", dateTime(2013, 4, 10), 29, 5, moduleOne)
 	val assignmentThree = addAssignment("1003", "test three", dateTime(2013, 5, 10), 13, 5, moduleOne)
 	
+	assignmentThree.summative = false
+	
 	val assignmentFour = addAssignment("1004", "test four", dateTime(2013, 5, 31), 35, 5, moduleTwo)
 	val assignmentFive = addAssignment("1005", "test five", dateTime(2013, 8, 23), 100, 50, moduleTwo)
 	val assignmentSix = addAssignment("1006", "test six", dateTime(2013, 7, 1), 73, 3, moduleTwo)

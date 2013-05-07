@@ -25,11 +25,11 @@ class MyObject extends PermissionsTarget {
   def departments = "ah" :: List("ch", "cs")
   
   @Restricted(Array("GodMode")) var permsName = "text"
-  @Restricted(Array("Module.Read")) def getPermsMotto() = "do be good, don't be bad"
-  @Restricted(Array("Module.Read")) def permsGrotto = "Santa's"
+  @Restricted(Array("Module.ManageAssignments")) def getPermsMotto() = "do be good, don't be bad"
+  @Restricted(Array("Module.ManageAssignments")) def permsGrotto = "Santa's"
 	  
-  @Restricted(Array("Module.Read")) def getPermsGreeting(name:String) = "Hello %s!" format (name)
-  @Restricted(Array("Module.Read", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
+  @Restricted(Array("Module.ManageAssignments")) def getPermsGreeting(name:String) = "Hello %s!" format (name)
+  @Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
   
   override def id = ""
 	override def permissionsParents = Nil
@@ -129,7 +129,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	      hash.get("permsGreeting") should be (null)
 	       
 	      securityService.can(currentUser, Permissions.GodMode) returns (true)
-	      securityService.can(currentUser, Permissions.Module.Read, obj) returns (true)
+	      securityService.can(currentUser, Permissions.Module.ManageAssignments, obj) returns (true)
 	      securityService.can(currentUser, Permissions.Module.Delete, obj) returns (true)
 	      
 	      hash.get("permsName").toString should be ("text")
