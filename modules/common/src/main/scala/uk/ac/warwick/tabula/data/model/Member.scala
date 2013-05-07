@@ -205,13 +205,12 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = { 
-		(
-			Option(homeDepartment) ++ 
-			Option(studyDetails.studyDepartment) ++ 
+	override def affiliatedDepartments =
+		Stream(
+			Option(homeDepartment), 
+			Option(studyDetails.studyDepartment), 
 			Option(studyDetails.route).map(_.department)
-		).toStream.distinct
-	}
+		).flatten.distinct
 
 	override def personalTutor =
 		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
