@@ -30,16 +30,16 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		
 		// set home department and test
 		member.homeDepartment = homeDept
-		member.affiliatedDepartments should be (Seq(homeDept))
-		member.touchedDepartments should be (Seq(homeDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept))
+		member.touchedDepartments should be (Stream(homeDept, extDept))
 		
 		// also set study department and test
 		val studyDept = new Department
 		studyDept.code = "pq"
 			
 		member.studyDetails.studyDepartment = studyDept
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, extDept))
 		
 		// also set route department and test
 		val routeDept = new Department
@@ -48,15 +48,15 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		route.department = routeDept
 		member.studyDetails.route = route
 		
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept, routeDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, routeDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept, routeDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, routeDept, extDept))
 		
 		// reset route to home, and check it appears only once
 		route.department = homeDept
 		member.studyDetails.route = route
 		
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, extDept))
 	}
 	
 	@Test def nullUsers {

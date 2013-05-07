@@ -61,7 +61,7 @@ class RoleServiceImpl extends RoleService with Logging {
 				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
 
 				val stream = hasResults flatMap { _._2 }
-				val next = scope.permissionsParents.toStream flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
+				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
 
 				stream #::: next
 			}
@@ -89,7 +89,7 @@ class RoleServiceImpl extends RoleService with Logging {
 				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
 
 				val stream = hasResults flatMap { _._2 }
-				val next = scope.permissionsParents.toStream flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
+				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
 
 				stream #::: next
 			}

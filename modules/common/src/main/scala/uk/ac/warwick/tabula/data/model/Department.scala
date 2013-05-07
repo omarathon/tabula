@@ -113,7 +113,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	  * 
 	  * This is open to discussion and change.
 	  */
-	def permissionsParents = Option(parent).toSeq
+	def permissionsParents = Option(parent).toStream
 	
 	/** The 'top' ancestor of this department, or itself if
 	  * it has no parent. 
