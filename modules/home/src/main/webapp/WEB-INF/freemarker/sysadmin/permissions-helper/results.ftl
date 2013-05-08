@@ -8,6 +8,8 @@
 	<span class="permission"><i class="icon-lock"></i> ${permission.name}</span>
 	<#if scope?? && scope?size != 0>
 		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
+	<#elseif permission.scoped>
+		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
 	</#if>
 	
 	<#if isTarget></strong></#if>

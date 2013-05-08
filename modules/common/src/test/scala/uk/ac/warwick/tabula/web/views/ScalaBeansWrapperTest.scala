@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.views
 
+import scala.collection.mutable
 import scala.collection.mutable.Buffer
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.Permission
 
 class MyObject extends PermissionsTarget {
   var name = "text"
@@ -32,7 +34,7 @@ class MyObject extends PermissionsTarget {
   @Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
   
   override def id = ""
-	override def permissionsParents = Nil
+	override def permissionsParents = Stream.empty
 }
 
 object World {
@@ -85,6 +87,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	      hash.get("grotto").toString should be("Santa's")
 	      hash.get("departments").getClass should be (classOf[SimpleSequence])
 	    }
+	    case _ => fail()
 	  }
 	  val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
 	  wrapper.wrap(list) match {
@@ -106,12 +109,30 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	 	 	  }
 	 	  }
 	  }
-	   
+
+	}
+	
+	@Test def accessingSameProperty {
+		val wrapper = new ScalaBeansWrapper()
+		val wrapped = wrapper.wrap(new MyObject)
+		
+		wrapped match {
+			case hash: wrapper.ScalaHashModel => {
+	      (hash.get("name") eq hash.get("name")) should be (true)
+	    }
+	    case _ => fail()
+		}
+		
+		
 	}
 	
 	@Test def permissions = withUser("cuscav") {
 		val wrapper = new ScalaBeansWrapper()
 		val securityService = mock[SecurityService]
+		
+		val m = mutable.HashMap[Permission, Boolean]()
+		m.put(Permissions.Assignment.Read, true)
+		m.contains(Permissions.Assignment.Read) should be (true)
 		
 		wrapper.securityService = securityService
 		
@@ -131,6 +152,8 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	      securityService.can(currentUser, Permissions.GodMode) returns (true)
 	      securityService.can(currentUser, Permissions.Module.ManageAssignments, obj) returns (true)
 	      securityService.can(currentUser, Permissions.Module.Delete, obj) returns (true)
+	      
+	      hash.clearCaches()
 	      
 	      hash.get("permsName").toString should be ("text")
 	      hash.get("permsMotto").toString should be ("do be good, don't be bad")

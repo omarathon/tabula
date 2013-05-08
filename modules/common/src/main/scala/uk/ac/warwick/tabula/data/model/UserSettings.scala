@@ -26,7 +26,7 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 			
 	override def toString = "UserSettings [" + settings + "]"
 	
-	def permissionsParents = Seq()
+	def permissionsParents = Stream.empty
 }
 
 object UserSettings {

@@ -121,7 +121,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@JoinColumn(name = "module_id")
 	var module: Module = _
 	
-	def permissionsParents = Seq(Option(module)).flatten
+	def permissionsParents = Option(module).toStream
 
 //	@ManyToMany(fetch = FetchType.LAZY)
 //	@JoinTable(name="assignment_assessmentgroup",
