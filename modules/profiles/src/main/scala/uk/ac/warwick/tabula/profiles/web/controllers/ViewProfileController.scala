@@ -19,17 +19,17 @@ class ViewProfileCommand(profile: StudentMember) extends ViewViewableCommand(Per
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
-	
+
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
-	
+
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
 		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
 		case _ => None
 	}
-	
+
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
 		case student: StudentMember => new ViewProfileCommand(student)
@@ -41,18 +41,18 @@ class ViewProfileController extends ProfilesController {
 			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
 			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
 			@RequestParam(value="meeting", required=false) openMeetingId: String) = {
-		
+
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
-		
+
 		val meetings = meetingsCmd match {
 			case None => Seq()
 			case Some(cmd) => cmd.apply
 		}
-		
+
 		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
-		
-		Mav("profile/view", 
+
+		Mav("profile/view",
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
