@@ -8,8 +8,8 @@ trait RequestLevelCaching[A, B] extends Logging {
 	
 	def cache = RequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
 	
-	def cachedBy[B1 >: B](key: A, default: => B1) = cache match {
-		case Some(cache) => cache.getOrElse(key, default)
+	def cachedBy(key: A, default: => B) = cache match {
+		case Some(cache) => logger.debug(cache); cache.getOrElseUpdate(key, default)
 		case _ => {
 			logger.warn("Tried to call a request level cache outside of a request!")
 			default
@@ -25,10 +25,10 @@ object RequestLevelCache {
 class RequestLevelCache {
 	import RequestLevelCache._
 	
-	private val cacheMap = mutable.Map[String, Cache[_, _]]()
+	val cacheMap = mutable.Map[String, Cache[_, _]]()
 	
 	def getCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
-		case cache: Cache[_, _] => cache.asInstanceOf[Cache[A, B]]
+		case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
 		case _ => {
 			val cache = mutable.Map[A, B]()
 			

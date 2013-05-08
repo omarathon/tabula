@@ -26,6 +26,7 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.Queue
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -60,6 +61,9 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	var dao = Wire[PermissionsDao]
 	var groupService = Wire[GroupService]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
+	
+	val rolesByIdCache = new GrantedRoleByIdCache(dao)
+	val permissionsByIdCache = new GrantedPermissionsByIdCache(dao)
 	
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {	
@@ -122,7 +126,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
-		dao.getGrantedRolesById(
+		rolesByIdCache.getGrantedRolesByIds[A](
 			// Get all roles where usercode is included,
 			GrantedRolesForUserCache.get((user.apparentUser, classTag[A])).asScala
 			
@@ -136,7 +140,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
-		dao.getGrantedPermissionsById(
+		permissionsByIdCache.getGrantedPermissionsByIds[A](
 			// Get all permissions where usercode is included,
 			GrantedPermissionsForUserCache.get((user.apparentUser, classTag[A])).asScala
 			
@@ -172,6 +176,26 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 			}
 		}
 	}
+	
+}
+
+class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {
+	
+	def getGrantedPermissionsByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
+		ids flatMap { id => getGrantedPermissionsById[A](id) }
+	
+	def getGrantedPermissionsById[A <: PermissionsTarget : ClassTag](id: String) = 
+		cachedBy(id, dao.getGrantedPermission[A](id)).asInstanceOf[Option[GrantedPermission[A]]]
+	
+}
+
+class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedRole[_]]] {
+	
+	def getGrantedRolesByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
+		ids flatMap { id => getGrantedRoleById[A](id) }
+	
+	def getGrantedRoleById[A <: PermissionsTarget : ClassTag](id: String) = 
+		cachedBy(id, dao.getGrantedRole[A](id)).asInstanceOf[Option[GrantedRole[A]]]
 	
 }
 

@@ -81,5 +81,6 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getCaches() = delegate.getCaches()
 	def clearCaches() = delegate.clearCaches()
 	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
+	def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
 
 }
