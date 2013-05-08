@@ -95,16 +95,16 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments = Option(homeDepartment).toSeq
+	def affiliatedDepartments = Option(homeDepartment).toStream
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
 	 * the department running their course and any departments that they are taking modules in.
 	 */
 	def touchedDepartments = {
-		val moduleDepts = registeredModules.map(x => x.department)
+		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
 
-		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
+		(affiliatedDepartments #::: moduleDepts).distinct
 	}
 
 	def permissionsParents = touchedDepartments
@@ -205,13 +205,13 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = { 
+	override def affiliatedDepartments =
 		(
-			Option(homeDepartment) ++ 
-			Option(studyDetails.studyDepartment) ++ 
-			Option(studyDetails.route).map(_.department)
-		).toSeq.distinct
-	}
+			Option(homeDepartment) #::
+			Option(studyDetails.studyDepartment) #:: 
+			Option(studyDetails.route).map(_.department) #::
+			Stream.empty
+		).flatten.distinct
 
 	override def personalTutor =
 		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
@@ -266,7 +266,7 @@ class OtherMember extends Member with AlumniProperties {
 }
 
 class RuntimeMember(user: CurrentUser) extends Member(user) {
-	override def permissionsParents = Nil
+	override def permissionsParents = Stream.empty
 }
 
 trait MemberProperties {

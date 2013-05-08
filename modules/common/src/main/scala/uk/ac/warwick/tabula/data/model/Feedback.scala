@@ -22,7 +22,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE), optional = false)
 	var assignment: Assignment = _
 	
-	def permissionsParents = Seq(Option(assignment)).flatten
+	def permissionsParents = Option(assignment).toStream
 
 	var uploaderId: String = _
 

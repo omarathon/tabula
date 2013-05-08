@@ -26,7 +26,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
 	
-	def permissionsParents = Seq(Option(assignment)).flatten
+	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
 	var userId:String =_
