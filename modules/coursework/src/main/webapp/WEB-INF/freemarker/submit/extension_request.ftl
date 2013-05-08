@@ -123,10 +123,12 @@
 						<@f.errors path="readGuidelines" cssClass="error" />
 				</@form.field>
 			</@form.row>
+			
+			<input type="hidden" name="returnTo" value="${returnTo}" />
 
 			<div class="submit-buttons">
 				<input type="submit" class="btn btn-primary" value="Submit" />
-				or <a href=".." class="btn">Cancel</a>
+				or <a class="btn" href="${returnTo}">Cancel</a>
 			</div>
 		</@f.form>
 	</#if>
