@@ -217,11 +217,11 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
-			
+
 		// is this student in a department that is set to import tutor data from SITS?
-		else if (dept.personalTutorSource != null && dept.personalTutorSource == "SITS") {
+		else if (dept.personalTutorSource != null && dept.personalTutorSource == Department.Settings.PersonalTutorSourceValues.Sits) {
 			val pts = dept.personalTutorSource
-			
+
 			if (sprTutor1 == null)
 				logger.warn("Trying to capture tutor for " + sprCode + " but PRS code on SPR is null in SITS.")
 			else {

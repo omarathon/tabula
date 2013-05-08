@@ -70,7 +70,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
 
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceDefault)
+	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Default)
 	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
 
 	// FIXME belongs in Freemarker
@@ -153,6 +153,9 @@ object Department {
 
 		val PersonalTutorSource = "personalTutorSource"
 
-		val PersonalTutorSourceDefault = "local"
+		object PersonalTutorSourceValues {
+			val Default = "local"
+			val Sits = "SITS"
+		}
 	}
 }

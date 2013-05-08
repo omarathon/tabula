@@ -1,34 +1,32 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.io.ByteArrayInputStream
-import java.sql.Blob
-import java.sql.Date
 import java.sql.ResultSet
+import java.sql.ResultSetMetaData
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
 import org.junit.Test
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentMember
-import java.sql.ResultSetMetaData
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.BeanWrapperImpl
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.data.model.RelationshipType._
 
 // scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -36,7 +34,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
-		val fileDao = mock[FileDao]
+		val fileDao = smartMock[FileDao]
 
 		val route = new Route
 		val mds = mock[ModuleAndDepartmentService]
@@ -45,7 +43,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		val department = new Department
 		department.code = "ph"
 		department.name = "Philosophy"
-		department.personalTutorSource = "SITS"
+		department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 		mds.getDepartmentByCode("ph") returns (Some(department))
 		mds.getDepartmentByCode("PH") returns (Some(department))
 		val rs = mock[ResultSet]
@@ -61,7 +59,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		rs.getInt("year_of_study") returns(3)
 		rs.getString("spr_code") returns("0672089/2")
 		rs.getString("route_code") returns("C100")
-		rs.getString("spr_tutor1") returns ("0070790")
+		rs.getString("spr_tutor1") returns ("IN0070790")
 		rs.getString("homeDepartmentCode") returns ("PH")
 
 		val mm = MembershipMember(
@@ -123,6 +121,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
+
 			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
@@ -147,16 +146,25 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 	}
 
 	@Transactional
-	@Test def testCaptureTutor {
-		var profileService = Wire.auto[ProfileService]
+	@Test def testCaptureTutorIfSourceIsLocal {
 
 		new Environment {
+			val existing = new StudentMember("0672089")
+			val existingStaffMember = new StaffMember("0070790")
 			val memberDao = mock[MemberDao]
+			val profileService = mock[ProfileService]
+
+			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
+			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
 			// if personalTutorSource is "local", there should be no update
 			department.personalTutorSource = "local"
 
 			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			command.memberDao = memberDao
+			command.fileDao = fileDao
+			command.moduleAndDepartmentService = mds
+			command.profileService = profileService
 
 			val member = command.applyInternal match {
 				case stu: StudentMember => Some(stu)
@@ -167,29 +175,41 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 			studentMember.studyDetails should not be (null)
 
-			val newTutor = profileService.getPersonalTutor(studentMember)
+			there was no(profileService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+		}
+	}
 
-			//newTutor should be (None)
+	@Transactional
+	@Test def testCaptureTutorIfSourceIsSits {
 
+		new Environment {
+			val existing = new StudentMember("0672089")
+			val existingStaffMember = new StaffMember("0070790")
+			val memberDao = mock[MemberDao]
+			val profileService = mock[ProfileService]
+			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
+			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
 			// if personalTutorSource is "SITS", there *should* an update
-			department.personalTutorSource = "SITS"
+			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
-			val command2 = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			command.memberDao = memberDao
+			command.fileDao = fileDao
+			command.moduleAndDepartmentService = mds
+			command.profileService = profileService
 
-			val member2 = command2.applyInternal match {
+
+			val member = command.applyInternal match {
 				case stu: StudentMember => Some(stu)
 				case _ => None
 			}
 
-			val studentMember2 = member2.get
+			val studentMember = member.get
 
-			studentMember2.studyDetails should not be (null)
+			studentMember.studyDetails should not be (null)
 
-			val newTutor2 = profileService.getPersonalTutor(studentMember2)
-
-			val newTutorUniId = newTutor2.get.universityId
-			newTutorUniId should be ("0070790")
+			there was one(profileService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
 		}
 	}
 }
