@@ -70,7 +70,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
 
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Default)
+	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
 	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
 
 	// FIXME belongs in Freemarker
@@ -101,7 +101,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
 	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource == "local"
+		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
 	}
 
 	// If hibernate sets owners to null, make a new empty usergroup
@@ -155,7 +155,7 @@ object Department {
 		val PersonalTutorSource = "personalTutorSource"
 
 		object PersonalTutorSourceValues {
-			val Default = "local"
+			val Local = "local"
 			val Sits = "SITS"
 		}
 	}

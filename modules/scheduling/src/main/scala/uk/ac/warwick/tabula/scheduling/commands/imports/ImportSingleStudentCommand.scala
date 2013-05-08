@@ -122,7 +122,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 			memberDao.saveOrUpdate(member)
 		}
 
-		captureTutor(studyDetailsBean)
+		if (member.studyDetails == null) logger.warn("Can't capture tutor for student " + sprCode + "; studyDetails is null")
+		else captureTutor(member.studyDetails.studyDepartment)
 
 		member
 	}
@@ -207,40 +208,42 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		}
 	}
 
-	def captureTutor(studyDetailsBean: BeanWrapper) = {
-
-		// first get the department
-		val dept = studyDetailsBean.getPropertyValue("studyDepartment") match {
-			case value: Department => value
-			case _ => null
-		}
+	def captureTutor(dept: Department) = {
 
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
 
 		// is this student in a department that is set to import tutor data from SITS?
 		else if (dept.personalTutorSource != null && dept.personalTutorSource == Department.Settings.PersonalTutorSourceValues.Sits) {
-			val pts = dept.personalTutorSource
+			val tutorUniIdOption = getUniIdFromPrsCode(sprTutor1)
 
-			if (sprTutor1 == null)
-				logger.warn("Trying to capture tutor for " + sprCode + " but PRS code on SPR is null in SITS.")
-			else {
-				val tutorUniId = sprTutor1.substring(2)
-
-				// only save the personal tutor if we can match the ID with a staff member in Tabula
-				val member = memberDao.getByUniversityId(tutorUniId) match {
-					case Some(mem: Member) => {
-						logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
-						profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
-					}
-					case _ => {
-						logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
+			tutorUniIdOption match {
+				case Some(tutorUniId: String) => {
+					// only save the personal tutor if we can match the ID with a staff member in Tabula
+					val member = memberDao.getByUniversityId(tutorUniId) match {
+						case Some(mem: Member) => {
+							logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
+							profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+						}
+						case _ => {
+							logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
+						}
 					}
 				}
+				case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
+
 			}
 		}
+	}
+
+	private def getUniIdFromPrsCode(prsCode: String): Option[String] = {
+		if (prsCode == null || prsCode.length() !=9) {
+			None
+		}
 		else {
-			val pts = dept.personalTutorSource
+			val uniId = prsCode.substring(2)
+			if (uniId forall Character.isDigit ) Some(uniId)
+			else None
 		}
 	}
 
