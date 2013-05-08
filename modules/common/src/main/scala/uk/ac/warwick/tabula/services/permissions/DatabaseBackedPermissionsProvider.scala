@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.userlookup.GroupService
 
 @Component
-class DatabaseBackedRoleProvider extends ScopelessRoleProvider {
+class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 	
 	var service = Wire[PermissionsService]
-	
-	def getRolesFor(user: CurrentUser): Stream[Role] = 
-		service.getGrantedRolesFor[PermissionsTarget](user) map { _.build() }
-	
-	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
+		
+	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =	
+		service.getGrantedPermissionsFor[PermissionsTarget](user) map { 
+			grantedPermission => PermissionDefinition(grantedPermission.permission, Some(grantedPermission.scope), grantedPermission.overrideType)
+		}
 	
 	// This isn't exhaustive because we use the cache now - it used to be though.
 
