@@ -72,11 +72,11 @@
 								
 									<#if !assignment.openEnded>
 										<#if extensionRequested>
-											<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-block">
+											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 												<i class="icon-calendar"></i> Review extension request
 											</a>
 										<#elseif !isExtended && !assignment.closed && assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
-											<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-block">
+											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 												<i class="icon-calendar"></i> Request extension
 											</a>
 										</#if>

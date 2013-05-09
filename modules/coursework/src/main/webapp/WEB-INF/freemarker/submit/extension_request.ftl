@@ -70,6 +70,10 @@
 				<@f.hidden path="modified" value="true" />
 			</#if>
 
+			<@form.labelled_row "" "Your University ID">
+				<div class="uneditable-input">${user.apparentUser.warwickId}</div>
+			</@form.labelled_row>
+
 			<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
 				<@f.textarea path="reason" cssClass="text big-textarea" />
 			</@form.labelled_row>
@@ -123,10 +127,12 @@
 						<@f.errors path="readGuidelines" cssClass="error" />
 				</@form.field>
 			</@form.row>
+			
+			<input type="hidden" name="returnTo" value="${returnTo}" />
 
 			<div class="submit-buttons">
 				<input type="submit" class="btn btn-primary" value="Submit" />
-				or <a href=".." class="btn">Cancel</a>
+				or <a class="btn" href="${returnTo}">Cancel</a>
 			</div>
 		</@f.form>
 	</#if>
