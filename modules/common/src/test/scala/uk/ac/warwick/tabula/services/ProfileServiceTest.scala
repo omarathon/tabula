@@ -63,19 +63,21 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after re-storing")).agent should be ("1234567")		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (1)
 		
-		// now store a new personal tutor for the same student:
+		// now store a new personal tutor for the same student. We should now have TWO personal tutors (as of TAB-416)
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "7654321")
 		
 		val rels = profileService.getRelationships(PersonalTutor, "1250148/1")
 		
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
-		val currentRelationshipUpdated = profileService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after storing another"))
-		currentRelationshipUpdated.agent should be ("7654321")
+		val currentRelationshipsUpdated = profileService.findCurrentRelationships(PersonalTutor, "1250148/1")
+		currentRelationshipsUpdated.size should be (2)
+		
+		currentRelationshipsUpdated.find(_.agent == "7654321") should be ('defined)
 		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (2)
 		
-		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "1234567").size should be (0)
+		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "1234567").size should be (1)
 		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").size should be (1)
 		profileService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").head.targetSprCode should be ("1250148/1")
 	}

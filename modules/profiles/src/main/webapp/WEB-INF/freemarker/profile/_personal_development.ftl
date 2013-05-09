@@ -13,16 +13,17 @@
 		</#if>
 	
 		<div class="tutors clearfix row">
-		<#list profile.personalTutors as personalTutor>
+		<#list profile.personalTutors as relationship>
+			<#assign personalTutor = relationship.agentMember />
 			<div class="tutor clearfix span4">
-				<#if personalTutor?is_string>
-					${personalTutor} <span class="muted">External to Warwick</span>
+				<#if !personalTutor??>
+					${relationship.agentName} <span class="muted">External to Warwick</span>
 					<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 						<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
 					<div class="photo">
-						<img src="<@routes.tutorPhoto profile />" />
+						<img src="<@routes.relationshipPhoto profile relationship />" />
 					</div>
 					<h5>
 						${personalTutor.fullName}

@@ -45,9 +45,6 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 
 	val newTutor = promise { tutor }
 
-	//var storeTutor: Boolean = false
-
-	// TODO We don't know which old tutor we're "replacing" yet
 	val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
 
 	def applyInternal = {

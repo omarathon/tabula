@@ -31,7 +31,7 @@ trait ProfileService {
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
-	def findCurrentRelationships(relationshipType: RelationshipType, targetUniversityId: String): Seq[StudentRelationship]
+	def findCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, targetUniversityId: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship

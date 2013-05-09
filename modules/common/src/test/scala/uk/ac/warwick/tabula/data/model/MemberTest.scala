@@ -142,14 +142,14 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 		
 		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Nil)
-		student.personalTutors should be (Seq("Not recorded"))
+		student.personalTutors should be ('empty)
 		
 		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
 		rel.profileService = profileService
 		
 		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.personalTutors should be (Seq("0672089"))
+		student.personalTutors map { _.agentParsed } should be (Seq("0672089"))
 		
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -157,7 +157,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 		
-		student.personalTutors should be (Seq(staff))
+		student.personalTutors map { _.agentParsed } should be (Seq(staff))
 	}
 	
 	@Test def deleteFileAttachmentOnDelete {
