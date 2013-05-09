@@ -48,7 +48,7 @@ class ViewPersonalTutorPhotoCommand(val member: Member) extends Command[Renderab
 	private var fileFound: Boolean = _
 	
 	override def applyInternal() = {
-		val attachment = member.personalTutor match {
+		val attachment = member.personalTutors match {
 			case member: Member => Option(member.photo) map { a => new Photo(a) } match {
 				case Some(photo) => photo.inputStream match {
 					case null => DefaultPhoto

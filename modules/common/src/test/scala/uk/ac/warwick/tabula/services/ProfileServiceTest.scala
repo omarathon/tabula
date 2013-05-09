@@ -49,18 +49,18 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
-		profileService.findCurrentRelationship(PersonalTutor, "1250148/1") should be (None)
+		profileService.findCurrentRelationships(PersonalTutor, "1250148/1") should be ('empty)
 		
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "1234567")
 		
-		val opt = profileService.findCurrentRelationship(PersonalTutor, "1250148/1")
+		val opt = profileService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption
 		val currentRelationship = opt.getOrElse(fail("Failed to get current relationship"))
 		currentRelationship.agent should be ("1234567")
 		
 		// now we've stored a relationship.  Try storing the identical one again:
 		profileService.saveStudentRelationship(PersonalTutor, "1250148/1", "1234567")
 		
-		profileService.findCurrentRelationship(PersonalTutor, "1250148/1").getOrElse(fail("Failed to get current relationship after re-storing")).agent should be ("1234567")		
+		profileService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after re-storing")).agent should be ("1234567")		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (1)
 		
 		// now store a new personal tutor for the same student:
@@ -70,7 +70,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		val rels = profileService.getRelationships(PersonalTutor, "1250148/1")
 		
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
-		val currentRelationshipUpdated = profileService.findCurrentRelationship(PersonalTutor, "1250148/1").getOrElse(fail("Failed to get current relationship after storing another"))
+		val currentRelationshipUpdated = profileService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after storing another"))
 		currentRelationshipUpdated.agent should be ("7654321")
 		
 		profileService.getRelationships(PersonalTutor, "1250148/1").size should be (2)
@@ -254,10 +254,10 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		session.save(rel1)
 		session.save(rel2)
 		
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, "0000001/1") should be (Some(rel1))
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, "0000002/1") should be (Some(rel2))
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, "0000003/1") should be (None)
-		profileService.findCurrentRelationship(null, "0000001/1") should be (None)
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Nil)
+		profileService.findCurrentRelationships(null, "0000001/1") should be (Nil)
 		
 		profileService.getRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
 		profileService.getRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
