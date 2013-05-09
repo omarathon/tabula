@@ -22,7 +22,7 @@ trait MemberDao {
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
-	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship]
+	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
@@ -107,7 +107,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.setString("universityId", universityId)
 					.seq
 	
-	def getCurrentRelationship(relationshipType: RelationshipType, targetSprCode: String): Option[StudentRelationship] = {
+	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
@@ -115,7 +115,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 							Restrictions.isNull("endDate"),
 							Restrictions.ge("endDate", new DateTime())
 							))				
-					.uniqueResult
+					.seq
 	}
 	
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {

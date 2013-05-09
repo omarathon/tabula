@@ -10,7 +10,11 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.ViewProfilePhotoCommand
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorPhotoCommand
+import uk.ac.warwick.tabula.profiles.commands.ViewStudentRelationshipPhotoCommand
+import uk.ac.warwick.tabula.data.model.RelationshipType
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
@@ -29,15 +33,28 @@ class PhotoController extends ProfilesController {
 }
 
 @Controller
-@RequestMapping(value = Array("/view/photo/{member}/tutor.jpg"))
-class PersonalTutorPhotoController extends ProfilesController {
+@RequestMapping(value = Array("/view/photo/{member}/{relationshipType}/{agent}.jpg"))
+class StudentRelationshipPhotoController extends ProfilesController {
 	
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 	
-	@ModelAttribute("viewPersonalTutorPhotoCommand") def command(@PathVariable("member") member: Member) = new ViewPersonalTutorPhotoCommand(member)
+	@ModelAttribute("viewStudentRelationshipPhotoCommand") 
+	def command(
+		@PathVariable("member") member: Member, 
+		@PathVariable("relationshipType") relationshipType: RelationshipType, 
+		@PathVariable("agent") agent: String
+	) = member match {
+		case student: StudentMember => {
+			val relationships = profileService.findCurrentRelationships(relationshipType, student.studyDetails.sprCode)
+			val relationship = relationships.find(_.agent == agent) getOrElse(throw new ItemNotFoundException)
+			
+			new ViewStudentRelationshipPhotoCommand(member, relationship)
+		}
+		case _ => throw new ItemNotFoundException
+	}
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getPhoto(@ModelAttribute("viewPersonalTutorPhotoCommand") command: ViewPersonalTutorPhotoCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.apply { (renderable) => fileServer.stream(renderable) }
 	}
