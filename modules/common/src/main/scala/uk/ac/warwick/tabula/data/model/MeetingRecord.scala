@@ -11,9 +11,10 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+import scala.collection.JavaConversions._
 
 @Entity
-class MeetingRecord extends GeneratedId with ToString {
+class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
@@ -51,7 +52,11 @@ class MeetingRecord extends GeneratedId with ToString {
 		this.relationship = relationship
 	}
 
-	def isApproved = true
+	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
+	var approvals: JList[MeetingRecordApproval] = JArrayList()
+
+	// if there are no approvals, isApproved is true - otherwise, all approvals need to be true
+	def isApproved = !approvals.exists(!_.approved)
 
 	def toStringProps = Seq(
 		"creator" -> creator,
