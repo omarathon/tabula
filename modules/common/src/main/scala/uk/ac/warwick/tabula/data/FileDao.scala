@@ -29,6 +29,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.spring.Wire
+import java.io.FileInputStream
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
@@ -56,15 +57,11 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def targetFile(id: String): File = new File(attachmentDir, partition(id))
 	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
-	private def saveAttachment(file: FileAttachment) {
-		if ((!file.id.hasText || !file.hasData) && file.uploadedData != null) {
-			file.hash = fileHasher.hash(file.uploadedData())
-		}
-		
+	private def saveAttachment(file: FileAttachment) {	
 		session.saveOrUpdate(file)
 		
 		if (!file.hasData && file.uploadedData != null) {
-			persistFileData(file, file.uploadedData())
+			persistFileData(file, file.uploadedData)
 		}
 	}
 
@@ -86,6 +83,9 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		directory.mkdirs()
 		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
 		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
+		
+		file.hash = fileHasher.hash(new FileInputStream(target))
+		session.saveOrUpdate(file)
 	}
 
 	def getFileById(id: String) = getById[FileAttachment](id)
