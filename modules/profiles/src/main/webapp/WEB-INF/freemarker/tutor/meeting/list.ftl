@@ -33,7 +33,15 @@
 					<details class="meeting ${deletedClasses} ${openClass!}" ${openAttribute!}>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title}
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
-							<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record" title="delete"><i class="meeting-record-toolbar icon-trash"></i></a>
+								<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record" title="Delete record">
+									<i class="meeting-record-toolbar icon-trash"></i>
+								</a>
+								<a href="<@routes.restore_meeting_record meeting.id />" class="restore-meeting-record" title="Restore record">
+									<i class="meeting-record-toolbar icon-repeat"></i>
+								</a>
+								<a href="<@routes.purge_meeting_record meeting.id />" class="purge-meeting-record" title="Purge record">
+									<i class="meeting-record-toolbar icon-remove"></i>
+								</a>
 							</#if>
 						</summary>
 

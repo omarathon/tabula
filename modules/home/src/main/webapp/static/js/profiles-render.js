@@ -77,8 +77,8 @@
 		$('section.meetings').on('click','a.delete-meeting-record', function(e) {
 			e.preventDefault();
 			var $this = $(this);
-			var $details = $this.closest('details');			
-			
+			var $details = $this.closest('details');
+
 			if (!$details.hasClass("deleted")) {
 				var url = $this.attr("href");
 				$.post(url, function(data) {
@@ -88,6 +88,39 @@
 				}, "json");
 			}
 		});
+
+		// restore meeting records
+		$('section.meetings').on('click','a.restore-meeting-record', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var $details = $this.closest('details');
+
+			if ($details.hasClass("deleted")) {
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.removeClass("deleted muted");
+					}
+				}, "json");
+			}
+		});
+
+		// purge meeting records
+		$('section.meetings').on('click','a.purge-meeting-record', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var $details = $this.closest('details');
+
+			if ($details.hasClass("purge")) {
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.remove();
+					}
+				}, "json");
+			}
+		});
+
 	});
 
 }(jQuery));

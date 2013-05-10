@@ -1234,6 +1234,12 @@ h1.with-settings {
 					.transition-duration(0.3s);
 				}
 
+				details {
+					i.icon-remove, i.icon-repeat {
+						opacity:0.5;
+					}
+				}
+
 				details.deleted {
 					summary {
 						text-decoration: line-through;
@@ -1243,10 +1249,13 @@ h1.with-settings {
 						i.icon-trash {
 							opacity:0.5;
 						}
+						i.icon-remove, i.icon-repeat {
+							opacity:1;
+						}
 					}
 				}
 			}
-}
+		}
 	} // .profile
 
 	#container #tutors {
