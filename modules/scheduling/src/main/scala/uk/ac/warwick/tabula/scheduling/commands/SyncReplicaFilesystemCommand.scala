@@ -260,7 +260,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	private def copyMissingFiles(files: Seq[JSONObject], startDate: DateTime, result: SyncReplicaResult) {
 		for (file <- files) try {
 			val id = file.getString("id")
-			val hash = Option(file.optString("hash"))
+			val hash = Option(file.optString("hash", null))
 			
 			val createdDate = new DateTime(file.getLong("createdDate"))
 			val authCode = macGenerator.generateMessageAuthenticationCode(id)
