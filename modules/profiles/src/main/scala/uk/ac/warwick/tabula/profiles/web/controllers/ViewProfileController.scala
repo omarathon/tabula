@@ -13,11 +13,14 @@ import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.helpers.Logging
 
 
-class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) {
-	if (user.isStudent && user.universityId != profile.universityId)
-		throw new PermissionDeniedException
+class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
+	if (user.isStudent && user.universityId != profile.universityId) {
+		logger.info("Denying access for user " + user + " to view profile " + profile)
+		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
+	}
 }
 
 @Controller
