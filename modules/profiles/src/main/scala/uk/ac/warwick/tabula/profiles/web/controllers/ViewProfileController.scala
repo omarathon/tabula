@@ -12,9 +12,13 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.tabula.PermissionDeniedException
 
 
-class ViewProfileCommand(profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile)
+class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) {
+	if (user.isStudent && user.universityId != profile.universityId)
+		throw new PermissionDeniedException
+}
 
 @Controller
 @RequestMapping(Array("/view/{member}"))
@@ -32,7 +36,7 @@ class ViewProfileController extends ProfilesController {
 
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => new ViewProfileCommand(student)
+		case student: StudentMember => new ViewProfileCommand(user, student)
 		case _ => throw new ItemNotFoundException
 	}
 
