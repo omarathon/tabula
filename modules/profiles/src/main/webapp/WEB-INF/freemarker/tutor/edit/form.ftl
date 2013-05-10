@@ -6,6 +6,7 @@
 			<div class="controls">
 				
 				<#if tutorToDisplay??>
+					<input type="hidden" name="currentTutor" value="${tutorToDisplay.universityId}" />
 					<@f.input type="text" id="personal-tutor" name="personal-tutor" path="query" 
 						placeholder="${tutorToDisplay.firstName} ${tutorToDisplay.lastName} (${tutorToDisplay.universityId})" />
 				<#else>

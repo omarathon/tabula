@@ -33,6 +33,15 @@
 		<@form.labelled_row "title" "Title">
 			<@f.input type="text" path="title" cssClass="input-block-level" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
+		
+		<#if allRelationships?size gt 1>
+			<@form.labelled_row "relationship" "Tutor">
+				<@f.select path="relationship" cssClass="input-large">
+					<@f.option disabled="true" selected="true" label="Please select one..." />
+					<@f.options items=allRelationships itemValue="agent" itemLabel="agentName" />
+				</@f.select>
+			</@form.labelled_row>
+		</#if>
 
 		<@form.labelled_row "meetingDate" "Date of meeting">
 			<div class="input-append">

@@ -168,18 +168,33 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 
 			val targetUniId = rawStudentRelationship.targetUniversityId
 
-			var targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
+			val targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
 				// should never be None as validation has already checked for this
 				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId)
 				case Some(mem: StudentMember) => mem.studyDetails.sprCode
 				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
+			
+			val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, targetSprCode)
+			
+			// Does this relationship already exist?
+			currentRelationships.find(_.agent == agent) match {
+				case Some(existing) => existing
+				case _ => {
+					// End all existing relationships
+					currentRelationships.foreach { rel =>
+						rel.endDate = DateTime.now
+						profileService.saveOrUpdate(rel)
+					}
+					
+					// Save the new one
+					val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
-			val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
-
-			logger.debug("Saved personal tutor for " + targetUniId)
-
-			rel
+					logger.debug("Saved personal tutor for " + targetUniId)
+			
+					rel
+				}
+			}
 		}
 
 		// persist valid personal tutors

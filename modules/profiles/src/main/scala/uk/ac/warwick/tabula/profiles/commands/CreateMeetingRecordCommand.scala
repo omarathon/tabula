@@ -31,7 +31,7 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat
 
 class CreateMeetingRecordCommand(
 		val creator: Member,
-		val relationship: StudentRelationship)
+		var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener {
 
 	val HOUR = 12 // arbitrary meeting time
@@ -61,7 +61,7 @@ class CreateMeetingRecordCommand(
 			})
 		}
 
-		var meeting = new MeetingRecord(creator, relationship)
+		val meeting = new MeetingRecord(creator, relationship)
 		meeting.title = title
 		meeting.description = formattedHtml(description)
 		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(HOUR) // arbitrarily record as noon

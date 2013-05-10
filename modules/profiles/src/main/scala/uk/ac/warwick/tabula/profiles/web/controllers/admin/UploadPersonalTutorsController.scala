@@ -27,7 +27,6 @@ class UploadPersonalTutorsController extends ProfilesController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def confirmBatchUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute("command") cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
-		val code = errors.getFieldError.getCode
 		if (errors.hasErrors && errors.getFieldError.getCode == "file.wrongtype.one") {
 			uploadForm(department, cmd)
 		} else {

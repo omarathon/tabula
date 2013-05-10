@@ -19,12 +19,13 @@ import uk.ac.warwick.tabula.permissions.ScopelessPermission
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles.Role
 import scala.annotation.tailrec
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 
 /**
  * Checks permissions.
  */
 @Service
-class SecurityService extends Logging {
+class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]] {
 
 	var roleService = Wire.auto[RoleService]
 
@@ -115,7 +116,7 @@ class SecurityService extends Logging {
 		
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
-		val result: Response = checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+		val result: Response = cachedBy((user, permission, scope.orNull), checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption)
 
 		result.map { canDo =>
 			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))

@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.model.RelationshipType._
+import uk.ac.warwick.tabula.data.model.RelationshipType
 
 // scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -152,7 +153,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 			val memberDao = mock[MemberDao]
-			val profileService = mock[ProfileService]
+			val profileService = smartMock[ProfileService]
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
@@ -186,9 +187,10 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 			val memberDao = mock[MemberDao]
-			val profileService = mock[ProfileService]
+			val profileService = smartMock[ProfileService]
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
+			profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits

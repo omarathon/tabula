@@ -12,6 +12,12 @@
 					action="/profiles/tutor/${student.universityId}/edit"
 					commandName="editTutorCommand" 
 					class="form-horizontal">
+					
+					<#if editTutorCommand.currentTutor??>
+						<@spring.bind path="currentTutor">
+							<input id="currentTutor" name="${status.expression}" type="hidden" value="${editTutorCommand.currentTutor.universityId}" />
+						</@spring.bind>
+					</#if>
 
 					<@spring.bind path="tutor">
 						<input id="tutor" name="${status.expression}" type="hidden" value="${editTutorCommand.tutor.universityId}" />
