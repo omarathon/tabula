@@ -123,6 +123,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+                <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 	        </list>

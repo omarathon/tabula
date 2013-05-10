@@ -147,6 +147,16 @@
 	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
 
+<#macro role_definition_description role_definition><#compress>
+	<#if role_definition.name == 'ModuleManagerRoleDefinition'>
+		module manager
+	<#elseif role_definition.name == 'ModuleAssistantRoleDefinition'>
+		module assistant
+	<#else>
+		${role_definition.name}
+	</#if>
+</#compress></#macro>
+
 </#escape>
 
 </#compress>
