@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.TestBase
 class PermissionTest extends TestBase {
 
 	@Test def of {		
-		Permissions.of("Module.Read") match {
-			case Module.Read => 
+		Permissions.of("Module.ManageAssignments") match {
+			case Module.ManageAssignments => 
 			case what:Any => fail("what is this?" + what) 
 		}
 	}
@@ -24,7 +24,7 @@ class PermissionTest extends TestBase {
 	@Test def name {
 		Permissions.Assignment.Archive.getName should be ("Assignment.Archive")
 		Permissions.GodMode.getName should be ("GodMode")
-		Permissions.of("Module.Read").getName should be ("Module.Read")
+		Permissions.of("Module.ManageAssignments").getName should be ("Module.ManageAssignments")
 	}
 	
 }

@@ -21,7 +21,7 @@ class ReflectionHelperTest extends TestBase {
 	}
 	
 	@Test def allPermissions = {
-		ReflectionHelper.allPermissions.contains(Permissions.Module.Read) should be (true) 
+		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be (true) 
 	}
 	
 	@Test def groupedPermissions = {

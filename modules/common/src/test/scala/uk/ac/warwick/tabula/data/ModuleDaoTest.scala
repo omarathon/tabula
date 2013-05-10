@@ -52,26 +52,6 @@ class ModuleDaoTest extends AppContextTestBase {
 		dao.getById(cs108.id) should be (Some(cs108))
 		dao.getById(cs333.id) should be (Some(cs333))
 		dao.getById("wibble") should be (None)
-		
-		val dept = Fixtures.department("in")
-		session.save(dept)
-		
-		cs333.department = dept
-		dao.saveOrUpdate(cs333)
-		
-		val gr = new ModuleGrantedRole(cs333, ModuleManagerRoleDefinition)
-		gr.users.addUser("cuscav")
-		gr.users.addUser("cusebr")
-		
-		session.save(gr)
-		session.flush
-		
-		dao.findByParticipant("cuscav") should be (Seq(cs333))
-		dao.findByParticipant("cusebr") should be (Seq(cs333))
-		dao.findByParticipant("wibble") should be (Seq())
-		
-		dao.findByParticipant("cuscav", dept) should be (Seq(cs333))
-		dao.findByParticipant("cuscav", session.get(classOf[Department], "1").asInstanceOf[Department]) should be (Seq())
 	}
 	
 }

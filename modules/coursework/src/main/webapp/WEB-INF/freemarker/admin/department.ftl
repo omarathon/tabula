@@ -16,12 +16,7 @@
 
 <#if department??>
 
-<script>
 
-	</script>
-
-
-<#-- TODO change this to a role check -->
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
 <#if (features.extensions || features.feedbackTemplates) && can_manage_dept>
 	<h1 class="with-settings">
@@ -30,51 +25,74 @@
 	
 	<div class="btn-toolbar dept-toolbar">
 	
-	<div class="btn-group dept-settings">
-		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-			<i class="icon-wrench"></i>
-			Manage
-			<span class="caret"></span>
-		</a>
-		<ul class="dropdown-menu pull-right">
-			<#if features.extensions>
-				<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
-			</#if>
-			<#if features.feedbackTemplates>
-				<li><a href="settings/feedback-templates"><i class="icon-comment"></i> Feedback templates</a></li>
-			</#if>
-			<#if features.markingWorkflows>
-				<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
-			</#if>
-			<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
-			<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
-		</ul>
-	</div>
-	
-	<div class="btn-group dept-show">
-		<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
-			<i class="icon-eye-open"></i>
-			Show
-		</a>
-	</div>
+		<#if department.parent??>
+			<a class="btn btn-medium use-tooltip" href="<@routes.departmenthome department.parent />" data-container="body" title="${department.parent.name}">
+				Parent department
+			</a>
+		</#if>
 
-</div>
-	
+		<#if department.children?has_content>
+		<div class="btn-group">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				Subdepartments
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#list department.children as child>
+					<li><a href="<@routes.departmenthome child />">${child.name}</a></li>
+				</#list>
+			</ul>
+		</div>
+		</#if>
+
+		<div class="btn-group dept-settings">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				<i class="icon-wrench"></i>
+				Manage
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#if features.extensions>
+					<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
+				</#if>
+				<#if features.feedbackTemplates>
+					<li><a href="settings/feedback-templates"><i class="icon-comment"></i> Feedback templates</a></li>
+				</#if>
+				<#if features.markingWorkflows>
+					<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
+				</#if>
+				<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
+				<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
+			</ul>
+		</div>
+
+		<div class="btn-group dept-show">
+			<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
+				<i class="icon-eye-open"></i>
+				Show
+			</a>
+		</div>
+	</div>
 <#else>
 	<h1>${department.name}</h1>
 </#if>
 
+<#if !modules?has_content && department.children?has_content>
+<p>This department doesn't directly contain any modules. Check subdepartments.</p>
+</#if>
+
 <#list modules as module>
-<#assign can_manage=can.do("Module.Read", module) />
-<#assign has_assignments=(module.assignments!?size gt 0) />
-<#assign has_archived_assignments=false />
-<#list module.assignments as assignment>
-		<#if assignment.archived>
-			<#assign has_archived_assignments=true />
-		</#if>
+	<#assign can_manage=can.do("Module.ManageAssignments", module) />
+	<#assign has_assignments=(module.assignments!?size gt 0) />
+	<#assign has_archived_assignments=false />
+	<#list module.assignments as assignment>
+	<#if assignment.archived>
+		<#assign has_archived_assignments=true />
+	</#if>
 </#list>
+
 <a id="${module_anchor(module)}"></a>
-<div class="module-info<#if !has_assignments> empty</#if>">
+<div class="module-info<#if can_manage_dept && !has_assignments> empty</#if>">
 	<div class="clearfix">
 		<h2 class="module-title"><@fmt.module_name module /></h2>
 		<div class="btn-group module-manage-button">

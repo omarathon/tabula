@@ -11,7 +11,7 @@ class SearchProfilesCommand(val currentMember: Member, user: CurrentUser) extend
 		else Seq()
 		
 	private def queryMatches = {
-		val depts = (currentMember.affiliatedDepartments ++ moduleService.departmentsOwnedBy(currentMember.userId)).distinct
+		val depts = (currentMember.affiliatedDepartments ++ moduleService.departmentsOwnedBy(user)).distinct
 		profileService.findMembersByQuery(query, depts, userTypes, user.god)
 	}
 }

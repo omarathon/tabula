@@ -26,12 +26,17 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Projections
 import org.hibernate.`type`.StringType
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
+import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.spring.Wire
 
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
 
 	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	
+	var fileHasher = Wire[FileHasher]
 
 	val idSplitSize = 2
 	val idSplitSizeCompat = 4 // for existing paths split by 4 chars
@@ -52,21 +57,28 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
 	private def saveAttachment(file: FileAttachment) {
+		if ((!file.id.hasText || !file.hasData) && file.uploadedData != null) {
+			file.hash = fileHasher.hash(file.uploadedData())
+		}
+		
 		session.saveOrUpdate(file)
+		
 		if (!file.hasData && file.uploadedData != null) {
-			persistFileData(file, file.uploadedData)
+			persistFileData(file, file.uploadedData())
 		}
 	}
-	
+
 	def saveTemporary(file: FileAttachment) {
 		file.temporary = true
 		saveAttachment(file)
 	}
-	
+
 	def savePermanent(file: FileAttachment) {
 		file.temporary = false
 		saveAttachment(file)
 	}
+	
+	def saveOrUpdate(file: FileAttachment) = session.saveOrUpdate(file)
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
 		val target = targetFile(file.id)
@@ -77,7 +89,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	}
 
 	def getFileById(id: String) = getById[FileAttachment](id)
-	
+
 	def getFileByStrippedId(id: String) = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
@@ -94,7 +106,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 			case _ => None
 		}
 	}
-	
+
 	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.ge("dateUploaded", createdSince))
@@ -103,30 +115,29 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.addOrder(asc("id"))
 				.list
 	}
-	
+
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
-		val criteria = 
+		val criteria =
 			session.newCriteria[FileAttachment]
 				.add(Is.eq("dateUploaded", createdOn))
-				
+
 		if (startingId.hasText)
 			criteria.add(Is.gt("id", startingId))
-				
+
 		criteria
 			.setMaxResults(maxResults)
 			.addOrder(asc("id"))
 			.list
 	}
-	
+
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
-		val criteria = 
+		val criteria =
 			session.newCriteria[FileAttachment]
 				.setProjection(Projections.id())
-				
+
 		createdBefore.map { date =>
 			criteria.add(Is.lt("dateUploaded", date))
 		}
-		
 		criteria.listOf[String].toSet
 	}
 

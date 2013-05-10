@@ -3,7 +3,7 @@
 -->
 <#if !assignment.openEnded>
 	<#macro extensionButtonContents label assignment>
-		<a href="<@routes.extensionRequest assignment=assignment />" class="btn btn-mini">
+		<a href="<@routes.extensionRequest assignment=assignment />?returnTo=<@routes.assignment assignment=assignment />" class="btn btn-mini">
 			<i class="icon-calendar"></i> ${label}
 		</a>
 	</#macro>
@@ -12,7 +12,7 @@
 		<#if willShowButtons>
 			<#if extensionRequested>
 				<@extensionButtonContents "Review extension request" assignment />
-			<#elseif !isExtended && !isClosed>
+			<#elseif !isExtended && !isClosed && assignment.module.department.canRequestExtension>
 				<@extensionButtonContents "Request an extension" assignment />
 			</#if>
 		</#if>

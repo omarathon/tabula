@@ -3,6 +3,10 @@
 @import "fonts/tabula.less";
 @import "id6-design.less";
 
+#container {
+	overflow: visible; /* Allow Tabula to break out of the container for popovers etc */
+}
+
 // Badass CSS transitions for the popup library
 .WPopupBox {
   top: 0;
@@ -60,6 +64,12 @@ h1 {
 
 tr.even-row {
     background-color: #eee;
+}
+
+// Resizes a box flush against the white container sides.
+body .full-width {
+	margin-left: -16px;
+	margin-right: -16px;
 }
 
 // Undo the damage done by Bootstrap

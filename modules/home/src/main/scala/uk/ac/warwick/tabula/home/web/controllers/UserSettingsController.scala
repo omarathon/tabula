@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.data.ModuleDao
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller
 @RequestMapping(Array("/settings"))
@@ -22,7 +23,7 @@ class UserSettingsController extends HomeController {
 	validatesSelf[UserSettingsCommand]
 	
 	var userSettingsService = Wire.auto[UserSettingsService]
-	var moduleDao = Wire.auto[ModuleDao]
+	var moduleService = Wire[ModuleAndDepartmentService]
 	
 	private def getUserSettings(user: CurrentUser) = 
 		userSettingsService.getByUserId(user.apparentId) 
@@ -38,8 +39,8 @@ class UserSettingsController extends HomeController {
 
 	
 	@RequestMapping(method=Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {		
-		 Mav("usersettings/form", "moduleRoles" -> moduleDao.findByParticipant(user.apparentId))	 		 
+	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {
+		 Mav("usersettings/form", "moduleRoles" -> moduleService.modulesManagedBy(user))	 		 
 	}
 
 	@RequestMapping(method=Array(POST))

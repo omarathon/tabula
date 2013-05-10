@@ -17,10 +17,7 @@ abstract class ClassValidator[A : ClassTag] extends Validator {
 		valid(target.asInstanceOf[A], errors)
 	}
 
-	final override def supports(clazz: Class[_]) = compatible(clazz)
-	private def compatible(clazz: Class[_]) = classTag[A].runtimeClass.isAssignableFrom(clazz)
-
-	def rejectValue(property: String, code: String)(implicit errors: Errors) =
-		errors.rejectValue(property, code)
+	final override def supports(clazz: Class[_]) = 
+		classTag[A].runtimeClass.isAssignableFrom(clazz)
 
 }

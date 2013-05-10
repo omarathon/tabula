@@ -123,8 +123,8 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		}
 	}
 
-	protected def copyDepartment(property: String, departmentCode: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
+	protected def copyDepartment(property: String, departmentCode: String, bean: BeanWrapper) = {
+		val oldValue = bean.getPropertyValue(property) match {
 			case null => null
 			case value: Department => value
 		}
@@ -132,16 +132,16 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		if (oldValue == null && departmentCode == null) false
 		else if (oldValue == null) {
 			// From no department to having a department
-			memberBean.setPropertyValue(property, toDepartment(departmentCode))
+			bean.setPropertyValue(property, toDepartment(departmentCode))
 			true
 		} else if (departmentCode == null) {
 			// User had a department but now doesn't
-			memberBean.setPropertyValue(property, null)
+			bean.setPropertyValue(property, null)
 			true
 		} else if (oldValue.code == departmentCode.toLowerCase) {
 			false
 		}	else {
-			memberBean.setPropertyValue(property, toDepartment(departmentCode))
+			bean.setPropertyValue(property, toDepartment(departmentCode))
 			true
 		}
 	}
@@ -160,7 +160,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment
 		photo.name = universityId + ".jpg"
-		photo.uploadedData = new ByteArrayInputStream(bytes)
+		photo.uploadedData = () => new ByteArrayInputStream(bytes)
 		photo.uploadedDataLength = bytes.length
 		fileDao.savePermanent(photo)
 		photo
@@ -182,8 +182,8 @@ object ImportMemberHelpers {
 
 	implicit def opt[A](value: A) = Option(value)
 
-	def oneOf[A](head: Option[A], tail: Option[A]*) =
-		((List(head) ++ tail).flatten).headOption
+	/** Return the first Option that has a value, else None. */
+	def oneOf[A](options: Option[A]*) = options.flatten.headOption
 
 	def optString(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[String] =
 		if (hasColumn(columnName)) Some(rs.getString(columnName))

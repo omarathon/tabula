@@ -130,7 +130,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			updateProgress(ProgressFormattedSheets)
 
 			// Adapter stuff to go from XSSF to the writer without having to save the spreadsheet to disk
-			val out = new ByteArrayOutputStream()
+			val out = new ByteArrayOutputStream
 			report.workbook.write(out)
 			out.close()
 			val in = new ByteArrayResource(out.toByteArray)

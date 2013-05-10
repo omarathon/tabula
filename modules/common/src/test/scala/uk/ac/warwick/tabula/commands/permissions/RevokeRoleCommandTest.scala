@@ -47,7 +47,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
@@ -73,7 +73,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscav")
@@ -92,7 +92,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val cmd = command(dept)
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		
@@ -115,7 +115,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cuscao")
 		
-		val existing = GrantedRole.init(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		

@@ -149,22 +149,29 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 			}
 		}
 
+		val membersUserIds = Option(assignment).map(membershipService.determineMembershipUsers(_).map(_.getUserId)).getOrElse(List())
+
 		// add includeUsers to members.includeUsers
 		((includeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
-			if (members.excludeUsers contains userId) {
-				members.unexcludeUser(userId)
-			}
-			else members.addUser(userId)
+				if (members.excludeUsers contains userId) {
+					members.unexcludeUser(userId)
+				} else if (!(membersUserIds contains userId)) {
+					// TAB-399 need to check if the user is already in the group before adding
+						members.addUser(userId)
+				}
 		}
+
 		// for excludeUsers, either remove from previously-added users or add to excluded users.
 		((excludeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.includeUsers contains userId) members.removeUser(userId)
 			else members.excludeUser(userId)
 		}
 
+
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
-		includeUsers.clear()
+		// TAB-399
+		//includeUsers.clear()
 		// HFC-327
 		//excludeUsers.clear()
 	}

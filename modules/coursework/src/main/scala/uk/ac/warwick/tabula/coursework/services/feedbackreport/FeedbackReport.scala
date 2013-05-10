@@ -38,6 +38,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		addStringCell("Module code", header, style)
 		addStringCell("Close date", header, style)
 		addStringCell("Publish deadline", header, style)
+		addStringCell("Credit bearing", header, style)
 		addStringCell("Expected submissions", header, style)
 		addStringCell("Actual submissions", header, style)
 		addStringCell("Late submissions - within extension", header, style)
@@ -62,6 +63,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addDateCell(assignment.closeDate.toDate, row, dateCellStyle(workbook))
 			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PUBLISH_DEADLINE_WORKING_DAYS)
 			addDateCell(publishDeadline.toDate, row, dateCellStyle(workbook))
+			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
@@ -93,6 +95,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.module.code,
 				assignment.module.name,
 				assignmentMembershipService.determineMembershipUsers(assignment).size,
+				assignment.summative,
 				assignment.submissions.size,
 				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
 				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
@@ -194,6 +197,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		var moduleCode: String,
 		var moduleName: String,
 		var membership: Int,
+		var summative: Boolean,
 		var numberOfSubmissions: Int,
 		var submissionsLateWithExt: Int,
 		var submissionsLateWithoutExt: Int,

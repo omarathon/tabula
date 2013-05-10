@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.data.model
+
 import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -14,6 +15,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import org.hibernate.annotations.ForeignKey
+import uk.ac.warwick.tabula.system.permissions.Restricted
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -93,16 +95,16 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments = Option(homeDepartment).toSeq
+	def affiliatedDepartments = Option(homeDepartment).toStream
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
 	 * the department running their course and any departments that they are taking modules in.
 	 */
 	def touchedDepartments = {
-		val moduleDepts = registeredModules.map(x => x.department)
+		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
 
-		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
+		(affiliatedDepartments #::: moduleDepts).distinct
 	}
 
 	def permissionsParents = touchedDepartments
@@ -145,7 +147,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"email" -> email)
 
 
-	def personalTutor: Any = "Not applicable"
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	def personalTutors: Seq[StudentRelationship] = Nil
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
@@ -159,7 +162,9 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	this.userType = MemberUserType.Student
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
+	@Restricted(Array("Profiles.Read.StudyDetails"))
 	var studyDetails: StudyDetails = new StudyDetails
+	
 	studyDetails.student = this
 
 	def this(id: String) = {
@@ -201,23 +206,19 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = { 
+	override def affiliatedDepartments =
 		(
-			Option(homeDepartment) ++ 
-			Option(studyDetails.studyDepartment) ++ 
-			Option(studyDetails.route).map(_.department)
-		).toSeq.distinct
-	}
+			Option(homeDepartment) #::
+			Option(studyDetails.studyDepartment) #:: 
+			Option(studyDetails.route).map(_.department) #::
+			Stream.empty
+		).flatten.distinct
 
-	override def personalTutor =
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
-			case None => "Not recorded"
-			case Some(name: String) => name
-			case Some(member: Member) => member
-			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
-		}
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	override def personalTutors =
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
 
-	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
+	override def hasAPersonalTutor = !personalTutors.isEmpty
 
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {
@@ -262,18 +263,22 @@ class OtherMember extends Member with AlumniProperties {
 }
 
 class RuntimeMember(user: CurrentUser) extends Member(user) {
-	override def permissionsParents = Nil
+	override def permissionsParents = Stream.empty
 }
 
 trait MemberProperties {
 	@Id var universityId: String = _
 	def id = universityId
 
-	@Column(nullable = false) var userId: String = _
+	@Column(nullable = false)
+	@Restricted(Array("Profiles.Read.Usercode"))
+	var userId: String = _
+	
 	var firstName: String = _
 	var lastName: String = _
 	var email: String = _
 
+	@Restricted(Array("Profiles.Read.HomeEmail"))
 	var homeEmail: String = _
 
 	var title: String = _
@@ -284,6 +289,7 @@ trait MemberProperties {
 	var userType: MemberUserType = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
+	@Restricted(Array("Profiles.Read.Gender"))
 	var gender: Gender = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
@@ -302,25 +308,34 @@ trait MemberProperties {
 	var homeDepartment: Department = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Restricted(Array("Profiles.Read.DateOfBirth"))
 	var dateOfBirth: LocalDate = _
 
 	var jobTitle: String = _
+	
+	@Restricted(Array("Profiles.Read.TelephoneNumber"))
 	var phoneNumber: String = _
 
+	@Restricted(Array("Profiles.Read.Nationality"))
 	var nationality: String = _
+	
+	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
 }
 
 trait StudentProperties {
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="HOME_ADDRESS_ID")
+	@Restricted(Array("Profiles.Read.HomeAddress"))
 	var homeAddress: Address = null
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
+	@Restricted(Array("Profiles.Read.TermTimeAddress"))
 	var termtimeAddress: Address = null
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
+	@Restricted(Array("Profiles.Read.NextOfKin"))
 	var nextOfKins:JList[NextOfKin] = JArrayList()
 }
 

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 
 sealed trait Permission extends CaseObjectEqualityFixes[Permission] {
 	val getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
-	
+
 	val isScoped = true
 }
 sealed trait ScopelessPermission extends Permission {
@@ -13,7 +13,7 @@ sealed trait ScopelessPermission extends Permission {
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
 object Permissions {
-	
+
 	private val ObjectClassPrefix = Permissions.getClass.getName
 
 	/**
@@ -33,19 +33,19 @@ object Permissions {
 			case e: ClassCastException => throw new IllegalArgumentException("Permission " + name + " is not an endpoint of the hierarchy")
 		}
 	}
-	
+
 	def shortName(clazz: Class[_ <: Permission])
 		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
-	
+
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission
-	
+
 	case object Masquerade extends ScopelessPermission
 	case object GodMode extends ScopelessPermission
 	case object ManageMaintenanceMode extends ScopelessPermission
 	case object ImportSystemData extends ScopelessPermission
 	case object ReplicaSyncing extends ScopelessPermission
-	
+
 	object RolesAndPermissions {
 		case object Create extends Permission
 		case object Read extends Permission
@@ -54,90 +54,92 @@ object Permissions {
 	}
 
 	object Department {
+		case object ArrangeModules extends Permission // sort modules into sub-departments.
 		case object ManageExtensionSettings extends Permission
 		case object ManageDisplaySettings extends Permission
 		case object DownloadFeedbackReport extends Permission
 	}
-	
+
 	object Module {
+		// We don't Read a module, we ManageAssignments on it
+		case object ManageAssignments extends Permission
+		
 		case object Create extends Permission
-		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-			
+
 	object Assignment {
 		case object ImportFromExternalSystem extends Permission
 		case object Archive extends Permission
-		
+
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-				
+
 	object Submission {
 		case object ViewPlagiarismStatus extends Permission
 		case object ManagePlagiarismStatus extends Permission
 		case object CheckForPlagiarism extends Permission
 		case object SendReceipt extends Permission
 		case object ReleaseForMarking extends Permission
-		
+
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-	
+
 	object Feedback {
 		case object Publish extends Permission
 		case object Rate extends Permission
-		
+
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-	
+
 	object Marks {
 		case object DownloadTemplate extends Permission
-		
+
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-				
+
 	object Extension {
 		case object MakeRequest extends Permission
 		case object ReviewRequest extends Permission
-		
+
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-				
+
 	object FeedbackTemplate {
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-	
+
 	object MarkingWorkflow {
 		case object Create extends Permission
 		case object Read extends Permission
 		case object Update extends Permission
 		case object Delete extends Permission
 	}
-	
+
 	object Profiles {
 		case object Search extends ScopelessPermission
-				
+
 		object Read {
-			case object Core extends Permission // Photo, name, course, Warwick email, job title
-			case object UniversityId extends Permission // University number
+			case object Core extends Permission // Photo, name, course, Warwick email, job title, University number
 			case object DateOfBirth extends Permission
 			case object Nationality extends Permission
 			case object Gender extends Permission
@@ -149,20 +151,19 @@ object Permissions {
 			case object HomeEmail extends Permission
 			case object Usercode extends Permission
 			case object PersonalTutees extends Permission // Person's tutees ('downward' relationship)
-			
 			case object StudyDetails extends Permission
 		}
-		
+
 		// Person's own tutor ('upward' relationship)
 		object PersonalTutor {
 			case object Upload extends Permission
-			
+
 			case object Create extends Permission
 			case object Read extends Permission
 			case object Update extends Permission
 			case object Delete extends Permission
 		}
-		
+
 		object MeetingRecord {
 			case object Create extends Permission
 			case object Read extends Permission
@@ -170,9 +171,9 @@ object Permissions {
 			case object Delete extends Permission
 		}
 	}
-	
+
 	object UserSettings {
 		case object Update extends Permission
 	}
-	
+
 }

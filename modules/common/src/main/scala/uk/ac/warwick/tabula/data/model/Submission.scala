@@ -36,7 +36,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
 
-	def permissionsParents = Seq(Option(assignment)).flatten
+	def permissionsParents = Option(assignment).toStream
 
 	var submitted: Boolean = false
 

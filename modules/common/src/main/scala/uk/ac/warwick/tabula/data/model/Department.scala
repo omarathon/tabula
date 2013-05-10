@@ -24,18 +24,19 @@ import scala.annotation.tailrec
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
 	import Department._
-  
+
 	var code:String = null
-	
+
 	var name:String = null
-	
+
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var children:JList[Department] = JArrayList();
-	
+
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null;
-	
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+
+	// No orphanRemoval as it makes it difficult to move modules between Departments.
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -65,9 +66,12 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
-	
+
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
+
+	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
+	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
@@ -84,13 +88,21 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
 	def isOwnedBy(userId:String) = owners.includes(userId)
+
+	@deprecated("Use ModuleAndDepartmentService.addOwner", "35")
 	def addOwner(owner:String) = owners.addUser(owner)
+
+	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35")
 	def removeOwner(owner:String) = owners.removeUser(owner)
 
 	def canRequestExtension = allowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
+
+	def canEditPersonalTutors: Boolean = {
+		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
+	}
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
@@ -100,25 +112,28 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
-	
+
 	/**
 	  * Although a department may have a parent, we don't actually
 	  * want to inherit permissions from it. We can add users explicitly
 	  * to the child department if they need access there.
-	  * 
+	  *
 	  * This is open to discussion and change.
 	  */
-	def permissionsParents = Nil // Option(parent).toSeq
+
+	def permissionsParents = Option(parent).toStream
 	
 	/** The 'top' ancestor of this department, or itself if
-	  * it has no parent. 
+	  * it has no parent.
 	  */
 	@tailrec
-	final def rootDepartment: Department = 
+	final def rootDepartment: Department =
 		if (parent == null) this
 		else parent.rootDepartment
-		
-	def isUpstream = (parent == null)
+
+	def hasParent = (parent != null)
+
+	def isUpstream = !hasParent
 
 	override def toString = "Department(" + code + ")"
 
@@ -136,5 +151,12 @@ object Department {
 		val AssignmentInfoView = "assignmentInfoView"
 
 		val PlagiarismDetection = "plagiarismDetection"
+
+		val PersonalTutorSource = "personalTutorSource"
+
+		object PersonalTutorSourceValues {
+			val Local = "local"
+			val Sits = "SITS"
+		}
 	}
 }

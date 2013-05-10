@@ -30,16 +30,16 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		
 		// set home department and test
 		member.homeDepartment = homeDept
-		member.affiliatedDepartments should be (Seq(homeDept))
-		member.touchedDepartments should be (Seq(homeDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept))
+		member.touchedDepartments should be (Stream(homeDept, extDept))
 		
 		// also set study department and test
 		val studyDept = new Department
 		studyDept.code = "pq"
 			
 		member.studyDetails.studyDepartment = studyDept
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, extDept))
 		
 		// also set route department and test
 		val routeDept = new Department
@@ -48,15 +48,15 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		route.department = routeDept
 		member.studyDetails.route = route
 		
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept, routeDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, routeDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept, routeDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, routeDept, extDept))
 		
 		// reset route to home, and check it appears only once
 		route.department = homeDept
 		member.studyDetails.route = route
 		
-		member.affiliatedDepartments should be (Seq(homeDept, studyDept))
-		member.touchedDepartments should be (Seq(homeDept, studyDept, extDept))
+		member.affiliatedDepartments should be (Stream(homeDept, studyDept))
+		member.touchedDepartments should be (Stream(homeDept, studyDept, extDept))
 	}
 	
 	@Test def nullUsers {
@@ -88,7 +88,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.fullName should be (Some("Mat Mannion"))
 		member.email should be ("M.Mannion@warwick.ac.uk")
 		member.description should be ("")
-		member.personalTutor should be ("Not applicable")
+		member.personalTutors should be ('empty)
 		member.isStaff should be (true)
 		member.isStudent should be (false)
 		
@@ -141,15 +141,15 @@ class MemberTest extends PersistenceTestBase with Mockito {
 			
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 		
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, "0205225/1") returns (None)
-		student.personalTutor should be ("Not recorded")
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Nil)
+		student.personalTutors should be ('empty)
 		
 		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
 		rel.profileService = profileService
 		
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, "0205225/1") returns (Some(rel))
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.personalTutor should be ("0672089")
+		student.personalTutors map { _.agentParsed } should be (Seq("0672089"))
 		
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -157,7 +157,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 		
-		student.personalTutor should be (staff)
+		student.personalTutors map { _.agentParsed } should be (Seq(staff))
 	}
 	
 	@Test def deleteFileAttachmentOnDelete {

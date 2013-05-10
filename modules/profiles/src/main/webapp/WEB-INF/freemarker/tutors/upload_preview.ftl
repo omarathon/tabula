@@ -67,12 +67,10 @@
 									</#if>
 								</td>
 								<td>
-									<#if item.agentName?has_content>
+									<#if item.agentMember?has_content>
+										${item.agentMember.fullName}
+									<#elseif item.agentName?has_content>
 										${item.agentName} (no ID - assumed external)
-									<#else>
-										<#if item.agentMember?has_content>
-											${item.agentMember.fullName}
-										</#if>
 									</#if>
 								</td>
 							</tr>

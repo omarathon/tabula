@@ -9,7 +9,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.permissions._
 
-class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.Read, module)
+class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
 @Controller
 @RequestMapping(Array("/module/{module}/"))

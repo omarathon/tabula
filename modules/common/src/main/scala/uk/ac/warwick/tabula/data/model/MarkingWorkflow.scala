@@ -41,7 +41,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "department_id")
 	var department: Department = null
 	
-	def permissionsParents = Seq(Option(department)).flatten
+	def permissionsParents = Option(department).toStream
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))

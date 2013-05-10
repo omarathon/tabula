@@ -21,6 +21,7 @@ import language.implicitConversions
 trait JavaImports {
 	type JBoolean = java.lang.Boolean
 	type JList[A] = java.util.List[A]
+	type JArrayList[A] = java.util.ArrayList[A]
 	type JMap[K, V] = java.util.Map[K, V]
 	type JSet[A] = java.util.Set[A]
 	type JInteger = java.lang.Integer
@@ -59,6 +60,12 @@ trait JavaImports {
 		def apply[A](elements: A*): java.util.ArrayList[A] = {
 			val list = new java.util.ArrayList[A]()
 			if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
+			list
+		}
+		
+		def apply[A](orig: JList[A]): java.util.ArrayList[A] = {
+			val list = new java.util.ArrayList[A]()
+			if (!orig.isEmpty) list.addAll(orig)
 			list
 		}
 	}
