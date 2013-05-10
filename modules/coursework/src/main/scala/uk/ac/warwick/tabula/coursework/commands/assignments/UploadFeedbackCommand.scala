@@ -239,7 +239,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					// just turn it into an underscore.
 					val name = entry.getName.replace("\uFFFD", "_")
 					f.name = filenameOf(name)
-					f.uploadedData = () => new ZipEntryInputStream(zip, entry)
+					f.uploadedData = new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
 					fileDao.saveTemporary(f)
 					(name, f)
