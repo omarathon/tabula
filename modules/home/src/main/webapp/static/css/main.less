@@ -184,4 +184,31 @@ body .full-width {
           transform-origin: 100% 100%;
 }
 
-// Sneaky include of bootstrap datepicker
+
+// Multi-select drag and drop widgets. Common styles.
+// Specific usages of the plugin may customise on top of this, e.g. #sortModulesCommand
+ul.drag-list {
+	.cloned { opacity: 0.5; }
+
+	li { 
+		display:inline-block; 
+		float: left; 
+		margin: 1px 3px; 
+		width: 62px;
+
+		background-color: @btnInfoBackground;
+		cursor: default;
+
+		.handle {
+			opacity: 0.5;
+			cursor: move;
+		}
+		&:hover {
+			background-color: @btnInfoBackgroundHighlight;
+			.handle { opacity: 1.0; }
+		}
+
+		&.ui-selecting { background: @btnPrimaryBackground !important; }
+		&.ui-selected { background: @btnPrimaryBackgroundHighlight !important; }
+	}
+}

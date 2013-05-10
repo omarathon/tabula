@@ -560,91 +560,11 @@ $(function(){
 
 });
 
-
-// Dragging modules between departments ("modules/arrange/form")
-// TODO refactor to make as much as possible reusable for other pages that need multi-select dragndrop.
-jQuery(function($){
-
-	var first_rows = {};
-
-	$('.draggable-module-codes')
-		.sortable({
-			connectWith: '.draggable-module-codes',
-			handle: '.handle',
-			placeholder: 'ui-state-highlight',
-			forcePlaceholderSize: true,
-			
-			// helper returns the HTML item that follows the mouse
-			helper: function(event, element) {
-			  var $element = $(element)
-			  var multidrag = $element.hasClass('ui-selected');
-			  var msg = $element.text();
-			  if (multidrag) msg = $('.ui-selected').length + " items"
-			  return $('<div>').addClass('label').addClass('multiple-items-drag-placeholder').html(msg);
-			},
-
-			// we have just started dragging a dragger - add some classes to things
-			start : function(event, ui) {
-				if (ui.item.hasClass('ui-selected') && $('.ui-selected').length > 1) {
-					first_rows = $('.ui-selected').map(function(i, e) {
-						var $tr = $(e);
-						return {
-							tr : $tr.clone(true),
-							id : $tr.attr('id')
-						};
-					}).get();
-					$('.ui-selected').addClass('cloned');
-				}
-				//ui.placeholder.html('');
-			},
-			
-			// dropped items, put them where they want to be
-			stop : function(event, ui) {
-				if (first_rows.length > 1) {
-					$.each(first_rows, function(i, item) {
-						$(item.tr)
-							.removeAttr('style')
-							.removeClass('ui-selected')
-							.insertBefore(ui.item);
-					});
-					$('.cloned').remove();
-					first_rows = {};
-				}
-				renameAllFields();
-			}
-
-		})
-		.selectable({
-			filter: 'li',
-			cancel: '.handle'
-		})
-		.find('li')
-			.addClass('ui-corner-all')
-			.prepend("<span class='handle'><i class='icon-white icon-move'></i> </span>")
-			.end()
-		.find('.label')
-			.tooltip({ delay: {show:500, hide:0}, container: 'body' });
-
-	var renameAllFields = function() {
-		$('.draggable-module-codes').each(function(i, deptBox) {
-			var deptCode = $(deptBox).data('deptcode');
-			renameFields(deptCode, $(deptBox).find('input[type=hidden]'));
-		});
-	};
-	
-	// Rename all form input for this department to represent the ordered list
-	var renameFields = function(deptCode, $fields) {
-		$fields.each(function(i, field) {
-			field.name = fieldNameFor(deptCode, i);
-		});
-	}
-	// Get form field name for this item.
-	var fieldNameFor = function(deptCode, index) {
-		return "mapping["+deptCode+"]["+index+"]";
-	}
-
+$(function(){
+	// Dragging modules between departments ("modules/arrange/form")
+	$('#sortModulesCommand').dragAndDrop({});	
+	// Dragging modules between departments end
 });
-
 
 }(jQuery));
 
