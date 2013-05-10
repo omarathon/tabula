@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Entity
 class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
@@ -56,7 +56,7 @@ class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// if there are no approvals, isApproved is true - otherwise, all approvals need to be true
-	def isApproved = !approvals.exists(!_.approved)
+	def isApproved = !approvals.asScala.exists(!_.approved)
 
 	def toStringProps = Seq(
 		"creator" -> creator,
