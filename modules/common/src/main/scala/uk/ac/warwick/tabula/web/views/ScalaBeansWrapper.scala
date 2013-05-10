@@ -98,7 +98,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 					val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
 					val perms: Seq[Permission] =
 						if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
-						else Nil			
+						else Nil
 					
 					(name -> (m, perms))
 
