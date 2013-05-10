@@ -113,57 +113,6 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 		}
 	}
 
-	/**
-	 * Checks that feedback published on deadline day is marked as on-time
-	 *
-	 **/
-
-	@Test
-	def deadlineDayTest() {
-
-		// For close date of 28/3/2013
-		// if 20 working days allowed for feedback
-		// 32 days later = deadline day, which should be marked as on-time
-
-		val report = getTestFeedbackReport
-		val assignmentSeven = addAssignment("1007", "test deadline day - 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentSeven, 31, studentData(0, 10))	// on-time
-		var feedbackCount = report.getFeedbackCounts(assignmentSeven)
-		feedbackCount should be (10,0) // 10 on time
-
-		val assignmentEight = addAssignment("1008", "test deadline day", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentEight, 32, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCounts(assignmentEight)
-		feedbackCount should be (10,0) // 10 on time
-
-		val assignmentNine = addAssignment("1009", "test deadline day + 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentNine, 33, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCounts(assignmentNine)
-		feedbackCount should be (0,10) // 10 late
-
-	}
-
-	@Test
-	def deadlineDayTest2() {
-		val report = getTestFeedbackReport
-		val assignmentTen = addAssignment("1010", "test deadline day - 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentTen, 27, studentData(0, 10))	// on time
-		var feedbackCount = report.getFeedbackCounts(assignmentTen)
-		feedbackCount should be (10,0) // 10 on time
-
-		val assignmentEleven = addAssignment("1010", "test deadline day", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentEleven, 28, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCounts(assignmentEleven)
-		feedbackCount should be (10,0) // 10 on time
-
-		val assignmentTwelve = addAssignment("1011", "test deadline day + 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentTwelve, 29, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCounts(assignmentTwelve)
-		feedbackCount should be (0, 10) // late
-	}
-
-
-
 	@Test
 	def sheetTest() {
 		import SpreadsheetTester._
