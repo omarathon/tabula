@@ -36,6 +36,8 @@ import uk.ac.warwick.tabula.scheduling.web.controllers.sync.ListFilesController
 import org.json.JSONException
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.util.core.spring.FileUtils
+import java.io.FileInputStream
 
 /**
  * This is a ReadOnly command because it runs in Maintenance mode on the replica
@@ -310,13 +312,28 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			successful = ex.execute(handle({ response =>
 				response.getStatusLine.getStatusCode match {
 					case HttpStatus.SC_OK => {
-						val hashMismatch = hash map { _ != fileHasher.hash(response.getEntity.getContent) } getOrElse (false)
+						// Create a temporary file and stream it to there, so that we can re-use the stream
+						val tmpFile = File.createTempFile(id, ".tmp")
+						tmpFile.deleteOnExit()
+						
+						FileCopyUtils.copy(response.getEntity.getContent, new FileOutputStream(tmpFile))
+						
+						val hashMismatch = 
+							hash map { expectedHash => 
+								val actualHash = fileHasher.hash(new FileInputStream(tmpFile))
+								val mismatch = expectedHash != actualHash 
+								
+								if (mismatch) {
+									logger.info("Error retrieving file " + outputFile + " - hash mismatch, expected " + expectedHash + " but was " + actualHash)
+								}
+
+								mismatch
+							} getOrElse (false)
 						
 						if (hashMismatch) {
-							logger.info("Error fetching file, hash mismatch - " + outputFile)
 							false
 						} else {
-							val is = response.getEntity.getContent
+							val is = new FileInputStream(tmpFile)
 							val os = new FileOutputStream(outputFile)
 							
 							try {
@@ -337,8 +354,9 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 									false
 								}
 							} finally {
-								IOUtils.closeQuietly(is);
-								IOUtils.closeQuietly(os);
+								IOUtils.closeQuietly(is)
+								IOUtils.closeQuietly(os)
+								FileUtils.recursiveDelete(tmpFile, false)
 							}
 						}
 					}
