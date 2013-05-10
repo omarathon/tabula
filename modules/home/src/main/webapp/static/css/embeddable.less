@@ -1233,6 +1233,18 @@ h1.with-settings {
 					background-color: #ebebeb;
 					.transition-duration(0.3s);
 				}
+
+				details.deleted {
+					summary {
+						text-decoration: line-through;
+						span {
+							text-decoration: inherit;
+						}
+						i.icon-trash {
+							opacity:0.5;
+						}
+					}
+				}
 			}
 }
 	} // .profile

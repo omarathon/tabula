@@ -26,7 +26,7 @@ class ViewProfileController extends ProfilesController {
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
+		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
 		case _ => None
 	}
 

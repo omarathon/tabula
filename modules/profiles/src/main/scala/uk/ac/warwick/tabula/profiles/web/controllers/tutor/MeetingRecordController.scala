@@ -20,6 +20,7 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import uk.ac.warwick.tabula.data.model.MeetingFormat
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.CurrentUser
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
@@ -40,7 +41,7 @@ class MeetingRecordController extends ProfilesController {
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("student") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
+		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
 		case _ => None
 	}
 

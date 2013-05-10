@@ -77,14 +77,16 @@
 		$('section.meetings').on('click','a.delete-meeting-record', function(e) {
 			e.preventDefault();
 			var $this = $(this);
-			var url = $this.attr("href");
-			var $summary = $this.closest('summary');
-
-			$.post(url, function(data) {
-				if (data.status == "successful") {
-					$summary.addClass("deleted");
-				}
-			}, "json");
+			var $details = $this.closest('details');			
+			
+			if (!$details.hasClass("deleted")) {
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.addClass("deleted muted");
+					}
+				}, "json");
+			}
 		});
 	});
 

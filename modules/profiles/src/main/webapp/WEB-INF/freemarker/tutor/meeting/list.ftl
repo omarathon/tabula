@@ -20,10 +20,20 @@
 		<#if can.do("Profiles.MeetingRecord.Read", profile)>
 			<#if meetings??>
 				<#list meetings as meeting>
-					<details class="meeting<#if openMeeting?? && openMeeting.id == meeting.id> open" open="open"<#else>"</#if>>
+					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
+
+					<#if openMeeting?? && openMeeting.id == meeting.id>
+						<#assign openClass>open</#assign>
+						<#assign openAttribute>open="open"</#assign>
+					<#else>
+						<#assign openClass></#assign>
+						<#assign openAttribute></#assign>
+					</#if>
+
+					<details class="meeting ${deletedClasses} ${openClass!}" ${openAttribute!}>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title}
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
-							<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record"><i class="meeting-record-toolbar icon-trash"></i></a>
+							<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record" title="delete"><i class="meeting-record-toolbar icon-trash"></i></a>
 							</#if>
 						</summary>
 
