@@ -111,19 +111,31 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 			dao.getGrantedPermission(scope, permission, overrideType)
 		}
 	
-	def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]] = transactional(readOnly = true) {
+	private def ensureFoundUserSeq[A](user: CurrentUser)(fn: => Seq[A]): Seq[A] =
+		if (user.exists) fn
+		else Seq.empty
+	
+	private def ensureFoundUserSet[A](user: CurrentUser)(fn: => Set[A]): Set[A] =
+		if (user.exists) fn
+		else Set.empty
+	
+	private def ensureFoundUserStream[A](user: CurrentUser)(fn: => Stream[A]): Stream[A] =
+		if (user.exists) fn
+		else Stream.empty
+	
+	def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(transactional(readOnly = true) {
 		dao.getGrantedRolesFor(scope) filter { _.users.includes(user.apparentId) }
-	}
+	})
 	
-	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] = transactional(readOnly = true) {
+	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] = ensureFoundUserSeq(user)(transactional(readOnly = true) {
 		dao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
-	}
+	})
 	
-	def getAllGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]] = getGrantedRolesFor[PermissionsTarget](user)
+	def getAllGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(getGrantedRolesFor[PermissionsTarget](user))
 	
-	def getAllGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]] = getGrantedPermissionsFor[PermissionsTarget](user)
+	def getAllGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]] = ensureFoundUserSeq(user)(getGrantedPermissionsFor[PermissionsTarget](user))
 	
-	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = transactional(readOnly = true) {
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = ensureFoundUserStream(user)(transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
 		rolesByIdCache.getGrantedRolesByIds[A](
@@ -135,9 +147,9 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		).toStream
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
-	}
+	})
 	
-	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = transactional(readOnly = true) {
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = ensureFoundUserStream(user)(transactional(readOnly = true) {
 		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
 		
 		permissionsByIdCache.getGrantedPermissionsByIds[A](
@@ -149,9 +161,9 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		).toStream
 			// For sanity's sake, filter by the users including the user
 			.filter { _.users.includes(user.apparentId) }
-	}
+	})
 	
-	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = {
+	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ensureFoundUserSet(user) {
 		val scopesWithGrantedRole = 
 			getGrantedRolesFor[A](user)
 			.filter { _.mayGrant(targetPermission) }
