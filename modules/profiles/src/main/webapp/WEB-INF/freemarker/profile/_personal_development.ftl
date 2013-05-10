@@ -26,7 +26,7 @@
 						<img src="<@routes.relationshipPhoto profile relationship />" />
 					</div>
 					<h5>
-						${personalTutor.fullName}
+						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
 							<a id="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>"><i class="icon-edit"></i></a>
 						</#if>

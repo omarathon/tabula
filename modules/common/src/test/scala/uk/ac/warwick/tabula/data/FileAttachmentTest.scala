@@ -40,7 +40,7 @@ class FileAttachmentTest extends AppContextTestBase {
 		val string = "Doe, a deer, a female deer"
 		val bytes = string.getBytes("UTF-8")
 		attachment.uploadedDataLength = bytes.length
-		attachment.uploadedData = () => new ByteArrayInputStream(bytes)
+		attachment.uploadedData = new ByteArrayInputStream(bytes)
 		dao.saveTemporary(attachment)
 		
 		attachment.id should not be (null)
