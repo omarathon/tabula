@@ -21,16 +21,20 @@
 			<#if meetings??>
 				<#list meetings as meeting>
 					<details class="meeting<#if openMeeting?? && openMeeting.id == meeting.id> open" open="open"<#else>"</#if>>
-						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title}</summary>
-						
+						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title}
+							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
+							<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record"><i class="meeting-record-toolbar icon-trash"></i></a>
+							</#if>
+						</summary>
+
 						<#if meeting.description??>
 							<div class="description"><#noescape>${meeting.description}</#noescape></div>
 						</#if>
-						
+
 						<#if meeting.attachments?size gt 0>
 							<@fmt.download_attachments meeting.attachments "/tutor/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 						</#if>
-						
+
 						<small class="muted">${(meeting.format.description)!"Unknown format"}. Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 					</details>
 				</#list>
@@ -38,3 +42,4 @@
 		</#if>
 	</section>
 </#escape>
+

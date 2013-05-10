@@ -70,7 +70,7 @@ summary { .cursor-pointer(); }
 
 #container {
 	.collapse-trigger { .cursor-pointer(); }
-	
+
 	h4.collapse-trigger i { margin-top: 5px; }
 }
 
@@ -81,7 +81,7 @@ summary { .cursor-pointer(); }
 	padding-left: 0;
 
 	list-style-type: none;
-	
+
 	li { margin-top: 8px; }
 }
 
@@ -95,7 +95,7 @@ summary { .cursor-pointer(); }
 }
 
 .span6 > h6 {
-	margin: 12px 0 6px; 
+	margin: 12px 0 6px;
 	color: #333;
 }
 
@@ -108,7 +108,13 @@ table.stream > caption {
 	display: none;
 }
 
-.error { 
+button.no-style {
+	background:none;
+	border:none;
+	padding:0;
+}
+
+.error {
 	color: @errorText;
 	display: block;
 }
@@ -124,23 +130,23 @@ tr.error, tr.warning {
 
 .module-info, .striped-section {
 	.box-style;
-	
+
 	padding: 0.5em 0.5em 0 0.5em;
 	margin: 0.7em 0;
 	background-color: #ebebeb;
-	
+
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
-	
+
 	.section-title { color: #606060 !important; }
-	
+
 	.button-list .btn {
 		text-align: left !important;
 		padding-left: 10px !important;
 	}
-	
+
 	&.collapsible {
 		.striped-section-contents { display: none; }
-		
+
 		&.expanded {
 			.striped-section-contents { display: block; }
 		}
@@ -150,7 +156,7 @@ tr.error, tr.warning {
 .module-info {
 	// Position module title and its Manage dropdown on the same line.
 	.module-title { display: inline-block; }
-	.module-manage-button, .section-manage-button { 
+	.module-manage-button, .section-manage-button {
 		display: inline-block;
 		margin-left: 8px;
 		top: 3px;
@@ -174,11 +180,11 @@ h2.section {
 }
 
 .header-with-tooltip {
-	> * { 
-		.inline-block; 
-		margin-right: 10px; 
+	> * {
+		.inline-block;
+		margin-right: 10px;
 	}
-	
+
 	> .use-tooltip {
 		vertical-align: top;
 	}
@@ -212,14 +218,14 @@ ul {
 		display:block-inline;
 		float: left;
 		margin: 1px 10px 5px 0;
-		
+
 		span { white-space: nowrap; }
 	}
 }
 
 .attachment {
 	margin-left: 18px;
-	
+
 	audio, video {
 		display: block;
 		margin: 12px 0;
@@ -236,7 +242,7 @@ ul {
 			&.plagiarism { background-color: #dcdcdd; border-left: 2px solid #767575; }
 			&.feedback   { background-color: #a6d4e5; border-left: 2px solid #767575; }
 		}
-		
+
 		thead > tr th {
 			background-color: transparent !important;
 			text-align: center;
@@ -251,11 +257,11 @@ ul {
 	            background-color: @errorBackground;
     	    }
     	}
-    	
+
     	> tr:nth-child(even) {
     		td { background-color: white;	}
     	}
-    	
+
     	td.id,
     	td.files,
     	td.submitted,
@@ -274,19 +280,19 @@ ul {
 	th, td {
 		white-space: nowrap;
 	}
-	
+
 	.check-col {
 		width: 1%;
 	}
-	
+
 	.student-col {
 		width: 10%;
 	}
-	
+
 	.progress-col {
 		width: 40%;
 	}
-	
+
 	.action-col {
 		width: 40%;
 	}
@@ -303,34 +309,34 @@ ul {
 	border-top: 1px solid @tableBorder;
 
 	.workflow {
-		h3 { 
+		h3 {
 			font-size: 18px;
 			letter-spacing: -1px;
-			
+
 			display: inline-block;
 		  .ie7-inline-block();
 		}
-		
+
 		h3 + .labels {
 			display: inline-block;
 		  .ie7-inline-block();
-		  
+
 		  position: relative;
 		  top: -2px;
 		}
-		
+
 		.stage-group {
 			margin-top: 12px;
 			&:first-child { margin-top: 0; }
-			
+
 			.stage {
 				&.incomplete {
 					color: @very-subtle-text-color;
-				
+
 					&.preconditions-not-met {
 						color: lighten(@very-subtle-text-color, 10%);
 					}
-				
+
 					&.current {
 						color: darken(@very-subtle-text-color, 10%);
 					}
@@ -345,7 +351,7 @@ ul {
 		margin: 0;
 		line-height: 30px;
 	}
-	
+
 	label {
 		margin-right: 10px;
 	}
@@ -354,13 +360,13 @@ ul {
 .feedback-info, .submission-info {
 	clear:both;
 	.box-style;
-	
+
 	padding: 0.5em;
 	margin: 0.5em 0;
 	background-color: #eee;
-	
+
 	.uni-id {
-	
+
 	}
 }
 
@@ -368,20 +374,20 @@ ul {
 	border-top: 2px groove white;
 
 	//fix appearance against bottom of rounded module box
-	&:last-child { 
+	&:last-child {
 		border-radius: 0 0 @box-style-border-radius @box-style-border-radius;
 	}
 
 	padding: 0.5em;
 	margin-left: -0.5em;
 	margin-right: -0.5em;
-	
+
 	// zebra-striping (but exclude archived items)
 	// doesn't work very well
 	// TODO jQuery this
 	//&:not(.archived):nth-of-type(odd) { background-color: #f5f5f5; }
 	&.alt-row { background-color: #f5f5f5; }
-	
+
 	.column1, .left {
 		width: 14.5em;
 		float:left;
@@ -395,25 +401,25 @@ ul {
 	.assignment-buttons, .right {
 		float: right;
 		width: 11em;
-		
+
 		.btn-group {
 			float:right;
 		}
-		
+
 		// darken the icons a bit
 		i {
 			opacity:1
 		}
-				
+
 		a {
 			display: block;
-			margin: 1px 0;	
+			margin: 1px 0;
 		}
-		
+
 		.btn-toolbar {
 		  margin: 0;
 		}
-		
+
 	}
 	.feedback-published {
 		line-height: 1.4em;
@@ -423,7 +429,7 @@ ul {
 		color: @subtle-text-color;
 	}
 	.submission-count, .feedback-count, .submission-and-feedback-count {
-	  
+
 	}
 	.has-unreleased-feedback, .has-unapproved-extensions {
 	  color: @warningText;
@@ -433,11 +439,11 @@ ul {
 	  color: @subtle-text-color;
 	  display:block;
 	}
-	
+
 	&.archived {
 	  display: none;
 	}
-	
+
 }
 
 .striped-section-contents .item-info {
@@ -451,7 +457,7 @@ ul {
 			background-position: -384px -121px;
 		}
 	}
-	
+
 }
 
 
@@ -476,17 +482,17 @@ ul {
 // assignment deadlines
 .deadline {
 	color: @green;
-	
+
 	.time-remaining {
 		display: block;
 		font-weight: bold;
 		font-size: 115%;
 	}
-	
+
 	a.btn {
 		float: right;
 	}
-	
+
 	&.late { color: @red; }
 	&.extended { color: @blue; }
 	&.not-open { color: #606060; }
@@ -515,8 +521,8 @@ ul {
 		padding-right: 1em;
 		border-right: 1px solid #eee;
 	}
-	#zip-column { 
-		padding-left: 1em; 
+	#zip-column {
+		padding-left: 1em;
 	}
 }
 
@@ -549,7 +555,7 @@ ul {
 		.vertical-gradient(#666,#333);
 		text-shadow: 0 1px 0 #000;
 	}
-	
+
 	.popover {
 		// For Read-only mode text
 		color: @tabulaGray;
@@ -560,7 +566,7 @@ table {
 	th,td {
 		vertical-align: top;
 	}
-	
+
 	th {
 		padding-right: 1em;
 	}
@@ -624,7 +630,7 @@ table {
 	input.big-input {
 		width: 80%;
 	}
-	
+
 	// Move over radio buttons in forms
     input[type="radio"] {
   		margin-right:6px;
@@ -636,66 +642,66 @@ table {
 			th {
 				background-color: lighten(@tabulaGrayLight, 35%);
 				padding-right: 20px;
-				
+
 				&.header {
 					background-image: url(/static/images/tablesorter/bg.gif);
 					background-repeat: no-repeat;
 					background-position: center right;
 					.cursor-pointer();
 				}
-				
+
 				&.headerSortUp {
 					background-image: url(/static/images/tablesorter/asc.gif);
 				}
-				
+
 				&.headerSortDown {
 					background-image: url(/static/images/tablesorter/desc.gif);
 				}
-				
+
 				&.headerSortDown,
 				&.headerSortUp {
 					background-color: lighten(@tabulaGrayLight, 25%);
 				}
 			}
 		}
-		
+
 		&.tabula-greenLight {
 			> thead > tr > th {
 				background-color: lighten(@tabulaGreenLight, 35%);
-				
+
 				&.headerSortDown,
 				&.headerSortUp {
 					background-color: lighten(@tabulaGreenLight, 25%);
 				}
 			}
 		}
-		
+
 		&.tabula-blueLight {
 			> thead > tr > th {
 				background-color: lighten(@tabulaBlueLight, 35%);
-				
+
 				&.headerSortDown,
 				&.headerSortUp {
 					background-color: lighten(@tabulaBlueLight, 25%);
 				}
 			}
 		}
-		
+
 		&.tabula-orangeLight {
 			> thead > tr > th {
 				background-color: lighten(@tabulaOrangeLight, 35%);
-				
+
 				&.headerSortDown,
 				&.headerSortUp {
 					background-color: lighten(@tabulaOrangeLight, 25%);
 				}
 			}
 		}
-		
+
 		&.tabula-turquoise {
 			> thead > tr > th {
 				background-color: desaturate(lighten(@tabulaTurquoise, 35%), 20%);
-				
+
 				&.headerSortDown,
 				&.headerSortUp {
 					background-color: desaturate(lighten(@tabulaTurquoise, 25%), 20%);
@@ -711,7 +717,7 @@ table {
 	text-align: center;
 	color: white;
 	.vertical-gradient(@tabulaRed, @tabulaRedDark);
-	
+
 	form { display: inline; margin: 0; }
 }
 
@@ -729,7 +735,7 @@ table {
    .description {
      color: #666;
    }
-   
+
    table.permission-list {
    	  margin: 1em 0 0.3em 1em;
    	  tr.anon-user {
@@ -757,7 +763,7 @@ table {
 		display: block;
 		tr, td { display: block; }
 	}
-	
+
 }
 
 .activity-message {
@@ -774,7 +780,7 @@ table {
 .mod-name {
 	color: #666;
 	font-size: 85%;
-	&:before { 
+	&:before {
 		content: '// ';
 		position: relative;
 		bottom: 1px;
@@ -801,12 +807,12 @@ table {
 
 .userpicker-results {
   overflow: auto;
-  height: 330px; 
-  
+  height: 330px;
+
   table { width: 100%; }
   td.user-id {
-    white-space: nowrap; 
-  	width: 5%; 
+    white-space: nowrap;
+  	width: 5%;
   	.cursor-pointer();
   	font-weight: bold;
   	color: darkblue;
@@ -818,7 +824,7 @@ table {
 }
 
 .user-picker-collection .user-picker-container {
-  display: block !important; 
+  display: block !important;
 }
 
 .clickable-cursor {
@@ -829,7 +835,7 @@ table {
 	cursor:help;
 	border-bottom: 1px dotted @grayLight;
 }
-	
+
 #app-comment-message {
   padding: 0.5em;
   height: 5em;
@@ -871,19 +877,19 @@ table {
 
 .rating-question { margin: 1em; }
 
-input.copyable-url { 
-  text-overflow: ellipsis; 
-  border: none; 
-  background: transparent; 
-  color: #333; 
+input.copyable-url {
+  text-overflow: ellipsis;
+  border: none;
+  background: transparent;
+  color: #333;
   font-size: 100% !important; // override Bootstrap
-  height: 1.3em; 
+  height: 1.3em;
   width: 100%;
   &, &[readonly] { cursor: pointer !important; }
   }
 span.copyable-url-container { display:block; position: relative; }
 span.press-ctrl-c {
-  position:absolute;   
+  position:absolute;
   top: 1.7em;
   left: 0;
   background: #eef;
@@ -978,7 +984,7 @@ a.btn { text-decoration: none; }
   .border-radius(3px);
   padding: 0.5em;
   margin-top: 0.5em;
-  
+
   table { width: 100%; }
 
   .scroller {
@@ -1045,7 +1051,7 @@ h1.with-settings {
 
 .dept-settings, .user-settings, .dept-show {
 	display: inline-block;
-	
+
 }
 
 .dept-toolbar {
@@ -1070,7 +1076,7 @@ h1.with-settings {
 	background-image: url("../libs/bootstrap/img/glyphicons-halflings.png");
 }
 
-// grey out disabled icons 
+// grey out disabled icons
 .tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
     opacity:.3;
     filter: alpha(opacity=30);
@@ -1084,144 +1090,153 @@ h1.with-settings {
 	 	dl, dt, dd { margin: 0; padding: 0; }
 	 	dt, dd { font-weight: normal; display: inline; }
  	}
- 	
+
 	// mixin
 	.tabula-photo (@width: 186px, @padding: 8px) {
-		float: left; 
+		float: left;
 		width: @width;
-		margin-right: 16px; 
-		
-		img { 
+		margin-right: 16px;
+
+		img {
 			padding: @padding;
 					background-color: #fff;
 					border: 1px solid #ccc;
 					border: 1px solid rgba(0,0,0,.2);
 			.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
-		
-			max-width: @width - (@padding * 2); 
+
+			max-width: @width - (@padding * 2);
 		}
 	}
-	
+
 	hr.full-width {
  		width: auto;
  		background: #bfb8d4;
  	}
- 	
+
 	.profile {
 		margin-top: 20px;
 	}
-	
+
 	#container .profile  {
 		#personal-details {
 			div.photo {
 				.tabula-photo;
 			}
-			
-			div.col1 { 
-				float: left; 
-				width: 354px; 
-				margin-right: 16px; 
+
+			div.col1 {
+				float: left;
+				width: 354px;
+				margin-right: 16px;
 			}
 			div.col2 {
-				float: left; 
+				float: left;
 				width: 354px;
-				margin-right: 0; 
+				margin-right: 0;
 			}
-	
+
 			header {
 				h1, h5 {
 					display: inline;
 					line-height: 26px;
 				}
-				
+
 				h1 {
 					margin-right: 10px;
 				}
-				
+
 				margin-bottom: 16px;
 			}
-			
+
 			table.profile-info {
 				// Reset
 				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
-				
+
 				width: 100%;
-				
-				th { 
+
+				th {
 					text-align: right;
 					color: @grayLight;
 					white-space: nowrap;
-					
-					&:after { content: ':'; margin-right: 3px; } 
+
+					&:after { content: ':'; margin-right: 3px; }
 				}
-				
+
 				td {
 					color: #0c0c0c;
 					width: 99%;
 				}
 			}
 		}
-		
+
 		#course-details {
 			table.course-info {
 				// Reset
 				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
-				
+
 				width: 100%;
-				
-				th { 
+
+				th {
 					text-align: right;
 					color: @grayLight;
 					white-space: nowrap;
-					
-					&:after { content: ':'; margin-right: 3px; } 
+
+					&:after { content: ':'; margin-right: 3px; }
 				}
-				
+
 				td {
 					color: #0c0c0c;
 					width: 99%;
 				}
-				
+
 				tbody {
 					border-bottom: 15px solid transparent;
 				}
 			}
-		}		
-		
+		}
+
 		.untabbed {
 			margin-top: 12px;
 		}
-		
+
 		#personal-development {
 			div.photo {
 				.tabula-photo(50px, 5px);
 			}
-			
+
 			section.meetings {
 				margin: 12px 0;
-				
+
 				details.meeting > summary {
-					margin-top: 9px;
+					padding-top: 9px;
 					font-weight: bold;
 					border-bottom: dotted 1px lighten(@grayLight, 35%);
 				}
-			
+
 				.new, .toggle-all-details {
 					margin: -20px 0 0 10px;
 					float: right;
 					text-decoration: none;
 					.cursor-pointer();
 				}
-				
+
 				span.date {
 					margin-right: 1em;
 					display: inline-block;
 					width: 13em;
 				}
+
+				.meeting-record-toolbar {
+					float: right;
+				}
+
+				summary:hover {
+					background-color: #ebebeb;
+					.transition-duration(0.3s);
+				}
 			}
 }
 	} // .profile
-	
+
 	#container #tutors {
 		.tutor-detail {
 			font-family: @baseFontFamily;
@@ -1230,14 +1245,14 @@ h1.with-settings {
 			color: @grayLight;
 			margin-left: 12px;
 		}
-	
+
 		div.photo {
 			.tabula-photo(50px, 5px);
 		}
-		
+
 		.tutees {
 			width: 100%;
-			
+
 			th.photo-col { width: 11%; }
 			th.tutee-col { width: 12%; }
 			th.id-col { width: 11%; }
@@ -1248,62 +1263,62 @@ h1.with-settings {
 
 			h6 { display: inline; }
 		}
-		
+
 		.profile-link {
 			font-weight: bold;
 			color: @grayLight;
 			text-decoration: none;
-			
+
 			&:hover,&:active {
 				text-decoration: none;
 			}
 		}
-		
+
 		.hover {
 			.cursor-pointer;
 			background-color: #ddd;
 			background-color: fadeout(lighten(#ff0,30%), 40%);
 		}
-		
+
 	} // #tutors
-	
+
 	#container ul.profile-user-list {
 		margin: 0;
 		padding-left: 0;
 		list-style: none;
-	
+
 		li {
 			.clearfix();
 			padding: 0.5em 0;
 			border: 0 solid lighten(@grayLight, 25%);
 			border-bottom-width: 1px;
-			
+
 			h3 { margin-bottom: 0; }
-			
+
 			.photo {
 				.tabula-photo(50px, 5px);
 				float: right;
 			}
-			
+
 			&:first-child { border-top-width: 1px; }
 		}
 	} // ul.profile-user-list
-	
+
 	#container .profile-search {
 		margin: 4px 0 20px;
-		
+
 		form { margin: 0; }
-		
+
 		// TODO Why
 		.input-append .btn { margin-top: 1px; }
-		
+
 		@searchFontSize: @baseFontSize * 1.5;
 		@searchLineHeight: @baseLineHeight * 1.5;
-		
+
 		.input-append {
 			margin-bottom: 0;
 			position: relative;
-			
+
 			div.spinner-container {
 				position: absolute;
 				line-height: 40px;
@@ -1314,7 +1329,7 @@ h1.with-settings {
 				z-index: 10;
 			}
 		}
-		
+
 		input[type="text"] {
 			height: @searchLineHeight;
 			margin-bottom: 0;
@@ -1322,68 +1337,68 @@ h1.with-settings {
 			line-height: @searchLineHeight;
 			#grid .fluid .span(10);
 		}
-		
+
 		.btn {
 			font-size: @searchFontSize;
 			line-height: @searchLineHeight;
 			#grid .fluid .span(2);
-			
+
 			i { vertical-align: baseline; }
 		}
-		
+
 		.dropdown-menu {
 			#grid .fluid .span(12);
-			
+
 			li > a { padding: 3px 8px; }
-			
+
 			h3 { margin-bottom: 0; }
-			
+
 			h3, .description {
 				#grid .fluid .span(10);
 			}
-			
+
 			.photo { max-height: 50px; }
-			
+
 			.description { white-space: normal; }
-			
+
 			.active > a, .active > a:hover {
 				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
 			}
-			
+
 			.pull-right a {
 				text-align: left;
 			}
-		
-			
+
+
 		}
 	} // .profile-search
 
 	#container .tutor-search {
 		.control-group { margin-top: 54px; }
 		.input-append .btn { margin-top: 1px; }
-		
+
 		@searchFontSize: @baseFontSize * 1.2;
 		@searchLineHeight: @baseLineHeight * 1.2;
-		
+
 		.input-box {
 			margin-bottom: 0;
 			position: relative;
 		}
-		
+
 		input[type="text"] {
 			height: @searchLineHeight;
 			font-size: @searchFontSize;
 			width: 400px;
 		}
-		
+
 		form { margin: 0; }
-		
-		b { 
-			line-height: 28px; 
+
+		b {
+			line-height: 28px;
 			font-size: @searchFontSize;
 		}
 	} // .tutor-search
-	
+
 	#container .tutor-edit {
 		button {
 			text-align: right;
@@ -1391,14 +1406,14 @@ h1.with-settings {
 			}
 
 	} // .tutor-edit
-	
+
 	#container .tutor-edit-return {
 		a {
 			margin-top: 54px;
 			}
 
 	} // .tutor-edit
-		
+
 } // .profiles-page
 
 .datetimepicker {
@@ -1413,7 +1428,7 @@ h1.with-settings {
 			background-position: 0 -15px;
 			background-color: @btnBackgroundHighlight;
 		}
-	
+
 		// btn-group-group, because the submission/feedback page is too complicated for normal btn-groups
 		.btn-group-group {
 			position: relative;
@@ -1423,32 +1438,32 @@ h1.with-settings {
 			vertical-align: middle; // match .btn alignment given font-size hack above
 			white-space: nowrap; // prevent buttons from wrapping when in tight spaces (e.g., the table on the tests page)
 			.ie7-restore-left-whitespace();
-			
+
 			> .btn-group > .btn {
 				.border-radius(0);
 			}
-			
+
 			> btn-group:first-child > .btn:first-child {
 				margin-left: 0;
 				.border-top-left-radius(@baseBorderRadius);
 				.border-bottom-left-radius(@baseBorderRadius);
 			}
-			
+
 			> .btn-group:last-child > .btn:last-child,
 			> .btn-group:last-child > .dropdown-toggle {
 				.border-top-right-radius(@baseBorderRadius);
 				.border-bottom-right-radius(@baseBorderRadius);
 			}
-			
+
 			.btn-group + .btn-group {
 				margin-left: 0;
-			
+
 				> .btn:first-child {
 					margin-left: -1px;
 				}
 			}
 		}
-		
+
 		> .btn-group-group + .btn,
 		> .btn-group-group + .btn-group,
 		> .btn-group-group + .btn-group-group,
@@ -1461,7 +1476,7 @@ h1.with-settings {
 	// Style guide zebra striping - double borders between rows
 	.table-striped {
 		background-color: @tableBackgroundNonAccent;
-	
+
 	  thead, tbody {
 	    > tr > td,
 	    > tr > th {
@@ -1469,28 +1484,28 @@ h1.with-settings {
 	      border-bottom: 1px solid @tableRowBorderBottom;
 	    }
 	  }
-	  
+
 	  tbody > tr:last-child > td,
 	  tbody > tr:last-child > th {
 	  	border-bottom: 0;
 	  }
-	  
+
 	  thead > tr:first-child > td,
 	  thead > tr:first-child > th {
 	  	border-top: 0;
 	  }
 	}
-	
+
 	// Fix popovers to be on top of modals
 	.popover {
 		&.introductory {
 			max-width: 600px;
-			
+
 			.close {
 				margin-top: 3px;
 				margin-right: 8px;
 			}
-			
+
 			.footer {
 				margin: 0; // reset heading margin
 				padding: 8px 14px;
@@ -1500,15 +1515,17 @@ h1.with-settings {
 				background-color: @popoverTitleBackground;
 				border-top: 1px solid darken(@popoverTitleBackground, 5%);
 				.border-radius(0 0 5px 5px);
-				
+
 				form { margin-bottom: 0; }
-				
+
 				&:empty {
 					display: none;
 				}
 			}
 		}
-		
+
 		z-index: @zindexPopover  + @zindexModal;
 	}
 }
+
+
