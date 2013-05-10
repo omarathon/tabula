@@ -87,23 +87,31 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 
 		def generateGetterInformation(cls: Class[_]) = {
-			val pairs = for (m <- cls.getMethods if isGetter(m)) yield {
-				val n = m.getName
+			val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
+			def isJavaGetter(m: Method) = javaGetterRegex.pattern.matcher(m.getName).matches
+			
+			def parse(m: Method, name: String) = {
+				val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
+				val perms: Seq[Permission] =
+					if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
+					else Nil			
 				
-					val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
-					val name = n match {
-						case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
-						case _ => n
-					}
-					val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
-					val perms: Seq[Permission] =
-						if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
-						else Nil
-					
-					(name -> (m, perms))
-
+				(name -> (m, perms))
 			}
-			pairs.toMap
+			
+			val scalaPairs = for (m <- cls.getMethods if isGetter(m) && !isJavaGetter(m)) yield {
+				parse(m, m.getName)
+			}
+			val javaPairs = for (m <- cls.getMethods if isGetter(m) && isJavaGetter(m)) yield {
+				val name = m.getName match {
+					case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
+					case _ => throw new IllegalStateException("Couldn't match java getter syntax")
+				}
+				parse(m, name)
+			}
+			
+			// TAB-766 Add the scala pairs after so they override the java ones of the same name
+			javaPairs.toMap ++ scalaPairs.toMap
 		}
 		
 		// Cache child properties for the life of this model, so that their caches are useful when a property is accessed twice.

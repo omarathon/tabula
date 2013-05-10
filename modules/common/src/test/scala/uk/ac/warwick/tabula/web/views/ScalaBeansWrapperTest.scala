@@ -15,6 +15,8 @@ import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permission
+import freemarker.template.TemplateBooleanModel
+import freemarker.ext.beans.SimpleMethodModel
 
 class MyObject extends PermissionsTarget {
   var name = "text"
@@ -23,6 +25,9 @@ class MyObject extends PermissionsTarget {
 	  
   def getGreeting(name:String) = "Hello %s!" format (name)
   def getGreeting():String = getGreeting("you")
+  
+  def isSomething = true
+  def something = "steve"
   
   def departments = "ah" :: List("ch", "cs")
   
@@ -160,6 +165,19 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	      hash.get("permsGrotto").toString should be ("Santa's")
 	      hash.get("permsGreeting").toString should be ("Hello you!")
 	    }
+	  }
+	}
+	
+	@Test def nameCollision {
+		// TAB-766
+		
+		val wrapper = new ScalaBeansWrapper()
+	  wrapper.wrap(new MyObject) match {
+	    case hash: wrapper.ScalaHashModel => {
+	      hash.get("something").toString should be("steve")
+	    	hash.get("isSomething").asInstanceOf[SimpleMethodModel].exec(JList()) should be (TemplateBooleanModel.TRUE)
+	    }
+	    case _ => fail()
 	  }
 	}
 }
