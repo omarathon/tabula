@@ -107,6 +107,7 @@ class MeetingRecordController extends ProfilesController {
 				Mav("tutor/meeting/list",
 					"profile" -> student,
 					"meetings" -> meetingList,
+					"viewer" -> currentMember,
 					"openMeeting" -> newMeeting).noLayout()
 			}
 		}

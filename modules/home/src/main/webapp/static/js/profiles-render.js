@@ -71,47 +71,51 @@
 	window.Profiles = jQuery.extend(window.Profiles, exports);
 
 	// MEETING RECORD STUFF
+
 	$(function() {
 
 		// delete meeting records
-		$('section.meetings').on('click','a.delete-meeting-record', function(e) {
-			e.preventDefault();
+		$('a.delete-meeting-record').on('click', function(e) {
 			var $this = $(this);
 			var $details = $this.closest('details');
 
 			if (!$details.hasClass("deleted")) {
+				$details.addClass("processing");
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
 						$details.addClass("deleted muted");
+						$details.removeClass("processing");
 					}
 				}, "json");
 			}
+			return false;
 		});
 
 		// restore meeting records
-		$('section.meetings').on('click','a.restore-meeting-record', function(e) {
-			e.preventDefault();
+		$('a.restore-meeting-record').on('click', function(e) {
 			var $this = $(this);
 			var $details = $this.closest('details');
 
 			if ($details.hasClass("deleted")) {
+				$details.addClass("processing");
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
-						$details.removeClass("deleted muted");
+						$details.removeClass("deleted muted processing");
 					}
 				}, "json");
 			}
+			return false;
 		});
 
 		// purge meeting records
-		$('section.meetings').on('click','a.purge-meeting-record', function(e) {
-			e.preventDefault();
+		$('a.purge-meeting-record').on('click', function(e) {
 			var $this = $(this);
 			var $details = $this.closest('details');
 
-			if ($details.hasClass("purge")) {
+			if ($details.hasClass("deleted")) {
+				$details.addClass("processing");
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
@@ -119,8 +123,7 @@
 					}
 				}, "json");
 			}
+			return false;
 		});
-
 	});
-
 }(jQuery));

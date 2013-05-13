@@ -1229,6 +1229,10 @@ h1.with-settings {
 
 				.meeting-record-toolbar {
 					float: right;
+					margin-right: 1em;
+					a {
+						text-decoration: none;
+					}
 				}
 
 				summary:hover {
@@ -1236,9 +1240,17 @@ h1.with-settings {
 					.transition-duration(0.3s);
 				}
 
+				i.icon-spinner {
+					background-image: url("../images/icon-spinner.gif");
+					background-position: 0px 0px;
+				}
+
 				details {
 					i.icon-remove, i.icon-repeat {
 						opacity:0.5;
+					}
+					i.icon-spinner {
+						display:none;
 					}
 				}
 
@@ -1254,6 +1266,15 @@ h1.with-settings {
 						i.icon-remove, i.icon-repeat {
 							opacity:1;
 						}
+					}
+				}
+
+				details.processing {
+					i {
+						display:none;
+					}
+					i.icon-spinner {
+						display:inline-block;
 					}
 				}
 			}
