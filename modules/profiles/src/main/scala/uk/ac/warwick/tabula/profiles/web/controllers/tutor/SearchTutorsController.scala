@@ -15,7 +15,8 @@ class SearchTutorsController extends ProfilesController {
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
 		
-	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@ModelAttribute("student") student: Member) =  profileService.getPersonalTutor(student)
+	@ModelAttribute("student") def student(@RequestParam("student") student: Member) = student
+	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@RequestParam(value="currentTutor", required=false) currentTutor: Member) = Option(currentTutor)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view", "displayOptionToSave" -> false)
@@ -29,30 +30,5 @@ class SearchTutorsController extends ProfilesController {
 				"results" -> cmd.apply())
 		}
 	}
-/*
-	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: searchTutorsCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			val profilesJson: JList[Map[String, Object]] = toJson(cmd.apply())
-			
-			Mav(new JSONView(profilesJson))
-		}
-	}
-	
-	def toJson(tutors: Seq[Member]) = {
-		def memberToJson(member: Member) = Map[String, String](
-			"name" -> {member.fullName match {
-				case None => "[Unknown user]"
-				case Some(name) => name
-			}},
-			"id" -> member.universityId,
-			"userId" -> member.userId,
-			"description" -> member.description)
-			
-		tutors.map(memberToJson(_))
-	}
-	* 
-	*/
+
 }

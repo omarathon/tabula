@@ -34,7 +34,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val provider2 = mock[ScopelessRoleProvider]
 			
 		when(scopedProvider.getRolesFor(isEq(currentUser), isA[PermissionsTarget])) thenThrow(classOf[RuntimeException])
-		when(provider1.getRolesFor(currentUser)) thenReturn(Seq(Sysadmin()))
+		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
 		when(provider2.getRolesFor(currentUser)) thenThrow(classOf[RuntimeException])
 				
 		val service = new RoleServiceImpl()
@@ -61,11 +61,11 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
 		
-		when(provider1.getRolesFor(currentUser)) thenReturn(Seq(Sysadmin()))
-		when(provider2.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
-		when(provider3.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
-		when(provider3.getRolesFor(currentUser, module)) thenReturn(Seq())
-		when(provider4.getRolesFor(currentUser)) thenReturn(Seq())
+		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
+		when(provider2.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
+		when(provider3.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
+		when(provider3.getRolesFor(currentUser, module)) thenReturn(Stream.empty)
+		when(provider4.getRolesFor(currentUser)) thenReturn(Stream.empty)
 		
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 		
@@ -88,8 +88,8 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
 		
-		when(provider.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
-		when(provider.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
+		when(provider.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
+		when(provider.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
 		
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (false)
 		
@@ -110,8 +110,8 @@ class RoleServiceTest extends TestBase with Mockito {
 		insub2.parent = in
 
 		val provider = mock[RoleProvider]
-		when(provider.getRolesFor(currentUser, insub1)) thenReturn(Nil)
-		when(provider.getRolesFor(currentUser, in)) thenReturn(Seq(DepartmentalAdministrator(in)))
+		when(provider.getRolesFor(currentUser, insub1)) thenReturn(Stream.empty)
+		when(provider.getRolesFor(currentUser, in)) thenReturn(Stream(DepartmentalAdministrator(in)))
 
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
@@ -139,7 +139,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
 		
-		when(provider2.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
+		when(provider2.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
 		
 		service.hasRole(currentUser, ModuleManager(module)) should be (true)
 		service.hasRole(currentUser, ExtensionManager(dept)) should be (false)
@@ -184,10 +184,10 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2)
 		
-		when(provider1.getRolesFor(currentUser, member)) thenReturn(Seq())
-		when(provider2.getRolesFor(currentUser, member)) thenReturn(Seq())
-		when(provider1.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
-		when(provider2.getRolesFor(currentUser, dept)) thenReturn(Seq())
+		when(provider1.getRolesFor(currentUser, member)) thenReturn(Stream.empty)
+		when(provider2.getRolesFor(currentUser, member)) thenReturn(Stream.empty)
+		when(provider1.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
+		when(provider2.getRolesFor(currentUser, dept)) thenReturn(Stream.empty)
 		
 		(service.getRolesFor(currentUser, member) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 		

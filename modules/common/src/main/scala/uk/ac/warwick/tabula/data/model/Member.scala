@@ -147,7 +147,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"email" -> email)
 
 
-	def personalTutor: Any = "Not applicable"
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	def personalTutors: Seq[StudentRelationship] = Nil
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
@@ -213,15 +214,11 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			Stream.empty
 		).flatten.distinct
 
-	override def personalTutor =
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
-			case None => "Not recorded"
-			case Some(name: String) => name
-			case Some(member: Member) => member
-			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
-		}
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	override def personalTutors =
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
 
-	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
+	override def hasAPersonalTutor = !personalTutors.isEmpty
 
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {

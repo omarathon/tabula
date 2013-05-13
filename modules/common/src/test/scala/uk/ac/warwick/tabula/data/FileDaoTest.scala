@@ -18,11 +18,30 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import java.io.File
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
+import org.junit.After
 
 // scalastyle:off magic.number
 class FileDaoTest extends AppContextTestBase {
 
 	@Autowired var dao:FileDao =_
+
+	@Test def deletingTemporaryFiles = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {
+		transactional { transactionStatus =>
+			dao.attachmentDir = createTemporaryDirectory
+			dao.attachmentDir.list.size should be (0)
+			for (i <- Range(0,10)) {
+				val attachment = new FileAttachment
+				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
+				attachment.uploadedData = () => new ByteArrayInputStream("This is the best file ever".getBytes)
+				dao.saveTemporary(attachment)
+			}
+		}
+		dao.deleteOldTemporaryFiles should be (7)
+	}
+	
+	@After def bangtidy { transactional { tx => 
+		session.createQuery("delete from FileAttachment").executeUpdate() 
+	}}
 	
 	@Test def crud = transactional { tx => 
 		dao.attachmentDir = createTemporaryDirectory
@@ -51,20 +70,6 @@ class FileDaoTest extends AppContextTestBase {
 		
 		dao.getAllFileIds() should be ((attachments map { _.id }).toSet)
 		dao.getAllFileIds(Some(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0))) should be ((attachments.slice(0, 4) map { _.id }).toSet)
-	}
-
-	@Test def deletingTemporaryFiles {
-		transactional { transactionStatus =>
-			dao.attachmentDir = createTemporaryDirectory
-			dao.attachmentDir.list.size should be (0)
-			for (i <- Range(0,10)) {
-				val attachment = new FileAttachment
-				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
-				attachment.uploadedData = () => new ByteArrayInputStream("This is the best file ever".getBytes)
-				dao.saveTemporary(attachment)
-			}
-		}
-		dao.deleteOldTemporaryFiles should be (7)
 	}
 
 	/*

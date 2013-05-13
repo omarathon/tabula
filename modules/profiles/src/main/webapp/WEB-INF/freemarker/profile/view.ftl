@@ -77,7 +77,7 @@
 							</tr>
 						</#if>
 						
-						<#if profile.student && profile.nextOfKins?size gt 0>
+						<#if profile.student && profile.nextOfKins?? && profile.nextOfKins?size gt 0>
 							<tr>
 								<th>Emergency contacts</th>
 								<td>

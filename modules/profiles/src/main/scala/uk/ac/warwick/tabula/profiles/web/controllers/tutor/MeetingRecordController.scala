@@ -21,19 +21,34 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
+import org.springframework.web.bind.WebDataBinder
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
 class MeetingRecordController extends ProfilesController {
 
 	validatesSelf[CreateMeetingRecordCommand]
+	
+	@ModelAttribute("allRelationships") def allRelationships(@PathVariable("student") member: Member) = member match {
+		case student: StudentMember => 
+			profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
+		case _ => throw new ItemNotFoundException
+	}
 
 	@ModelAttribute("createMeetingRecordCommand")
 	def getCommand(@PathVariable("student") member: Member) = member match {
 		case student: StudentMember => {
-			profileService.findCurrentRelationship(PersonalTutor, student.studyDetails.sprCode) match {
-				case Some(rel) => new CreateMeetingRecordCommand(currentMember, rel)
-				case None => throw new ItemNotFoundException
+			profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode) match {
+				case Nil => throw new ItemNotFoundException
+				case relationships => 
+					// Try and guess a default relationship
+					val defaultRelationship = 
+						relationships.find(rel => (rel.agentMember map { _.universityId }) == Some(user.universityId))
+						.getOrElse(relationships.head)
+						
+					new CreateMeetingRecordCommand(currentMember, defaultRelationship)
 			}
 		}
 		case _ => throw new ItemNotFoundException
@@ -127,5 +142,13 @@ class MeetingRecordController extends ProfilesController {
 				Redirect(Routes.profile.view(student, meeting))
 			}
 		}
+	}
+	
+	@InitBinder
+	def initRelationshipsEditor(binder: WebDataBinder, @PathVariable("student") student: Member) {
+		binder.registerCustomEditor(classOf[StudentRelationship], new AbstractPropertyEditor[StudentRelationship] {
+			override def fromString(agent: String) = allRelationships(student).find(_.agent == agent).orNull
+			override def toString(rel: StudentRelationship) = rel.agent
+		})
 	}
 }

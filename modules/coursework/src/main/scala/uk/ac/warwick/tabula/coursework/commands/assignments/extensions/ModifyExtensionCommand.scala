@@ -116,6 +116,12 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	}
 
 	def validateExtension(extension:ExtensionItem, errors:Errors){
+
+		val userId = userLookup.getUserByWarwickUniId(extension.universityId).getUserId
+		if(userId == null) {
+			errors.rejectValue("universityId", "extension.universityId.noValidUserId")
+		}
+
 		if(extension.expiryDate == null){
 			if (!extension.rejected){
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")

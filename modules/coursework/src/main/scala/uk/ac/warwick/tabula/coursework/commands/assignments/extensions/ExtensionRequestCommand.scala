@@ -38,6 +38,10 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	var modified:JBoolean = false
 
 	def validate(errors:Errors){
+		if(!submitter.apparentUser.getUserId.hasText){
+			errors.reject("extension.noValidUserId")
+		}
+
 		if (!readGuidelines){
 			errors.rejectValue("readGuidelines","extension.readGuidelines.mustConfirmRead" )
 		}
