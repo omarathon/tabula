@@ -26,7 +26,7 @@ request.params[${key}]=[<#list parameters[key] as v>${v}<#if v_has_next>,</#if><
 ${exceptionStack}
 
 <#if request??>
-<#list request.headerNames?sort as header>${header}: ${request.getHeader(header)}
+<#list request.headerNames as header>${header}: ${request.getHeader(header)}
 </#list>
 </#if>
 
