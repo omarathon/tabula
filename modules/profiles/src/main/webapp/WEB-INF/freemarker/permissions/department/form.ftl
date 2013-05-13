@@ -38,9 +38,8 @@
 	<#if seniorTutors?size gt 0>
 	
 		<table class="permission-list">
+		<tbody>
 		<#list seniorTutors as u>
-			<#if returned_users[id].foundUser>
-			<#assign u=returned_users[id] />
 			<tr>
 				<td>${u.userId}</td>
 				<td>(${u.fullName})</td>
@@ -48,8 +47,8 @@
 					<@useractions u.userId />
 				</td>
 			</tr>
-			</#if>
 		</#list>
+		</tbody>
 		</table>
 		
 	<#else>
