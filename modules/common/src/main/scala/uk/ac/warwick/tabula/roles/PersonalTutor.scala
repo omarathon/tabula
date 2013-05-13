@@ -16,6 +16,7 @@ object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.Usercode,
 		Profiles.MeetingRecord.Create,
 		Profiles.MeetingRecord.Read,
+		Profiles.MeetingRecord.ReadDetails,
 		Profiles.MeetingRecord.Update,
 		Profiles.MeetingRecord.Delete
 	)
