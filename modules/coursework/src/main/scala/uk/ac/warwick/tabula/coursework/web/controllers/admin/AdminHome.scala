@@ -16,21 +16,17 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.coursework.web.Routes
 
 /**
  * Screens for department and module admins.
  */
 
 @Controller
-@RequestMapping(Array("/admin/"))
+@RequestMapping(Array("/admin/", "/admin/department/"))
 class AdminHomeController extends CourseworkController {
-		@Autowired var moduleService: ModuleAndDepartmentService = _
-	
-		@RequestMapping(method=Array(GET, HEAD))
-		def homeScreen(user: CurrentUser) = {
-		Mav("admin/home",
-			"ownedDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions))
-	}
+	@RequestMapping(method=Array(GET, HEAD))
+	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
 @Controller
@@ -59,19 +55,19 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	
 	val modules: JList[Module] = 
-		if (securityService.can(user, Permissions.Module.Read, mandatory(department))) {
+		if (securityService.can(user, Permissions.Module.ManageAssignments, mandatory(department))) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
-			PermissionCheck(Permissions.Module.Read, department)
+			PermissionCheck(Permissions.Module.ManageAssignments, department)
 			
 			department.modules
 		} else {
-			val managedModules = moduleService.modulesManagedBy(user.idForPermissions, department).toList
+			val managedModules = moduleService.modulesManagedBy(user, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
-			PermissionCheckAll(Permissions.Module.Read, managedModules)
+			PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)
 			
 			if (managedModules.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.Module.Read, department)
+				throw new PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
 			
 			managedModules
 		}

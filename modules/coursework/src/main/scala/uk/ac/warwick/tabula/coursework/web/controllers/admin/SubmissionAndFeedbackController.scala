@@ -158,7 +158,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 		new ExcelView(assignment.name + ".xlsx", workbook)
 	}
 	
-	override def binding[SubmissionAndFeedbackCommand](binder: WebDataBinder, cmd: SubmissionAndFeedbackCommand) {
+	override def binding[A](binder: WebDataBinder, cmd: A) {
 		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
 			override def fromString(name: String) = CourseworkFilters.of(name)			
 			override def toString(filter: CourseworkFilter) = filter.getName

@@ -23,7 +23,7 @@
 							<td><h6>${student.lastName}</h6></td>
 							<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
 							<td>${student.groupName}</td>
-							<td>${student.studyDetails.yearOfStudy!""}</td>
+							<td>${(student.studyDetails.yearOfStudy)!""}</td>
 							<td><#if student.studyDetails.route??>${student.studyDetails.route.name}</#if></td>
 						</tr>
 					</#list>

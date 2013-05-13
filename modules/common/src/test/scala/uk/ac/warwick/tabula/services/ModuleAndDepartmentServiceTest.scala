@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.MockUserLookup
 import org.junit.Before
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 
 class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 	
@@ -52,32 +53,31 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 		service.getRouteByCode("g503") should be (Some(route))
 		service.getRouteByCode("wibble") should be (None)
 		
-		service.departmentsOwnedBy("cusebr") should be (Seq(cs))
-		service.departmentsOwnedBy("cuscav") should be (Seq())
-		service.modulesAdministratedBy("cuscav") should be (Seq())
-		service.modulesAdministratedBy("cuscav", cs) should be (Seq())
-		service.modulesAdministratedBy("cuscav", ch) should be (Seq())
-		
-		service.addOwner(cs, "cuscav")
-		service.departmentsOwnedBy("cuscav") should be (Seq(cs))
-		service.modulesAdministratedBy("cuscav") should be (Seq(cs108, cs240))
-		service.modulesAdministratedBy("cuscav", cs) should be (Seq(cs108, cs240))
-		service.modulesAdministratedBy("cuscav", ch) should be (Seq())
-		
-		service.removeOwner(cs, "cuscav")
-		service.departmentsOwnedBy("cuscav") should be (Seq())
-		
-		service.modulesManagedBy("cuscav") should be (Seq())
-		service.modulesManagedBy("cuscav", cs) should be (Seq())
-		service.modulesManagedBy("cuscav", ch) should be (Seq())
-		
-		cs108.managers.addUser("cuscav")
-		session.update(cs108)
-		
-		service.modulesManagedBy("cuscav") should be (Seq(cs108))
-		service.modulesManagedBy("cuscav", cs) should be (Seq(cs108))
-		service.modulesManagedBy("cuscav", ch) should be (Seq())
-		
+		withUser("cusebr") { service.departmentsOwnedBy(currentUser) should be (Set(cs)) }
+		withUser("cuscav") { 
+			service.departmentsOwnedBy(currentUser) should be (Set())
+			service.modulesAdministratedBy(currentUser) should be (Set())
+			service.modulesAdministratedBy(currentUser, cs) should be (Set())
+			service.modulesAdministratedBy(currentUser, ch) should be (Set())
+			
+			service.addOwner(cs, "cuscav")
+			service.departmentsOwnedBy(currentUser) should be (Set(cs))
+			service.modulesAdministratedBy(currentUser) should be (Set(cs108, cs240))
+			service.modulesAdministratedBy(currentUser, cs) should be (Set(cs108, cs240))
+			service.modulesAdministratedBy(currentUser, ch) should be (Set())
+			
+			service.removeOwner(cs, "cuscav")
+			service.departmentsOwnedBy(currentUser) should be (Set())
+			
+			service.modulesManagedBy(currentUser) should be (Set())
+			service.modulesManagedBy(currentUser, cs) should be (Set())
+			service.modulesManagedBy(currentUser, ch) should be (Set())
+			
+			service.addManager(cs108, "cuscav")
+			service.modulesManagedBy(currentUser) should be (Set(cs108))
+			service.modulesManagedBy(currentUser, cs) should be (Set(cs108))
+			service.modulesManagedBy(currentUser, ch) should be (Set())
+		}
 	}
 
 }

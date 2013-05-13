@@ -21,9 +21,7 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 
 	PermissionCheck(Permissions.Assignment.Update, assignment)
 
-	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
-	@transient
 	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
 	var userLookup = Wire.auto[UserLookupService]
 

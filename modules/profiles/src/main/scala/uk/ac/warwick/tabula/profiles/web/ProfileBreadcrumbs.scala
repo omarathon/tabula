@@ -20,7 +20,7 @@ object ProfileBreadcrumbs {
 			case Some(name) => name
 		}
 		val url = Routes.profile.view(profile)
-		override val tooltip = profile.fullName + " (" + profile.universityId + ")"
+		override val tooltip = profile.fullName.getOrElse("") + " (" + profile.universityId + ")"
 	}
 
 	/**

@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
@@ -32,9 +33,10 @@ class ExtensionRequestController extends CourseworkController{
 	def showForm(cmd:ExtensionRequestCommand):Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 		
-		if (!module.department.canRequestExtension)
+		if (!module.department.canRequestExtension) {
+			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
 			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
-		else {
+		} else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)
 				existingRequest.foreach(cmd.presetValues(_))
@@ -47,7 +49,8 @@ class ExtensionRequestController extends CourseworkController{
 					"department" -> module.department,
 					"isModification" -> isModification,
 					"existingRequest" -> existingRequest.getOrElse(null),
-					"command" -> cmd
+					"command" -> cmd,
+					"returnTo" -> getReturnTo("/coursework" + Routes.assignment(assignment))
 				)
 			} else {
 				RedirectToSignin()
@@ -71,6 +74,7 @@ class ExtensionRequestController extends CourseworkController{
 			crumbed(model, module)
 		}
 	}
+	
 
 	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
 		val assignment = extension.assignment

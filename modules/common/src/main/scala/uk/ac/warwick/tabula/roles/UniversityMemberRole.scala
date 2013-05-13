@@ -7,9 +7,12 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 case class UniversityMemberRole(member: model.Member) extends BuiltInRole(member, UniversityMemberRoleDefinition)
 
 case object UniversityMemberRoleDefinition extends BuiltInRoleDefinition {
-	GrantsScopedPermission( 
-		Profiles.Read.Core,
-		Profiles.Read.UniversityId,
+	// As per discussion in TAB-753, anyone at the University can see anyone else's core information
+	GrantsGlobalPermission( 
+		Profiles.Read.Core
+	)
+	
+	GrantsScopedPermission(
 		Profiles.Read.NextOfKin,
 		Profiles.Read.HomeAddress,
 		Profiles.Read.TermTimeAddress,

@@ -3,6 +3,7 @@
 	assignment membership editor split out from _fields.ftl for readability.
 
 -->
+<#escape x as x?html>
 <@form.labelled_row "members" "Students">
 
 		<@f.hidden path="upstreamAssignment" id="upstreamAssignment" />
@@ -14,16 +15,24 @@
 		<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
 
 		<#macro what_is_this>
+			<#assign popoverText>
+				<p>
+					 Here you can specify where this assignment should get its list of enrolled students from.
+			     You can link to a central SITS assignment and a live list of students will be maintained.
+			     If you are not using SITS you can manually specify a list of users.
+			  </p>
+			     
+			  <p>
+			     It is also possible to tweak the membership even when using SITS data, but this is only to be used
+			     when necessary and you still need to ensure that the upstream SITS data gets fixed.
+		    </p>
+			</#assign>
+		
 			<a href="#" class="use-popover" 
 			   data-title="Student membership"
 			   data-trigger="hover"
 	   		   data-html="true"
-			   data-content="&lt;p&gt;Here you can specify where this assignment should get its list of enrolled students from.
-			     You can link to a central SITS assignment and a live list of students will be maintained.
-			     If you are not using SITS you can manually specify a list of users.&lt;/p&gt;&lt;p&gt;
-			     It is also possible to tweak the membership even when using SITS data, but this is only to be used
-			     when necessary and you still need to ensure that the upstream SITS data gets fixed.
-			     &lt;/p&gt;"
+			   data-content="${popoverText}"
 			   >What's this?</a>
 		</#macro>
 
@@ -386,3 +395,4 @@
 		</script>
 
 	</@form.labelled_row>
+</#escape>

@@ -45,6 +45,19 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("textarea")
 	}
 	
+	@Test def nullWordCount {
+		val field = new WordCountField
+		field.min = 3
+		field.max = 10
+		
+		val string = new StringSubmissionValue(field)
+		string.value = null
+		
+		val errors = new BindException(string, "string")
+		
+		field.validate(string, errors)
+	}
+	
 	@Test def wordCountField {
 		val field = new WordCountField
 		field.max = 10

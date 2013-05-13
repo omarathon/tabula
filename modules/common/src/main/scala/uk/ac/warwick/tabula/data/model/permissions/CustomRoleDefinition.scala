@@ -59,7 +59,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	var overrides:JList[RoleOverride] = JArrayList()
 
 	def permissionsParents =
-		Seq(Option(department)).flatten
+		Option(department).toStream
 
 	/**
 	 * This method eagerly resolves sub-roles, which is why we return
@@ -84,5 +84,9 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope)
+		
+	def mayGrant(target: Permission) =
+		baseRoleDefinition.mayGrant(target) ||
+		(overrides exists { o => o.overrideType == RoleOverride.Allow && o.permission == target })
 
 }

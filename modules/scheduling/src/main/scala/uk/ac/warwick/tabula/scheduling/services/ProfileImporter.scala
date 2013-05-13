@@ -66,7 +66,7 @@ class ProfileImporter extends Logging {
 			} catch {
 				case e: MembershipInterfaceException => None
 			}
-			
+
 			MembershipInformation(member, photo)
 		}
 
@@ -107,10 +107,14 @@ object ProfileImporter {
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
 			--spr.spr_levc as level_code,
+			spr.prs_code as spr_tutor1,
+			--spr.spr_prs2 as spr_tutor2,
 
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
+			--scj.scj_prsc as scj_tutor1,
+			--scj.scj_prs2 as scj_tutor2,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
@@ -168,7 +172,7 @@ object ProfileImporter {
 			where prs.prs_exid in (:usercodes)
 		"""
 
-	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) 
+	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
 		extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
@@ -176,7 +180,7 @@ object ProfileImporter {
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
 	}
 
-	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User) 
+	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
 		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()

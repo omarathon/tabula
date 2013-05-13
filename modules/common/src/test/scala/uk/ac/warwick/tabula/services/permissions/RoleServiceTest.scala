@@ -16,6 +16,10 @@ import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.roles.UniversityMemberRole
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 
 class RoleServiceTest extends TestBase with Mockito {
 
@@ -30,7 +34,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val provider2 = mock[ScopelessRoleProvider]
 			
 		when(scopedProvider.getRolesFor(isEq(currentUser), isA[PermissionsTarget])) thenThrow(classOf[RuntimeException])
-		when(provider1.getRolesFor(currentUser)) thenReturn(Seq(Sysadmin()))
+		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
 		when(provider2.getRolesFor(currentUser)) thenThrow(classOf[RuntimeException])
 				
 		val service = new RoleServiceImpl()
@@ -57,11 +61,11 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
 		
-		when(provider1.getRolesFor(currentUser)) thenReturn(Seq(Sysadmin()))
-		when(provider2.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
-		when(provider3.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
-		when(provider3.getRolesFor(currentUser, module)) thenReturn(Seq())
-		when(provider4.getRolesFor(currentUser)) thenReturn(Seq())
+		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
+		when(provider2.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
+		when(provider3.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
+		when(provider3.getRolesFor(currentUser, module)) thenReturn(Stream.empty)
+		when(provider4.getRolesFor(currentUser)) thenReturn(Stream.empty)
 		
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 		
@@ -84,8 +88,8 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
 		
-		when(provider.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
-		when(provider.getRolesFor(currentUser, dept)) thenReturn(Seq(DepartmentalAdministrator(dept)))
+		when(provider.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
+		when(provider.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
 		
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (false)
 		
@@ -94,8 +98,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 	}
 	
-	/** Test that permissions checking DOESN'T go up from a department to its parent if it has one.
-	 *  This is the current behaviour though subject to change.
+	/** Test that permissions checking DOES go up from a department to its parent if it has one.
 	 */
 	@Test def parentDepartments = withUser("cuscav", "0672089") {
 
@@ -107,13 +110,13 @@ class RoleServiceTest extends TestBase with Mockito {
 		insub2.parent = in
 
 		val provider = mock[RoleProvider]
-		when(provider.getRolesFor(currentUser, insub1)) thenReturn(Nil)
-		when(provider.getRolesFor(currentUser, in)) thenReturn(Seq(DepartmentalAdministrator(in)))
+		when(provider.getRolesFor(currentUser, insub1)) thenReturn(Stream.empty)
+		when(provider.getRolesFor(currentUser, in)) thenReturn(Stream(DepartmentalAdministrator(in)))
 
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
 
-		service.getRolesFor(currentUser, insub1).toList should equal (List())
+		service.getRolesFor(currentUser, insub1).toList should equal (List(DepartmentalAdministrator(in)))
 
 	}
 
@@ -136,7 +139,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
 		
-		when(provider2.getRolesFor(currentUser, module)) thenReturn(Seq(ModuleManager(module)))
+		when(provider2.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
 		
 		service.hasRole(currentUser, ModuleManager(module)) should be (true)
 		service.hasRole(currentUser, ExtensionManager(dept)) should be (false)
@@ -153,9 +156,9 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.permissionsProviders = Array(provider1, provider2)
 		
-		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Read, Some(module), GrantedPermission.Allow)))
+		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, dept)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
-		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream())
+		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream.empty)
 		
 		(service.getExplicitPermissionsFor(currentUser, module) exists { 
 			_ == PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow) 
@@ -165,6 +168,30 @@ class RoleServiceTest extends TestBase with Mockito {
 		there was one(provider1).getPermissionsFor(currentUser, module)
 		there was one(provider2).getPermissionsFor(currentUser, dept)
 		there was one(provider2).getPermissionsFor(currentUser, module)
+	}
+	
+	@Test def dontCheckAllParents() = withUser("cuscav", "0672089") {
+		// TAB-755 We should never have to go to the list of registered modules here, because we're looking for something in ITS
+		val dept = Fixtures.department("in")
+		val member = Fixtures.student(universityId = "0672089", department = dept)
+		
+		val profileService = mock[ProfileService]
+		member.profileService = profileService
+		
+		val provider1 = mock[RoleProvider]
+		val provider2 = mock[RoleProvider]
+		
+		val service = new RoleServiceImpl()
+		service.roleProviders = Array(provider1, provider2)
+		
+		when(provider1.getRolesFor(currentUser, member)) thenReturn(Stream.empty)
+		when(provider2.getRolesFor(currentUser, member)) thenReturn(Stream.empty)
+		when(provider1.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
+		when(provider2.getRolesFor(currentUser, dept)) thenReturn(Stream.empty)
+		
+		(service.getRolesFor(currentUser, member) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
+		
+		there was no(profileService).getRegisteredModules("0672089")
 	}
 
 }

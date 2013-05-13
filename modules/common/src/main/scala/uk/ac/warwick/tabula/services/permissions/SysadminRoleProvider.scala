@@ -18,9 +18,9 @@ class SysadminRoleProvider extends ScopelessRoleProvider {
 	
 	def groupService = userLookup.getGroupService
 
-	def getRolesFor(user: CurrentUser): Seq[Role] =
-		if (user.realId.hasText && groupService.isUserInGroup(user.realId, adminGroup)) Seq(Sysadmin())
-		else Seq()
+	def getRolesFor(user: CurrentUser): Stream[Role] =
+		if (user.realId.hasText && groupService.isUserInGroup(user.realId, adminGroup)) Stream(Sysadmin())
+		else Stream.empty
 		
 	def rolesProvided = Set(classOf[Sysadmin])
 	

@@ -18,9 +18,9 @@ class MasqueraderRoleProvider extends ScopelessRoleProvider {
 	
 	def groupService = userLookup.getGroupService
 
-	def getRolesFor(user: CurrentUser): Seq[Role] =
-		if (user.realId.hasText && groupService.isUserInGroup(user.realId, masqueradeGroup)) Seq(Masquerader())
-		else Seq()
+	def getRolesFor(user: CurrentUser): Stream[Role] =
+		if (user.realId.hasText && groupService.isUserInGroup(user.realId, masqueradeGroup)) Stream(Masquerader())
+		else Stream.empty
 		
 	def rolesProvided = Set(classOf[Masquerader])
 	

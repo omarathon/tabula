@@ -30,7 +30,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 			Mav(
 				"home/view",
 				"isAPersonalTutor" -> currentMember.isAPersonalTutor,
-				"adminDepartments" -> moduleService.departmentsOwnedBy(user.idForPermissions)
+				"adminDepartments" -> moduleService.departmentsOwnedBy(user)
 			)
 		} else if (optionalCurrentMember.isDefined && currentMember.userType == Student) {
 			Redirect(Routes.profile.view(currentMember))

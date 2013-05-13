@@ -38,10 +38,12 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		addStringCell("Module code", header, style)
 		addStringCell("Close date", header, style)
 		addStringCell("Publish deadline", header, style)
+		addStringCell("Credit bearing", header, style)
 		addStringCell("Expected submissions", header, style)
 		addStringCell("Actual submissions", header, style)
 		addStringCell("Late submissions - within extension", header, style)
 		addStringCell("Late submissions - without extension", header, style)
+		addStringCell("Outstanding feedback", header, style)
 		addStringCell("Total published feedback", header, style)
 		addStringCell("On-time feedback", header, style)
 		addStringCell("On-time feedback %", header, style)
@@ -62,6 +64,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addDateCell(assignment.closeDate.toDate, row, dateCellStyle(workbook))
 			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PUBLISH_DEADLINE_WORKING_DAYS)
 			addDateCell(publishDeadline.toDate, row, dateCellStyle(workbook))
+			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
@@ -69,6 +72,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addNumericCell(assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size, row)
 			val (onTime, late) = getFeedbackCounts(assignment)
 			val totalPublished = onTime + late
+			val totalUnPublished = assignment.submissions.size - totalPublished
+			addNumericCell(totalUnPublished, row)
 			addNumericCell(totalPublished, row)
 			addNumericCell(onTime, row)
 			addPercentageCell(onTime, totalPublished, row, workbook)
@@ -93,6 +98,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.module.code,
 				assignment.module.name,
 				assignmentMembershipService.determineMembershipUsers(assignment).size,
+				assignment.summative,
 				assignment.submissions.size,
 				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
 				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
@@ -118,6 +124,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		addStringCell("Actual submissions", header, style)
 		addStringCell("Late submissions - within extension", header, style)
 		addStringCell("Late submissions - without extension", header, style)
+		addStringCell("Outstanding Feedback", header, style)
+		addStringCell("Total Published Feedback", header, style)
 		addStringCell("On-time feedback", header, style)
 		addStringCell("On-time feedback %", header, style)
 		addStringCell("Late feedback", header, style)
@@ -148,6 +156,9 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			val submissionsLateWithoutExt = assignmentInfoList.map(_.submissionsLateWithoutExt).sum
 			addNumericCell(submissionsLateWithoutExt, row)
 			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
+			val totalUnPublished = numberOfSubmissions - totalPublished
+			addNumericCell(totalUnPublished, row)
+			addNumericCell(totalPublished, row)
 			val ontime = assignmentInfoList.map(_.onTimeFeedback).sum
 			addNumericCell(ontime, row)
 			addPercentageCell(ontime, totalPublished, row, workbook)
@@ -194,6 +205,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		var moduleCode: String,
 		var moduleName: String,
 		var membership: Int,
+		var summative: Boolean,
 		var numberOfSubmissions: Int,
 		var submissionsLateWithExt: Int,
 		var submissionsLateWithoutExt: Int,

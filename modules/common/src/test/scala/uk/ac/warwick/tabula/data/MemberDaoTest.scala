@@ -215,10 +215,10 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.saveOrUpdate(rel1)
 		dao.saveOrUpdate(rel2)
 		
-		dao.getCurrentRelationship(RelationshipType.PersonalTutor, "0000001/1") should be (Some(rel1))
-		dao.getCurrentRelationship(RelationshipType.PersonalTutor, "0000002/1") should be (Some(rel2))
-		dao.getCurrentRelationship(RelationshipType.PersonalTutor, "0000003/1") should be (None)
-		dao.getCurrentRelationship(null, "0000001/1") should be (None)
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Nil)
+		dao.getCurrentRelationships(null, "0000001/1") should be (Nil)
 		
 		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
 		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))

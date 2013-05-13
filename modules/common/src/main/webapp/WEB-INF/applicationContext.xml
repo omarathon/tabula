@@ -126,6 +126,7 @@
                 <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
+							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -261,13 +262,14 @@
 
 	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
 		p:group="${permissions.admin.group}"
-		p:groupService="#{realUserLookup.groupService}" />
+		p:groupService-ref="groupService" />
 		<!-- FIXME groupservice wont be switched out for a maintenance version -->
 
 	<bean id="userLookup" class="uk.ac.warwick.tabula.services.SwappableUserLookupService">
 		<constructor-arg ref="realUserLookup" />
 	</bean>
-
+	<bean id="groupService" factory-bean="userLookup" factory-method="getGroupService" />
+	
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
 		<constructor-arg ref="userLookupDelegate" />
 	</bean>
@@ -286,6 +288,8 @@
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
+				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>
+				<entry key="introHash"><bean class="uk.ac.warwick.tabula.web.views.IntroHashFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.tabula.web.views.TheYear" /></entry>
 				<entry key="features" value-ref="features" />
 				<entry key="appBuildDate">
@@ -340,6 +344,7 @@
 					<list>
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
+						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
 					</list>
 				</property>
 			</bean>
@@ -376,6 +381,7 @@
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
+		
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>

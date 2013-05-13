@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import java.lang.reflect.Method
 
 /**
  * A implementation of BeansWrapper that support native Scala basic and collection types
@@ -37,6 +38,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		super.wrap(obj)
 	}
 
+	// scalastyle:off
 	override def wrap(obj: Object): TemplateModel = {	
 		obj match {
 			case Some(x: Object) => wrap(x)
@@ -55,6 +57,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case _ => superWrap(obj)
 		}
 	}
+	// scalastyle:on
 	
 	private def isScalaCompiled(obj: Any) = Option(obj) match {
 		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
@@ -73,42 +76,52 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	 */
 	class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
 		import ScalaHashModel._
-	
+
 		def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
-	
+
+		def isGetter(m: Getter) = !m.getName.endsWith("_$eq") && m.getParameterTypes.length == 0
+		
 		val getters = {
 			val cls = sobj.getClass
-			gettersCache.synchronized {
-				gettersCache.get(cls) match {
-					case Some(cachedGetters) => cachedGetters
-					case None => {
-						val map = new mutable.HashMap[String, (Getter, Seq[Permission])]
-						cls.getMethods.foreach { m =>
-							val n = m.getName
-							if (!n.endsWith("_$eq") && m.getParameterTypes.length == 0) {
-								val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
-								val name = n match {
-									case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
-									case _ => n
-								}
-								val restrictedAnnotation = m.getAnnotation(classOf[Restricted]) 
-								val perms: Seq[Permission] =
-									if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
-									else Nil			
-								
-								map += Pair(name, (m, perms))
-							}
-						}
-						gettersCache.put(cls, map)
-						map
-					}
-				}
+			gettersCache.getOrElseUpdate(cls, generateGetterInformation(cls))
+		}
+
+		def generateGetterInformation(cls: Class[_]) = {
+			val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
+			def isJavaGetter(m: Method) = javaGetterRegex.pattern.matcher(m.getName).matches
+			
+			def parse(m: Method, name: String) = {
+				val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
+				val perms: Seq[Permission] =
+					if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
+					else Nil			
+				
+				(name -> (m, perms))
 			}
+			
+			val scalaPairs = for (m <- cls.getMethods if isGetter(m) && !isJavaGetter(m)) yield {
+				parse(m, m.getName)
+			}
+			val javaPairs = for (m <- cls.getMethods if isGetter(m) && isJavaGetter(m)) yield {
+				val name = m.getName match {
+					case javaGetterRegex(isGet, propName) => lowercaseFirst(propName)
+					case _ => throw new IllegalStateException("Couldn't match java getter syntax")
+				}
+				parse(m, name)
+			}
+			
+			// TAB-766 Add the scala pairs after so they override the java ones of the same name
+			javaPairs.toMap ++ scalaPairs.toMap
 		}
 		
+		// Cache child properties for the life of this model, so that their caches are useful when a property is accessed twice.
+		// Not the same as TAB-469, which would cache for longer than the life of a request, causing memory leaks. This cache
+		// will use a bit more memory but it won't leak outside of a request.
+		var cachedResults = mutable.HashMap[String, TemplateModel]()
+
 		def user = RequestInfo.fromThread.get.user
-		
-		def canDo(perms: Seq[Permission]) = perms forall {
+
+		def canDo(perms: Seq[Permission]) = perms forall { 
 			case permission: ScopelessPermission => securityService.can(user, permission)
 			case permission if classOf[PermissionsTarget].isInstance(sobj) => 
 				securityService.can(user, permission, sobj.asInstanceOf[PermissionsTarget])
@@ -116,19 +129,21 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 				logger.warn("Couldn't check for permission %s against object %s because it isn't a PermissionsTarget".format(permission.toString, sobj.toString))
 				false
 			}
-		} 
+		}
 		
 		override def get(key: String): TemplateModel = {
 			val x = key
-			getters.get(key) match {
-				case Some((getter, permissions)) => 
-					if (canDo(permissions)) wrapper.wrap(getter.invoke(sobj))
-					else null
-				case None => checkInnerClasses(key) match {
-					case Some(method) => method
-					case None => super.get(key)
+			cachedResults.getOrElseUpdate(key, 
+				getters.get(key) match {
+					case Some((getter, permissions)) => 
+						if (canDo(permissions)) wrapper.wrap(getter.invoke(sobj))
+						else null
+					case None => checkInnerClasses(key) match {
+						case Some(method) => method
+						case None => super.get(key)
+					}
 				}
-			}
+			)
 		}
 	
 		def checkInnerClasses(key: String): Option[TemplateModel] = {
@@ -141,12 +156,16 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 	
 		override def isEmpty = false
+		
+		def clearCaches() {
+			cachedResults.clear()
+		}
 	}
 	
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
 		
-		val gettersCache = new mutable.HashMap[Class[_], mutable.HashMap[String, (Getter, Seq[Permission])]]
+		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, Seq[Permission])]]
 	}
 
 }

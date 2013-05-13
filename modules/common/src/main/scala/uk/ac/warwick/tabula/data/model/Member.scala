@@ -95,16 +95,16 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	def affiliatedDepartments = Option(homeDepartment).toSeq
+	def affiliatedDepartments = Option(homeDepartment).toStream
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
 	 * the department running their course and any departments that they are taking modules in.
 	 */
 	def touchedDepartments = {
-		val moduleDepts = registeredModules.map(x => x.department)
+		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
 
-		(affiliatedDepartments ++ moduleDepts).distinct.toSeq
+		(affiliatedDepartments #::: moduleDepts).distinct
 	}
 
 	def permissionsParents = touchedDepartments
@@ -147,7 +147,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"email" -> email)
 
 
-	def personalTutor: Any = "Not applicable"
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	def personalTutors: Seq[StudentRelationship] = Nil
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
@@ -205,23 +206,19 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = { 
+	override def affiliatedDepartments =
 		(
-			Option(homeDepartment) ++ 
-			Option(studyDetails.studyDepartment) ++ 
-			Option(studyDetails.route).map(_.department)
-		).toSeq.distinct
-	}
+			Option(homeDepartment) #::
+			Option(studyDetails.studyDepartment) #:: 
+			Option(studyDetails.route).map(_.department) #::
+			Stream.empty
+		).flatten.distinct
 
-	override def personalTutor =
-		profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode) map (rel => rel.agentParsed) match {
-			case None => "Not recorded"
-			case Some(name: String) => name
-			case Some(member: Member) => member
-			case other => throw new IllegalArgumentException("Unexpected personal tutor found; " + other)
-		}
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	override def personalTutors =
+		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
 
-	override def hasAPersonalTutor = profileService.findCurrentRelationship(RelationshipType.PersonalTutor, studyDetails.sprCode).isDefined
+	override def hasAPersonalTutor = !personalTutors.isEmpty
 
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {
@@ -266,11 +263,11 @@ class OtherMember extends Member with AlumniProperties {
 }
 
 class RuntimeMember(user: CurrentUser) extends Member(user) {
-	override def permissionsParents = Nil
+	override def permissionsParents = Stream.empty
 }
 
 trait MemberProperties {
-	@Id @Restricted(Array("Profiles.Read.UniversityId")) var universityId: String = _
+	@Id var universityId: String = _
 	def id = universityId
 
 	@Column(nullable = false)

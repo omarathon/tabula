@@ -9,7 +9,13 @@
 		<div class="profile-search-results">
 			<#list results as result>
 				<article class="result" data-id="${result.universityId}">
-					<h3><a href="<@routes.tutor_edit student.universityId result />"><@fmt.profile_name result /></a></h3>
+					<h3><a href="<#compress>
+						<#if tutorToDisplay??>
+							<@routes.tutor_edit_replace student=student.universityId currentTutor=tutorToDisplay newTutor=result />
+						<#else>
+							<@routes.tutor_edit_set student=student.universityId newTutor=result />
+						</#if>
+					</#compress>"><@fmt.profile_name result /></a></h3>
 					<@fmt.profile_description result />
 				</article>
 			</#list>

@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.userlookup.User
 
 class PermissionsDaoTest extends AppContextTestBase {
 	
@@ -27,8 +28,8 @@ class PermissionsDaoTest extends AppContextTestBase {
 		session.flush()
 	
 		val gr1 = new DepartmentGrantedRole(dept1, DepartmentalAdministratorRoleDefinition)
-		gr1.users.addUser("cuscav")
-		gr1.users.addUser("cusebr")
+		gr1.users.addUser("cusbruv")
+		gr1.users.addUser("cusxar")
 		dao.saveOrUpdate(gr1)
 		
 		val crd = new CustomRoleDefinition
@@ -37,20 +38,20 @@ class PermissionsDaoTest extends AppContextTestBase {
 		crd.builtInBaseRoleDefinition = ModuleManagerRoleDefinition
 		
 		val ro = new RoleOverride
-		ro.permission = Permissions.Module.Read
-		ro.overrideType = ro.Deny
+		ro.permission = Permissions.Module.ManageAssignments
+		ro.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro)
 		
 		dao.saveOrUpdate(crd)
 		
 		val gr2 = new DepartmentGrantedRole(dept1, crd)
-		gr2.users.addUser("cuscav")
+		gr2.users.addUser("cusbruv")
 		gr2.users.addUser("cuscao")
 		dao.saveOrUpdate(gr2)
 		
 		val gp = new DepartmentGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow)
-		gp.users.addUser("cuscav")
+		gp.users.addUser("cusbruv")
 		gp.users.addUser("cuscao")
 		dao.saveOrUpdate(gp)
 		
@@ -64,8 +65,18 @@ class PermissionsDaoTest extends AppContextTestBase {
 		
 		dao.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow) should be (Some(gp))
 		dao.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Deny) should be (None)
-		dao.getGrantedPermission(dept1, Permissions.Module.Read, GrantedPermission.Allow) should be (None)
+		dao.getGrantedPermission(dept1, Permissions.Module.ManageAssignments, GrantedPermission.Allow) should be (None)
 		dao.getGrantedPermission(dept2, Permissions.Module.Create, GrantedPermission.Allow) should be (None)
+		
+		dao.getGrantedRolesForUser(new User("cusbruv")).toSet should be (Set(gr1, gr2))
+		dao.getGrantedRolesForUser(new User("cusxar")) should be (Seq(gr1))
+		dao.getGrantedRolesForUser(new User("cuscao")) should be (Seq(gr2))
+		dao.getGrantedRolesForUser(new User("cusfaq")) should be (Seq())
+		
+		dao.getGrantedPermissionsForUser(new User("cusbruv")) should be (Seq(gp))
+		dao.getGrantedPermissionsForUser(new User("cusxar")) should be (Seq())
+		dao.getGrantedPermissionsForUser(new User("cuscao")) should be (Seq(gp))
+		dao.getGrantedPermissionsForUser(new User("cusfaq")) should be (Seq())
 	}
 	
 	@Test def guards = transactional { tx =>

@@ -27,19 +27,26 @@ the comments textarea needs to maintain newlines.
 <@form.labelled_row "openEnded" "Open-ended">
 	<label class="checkbox">
 		<@f.checkbox path="openEnded" id="openEnded" />
+		
+		<#assign popoverText>
+			<p>
+		   Check this box to mark the assignment as open-ended.
+		  </p>
+		  
+		  <ul>
+		   <li>Any close date previously entered will have no effect.</li>
+		   <li>Allowing extensions and submission after the close date will have no effect.</li>
+		   <li>No close date will be shown to students.</li>
+		   <li>There will be no warnings for lateness, and no automatic deductions to marks.</li>
+		   <li>You will be able to publish feedback individually at any time.</li>
+		  </ul>
+		</#assign>
+		
 		<a href="#" class="use-popover" 
 		   data-title="Open-ended assignments"
 		   data-html="true"
 		   data-trigger="hover"
-		   data-content="&lt;p&gt;
-		   Check this box to mark the assignment as open-ended.
-		   &lt;/p&gt;&lt;ul&gt;
-		   &lt;li&gt;Any close date previously entered will have no effect.&lt;/li&gt;
-		   &lt;li&gt;Allowing extensions and submission after the close date will have no effect.&lt;/li&gt;
-		   &lt;li&gt;No close date will be shown to students.&lt;/li&gt;
-		   &lt;li&gt;There will be no warnings for lateness, and no automatic deductions to marks.&lt;/li&gt;
-		   &lt;li&gt;You will be able to publish feedback individually at any time.&lt;/li&gt;
-		   &lt;/ul&gt;"
+		   data-content="${popoverText}"
 		   >What's this?</a>
 	</label>
 </@form.labelled_row>

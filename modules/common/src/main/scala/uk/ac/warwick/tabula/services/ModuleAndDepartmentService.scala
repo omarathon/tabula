@@ -16,6 +16,15 @@ import collection.JavaConverters._
 import uk.ac.warwick.userlookup.Group
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.RouteDao
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.RoleDefinition
+import scala.reflect.ClassTag
 
 /**
  * Handles data about modules and departments
@@ -27,6 +36,8 @@ class ModuleAndDepartmentService extends Logging {
 	@Autowired var departmentDao: DepartmentDao = _
 	@Autowired var routeDao: RouteDao = _
 	@Autowired var userLookup: UserLookupService = _
+	@Autowired var securityService: SecurityService = _
+	@Autowired var permissionsService: PermissionsService = _
 	def groupService = userLookup.getGroupService
 
 	def allDepartments = transactional(readOnly = true) {
@@ -57,24 +68,55 @@ class ModuleAndDepartmentService extends Logging {
 		routeDao.getByCode(code)
 	} 
 
-	def departmentsOwnedBy(usercode: String) = departmentDao.getByOwner(usercode)
-
-	def modulesManagedBy(usercode: String) = moduleDao.findByParticipant(usercode)
-	def modulesManagedBy(usercode: String, dept: Department) = moduleDao.findByParticipant(usercode, dept)
+	// We may have a granted role that's overridden later, so we also need to do a security service check as well
+	// as getting the role itself
 	
-	def modulesAdministratedBy(usercode: String) = {
-		departmentsOwnedBy(usercode).toSeq flatMap (dept => dept.modules.asScala)
+	def departmentsOwnedBy(user: CurrentUser): Set[Department] = 
+		permissionsService.getAllPermissionDefinitionsFor[Department](user, Permissions.Module.ManageAssignments)
+			.filter { department => securityService.can(user, Permissions.Module.ManageAssignments, department) }
+
+	def modulesManagedBy(user: CurrentUser): Set[Module] = 
+		permissionsService.getAllPermissionDefinitionsFor[Module](user, Permissions.Module.ManageAssignments)
+			.filter { module => securityService.can(user, Permissions.Module.ManageAssignments, module) }
+	
+	def modulesManagedBy(user: CurrentUser, dept: Department): Set[Module] = 
+		modulesManagedBy(user).filter { _.department == dept }
+	
+	def modulesAdministratedBy(user: CurrentUser) = {
+		departmentsOwnedBy(user) flatMap (dept => dept.modules.asScala)
 	}
-	def modulesAdministratedBy(usercode: String, dept: Department) = {
-		if (departmentsOwnedBy(usercode) contains dept) dept.modules.asScala else Nil
+	def modulesAdministratedBy(user: CurrentUser, dept: Department): Set[Module] = {
+		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala.toSet else Set()
 	}
+	
+	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) = 
+		permissionsService.getGrantedRole(target, defn) match {
+			case Some(role) => role
+			case _ => GrantedRole(target, defn)
+		}
 
 	def addOwner(dept: Department, owner: String) = transactional() {
-		dept.owners.addUser(owner)
+		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		role.users.addUser(owner)
+		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
-		dept.owners.removeUser(owner)
+		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		role.users.removeUser(owner)
+		permissionsService.saveOrUpdate(role)
+	}
+
+	def addManager(module: Module, owner: String) = transactional() {
+		val role = getRole(module, ModuleManagerRoleDefinition)
+		role.users.addUser(owner)
+		permissionsService.saveOrUpdate(role)
+	}
+
+	def removeManager(module: Module, owner: String) = transactional() {
+		val role = getRole(module, ModuleManagerRoleDefinition)
+		role.users.removeUser(owner)
+		permissionsService.saveOrUpdate(role)
 	}
 	
 	def save(dept: Department) = transactional() {

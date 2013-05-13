@@ -27,10 +27,11 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var assignments: JList[Assignment] = JArrayList()
 	
 	/* For permission parents, we include both the department and any assignments linked to this template */
-	def permissionsParents = Option(assignments) match { 
-		case Some(assignments) => Seq(Option(department)).flatten ++ assignments.asScala
-		case None => Seq(Option(department)).flatten
-	}
+	def permissionsParents = 
+		Option[PermissionsTarget](department).toStream.append(Option(assignments) match {
+			case Some(assignments) => assignments.asScala.toStream
+			case _ => Stream.empty
+		})
 
 	def countLinkedAssignments = Option(assignments) match { case Some(a) => a.size()
 		case None => 0

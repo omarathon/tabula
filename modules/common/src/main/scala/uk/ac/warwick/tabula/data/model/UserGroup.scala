@@ -60,14 +60,14 @@ class UserGroup extends GeneratedId {
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {
 			includeUsers.add(user)
-		}
+		} else false
 	}
 	def removeUser(user: String) = includeUsers.remove(user)
 
 	def excludeUser(user: String) = {
 		if (!excludeUsers.contains(user)) {
 			excludeUsers.add(user)
-		}
+		} else false
 	}
 	def unexcludeUser(user: String) = excludeUsers.remove(user)
 

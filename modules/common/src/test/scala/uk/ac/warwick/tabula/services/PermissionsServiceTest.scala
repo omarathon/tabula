@@ -36,8 +36,8 @@ class PermissionsServiceTest extends AppContextTestBase {
 		crd.builtInBaseRoleDefinition = ModuleManagerRoleDefinition
 		
 		val ro = new RoleOverride
-		ro.permission = Permissions.Module.Read
-		ro.overrideType = ro.Deny
+		ro.permission = Permissions.Module.ManageAssignments
+		ro.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro)
 		
@@ -63,7 +63,7 @@ class PermissionsServiceTest extends AppContextTestBase {
 		
 		service.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow) should be (Some(gp))
 		service.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Deny) should be (None)
-		service.getGrantedPermission(dept1, Permissions.Module.Read, GrantedPermission.Allow) should be (None)
+		service.getGrantedPermission(dept1, Permissions.Module.ManageAssignments, GrantedPermission.Allow) should be (None)
 		service.getGrantedPermission(dept2, Permissions.Module.Create, GrantedPermission.Allow) should be (None)
 		
 		withUser("cuscav") {
