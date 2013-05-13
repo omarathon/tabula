@@ -77,4 +77,13 @@ object Module {
 		case ModuleCatsPattern(module, cats) => Some(cats)
 		case _ => None
 	}
+	
+	// For sorting a collection by module code. Either pass to the sort function,
+	// or expose as an implicit val.
+	val CodeOrdering = Ordering.by[Module, String] ( _.code )
+	val NameOrdering = Ordering.by[Module, String] ( _.name )
+	
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of modules.
+	implicit val defaultOrdering = CodeOrdering
 }
