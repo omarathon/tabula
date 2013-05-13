@@ -125,27 +125,27 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 
 		check("Row 1",
 			assignmentSheet.getRow(1),
-			Seq("test one", "IN101", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", 10, 10, 0, 2, 10, 10, 1, 0, 0))
+			Seq("test one", "IN101", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", 10, 10, 0, 2, 0, 10, 10, 1, 0, 0))
 
 		check("Row 2",
 			assignmentSheet.getRow(2),
-			Seq("test two", "IN101", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", 29, 29, 0, 5, 29, 0, 0, 29, 1))
+			Seq("test two", "IN101", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", 29, 29, 0, 5, 0, 29, 0, 0, 29, 1))
 
 		check("Row 3",
 			assignmentSheet.getRow(3),
-			Seq("test three", "IN101", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", 13, 13, 0, 2, 13, 4, 0.307692307692307692, 9, 0.6923076923076923))
+			Seq("test three", "IN101", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", 13, 13, 0, 2, 0, 13, 4, 0.307692307692307692, 9, 0.6923076923076923))
 
 		check("Row 4",
 			assignmentSheet.getRow(4),
-			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative",35,35,0,7,35,7,0.2,28,0.8))
+			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative",35,35,0,7,0,35,7,0.2,28,0.8))
 
 		check("Row 5",
 			assignmentSheet.getRow(6),
-			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative",100,100,0,2,100,2,0.02,98,0.98))
+			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative",100,100,0,2,0,100,2,0.02,98,0.98))
 
 		check("Row 6",
 			assignmentSheet.getRow(5),
-			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative",73,73,24,0,73,65,0.890410958904109589,8,0.109589041095890410))
+			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative",73,73,24,0,0,73,65,0.890410958904109589,8,0.109589041095890410))
 
 
 		val moduleSheet = report.generateModuleSheet(department)
@@ -153,11 +153,11 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 
 		check("Module row 1",
 			moduleSheet.getRow(1),
-			Seq("Module One","IN101",3,52,52,0,9,14,0.269230769230769230,38,0.730769230769230769))
+			Seq("Module One","IN101",3,52,52,0,9,0,52,14,0.269230769230769230,38,0.730769230769230769))
 
 		check("Module row 2",
 			moduleSheet.getRow(2),
-			Seq("Module Two","IN102",3,208,208,24,9,74,0.3557692307692307692,134,0.6442307692307692307))
+			Seq("Module Two","IN102",3,208,208,24,9,0,208,74,0.3557692307692307692,134,0.6442307692307692307))
 
 	}
 
