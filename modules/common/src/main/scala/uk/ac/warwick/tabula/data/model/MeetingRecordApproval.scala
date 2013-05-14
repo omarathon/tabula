@@ -26,11 +26,10 @@ class MeetingRecordApproval extends GeneratedId  {
 
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	var creationDate: DateTime = DateTime.now	
-	
-	@Column(name="last_updated_date")
+	var creationDate: DateTime = DateTime.now
+
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	var lastUpdatedDate: DateTime = creationDate	
+	var lastUpdatedDate: DateTime = creationDate
 
 	var comments: String = _
 }
