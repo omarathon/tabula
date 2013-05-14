@@ -7,10 +7,11 @@ import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import org.hibernate.criterion.{Restrictions,Order}
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.data.model.Member
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
-	def list(rel: Set[StudentRelationship]): Seq[MeetingRecord]
+	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
 	def get(id: String): Option[MeetingRecord]
 }
 
@@ -19,16 +20,25 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
 
-	def list(rel: Set[StudentRelationship]): Seq[MeetingRecord] = {
+	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
 			session.newCriteria[MeetingRecord]
 					.add(Restrictions.in("relationship", rel))
+					// and only pick records where deleted = 0 or the current user id is the creator id
+					// - so that no-one can see records created and deleted by someone else
+					.add(Restrictions.disjunction()
+							.add(Restrictions.eq("deleted", false))
+							.add(Restrictions.eq("creator", currentUser))
+					)
 					.addOrder(Order.desc("meetingDate"))
 					.addOrder(Order.desc("lastUpdatedDate"))
 					.seq
+
+
 	}
-	
+
+
 	def get(id: String) = getById[MeetingRecord](id);
 }

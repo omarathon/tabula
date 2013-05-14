@@ -24,11 +24,13 @@ class CourseworkWorkflowService {
 	def getStagesFor(assignment: Assignment) = {
 		var stages = Seq[WorkflowStage]()
 		if (assignment.collectSubmissions) {
-			stages = stages ++ Seq(Submission, DownloadSubmission)
+			stages = stages ++ Seq(Submission)
 			
 			if (features.turnitin && assignment.module.department.plagiarismDetectionEnabled) {
 				stages = stages ++ Seq(CheckForPlagiarism)
 			}
+			
+			stages = stages ++ Seq(DownloadSubmission)
 			
 			if (features.markingWorkflows && assignment.markingWorkflow != null) {
 				stages = stages ++ Seq(ReleaseForMarking, FirstMarking)

@@ -36,7 +36,7 @@ import org.springframework.validation.BindingResult
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, mandatory(department))
 
 	val acceptedExtensions = Seq(".xlsx")
 

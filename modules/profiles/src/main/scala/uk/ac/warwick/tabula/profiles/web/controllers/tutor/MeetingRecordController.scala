@@ -20,6 +20,7 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import uk.ac.warwick.tabula.data.model.MeetingFormat
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
@@ -55,7 +56,7 @@ class MeetingRecordController extends ProfilesController {
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("student") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student))
+		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
 		case _ => None
 	}
 
@@ -106,6 +107,7 @@ class MeetingRecordController extends ProfilesController {
 				Mav("tutor/meeting/list",
 					"profile" -> student,
 					"meetings" -> meetingList,
+					"viewer" -> currentMember,
 					"openMeeting" -> newMeeting).noLayout()
 			}
 		}

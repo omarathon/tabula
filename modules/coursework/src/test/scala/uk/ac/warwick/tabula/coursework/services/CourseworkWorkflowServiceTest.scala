@@ -71,8 +71,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		department.plagiarismDetectionEnabled = true
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, DownloadSubmission,
-			CheckForPlagiarism,
+			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			AddMarks, AddFeedback, ReleaseFeedback, DownloadFeedback
 		))
 		
@@ -80,8 +79,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		assignment.markingWorkflow = Fixtures.markingWorkflow("my workflow")
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, DownloadSubmission,
-			CheckForPlagiarism,
+			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking,
 			AddMarks, AddFeedback, ReleaseFeedback, DownloadFeedback
 		))
@@ -89,8 +87,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		assignment.markingWorkflow.markingMethod = MarkingMethod.SeenSecondMarking
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, DownloadSubmission,
-			CheckForPlagiarism,
+			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking, SecondMarking,
 			AddMarks, AddFeedback, ReleaseFeedback, DownloadFeedback
 		))

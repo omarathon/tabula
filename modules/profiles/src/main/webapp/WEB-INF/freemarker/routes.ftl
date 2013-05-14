@@ -1,12 +1,15 @@
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
-if we end up changing any of them. 
+if we end up changing any of them.
 
-TODO grab values from the Routes object in code, as that's pretty equivalent and 
+TODO grab values from the Routes object in code, as that's pretty equivalent and
 	we're repeating ourselves here. OR expose Routes directly.
 
 --><#compress>
 <#macro home><@url page="/" /></#macro>
+
+<#macro deptperms department><@url page="/admin/department/${department.code}/permissions" /></#macro>
+
 <#macro search><@url page="/search" /></#macro>
 <#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
 <#macro profile_by_id student><@url page="/view/${student}"/></#macro>
@@ -25,4 +28,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/edit" /></#macro>
 
 <#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
+
+<#macro delete_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/delete" /></#macro>
+<#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
+<#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
+
+
 </#compress>
