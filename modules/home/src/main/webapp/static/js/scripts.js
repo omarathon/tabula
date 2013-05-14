@@ -138,7 +138,7 @@
 		var $this = $(this);
 
 		if ($this.is('form') && !$this.data('submitOnceHandled')) {
-			$this.data('submitOnceHandled', 'true');
+			$this.data('submitOnceHandled', true);
 			$this.removeData('submitOnceSubmitted');
 
 			$(this).on('submit', function(event) {
@@ -148,7 +148,7 @@
 				if (!submitted) {
 					var $buttons = $this.find('.submit-buttons .btn').not('.disabled');
 					$buttons.addClass('disabled');
-					$this.data('already-submitted', true);
+					$this.data('submitOnceSubmitted', true);
 					// For FF and other browsers with BFCache/History Cache,
 					// re-enable the form if you click Back.
 					$(window).on('pageshow', function() {
