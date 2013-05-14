@@ -40,7 +40,7 @@ abstract class ParameterlessCourseworkFilter extends CourseworkFilter {
 object CourseworkFilters {
 	private val ObjectClassPrefix = CourseworkFilters.getClass.getName
 	lazy val AllFilters = Seq(
-		AllStudents, SubmittedBetweenDates, OnTime, WithExtension, WithinExtension, WithWordCount, Unsubmitted,
+		AllStudents, SubmittedBetweenDates, OnTime, WithExtension, WithinExtension, WithWordCount,SubmissionNotDownloaded, Unsubmitted,
 		NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
 		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage,
 		NoFeedback, FeedbackNotReleased, FeedbackNotDownloaded
@@ -71,6 +71,16 @@ object CourseworkFilters {
 		def getDescription = "students"
 		def predicate(item: Student) = {
 			true
+		}
+		def applies(assignment: Assignment) = true
+	}
+	
+	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
+		def getDescription = "assignments not downloaded by staff"
+		def predicate(item: Student) = { 
+			(item.coursework.enhancedSubmission map { item => 
+				!item.downloaded
+			}) getOrElse(false)
 		}
 		def applies(assignment: Assignment) = true
 	}
@@ -351,4 +361,6 @@ object CourseworkFilters {
 		}
 		def applies(assignment: Assignment) = true
 	}
+	
+	
 }
