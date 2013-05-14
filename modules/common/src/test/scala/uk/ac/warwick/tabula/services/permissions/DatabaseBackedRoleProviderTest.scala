@@ -13,6 +13,9 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
+import uk.ac.warwick.tabula.roles.ModuleManager
 
 class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
 	
@@ -22,44 +25,24 @@ class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
 	provider.service = service
 	
 	val dept = Fixtures.department("in")
+	val module = Fixtures.module("in101")
 	
 	@Test def getRoles = withUser("cuscav") {
 		val gr1 = new DepartmentGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
-		val gr2 = new DepartmentGrantedRole(dept, ModuleManagerRoleDefinition)
+		val gr2 = new ModuleGrantedRole(module, ModuleManagerRoleDefinition)
 		
-		service.getGrantedRolesFor(currentUser, dept) returns (Seq(gr1, gr2))
+		service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream(gr1, gr2).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
 		
 		// Can't do exact equality because a granted role with no overrides is still a generated role, not a strict built in role
 		val roles = provider.getRolesFor(currentUser, dept)
 		roles.size should be (2)
 		roles(0).explicitPermissions should be (DepartmentalAdministrator(dept).explicitPermissions)
-		roles(1).explicitPermissions should be (DepartmentModuleManager(dept).explicitPermissions)
+		roles(1).explicitPermissions should be (ModuleManager(module).explicitPermissions)
 	}
 	
 	@Test def noRoles = withUser("cuscav") {
-		service.getGrantedRolesFor(currentUser, dept) returns (Seq())
-		provider.getRolesFor(currentUser, dept) should be (Seq())
-	}
-	
-	@Test def getPermissions = withUser("cuscav") {
-		val gp1 = new DepartmentGrantedPermission(dept, Permissions.Department.ManageDisplaySettings, GrantedPermission.Allow)
-		val gp2 = new DepartmentGrantedPermission(dept, Permissions.Module.Create, GrantedPermission.Deny)
-		
-		service.getGrantedPermissionsFor(currentUser, dept) returns (Seq(gp1, gp2))
-		
-		val permissions = provider.getPermissionsFor(currentUser, dept)
-		permissions.size should be (2)
-		permissions(0).permission should be (Permissions.Department.ManageDisplaySettings)
-		permissions(0).scope should be (Some(dept))
-		permissions(0).permissionType should be (GrantedPermission.Allow)
-		permissions(1).permission should be (Permissions.Module.Create)
-		permissions(1).scope should be (Some(dept))
-		permissions(1).permissionType should be (GrantedPermission.Deny)
-	}
-	
-	@Test def noPermissions = withUser("cuscav") {
-		service.getGrantedPermissionsFor(currentUser, dept) returns (Seq())
-		provider.getPermissionsFor(currentUser, dept) should be (Seq())
+		service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream.empty)
+		provider.getRolesFor(currentUser) should be (Stream.empty)
 	}
 
 }

@@ -34,6 +34,8 @@ class TutorChangeNotifierCommandTest extends TestBase with Mockito with Promises
 
 		cmd.replyAddress = "reply@to.me"
 		cmd.fromAddress = "from@to.me"
+			
+		// FIXME not testing anything?
 
 /*		val message = cmd.messageFor("/WEB-INF/freemarker/emails/new_tutor_notification.ftl",
 			"new@tutor.com",

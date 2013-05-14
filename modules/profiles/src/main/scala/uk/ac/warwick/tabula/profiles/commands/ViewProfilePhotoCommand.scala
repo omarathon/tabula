@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.RelationshipType
 
 class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
 	
@@ -40,16 +42,19 @@ class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile
 
 }
 
-class ViewPersonalTutorPhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
+class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
 	
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member)
+	relationship.relationshipType match {
+		case RelationshipType.PersonalTutor => PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member) 
+		case _ => throw new IllegalStateException("Unsupported relationship type: " + relationship.relationshipType)
+	}
 	
 	private val DefaultPhoto = new DefaultPhoto
 	private var fileFound: Boolean = _
 	
 	override def applyInternal() = {
-		val attachment = member.personalTutor match {
-			case member: Member => Option(member.photo) map { a => new Photo(a) } match {
+		val attachment = relationship.agentMember match {
+			case Some(member) => Option(member.photo) map { a => new Photo(a) } match {
 				case Some(photo) => photo.inputStream match {
 					case null => DefaultPhoto
 					case _ => photo
@@ -64,7 +69,7 @@ class ViewPersonalTutorPhotoCommand(val member: Member) extends Command[Renderab
 		attachment
 	}
 	
-	override def describe(d: Description) = d.member(member)
+	override def describe(d: Description) = d.member(member).property("relationship" -> relationship)
 	override def describeResult(d: Description) { d.property("fileFound", fileFound) }
 
 }

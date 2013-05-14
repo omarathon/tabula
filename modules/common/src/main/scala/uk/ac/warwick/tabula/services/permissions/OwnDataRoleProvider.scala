@@ -19,24 +19,24 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 @Component
 class OwnDataRoleProvider extends RoleProvider {
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
 		scope match {
 			// You can view your own submission			
 			case submission: Submission => 
-				if (submission.universityId == user.universityId) Seq(Submitter(submission))
-				else Seq()
+				if (submission.universityId == user.universityId) Stream(Submitter(submission))
+				else Stream.empty
 				
 			// You can view feedback to your work, but only if it's released
 			case feedback: Feedback => 
-				if (feedback.universityId == user.universityId && feedback.released) Seq(FeedbackRecipient(feedback))
-				else Seq()
+				if (feedback.universityId == user.universityId && feedback.released) Stream(FeedbackRecipient(feedback))
+				else Stream.empty
 				
 			// You can change your own user settings
 			case settings: UserSettings => 
-				if (user.apparentId.hasText && settings.userId == user.apparentId) Seq(SettingsOwner(settings))
-				else Seq()
+				if (user.apparentId.hasText && settings.userId == user.apparentId) Stream(SettingsOwner(settings))
+				else Stream.empty
 			
-			case _ => Seq()
+			case _ => Stream.empty
 		}
 	}
 	

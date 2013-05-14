@@ -222,8 +222,26 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 					// only save the personal tutor if we can match the ID with a staff member in Tabula
 					val member = memberDao.getByUniversityId(tutorUniId) match {
 						case Some(mem: Member) => {
-							logger.info("Got a personal tutor from SITS!  sprcode: " + sprCode + ", tutorUniId: " + tutorUniId)
-							profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
+							
+							val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, sprCode)
+			
+							// Does this relationship already exist?
+							currentRelationships.find(_.agent == tutorUniId) match {
+								case Some(existing) => existing
+								case _ => {
+									// End all existing relationships
+									currentRelationships.foreach { rel =>
+										rel.endDate = DateTime.now
+										profileService.saveOrUpdate(rel)
+									}
+									
+									// Save the new one
+									val rel = profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+							
+									rel
+								}
+							}
 						}
 						case _ => {
 							logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")

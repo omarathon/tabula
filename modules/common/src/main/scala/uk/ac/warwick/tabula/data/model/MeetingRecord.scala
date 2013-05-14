@@ -12,9 +12,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.system.permissions.Restricted
 
 @Entity
-class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
+class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted {
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
@@ -41,9 +43,13 @@ class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
 	var creator: Member = _
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
+	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var attachments: JList[FileAttachment] = JArrayList()
 
+	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var title: String = _
+	
+	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var description: String = _
 
 	def this(creator: Member, relationship: StudentRelationship) {
@@ -57,6 +63,8 @@ class MeetingRecord extends GeneratedId with ToString with CanBeDeleted {
 
 	// if there are no approvals, isApproved is true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(!_.approved)
+	
+	def permissionsParents = Stream(relationship.studentMember)
 
 	def toStringProps = Seq(
 		"creator" -> creator,

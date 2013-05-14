@@ -7,19 +7,35 @@ import org.joda.time.DateTime
 import javax.annotation.PreDestroy
 import uk.ac.warwick.userlookup.webgroups.GroupServiceAdapter
 import scala.collection.JavaConverters._
+import java.lang.String
+import scala.Predef.String
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.userlookup.User
 
 trait UserLookupService extends UserLookupInterface
 
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache {
-	
+
+
+	override def getUserByUserId(id: String) = filterApplicantUsers(super.getUserByUserId(id))
+
 	override def getUserByWarwickUniId(id: String) =
 		getUserByWarwickUniId(id, true)
 
 	override def getUserByWarwickUniId(id: String, ignored: Boolean) =
 		UserByWarwickIdCache.get(id)
 		
-	def getUserByWarwickUniIdUncached(id: String) = super.getUserByWarwickUniId(id)
-		
+	def getUserByWarwickUniIdUncached(id: String) = filterApplicantUsers(super.getUserByWarwickUniId(id))
+
+	private def filterApplicantUsers(user: User) = user.getExtraProperty("urn:websignon:usertype") match {
+		case "Applicant" => {
+			val result = new AnonymousUser()
+			result.setWarwickId(user.getWarwickId)
+			result
+		}
+		case _ => user
+	}
+
 }
 
 trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserLookupAdapter =>
@@ -81,5 +97,6 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getCaches() = delegate.getCaches()
 	def clearCaches() = delegate.clearCaches()
 	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
+	def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
 
 }

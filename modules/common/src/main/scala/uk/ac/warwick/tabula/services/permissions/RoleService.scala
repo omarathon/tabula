@@ -9,9 +9,10 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 
 trait RoleProvider {
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[Role]
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
 	
 	def rolesProvided: Set[Class[_ <: Role]]
 	
@@ -21,10 +22,10 @@ trait RoleProvider {
 	def isExhaustive = false
 }
 
-trait ScopelessRoleProvider extends RoleProvider {
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = getRolesFor(user)
+trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
+	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user, getRolesFor(user))
 	
-	def getRolesFor(user: CurrentUser): Seq[Role]
+	def getRolesFor(user: CurrentUser): Stream[Role]
 }
 
 case class PermissionDefinition(permission: Permission, scope: Option[PermissionsTarget], permissionType: GrantedPermission.OverrideType)
@@ -36,6 +37,12 @@ trait PermissionsProvider {
 	 * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
 	 */
 	def isExhaustive = false
+}
+
+trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
+	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user, getPermissionsFor(user))
+	
+	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition]
 }
 
 trait RoleService {

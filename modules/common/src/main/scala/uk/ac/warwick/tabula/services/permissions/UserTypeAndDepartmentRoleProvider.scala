@@ -20,12 +20,12 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	var profileService = Wire.auto[ProfileService]
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
 	
-	private def getRolesForMembers(members: Seq[Member]) = members flatMap { member =>
-		Seq(UniversityMemberRole(member)) ++ (member.userType match {
+	private def getRolesForMembers(members: Seq[Member]) = members.toStream flatMap { member =>
+		UniversityMemberRole(member) #:: (member.userType match {
 			case Student => member.touchedDepartments map { StudentRole(_) }
 			case Staff => member.affiliatedDepartments map { StaffRole(_) }
 			case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
-			case _ => Seq()
+			case _ => Stream.empty
 		})
 	}
 	
@@ -33,20 +33,20 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 		if (user.departmentCode.hasText) {
 			departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 				case Some(department) =>
-					if (user.isStaff) Seq(StaffRole(department))
-					else if (user.isStudent) Seq(StudentRole(department))
-					else Seq()
-				case None => Seq()
+					if (user.isStaff) Stream(StaffRole(department))
+					else if (user.isStudent) Stream(StudentRole(department))
+					else Stream.empty
+				case None => Stream.empty
 			}
 		}
-		else Seq()
+		else Stream.empty
 
-	def getRolesFor(user: CurrentUser): Seq[Role] = {
+	def getRolesFor(user: CurrentUser): Stream[Role] = {
 		if (user.realUser.isLoggedIn) {
 			val members = profileService.getAllMembersWithUserId(user.apparentId, true)
 			if (!members.isEmpty) getRolesForMembers(members)
 			else getRolesForSSO(user)
-		} else Seq()
+		} else Stream.empty
 	}
 	
 	def rolesProvided = Set(classOf[StudentRole], classOf[StaffRole], classOf[UniversityMemberRole])
