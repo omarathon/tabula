@@ -26,9 +26,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
 
-<#macro delete_meeting_record meeting_record_id><@url page="/tutor/meeting/${meeting_record_id}/delete" /></#macro>
-<#macro restore_meeting_record meeting_record_id><@url page="/tutor/meeting/${meeting_record_id}/restore" /></#macro>
-<#macro purge_meeting_record meeting_record_id><@url page="/tutor/meeting/${meeting_record_id}/purge" /></#macro>
+<#macro delete_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/delete" /></#macro>
+<#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
+<#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
 
 
 </#compress>
