@@ -18,4 +18,8 @@ object Routes {
 		def view(member: Member, meeting: MeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
 	}
+	
+	object admin {
+		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
+	}
 }

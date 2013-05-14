@@ -7,6 +7,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 --><#compress>
 <#macro home><@url page="/" /></#macro>
+
+<#macro deptperms department><@url page="/admin/department/${department.code}/permissions" /></#macro>
+
 <#macro search><@url page="/search" /></#macro>
 <#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
 <#macro profile_by_id student><@url page="/view/${student}"/></#macro>
