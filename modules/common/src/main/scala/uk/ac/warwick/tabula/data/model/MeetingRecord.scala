@@ -14,6 +14,7 @@ import java.sql.Types
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 
 @Entity
 class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted {
@@ -48,7 +49,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 
 	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var title: String = _
-	
+
 	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var description: String = _
 
@@ -61,9 +62,9 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
-	// if there are no approvals, isApproved is true - otherwise, all approvals need to be true
-	def isApproved = !approvals.asScala.exists(!_.approved)
-	
+	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
+	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
+
 	def permissionsParents = Stream(relationship.studentMember)
 
 	def toStringProps = Seq(
