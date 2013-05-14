@@ -76,7 +76,7 @@ object CourseworkFilters {
 	}
 	
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
-		def getDescription = "assignments not downloaded by staff"
+		def getDescription = "submissions not downloaded by staff"
 		def predicate(item: Student) = { 
 			(item.coursework.enhancedSubmission map { item => 
 				!item.downloaded
