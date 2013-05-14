@@ -160,7 +160,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment
 		photo.name = universityId + ".jpg"
-		photo.uploadedData = () => new ByteArrayInputStream(bytes)
+		photo.uploadedData = new ByteArrayInputStream(bytes)
 		photo.uploadedDataLength = bytes.length
 		fileDao.savePermanent(photo)
 		photo

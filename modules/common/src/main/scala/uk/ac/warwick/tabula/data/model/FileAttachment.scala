@@ -114,7 +114,7 @@ class FileAttachment extends GeneratedId with DetectMimeType {
 
 	def hasData = file != null
 
-	@transient var uploadedData: (() => InputStream) = null
+	@transient var uploadedData: InputStream = null
 	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {

@@ -26,7 +26,7 @@ class SortModulesController extends BaseController {
 	def command(@PathVariable department: Department) = new SortModulesCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute cmd:SortModulesCommand):Mav = {
+	def showForm(@ModelAttribute cmd:SortModulesCommand, errors: Errors):Mav = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd)

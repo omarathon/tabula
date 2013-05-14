@@ -17,7 +17,7 @@ request.remoteAddr=${request.remoteAddr}
 request.requestURI=${request.requestURI}
 request.method=${request.method}
 <#assign parameters=request.parameterMap />
-<#list parameters?keys as key>
+<#list parameters?keys?sort as key>
 request.params[${key}]=[<#list parameters[key] as v>${v}<#if v_has_next>,</#if></#list>]
 </#list>
 </#if>
