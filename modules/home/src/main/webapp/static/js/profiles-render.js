@@ -85,8 +85,8 @@
 				$.post(url, function(data) {
 					if (data.status == "successful") {
 						$details.addClass("deleted muted");
-						$details.removeClass("processing");
 					}
+					$details.removeClass("processing");
 				}, "json");
 			}
 			return false;
@@ -102,8 +102,9 @@
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
-						$details.removeClass("deleted muted processing");
+						$details.removeClass("deleted muted");
 					}
+					$details.removeClass("processing");
 				}, "json");
 			}
 			return false;
