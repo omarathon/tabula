@@ -167,6 +167,7 @@ object Permissions {
 		object MeetingRecord {
 			case object Create extends Permission
 			case object Read extends Permission
+			case object ReadDetails extends Permission
 			case object Update extends Permission
 			case object Delete extends Permission
 		}
