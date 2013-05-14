@@ -37,9 +37,9 @@
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title!}
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.delete_meeting_record meeting.id />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.restore_meeting_record meeting.id />" class="restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.purge_meeting_record meeting.id />" class="purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<a href="<@routes.delete_meeting_record meeting />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="<@routes.restore_meeting_record meeting />" class="restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="<@routes.purge_meeting_record meeting />" class="purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
 									<i class="icon-spinner"></i>
 								</div>
 							</#if>
