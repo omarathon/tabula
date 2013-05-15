@@ -1,15 +1,14 @@
 <#compress>
 <#escape x as x?html>
 
-<h1>Module permissions for ${module.code?upper_case} // ${module.name}</h1>
-
-<h2>Add a:</h2>
-
-<#assign moduleperms_url><@routes.moduleperms module/></#assign>
-
 <div id="module-permissions-page">
+	<h1>Module permissions for ${module.code?upper_case} // ${module.name}</h1>
+
+	<#assign moduleperms_url><@routes.moduleperms module/></#assign>
 
 <@f.form action="${moduleperms_url}" method="post" commandName="addCommand" cssClass="module-permissions">
+	<h2>Add a:</h2>
+
 	<@form.row path="usercodes">
 	<input type="hidden" name="_command" value="add">
 

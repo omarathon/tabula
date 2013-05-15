@@ -82,7 +82,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			alternativeEmailAddress	= null,
 			userType				= Student		)
 
-		val mac = MembershipInformation(mm, Some(blobBytes))
+		val mac = MembershipInformation(mm, () => Some(blobBytes))
 
 	}
 

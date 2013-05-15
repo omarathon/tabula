@@ -4,9 +4,12 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class StaffRole(department: model.Department) extends BuiltInRole(department, StaffRoleDefinition)
+case class StaffRole(department: model.Department) extends BuiltInRole(StaffRoleDefinition, department)
 
-case object StaffRoleDefinition extends BuiltInRoleDefinition {
+case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
+	
+	override def description = "Staff Member"
+		
 	GrantsScopelessPermission(
 		UserPicker
 	)

@@ -61,6 +61,8 @@ class GrantRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends C
 		// Ensure that the current user can do everything that they're trying to grant permissions for
 		if (roleDefinition == null) errors.rejectValue("roleDefinition", "NotEmpty")
 		else {
+			if (!roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
+			
 			val user = RequestInfo.fromThread.get.user
 			if (!user.sysadmin) roleDefinition.allPermissions(Some(scope)) map { permissionAndScope =>
 				val (permission, scope) = (permissionAndScope._1, permissionAndScope._2.orNull)

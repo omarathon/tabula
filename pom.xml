@@ -65,8 +65,10 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/home</module>
+    <module>modules/admin</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
+		<module>modules/groups</module>
 		<module>modules/scheduling</module>
 	</modules>
 
