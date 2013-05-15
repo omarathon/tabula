@@ -148,13 +148,7 @@
 </#macro>
 
 <#macro role_definition_description role_definition><#compress>
-	<#if role_definition.name == 'ModuleManagerRoleDefinition'>
-		module manager
-	<#elseif role_definition.name == 'ModuleAssistantRoleDefinition'>
-		module assistant
-	<#else>
-		${role_definition.name}
-	</#if>
+	${role_definition.description?lower_case}
 </#compress></#macro>
 
 </#escape>

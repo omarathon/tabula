@@ -25,6 +25,10 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 
 	// Role uses getName. Could change it to name.
 	def getName = name
+	
+	def description = "%s (derived from %s)" format (name, Option(baseRoleDefinition).map { _.description } getOrElse("another role"))
+	
+	def isAssignable = true
 
 	// The role definition that this role infers from; can be a built in role definition
 	// or a custom role definition
