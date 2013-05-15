@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
 import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 @Entity
