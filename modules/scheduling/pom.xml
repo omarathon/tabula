@@ -25,6 +25,28 @@
 	</scm>
 
 	<profiles>
+		<!-- Scheduling is NEVER skinny -->
+		<profile>
+			<id>skinny</id>
+			
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<packagingExcludes></packagingExcludes>
+							<archive>
+								<manifest>
+									<addClasspath>false</addClasspath>
+									<classpathPrefix></classpathPrefix>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	
 		<!-- deploy to jboss -->
 		<profile>
 			<id>deploy</id>
