@@ -52,7 +52,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			userType				= Staff
 		)
 		
-		val mac = MembershipInformation(mm, Some(blobBytes))
+		val mac = MembershipInformation(mm, () => Some(blobBytes))
 	}
 	
 	// SITS names come uppercased - check that we reformat various names correctly.
@@ -66,7 +66,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					universityId = "0672089",
 					preferredForenames = name.toUpperCase,
 					userType = Staff
-				), None)
+				), () => None)
 				
 				val member = new ImportSingleStudentCommand(mac, new AnonymousUser, rs)				
 				member.firstName should be (name)
@@ -87,7 +87,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					universityId = "0672089",
 					preferredSurname = name.toUpperCase,
 					userType = Staff
-				), None)
+				), () => None)
 				
 				val member = new ImportSingleStudentCommand(mac, new AnonymousUser, rs)
 				member.lastName should be (name)
@@ -141,7 +141,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
 			userType				= Staff
-		), Some(blobBytes))
+		), () => Some(blobBytes))
 		
 		val importer = new ProfileImporter()
 		val fileDao = mock[FileDao]
