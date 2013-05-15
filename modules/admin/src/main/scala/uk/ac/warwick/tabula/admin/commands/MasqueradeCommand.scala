@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.home.commands.admin
+package uk.ac.warwick.tabula.admin.commands
 
 import uk.ac.warwick.tabula.web.Cookie
 import uk.ac.warwick.tabula.commands.Command
