@@ -80,7 +80,9 @@
 					$form = $m.find('form.double-submit-protection');
 					$form.tabulaSubmitOnce();
 					$form.find(".btn").removeClass('disabled');
-	
+					// wipe any existing state information for the submit protection
+					$form.removeData('submitOnceSubmitted');
+
 					// firefox fix
 					var wait = setInterval(function() {
 						var h = $f.find("body").height();

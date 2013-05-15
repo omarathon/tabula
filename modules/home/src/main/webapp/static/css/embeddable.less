@@ -1208,11 +1208,21 @@ h1.with-settings {
 			section.meetings {
 				margin: 12px 0;
 
-				details.meeting > summary {
-					padding-top: 9px;
-					font-weight: bold;
-					border-bottom: dotted 1px lighten(@grayLight, 35%);
+				details.meeting {
+					summary {
+						padding-top: 9px;
+						font-weight: bold;
+						border-bottom: dotted 1px lighten(@grayLight, 35%);
+					}
+
+					.meeting-body {
+						margin: 10px 0 0 20px;
+						.description, .attachment{
+							margin-bottom: 5px;
+						}
+					}
 				}
+
 
 				.new, .toggle-all-details {
 					margin: -20px 0 0 10px;

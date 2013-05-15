@@ -69,6 +69,7 @@ class MeetingRecordController extends ProfilesController {
 			"modal" -> true,
 			"command" -> createCommand,
 			"student" -> student,
+			"isStudent" -> (student == currentMember),
 			"tutorName" -> createCommand.relationship.agentName).noLayout()
 	}
 
@@ -82,6 +83,7 @@ class MeetingRecordController extends ProfilesController {
 			"iframe" -> true,
 			"command" -> createCommand,
 			"student" -> student,
+			"isStudent" -> (student == currentMember),
 			"tutorName" -> createCommand.relationship.agentName,
 			"creator" -> createCommand.creator,
 			"formats" -> formats).noNavigation()
@@ -121,6 +123,7 @@ class MeetingRecordController extends ProfilesController {
 		Mav("tutor/meeting/edit",
 			"command" -> createCommand,
 			"student" -> student,
+			"isStudent" -> (student == currentMember),
 			"tutorName" -> createCommand.relationship.agentName,
 			"creator" -> createCommand.creator,
 			"formats" -> formats)

@@ -70,8 +70,11 @@ class CreateMeetingRecordCommand(
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
-		generateMeetingApproval(meeting)
-		//meetingApprovals.foreach(???) TODO-RITCHIE - Notifications
+		val meetingApprovals = generateMeetingApproval(meeting)
+		meetingApprovals.foreach(meetingApproval => {
+			meeting.approvals.add(meetingApproval)
+			//TODO-Ritchie notification
+		})
 
 		meeting
 	}
@@ -87,7 +90,7 @@ class CreateMeetingRecordCommand(
 			meetingRecordApproval
 		}
 
-		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ == creator)
+		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ != creator)
 		approver.map(newMeetingRecord(_))
 
 	}

@@ -66,8 +66,11 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
 
 	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
+	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
+	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.find(_.approver == member).isDefined
 
 	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
+	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
 
 	def permissionsParents = Stream(relationship.studentMember)
 

@@ -21,8 +21,9 @@
 	<div class="modal-footer">
 		<form class="double-submit-protection">
 			<span class="submit-buttons">
-				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
+				<#assign title>Submit record for approval by personal <#if isStudent>tutor<#else>tutee</#if></#assign>
+				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+					Submit for approval
 				</button>
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 			</span>
