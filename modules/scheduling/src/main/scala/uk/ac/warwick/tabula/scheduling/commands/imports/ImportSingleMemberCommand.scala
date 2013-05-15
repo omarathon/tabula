@@ -51,9 +51,11 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	// A couple of intermediate properties that will be transformed later
-	var photoOption: Option[Array[Byte]] = _
+	var photoOption: () => Option[Array[Byte]] = _
 	var homeDepartmentCode: String = _
 	//var studyDepartmentCode: String = _
+	
+	var membershipLastUpdated: LocalDate = _
 
 	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
 		this()
@@ -62,6 +64,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		implicit val metadata = rs.getMetaData
 
 		val member = mac.member
+		this.membershipLastUpdated = member.modified
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
 		this.userId = member.usercode
@@ -150,11 +153,25 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
 		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
 	)
+	
+	private def copyPhotoIfModified(property: String, photoOption: () => Option[Array[Byte]], memberBean: BeanWrapper): Boolean = {
+		val memberLastUpdated = memberBean.getPropertyValue("lastUpdatedDate").asInstanceOf[DateTime]
+		
+		/*
+		 * We copy the photo if:
+		 * - There is no last updated date for the Member; or
+		 * - There is no last updated date from Membership; or
+		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
+		 */
+		if (memberLastUpdated == null || membershipLastUpdated == null || memberLastUpdated.isBefore(membershipLastUpdated.toDateTimeAtStartOfDay().plusDays(1)))
+			copyPhoto("photo", photoOption(), memberBean)
+		else false
+	}
 
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-		copyPhoto("photo", photoOption, memberBean) |
+		copyPhotoIfModified("photo", photoOption, memberBean) |
 		copyDepartment("homeDepartment", homeDepartmentCode, memberBean)
 
 	private def toPhoto(bytes: Array[Byte]) = {
