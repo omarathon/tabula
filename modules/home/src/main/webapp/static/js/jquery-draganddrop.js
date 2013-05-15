@@ -17,6 +17,10 @@ that this list will be bound to on the server. Each list item must then
 contain a hidden field relating to its value. The script will use the
 bindpath value to rename fields as they are moved about.
 
+If you actually don't want to bind any items in a particular list, give it
+data-bindpath="true" instead and it will set the name to blank when moved
+into this list.
+
 Example (showing some optional extras as below)
 
   <div id=tutee-widget>
@@ -42,7 +46,7 @@ Optional extras:
  - Popup list: Add a .show-list button and it will trigger a popout
        listing all the items. Use this in conjunction with hiding the
        list itself (by adding .hide to .drag-list)
- - Return items: Add .return-list to ONE .drag-list then add a 
+ - Return items: Add .return-list to ONE .drag-list then add a
        .return-items button; it will be wired to move all items into
        that list.
 
@@ -75,7 +79,7 @@ TODO: More options; Random allocation function.
         };
 
         this.randomise = function() {
-            throw "Not implemented";
+            throw new Error("Not implemented");
         };
 
         // call on a $(ul) when its content changes.
@@ -99,17 +103,41 @@ TODO: More options; Random allocation function.
             self.returnItems();
         });
 
-        $el.find('.show-list').popover({
-            content: function() {
-                var lis = $(this)
-                    .closest('.drag-target')
-                    .find('li')
-                    .map(function(i, li){
-                        return '<li>'+$(li).text()+'</li>';
-                    })
-                    .toArray();
-                return '<ul>'+lis.join('')+'</ul>';
-            }
+        $el.find('.show-list').each(function(i, button) {
+        	var $button = $(button);
+        	var closeLinkHtml = ' <a href=# class="delete btn btn-danger">&times;</a>';
+        	$button.popover({
+                content: function() {
+                	var customHeader = $(this).data('pre') || ''; // data-pre attribute
+                    var lis = $(this)
+                        .closest('.drag-target')
+                        .find('li')
+                        .map(function(i, li){
+                        	var $li = $(li);
+                        	var id = $li.find('input').val();
+                            return '<li data-item-id="'+id+'">'+$li.text()+closeLinkHtml+'</li>';
+                        })
+                        .toArray();
+                    return customHeader + '<ul>'+lis.join('')+'</ul>';
+                }
+            });
+        });
+
+        // Handle buttons inside the .show-list popover by attaching it to .drag-target,
+        // so we don't have to remember to bind events to popovers as they come and go.
+        $el.find('.drag-target').on('click', '.delete', function() {
+        	var $link = $(this);
+        	var id = $link.data('item-id');
+        	// the popover list item
+        	var $li = $link.closest('li');
+        	// the underlying list item
+        	var $realLi = $li
+	        	.closest('.drag-target')
+	        	.find('input')
+	        	.filter(function(){ return this.value === id; })
+	        	.closest('li');
+        	returnItem($realLi);
+        	$li.remove();
         });
 
         var $sortables = $el.find(sortables);
@@ -177,6 +205,7 @@ TODO: More options; Random allocation function.
 
         // Dropping onto any .drag-target
         $el.find('.drag-target').droppable({
+        	hoverClass: "drop-hover",
             activate: function(event, ui) {
                 //$(event.target).addClass('droponme-highlight');
             },
@@ -250,9 +279,12 @@ TODO: More options; Random allocation function.
     // NOTE only works if exactly 1 input in each li
     var renameFields = function($list) {
         var bindpath = $list.data('bindpath');
-        if (!bindpath) throw "No data-bindpath on ul";
+        var nobind = $list.data('nobind') === true;
+        if (!bindpath && !nobind) throw new Error("No data-bindpath on ul: " + $list);
         $list.find('li input').each(function(i, field) {
-            field.name = bindpath + '[' + i + ']';
+            var path = "";
+            if (!nobind) path = bindpath + '[' + i + ']';
+            field.name = path;
         });
     };
 

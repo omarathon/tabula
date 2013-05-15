@@ -1,6 +1,13 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
+<#macro student_item student bindpath="">
+<li class="label">
+	<i class="icon-user"></i> ${student.displayValue}
+	<input type="hidden" name="${bindpath}" value="${student.userCode}" />
+</li>
+</#macro>
+
 <#macro assignStudents studentList markerList class name>
 	<div class="btn-toolbar">
 		<a class="random btn btn-mini"
@@ -15,70 +22,32 @@
 	<div class="row-fluid">
 		<div class="students span3">
 			<h3>Students</h3>
-			<div class="student-list">
-				<ul class="member-list">
+			<div class="student-list drag-target">
+				<ul class="drag-list" data-nobind="true">
 					<#list studentList as student>
-						<li>
-							<div class="student"
-								 data-student-display="${student.displayValue}"
-								 data-student-id="${student.userCode}">
-								<i class="icon-user"></i> ${student.displayValue}
-							</div>
-						</li>
+						<@student_item student "" />
 					</#list>
 				</ul>
 			</div>
 		</div>
 		<div class="${class} span9">
 			<h3>${name}</h3>
-			<ul class="member-list">
-				<#list markerList as marker>
-					<#assign existingStudents = marker.students />
-					<li>
-						<div class="marker" data-marker-id="${marker.userCode}">
-							<span>${marker.fullName}</span>
-							<span class="count badge badge-info">${existingStudents?size}</span>
-							<div id="container-${marker.userCode}" class="student-container hidden">
-								<ul class="student-list">
-									<#list existingStudents as student>
-										<li>
-											${student.displayValue}
-											<a class="remove-student btn btn-mini"
-												href="#" data-marker-id="${marker.userCode}"
-												data-student-id="${student.userCode}"
-												data-student-display="${student.displayValue}">
-												<i class="icon-remove"></i> Remove
-											</a>
-										</li>
-									</#list>
-								</ul>
-								<#list existingStudents as student>
-									<input type="hidden"
-										   name="markerMapping[${marker.userCode}][${student_index}]"
-										   value="${student.userCode}"
-										   data-student-display="${student.displayValue}">
-								</#list>
-							</div>
-							<a id="tool-tip-${marker.userCode}" class="btn btn-mini" data-toggle="button" href="#">
-								<i class="icon-list"></i>
-								List
-							</a>
-							<script type="text/javascript">
-								jQuery(function($){
-									$("#tool-tip-${marker.userCode}").popover({
-										placement: 'right',
-										html: true,
-										content: function(){
-											return $('<div />').append($('#container-${marker.userCode} .student-list').clone()).html();
-										},
-										title: 'Students to be marked by ${marker.fullName}'
-									});
-								});
-							</script>
-						</div>
-					</li>
-				</#list>
-			</ul>
+			<#list markerList as marker>
+				<#assign existingStudents = marker.students />
+				<div class="marker drag-target">
+					<span>${marker.fullName}</span>
+					<span class="drag-count badge badge-info">${existingStudents?size}</span>
+
+					<ul class="drag-list hide" data-bindpath="markerMapping[${marker.userCode}]">
+						<#list existingStudents as student>
+							<@student_item student bindpath="markerMapping[${marker.userCode}][${student_index}]" />
+						</#list>
+					</ul>
+
+					<a href="#" class="show-list" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
+
+				</div>
+			</#list>
 		</div>
 	</div>
 </#macro>

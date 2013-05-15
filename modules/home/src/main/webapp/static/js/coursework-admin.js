@@ -243,8 +243,14 @@ $.fn.shiftSelectable = function() {
     });
 };
 
-// assign markers javascript
-$(function(){
+// assign markers
+$(function() {
+
+	$('#first-markers, #second-markers').dragAndDrop();
+	
+});
+
+var DISABLED = function(){
 
 	var draggableOptions = {
 		containment: "#assign-markers",
@@ -362,7 +368,7 @@ $(function(){
 		e.preventDefault();
 		return false;
 	});
-});
+}
 
 // code for markingWorkflow add/edit
 $(function(){
