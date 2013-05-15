@@ -48,7 +48,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures {
 			// Remove module manager 2
 			className("permission-list").webElement.findElements(By.tagName("tr")).size should be (2)
 			
-			val row = className("permission-list").webElement.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == P.ModuleManager2.usercode })
+			val row = className("permission-list").webElement.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == "(" + P.ModuleManager2.usercode + ")"  })
 			click on (row.get.findElement(By.className("btn")))
 			
 			// The HtmlUnit driver doesn't support Javascript alerts, so this just works
