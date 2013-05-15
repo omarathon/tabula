@@ -15,24 +15,22 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.web.multipart.MultipartFile
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.data.model.MeetingFormat
+import scala.Some
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 
 class CreateMeetingRecordCommand(
 		val creator: Member,
 		var relationship: StudentRelationship)
-	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener {
+	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
 
 	val HOUR = 12 // arbitrary meeting time
 	val PREHISTORIC_YEARS = 5 // number of years to consider as extremely old
@@ -69,9 +67,29 @@ class CreateMeetingRecordCommand(
 		meeting.format = format
 		doFiling(meeting)
 
+		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
+		generateMeetingApproval(meeting)
+		//meetingApprovals.foreach(???) TODO-RITCHIE - Notifications
+
 		meeting
+	}
+
+	def generateMeetingApproval(meetingRecord: MeetingRecord) : Option[MeetingRecordApproval] = {
+
+		def newMeetingRecord(approver: Member) : MeetingRecordApproval = {
+			val meetingRecordApproval = new MeetingRecordApproval()
+			meetingRecordApproval.state = Pending
+			meetingRecordApproval.approver = approver
+			meetingRecordApproval.meetingRecord = meetingRecord
+			session.saveOrUpdate(meetingRecordApproval)
+			meetingRecordApproval
+		}
+
+		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ == creator)
+		approver.map(newMeetingRecord(_))
+
 	}
 
 	override def onBind(result:BindingResult) = transactional() {

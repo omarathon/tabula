@@ -35,6 +35,7 @@
 
 					<details class="meeting ${deletedClasses} ${openClass!}" ${openAttribute!}>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title!}
+
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
 									<a href="<@routes.delete_meeting_record meeting />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
@@ -46,7 +47,14 @@
 						</summary>
 
 						<#if meeting.description??>
-							<div class="description"><#noescape>${meeting.description}</#noescape></div>
+							<div class="description">
+								<#noescape>${meeting.description}</#noescape>
+								<#if meeting.pendingApproval>
+									<div class="alert alert-info">
+										This meeting record needs to be approved.
+									</div>
+								</#if>
+							</div>
 						</#if>
 
 						<#if meeting.attachments?? && meeting.attachments?size gt 0>

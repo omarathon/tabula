@@ -94,23 +94,26 @@ class MeetingRecordController extends ProfilesController {
 			errors: Errors, @ModelAttribute("viewMeetingRecordCommand")
 			viewCommand: Option[ViewMeetingRecordCommand],
 			@PathVariable("student") student: Member) = {
-		transactional() {
-			if (errors.hasErrors) {
-				showIframeForm(createCommand, student)
-			} else {
-				val newMeeting = createCommand.apply()
-				val meetingList = viewCommand match {
-					case None => Seq()
-					case Some(cmd) => cmd.apply
-				}
 
-				Mav("tutor/meeting/list",
-					"profile" -> student,
-					"meetings" -> meetingList,
-					"viewer" -> currentMember,
-					"openMeeting" -> newMeeting).noLayout()
-			}
-		}
+				if (errors.hasErrors) {
+					showIframeForm(createCommand, student)
+				} else {
+
+					val newMeeting = transactional(){
+						createCommand.apply()
+					}
+
+					val  meetingList = viewCommand match {
+						case None => Seq()
+						case Some(cmd) => transactional(){cmd.apply()}
+					}
+
+					Mav("tutor/meeting/list",
+						"profile" -> student,
+						"meetings" -> meetingList,
+						"viewer" -> currentMember,
+						"openMeeting" -> newMeeting).noLayout()
+				}
 	}
 
 	// blank sync form
