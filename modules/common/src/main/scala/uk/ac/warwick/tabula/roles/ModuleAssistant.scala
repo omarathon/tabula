@@ -4,9 +4,11 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-case class ModuleAssistant(module: model.Module) extends BuiltInRole(module, ModuleAssistantRoleDefinition)
+case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssistantRoleDefinition, module)
 
 case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
+	
+	override def description = "Module Assistant"
 		
 	GrantsScopedPermission( 
 		Module.ManageAssignments,

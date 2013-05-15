@@ -16,8 +16,15 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 
 class PermissionsHelperCommandTest extends TestBase with Mockito {
+	
+	case object EmptyBuiltInDefinition extends BuiltInRoleDefinition {
+		import Permissions._
+		
+		override def description = "Empty"
+	}
 	
 	val securityService = mock[SecurityService]
 	val roleService = mock[RoleService]
@@ -44,8 +51,8 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 			pd1, pd2
 		))
 		
-		val r1 = new GeneratedRole(None, "r1")
-		val r2 = new GeneratedRole(None, "r2")
+		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 		
 		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
 			r1, r2
@@ -76,8 +83,8 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 			pd1, pd2
 		))
 		
-		val r1 = new GeneratedRole(None, "r1")
-		val r2 = new GeneratedRole(None, "r2")
+		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 		
 		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
 			r1, r2
@@ -111,8 +118,8 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 			pd1, pd2
 		))
 		
-		val r1 = new GeneratedRole(None, "r1")
-		val r2 = new GeneratedRole(None, "r2")
+		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 		
 		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
 			r1, r2
@@ -150,8 +157,8 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 			pd1, pd2
 		))
 		
-		val r1 = new GeneratedRole(None, "r1")
-		val r2 = new GeneratedRole(None, "r2")
+		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 		
 		roleService.getRolesFor(isA[CurrentUser], isEq(dept)) returns (Stream(
 			r1, r2
@@ -188,8 +195,8 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 			pd1, pd2
 		))
 		
-		val r1 = new GeneratedRole(None, "r1")
-		val r2 = new GeneratedRole(None, "r2")
+		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 		
 		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
 			r1, r2

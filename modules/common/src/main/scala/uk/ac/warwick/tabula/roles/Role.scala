@@ -9,7 +9,20 @@ import javax.persistence.Transient
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 
 trait RoleDefinition {
+	/**
+	 * The canonical machine-readable name for this role. Used for listing and (for built-ins) as a database identifier
+	 */
 	def getName: String
+	
+	/**
+	 * A short description of this definition; usually a human-readable version of getName
+	 */
+	def description: String
+	
+	/**
+	 * Whether this role can be assigned to a user in the system. Return false for inferred roles
+	 */
+	def isAssignable: Boolean
 
 	def permissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
 	def subRoles(scope: Option[PermissionsTarget]): Set[Role]
@@ -62,6 +75,12 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
+		
+	def isAssignable = true
+}
+
+trait UnassignableBuiltInRoleDefinition extends BuiltInRoleDefinition {
+	override def isAssignable = false
 }
 
 object RoleDefinition {
@@ -88,7 +107,7 @@ object RoleDefinition {
 		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 }
 
-abstract class Role(val scope: Option[PermissionsTarget]) {
+abstract class Role(val definition: RoleDefinition, val scope: Option[PermissionsTarget]) {
 
 	private var permissions: Map[Permission, Option[PermissionsTarget]] = ListMap()
 	private var roles: Set[Role] = Set()
@@ -103,18 +122,17 @@ abstract class Role(val scope: Option[PermissionsTarget]) {
 	private def grant(scope: Option[PermissionsTarget], perms: Iterable[Permission]): Unit =
 		permissions ++= (perms map { _ -> scope })
 
-	final def applyRoleDefinition(definition: RoleDefinition): Role = {
+	private final def applyRoleDefinition(definition: RoleDefinition): Role = {
 		permissions ++= definition.permissions(scope)
 		roles ++= definition.subRoles(scope)
 
 		this
 	}
+	applyRoleDefinition(definition)
 }
 
-abstract class BuiltInRole(scope: Option[PermissionsTarget], definition: BuiltInRoleDefinition) extends Role(scope) {
-	def this(scope: PermissionsTarget, definition: BuiltInRoleDefinition) {
-		this(Option(scope), definition)
+abstract class BuiltInRole(definition: BuiltInRoleDefinition, scope: Option[PermissionsTarget]) extends Role(definition, scope) {
+	def this(definition: BuiltInRoleDefinition, scope: PermissionsTarget) {
+		this(definition, Option(scope))
 	}
-
-	applyRoleDefinition(definition)
 }
