@@ -1,4 +1,4 @@
-<#assign tiles=JspTaglibs["http://tiles.apache.org/tags-tiles"]>
+<#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
 <!doctype html>
 <html class="iframe" lang="en-GB">
 	<head>
