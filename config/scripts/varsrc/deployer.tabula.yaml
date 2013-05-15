@@ -17,13 +17,8 @@ apaches:
   state: balanced
 build_status: starting
 app: "tabula"
-war_names:
-- courses
-- home
-- profiles
 - scheduling
-- admin
-- groups
+- tabula.ear
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
