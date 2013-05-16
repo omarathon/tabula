@@ -17,6 +17,7 @@ apaches:
   state: balanced
 build_status: starting
 app: "tabula"
+war_names:
 - scheduling
 - tabula.ear
 checkout_base: "/var/src/checkout"
