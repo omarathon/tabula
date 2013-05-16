@@ -25,7 +25,9 @@ branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
-  goal: "-Dscalastyle.skip=true -Pskinny clean install"
+  profiles:
+  - skinny
+  goal: "-Dscalastyle.skip=true clean install"
 scheduler_jboss: !ruby/object:Jboss 
   deployment_state: old
   name: tabula-scheduler
