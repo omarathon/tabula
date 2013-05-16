@@ -257,6 +257,7 @@
 								<include>jquery-biglist.js</include>
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
+                <include>jquery-draganddrop.js</include>
 								<include>userpicker.js</include>
 								<include>ajax-popup.js</include>
 								<include>app-comments.js</include>
@@ -295,6 +296,22 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>profiles-render.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/groups.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/admin.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

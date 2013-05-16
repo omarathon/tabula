@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentComma
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
 
-case class MembershipInformation(val member: MembershipMember, val photo: Option[Array[Byte]])
+case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
 @Service
 class ProfileImporter extends Logging {
@@ -58,22 +58,26 @@ class ProfileImporter extends Logging {
 			}
 		}
 	}
+	
+	def photoFor(universityId: String): () => Option[Array[Byte]] = {
+		def photo() = try {
+			Option(membershipInterface.getPhotoById(universityId))
+		} catch {
+			case e: MembershipInterfaceException => None
+		}
+		
+		photo
+	}
 
 	def userIdsAndCategories(department: Department): Seq[MembershipInformation] =
 		membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
-			val photo = try {
-				Option(membershipInterface.getPhotoById(member.universityId))
-			} catch {
-				case e: MembershipInterfaceException => None
-			}
-
-			MembershipInformation(member, photo)
+			MembershipInformation(member, photoFor(member.universityId))
 		}
 
 	def userIdAndCategory(member: Member) =
 		MembershipInformation(
 			membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).head,
-			Option(membershipInterface.getPhotoById(member.universityId))
+			photoFor(member.universityId)
 		)
 }
 

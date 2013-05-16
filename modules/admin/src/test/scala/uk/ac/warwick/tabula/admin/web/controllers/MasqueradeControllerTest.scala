@@ -1,7 +1,7 @@
-package uk.ac.warwick.tabula.home.web.controllers.admin
+package uk.ac.warwick.tabula.admin.web.controllers
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.home.commands.admin.MasqueradeCommand
+import uk.ac.warwick.tabula.admin.commands.MasqueradeCommand
 import uk.ac.warwick.tabula.MockUserLookup
 import org.springframework.mock.web.MockHttpServletResponse
 import uk.ac.warwick.tabula.CurrentUser
@@ -23,7 +23,7 @@ class MasqueradeControllerTest extends TestBase {
 		cmd.usercode = "cusebr"
 
 		val response = new MockHttpServletResponse
-		controller.submit(cmd, response).viewName should be ("redirect:/admin/masquerade")
+		controller.submit(cmd, response).viewName should be ("redirect:/masquerade")
 		
 		response.getCookies().length should be (1)
 		response.getCookie(CurrentUser.masqueradeCookie).getValue should be ("cusebr")
@@ -36,7 +36,7 @@ class MasqueradeControllerTest extends TestBase {
 		cmd.action = "remove"
 			
 		val response = new MockHttpServletResponse
-		controller.submit(cmd, response).viewName should be ("redirect:/admin/masquerade")
+		controller.submit(cmd, response).viewName should be ("redirect:/masquerade")
 		
 		response.getCookies().length should be (1)
 		response.getCookie(CurrentUser.masqueradeCookie).getValue should be (null)
@@ -49,7 +49,7 @@ class MasqueradeControllerTest extends TestBase {
 		cmd.usercode = "undefined"
 			
 		val response = new MockHttpServletResponse
-		controller.submit(cmd, response).viewName should be ("redirect:/admin/masquerade")
+		controller.submit(cmd, response).viewName should be ("redirect:/masquerade")
 		
 		response.getCookies().length should be (0)
 		response.getCookie(CurrentUser.masqueradeCookie) should be (null)

@@ -22,6 +22,8 @@ war_names:
 - home
 - profiles
 - scheduling
+- admin
+- groups
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
