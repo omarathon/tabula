@@ -24,8 +24,10 @@
 			<#if meetings??>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
+					<#assign pendingAction = meeting.pendingAction(viewer) />
+					<#assign pendingActionClasses><#if pendingAction>pending-action</#if></#assign>
 
-					<#if openMeeting?? && openMeeting.id == meeting.id>
+					<#if (openMeeting?? && openMeeting.id == meeting.id) || pendingAction>
 						<#assign openClass>open</#assign>
 						<#assign openAttribute>open="open"</#assign>
 					<#else>
@@ -33,7 +35,7 @@
 						<#assign openAttribute></#assign>
 					</#if>
 
-					<details class="meeting ${deletedClasses} ${openClass!}" ${openAttribute!}>
+					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!}" ${openAttribute!}>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title!}
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
@@ -55,21 +57,7 @@
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
 								<@fmt.download_attachments meeting.attachments "/tutor/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
-
-							<#if meeting.pendingApproval && viewer.universityId == meeting.creator.universityId>
-								<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-								<div class="alert alert-info">
-									This meeting record needs to be approved.
-								</div>
-							<#elseif meeting.pendingApprovalBy(viewer)>
-								<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-								<div class="alert alert-warning">
-									This record needs your approval. Please review, then approve or reject it.
-									If you reject it, please explain why.
-								</div>
-							<#else>
-								<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-							</#if>
+							<#include "_meeting_record_state.ftl" />
 						</div>
 					</details>
 				</#list>

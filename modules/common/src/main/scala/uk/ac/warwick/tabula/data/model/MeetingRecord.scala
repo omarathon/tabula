@@ -62,6 +62,9 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
+	// true if the specified user needs to perform a workflow action on this meeting record
+	def pendingAction(member: Member): Boolean = pendingApprovalBy(member)
+
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
 

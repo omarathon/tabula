@@ -18,6 +18,9 @@ html.iframe {
 
 @box-style-border-radius: 8px;
 
+@zebra-pale: #f5f5f5;
+@zebra-dark: #ebebeb;
+
 .box-style() {
 	border: 1px solid @grayLight;
 	border-bottom: 1px solid @gray;
@@ -133,7 +136,7 @@ tr.error, tr.warning {
 
 	padding: 0.5em 0.5em 0 0.5em;
 	margin: 0.7em 0;
-	background-color: #ebebeb;
+	background-color: @zebra-dark;
 
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
 
@@ -387,8 +390,8 @@ ul {
 	// zebra-striping (but exclude archived items)
 	// doesn't work very well
 	// TODO jQuery this
-	//&:not(.archived):nth-of-type(odd) { background-color: #f5f5f5; }
-	&.alt-row { background-color: #f5f5f5; }
+	//&:not(.archived):nth-of-type(odd) { background-color: @zebra-pale; }
+	&.alt-row { background-color: @zebra-pale; }
 
 	.column1, .left {
 		width: 14.5em;
@@ -449,7 +452,7 @@ ul {
 }
 
 .striped-section-contents .item-info {
-	&:nth-of-type(odd) { background-color: #f5f5f5; }
+	&:nth-of-type(odd) { background-color: @zebra-pale; }
 }
 
 // fix for icons sitting a bit off the baseline
@@ -1209,7 +1212,16 @@ h1.with-settings {
 				margin: 12px 0;
 
 				details.meeting {
+
+					&.pending-action {
+						background: none repeat scroll 0 0 @zebra-pale;
+						border: 1px solid #8D8D8D;
+						.border-radius(5px);
+						margin: 5px 0;
+					}
+
 					summary {
+						margin-left: 5px;
 						padding-top: 9px;
 						font-weight: bold;
 						border-bottom: dotted 1px lighten(@grayLight, 35%);
@@ -1246,7 +1258,7 @@ h1.with-settings {
 				}
 
 				summary:hover {
-					background-color: #ebebeb;
+					background-color: @zebra-dark;
 					.transition-duration(0.3s);
 				}
 
