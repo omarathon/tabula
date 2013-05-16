@@ -5,7 +5,7 @@
 
 	<#if isTarget><strong></#if>
 	
-	<span class="permission"><i class="icon-lock"></i> ${permission.name}</span>
+	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
 	<#if scope?? && scope?size != 0>
 		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
 	<#elseif permission.scoped>
@@ -16,7 +16,7 @@
 </#macro>
 
 <#macro debugRole role>
-	<span class="role"><i class="icon-user"></i> ${role.name}</span><#if role.scope??> on <span class="scope"><i class="icon-bookmark"></i> ${role.scope.toString}</span></#if>
+	<span class="role"><i class="icon-user"></i> ${role.definition.description}</span><#if role.scope??> on <span class="scope"><i class="icon-bookmark"></i> ${role.scope.toString}</span></#if>
 	<#if role.explicitPermissions?size gt 0 || role.subRoles?size gt 0>
 		<ul>
 			<#list role.subRoles as subRole>

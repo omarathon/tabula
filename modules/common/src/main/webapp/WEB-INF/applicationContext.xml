@@ -123,6 +123,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+                <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
@@ -290,6 +291,7 @@
 				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>
 				<entry key="introHash"><bean class="uk.ac.warwick.tabula.web.views.IntroHashFunction" /></entry>
 				<entry key="theYear"><bean class="uk.ac.warwick.tabula.web.views.TheYear" /></entry>
+				<entry key="usersWithRole"><bean class="uk.ac.warwick.tabula.web.views.UsersWithRoleFunction" /></entry>
 				<entry key="features" value-ref="features" />
 				<entry key="appBuildDate">
 					<bean factory-bean="dateTimeFormatter" factory-method="parseDateTime">

@@ -147,6 +147,10 @@
 	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
 
+<#macro role_definition_description role_definition><#compress>
+	${role_definition.description?lower_case}
+</#compress></#macro>
+
 </#escape>
 
 </#compress>

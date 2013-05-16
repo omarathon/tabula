@@ -20,7 +20,7 @@ class PersonalTutorGraph(val tuteeMap: TreeMap[String, Seq[StudentRelationship]]
 
 class ViewPersonalTutorsCommand(val department: Department) extends Command[PersonalTutorGraph] with Unaudited {
 	
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, department)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Read, mandatory(department))
 
 	var profileService = Wire.auto[ProfileService]
 	

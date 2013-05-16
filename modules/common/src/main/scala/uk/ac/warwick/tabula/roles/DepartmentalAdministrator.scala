@@ -5,9 +5,11 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(department, DepartmentalAdministratorRoleDefinition)
+case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(DepartmentalAdministratorRoleDefinition, department)
 
 case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinition {
+	
+	override def description = "Departmental Administrator"
 	
 	// Implicitly grants module manager role for all modules in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
@@ -44,7 +46,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.PersonalTutor.Create,
 		Profiles.PersonalTutor.Read,
 		Profiles.PersonalTutor.Update,
-		Profiles.PersonalTutor.Delete
+		Profiles.PersonalTutor.Delete,
+		
+		Profiles.MeetingRecord.Read
 	)
 
 }

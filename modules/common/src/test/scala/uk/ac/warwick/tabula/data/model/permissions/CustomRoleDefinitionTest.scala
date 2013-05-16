@@ -9,6 +9,8 @@ class CustomRoleDefinitionTest extends TestBase {
 	case object TestBuiltInDefinition extends BuiltInRoleDefinition {
 		import Permissions._
 		
+		override def description = "Test"
+		
 		GrantsScopelessPermission(Masquerade)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)

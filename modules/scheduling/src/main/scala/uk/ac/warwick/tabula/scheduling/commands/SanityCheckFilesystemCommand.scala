@@ -53,7 +53,7 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 							
 							(1, 0)
 						} else if (attachment.hash.hasText && attachment.hash != currentHash) {
-							logger.error("Expected hash didn't match! Expected %s but was actually %s".format(attachment.hash, currentHash))
+							logger.error("Expected hash for %s didn't match! Expected %s but was actually %s".format(attachment.id, attachment.hash, currentHash))
 							(0, 1)
 						} else (1, 0)
 					} getOrElse (1, 0)

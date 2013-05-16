@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>36-SNAPSHOT</version>
+		<version>36</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -25,6 +25,28 @@
 	</scm>
 
 	<profiles>
+		<!-- Scheduling is NEVER skinny -->
+		<profile>
+			<id>skinny</id>
+			
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<packagingExcludes>##########################NOTHING-TO-EXCLUDE#############################</packagingExcludes>
+							<archive>
+								<manifest>
+									<addClasspath>false</addClasspath>
+									<classpathPrefix></classpathPrefix>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	
 		<!-- deploy to jboss -->
 		<profile>
 			<id>deploy</id>
@@ -122,7 +144,7 @@
 			<artifactId>home</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
-			<scope>runtime</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

@@ -6,9 +6,11 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 /*
  * A role based on being the person who actually made the submission
  */
-case class Submitter(submission: model.Submission) extends BuiltInRole(submission, SubmitterRoleDefinition) 
+case class Submitter(submission: model.Submission) extends BuiltInRole(SubmitterRoleDefinition, submission) 
 
-case object SubmitterRoleDefinition extends BuiltInRoleDefinition {
+case object SubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
+	
+	override def description = "Submitted Assignment"
 	
 	GrantsScopedPermission( 
 		Submission.Read,

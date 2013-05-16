@@ -4,9 +4,12 @@ import uk.ac.warwick.tabula.data._
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class UniversityMemberRole(member: model.Member) extends BuiltInRole(member, UniversityMemberRoleDefinition)
+case class UniversityMemberRole(member: model.Member) extends BuiltInRole(UniversityMemberRoleDefinition, member)
 
-case object UniversityMemberRoleDefinition extends BuiltInRoleDefinition {
+case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefinition {
+	
+	override def description = "University Member"
+		
 	// As per discussion in TAB-753, anyone at the University can see anyone else's core information
 	GrantsGlobalPermission( 
 		Profiles.Read.Core
@@ -22,7 +25,8 @@ case object UniversityMemberRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.PersonalTutor.Read,
 		Profiles.Read.PersonalTutees,
 		Profiles.Read.StudyDetails,
-		Profiles.MeetingRecord.Read
+		Profiles.MeetingRecord.Read,
+		Profiles.MeetingRecord.ReadDetails
 	)
 	
 	GrantsScopelessPermission(

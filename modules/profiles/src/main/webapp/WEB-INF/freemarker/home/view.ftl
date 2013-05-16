@@ -19,17 +19,32 @@
 			</#if>
 		</div>
 		
-		<div id="profile-dept-admin" class="span4 offset2">
+		<div id="profile-dept-admin" class="span6">
 			<#if adminDepartments?has_content>
 				<h4>Departmental administration</h4>
 		
 				<#list adminDepartments as dept>
-					<h5>${dept.name}</h5>
+				<div class="clearfix">
+					<div class="btn-group pull-right">
+					  <a class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+					  <ul class="dropdown-menu pull-right">	
+							<li><a href="<@routes.deptperms dept/>">
+								<i class="icon-user"></i> Edit departmental permissions
+							</a></li>
+							
+							<li><a href="<@routes.tutors dept />">
+								<i class="icon-eye-open"></i> Personal tutors
+							</a></li>
+							<li><a href="<@routes.tutors_missing dept />">
+								<i class="icon-eye-close"></i> Students with no personal tutor
+							</a></li>
+					  </ul>
+					</div>
 					
-					<ul>
-						<li><a href="<@routes.tutors dept />">Personal tutors</a></li>
-						<li><a href="<@routes.tutors_missing dept />">Students with no personal tutor</a></li>
-					</ul>
+					<h5>${dept.name}</h5>
+				</div>
+				
+				<#if dept_has_next><hr></#if>
 				</#list>
 			</#if>
 		</div>

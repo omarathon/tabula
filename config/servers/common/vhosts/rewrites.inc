@@ -20,6 +20,8 @@ RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
+RewriteRule ^/admin$ /admin/ [QSA,L,R=301]
+RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 
 # Remove /home context
 RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
@@ -36,6 +38,8 @@ RewriteCond %{REQUEST_URI} !^/coursework/(.*)
 RewriteCond %{REQUEST_URI} !^/home/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)
 RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
+RewriteCond %{REQUEST_URI} !^/admin/(.*)
+RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 
 # Else, go straight to Jboss
