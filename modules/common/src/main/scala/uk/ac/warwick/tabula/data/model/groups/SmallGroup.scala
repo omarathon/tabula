@@ -1,0 +1,119 @@
+package uk.ac.warwick.tabula.data.model.groups
+
+import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import javax.persistence._
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import javax.persistence._
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
+import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.roles.SmallGroupMemberRoleDefinition
+import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
+import javax.validation.constraints.NotNull
+
+object SmallGroup {
+	final val NotDeletedFilter = "notDeleted"
+}
+
+/**
+ * Represents a small teaching group, within an instance of a module.
+ */
+@FilterDef(name = SmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
+@Filter(name = SmallGroup.NotDeletedFilter)
+@Entity
+@AccessType("field")
+class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
+	import SmallGroup._
+	
+	@transient var permissionsService = Wire[PermissionsService]
+
+	def this(_module: Module) {
+		this()
+		this.module = _module
+	}
+
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	@Column(nullable = false)
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+
+	@NotNull
+	var name: String = _
+
+	var archived: JBoolean = false
+	
+	@Column(name="group_format")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
+	@NotNull
+	var format: SmallGroupFormat = _
+
+	@ManyToOne
+	@JoinColumn(name = "module_id")
+	var module: Module = _
+	
+	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	var events: JList[SmallGroupEvent] = JArrayList()
+	
+	def permissionsParents = Option(module).toStream
+		
+	@transient
+	lazy val students = permissionsService.ensureUserGroupFor(this, SmallGroupMemberRoleDefinition)
+
+	def toStringProps = Seq(
+		"id" -> id,
+		"name" -> name,
+		"module" -> module)
+	
+}
+
+sealed abstract class SmallGroupFormat(val code: String, val description: String) {
+	override def toString = description
+}
+
+object SmallGroupFormat {
+	case object Seminar extends SmallGroupFormat("seminar", "Seminar")
+	case object Lab extends SmallGroupFormat("lab", "Lab")
+	case object Tutorial extends SmallGroupFormat("tutorial", "Tutorial")
+	case object Project extends SmallGroupFormat("project", "Project group")
+	case object Example extends SmallGroupFormat("example", "Example Class")
+
+	// lame manual collection. Keep in sync with the case objects above
+	val members = Set(Seminar, Lab, Tutorial, Project, Example)
+
+	def fromCode(code: String) =
+		if (code == null) null
+		else members.find{_.code == code} match {
+			case Some(caseObject) => caseObject
+			case None => throw new IllegalArgumentException()
+		}
+
+	def fromDescription(description: String) =
+		if (description == null) null
+		else members.find{_.description == description} match {
+			case Some(caseObject) => caseObject
+			case None => throw new IllegalArgumentException()
+		}
+}
+
+class SmallGroupFormatUserType extends AbstractBasicUserType[SmallGroupFormat, String] {
+
+	val basicType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.VARCHAR)
+
+	val nullValue = null
+	val nullObject = null
+
+	override def convertToObject(string: String) = SmallGroupFormat.fromCode(string)
+	override def convertToValue(format: SmallGroupFormat) = format.code
+}

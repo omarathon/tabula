@@ -14,12 +14,16 @@
 <#else>
 	<ul id="home-list">
 		<#-- TODO can we guard this, or would it be too expensive to be worth the bother? -->
-		<li><h2><a href="<@url page="/coursework/" />">Coursework Management</a></h2></li>
+		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2></li>
+		
+		<#if features.smallGroupTeaching>
+			<li><h2><a href="<@url page="/" context="/groups" />" />Small Group Teaching</h2></li>
+		</#if>
 	
 		<#if user.staff>
-			<li><h2><a href="<@url page="/profiles/" />">Student Profiles</a></h2></li>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2></li>
 		<#elseif user.student>
-			<li><h2><a href="<@url page="/profiles/" />">My Student Profile</a></h2></li>
+			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2></li>
 		</#if>
 	</ul>
 </#if>

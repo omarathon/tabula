@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
 @Entity
 @NamedQueries(Array(
@@ -47,6 +48,9 @@ class Module extends GeneratedId with PermissionsTarget {
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assignments: JList[Assignment] = JArrayList()
+	
+	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	var groups: JList[SmallGroup] = JArrayList()
 
 	var active: Boolean = _
 	
