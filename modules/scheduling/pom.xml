@@ -34,7 +34,7 @@
 					<plugin>
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
-							<packagingExcludes></packagingExcludes>
+							<packagingExcludes>##########################NOTHING-TO-EXCLUDE#############################</packagingExcludes>
 							<archive>
 								<manifest>
 									<addClasspath>false</addClasspath>
