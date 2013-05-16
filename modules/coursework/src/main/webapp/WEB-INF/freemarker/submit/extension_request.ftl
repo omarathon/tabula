@@ -64,7 +64,7 @@
 			</#if>
 		</#if>
 
-		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="extensionRequestCommand">
+		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="extensionRequestCommand">
 
 			<#if isModification>
 				<@f.hidden path="modified" value="true" />
