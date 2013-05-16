@@ -70,9 +70,9 @@
 	// we use extend() to add to any existing variable rather than clobber it
 	window.Profiles = jQuery.extend(window.Profiles, exports);
 
-	// MEETING RECORD STUFF
-
 	$(function() {
+
+		// MEETING RECORD STUFF
 
 		// delete meeting records
 		$('a.delete-meeting-record').on('click', function(e) {
@@ -126,5 +126,20 @@
 			}
 			return false;
 		});
+
+		// MEETING RECORD APPROVAL STUFF
+
+		// show rejection comment box
+		var rejectRadios = $('input.reject').each( function() {
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $commentBox = $form.find('.rejection-comment');
+			$this.slideMoreOptions($commentBox, true);
+		});
+
+		$('section.meetings').ajaxSubmit(function() {
+			document.location.reload(true);
+		});
+
 	});
 }(jQuery));

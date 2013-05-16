@@ -33,5 +33,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
 <#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
 
+<#macro save_meeting_approval meeting_record><@url page="/tutor/meeting/${meeting_record.id}/approval" /></#macro>
 
 </#compress>
