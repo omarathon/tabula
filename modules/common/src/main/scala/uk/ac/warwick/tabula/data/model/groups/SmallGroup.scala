@@ -27,7 +27,7 @@ object SmallGroup {
 }
 
 /**
- * Represents a small teaching group, within an instance of a module.
+ * Represents a single small teaching group within a group set.
  */
 @FilterDef(name = SmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = SmallGroup.NotDeletedFilter)
@@ -38,34 +38,22 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@transient var permissionsService = Wire[PermissionsService]
 
-	def this(_module: Module) {
+	def this(_set: SmallGroupSet) {
 		this()
-		this.module = _module
+		this.groupSet = _set
 	}
-
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 
 	@NotNull
 	var name: String = _
 
-	var archived: JBoolean = false
-	
-	@Column(name="group_format")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
-	@NotNull
-	var format: SmallGroupFormat = _
-
 	@ManyToOne
-	@JoinColumn(name = "module_id")
-	var module: Module = _
+	@JoinColumn(name = "set_id")
+	var groupSet: SmallGroupSet = _
 	
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
-	def permissionsParents = Option(module).toStream
+	def permissionsParents = Option(groupSet).toStream
 		
 	@transient
 	lazy val students = permissionsService.ensureUserGroupFor(this, SmallGroupMemberRoleDefinition)
@@ -73,47 +61,6 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
-		"module" -> module)
+		"set" -> groupSet)
 	
-}
-
-sealed abstract class SmallGroupFormat(val code: String, val description: String) {
-	override def toString = description
-}
-
-object SmallGroupFormat {
-	case object Seminar extends SmallGroupFormat("seminar", "Seminar")
-	case object Lab extends SmallGroupFormat("lab", "Lab")
-	case object Tutorial extends SmallGroupFormat("tutorial", "Tutorial")
-	case object Project extends SmallGroupFormat("project", "Project group")
-	case object Example extends SmallGroupFormat("example", "Example Class")
-
-	// lame manual collection. Keep in sync with the case objects above
-	val members = Set(Seminar, Lab, Tutorial, Project, Example)
-
-	def fromCode(code: String) =
-		if (code == null) null
-		else members.find{_.code == code} match {
-			case Some(caseObject) => caseObject
-			case None => throw new IllegalArgumentException()
-		}
-
-	def fromDescription(description: String) =
-		if (description == null) null
-		else members.find{_.description == description} match {
-			case Some(caseObject) => caseObject
-			case None => throw new IllegalArgumentException()
-		}
-}
-
-class SmallGroupFormatUserType extends AbstractBasicUserType[SmallGroupFormat, String] {
-
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
-
-	override def convertToObject(string: String) = SmallGroupFormat.fromCode(string)
-	override def convertToValue(format: SmallGroupFormat) = format.code
 }

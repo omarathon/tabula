@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller class HomeController extends ProfilesController {
 	
@@ -30,7 +31,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 			Mav(
 				"home/view",
 				"isAPersonalTutor" -> currentMember.isAPersonalTutor,
-				"adminDepartments" -> moduleService.departmentsOwnedBy(user)
+				"adminDepartments" -> moduleService.departmentsWithPermission(user, Permissions.Module.ManageProfiles)
 			)
 		} else if (optionalCurrentMember.isDefined && currentMember.userType == Student) {
 			Redirect(Routes.profile.view(currentMember))

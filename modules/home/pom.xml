@@ -304,6 +304,7 @@
 							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+								<include>groups-admin.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

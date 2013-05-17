@@ -6,7 +6,10 @@ import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
 
-sealed abstract class DayOfWeek(val dbValue: Int)
+sealed abstract class DayOfWeek(val dbValue: Int) {
+	def name = toString()
+	def shortName = name.substring(0, 3)
+}
 
 object DayOfWeek {
 	case object Monday extends DayOfWeek(DateTimeConstants.MONDAY)

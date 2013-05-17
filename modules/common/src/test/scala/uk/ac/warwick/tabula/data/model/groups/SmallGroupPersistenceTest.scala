@@ -20,12 +20,18 @@ class SmallGroupPersistenceTest extends AppContextTestBase {
 		{
 			val cs108 = service.getModuleByCode("cs108").get
 			
-			val group1 = new SmallGroup(cs108)
-			group1.name = "Group 1"
-			group1.format = SmallGroupFormat.Seminar
+			val set1 = new SmallGroupSet(cs108)
+			set1.name = "Seminar groups"
+			set1.format = SmallGroupFormat.Seminar
 			
-			cs108.groups.add(group1)
+			cs108.groupSets.add(set1)
 			session.saveOrUpdate(cs108)
+			
+			val group1 = new SmallGroup(set1)
+			group1.name = "Group 1"
+			
+			set1.groups.add(group1)
+			session.saveOrUpdate(set1)
 			
 			group1.students.addUser("cuscav")
 			session.saveOrUpdate(group1)
@@ -62,13 +68,16 @@ class SmallGroupPersistenceTest extends AppContextTestBase {
 		}
 		
 		val cs108 = service.getModuleByCode("cs108").get
-		val group1 = cs108.groups.get(0)
+		val set1 = cs108.groupSets.get(0)
+		val group1 = set1.groups.get(0)
 		val event1 = group1.events.asScala.find(_.title == "Event 1").head
 		val event2 = group1.events.asScala.find(_.title == "Event 2").head
 		
 		// Check a few choice fields to check they're persisted right
-		group1.format should be (SmallGroupFormat.Seminar)
-		group1.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		set1.format should be (SmallGroupFormat.Seminar)
+		set1.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		
+		group1.name should be ("Group 1")
 		
 		event1.day should be (DayOfWeek.Tuesday)
 		event1.startTime should be (new LocalTime(15, 0))
