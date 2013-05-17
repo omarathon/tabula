@@ -34,7 +34,8 @@ class CreateMeetingRecordCommand(
 		var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
 
-	@Autowired var features: Features = _
+	//@Autowired var features: Features = _
+	var features = Wire.auto[Features]
 
 	val HOUR = 12 // arbitrary meeting time
 	val PREHISTORIC_YEARS = 5 // number of years to consider as extremely old
