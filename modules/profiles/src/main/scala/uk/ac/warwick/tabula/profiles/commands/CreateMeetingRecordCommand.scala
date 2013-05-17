@@ -26,11 +26,15 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalTime
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.Features
 
 class CreateMeetingRecordCommand(
 		val creator: Member,
 		var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
+
+	@Autowired var features: Features = _
 
 	val HOUR = 12 // arbitrary meeting time
 	val PREHISTORIC_YEARS = 5 // number of years to consider as extremely old
@@ -70,11 +74,13 @@ class CreateMeetingRecordCommand(
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
-		val meetingApprovals = generateMeetingApproval(meeting)
-		meetingApprovals.foreach(meetingApproval => {
-			meeting.approvals.add(meetingApproval)
-			//TODO-Ritchie notification
-		})
+		if (features.meetingRecordApproval){
+			val meetingApprovals = generateMeetingApproval(meeting)
+			meetingApprovals.foreach(meetingApproval => {
+				meeting.approvals.add(meetingApproval)
+				//TODO-Ritchie notification
+			})
+		}
 
 		meeting
 	}
