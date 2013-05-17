@@ -18,18 +18,16 @@ apaches:
 build_status: starting
 app: "tabula"
 war_names:
-- courses
-- home
-- profiles
 - scheduling
-- admin
-- groups
+- tabula.ear
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
+  profiles:
+  - skinny
   goal: "-Dscalastyle.skip=true clean install"
 scheduler_jboss: !ruby/object:Jboss 
   deployment_state: old
