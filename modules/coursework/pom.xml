@@ -96,7 +96,7 @@
 			<artifactId>home</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
-			<scope>runtime</scope>
+			<scope>provided</scope>
 		</dependency>
 	
 		<dependency>

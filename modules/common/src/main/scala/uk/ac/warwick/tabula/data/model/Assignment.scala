@@ -333,9 +333,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	// scalastyle:off
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
-	
-	
-	def unreleaseddFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)
