@@ -70,6 +70,9 @@
 		<module>modules/profiles</module>
 		<module>modules/groups</module>
 		<module>modules/scheduling</module>
+
+		<!-- Combined EAR -->
+		<module>modules/all</module>
 	</modules>
 
 	<profiles>
@@ -180,11 +183,6 @@
 		<profile>
 			<id>war</id>
 
-			<!-- TODO we need to think of a better way to do this, this activation
-				means it'll be active on all modules EXCEPT common and the project itself,
-				which is probably okay but we could have modules which aren't wars but also
-				aren't common - e.g. if we moved static content out of home and into its
-				own module. -->
 			<activation>
 				<file>
 					<exists>src/main/webapp/WEB-INF/.war-project</exists>
@@ -353,6 +351,27 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+		</profile>
+		
+		<profile>
+			<id>skinny</id>
+			
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<classpathPrefix>lib/</classpathPrefix>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
@@ -530,6 +549,16 @@
 								</includes>
 							</overlay>
 						</overlays>
+					</configuration>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.8</version>
+					<configuration>
+						<outputDirectory>${tabula.basedir}/dist</outputDirectory>
+						<finalName>tabula</finalName>
 					</configuration>
 				</plugin>
 
@@ -739,6 +768,27 @@
 										</versionRange>
 										<goals>
 											<goal>reflections</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-ear-plugin
+										</artifactId>
+										<versionRange>
+											[2.8,)
+										</versionRange>
+										<goals>
+											<goal>
+												generate-application-xml
+											</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

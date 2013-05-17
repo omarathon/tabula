@@ -93,7 +93,7 @@
 			<artifactId>home</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
-			<scope>runtime</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- libphonenumber, for formatting phone numbers -->
