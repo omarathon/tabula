@@ -25,9 +25,10 @@ object WeekRange {
 	implicit val defaultOrdering = Ordering.by[WeekRange, Int] ( _.minWeek )
 	
 	object NumberingSystem {
-		val Term = "term"
-		val Cumulative = "cumulative"
-		val Academic = "academic"
+		val Term = "term" // 1-10, 1-10, 1-10
+		val Cumulative = "cumulative" // 1-10, 11-20, 21-30
+		val Academic = "academic" // 1-52
+		val None = "none" // Dates only
 			
 		val Default = Term
 	}

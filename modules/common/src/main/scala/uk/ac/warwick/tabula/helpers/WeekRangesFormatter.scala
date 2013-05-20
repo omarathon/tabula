@@ -31,17 +31,7 @@ object WeekRangesFormatter {
 	 * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
 	 */
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
-		// Special early exit for the "academic" week numbering system - because that's what we
-		// store, we can simply return that.
-		if (numberingSystem == WeekRange.NumberingSystem.Academic) {
-			val prefix = 
-				if (ranges.size == 1 && ranges.head.isSingleWeek) "Week"
-				else "Weeks"
-			
-			prefix + " " + ranges.mkString(separator)
-		} else {		
-			formatterMap(year) format (ranges, dayOfWeek, numberingSystem)
-		}
+		formatterMap(year) format (ranges, dayOfWeek, numberingSystem)
 	
 	class WeekRangesFormatterCache extends mutable.HashMap[AcademicYear, WeekRangesFormatter] {
 		override def default(year: AcademicYear) = new WeekRangesFormatter(year)
@@ -73,56 +63,69 @@ class WeekRangesFormatter(year: AcademicYear) {
 	
 	// Pimp Term to have a clever toString output
 	implicit class PimpedTerm(term: Term) {
-		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String) = 
-			if (numberingSystem == WeekRange.NumberingSystem.Academic) {
-				val prefix = 
-					if (weekRange.isSingleWeek) "Week"
-					else "Weeks"
-			
-				prefix + " " + weekRange.toString
-			} else {
-				// TODO we've already done this calculation once in groupWeekRangesByTerm, do we really need to do it again?
-				val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
-				val endDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
-				
-				term match {
-					case vac: Vacation => {
-						// Date range
-						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate))
+		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String) = {
+			// TODO we've already done this calculation once in groupWeekRangesByTerm, do we really need to do it again?
+			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
+			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
+
+			term match {
+				case vac: Vacation => {
+					// Date range
+					"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, false))
+				}
+				case term => {
+					// Convert week numbers to the correct style
+					val termNumber = term.getTermType match {
+						case Term.TermType.autumn => 1
+						case Term.TermType.spring => 2
+						case Term.TermType.summer => 3
 					}
-					case term => {
-						// Convert week numbers to the correct style
-						val termNumber = term.getTermType match {
-							case Term.TermType.autumn => 1
-							case Term.TermType.spring => 2
-							case Term.TermType.summer => 3
+					
+					def weekNumber(date: DateTime) =
+						numberingSystem match {
+							case WeekRange.NumberingSystem.Term => term.getWeekNumber(date)
+							case WeekRange.NumberingSystem.Cumulative => term.getCumulativeWeekNumber(date)
 						}
-						
-						def weekNumber(date: DateTime) =
-							numberingSystem match {
-								case WeekRange.NumberingSystem.Term => term.getWeekNumber(date)
-								case WeekRange.NumberingSystem.Cumulative => term.getCumulativeWeekNumber(date)
-							}
-						
-						if (weekRange.isSingleWeek) "Term %d, week %d" format (termNumber, weekNumber(startDate))
-						else "Term %d, weeks %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
-					}
+					
+					if (weekRange.isSingleWeek) "Term %d, week %d" format (termNumber, weekNumber(startDate))
+					else "Term %d, weeks %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
 				}
 			}
+		}
 	}
 	
-	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String) = {
-		/*
-		 * The first thing we need to do is split the WeekRanges by term.
-		 * 
-		 * If we have a weekRange that is 1-24, we might split that into three week ranges:
-		 *  1-10, 11-15, 16-24
-		 *  
-		 * This is because we display it as three separate ranges.
-		 */
-		groupWeekRangesByTerm(ranges, dayOfWeek).map { case (weekRange, term) =>
-			term.print(weekRange, dayOfWeek, numberingSystem)
-		}.mkString(separator)
+	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String) = numberingSystem match {
+		case WeekRange.NumberingSystem.Academic => {
+	    // Special early exit for the "academic" week numbering system - because that's what we
+		  // store, we can simply return that.
+      val prefix =
+        if (ranges.size == 1 && ranges.head.isSingleWeek) "Week"
+        else "Weeks"
+
+      prefix + " " + ranges.mkString(separator)
+    }
+		case WeekRange.NumberingSystem.None => {
+			ranges.map { weekRange =>
+        val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
+        val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
+
+        IntervalFormatter.format(startDate, endDate, false)
+			}.mkString(separator)
+		}
+		case _ =>
+			/*
+			 * The first thing we need to do is split the WeekRanges by term.
+			 * 
+			 * If we have a weekRange that is 1-24, we might split that into three week ranges:
+			 *  1-10, 11-15, 16-24
+			 *  
+			 * This is because we display it as three separate ranges.
+			 *
+			 * Then we use our PimpedTerm to print the week numbers based on the numbering system.
+			 */
+			groupWeekRangesByTerm(ranges, dayOfWeek).map { case (weekRange, term) =>
+				term.print(weekRange, dayOfWeek, numberingSystem)
+			}.mkString(separator)
 	}
 	
 	// We are confident that November 1st is always in term 1 of the year
