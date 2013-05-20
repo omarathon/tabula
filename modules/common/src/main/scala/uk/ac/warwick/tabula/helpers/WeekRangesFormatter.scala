@@ -13,6 +13,14 @@ import uk.ac.warwick.util.termdates.Term
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
+import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.JavaImports._
+import freemarker.template.{TemplateModel, TemplateMethodModelEx}
+import freemarker.template.utility.DeepUnwrap
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.UserSettingsService
 
 /**
  * Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
@@ -37,6 +45,33 @@ object WeekRangesFormatter {
 		override def default(year: AcademicYear) = new WeekRangesFormatter(year)
 	}
 
+}
+
+/**
+  * Companion class for Freemarker.
+  */
+class WeekRangesFormatterTag extends TemplateMethodModelEx {
+  import WeekRangesFormatter.format
+
+	@Autowired var userSettings: UserSettingsService = _
+
+  /** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
+  override def exec(list: JList[_]) = {
+		val user = RequestInfo.fromThread.get.user
+
+		def numberingSystem(department: Department) = {
+			userSettings.getByUserId(user.apparentId)
+				.flatMap { settings => Option(settings.weekNumberingSystem) }
+				.getOrElse(department.weekNumberingSystem)
+		}
+
+    val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+    args match {
+      case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
+      case Seq(event: SmallGroupEvent) => format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
+      case _ => throw new IllegalArgumentException("Bad args")
+    }
+  }
 }
 
 class WeekRangesFormatter(year: AcademicYear) {
