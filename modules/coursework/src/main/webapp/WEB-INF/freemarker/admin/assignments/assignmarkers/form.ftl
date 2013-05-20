@@ -20,7 +20,7 @@
 		</a>
 	</div>
 	<div class="row-fluid">
-		<div class="students span3">
+		<div class="students span4">
 			<h3>Students</h3>
 			<div class="student-list drag-target">
 				<ul class="drag-list return-list" data-nobind="true">
@@ -30,7 +30,7 @@
 				</ul>
 			</div>
 		</div>
-		<div class="${class} span9">
+		<div class="${class} span8">
 			<h3>${name}</h3>
 			<#list markerList as marker>
 				<#assign existingStudents = marker.students />
@@ -40,7 +40,7 @@
 
 					<ul class="drag-list hide" data-bindpath="markerMapping[${marker.userCode}]">
 						<#list existingStudents as student>
-							<@student_item student bindpath="markerMapping[${marker.userCode}][${student_index}]" />
+							<@student_item student "markerMapping[${marker.userCode}][${student_index}]" />
 						</#list>
 					</ul>
 

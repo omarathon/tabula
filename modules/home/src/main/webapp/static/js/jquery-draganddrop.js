@@ -67,10 +67,13 @@ TODO: More options; Random allocation function.
         var $el = $(element);
         var self = this;
         var first_rows = {};
+        
+        var $returnList = $el.find('.return-list');
+        var hasReturnList = $returnList.length > 0;
 
         // randomly allocate items from .return-list into all the other lists.
         this.randomise = function() {
-            var $sourceList = $el.find('.return-list');
+            var $sourceList = $returnList;
             var $targets = $el.find(sortables).not('.return-list');
 
             // shuffle the items
@@ -134,8 +137,7 @@ TODO: More options; Random allocation function.
         // Returns all items to the .return-list.drag-list
         // assuming there is one.
         this.returnItems = function() {
-            var $returnList = $el.find('.return-list');
-            if ($returnList.length === 0) throw new Error ('No .return-list list to return items to');
+            if (!hasReturnList) throw new Error ('No .return-list list to return items to');
             self.batchMove([{
                 target: $returnList,
                 items: $el.find(sortables).find('li'),
@@ -145,7 +147,6 @@ TODO: More options; Random allocation function.
 
         var returnItem = function($listItem) {
             var $sourceList = $listItem.closest('ul');
-            var $returnList = $el.find('.return-list');
             self.batchMove([{
                 target: $returnList,
                 items: $listItem,
@@ -169,7 +170,8 @@ TODO: More options; Random allocation function.
                 .map(function(i, li){
                     var $li = $(li);
                     var id = $li.find('input').val();
-                    return '<li data-item-id="'+id+'">'+$li.text()+deleteLinkHtml+'</li>';
+                    var text = (hasReturnList)? ($li.text()+deleteLinkHtml) : ($li.text());
+                    return '<li data-item-id="'+id+'">'+text+'</li>';
                 })
                 .toArray();
             return customHeader + '<ul>'+lis.join('')+'</ul>';
