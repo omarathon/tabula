@@ -35,4 +35,15 @@
 		<nature>org.zeroturnaround.eclipse.jrebelNature</nature>
 		<nature>org.scalastyle.scalastyleplugin.core.ScalastyleNature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1368537226563</id>
+			<name></name>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-target</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>
