@@ -129,8 +129,8 @@
 											<#list group.events as event>
 												<li>
 													<#-- Tutor, weeks, day/time, location -->
-												
-													Week<#if !event.singleEvent>s</#if> <#list event.weekRanges as range>${range.toString}<#if range_has_next>, </#if></#list>,
+
+													<@fmt.weekRanges event />,
 													${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 													${event.location}
 												</li>
