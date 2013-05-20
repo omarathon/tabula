@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
-import scala.Array
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 
 @Controller
