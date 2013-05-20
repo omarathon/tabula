@@ -2,8 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <#macro student_item student bindpath="">
-<li class="label">
-	<i class="icon-user"></i> ${student.displayValue}
+<li class="student">
+	<i class="icon-white icon-user"></i> ${student.displayValue}
 	<input type="hidden" name="${bindpath}" value="${student.userCode}" />
 </li>
 </#macro>
@@ -14,7 +14,7 @@
 		   href="#" >
 			<i class="icon-random"></i> Randomly allocate
 		</a>
-		<a class="remove-all btn btn-mini"
+		<a class="return-items btn btn-mini"
 		   href="#" >
 			<i class="icon-arrow-left"></i> Remove all
 		</a>
@@ -23,7 +23,7 @@
 		<div class="students span3">
 			<h3>Students</h3>
 			<div class="student-list drag-target">
-				<ul class="drag-list" data-nobind="true">
+				<ul class="drag-list return-list" data-nobind="true">
 					<#list studentList as student>
 						<@student_item student "" />
 					</#list>
@@ -35,7 +35,7 @@
 			<#list markerList as marker>
 				<#assign existingStudents = marker.students />
 				<div class="marker drag-target">
-					<span>${marker.fullName}</span>
+					<span class="name">${marker.fullName}</span>
 					<span class="drag-count badge badge-info">${existingStudents?size}</span>
 
 					<ul class="drag-list hide" data-bindpath="markerMapping[${marker.userCode}]">
@@ -44,7 +44,7 @@
 						</#list>
 					</ul>
 
-					<a href="#" class="show-list" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
+					<a href="#" class="btn show-list" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
 
 				</div>
 			</#list>
@@ -55,6 +55,9 @@
 
 <#escape x as x?html>
 	<h1>Assign markers for ${assignment.name}</h1>
+	
+	<p>Drag students by their <i class="icon-th"></i> onto a marker.</p>
+	
 	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
 	<div id="assign-markers">
 		<ul class="nav nav-tabs">

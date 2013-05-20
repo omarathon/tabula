@@ -40,9 +40,13 @@
 	}
 
 	.marker {
-		line-height: 55px;
-		width: 250px;
-		font-size: 22px;
+		margin-bottom: 1em;
+		padding: 1em;
+		background-color: @tableBackgroundNonAccent;
+		width: 350px;
+		.name {
+			font-size: 22px;
+		}
 		&.drop-hover{
 			background-color: #DFF0D8;
 			border-color: #C9DCB9;
@@ -50,8 +54,9 @@
 	}
 
 	.student {
-		cursor: move;
 		min-width: 155px;
+		padding: 3px 5px;
+		color: white;
 	}
 }
 

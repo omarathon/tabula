@@ -246,7 +246,14 @@ $.fn.shiftSelectable = function() {
 // assign markers
 $(function() {
 
-	$('#first-markers, #second-markers').dragAndDrop();
+	$('#first-markers, #second-markers')
+		.dragAndDrop()
+		.each(function(i, container) {
+			var $container = $(container);
+			$container.find('a.random').on('click', function() {
+				$container.dragAndDrop('randomise');
+			})
+		});
 	
 });
 

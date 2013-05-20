@@ -68,34 +68,89 @@ TODO: More options; Random allocation function.
         var self = this;
         var first_rows = {};
 
-        // Returns all items to the .return-list.drag-list
-        // assuming there is one.
-        this.returnItems = function() {
-            var $returnList = $el.find('.return-list');
-            $el.find('li').appendTo($returnList[0]);
-            $el.find(sortables).each(function(i, list) {
-                listChanged($(list));
+        // randomly allocate items from .return-list into all the other lists.
+        this.randomise = function() {
+            var $sourceList = $el.find('.return-list');
+            var $targets = $el.find(sortables).not('.return-list');
+
+            // shuffle the items
+            var items = $sourceList.find(".student").sort(function(){
+                return Math.random() > 0.5 ? 1 : -1;
+            });
+
+            var itemsPerTarget =  Math.floor(items.length / $targets.length);
+            var remainder = items.slice(items.length - (items.length % $targets.length));
+            $targets.each(function(index, target){
+                var $target = $(target);
+                var from = (index*itemsPerTarget);
+                var to = ((index+1)*itemsPerTarget);
+                var itemsForTarget = items.slice(from, to);
+                // If any left, add one to this list.
+                if(remainder.length > 0)
+                    itemsForTarget = itemsForTarget.add(remainder.splice(0,1));
+
+                self.batchMove([{
+                    target: $target,
+                    items: itemsForTarget,
+                    sources: [] // don't trigger change for source every time
+                }]);
+            });
+
+            // trigger change event for source now since we didn't do it inside the loop.
+            $sourceList.trigger('changed.tabula');
+
+            return false;
+        };
+
+        // Move a bunch of items. Mappings is a list of objects. Each object contains:
+        //   'target', the $ul to move items to;
+        //   'items', an array of list items to move;
+        //   'sources', array of lists where the items came from 
+        //             (just used to trigger an event on the list);
+        // This function powers most of the other item moving functions.
+        this.batchMove = function(mappings) {
+            $.each(mappings, function( i, entry ) {
+                var $target = entry.target;
+                var $sources = entry.sources;
+                if (!$sources.jquery) $sources = $($sources);
+                $.each(entry.items, function(i, li) {
+                    $target.append(li);
+                });
+                $target.trigger('changed.tabula');
+                $sources.trigger('changed.tabula');
             });
         };
 
-        this.randomise = function() {
-            throw new Error("Not implemented");
-        };
-
-        // call on a $(ul) when its content changes.
-        var listChanged = function($list) {
+        // called on a $(ul) when its content changes.
+        $(sortables).on('changed.tabula', function() {
+            var $list = $(this);
             renameFields($list);
             var $target = $list.closest('.drag-target');
             if ($target.length) {
                 updateCount($target);
             }
+        });
+
+        // Returns all items to the .return-list.drag-list
+        // assuming there is one.
+        this.returnItems = function() {
+            var $returnList = $el.find('.return-list');
+            if ($returnList.length === 0) throw new Error ('No .return-list list to return items to');
+            self.batchMove([{
+                target: $returnList,
+                items: $el.find(sortables).find('li'),
+                sources: $el.find('ul:not(.return-list)')
+            }]);
         };
 
         var returnItem = function($listItem) {
+            var $sourceList = $listItem.closest('ul');
             var $returnList = $el.find('.return-list');
-            $listItem.appendTo($returnList[0]);
-            listChanged($listItem.closest('ul'));
-            listChanged($returnList);
+            self.batchMove([{
+                target: $returnList,
+                items: $listItem,
+                sources: $sourceList
+            }]);
         };
 
         // Wire button to trigger returnItems
@@ -103,41 +158,66 @@ TODO: More options; Random allocation function.
             self.returnItems();
         });
 
-        $el.find('.show-list').each(function(i, button) {
-        	var $button = $(button);
-        	var closeLinkHtml = ' <a href=# class="delete btn btn-danger">&times;</a>';
-        	$button.popover({
-                content: function() {
-                	var customHeader = $(this).data('pre') || ''; // data-pre attribute
-                    var lis = $(this)
-                        .closest('.drag-target')
-                        .find('li')
-                        .map(function(i, li){
-                        	var $li = $(li);
-                        	var id = $li.find('input').val();
-                            return '<li data-item-id="'+id+'">'+$li.text()+closeLinkHtml+'</li>';
-                        })
-                        .toArray();
-                    return customHeader + '<ul>'+lis.join('')+'</ul>';
+        var deleteLinkHtml = ' <a href=# class="delete btn btn-mini"><i class="icon-remove"></i> Remove</a>';
+
+		var popoverGenerator = function() {
+            var customHeader = $(this).data('pre') || ''; // data-pre attribute
+            var lis = $(this)
+                .closest('.drag-target')
+                .find(sortables)
+                .find('li')
+                .map(function(i, li){
+                    var $li = $(li);
+                    var id = $li.find('input').val();
+                    return '<li data-item-id="'+id+'">'+$li.text()+deleteLinkHtml+'</li>';
+                })
+                .toArray();
+            return customHeader + '<ul>'+lis.join('')+'</ul>';
+        };
+
+        // A button to show the list in a popover.
+        $el.find('.show-list').tabulaPopover({
+            html: true,
+            content: popoverGenerator
+        }).click(function(e){
+            return false;
+        }).each(function(i, link) {
+            var $link = $(link);
+            var $sourceList = $link.closest('.drag-target').find(sortables);
+            // When the underlying list changes...
+            $sourceList.on('changed.tabula', function() {
+                // Update the popover contents, if it's visible.
+                if ($sourceList.find('li').length === 0) {
+                    $link.addClass('disabled');
+                    $link.popover('hide');
+                } else {
+                    $link.removeClass('disabled');
+                    var popover = $link.data('popover');
+                    if (popover.$tip) {
+                        var $content = popover.$tip.find('.popover-content');
+                        if ($content.is(':visible')) {
+                            $content.html( popoverGenerator.call( $link[0] ) );
+                        }
+                    }
                 }
             });
         });
 
         // Handle buttons inside the .show-list popover by attaching it to .drag-target,
         // so we don't have to remember to bind events to popovers as they come and go.
-        $el.find('.drag-target').on('click', '.delete', function() {
-        	var $link = $(this);
-        	var id = $link.data('item-id');
-        	// the popover list item
-        	var $li = $link.closest('li');
-        	// the underlying list item
-        	var $realLi = $li
-	        	.closest('.drag-target')
-	        	.find('input')
-	        	.filter(function(){ return this.value === id; })
-	        	.closest('li');
-        	returnItem($realLi);
-        	$li.remove();
+        $el.find('.drag-target').on('click', '.delete', function(e) {
+            var $link = $(this);
+            // the popover list item
+            var $li = $link.closest('li');
+            var id = $li.data('item-id');
+            // the underlying list item
+            var $realLi = $li
+                .closest('.drag-target')
+                .find('input')
+                .filter(function(){ return this.value === id; })
+                .closest('li');
+            returnItem($realLi);
+            return false;
         });
 
         var $sortables = $el.find(sortables);
@@ -205,7 +285,7 @@ TODO: More options; Random allocation function.
 
         // Dropping onto any .drag-target
         $el.find('.drag-target').droppable({
-        	hoverClass: "drop-hover",
+            hoverClass: "drop-hover",
             activate: function(event, ui) {
                 //$(event.target).addClass('droponme-highlight');
             },
@@ -240,28 +320,29 @@ TODO: More options; Random allocation function.
                 $el.find('.ui-selected').removeClass('ui-selected');
 
                 // update counts, lists, popups
-                listChanged($dragList);
-                listChanged($sourceDragList);
+                $dragList.trigger('changed.tabula');
+                $sourceDragList.trigger('changed.tabula');
             }
         });
 
-        // Initialise all count badges
-        updateAllCounts();
+        // Initialise all dependent widgets.
+        $el.find(sortables).trigger('changed.tabula');
 
     };
 
     // The jQ plugin itself is a basic adapter around DragAndDrop
     $.fn.dragAndDrop = function(options) {
-        var dnd = $(this).data(DataName);
+        var dnd = this.data(DataName);
         if (options === 'return') {
             dnd.returnItems();
         } else if (options === 'randomise') {
             dnd.randomise();
         } else {
-            $(this).each(function(i, element) {
+            this.each(function(i, element) {
                 dnd = new DragAndDrop(element, options);
                 $(element).data(DataName, dnd);
             });
+            return this;
         }
     };
 
@@ -280,12 +361,15 @@ TODO: More options; Random allocation function.
     var renameFields = function($list) {
         var bindpath = $list.data('bindpath');
         var nobind = $list.data('nobind') === true;
-        if (!bindpath && !nobind) throw new Error("No data-bindpath on ul: " + $list);
-        $list.find('li input').each(function(i, field) {
-            var path = "";
-            if (!nobind) path = bindpath + '[' + i + ']';
-            field.name = path;
-        });
+        if (bindpath || nobind) {
+            $list.find('li input').each(function(i, field) {
+                var path = "";
+                if (!nobind) path = bindpath + '[' + i + ']';
+                field.name = path;
+            });
+        } else {
+            throw new Error("No data-bindpath on ul: " + $list);
+        }
     };
 
 })(jQuery);
