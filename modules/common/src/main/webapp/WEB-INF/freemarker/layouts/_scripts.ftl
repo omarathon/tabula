@@ -4,7 +4,7 @@
 	<@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
 	<@script "/static/libs/jquery.delayedObserver.js" />
 	<@script "/static/libs/jquery-caret/jquery.caret.1.02.min.js" />
-	<@script "/static/libs/jquery-stickytableheaders/jquery.stickytableheaders.min.js" />
+	<@script "/static/libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js" />
 	<@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
 	<@script "/static/libs/popup/popup.js" />
 	<@script "/static/libs/bootstrap/js/bootstrap.js" />

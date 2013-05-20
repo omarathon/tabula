@@ -206,8 +206,14 @@ h2.section {
 	margin-top: 1em;
 }
 
-#container h1 + .header-with-tooltip h2 {
-	margin-top: -8px;
+#container {
+	h1 + .header-with-tooltip h2 {
+		margin-top: -8px;
+	}
+	
+	summary + p {
+		margin-top: 12px;
+	}
 }
 
 .header-with-tooltip {
@@ -863,8 +869,12 @@ table {
 }
 
 *[rel=tooltip] {
-	cursor:help;
+	cursor: help;
 	border-bottom: 1px dotted @grayLight;
+}
+
+.use-tooltip, .use-popover, .use-introductory {
+	cursor: help;
 }
 
 #app-comment-message {
@@ -1006,35 +1016,19 @@ a.btn { text-decoration: none; }
   color: @very-subtle-text-color;
 }
 
-.ag-picker, .membership-picker {
-  border: 1px solid #ccc;
-  .border-radius(3px);
-  padding: 0.5em;
-  margin-top: 0.5em;
-
-  .table {
-  	margin-bottom: 12px;
-  }
-  
-  .picker-actions {
-  	margin-bottom: 12px;
-  }
-
-  .scroller {
-    overflow-y: auto;
-    height: 18em;
-  }
-
-  textarea { width: 97%; height: 5em; }
-}
-
-.membership-picker {
-	.item-type-include { color: #393 }
-	.item-type-exclude { color: #999 }
-	.item-type-sits { color: #33f }
-
-	// checkbox column
-	table tr > td:nth-of-type(1) { width: 16px; }
+.studentManagement {
+	.table {
+		margin-bottom: 12px;
+	}
+	
+	.scroller {
+		overflow-y: auto;
+		height: 18em;
+	}
+	
+	.item-type-include { color: @tabulaGreenDark; }
+	.item-type-exclude { color: @tabulaGrayLight; }
+	.item-type-sits { color: @tabulaGrayDark; }
 }
 
 // setup assignments - hidden options groups
