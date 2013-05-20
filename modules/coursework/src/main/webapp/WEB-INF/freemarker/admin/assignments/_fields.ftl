@@ -42,12 +42,14 @@ the comments textarea needs to maintain newlines.
 		  </ul>
 		</#assign>
 		
-		<a href="#" class="use-popover" 
+		<a href="#"
+		   title="What's this?"
+		   class="use-popover" 
 		   data-title="Open-ended assignments"
 		   data-html="true"
 		   data-trigger="hover"
 		   data-content="${popoverText}"
-		   >What's this?</a>
+		   ><i class="icon-question-sign"></i></a>
 	</label>
 </@form.labelled_row>
 

@@ -50,19 +50,19 @@ the comments textarea needs to maintain newlines.
 
 </div>
 -->
-<div class="submit-buttons">
+<div class="submit-buttons form-actions">
 <input type="submit" value="Save" class="btn btn-primary">
-or <a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
+<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 
 <#if canDelete>
-<p class="subtle">Did you create this assignment in error? 
-You may <a href="<@routes.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
+	<p class="alert alert-info">Did you create this assignment in error? 
+	You may <a href="<@routes.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
 <#else>
-<p class="subtle">
-It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
-</p>
+	<p class="alert alert-info">
+	It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
+	</p>
 </#if>
 
 </#escape>

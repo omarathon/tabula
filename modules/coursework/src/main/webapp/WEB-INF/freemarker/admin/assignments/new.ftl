@@ -30,9 +30,9 @@ Some fields have been pre-filled from assignment ${command.prefillAssignment.nam
 
 <#include "_fields.ftl" />
 
-<div class="submit-buttons">
+<div class="submit-buttons form-actions">
 <input type="submit" value="Create" class="btn btn-primary">
-or <a class="btn" href="<@routes.depthome module=module />">Cancel</a>
+<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
 </div>
 
 </@f.form>
