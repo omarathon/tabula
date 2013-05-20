@@ -5,8 +5,12 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 case class WeekRange(val minWeek: Int, val maxWeek: Int) {
+	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
+	
+	def isSingleWeek = maxWeek == minWeek
+	
 	override def toString =
-		if (maxWeek > minWeek) "%d-%d" format (minWeek, maxWeek)
+		if (!isSingleWeek) "%d-%d" format (minWeek, maxWeek)
 		else minWeek.toString
 }
 
@@ -19,6 +23,14 @@ object WeekRange {
 	}
 	
 	implicit val defaultOrdering = Ordering.by[WeekRange, Int] ( _.minWeek )
+	
+	object NumberingSystem {
+		val Term = "term"
+		val Cumulative = "cumulative"
+		val Academic = "academic"
+			
+		val Default = Term
+	}
 }
 
 class WeekRangeListUserType extends AbstractBasicUserType[Seq[WeekRange], String] {

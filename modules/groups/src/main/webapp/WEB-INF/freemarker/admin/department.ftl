@@ -116,18 +116,26 @@
 					
 					<div class="span7">
 						<#list groupSet.groups?chunk(2) as row>
-							<div class="row groups">
+							<div class="groups">
 								<#list row as group>
-									<div class="group span6">
+									<div class="group">
 										<h4 class="name">
 											<small>
 												${group.name}
 											</small>
 										</h4>
 										
-										<#list group.events as event>
-											${event.day.name}
-										</#list>
+										<ul class="unstyled">
+											<#list group.events as event>
+												<li>
+													<#-- Tutor, weeks, day/time, location -->
+												
+													Week<#if !event.singleEvent>s</#if> <#list event.weekRanges as range>${range.toString}<#if range_has_next>, </#if></#list>,
+													${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+													${event.location}
+												</li>
+											</#list>
+										</ul>
 									</div>
 								</#list>
 							</div>

@@ -62,6 +62,8 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget {
 	
 	var title: String = _
 	
+	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
+	
 	@transient
 	lazy val tutors = permissionsService.ensureUserGroupFor(this, SmallGroupTutorRoleDefinition)
 	

@@ -30,6 +30,13 @@
 	--></#noescape><#--
 --></#macro>
 
+<#-- This macro assumes that time is a LocalTime -->
+<#macro time time twentyFourHour=true seconds=false><#--
+	--><#noescape><#--
+		-->${timeBuilder(time, twentyFourHour, seconds)}<#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>

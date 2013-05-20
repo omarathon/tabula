@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.JavaImports._
 */
 object IntervalFormatter {
 
-	private val hourFormat = DateTimeFormat.forPattern("Ka")
 	private val hourMinuteFormat = DateTimeFormat.forPattern("HH:mm")
 	private val dayAndDateFormat = DateTimeFormat.forPattern("EE d")
 	private val monthFormat = DateTimeFormat.forPattern(" MMM")

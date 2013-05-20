@@ -1577,6 +1577,12 @@ h1.with-settings {
 
 		z-index: @zindexPopover  + @zindexModal;
 	}
+
+	// Remove this if we ever include type.less in our Bootstrap build (i.e. we build ID6 on top of Bootstrap)
+	ul.unstyled,
+	ol.unstyled {
+	  margin-left: 0;
+	  padding-left: 0;
+	  list-style: none;
+	}
 }
-
-

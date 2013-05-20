@@ -6,7 +6,7 @@ import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
 
-sealed abstract class DayOfWeek(val dbValue: Int) {
+sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) {
 	def name = toString()
 	def shortName = name.substring(0, 3)
 }
@@ -46,6 +46,6 @@ class DayOfWeekUserType extends AbstractBasicUserType[DayOfWeek, JInteger] {
 	val nullObject = null
 
 	override def convertToObject(int: JInteger) = DayOfWeek(int)
-	override def convertToValue(day: DayOfWeek) = day.dbValue
+	override def convertToValue(day: DayOfWeek) = day.jodaDayOfWeek
 
 }
