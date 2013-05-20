@@ -72,8 +72,9 @@
 		<#else>
 			<#-- separate page, not modal -->
 			<div class="form-actions">
-				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Publish <#-- TODO: 'Submit for approval' to follow in TAB-402 et alia, ad infinitum -->
+				<#assign title>Submit record for approval by personal <#if isStudent>tutor<#else>tutee</#if></#assign>
+				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+					Submit for approval
 				</button>
 				<a class="btn" href="<@routes.profile student />">Cancel</a>
 			</div>

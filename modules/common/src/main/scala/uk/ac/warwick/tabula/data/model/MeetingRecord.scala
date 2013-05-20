@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
@@ -63,7 +62,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// true if the specified user needs to perform a workflow action on this meeting record
-	def pendingAction(member: Member): Boolean = pendingApprovalBy(member)
+	def pendingAction(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
 
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
@@ -74,6 +73,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 
 	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
+	def pendingRevisionBy(member: Member) = isRejected && member == creator
 
 	def permissionsParents = Stream(relationship.studentMember)
 

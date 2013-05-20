@@ -1,4 +1,4 @@
-<#if meeting.pendingApproval && viewer.universityId == meeting.creator.universityId>
+<#if meeting.pendingApproval && viewer == meeting.creator>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 	<div class="alert alert-info">
 		This meeting record needs to be approved.
@@ -32,6 +32,20 @@
 		</div>
 		<button type="submit" class="btn btn-primary">Submit</button>
 	</form>
+<#elseif meeting.pendingRevisionBy(viewer)>
+	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+	<div class="pending-action alert alert-error">
+		<#list meeting.rejectedApprovals as rejectedApproval>
+			<div class="rejection">
+				<p>This record has been rejected by ${rejectedApproval.approver.fullName} because:</p>
+				<p class="reason">${rejectedApproval.comments}</p>
+				<p>Please edit the record and submit it for approval again.</p>
+			</div>
+		</#list>
+	</div>
+	<div class="submit-buttons">
+		<a class="btn btn-primary" href="<@routes.edit_meeting_record meeting />">Edit</a>
+	</div>
 <#else>
 	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 </#if>

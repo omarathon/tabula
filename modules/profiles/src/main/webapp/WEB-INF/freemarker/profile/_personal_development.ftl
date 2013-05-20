@@ -59,13 +59,16 @@
 			var $m = $("#modal");
 	
 			var scrollToOpenDetails = function() {
-				$("details.open").each(function() {
-					$("html, body").animate({
-						scrollTop: $(this).offset().top - window.getNavigationHeight()
-					}, 300);
-				});
+				// prevent js errors when getNavigationHeight is undefined
+				if(window.getNavigationHeight != undefined){
+					$("details.open").each(function() {
+						$("html, body").animate({
+							scrollTop: $(this).offset().top - window.getNavigationHeight()
+						}, 300);
+					});
+				}
 			};
-	
+
 			frameLoad = function(frame) {
 				// reset slow load spinner
 				$m.tabulaPrepareSpinners();

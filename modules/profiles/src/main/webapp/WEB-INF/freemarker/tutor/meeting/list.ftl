@@ -40,6 +40,7 @@
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
+									<a href="<@routes.edit_meeting_record meeting />" class="edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
 									<a href="<@routes.restore_meeting_record meeting />" class="restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
 									<a href="<@routes.purge_meeting_record meeting />" class="purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
