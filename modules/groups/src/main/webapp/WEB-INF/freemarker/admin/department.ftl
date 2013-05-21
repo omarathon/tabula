@@ -42,6 +42,17 @@
 				</ul>
 			</div>
 		</#if>
+		
+		<div class="btn-group dept-settings">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				<i class="icon-wrench"></i>
+				Manage
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
+			</ul>
+		</div>
 
 		<div class="btn-group dept-show">
 			<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no groups are hidden. Click to show all modules." data-title-show="Modules with no groups are hidden. Click to show all modules." data-title-hide="Modules with no groups are shown. Click to hide them">
@@ -72,10 +83,8 @@
 		<div class="btn-group section-manage-button">
 		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
 		  <ul class="dropdown-menu pull-right">
-		  	<#if can_manage>	
-					<#assign module_managers_count = ((module.managers.includeUsers)![])?size />
-					<#-- TODO this needs breaking out of coursework -->
-					<li><a href="<@url page="/admin/module/${module.code}/permissions" context="/coursework" />">
+		  	<#if can_manage>
+					<li><a href="<@routes.moduleperms module />">
 						<i class="icon-user"></i> Edit module permissions
 					</a></li>
 				</#if>

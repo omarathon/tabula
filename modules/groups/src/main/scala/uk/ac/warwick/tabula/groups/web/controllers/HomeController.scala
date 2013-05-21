@@ -10,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller class HomeController extends GroupsController {
+	
 	var moduleService = Wire[ModuleAndDepartmentService]
 	
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {

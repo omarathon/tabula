@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands.departments
+package uk.ac.warwick.tabula.admin.commands.department
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}

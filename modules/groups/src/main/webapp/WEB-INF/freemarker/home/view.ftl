@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
 <#macro link_to_department department>
-	<a href="<@url page="/admin/department/${department.code}/"/>">
+	<a href="<@routes.departmenthome department />">
 		Go to the ${department.name} admin page
 	</a>
 </#macro>

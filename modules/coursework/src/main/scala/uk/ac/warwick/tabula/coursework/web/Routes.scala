@@ -35,8 +35,6 @@ object Routes {
 			def create() = "/admin/module/add"
 		}
 
-		def modulePermissions(module: Module) = "/admin/module/%s/permissions" format (encoded(module.code))
-
 		object assignment {
 			object markerFeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
@@ -79,7 +77,7 @@ object Routes {
 // Could do something like this to centralise all the @RequestMapping locations?
 /*object Mappings {
 	object admin {
-		final val permissions = "/admin/module/{module}/permissions"
+		final val settings = "/admin/module/{module}/settings"
 		object assignment {
 			final val create = "/admin/module/{module}/assignments/new"
 		}
