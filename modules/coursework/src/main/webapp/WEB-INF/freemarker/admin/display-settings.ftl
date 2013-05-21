@@ -49,6 +49,29 @@
 		</@form.field>
 	</@form.row>
 	
+	<@form.row>
+		<@form.label>Week numbering system</@form.label>
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="weekNumberingSystem" value="term" />
+				Count weeks from 1-10 for each term (the first week of the Spring term is Term 2, week 1)
+			</@form.label>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="weekNumberingSystem" value="cumulative" />
+				Count term weeks cumulatively (the first week of the Spring term is Term 2, week 11)
+			</@form.label>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="weekNumberingSystem" value="academic" />
+				Use academic week numbers, including vacations (the first week of the Spring term is week 15 or week 16)
+			</@form.label>
+			<@form.label checkbox=true>
+				<@f.radiobutton path="weekNumberingSystem" value="none" />
+				Use no week numbers, displaying dates instead
+			</@form.label>
+			<@f.errors path="weekNumberingSystem" cssClass="error" />
+		</@form.field>
+	</@form.row>
+	
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
 	or <a class="btn" href="<@routes.departmenthome department=department />">Cancel</a>

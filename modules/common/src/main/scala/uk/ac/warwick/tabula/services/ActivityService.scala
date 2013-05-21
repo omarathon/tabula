@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.Module
 import org.apache.lucene.search.FieldDoc
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions.Permissions
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
  *  and specifically is only noticing new submission events.
@@ -55,8 +56,8 @@ class ActivityService {
 	}
 	
 	private def getModules(user: CurrentUser): Seq[Module] = {
-		val ownedModules = moduleService.modulesManagedBy(user)
-		val adminModules = moduleService.modulesAdministratedBy(user)
+		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
+		val adminModules = moduleService.modulesInDepartmentsWithPermission(user, Permissions.Module.ManageAssignments)
 		
 		(ownedModules ++ adminModules).toSeq
 	}
