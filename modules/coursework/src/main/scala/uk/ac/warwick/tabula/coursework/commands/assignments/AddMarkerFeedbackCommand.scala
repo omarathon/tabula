@@ -60,8 +60,8 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		for (attachment <- file.attached){
 			// if an attachment with the same name as this one exists then delete it
 			val duplicateAttachment = markerFeedback.attachments.find(_.name == attachment.name)
-			duplicateAttachment.foreach(session.delete(_))
-			markerFeedback addAttachment attachment
+			duplicateAttachment.foreach(markerFeedback.removeAttachment(_))
+			markerFeedback.addAttachment(attachment)
 		}
 
 		session.saveOrUpdate(parentFeedback)
