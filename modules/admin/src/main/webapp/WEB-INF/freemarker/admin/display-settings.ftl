@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 <h1>Display settings for ${department.name}</h1>
-<@f.form method="post" class="form-horizontal" action="${url('/admin/department/${department.code}/settings/display')}" commandName="displaySettingsCommand">
+<@f.form method="post" class="form-horizontal" action="" commandName="displaySettingsCommand">
 	<@form.row>
 		<@form.label></@form.label>
 		<@form.field>
@@ -74,7 +74,12 @@
 	
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
-	or <a class="btn" href="<@routes.departmenthome department=department />">Cancel</a>
+	<#if (returnTo!"")?length gt 0>
+		<#assign cancelDestination=returnTo />
+	<#else>
+		<#assign cancelDestination><@routes.departmenthome department=department /></#assign>
+	</#if>
+	or <a class="btn" href="${cancelDestination}">Cancel</a>
 </div>
 </@f.form>
 </#escape>

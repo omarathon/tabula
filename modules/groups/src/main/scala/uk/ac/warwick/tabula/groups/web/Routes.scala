@@ -15,6 +15,5 @@ object Routes {
 
 	object admin {
 		def apply(department: Department) = "/admin/department/%s" format (encoded(department.code))
-		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
 	}
 }
