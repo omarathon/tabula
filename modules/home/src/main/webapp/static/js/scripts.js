@@ -223,6 +223,33 @@
 			});
 		}
 	};
+	
+	
+	/* 
+		Customised Popover wrapper. Implements click away to dismiss.
+	*/
+	$.fn.tabulaPopover = function(options) {
+		var $items = this;
+		
+		$items.on('click', function(e) {
+			if ($(this).hasClass('disabled')) {
+				e.stopImmediatePropagation();
+				e.preventDefault();
+			}
+		});
+		
+		$items.popover(options);
+		
+		// Click away to dismiss
+		$('html').on('click', function(e) {
+			// if clicking anywhere other than the popover itself
+			if ($(e.target).closest('.popover').length === 0) {
+				$items.popover('hide');
+			}
+		});
+		
+		return $items;
+	};
 
 	// on ready
 	$(function() {
