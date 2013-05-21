@@ -42,6 +42,26 @@ object WeekRangesFormatter {
 	class WeekRangesFormatterCache extends mutable.HashMap[AcademicYear, WeekRangesFormatter] {
 		override def default(year: AcademicYear) = new WeekRangesFormatter(year)
 	}
+	
+	/* Pimp the TermFactory to include Vacation "Terms"
+	 * We extend AnyVal here to make this a Value class (c.f. http://docs.scala-lang.org/overviews/core/value-classes.html)
+	 * This means we never instantiate the wrapper, the compiler just performs voodoo to call the methods. 
+	 */
+	implicit class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal {
+		def getTermFromDateIncludingVacations(date: BaseDateTime) = {
+			val term = delegate.getTermFromDate(date)
+			if (date.isBefore(term.getStartDate())) Vacation(delegate.getPreviousTerm(term), term)
+			else term
+		}
+
+		def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term] = {
+			val startTerm = getTermFromDateIncludingVacations(start)
+			val endTerm = getTermFromDateIncludingVacations(end)
+
+			if (startTerm == endTerm) Seq(startTerm)
+			else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
+		}
+	}
 
 }
 
@@ -64,8 +84,12 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
-			case Seq(event: SmallGroupEvent) => format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
+			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+				format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
+				
+			case Seq(event: SmallGroupEvent) => 
+				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
+				
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
@@ -75,23 +99,6 @@ class WeekRangesFormatter(year: AcademicYear) {
 	import WeekRangesFormatter._
 
 	var termFactory = Wire[TermFactory]
-
-	// Pimp the TermFactory to include Vacation "Terms"
-	implicit class VacationAwareTermFactory(delegate: TermFactory) {
-		def getTermFromDateIncludingVacations(date: BaseDateTime) = {
-			val term = delegate.getTermFromDate(date)
-			if (date.isBefore(term.getStartDate())) Vacation(delegate.getPreviousTerm(term), term)
-			else term
-		}
-
-		def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term] = {
-			val startTerm = getTermFromDateIncludingVacations(start)
-			val endTerm = getTermFromDateIncludingVacations(end)
-
-			if (startTerm == endTerm) Seq(startTerm)
-			else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
-		}
-	}
 
 	// Pimp Term to have a clever toString output
 	implicit class PimpedTerm(term: Term) {
