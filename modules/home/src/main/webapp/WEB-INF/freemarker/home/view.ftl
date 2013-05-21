@@ -17,11 +17,15 @@
 		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2></li>
 		
 		<#if features.smallGroupTeaching>
-			<li><h2><a href="<@url page="/" context="/groups" />" />Small Group Teaching</h2></li>
+			<li><h2><a href="<@url page="/" context="/groups" />" />Small Group Teaching</a></h2>
+				<span class="hint">Create seminars, tutorials and lab groups</span>
+			</li>
 		</#if>
 	
 		<#if user.staff>
-			<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2></li>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2>
+				<span class="hint">View student information and edit personal tutors</span>
+			</li>
 		<#elseif user.student>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2></li>
 		</#if>

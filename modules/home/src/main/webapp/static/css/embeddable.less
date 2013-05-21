@@ -82,7 +82,16 @@ summary { .cursor-pointer(); }
 
 	list-style-type: none;
 
-	li { margin-top: 8px; }
+	li { 
+		margin-top: 8px;
+		
+		> * { 
+			display: inline-block;
+			margin: 0 5px; 
+		} 
+	}
+	
+	.hint { color: @tabulaGrayLight; }
 }
 
 #what-is-tabula {
