@@ -40,14 +40,10 @@ class UploadPersonalTutorsController extends ProfilesController {
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def doUpload(@PathVariable("department") department: Department, @Valid @ModelAttribute("command") cmd: UploadPersonalTutorsCommand, errors: Errors): Mav = {
 
-		def personSpecificError(err: ObjectError) = {
-			if (err.getCode.contains("uniNumber") || err.getCode().contains("member"))
-				true
-			else false
-		}
+		def isPersonSpecificError(err: ObjectError) = (err.getCode.contains("uniNumber") || err.getCode().contains("member"))
 
 		val foundErrorsToDisplay = errors.getAllErrors().asScala.exists {
-			err => !personSpecificError(err)
+			!isPersonSpecificError(_)
 		}
 
 		val tutorCount = cmd.apply().size
