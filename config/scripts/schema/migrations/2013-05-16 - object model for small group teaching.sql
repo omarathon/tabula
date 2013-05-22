@@ -9,8 +9,8 @@ create table SmallGroupSet (
 	constraint SmallGroupSet_PK primary key (id)
 );
    
-create index idx_smallgroupset_module on SmallGroup(module_id);
-create index idx_smallgroupset_deleted on SmallGroup(deleted);
+create index idx_smallgroupset_module on SmallGroupSet(module_id);
+create index idx_smallgroupset_deleted on SmallGroupSet(deleted);
 
 create table SmallGroup (
 	id nvarchar2(255) not null,
