@@ -4,7 +4,10 @@
 
 -->
 <#escape x as x?html>
-<@form.labelled_row "members" "Students">
+	<@form.labelled_row "members" "Students" "assignmentEnrolment">
+		<@f.hidden path="upstreamAssignment" id="upstreamAssignment" />
+		<@f.hidden path="occurrence" id="occurrence" />
+
 		<@spring.bind path="members">
 			<#assign membersGroup=status.actualValue />
 		</@spring.bind>
@@ -14,16 +17,13 @@
 		
 		<#macro what_is_this>
 			<#assign popoverText>
-				<p>
-					Here you can choose which students see this assignment.
-			    	You can link to an assignment in SITS and the list of students will be updated automatically from there.
-			    	If you are not using SITS you can manually add students by ITS usercode or university number.
-				</p>
-			     
-				<p>
-			    	It is also possible to tweak the list even when using SITS data, but this is only to be used
-			    	when necessary and you still need to ensure that the upstream SITS data gets fixed.
-		    	</p>
+				<p>Expand to view and choose which students see this assignment.</p>
+				
+				<p>You can link to an assignment in SITS and the list of students will be updated automatically from there.
+				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
+				
+				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
+				when necessary and you still need to ensure that the upstream SITS data gets fixed.</p>
 			</#assign>
 		
 			<a href="#"
@@ -35,81 +35,74 @@
 			   data-content="${popoverText}"
 			   ><i class="icon-question-sign"></i></a>
 		</#macro>
-
-		<details class="studentManagement">
+		
+		<details>
 			<summary>
-				<#-- enumerate current state and offer change buttons -->
+				<#-- enumerate current state -->
 				<#if upstreamAssessmentGroups?has_content>
 					<#assign sitsTotal = 0 />
 					<#list upstreamAssessmentGroups as group>
 						<#assign sitsTotal = sitsTotal + group.members.members?size />
 					</#list>
-					<#if hasMembers>
-						<#assign total = sitsTotal + membersGroup.includeUsers?size />
-					<#else>
-						<#assign total = sitsTotal />
-					</#if>
-		
+					<#assign sitsTotal = sitsTotal - (membersGroup.excludeUsers?size)!0 />
+					<#assign total = sitsTotal + (membersGroup.includeUsers?size)!0 />
+					
 					<span class="uneditable-value">
 						${total} enrolled
 						<#if hasMembers>
 							(${sitsTotal} <#if membersGroup.excludeUsers?size gt 0>left</#if> from SITS<#if membersGroup.excludeUsers?size gt 0> after <@fmt.p membersGroup.excludeUsers?size "manual removal" /></#if><#if membersGroup.includeUsers?size gt 0>, plus <@fmt.p membersGroup.includeUsers?size "manual addition" /></#if>)
+						<#else>
+							from SITS
 						</#if>
 					<@what_is_this /></span>
 				<#elseif hasMembers>
 					<span class="uneditable-value">${membersGroup.includeUsers?size} manually enrolled.
 					<@what_is_this /></span>
 				<#else>
-					<span class="uneditable-value">No students enrolled.</span>
+					<span class="uneditable-value">No students enrolled.
 					<@what_is_this /></span>
 				</#if>
 			</summary>
 
 			<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
-			<p class="alert alert-success"><i class="icon-ok"></i> This assignment is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p>
+			<#-- <p class="alert alert-success"><i class="icon-ok"></i> This assignment is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 		
-			<div style="margin-bottom: 12px;">
-				<#if sitsTotal??>
-					<a class="btn" id="show-sits-picker">
-						<#if upstreamAssessmentGroups?has_content>
-							Change link to SITS
-						<#else>
-							Add link to SITS
-						</#if>
-					</a>
+			<p>
+				<#if upstreamAssessmentGroups??>
+					<a class="btn use-tooltip" id="show-sits-picker" title="Change the linked SITS assignment used for enrolment data">Change link to SITS</a>
+				<#elseif upstreamGroupOptions??>
+					<a class="btn use-tooltip" id="show-sits-picker" title="Use enrolment data from one or more assignments recorded in SITS">Add link to SITS</a>
+				<#else>
+					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
-				
-				<a class="btn" id="show-adder">Add students manually</a>
-				
-				<a class="btn btn-warning disabled hide-checked-users member-action use-tooltip"
-						id="membership-remove-selected"
-						<#if upstreamAssessmentGroups??>title="This will only adjust membership for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
-						>
-					Remove selected
 				</a>
-			</div>
-
-			<#-- includeUsers members -->
-			<#list command.members.includeUsers as _u>
-				<input type="hidden" name="includeUsers" value="${_u}">
-			</#list>
-
-			<#-- existing includeUsers cmd -->
-			<#list command.includeUsers as _u>
-				<input type="hidden" name="includeUsers" value="${_u}">
-			</#list>
-
-			<#list command.members.excludeUsers as _u>
-				<input type="hidden" name="excludeUsers" value="${_u}">
-			</#list>
+			
+				<a class="btn use-tooltip" id="show-adder"
+						<#if upstreamAssessmentGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+						>
+					Add students manually
+				</a>
+				
+				<a class="btn btn-warning disabled remove-users member-action use-tooltip"
+						<#if upstreamAssessmentGroups??>title="This will only remove enrolment for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+						>
+					Remove
+				</a> 
+				
+				<a class="btn restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
+			</p>
 
 			<#if hasMembers>
-				<div id="member-list" class="scroller">
-					<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" data-controller=".member-action">
+				<#assign includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span></#assign>
+				<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Removed</span></#assign>
+				<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
+				
+				<div id="enrolment" class="scroller">
+					<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 						<thead>
 							<tr>
-								<th class="for-check-all" style="width: 45px;"></th>
-								<th class="sortable" style="width: 45px;">Source</th>
+								<th class="for-check-all" style="width: 25px;"></th>
+								<th class="sortable" style="width: 60px;">Source</th>
 								<th class="sortable">First name</th>
 								<th class="sortable">Last name</th>
 								<th class="sortable">ID</th>
@@ -123,52 +116,45 @@
 								
 								<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
 									<td>
-										<#if item.itemType != 'exclude'>
-											<#--
-												TODO checkboxes are currently all named "excludeUsers", relying on the fact that we only
-												use the checkboxes for removing users. If we add other options then this will need changing
-												and probably the script will need to generate hidden inputs instead. As it is, the checkboxes
-												generate the formdata that we want and so we can just submit it.
-											-->
-											<@form.selector_check_row "excludeUsers" item.userId />
-										<#elseif item.userId??>
-											<a class="btn btn-mini btn-success restore-user use-tooltip" data-usercode="${item.userId}" data-placement="left" title="Reinstate normal SITS enrolment for this student">Restore</a>
+										<#if item.userId??>
+											<@form.selector_check_row "modifyEnrolment" item.userId />
+										<#else>
+											<i class="icon-ban-circle use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 										</#if>
+									</td>
+									<td class="source">
+										<#noescape>
+											<#if item.itemType='include'>
+												${includeIcon}
+											<#elseif item.itemType='exclude'>
+												${excludeIcon}
+											<#else>
+												${sitsIcon}
+											</#if>
+										</#noescape>
 									</td>
 									<td>
-										<#if item.itemType='include'>
-											<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span>
-										<#elseif item.itemType='exclude'>
-											<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Removed</span>
-										<#else>
-											<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span>
-										</#if>
-									</td>
-									<td><#if item.itemType='exclude'><del></#if>
 										<#if _u.foundUser>
 											${_u.firstName}
 										<#else>
 											<span class="muted">Unknown</span>
 										</#if>
-										<#if item.itemType='exclude'></del></#if>
 									</td>
-									<td><#if item.itemType='exclude'><del></#if>
+									<td>
 										<#if _u.foundUser>
 											${_u.lastName}
 										<#else>
 											<span class="muted">Unknown</span>
 										</#if>
-										<#if item.itemType='exclude'></del></#if>
 									</td>
-									<td><#if item.itemType='exclude'><del></#if>
+									<td>
 										<#if item.universityId??>
 											${item.universityId}
 										<#else>
 											<span class="muted">Unknown</span>
 										</#if>
-										<#if item.itemType='exclude'></del></#if>
 									</td>
-									<td><#if item.itemType='exclude'><del></#if>
+									<td>
 										<#if _u.foundUser>
 											${_u.userId}
 										<#elseif item.userId??>
@@ -176,11 +162,24 @@
 										<#else><#-- Hmm this bit shouldn't ever happen -->
 											<span class="muted">Unknown</span>
 										</#if>
-										<#if item.itemType='exclude'></del></#if>
 									</td>
 								</tr>
 							</#list>
 						</tbody>
+						
+						<#-- includeUsers members -->
+						<#list command.members.includeUsers as _u>
+							<input type="hidden" name="includeUsers" value="${_u}">
+						</#list>
+			
+						<#-- existing includeUsers cmd -->
+						<#list command.includeUsers as _u>
+							<input type="hidden" name="includeUsers" value="${_u}">
+						</#list>
+			
+						<#list command.members.excludeUsers as _u>
+							<input type="hidden" name="excludeUsers" value="${_u}">
+						</#list>
 					</table>
 				</div>
 			<#else>
@@ -196,9 +195,10 @@
 			</div>
 			
 			<div class="modal-body">
-				<p>
-					Type or paste in a list of usercodes or University numbers here then click Add.
-					<br>
+				<p class="muted">
+					Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
+				</p>
+				<p class="muted">
 					<strong>Is your module in SITS?</strong> It may be better to fix the data there,
 					as other University systems won't know about any changes you make here.
 				</p>
@@ -207,12 +207,11 @@
 					<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
 				</div>
 				-->
-				<textarea class="input-block-level" name="massAddUsers"></textarea>
+				<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
 			</div>
 				
 			<div class="modal-footer">
 				<a class="btn btn-success refresh-form disabled" id="add-students">Add</a>
-				<a class="btn cancel">Cancel</a>
 			</div>
 		</div>
 		
@@ -229,7 +228,7 @@
 					<p class="muted">Add students by linking this assignment to one or more of the following SITS assignments for
 					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
 					
-					<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" data-controller=".sits-picker-action">
+					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 						<thead>
 							<tr>
 								<th class="for-check-all"></th>
@@ -257,7 +256,6 @@
 				<div class="modal-footer">
 					<a class="btn btn-success refresh-form disabled sits-picker-action" id="add-sits-link">Link</a>
 					<a class="btn btn-warning refresh-form disabled sits-picker-action" id="remove-sits-link">Unlink</a>
-					<a class="btn cancel">Cancel</a>
 				</div>
 			<#else>
 				<div class="modal-body">
@@ -272,28 +270,42 @@
 			<#-- sortable tables -->
 			$('.table-sortable').sortableTable();
 			
+			var $enrolmentTable = $('#enrolment-table');
+			var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.</p>');
+			
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
 			
 			<#-- controller detects action=refresh and does a bind without submit -->
-			$('.refresh-form').on('click', '.btn:not.disabled', function(e) {
+			<#--
+			 $('.refresh-form').on('click', '.btn:not.disabled', function(e) {
 				e.preventDefault();
 				$('#action-input').val('refresh');
 				$(this).closest('form').submit();
 			});
+			-->
 			
-			<#-- manage check-all state and en/disable buttons -->
-			var updateTable = function($table) {
+			<#-- manage check-all state -->
+			var updateCheckboxes = function($table) {
 				var checked = $table.find('td input:checked').length;
 				var disable = (checked == 0);
 				if (checked == $table.find('td input').length) $table.find('.check-all').prop('checked', true);
 				if (checked == 0) $table.find('.check-all').prop('checked', false);
-				
-				var $controller = $($table.data('controller'));
-				$controller.toggleClass('disabled', (checked == 0));
 			}
 			
-			<#-- make modal rows clickable -->
+			<#-- en/disable action buttons -->
+			var enableActions = function($table) {
+				var context = $table.prop('id');
+				
+				if (context == 'sits-table') {
+					$('.sits-picker-action').toggleClass('disabled', $table.find('input:checked').length==0);
+				} else if (context == 'enrolment-table') {
+					$('.remove-users').toggleClass('disabled', $table.find('tr.item-type-include input:checked, tr.sits input:checked').length==0);
+					$('.restore-users').toggleClass('disabled', $table.find('tr.item-type-exclude input:checked').length==0);
+				}
+			}
+			
+			<#-- make table rows clickable -->
 			$('.table-checkable').on('click', 'tr', function(e) {
 				if ($(e.target).is(':not(input:checkbox)')) {
 					e.preventDefault();
@@ -303,17 +315,21 @@
 					}
 				}
 				
-				updateTable($(this).closest('table'));
+				var $table = $(this).closest('table');
+				updateCheckboxes($table);
+				enableActions($table);
 			});
 			
 			<#-- dynamically attach check-all checkbox -->
 			$('.for-check-all').append($('<input />', { type: 'checkbox', class: 'check-all use-tooltip', title: 'Select all/none' }));
 			$('.check-all').tooltip({ delay: 1500 });
 			$('table th').on('click', '.check-all', function(e) {
+				var $table = $(this).closest('table');
 				var checkStatus = this.checked;
-				$(this).closest('table').find('td input:checkbox').prop('checked', checkStatus);
+				$table.find('td input:checkbox').prop('checked', checkStatus);
 				
-				updateTable($(this).closest('table'));
+				updateCheckboxes($table);
+				enableActions($table);
 			});
 			
 			<#-- sits-picker click handler -->
@@ -325,6 +341,7 @@
 					
 					Do an AJAX call to get the list of students from SITS in selected groups,
 					mixin manual edits and return as JSON for injection into the master list -->
+					$('#focusOn').val('#enrolment-table');
 				}
 			});
 
@@ -337,6 +354,7 @@
 					
 					Do an AJAX call to get the list of students from SITS in selected groups,
 					mixin manual edits (including new data) and return as JSON for injection into the master list -->
+					$('#focusOn').val('#enrolment-table');
 				}
 			});
 
@@ -347,64 +365,74 @@
 				$('#add-students').toggleClass('disabled', empty);
 			});
 			
-			<#-- cancel button -->
-			$('.modal').on('click', '.cancel', function(e) {
-				$(this).closest('.modal').modal('hide');
-			});
-
-			<#-- refocus after click -->
-			$('#add-members, #membership-remove-selected').click(function(e) {
-				$('#focusOn').val('member-list');
-			});
-			
-			var $membershipPicker = $('#member-list');
-
-			<#-- button to unexclude excluded users -->
-			$membershipPicker.find('.restore').click(function(e) {
-				var $this = $(this);
-				$('#focusOn').val('member-list');
-				$this.closest('form').append(
-					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
-				);
-			});
-			
-			var $removeSelected = $('#membership-remove-selected');
-			$membershipPicker.on('change', 'input.collection-checkbox', function() {
-				$removeSelected.toggleClass('disabled', $membershipPicker.find('input.collection-checkbox:checked').length == 0);
-			});
-
-			$('.restore-user').click(function(e) {
-				e.preventDefault();
-				var $this = $(this);
-				$('#focusOn').val('member-list');
-				var $usercode = $this.data('usercode');
-				$membershipPicker.find('input:hidden[value='+ $usercode + '][name=excludeUsers]').remove();
-				$this.closest('form').append(
-					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
-				);
-				$(this).closest('tr').removeClass('item-type-exclude').addClass('item-type-sits');
-				$(this).closest('tr').find('i.icon-minus-sign').remove();
-				$(this).closest('tr').find('a.restore-user').remove();
-			});
-			
-			$('.hide-checked-users').click(function(e) {
-			    e.preventDefault();
-				var checkedToRemove = $membershipPicker.find('input.collection-checkbox:checked')
-				checkedToRemove.parents('.membership-item').hide();
-				checkedToRemove.map(function() {
-					$membershipPicker.find('input:hidden[value='+ this.value + '][name=includeUsers]').remove();
-				});
-			});
-
-			$('select#academicYear').change(function(e) {
-				refreshForm();
-			});
-
+			<#-- show modals -->
 			$('#show-sits-picker').click(function() {
 				$('#sits-picker').modal('show');
 			});
 			$('#show-adder').click(function() {
 				$('#adder').modal('show');
+			});
+			
+			<#-- remove user from enrolment table -->
+			$('.remove-users').click(function(e) {
+				e.preventDefault();
+				$enrolmentTable.find('tr.item-type-include input:checked, tr.item-type-sits input:checked').each(function() {
+					var usercode = $(this).val();
+					var $tr = $(this).closest('tr');
+					
+					// update the hidden fields 
+					$enrolmentTable.find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
+					$enrolmentTable.append($('<input type=hidden name=excludeUsers />').val(usercode));
+					
+					// update rendering
+					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>').append($(' <span class="label">Pending</span>'));
+					$tr.removeClass(function(i, css) {
+						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+					}).addClass('item-type-exclude');
+					
+					this.checked = '';
+					
+					$('#enrolment').before($pendingAlert);
+					$pendingAlert.slideDown();
+				});
+			});
+			
+			<#-- restore excluded user -->
+			$('.restore-users').click(function(e) {
+				e.preventDefault();
+				$enrolmentTable.find('tr.item-type-exclude input:checked').each(function() {
+					var usercode = $(this).val();
+					var $tr = $(this).closest('tr');
+					
+					// update the hidden fields 
+					$enrolmentTable.find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
+					$enrolmentTable.append($('<input type=hidden name=includeUsers />').val(usercode));
+					
+					// update rendering
+					$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>').append($(' <span class="label">Pending</span>'));
+					$tr.removeClass(function(i, css) {
+						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+					}).addClass('item-type-include');
+					
+					this.checked = '';
+					
+					$('#enrolment').before($pendingAlert);
+					$pendingAlert.slideDown();
+				});
+			});
+			
+		
+		
+			
+			
+			
+			$('.hide-checked-users').click(function(e) {
+			    e.preventDefault();
+				var checkedToRemove = $enrolmentTable.find('input.collection-checkbox:checked')
+				checkedToRemove.parents('.membership-item').hide();
+				checkedToRemove.map(function() {
+					$enrolmentTable.find('input:hidden[value='+ this.value + '][name=includeUsers]').remove();
+				});
 			});
 
 			<#assign focusOn=RequestParameters.focusOn!'' />
