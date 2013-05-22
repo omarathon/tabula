@@ -8,7 +8,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Command
 import data.model._
-import forms.AssessmentGroup
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -57,9 +56,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 	// start complicated membership stuff
 
-	/** linked SITS assignment. Optional. */
-	var upstreamAssignment: UpstreamAssignment = _
-
+	/** linked SITS assignments. Optional. */
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 	var assessmentGroupItems: JList[AssessmentGroupItem] = JArrayList()
 
@@ -94,9 +91,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 	// can be set to false if that's not what you want.
 	var prefillFromRecent = true
-
-	/** MAV_OCCURRENCE as per the value in SITS.  */
-	var occurrence: String = _
 
 	var prefillAssignment: Assignment = _
 
@@ -183,12 +177,9 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		assignment.academicYear = academicYear
 		assignment.feedbackTemplate = feedbackTemplate
 
-		if(this.assignment != null){
+		if (this.assignment != null) {
 			persistAssessmentGroupChanges()
 		}
-
-		assignment.upstreamAssignment = upstreamAssignment
-		assignment.occurrence = occurrence
 
 		copySharedTo(assignment: Assignment)
 
@@ -243,8 +234,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		name = assignment.name
 		academicYear = assignment.academicYear
 		feedbackTemplate = assignment.feedbackTemplate
-		upstreamAssignment = assignment.upstreamAssignment
-		occurrence = assignment.occurrence
 		assessmentGroups = assignment.assessmentGroups
 		if (assignment.members != null) {
 			members copyFrom assignment.members

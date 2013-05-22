@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.AssessmentGroup
 
 
 /**
@@ -112,8 +113,15 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				assignment.addDefaultFields()
 				assignment.academicYear = academicYear
 				assignment.name = item.name
-				assignment.upstreamAssignment = item.upstreamAssignment
-				assignment.occurrence = item.occurrence
+				
+				val assessmentGroup = new AssessmentGroup
+				assessmentGroup.occurrence = item.occurrence
+				assessmentGroup.upstreamAssignment = item.upstreamAssignment
+				assessmentGroup.assignment = assignment
+				assignmentMembershipService.save(assessmentGroup)
+				
+				assignment.assessmentGroups.add(assessmentGroup)
+				
 				assignment.module = findModule(item.upstreamAssignment).get
 
 				assignment.openDate = item.openDate

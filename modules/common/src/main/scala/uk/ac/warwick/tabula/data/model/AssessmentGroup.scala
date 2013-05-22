@@ -1,8 +1,9 @@
-package uk.ac.warwick.tabula.data.model.forms
+package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.data.model.{GeneratedId, Assignment, UpstreamAssignment}
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 
 @Entity
 class AssessmentGroup extends GeneratedId {
