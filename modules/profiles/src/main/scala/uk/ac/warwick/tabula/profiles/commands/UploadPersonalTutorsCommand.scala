@@ -55,6 +55,8 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (rawStudentRelationships != null && !rawStudentRelationships.isEmpty()) {
+			val numRels = rawStudentRelationships.length
+			println("There are " + numRels + " relationships.")
 			for (i <- 0 until rawStudentRelationships.length) {
 				val rawStudentRelationship = rawStudentRelationships.get(i)
 				val newTarget = uniIdsSoFar.add(rawStudentRelationship.targetUniversityId match {
@@ -174,9 +176,9 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 				case Some(mem: StudentMember) => mem.studyDetails.sprCode
 				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
-			
+
 			val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, targetSprCode)
-			
+
 			// Does this relationship already exist?
 			currentRelationships.find(_.agent == agent) match {
 				case Some(existing) => existing
@@ -186,12 +188,12 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						rel.endDate = DateTime.now
 						profileService.saveOrUpdate(rel)
 					}
-					
+
 					// Save the new one
 					val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
 					logger.debug("Saved personal tutor for " + targetUniId)
-			
+
 					rel
 				}
 			}
