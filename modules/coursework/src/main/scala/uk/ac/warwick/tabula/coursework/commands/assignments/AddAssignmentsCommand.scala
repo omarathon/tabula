@@ -114,14 +114,6 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				assignment.academicYear = academicYear
 				assignment.name = item.name
 				
-				val assessmentGroup = new AssessmentGroup
-				assessmentGroup.occurrence = item.occurrence
-				assessmentGroup.upstreamAssignment = item.upstreamAssignment
-				assessmentGroup.assignment = assignment
-				assignmentMembershipService.save(assessmentGroup)
-				
-				assignment.assessmentGroups.add(assessmentGroup)
-				
 				assignment.module = findModule(item.upstreamAssignment).get
 
 				assignment.openDate = item.openDate
@@ -134,6 +126,15 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				// Do open-ended afterwards; it's a date item that we're copying, not from shared options
 				assignment.openEnded = item.openEnded
 
+				assignmentService.save(assignment)
+				
+				val assessmentGroup = new AssessmentGroup
+				assessmentGroup.occurrence = item.occurrence
+				assessmentGroup.upstreamAssignment = item.upstreamAssignment
+				assessmentGroup.assignment = assignment
+				assignmentMembershipService.save(assessmentGroup)
+				
+				assignment.assessmentGroups.add(assessmentGroup)
 				assignmentService.save(assignment)
 			}
 		}
