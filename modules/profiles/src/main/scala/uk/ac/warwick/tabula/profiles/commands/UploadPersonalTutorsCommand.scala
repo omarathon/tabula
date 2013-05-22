@@ -55,8 +55,6 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (rawStudentRelationships != null && !rawStudentRelationships.isEmpty()) {
-			val numRels = rawStudentRelationships.length
-			println("There are " + numRels + " relationships.")
 			for (i <- 0 until rawStudentRelationships.length) {
 				val rawStudentRelationship = rawStudentRelationships.get(i)
 				val newTarget = uniIdsSoFar.add(rawStudentRelationship.targetUniversityId match {
