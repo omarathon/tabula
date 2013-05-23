@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -92,9 +91,6 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
-	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)).orNull
-
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member) = student match {
 		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor))
@@ -106,18 +102,17 @@ class EditTutorController extends BaseController {
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false).noLayout()
+			"tutorToDisplay" -> cmd.currentTutor
+		).noLayout()
 	}
 
 	@RequestMapping(method=Array(POST))
-	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
+	def saveTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 }
