@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 import collection.JavaConverters._
 import collection.mutable
 import language.implicitConversions
+import scala.collection.GenTraversableOnce
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -73,6 +74,13 @@ trait JavaImports {
 			val list = new java.util.ArrayList[A]()
 			if (!orig.isEmpty) list.addAll(orig)
 			list
+		}
+		
+		def apply[A](orig: GenTraversableOnce[A]): java.util.ArrayList[A] = {
+			if (orig.isEmpty)
+				new java.util.ArrayList[A]
+			else
+				new java.util.ArrayList[A](orig.toIndexedSeq.asJavaCollection)
 		}
 	}
 	

@@ -236,7 +236,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	def afterBind() {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
 		for (item <- assignmentItems if item.assessmentGroup == null) {
-			item.assessmentGroup = assignmentMembershipService.getAssessmentGroup(new UpstreamAssessmentGroup {
+			item.assessmentGroup = assignmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
 				this.academicYear = academicYear
 				this.occurrence = item.occurrence
 				this.moduleCode = item.upstreamAssignment.moduleCode
@@ -248,7 +248,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
 			upstreamAssignment <- assignmentMembershipService.getUpstreamAssignments(department);
-			assessmentGroup <- assignmentMembershipService.getAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
+			assessmentGroup <- assignmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(
 				include = shouldIncludeByDefault(upstreamAssignment),

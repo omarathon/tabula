@@ -8,8 +8,9 @@ the comments textarea needs to maintain newlines.
 <#assign commandName="editAssignmentCommand"/>
 <#assign command=editAssignmentCommand />
 <#assign canUpdateMarkingWorkflow=command.canUpdateMarkingWorkflow/>
+<#assign route><@routes.assignmentedit assignment /></#assign>
 
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/edit')}" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action=route commandName=commandName cssClass="form-horizontal">
 
 <#--
 <div id="form-editor-sidebar">
@@ -51,8 +52,9 @@ the comments textarea needs to maintain newlines.
 </div>
 -->
 <div class="submit-buttons form-actions">
-<input type="submit" value="Save" class="btn btn-primary">
-<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
+	<input type="submit" value="Save" class="btn btn-primary">
+	<input type="submit" value="Save and stay on this page" class="btn" id="updateOnly">
+	<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 

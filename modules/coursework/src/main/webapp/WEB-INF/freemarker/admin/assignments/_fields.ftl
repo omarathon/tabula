@@ -4,11 +4,8 @@ the comments textarea needs to maintain newlines.
 -->
 <#escape x as x?html>
 
-<#-- Set to "refresh" when posting without submitting -->
-<input type="hidden" name="action" id="action-input" value="submit" >
-
-<#-- ignored by controller but used by this FTL to determine what popups to pre-open -->
-<input type="hidden" name="focusOn" id="focusOn">
+<#-- Field to support redirection post-submit -->
+<input type="hidden" name="action" value="submit" id="action-submit">
 
 <#macro datefield path label cssClass="">
 	<@form.labelled_row path label cssClass>
@@ -78,7 +75,7 @@ the comments textarea needs to maintain newlines.
 <#if newRecord>
 	<!-- <div id="assignment-picker" class="alert alert-success"> -->
 	<div class="span6 alert alert-success">
-		<p>To find an assignment to pre-populate from, just start typing its name.  Assignments within your 
+		<p><i class="icon-lightbulb"></i> To find an assignment to pre-populate from, just start typing its name.  Assignments within your 
 		department will be matched.  Click on an assignment to choose it.</p>
 		<@form.labelled_row "prefillAssignment" "Assignment to copy:">
 			<@f.hidden id="prefillAssignment" path="prefillAssignment" />
@@ -133,5 +130,11 @@ the comments textarea needs to maintain newlines.
 <#-- These fields are also used by the batch assignment importer so they are in a separate file. -->
 <#include "_common_fields.ftl" />
 
-
+<script>
+jQuery(function ($) {
+	$('#action-submit').closest('form').on('click', '#updateOnly', function() {
+		$('#action-submit').val('update');
+	});
+});
+</script>
 </#escape>

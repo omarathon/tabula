@@ -1,31 +1,23 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.JavaConversions._
-import org.hibernate.validator.constraints.Length
-import org.hibernate.validator.constraints.NotEmpty
+import scala.Array.canBuildFrom
+import scala.Option.option2Iterable
+import scala.collection.JavaConversions.{asScalaBuffer, bufferAsJavaList, seqAsJavaList}
+
+import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands.Command
-import data.model._
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.{ UniversityId, AcademicYear, DateFormats }
-import uk.ac.warwick.tabula.services.UserLookupService
+
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.commands.{Command, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, UpstreamAssessmentGroup, UpstreamAssignment, UserGroup}
+import uk.ac.warwick.tabula.data.model.forms.AssessmentGroup
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService, UserLookupService}
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
-
-case class UpstreamGroupOption(
-	assignmentId: String,
-	name: String,
-	cats: Option[String], // TODO joke about cats and string
-	sequence: String,
-	occurrence: String,
-	memberCount: Int,
-	isLinked: Boolean)
 
 /**
  * Common behaviour
@@ -54,11 +46,20 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		else
 			""
 
-	// start complicated membership stuff
+	/** 1:1 linked SITS assignment and MAV_OCCURRENCE as per the value in SITS.
+	 *  Optional, superceded by assessmentGroups
+	 */
+	@deprecated var upstreamAssignment: UpstreamAssignment = _
+	@deprecated var occurrence: String = _
 
-	/** linked SITS assignments. Optional. */
+	/** linked assessment groups, which are to be persisted with the assignment.
+	 *  They can be used to lookup SITS UpstreamAssessmentGroups on demand,
+	 *  when required to lookup users.
+	 */
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
-	var assessmentGroupItems: JList[AssessmentGroupItem] = JArrayList()
+	
+	/** bind property for changing assessment groups */
+	@transient var upstreamGroups: JList[UpstreamGroup] = JArrayList()
 
 	/**
 	 * If copying from existing Assignment, this must be a DEEP COPY
@@ -72,22 +73,20 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 */
 	var members: UserGroup = new UserGroup
 
-	// items added here are added to members.includeUsers.
-	var includeUsers: JList[String] = JArrayList()
-
-	// items added here are either removed from members.includeUsers or added to members.excludeUsers.
-	var excludeUsers: JList[String] = JArrayList()
+	// bind property for items to be added to members.includeUsers
+	@transient var includeUsers: JList[String] = JArrayList()
+	
+	// bind property for items to either be removed from members.includeUsers or added to members.excludeUsers
+	@transient var excludeUsers: JList[String] = JArrayList()
 
 	// bind property for the big free-for-all textarea of usercodes/uniIDs to add.
 	// These are first resolved to userIds and then added to includeUsers
-	var massAddUsers: String = _
+	@transient var massAddUsers: String = _
 
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =
 		if (massAddUsers == null) Nil
-		else massAddUsers split ("\\s+") map (_.trim) filterNot (_.isEmpty)
-
-	///// end of complicated membership stuff
+		else massAddUsers split ("[\\s\\W]+") map (_.trim) filterNot (_.isEmpty)
 
 	// can be set to false if that's not what you want.
 	var prefillFromRecent = true
@@ -118,8 +117,11 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		validateShared(errors)
 	}
 
-	// Called by controller after Spring has done its basic binding, to do more complex
-	// stuff like resolving users into groups and putting them in the members UserGroup.
+	/**
+	 *  
+	 * Called by controller after Spring has done its basic binding, to do more complex
+	 * stuff like resolving users into groups and putting them in the members UserGroup.
+	 */
 	def afterBind() {
 
 		def addUserId(item: String) {
@@ -147,27 +149,25 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 		// add includeUsers to members.includeUsers
 		((includeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
-				if (members.excludeUsers contains userId) {
-					members.unexcludeUser(userId)
-				} else if (!(membersUserIds contains userId)) {
-					// TAB-399 need to check if the user is already in the group before adding
-						members.addUser(userId)
-				}
+			if (members.excludeUsers contains userId) {
+				members.unexcludeUser(userId)
+			} else if (!(membersUserIds contains userId)) {
+				// TAB-399 need to check if the user is already in the group before adding
+				members.addUser(userId)
+			}
 		}
 
-		// for excludeUsers, either remove from previously-added users or add to excluded users.
+		// for excludeUsers, either remove from previously-added users or add to excluded users
 		((excludeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.includeUsers contains userId) members.removeUser(userId)
 			else members.excludeUser(userId)
 		}
 
-
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
-		// TAB-399
-		//includeUsers.clear()
-		// HFC-327
-		//excludeUsers.clear()
+		
+		// now deal with groups
+		updateAssessmentGroups()
 	}
 
 	def copyTo(assignment: Assignment) {
@@ -176,10 +176,15 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		assignment.closeDate = closeDate
 		assignment.academicYear = academicYear
 		assignment.feedbackTemplate = feedbackTemplate
-
-		if (this.assignment != null) {
-			persistAssessmentGroupChanges()
+		
+		assignment.assessmentGroups.clear
+		assignment.assessmentGroups.addAll(assessmentGroups)
+		for (group <- assignment.assessmentGroups if group.assignment == null) {
+			group.assignment = assignment // only required for a new assignment
 		}
+		
+		assignment.upstreamAssignment = upstreamAssignment
+		assignment.occurrence = occurrence
 
 		copySharedTo(assignment: Assignment)
 
@@ -187,24 +192,20 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		assignment.members copyFrom members
 	}
 
-
-
-	def persistAssessmentGroupChanges() {
-			val removedGroups = assignment.assessmentGroups.filterNot(assessmentGroups.contains(_))
-			removedGroups.foreach(membershipService.delete(_))
-
-			val newGroups = assessmentGroupItems.map{item =>
-				val assessmentGroup = new AssessmentGroup
-				assessmentGroup.occurrence =  item.occurrence
-				assessmentGroup.upstreamAssignment =  item.upstreamAssignment
-				assessmentGroup.assignment = assignment
-				membershipService.save(assessmentGroup)
-				assessmentGroup
-			}
-
-			assignment.assessmentGroups = assessmentGroups ++ newGroups
+	/**
+	 *  Convert Spring-bound upstream group references to an #AssessmentGroup buffer,
+	 *  and persist if required.
+	 */
+	def updateAssessmentGroups(persist: Boolean = false) {
+		assessmentGroups = upstreamGroups.flatMap ( ug => {
+			val template = new AssessmentGroup
+			template.upstreamAssignment = ug.upstreamAssignment
+			template.occurrence = ug.occurrence
+			template.assignment = assignment
+			membershipService.getAssessmentGroup(template) orElse Some(template)
+		})
 	}
-
+	
 	def prefillFromRecentAssignment() {
 		if (prefillAssignment != null) {
 			copyNonspecificFrom(prefillAssignment)
@@ -229,68 +230,100 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		closeDate = assignment.closeDate
 		copySharedFrom(assignment)
 	}
+	
+	def copyGroupsFrom(assignment: Assignment) {
+		assessmentGroups = assignment.assessmentGroups
+		upstreamGroups.addAll(availableUpstreamGroups filter { ug => 
+			assessmentGroups.exists( ag => ug.upstreamAssignment == ag.upstreamAssignment && ag.occurrence == ug.occurrence )
+		})
+	}
 
 	def copyFrom(assignment: Assignment) {
 		name = assignment.name
 		academicYear = assignment.academicYear
 		feedbackTemplate = assignment.feedbackTemplate
-		assessmentGroups = assignment.assessmentGroups
+		upstreamAssignment = assignment.upstreamAssignment
+		occurrence = assignment.occurrence
 		if (assignment.members != null) {
 			members copyFrom assignment.members
 		}
 		copyNonspecificFrom(assignment)
 	}
 
-
 	/**
-	 * Retrieve a list of possible upstream assignments and occurrences
-	 * to link to SITS data. Includes the upstream assignment and the
-	 * occurrence ID, plus some info like the number of members there.
+	 * Build a seq of available upstream groups for upstream assignments on this module
 	 */
-	def upstreamGroupOptions: Seq[UpstreamGroupOption] = {
-		val assignments = membershipService.getUpstreamAssignments(module)
-		assignments flatMap { assignment =>
-			val groups = membershipService.getAssessmentGroups(assignment, academicYear)
-			groups map { group =>
-				UpstreamGroupOption(
-					assignmentId = assignment.id,
-					name = assignment.name,
-					cats = assignment.cats,
-					sequence = assignment.sequence,
-					occurrence = group.occurrence,
-					memberCount = group.members.members.size,
-					isLinked = assessmentGroups.exists(g =>
-						g.upstreamAssignment.id == assignment.id && g.occurrence == group.occurrence))
+	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
+		val upstreamAssignments = membershipService.getUpstreamAssignments(module)
+		
+		upstreamAssignments.flatMap { ua =>
+			val uags = membershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			uags map { uag =>
+				new UpstreamGroup(ua, uag)
 			}
 		}
 	}
 
-	/**
-	 * Returns a sequence of MembershipItems
-	 */
-	def membershipDetails =
-		membershipService.determineMembership(upstreamAssessmentGroups, Option(members))
-
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+	
+	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
+	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
 		if(academicYear == null || assessmentGroups == null){
 			Seq()
 		}
 		else {
-			val validAssignments = assessmentGroups.filterNot(group => group.upstreamAssignment == null || group.occurrence == null)
-			val groups = validAssignments.flatMap{group =>
+			val validGroups = assessmentGroups.filterNot(group => group.upstreamAssignment == null || group.occurrence == null).toList
+			
+			validGroups.map{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
-				membershipService.getAssessmentGroup(template)
-			}
-			groups
+				membershipService.getUpstreamAssessmentGroup(template)
+			}.flatten
 		}
 	}
+	
+	/**
+	 * Returns a sequence of MembershipItems
+	 */
+	def assignmentMembership = membershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 }
 
-class AssessmentGroupItem(){
-	var occurrence: String = _
-	var upstreamAssignment: UpstreamAssignment =_
+
+/**
+ * convenience class
+ */
+class UpstreamGroup(val upstreamAssignment: UpstreamAssignment, val group: UpstreamAssessmentGroup) {
+	val id = upstreamAssignment.id + ";" + group.id
+	
+	val name = upstreamAssignment.name
+	val memberCount = group.memberCount
+	val cats = upstreamAssignment.cats
+	val occurrence = group.occurrence
+	val sequence = upstreamAssignment.sequence
+	
+	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.exists(ag =>
+			ag.upstreamAssignment.id == upstreamAssignment.id && ag.occurrence == group.occurrence)
+	
+	override def toString = "upstreamAssignment: " + upstreamAssignment.id + ", occurrence: " + group.occurrence
+}
+
+
+class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] {
+	var membershipService = Wire.auto[AssignmentMembershipService]
+	
+	override def fromString(id: String) = {
+		def explode = throw new IllegalArgumentException("No unique upstream group which matches id " + id + " is available")
+		
+		id.split(";") match {
+			case Array(uaId: String, groupId: String) =>
+				val ua = membershipService.getUpstreamAssignment(uaId).getOrElse(explode)
+				val uag = membershipService.getUpstreamAssessmentGroup(groupId).getOrElse(explode)
+				new UpstreamGroup(ua, uag)
+			case _ => explode
+		}
+	}
+	
+	override def toString(ug: UpstreamGroup) = ug.id
 }

@@ -17,5 +17,9 @@ class AssessmentGroup extends GeneratedId {
 	var upstreamAssignment: UpstreamAssignment = _
 
 	var occurrence: String = _
+	
+	override def toString = "assessmentGroup: { assignment: " +
+													assignment.id + " (" + assignment.name + "), upstreamAssignment: " +
+													upstreamAssignment.id + " (" + upstreamAssignment.name + "), occurrence: " + occurrence + " }"
 
 }

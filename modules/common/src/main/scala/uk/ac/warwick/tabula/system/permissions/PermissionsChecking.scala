@@ -27,6 +27,10 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 		for (scope <- scopes) check(permission, Some(scope))
 	}
 	
+	def PermissionCheckOneOf(checkablePermissions: => Iterable[CheckablePermission]) {
+		for (p <- checkablePermissions) check(p.permission, p.scope)
+	}
+	
 	def PermissionCheck(scopelessPermission: ScopelessPermission) {
 		check(scopelessPermission, None)
 	}
