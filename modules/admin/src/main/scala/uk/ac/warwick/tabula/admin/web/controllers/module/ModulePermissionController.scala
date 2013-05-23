@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.web.controllers.admin
+package uk.ac.warwick.tabula.admin.web.controllers.module
 
 import scala.collection.JavaConversions._
 import javax.validation.Valid
@@ -6,17 +6,18 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.admin.web.Routes
+import uk.ac.warwick.tabula.web.Breadcrumbs
+import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 
 
-trait ModulePermissionControllerMethods extends CourseworkController {
+trait ModulePermissionControllerMethods extends AdminController {
 
 	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("module") module: Module) = new GrantRoleCommand(module)
 	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("module") module: Module) = new RevokeRoleCommand(module)
@@ -39,8 +40,8 @@ trait ModulePermissionControllerMethods extends CourseworkController {
 	}
 }
 
-@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModulePermissionController extends CourseworkController with ModulePermissionControllerMethods {
+@Controller @RequestMapping(value = Array("/module/{module}/permissions"))
+class ModulePermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	@RequestMapping
 	def permissionsForm(@PathVariable("module") module: Module, @RequestParam(defaultValue="") usercodes: Array[String],
@@ -50,8 +51,8 @@ class ModulePermissionController extends CourseworkController with ModulePermiss
 
 }
 
-@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModuleAddPermissionController extends CourseworkController with ModulePermissionControllerMethods {
+@Controller @RequestMapping(value = Array("/module/{module}/permissions"))
+class ModuleAddPermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	validatesSelf[GrantRoleCommand[_]]
 	
@@ -62,7 +63,7 @@ class ModuleAddPermissionController extends CourseworkController with ModulePerm
 			form(module)
 		} else {
 			val roleName = command.apply().roleDefinition.getName
-			Mav("redirect:" + Routes.admin.modulePermissions(module),
+			Mav("redirect:" + Routes.module.permissions(module),
 					"role" -> roleName,
 					"usercodes" -> command.usercodes,
 					"action" -> "add"
@@ -72,8 +73,8 @@ class ModuleAddPermissionController extends CourseworkController with ModulePerm
 	}
 }
 
-@Controller @RequestMapping(value = Array("/admin/module/{module}/permissions"))
-class ModuleRemovePermissionController extends CourseworkController with ModulePermissionControllerMethods {
+@Controller @RequestMapping(value = Array("/module/{module}/permissions"))
+class ModuleRemovePermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	validatesSelf[RevokeRoleCommand[_]]
 	
@@ -86,7 +87,7 @@ class ModuleRemovePermissionController extends CourseworkController with ModuleP
 		} else {
 			command.apply()
 			val roleName = command.apply().roleDefinition.getName
-			Mav("redirect:" + Routes.admin.modulePermissions(module),
+			Mav("redirect:" + Routes.module.permissions(module),
 					"role" -> roleName,
 					"usercodes" -> command.usercodes,
 					"action" -> "remove"

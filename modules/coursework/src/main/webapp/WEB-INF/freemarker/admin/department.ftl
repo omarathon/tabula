@@ -53,16 +53,16 @@
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<#if features.extensions>
-					<li><a href="settings/extensions"><i class="icon-calendar"></i> Extensions</a></li>
+					<li><a href="<@routes.extensionsettings department />"><i class="icon-calendar"></i> Extensions</a></li>
 				</#if>
 				<#if features.feedbackTemplates>
-					<li><a href="settings/feedback-templates"><i class="icon-comment"></i> Feedback templates</a></li>
+					<li><a href="<@routes.feedbacktemplates department />"><i class="icon-comment"></i> Feedback templates</a></li>
 				</#if>
 				<#if features.markingWorkflows>
-					<li><a href="markingworkflows"><i class="icon-check"></i> Marking workflows</a></li>
+					<li><a href="<@routes.markingworkflowlist department />"><i class="icon-check"></i> Marking workflows</a></li>
 				</#if>
-				<li id="feedback-report-button"><a href="<@url page="/admin/department/${department.code}/reports/feedback"/>"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
-				<li><a href="settings/display"><i class="icon-list-alt"></i> Display settings</a></li>
+				<li id="feedback-report-button"><a href="<@routes.feedbackreport department />"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
+				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
 			</ul>
 		</div>
 
@@ -100,7 +100,7 @@
 		  <ul class="dropdown-menu pull-right">
 		  	<#if can_manage >	
 					<#assign  module_managers_count = ((module.managers.includeUsers)![])?size />
-					<li><a href="<@url page="/admin/module/${module.code}/permissions" />">
+					<li><a href="<@routes.moduleperms module />">
 						<i class="icon-user"></i> Edit module permissions <!--<span class="badge">${module_managers_count}</span>-->
 					</a></li>
 				</#if>

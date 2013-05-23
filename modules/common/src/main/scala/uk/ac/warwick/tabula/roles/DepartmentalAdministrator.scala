@@ -36,6 +36,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Update,
 		MarkingWorkflow.Delete,
 		
+		Department.ManageProfiles,
+		
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
 		Profiles.Read.PersonalTutees,

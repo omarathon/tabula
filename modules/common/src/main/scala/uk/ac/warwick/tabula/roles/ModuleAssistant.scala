@@ -12,6 +12,7 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		
 	GrantsScopedPermission( 
 		Module.ManageAssignments,
+		Module.ManageSmallGroups,
 		
 		RolesAndPermissions.Read,
 		

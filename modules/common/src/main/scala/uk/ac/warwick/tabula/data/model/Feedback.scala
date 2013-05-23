@@ -116,12 +116,17 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		attachment.feedback = this
 		attachments.add(attachment)
 	}
+		
+	def removeAttachment(attachment: FileAttachment) = {
+		attachment.feedback = null
+		attachments.remove(attachment)
+	}
 
 	def clearAttachments() {
 		for(attachment <- attachments){
 			attachment.feedback = null
 		}
-		attachments = JArrayList()
+		attachments.clear()
 	}
 
 	/**

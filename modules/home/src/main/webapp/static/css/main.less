@@ -7,6 +7,13 @@
 	overflow: visible; /* Allow Tabula to break out of the container for popovers etc */
 }
 
+// with overflow:visible above, #content-wrapper did not match the height of #main-content without
+// a clear:both element, causing ugly BG flashes during load. We can disable the float since it was
+// only needed to support left hand nav in Sitebuilder in the face of user content.
+#content-wrapper #main-content {
+	float: none;
+}
+
 // Badass CSS transitions for the popup library
 .WPopupBox {
   top: 0;

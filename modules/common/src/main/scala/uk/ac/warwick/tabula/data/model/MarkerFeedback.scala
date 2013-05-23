@@ -42,6 +42,11 @@ class MarkerFeedback extends GeneratedId {
 		attachment.markerFeedback = this
 		attachments.add(attachment)
 	}
+		
+	def removeAttachment(attachment: FileAttachment) = {
+		attachment.markerFeedback = null
+		attachments.remove(attachment)
+	}
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
