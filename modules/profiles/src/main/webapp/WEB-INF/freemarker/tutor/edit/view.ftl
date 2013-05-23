@@ -75,7 +75,7 @@
 				}
 
 				var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-				window.location = currentUrl + "?action=tutor" + action + "&tutor=" + tutor;
+				window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutor;
 			});
 
 			function setStudent(memberString) {

@@ -9,7 +9,7 @@
 					<#if RequestParameters.action = "tutorremoved">
 						${profile.firstName}'s personal tutor has been unassigned.
 					<#else>
-						${profile.firstName}'s personal tutor is now personalTutor.fullName.
+						${profile.firstName}'s personal tutor is now ${tutor.fullName}.
 					</#if>
 				</p>
 			</div>

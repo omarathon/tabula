@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
 
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
@@ -26,6 +28,8 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 @Controller
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
+
+	var userLookup = Wire.auto[UserLookupService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -47,7 +51,8 @@ class ViewProfileController extends ProfilesController {
 	def viewProfile(
 			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
 			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
-			@RequestParam(value="meeting", required=false) openMeetingId: String) = {
+			@RequestParam(value="meeting", required=false) openMeetingId: String,
+			@RequestParam(defaultValue="", required=false) tutorId: String) = {
 
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
@@ -59,13 +64,16 @@ class ViewProfileController extends ProfilesController {
 
 		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
 
+		val tutor = userLookup.getUserByWarwickUniId(tutorId)
+
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
 			"hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment,
 			"meetings" -> meetings,
-			"openMeeting" -> openMeeting)
+			"openMeeting" -> openMeeting,
+			"tutor" -> tutor)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
