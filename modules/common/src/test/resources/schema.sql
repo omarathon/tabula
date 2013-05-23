@@ -1,5 +1,4 @@
 drop table auditevent if exists;
-drop sequence auditevent_seq if exists;
 create table auditevent (
 	id integer,
 	eventid varchar(36),

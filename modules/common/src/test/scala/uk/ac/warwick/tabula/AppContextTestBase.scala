@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	protected def allCommandsInSystem(packageBase: String) = {
