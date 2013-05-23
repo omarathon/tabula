@@ -102,24 +102,15 @@ class EditTutorController extends BaseController {
 	}
 
 	// initial form display
-	@RequestMapping(params = Array("!tutor"))
+	@RequestMapping(method=Array(GET))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
 			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false)
+			"displayOptionToSave" -> false).noLayout()
 	}
 
-	// now we've got a tutor id to display, but it's not time to save it yet
-	@RequestMapping(params = Array("tutor", "!storeTutor"))
-	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
-		Mav("tutor/edit/view",
-			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.tutor,
-			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.equals(cmd.tutor)))	
-	}
-
-	@RequestMapping(params=Array("tutor", "storeTutor"), method=Array(POST))
+	@RequestMapping(method=Array(POST))
 	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 

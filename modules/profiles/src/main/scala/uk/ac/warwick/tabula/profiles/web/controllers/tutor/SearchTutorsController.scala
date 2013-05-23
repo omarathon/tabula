@@ -9,14 +9,15 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.web.views.JSONView
+import scala.collection.JavaConversions._
+
 
 @Controller
 class SearchTutorsController extends ProfilesController {
 	
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
-		
-	@ModelAttribute("student") def student(@RequestParam("student") student: Member) = student
-	@ModelAttribute("tutorToDisplay") def tutorToDisplay(@RequestParam(value="currentTutor", required=false) currentTutor: Member) = Option(currentTutor)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
 	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view", "displayOptionToSave" -> false)
@@ -30,5 +31,32 @@ class SearchTutorsController extends ProfilesController {
 				"results" -> cmd.apply())
 		}
 	}
+
+	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
+	def submitJson(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) = {
+		if (errors.hasErrors) {
+			form(cmd)
+		} else {
+			val profilesJson: JList[Map[String, Object]] = toJson(cmd.apply())
+
+			Mav(new JSONView(profilesJson))
+		}
+	}
+
+
+
+	def toJson(profiles: Seq[Member]) = {
+		def memberToJson(member: Member) = Map[String, String](
+			"name" -> {member.fullName match {
+				case None => "[Unknown user]"
+				case Some(name) => name
+			}},
+			"id" -> member.universityId,
+			"userId" -> member.userId,
+			"description" -> member.description)
+
+		profiles.map(memberToJson(_))
+	}
+
 
 }

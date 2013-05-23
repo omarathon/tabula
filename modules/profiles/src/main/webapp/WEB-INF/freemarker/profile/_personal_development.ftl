@@ -1,5 +1,21 @@
 <#escape x as x?html>
 <section id="personal-development" class="clearfix">
+
+	<#if RequestParameters.action??>
+		<#if RequestParameters.action?? && RequestParameters.action == "tutorremoved" || RequestParameters.action == "tutorchanged">
+			<div id="tutorsMessage" class="alert alert-success">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<p>
+					<#if RequestParameters.action = "tutorremoved">
+						${profile.firstName}'s personal tutor has been unassigned.
+					<#else>
+						${profile.firstName}'s personal tutor is now personalTutor.fullName.
+					</#if>
+				</p>
+			</div>
+		</#if>
+	</#if>
+
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
 		
@@ -7,11 +23,11 @@
 			<p>
 				Not recorded
 				<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-					<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
+					<a id="edit-tutor-link" data-toggle="modal" data-target="#modal" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 				</#if>
 			</p>
 		</#if>
-	
+
 		<div class="tutors clearfix row">
 		<#list profile.personalTutors as relationship>
 			<#assign personalTutor = relationship.agentMember />
@@ -19,7 +35,7 @@
 				<#if !personalTutor??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
 					<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-						<a id="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
+						<a id="edit-tutor-link" data-toggle="modal" data-target="#modal"> href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
 					<div class="photo">
@@ -28,7 +44,7 @@
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-							<a id="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>"><i class="icon-edit"></i></a>
+							<a id="edit-tutor-link" data-toggle="modal" data-target="#modal" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>"><i class="icon-edit"></i></a>
 						</#if>
 					</h5>
 					<#if personalTutor.universityId == viewer.universityId>
@@ -139,6 +155,13 @@
 	
 				// hide the iframe, so we don't get a FOUC
 				$m.find('.modal-body').slideUp();
+			});
+
+			// load edit personal tutor
+			$("#personal-development").on("click", "#edit-tutor-link", function(e) {
+				e.preventDefault();
+				var url = $(this).attr('href');
+				$m.load(url);
 			});
 		});
 		</script>
