@@ -127,6 +127,7 @@
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
+                <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
