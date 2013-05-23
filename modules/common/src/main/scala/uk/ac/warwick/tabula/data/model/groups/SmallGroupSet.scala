@@ -17,7 +17,6 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.roles.SmallGroupMemberRoleDefinition
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
@@ -64,6 +63,16 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	
 	@OneToMany(mappedBy = "groupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var groups: JList[SmallGroup] = JArrayList()
+
+	@OneToOne(cascade = Array(ALL))
+	@JoinColumn(name = "membersgroup_id")
+	var members: UserGroup = new UserGroup
+	
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name="smallgroupset_assessmentgroup",
+		joinColumns=Array(new JoinColumn(name="smallgroupset_id")),
+		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
+	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
 	
 	def permissionsParents = Option(module).toStream
 

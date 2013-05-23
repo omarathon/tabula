@@ -174,6 +174,13 @@ object Permissions {
 			case object Delete extends Permission("Remove a meeting record")
 		}
 	}
+	
+	object SmallGroups {
+		case object Create extends Permission("Create small groups")
+		case object Read extends Permission("View small groups")
+		case object Update extends Permission("Edit small groups")
+		case object Delete extends Permission("Delete small groups")
+	}
 
 	object UserSettings {
 		case object Update extends Permission("Edit user settings")

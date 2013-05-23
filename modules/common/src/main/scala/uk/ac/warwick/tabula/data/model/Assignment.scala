@@ -124,14 +124,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def permissionsParents = Option(module).toStream
 
-//	@ManyToMany(fetch = FetchType.LAZY)
-//	@JoinTable(name="assignment_assessmentgroup",
-//		joinColumns=Array(new JoinColumn(name="assignment_id")),
-//		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-//	var assessmentGroups :JList[UpstreamAssessmentGroup] = JArrayList()
-//
-//	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
-
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
