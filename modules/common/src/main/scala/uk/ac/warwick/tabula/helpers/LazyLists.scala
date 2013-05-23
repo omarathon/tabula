@@ -24,8 +24,8 @@ object LazyLists {
 	 * elements on demand using the default no-arg constructor for the class.
 	 */
 	def simpleFactory[A: ClassTag](list: JList[A] = JArrayList[A]()): JList[A] = {
-		val constructor = classTag[A].runtimeClass.getConstructor(null)
-		val factory = () => constructor.newInstance(null).asInstanceOf[A]
+		val constructor = classTag[A].runtimeClass.getDeclaredConstructor()
+		val factory = () => constructor.newInstance().asInstanceOf[A]
 		
 		withFactory[A](factory, list)
 	}
