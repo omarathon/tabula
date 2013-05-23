@@ -1,4 +1,5 @@
 -- let's make a fake ADS
+drop table MODULE_REGISTRATION if exists;
 
 CREATE TABLE MODULE_REGISTRATION 
 (
