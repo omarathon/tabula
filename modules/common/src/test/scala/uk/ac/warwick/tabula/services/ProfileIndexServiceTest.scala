@@ -33,8 +33,11 @@ import uk.ac.warwick.tabula.Fixtures
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Callable
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 
 // scalastyle:off magic.number
+@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var indexer:ProfileIndexService = _

@@ -24,7 +24,7 @@
 	<import resource="persistence-context.xml" />
 	
 	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
-	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" lazy-init="false" />
 
 	<!-- fire up annotation driven everything -->
 	<context:annotation-config />
