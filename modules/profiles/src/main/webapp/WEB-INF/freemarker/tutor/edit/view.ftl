@@ -1,7 +1,13 @@
 <#escape x as x?html>
+	<#if tutorToDisplay??>
+		<#assign pageAction="edit" >
+	<#else>
+		<#assign pageAction="add" >
+	</#if>
+
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3>Edit Personal Tutor</h3>
+		<h3>${pageAction?capitalize} Personal Tutor</h3>
 	</div>
 
 	<#if user.staff>
@@ -29,34 +35,48 @@
 						</div>
 					</div>
 				</div>
-				<!-- fresh -->
-				<button id="remove-tutor" class="btn btn-danger" type="button">Remove</button>
+
+				<input type="hidden" name="remove" value="false" />
+				<#if pageAction!="add">
+					<button id="remove-tutor" class="btn btn-danger" type="button">Remove</button>
+				</#if>
 
 				<div id="tutorSearchResults"></div>
 
-				<div class="control-group" id="notify-tutor-change">
-					<div class="controls">
-						<label class="checkbox">
-							<@f.checkbox path="notifyCommand.notifyTutee" value="false" />
-							Notify tutee of change
-						</label>
+				<#if pageAction!="add">
+					<div id="removeTutorMessage" style="display: none" class="alert clearfix">
+						<p>Are you sure you want to remove <strong>${tutorToDisplay.fullName}</strong> as ${student.firstName}'s personal tutor?</p>
+						<button id="cancel-remove-tutor" class="btn pull-right" type="button">Cancel</button>
+						<button id="confirm-remove-tutor" class="btn btn-primary pull-right" type="button">Confirm</button>
+					</div>
+				</#if>
 
-						<label class="checkbox">
-							<@f.checkbox path="notifyCommand.notifyOldTutor" value="false" />
-							Notify old tutor of change
-						</label>
+				<div id="notify-tutor-change">
+					<p>Notify these people via email of this change</p>
+					<div class="control-group">
+						<div class="controls">
+							<label class="checkbox">
+								<input type="checkbox" name="notifyCommand.notifyTutee" class="notifyTutee" checked />
+								Tutee
+							</label>
 
-						<label class="checkbox">
-							<@f.checkbox path="notifyCommand.notifyNewTutor" value="false" />
-							Notify new tutor of change
-						</label>
+							<label class="checkbox <#if pageAction=="add">muted</#if>">
+								<input type="checkbox" name="notifyCommand.notifyOldTutor" class="notifyOldTutor" <#if pageAction!="add">checked <#else> disabled </#if> />
+								Old tutor
+							</label>
+
+							<label class="checkbox">
+								<input type="checkbox" name="notifyCommand.notifyNewTutor" class="notifyNewTutor" checked />
+								New tutor
+							</label>
+						</div>
 					</div>
 				</div>
 
 			</div>
 
 			<div class="modal-footer">
-				<input type="submit" class="btn btn-primary" id="save-tutor" value="Save" />
+				<button type="button" class="btn btn-primary" id="save-tutor">Save</button>
 			</div>
 		</@f.form>
 	</#if>
@@ -67,15 +87,16 @@
 			$('#save-tutor').click(function() {
 				$.post($("#editTutorCommand").prop('action'), $("#editTutorCommand").serialize());
 				$('#modal').modal('hide');
-				var tutor = $('#editTutorCommand input[name=tutor]').val();
-				if(tutor =="") {
+				var tutorId = $('#editTutorCommand input[name=tutor]').val();
+				var remove = $('#editTutorCommand input[name=remove]').val();
+				if(remove == "true") {
 					var action = "removed";
 				} else {
-		         	var action = "changed";
+					var action = "changed";
 				}
 
 				var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-				window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutor;
+				window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId;
 			});
 
 			function setStudent(memberString) {
@@ -95,6 +116,7 @@
 				var container = $(this).parents("form");
 				var target = "../tutor/search.json";
 				var query = container.find('input[name="query"]').val();
+				if(query.length < 4) return;
 
 				$('#notify-tutor-change').hide();
 				$("#tutorSearchResults").html('<h5>Search results</h5><ul></ul>');
@@ -107,10 +129,20 @@
 			});
 
 			$('#remove-tutor').click(function() {
-				$('input[name=tutor]').val("");
-				$(this).parents('#modal').find('.profile-search input[name="query"]').val("");
-				// open up a "are you sure?" flash message
-				// if that is clicked
+				$('#removeTutorMessage').show();
+			});
+
+			$('#confirm-remove-tutor').click(function() {
+				$('.notifyNewTutor').attr("disabled", "disabled");
+				$('.notifyNewTutor').prop("checked", false);
+				$('.notifyNewTutor').closest("label").addClass("muted");
+				$('#removeTutorMessage').hide();
+				$('#notify-tutor-change').show();
+				$("#editTutorCommand input[name='remove']").val('true');
+			});
+
+			$('#cancel-remove-tutor').click(function() {
+				$('#removeTutorMessage').hide();
 			});
 
 			$('#tutorSearchResults').on('click', 'li', function() {

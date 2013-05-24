@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestParam
 import org.joda.time.DateTime
 
-class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member]) extends Command[Option[StudentRelationship]] with Promises {
+class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val remove: Option[Boolean]) extends Command[Option[StudentRelationship]] with Promises {
 	
 	var profileService = Wire[ProfileService]
 
@@ -62,14 +62,11 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 			currentRelationships.find(_.agent == tutor.universityId) match {
 				case Some(existingRelationship) => {
 					// Just return the existing relationship without any notification
-					Some(existingRelationship)
+						Some(existingRelationship)
 				}
 				case _ => {
 					// Find the relationship for the current tutor, and end it
-					currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel => 
-						rel.endDate = DateTime.now
-						profileService.saveOrUpdate(rel)
-					}
+					endTutorRelationship(currentRelationships)
 					
 					// Save the new relationship
 					val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
@@ -78,8 +75,19 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 					Some(newRelationship)
 				}
 			}
-		} else {
-			None
+		} else if (currentTutor.get == tutor && remove.getOrElse(false)) {
+				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
+				endTutorRelationship(currentRelationships)
+				None
+			} else {
+				None
+			}
+	}
+
+	def endTutorRelationship(currentRelationships: Seq[StudentRelationship]) {
+		currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel =>
+			rel.endDate = DateTime.now
+			profileService.saveOrUpdate(rel)
 		}
 	}
 
@@ -92,8 +100,9 @@ class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("editTutorCommand")
-	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member) = student match {
-		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor))
+	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member,
+	                     @RequestParam(value="remove", required=false) remove: Boolean) = student match {
+		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), Option(remove))
 		case _ => throw new ItemNotFoundException
 	}
 

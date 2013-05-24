@@ -7,9 +7,9 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<p>
 					<#if RequestParameters.action = "tutorremoved">
-						${profile.firstName}'s personal tutor has been unassigned.
+						<strong>${tutor.fullName}</strong>  is no longer ${profile.firstName}'s personal tutor.
 					<#else>
-						${profile.firstName}'s personal tutor is now <strong>${tutor.fullName}</strong>.
+						<strong>${tutor.fullName}</strong> is now ${profile.firstName}'s personal tutor.
 					</#if>
 				</p>
 			</div>
