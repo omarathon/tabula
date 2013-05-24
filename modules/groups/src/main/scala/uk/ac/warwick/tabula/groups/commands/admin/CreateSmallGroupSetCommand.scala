@@ -9,8 +9,11 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
-class CreateSmallGroupSetCommand(module: Module) extends ModifySmallGroupSetCommand(module) {
+class CreateSmallGroupSetCommand(module: Module) extends ModifySmallGroupSetCommand(module) with BindListener {
 	
 	PermissionCheck(Permissions.SmallGroups.Create, module)
 	
@@ -22,6 +25,15 @@ class CreateSmallGroupSetCommand(module: Module) extends ModifySmallGroupSetComm
 		copyTo(set)
 		service.saveOrUpdate(set)
 		set
+	}
+	
+	override def onBind(result: BindingResult) {
+		super.onBind(result)
+		
+		// If we haven't set a name, make one up
+		if (!name.hasText) {
+			Option(format) foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
+		}
 	}
 
 	override def describeResult(d: Description, smallGroupSet: SmallGroupSet) = d.smallGroupSet(smallGroupSet)

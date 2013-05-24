@@ -24,7 +24,6 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.reflect._
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"

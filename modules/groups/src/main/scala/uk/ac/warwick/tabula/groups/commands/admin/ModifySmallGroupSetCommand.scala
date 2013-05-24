@@ -15,12 +15,26 @@ import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.commands.PromisingCommand
 import scala.collection.JavaConverters._
+import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroupSet) to copy any existing properties.
  */
-abstract class ModifySmallGroupSetCommand(val module: Module) extends PromisingCommand[SmallGroupSet] with Promise[SmallGroupSet] with SelfValidating {
+abstract class ModifySmallGroupSetCommand(val module: Module) 
+	extends PromisingCommand[SmallGroupSet]  
+		with SelfValidating 
+		with BindListener {
+	
+	var userLookup = Wire[UserLookupService]
+	var membershipService = Wire[AssignmentMembershipService]
 	
 	@Length(max = 200)
 	@NotEmpty(message = "{NotEmpty.smallGroupSetName}")
@@ -28,12 +42,12 @@ abstract class ModifySmallGroupSetCommand(val module: Module) extends PromisingC
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 	
-	@NotEmpty
+	@NotNull
 	var format: SmallGroupFormat = _
 	
 	// start complicated membership stuff
 	
-	var assessmentGroups: JList[AssessmentGroupItem] = JArrayList()
+	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
 	
 	/**
 	 * If copying from existing SmallGroupSet, this must be a DEEP COPY
@@ -101,9 +115,51 @@ abstract class ModifySmallGroupSetCommand(val module: Module) extends PromisingC
 		if (set.members == null) set.members = new UserGroup
 		set.members.copyFrom(members)
 	}
-
-}
-
-class AssessmentGroupItem() {
 	
+	override def onBind(result: BindingResult) {
+		def addUserId(item: String) {
+			val user = userLookup.getUserByUserId(item)
+			if (user.isFoundUser && null != user.getWarwickId) {
+				includeUsers.add(user.getUserId)
+			}
+		}
+
+		// parse items from textarea into includeUsers collection
+		for (item <- massAddUsersEntries) {
+			if (UniversityId.isValid(item)) {
+				val user = userLookup.getUserByWarwickUniId(item)
+				if (user.isFoundUser) {
+					includeUsers.add(user.getUserId)
+				} else {
+					addUserId(item)
+				}
+			} else {
+				addUserId(item)
+			}
+		}
+
+		val membersUserIds = 
+			membershipService.determineMembershipUsers(assessmentGroups.asScala, Some(members))
+			.map(_.getUserId)
+
+		// add includeUsers to members.includeUsers
+		((includeUsers.asScala.map { _.trim }.filterNot { _.isEmpty }).distinct) foreach { userId =>
+			if (members.excludeUsers contains userId) {
+				members.unexcludeUser(userId)
+			} else if (!(membersUserIds contains userId)) {
+				// TAB-399 need to check if the user is already in the group before adding
+				members.addUser(userId)
+			}
+		}
+
+		// for excludeUsers, either remove from previously-added users or add to excluded users.
+		((excludeUsers.asScala.map { _.trim }.filterNot { _.isEmpty }).distinct) foreach { userId =>
+			if (members.includeUsers contains userId) members.removeUser(userId)
+			else members.excludeUser(userId)
+		}
+
+		// empty these out to make it clear that we've "moved" the data into members
+		massAddUsers = ""
+	}
+
 }

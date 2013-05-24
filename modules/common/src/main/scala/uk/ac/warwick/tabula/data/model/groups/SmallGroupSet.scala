@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
+import scala.collection.JavaConverters._
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -36,6 +37,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	import SmallGroupSet._
 	
 	@transient var permissionsService = Wire[PermissionsService]
+	@transient var membershipService = Wire[AssignmentMembershipService]
 
 	def this(_module: Module) {
 		this()
@@ -51,6 +53,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var name: String = _
 
 	var archived: JBoolean = false
+
+	var released: JBoolean = false
 	
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
@@ -74,6 +78,15 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
 	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
 	
+	def unallocatedStudents = {
+		val allStudents = membershipService.determineMembershipUsers(assessmentGroups.asScala, Some(members))
+		val allocatedStudents = groups.asScala flatMap { _.students.users }
+		
+		allStudents diff allocatedStudents
+	}
+	
+	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
+	
 	def permissionsParents = Option(module).toStream
 
 	def toStringProps = Seq(
@@ -84,6 +97,10 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 }
 
 sealed abstract class SmallGroupFormat(val code: String, val description: String) {
+	// For Spring, the silly bum
+	def getCode = code
+	def getDescription = description
+	
 	override def toString = description
 }
 

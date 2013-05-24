@@ -127,6 +127,7 @@
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -138,6 +139,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
 	        </list>
 	    </property>
 	</bean>

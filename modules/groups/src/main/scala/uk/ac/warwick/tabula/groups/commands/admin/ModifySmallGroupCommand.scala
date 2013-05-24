@@ -69,7 +69,7 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
 		
-		students.copyFrom(group.students)
+		if (group.students != null) students.copyFrom(group.students)
 	}
 	
 	def copyTo(group: SmallGroup) {
@@ -80,6 +80,7 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 		group.events.clear()
 		group.events.addAll(events.asScala.map(_.apply()).asJava)
 		
+		if (group.students == null) group.students = new UserGroup
 		group.students.copyFrom(students)
 	}
 }

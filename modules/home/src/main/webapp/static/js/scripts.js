@@ -293,15 +293,12 @@
 				return $section.hasClass('expanded');
 			};
 
-			var $icon = $('<i></i>');
+			var $icon = $('<i class="icon-fixed-width"></i>');
 			if (open()) $icon.addClass('icon-chevron-down');
 			else $icon.addClass('icon-chevron-right');
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
-
-			var buffer = $title.height() / 2 - 10;
-			$icon.css('margin-top', buffer + 'px');
 
 			$title.css('cursor', 'pointer').on('click', function() {
 				if (open()) {
