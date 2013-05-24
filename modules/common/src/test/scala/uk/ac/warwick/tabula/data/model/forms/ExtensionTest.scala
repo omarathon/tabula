@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 
@@ -56,7 +55,6 @@ class ExtensionTest extends PersistenceTestBase {
 
   }
 	
-  @Transactional
 	@Test def deleteFileAttachmentOnDelete {
 		// TAB-667
 		val orphanAttachment = transactional { tx =>

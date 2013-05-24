@@ -14,6 +14,7 @@ class AuditEventServiceTest extends AppContextTestBase {
 	
 	@Autowired var service:AuditEventService =_
 	
+	
 	@Transactional
 	@Test def listEvents {
 		

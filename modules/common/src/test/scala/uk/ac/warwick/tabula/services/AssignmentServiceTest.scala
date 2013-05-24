@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.Fixtures
 
 // scalastyle:off magic.number
-@Transactional
 class AssignmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var assignmentService:AssignmentServiceImpl =_

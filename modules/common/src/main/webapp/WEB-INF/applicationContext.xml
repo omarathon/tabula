@@ -28,7 +28,7 @@
 
 	<!-- fire up annotation driven everything -->
 	<context:annotation-config />
-	<context:component-scan base-package="uk.ac.warwick.tabula.web.controllers"  />
+	<context:component-scan base-package="uk.ac.warwick.tabula.web.controllers" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
