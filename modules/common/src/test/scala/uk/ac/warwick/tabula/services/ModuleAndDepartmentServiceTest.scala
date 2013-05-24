@@ -7,7 +7,9 @@ import org.junit.Before
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.transaction.annotation.Transactional
 
+@Transactional
 class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 	
 	@Autowired var service: ModuleAndDepartmentService = _

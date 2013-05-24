@@ -74,7 +74,10 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	}
 		
 	override def afterPropertiesSet = {
-		queue.addListener(classOf[PermissionsCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
+		val clazz = classOf[PermissionsCacheBusterMessage]
+		val annotation = clazz.getAnnotation(classOf[ItemType])
+		val annotationValue = annotation.value
+		queue.addListener(annotationValue, this)
 	}
 	
 	private def clearCaches() {

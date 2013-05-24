@@ -19,8 +19,10 @@ import java.io.File
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
 import org.junit.After
+import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
+@Transactional
 class FileDaoTest extends AppContextTestBase {
 
 	@Autowired var dao:FileDao =_
