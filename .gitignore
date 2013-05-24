@@ -30,3 +30,4 @@ junit*.properties
 .ensime*
 *.orig
 
+.attach_pid*
