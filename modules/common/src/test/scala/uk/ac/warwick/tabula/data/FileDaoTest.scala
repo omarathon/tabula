@@ -38,7 +38,9 @@ class FileDaoTest extends AppContextTestBase {
 				dao.saveTemporary(attachment)
 			}
 		}
-		dao.deleteOldTemporaryFiles should be (7)
+		transactional { transactionStatus =>
+			dao.deleteOldTemporaryFiles should be (7)
+		}
 	}
 	
 	@After def bangtidy { transactional { tx => 
