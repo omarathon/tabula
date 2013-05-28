@@ -1,14 +1,16 @@
+# Build artifacts
 /bin
 /dist
 /target
 /modules/*/target
 /modules/*/bin
-/hs_err*
+/modules/*/overlays
+junit*.properties
+/project/target
+/project/project
+
+# Local settings
 local.properties
-.cache
-*~
-CVS
-ajcore*
 /config/scripts/dev/tabula.properties
 /config/scripts/dev/tabula-private.properties
 /config/scripts/dev/courses.properties
@@ -16,18 +18,32 @@ ajcore*
 console.properties
 tabula-private.properties
 !/modules/*/src/test/resources/tabula-private.properties
-.ctags
-/.classpath
-junit*.properties
-.*.swp
-/.idea
-*.iml
-/project/target
-/project/project
-.externalToolBuilders
-*.sublime-project
-*.sublime-workspace
+
+# Error dumps, logs
+/hs_err*
+ajcore*
+.attach_pid*
+
+# Temporary files
+.cache
+*~
 .ensime*
 *.orig
+.*.swp
+.ctags
 
-.attach_pid*
+# Eclipse IDE
+/.classpath
+.externalToolBuilders
+
+# IntelliJ IDE
+/.idea
+*.iml
+
+# Sublime Text IDE
+*.sublime-project
+*.sublime-workspace
+
+# What
+CVS
+
