@@ -30,11 +30,13 @@
 		</form>
 	</div>
 <#else>
-	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="${url('/tutor/meeting/' + student.universityId + '/create')}" commandName="createMeetingRecordCommand" class="form-horizontal double-submit-protection">
+	<!-- blank action = post to current path. needs to be left blank so we know if we should post to create or edit -->
+	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
+
 		<@form.labelled_row "title" "Title">
 			<@f.input type="text" path="title" cssClass="input-block-level" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
-		
+
 		<#if allRelationships?size gt 1>
 			<@form.labelled_row "relationship" "Tutor">
 				<@f.select path="relationship" cssClass="input-large">
@@ -58,14 +60,45 @@
 			</@f.select>
 		</@form.labelled_row>
 
-		<#-- TODO: TinyMCE editor, bleh -->
-		<@form.labelled_row "description" "Description (optional)">
-			<@f.textarea rows="6" path="description" cssClass="input-block-level" />
-		</@form.labelled_row>
+
 
 		<#-- file upload (TAB-359) -->
 		<#assign fileTypes=command.attachmentTypes />
 		<@form.filewidget basename="file" types=fileTypes />
+
+		<#-- hidden flag tells command a form was posted - needed when attachedFiles is empty -->
+		<@f.hidden path="posted" value="true" />
+
+		<#if command.attachedFiles?has_content >
+			<@form.labelled_row "attachedFiles" "Previously uploaded files">
+				<ul class="unstyled">
+					<#list command.attachedFiles as attachment>
+						<li id="attachment-${attachment.id}" class="attachment">
+							<span>${attachment.name}</span>&nbsp;
+							<@f.hidden path="attachedFiles" value="${attachment.id}" />
+							<a class="remove-attachment" href="">Remove</a>
+						</li>
+					</#list>
+				</ul>
+				<script>
+					jQuery(function($){
+						$(".remove-attachment").on("click", function(e){
+							$(this).closest("li.attachment").remove();
+							return false;
+						});
+					});
+				</script>
+				<small class="subtle help-block">
+					This is a list of all supporting documents that have been attached to this meeting record.
+					Click the remove link next to a document to delete it.
+				</small>
+			</@form.labelled_row>
+		</#if>
+
+<#-- TODO: TinyMCE editor, bleh -->
+<@form.labelled_row "description" "Description (optional)">
+<@f.textarea rows="6" path="description" cssClass="input-block-level" />
+</@form.labelled_row>
 
 		<#if iframe??>
 			<input type="hidden" name="modal" value="true" />

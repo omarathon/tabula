@@ -14,9 +14,11 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 
 @Entity
-class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted {
+class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
+
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
@@ -52,11 +54,15 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var description: String = _
 
+	def escapedDescription:String = formattedHtml(description)
+
 	def this(creator: Member, relationship: StudentRelationship) {
 		this()
 		this.creator = creator
 		this.relationship = relationship
 	}
+
+	// Workflow definitions
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
@@ -70,10 +76,15 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
 	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.find(_.approver == member).isDefined
+	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
 
 	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
+	def rejectedBy(member: Member): Boolean = rejectedApprovals.find(_.approver == member).isDefined
 	def pendingRevisionBy(member: Member) = isRejected && member == creator
+
+
+	// End of workflow definitions
 
 	def permissionsParents = Stream(relationship.studentMember)
 

@@ -25,7 +25,7 @@
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
 					<#assign pendingAction = meeting.pendingAction(viewer) />
-					<#assign pendingActionClasses><#if pendingAction>pending-action</#if></#assign>
+					<#assign pendingActionClasses><#if pendingAction>well</#if></#assign>
 
 					<#if (openMeeting?? && openMeeting.id == meeting.id) || pendingAction>
 						<#assign openClass>open</#assign>
@@ -51,7 +51,7 @@
 						<div class="meeting-body">
 							<#if meeting.description??>
 								<div class="description">
-									<#noescape>${meeting.description}</#noescape>
+									<#noescape>${meeting.escapedDescription}</#noescape>
 								</div>
 							</#if>
 

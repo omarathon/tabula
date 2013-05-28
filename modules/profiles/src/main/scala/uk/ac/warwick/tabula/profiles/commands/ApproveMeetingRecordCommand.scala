@@ -20,8 +20,6 @@ class ApproveMeetingRecordCommand (val meetingRecord: MeetingRecord, val current
 	extends Command[MeetingRecordApproval] with SelfValidating with Daoisms {
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Update, meetingRecord)
 
-	var meetingRecordDao = Wire.auto[MeetingRecordDao]
-
 	var approved: JBoolean = _
 	var rejectionComments: String =_
 
