@@ -9,7 +9,9 @@ import org.springframework.context.MessageSource
 import uk.ac.warwick.spring.Wire
 
 
-class JSONErrorView(var errors: Errors)  extends JSONView {
+class JSONErrorView(val errors: Errors, val additionalData: Map[String, String])  extends JSONView {
+
+	def this( errors: Errors) = this(errors, Map())
 
 	var messageSource = Wire.auto[MessageSource]
 
@@ -18,9 +20,16 @@ class JSONErrorView(var errors: Errors)  extends JSONView {
 		val out = response.getWriter
 		val errorList = errors.getFieldErrors
 		val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
-		val errorJson = Map("status" -> "error", "result" -> errorMap)
 
-		objectMapper.writeValue(out, errorJson)
+
+		val errorJson = Map(
+			"status" -> "error",
+			"result" -> errorMap
+		)
+
+		val finalJson = errorJson ++ additionalData
+
+		objectMapper.writeValue(out, finalJson)
 	}
 
 	def getMessage(key: String, args: Object*) = messageSource.getMessage(key, args.toArray, null)

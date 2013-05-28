@@ -24,8 +24,10 @@
 			<#if meetings??>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
+					<#assign pendingAction = meeting.pendingAction(viewer) />
+					<#assign pendingActionClasses><#if pendingAction>well</#if></#assign>
 
-					<#if openMeeting?? && openMeeting.id == meeting.id>
+					<#if (openMeeting?? && openMeeting.id == meeting.id) || pendingAction>
 						<#assign openClass>open</#assign>
 						<#assign openAttribute>open="open"</#assign>
 					<#else>
@@ -33,10 +35,12 @@
 						<#assign openAttribute></#assign>
 					</#if>
 
-					<details class="meeting ${deletedClasses} ${openClass!}" ${openAttribute!}>
+					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!}" ${openAttribute!}>
 						<summary><span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span> ${meeting.title!}
+
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
+									<a href="<@routes.edit_meeting_record meeting />" class="edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
 									<a href="<@routes.restore_meeting_record meeting />" class="restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
 									<a href="<@routes.purge_meeting_record meeting />" class="purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
@@ -44,15 +48,18 @@
 								</div>
 							</#if>
 						</summary>
+						<div class="meeting-body">
+							<#if meeting.description??>
+								<div class="description">
+									<#noescape>${meeting.escapedDescription}</#noescape>
+								</div>
+							</#if>
 
-						<#if meeting.description??>
-							<div class="description"><#noescape>${meeting.description}</#noescape></div>
-						</#if>
-
-						<#if meeting.attachments?? && meeting.attachments?size gt 0>
-							<@fmt.download_attachments meeting.attachments "/tutor/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
-						</#if>
-						<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Published by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+							<#if meeting.attachments?? && meeting.attachments?size gt 0>
+								<@fmt.download_attachments meeting.attachments "/tutor/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
+							</#if>
+							<#include "_meeting_record_state.ftl" />
+						</div>
 					</details>
 				</#list>
 			</#if>
