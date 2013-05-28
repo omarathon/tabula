@@ -148,7 +148,7 @@
 						<#assign unallocatedSize = groupSet.unallocatedStudents?size /> 
 						<#if unallocatedSize gt 0>
 							<div class="alert">
-								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student" "students" /> have not been allocated to a group
+								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
 							</div>
 						</#if>
 						

@@ -28,7 +28,7 @@ trait SmallGroupSetsController extends GroupsController {
 		
 	@ModelAttribute("module") def module(@PathVariable("module") module: Module) = module 
 	
-	override final def binding[A](binder: WebDataBinder, cmd: A) {
+	override final def binding[A](binder: WebDataBinder, cmd: A) {		
 		binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
 			override def fromString(code: String) = SmallGroupFormat.fromCode(code)			
 			override def toString(format: SmallGroupFormat) = format.code

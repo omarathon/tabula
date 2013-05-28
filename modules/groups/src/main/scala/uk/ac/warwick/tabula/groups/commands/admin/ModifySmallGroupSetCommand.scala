@@ -23,6 +23,8 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import org.hibernate.validator.Valid
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -85,6 +87,12 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	
 	def validate(errors: Errors) {
 		// TODO
+		
+		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
+			errors.pushNestedPath("groups[" + index + "]")
+			cmd.validate(errors)
+			errors.popNestedPath()
+		}
 	}
 	
 	def copyFrom(set: SmallGroupSet) {
@@ -160,6 +168,19 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
+			
+		// If the last element of groups is both a Creation and is empty, disregard it
+		if (!groups.isEmpty()) {
+			val last = groups.asScala.last
+			
+			last match {
+				case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty =>
+					groups.remove(last)
+				case _ => // do nothing
+			}
+		}
+		
+		groups.asScala.foreach(_.onBind(result))
 	}
 
 }

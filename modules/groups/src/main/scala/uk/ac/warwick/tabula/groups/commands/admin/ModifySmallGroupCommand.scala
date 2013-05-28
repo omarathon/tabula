@@ -15,12 +15,20 @@ import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.commands.PromisingCommand
 import uk.ac.warwick.tabula.helpers.LazyLists
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.UniversityId
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.spring.Wire
+import org.hibernate.validator.Valid
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroup) to copy any existing properties.
  */
-abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[SmallGroup] with SelfValidating {
+abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
+	
+	var userLookup = Wire[UserLookupService]
 	
 	@Length(max = 200)
 	@NotEmpty(message = "{NotEmpty.smallGroupName}")
@@ -55,7 +63,7 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	///// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the events
-	var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
+	@Valid var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
 		new CreateSmallGroupEventCommand(this, module)
 	}
 	
@@ -82,5 +90,36 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 		
 		if (group.students == null) group.students = new UserGroup
 		group.students.copyFrom(students)
+	}
+	
+	override def onBind(result: BindingResult) {
+		def addUserId(item: String) {
+			val user = userLookup.getUserByUserId(item)
+			if (user.isFoundUser && null != user.getWarwickId) {
+				includeUsers.add(user.getUserId)
+			}
+		}
+
+		// parse items from textarea into includeUsers collection
+		for (item <- massAddUsersEntries) {
+			if (UniversityId.isValid(item)) {
+				val user = userLookup.getUserByWarwickUniId(item)
+				if (user.isFoundUser) {
+					includeUsers.add(user.getUserId)
+				} else {
+					addUserId(item)
+				}
+			} else {
+				addUserId(item)
+			}
+		}
+
+		// add includeUsers to members.includeUsers
+		((includeUsers.asScala.map { _.trim }.filterNot { _.isEmpty }).distinct) foreach { userId =>
+			students.addUser(userId)
+		}
+
+		// empty these out to make it clear that we've "moved" the data into members
+		massAddUsers = ""
 	}
 }

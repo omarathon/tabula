@@ -87,4 +87,14 @@
 	
 	<#include "_allocation.ftl" />
 </fieldset>
+
+<script type="text/javascript">
+	jQuery(function($) {
+		<#-- controller detects action=refresh and does a bind without submit -->
+		$('.modal.refresh-form').on('hide', function() {
+			$('#action-input').val('refresh');
+      $('#action-input').closest('form').submit();
+		});
+	});
+</script>
 </#escape>

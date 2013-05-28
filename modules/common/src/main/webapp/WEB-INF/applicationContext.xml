@@ -183,7 +183,8 @@
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer"
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
-		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" />
+		p:propertyEditorRegistrar-ref="propertyEditorRegistrar"
+		p:autoGrowNestedPaths="false" />
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.tabula.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">
