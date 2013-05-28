@@ -24,7 +24,7 @@
 	<import resource="persistence-context.xml" />
 	
 	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
-	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" lazy-init="false" />
 
 	<!-- fire up annotation driven everything -->
 	<context:annotation-config />
@@ -128,6 +128,7 @@
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+                <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
