@@ -23,14 +23,14 @@ import uk.ac.warwick.tabula.coursework.web.Routes
  */
 
 @Controller
-@RequestMapping(Array("/admin/", "/admin/department/"))
+@RequestMapping(Array("/admin", "/admin/department"))
 class AdminHomeController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
 @Controller
-@RequestMapping(value=Array("/admin/department/{dept}/"))
+@RequestMapping(value=Array("/admin/department/{dept}"))
 class AdminDepartmentHomeController extends CourseworkController {
 
 	hideDeletedItems
@@ -61,7 +61,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			
 			department.modules
 		} else {
-			val managedModules = moduleService.modulesManagedBy(user, department).toList
+			val managedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
 			PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)

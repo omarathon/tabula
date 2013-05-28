@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.data.ModuleDao
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller
 @RequestMapping(Array("/settings"))
@@ -40,7 +41,7 @@ class UserSettingsController extends HomeController {
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def viewSettings(user: CurrentUser, command:UserSettingsCommand, errors:Errors) = {
-		 Mav("usersettings/form", "moduleRoles" -> moduleService.modulesManagedBy(user))	 		 
+		 Mav("usersettings/form", "isCourseworkModuleManager" -> !moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).isEmpty)
 	}
 
 	@RequestMapping(method=Array(POST))

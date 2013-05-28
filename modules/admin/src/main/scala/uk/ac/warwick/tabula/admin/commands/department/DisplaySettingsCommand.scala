@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.commands.departments
+package uk.ac.warwick.tabula.admin.commands.department
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.{Description, Command}
@@ -20,12 +20,14 @@ class DisplaySettingsCommand (val department:Department) extends Command[Unit] w
 	var showStudentName = department.showStudentName
 	var plagiarismDetection = department.plagiarismDetectionEnabled
 	var assignmentInfoView = department.assignmentInfoView
+	var weekNumberingSystem = department.weekNumberingSystem
 
 	override def applyInternal() = transactional() {
 		department ++= (
 			Settings.ShowStudentName -> showStudentName,
 			Settings.PlagiarismDetection -> plagiarismDetection,
-			Settings.AssignmentInfoView -> assignmentInfoView
+			Settings.AssignmentInfoView -> assignmentInfoView,
+			Settings.WeekNumberingSystem -> weekNumberingSystem
 		)
 		
 		departmentService.save(department)

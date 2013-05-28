@@ -5,10 +5,6 @@
 -->
 <#escape x as x?html>
 <@form.labelled_row "members" "Students">
-
-		<@f.hidden path="upstreamAssignment" id="upstreamAssignment" />
-		<@f.hidden path="occurrence" id="occurrence" />
-
 		<@spring.bind path="members">
 			<#assign membersGroup=status.actualValue />
 		</@spring.bind>

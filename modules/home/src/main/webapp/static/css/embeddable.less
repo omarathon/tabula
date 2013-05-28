@@ -6,6 +6,7 @@ html.iframe {
 @import "css3.less";
 .tabula-page, #container {
   @import "bootstrap/responsive.less";
+	@import "../libs/font-awesome/less/font-awesome.less";
 }
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
@@ -94,7 +95,16 @@ summary { .cursor-pointer(); }
 
 	list-style-type: none;
 
-	li { margin-top: 8px; }
+	li { 
+		margin-top: 8px;
+		
+		> * { 
+			display: inline-block;
+			margin: 0 5px; 
+		} 
+	}
+	
+	.hint { color: @tabulaGrayLight; }
 }
 
 #what-is-tabula {
@@ -142,6 +152,8 @@ tr.error, tr.warning {
 
 .module-info, .striped-section {
 	.box-style;
+	
+	&.empty { display: none; }
 
 	padding: 0.5em 0.5em 0 0.5em;
 	margin: 0.7em 0;
@@ -149,7 +161,13 @@ tr.error, tr.warning {
 
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
 
-	.section-title { color: #606060 !important; }
+	.section-title { 
+		color: #606060 !important;
+		
+		&.with-button {
+			display: inline-block;
+		} 
+	}
 
 	.button-list .btn {
 		text-align: left !important;
@@ -165,17 +183,16 @@ tr.error, tr.warning {
 	}
 }
 
+.module-info .module-manage-button, .striped-section .section-manage-button {
+	display: inline-block;
+	margin-left: 8px;
+	top: 3px;
+	float:right;
+}
+
 .module-info {
 	// Position module title and its Manage dropdown on the same line.
 	.module-title { display: inline-block; }
-	.module-manage-button, .section-manage-button {
-		display: inline-block;
-		margin-left: 8px;
-		top: 3px;
-		float:right;
-	}
-
-	&.empty { display: none; }
 
 	.module-manage-button {
 		i { .opacity-one(1); }
@@ -1618,6 +1635,12 @@ h1.with-settings {
 
 		z-index: @zindexPopover  + @zindexModal;
 	}
+
+	// Remove this if we ever include type.less in our Bootstrap build (i.e. we build ID6 on top of Bootstrap)
+	ul.unstyled,
+	ol.unstyled {
+	  margin-left: 0;
+	  padding-left: 0;
+	  list-style: none;
+	}
 }
-
-

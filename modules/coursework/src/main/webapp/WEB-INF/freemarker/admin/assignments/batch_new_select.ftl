@@ -185,7 +185,6 @@ first page of the form to setup a bunch of assignments from SITS.
 <#list command.assignmentItems as item>
 <@spring.nestedPath path="assignmentItems[${item_index}]">
 <#if step!="select" && !item.include>
-	<#-- <@f.hidden path="upstreamAssignment" /> -->
 	<@f.hidden path="include" />
 </#if>
 </@spring.nestedPath>

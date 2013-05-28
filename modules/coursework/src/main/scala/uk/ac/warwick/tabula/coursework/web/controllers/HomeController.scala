@@ -58,8 +58,8 @@ import uk.ac.warwick.tabula.data.model.Department
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
 		if (user.loggedIn) {
-			val ownedDepartments = moduleService.departmentsOwnedBy(user)
-			val ownedModules = moduleService.modulesManagedBy(user)
+			val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+			val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
 			
 			val pagedActivities = activityService.getNoteworthySubmissions(user)
 

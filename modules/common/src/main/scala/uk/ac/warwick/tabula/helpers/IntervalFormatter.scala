@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.JavaImports._
 */
 object IntervalFormatter {
 
-	private val hourFormat = DateTimeFormat.forPattern("Ka")
 	private val hourMinuteFormat = DateTimeFormat.forPattern("HH:mm")
 	private val dayAndDateFormat = DateTimeFormat.forPattern("EE d")
 	private val monthFormat = DateTimeFormat.forPattern(" MMM")
@@ -32,20 +31,22 @@ object IntervalFormatter {
 	  *     09:00 Wed 10th Oct 2012 - 12:00 Mon 5th Nov 2013
 	  *
 	  * Seconds are never printed.
+		*
+		* Includes time by default, but set includeTime=false to not include time.
 	  */
-	def format(start: DateTime, end: DateTime) = {
+	def format(start: DateTime, end: DateTime, includeTime: Boolean = true) = {
 		val yearAtStart = (start.getYear != end.getYear)
-		doFormat(start, yearAtStart) + " - " + doFormat(end, true)
+		doFormat(start, yearAtStart, includeTime) + " - " + doFormat(end, true, includeTime)
 	}
 
 
 	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
 	def format(start: DateTime): String = doFormat(start, true)
 
-	/** @see #format(DateTime, DateTime) */
+	/** @see #format(DateTime, DateTime, Boolean) */
 	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)
 
-	private def doFormat(date: DateTime, includeYear: Boolean) = {
+	private def doFormat(date: DateTime, includeYear: Boolean, includeTime: Boolean = true) = {
 		
 		// TAB-546 : This was previously in a 12-hour format, e.g. 9am, 9:15am, 12 noon, 12 midnight
 		// now 24 hour format
@@ -64,7 +65,10 @@ object IntervalFormatter {
 			else monthFormat.print(date)
 		}
 
-		timePart(date) + " " + dayPart(date) + monthYearPart(date, includeYear)
+		val datePart = dayPart(date) + monthYearPart(date, includeYear)
+
+		if (includeTime) timePart(date) + " " + datePart
+		else datePart
 	}
 }
 

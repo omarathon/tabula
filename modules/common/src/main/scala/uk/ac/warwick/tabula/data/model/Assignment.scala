@@ -134,14 +134,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
-
-	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "upstream_id")
-	var upstreamAssignment: UpstreamAssignment = _
-
-	var occurrence: String = _
-
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
 	var submissions: JList[Submission] = JArrayList()

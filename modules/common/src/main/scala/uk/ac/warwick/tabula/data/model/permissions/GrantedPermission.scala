@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.hibernate.annotations.ForeignKey
 import scala.reflect._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 
 @Entity
 @AccessType("field")
@@ -64,6 +65,8 @@ object GrantedPermission {
 			case module: Module => new ModuleGrantedPermission(module, permission, overrideType)
 			case member: Member => new MemberGrantedPermission(member, permission, overrideType)
 			case assignment: Assignment => new AssignmentGrantedPermission(assignment, permission, overrideType)
+			case group: SmallGroup => new SmallGroupGrantedPermission(group, permission, overrideType)
+			case event: SmallGroupEvent => new SmallGroupEventGrantedPermission(event, permission, overrideType)
 			case _ => throw new IllegalArgumentException("Cannot define new permissions for " + scope)
 		}).asInstanceOf[GrantedPermission[A]]
 	
@@ -72,6 +75,8 @@ object GrantedPermission {
 		case _: Module => true
 		case _: Member => true
 		case _: Assignment => true
+		case _: SmallGroup => true
+		case _: SmallGroupEvent => true
 		case _ => false
 	} 
 	
@@ -80,6 +85,8 @@ object GrantedPermission {
 		case t if t <:< classTag[Module] => classOf[ModuleGrantedPermission]
 		case t if t <:< classTag[Member] => classOf[MemberGrantedPermission]
 		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedPermission]
+		case t if t <:< classTag[SmallGroup] => classOf[SmallGroupGrantedPermission]
+		case t if t <:< classTag[SmallGroupEvent] => classOf[SmallGroupEventGrantedPermission]
 		case _ => classOf[GrantedPermission[_]]
 	}
 	
@@ -140,4 +147,30 @@ object GrantedPermission {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Assignment = _
+}
+@Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedPermission extends GrantedPermission[SmallGroup] {
+	def this(group: SmallGroup, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
+		this()
+		this.scope = group
+		this.permission = permission
+		this.overrideType = overrideType
+	}
+	
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: SmallGroup = _
+}
+@Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedPermission extends GrantedPermission[SmallGroupEvent] {
+	def this(event: SmallGroupEvent, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
+		this()
+		this.scope = event
+		this.permission = permission
+		this.overrideType = overrideType
+	}
+	
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: SmallGroupEvent = _
 }

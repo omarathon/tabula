@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>36-SNAPSHOT</version>
+		<version>38-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -304,6 +304,7 @@
 							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+								<include>groups-admin.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

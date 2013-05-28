@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>36-SNAPSHOT</version>
+	<version>38-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -609,8 +609,14 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.14.1</version>
 					<configuration>
-						<forkMode>always</forkMode>
+						<forkCount>1C</forkCount>
+						<systemPropertyVariables>
+							<!-- Referenced in test tabula.properties data directory,
+								ensuring forks use separate data -->
+							<TestProcessId>F${surefire.forkNumber}</TestProcessId>
+						</systemPropertyVariables>
 					</configuration>
 				</plugin>
 
