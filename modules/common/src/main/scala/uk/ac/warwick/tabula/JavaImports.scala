@@ -62,7 +62,13 @@ trait JavaImports {
 			if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
 			list
 		}
-		
+
+		def apply[A](orig: List[A]): java.util.ArrayList[A] = {
+			val list = new java.util.ArrayList[A]()
+			if (!orig.isEmpty) list.addAll(orig.asJavaCollection)
+			list
+		}
+
 		def apply[A](orig: JList[A]): java.util.ArrayList[A] = {
 			val list = new java.util.ArrayList[A]()
 			if (!orig.isEmpty) list.addAll(orig)
