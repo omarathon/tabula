@@ -44,7 +44,12 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			m
 		}
 
-		val student = mock[StudentMember]
+		val student = transactional { tx =>
+			val m = new StudentMember("1170836")
+			m.userId = "studentmember"
+			session.save(m)
+			m
+		}
 
 		val relationship = transactional { tx =>
 			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
