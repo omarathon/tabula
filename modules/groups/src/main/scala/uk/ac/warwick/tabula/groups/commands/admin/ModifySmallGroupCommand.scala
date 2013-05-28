@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -30,8 +31,6 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	
 	var userLookup = Wire[UserLookupService]
 	
-	@Length(max = 200)
-	@NotEmpty(message = "{NotEmpty.smallGroupName}")
 	var name: String = _
 	
 	// start complicated membership stuff
@@ -68,7 +67,14 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	}
 	
 	def validate(errors: Errors) {
-		// TODO
+		if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupName")
+		else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupName", Array[Object](200: JInteger), "")
+			
+		events.asScala.zipWithIndex foreach { case (cmd, index) =>
+			errors.pushNestedPath("groups[" + index + "]")
+			cmd.validate(errors)
+			errors.popNestedPath()
+		}
 	}
 	
 	def copyFrom(group: SmallGroup) {

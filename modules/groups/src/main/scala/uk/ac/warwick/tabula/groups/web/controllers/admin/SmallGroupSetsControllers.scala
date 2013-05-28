@@ -17,14 +17,16 @@ import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupSetCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 trait SmallGroupSetsController extends GroupsController {
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 	
-	@ModelAttribute("allFormats") def allFormats =
-		SmallGroupFormat.members.toSeq
+	@ModelAttribute("allFormats") def allFormats = SmallGroupFormat.members
+	
+	@ModelAttribute("allDays") def allDays = DayOfWeek.members
 		
 	@ModelAttribute("module") def module(@PathVariable("module") module: Module) = module 
 	

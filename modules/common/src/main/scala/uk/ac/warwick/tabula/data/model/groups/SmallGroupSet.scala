@@ -112,7 +112,7 @@ object SmallGroupFormat {
 	case object Example extends SmallGroupFormat("example", "Example Class")
 
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Set(Seminar, Lab, Tutorial, Project, Example)
+	val members = Seq(Seminar, Lab, Tutorial, Project, Example)
 
 	def fromCode(code: String) =
 		if (code == null) null

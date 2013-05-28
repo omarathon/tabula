@@ -41,6 +41,8 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 	
 	var title: String = _
 	
+	var tutors: JList[String] = JArrayList()
+	
 	def validate(errors: Errors) {
 		// TODO
 	}
@@ -52,6 +54,8 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 		day = event.day
 		startTime = event.startTime
 		endTime = event.endTime
+		
+		if (event.tutors != null) tutors.addAll(event.tutors.includeUsers)
 	}
 	
 	def copyTo(event: SmallGroupEvent) {
@@ -61,5 +65,8 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 		event.day = day
 		event.startTime = startTime
 		event.endTime = endTime
+		
+		if (event.tutors == null) event.tutors = new UserGroup
+		event.tutors.includeUsers = tutors
 	}
 }

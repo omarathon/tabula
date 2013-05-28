@@ -127,7 +127,7 @@
 						<#list groupSet.groups as group>
 							<div class="group">
 								<h4 class="name">
-									${group.name}
+									${group.name!""}
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</h4>
 								

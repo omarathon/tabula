@@ -63,6 +63,31 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
+	jQuery.fn.tabulaTimePicker = function() {
+		$(this).datetimepicker({
+			format: "hh:ii:ss",
+			weekStart: 1,
+			startView: 'hour',
+			autoclose: true
+		}).on('show', function(ev){
+			var d = new Date(ev.date.valueOf()),
+				  minutes = d.getUTCMinutes(),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+
+			if (minutes > 0 || seconds > 0 || millis > 0) {
+				d.setUTCMinutes(0);
+				d.setUTCSeconds(0);
+				d.setUTCMilliseconds(0);
+
+				var DPGlobal = $.fn.datetimepicker.DPGlobal;
+				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
+
+				$(this).datetimepicker('update');
+			}
+		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	};
+
 	/*
 	 * Prepare a spinner and store reference in data store.
 	 * Add spinner-* classes to control positioning and automatic spinning
@@ -196,6 +221,7 @@
 		// form behavioural hooks
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
+		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
 		
 		// prepare spinnable elements

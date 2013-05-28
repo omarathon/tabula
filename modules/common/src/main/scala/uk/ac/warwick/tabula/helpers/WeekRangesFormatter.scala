@@ -86,11 +86,14 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 		args match {
 			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
 				format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
+			
+			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+				format(ranges.asScala.toSeq.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
 				
 			case Seq(event: SmallGroupEvent) => 
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 				
-			case _ => throw new IllegalArgumentException("Bad args")
+			case _ => throw new IllegalArgumentException("Bad args: Seq(" + args.map(_.getClass().toString()).mkString(",") + ")")
 		}
 	}
 }

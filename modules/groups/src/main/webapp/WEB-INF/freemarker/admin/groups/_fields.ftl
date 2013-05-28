@@ -66,20 +66,26 @@
 <fieldset>
 	<legend>Events <small>Add weekly events for these groups</small></legend>
 	
-	<#assign eventCount=0 />
-	<#list groups as group>
-		<@spring.nestedPath path="groups[${group_index}]">
-			<@spring.bind path="events">
-				<#assign events=status.actualValue />
-			</@spring.bind>
-			
-			<#assign eventCount = eventCount + events?size />
-		</@spring.nestedPath>
-	</#list>
+	<#if groups?size gt 0>
+	<#--
+		<#assign eventCount=0 />
+		<#list groups as group>
+			<@spring.nestedPath path="groups[${group_index}]">
+				<@spring.bind path="events">
+					<#assign events=status.actualValue />
+				</@spring.bind>
+				
+				<#assign eventCount = eventCount + events?size />
+			</@spring.nestedPath>
+		</#list>
 	
-	<p>There are <@fmt.p eventCount "event" "events" /></p>
+		<p>There are <@fmt.p eventCount "event" "events" /></p>
+	-->
 	
-	<#include "_events.ftl" />
+		<#include "_events.ftl" />
+	<#else>
+		<p>Please add at least one group before creating events.</p>
+	</#if>
 </fieldset>
 
 <fieldset>
@@ -95,6 +101,9 @@
 			$('#action-input').val('refresh');
       $('#action-input').closest('form').submit();
 		});
+		
+		// Open the first modal with an error in it
+		$('.modal .error').first().closest('.modal').modal('show');
 	});
 </script>
 </#escape>

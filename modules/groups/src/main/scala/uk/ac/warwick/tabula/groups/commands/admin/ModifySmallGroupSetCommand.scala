@@ -38,8 +38,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	var userLookup = Wire[UserLookupService]
 	var membershipService = Wire[AssignmentMembershipService]
 	
-	@Length(max = 200)
-	@NotEmpty(message = "{NotEmpty.smallGroupSetName}")
 	var name: String = _
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
@@ -86,7 +84,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	}
 	
 	def validate(errors: Errors) {
-		// TODO
+		if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupSetName")
+		else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupSetName", Array[Object](200: JInteger), "")
 		
 		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
 			errors.pushNestedPath("groups[" + index + "]")
