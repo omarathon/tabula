@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula
 
 import java.io.File
 import java.io.StringReader
-
 import scala.collection.JavaConversions._
-
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -21,7 +19,6 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.util.FileCopyUtils
-
 import freemarker.cache.ClassTemplateLoader
 import freemarker.cache.MultiTemplateLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
@@ -32,6 +29,8 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
+import org.junit.rules.Timeout
+import org.junit.Rule
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -42,6 +41,10 @@ import uk.ac.warwick.util.web.Uri
 abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures {
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
+	
+	// No test should take longer than a minute
+	val minuteTimeout = new Timeout(60000)
+	@Rule def timeoutRule = minuteTimeout
 }
 
 /** Various test objects
