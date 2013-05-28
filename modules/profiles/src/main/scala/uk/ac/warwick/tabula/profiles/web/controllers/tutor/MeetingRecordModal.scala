@@ -14,7 +14,7 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.ItemNotFoundException
 
-abstract class MeetingRecordModal extends ProfilesController {
+trait MeetingRecordModal extends ProfilesController {
 
 	/**
 	 * Contains all of the request mappings needed to drive meeting record modals (including iframe stuff)
@@ -79,8 +79,7 @@ abstract class MeetingRecordModal extends ProfilesController {
 	                           @PathVariable("student") student: Member) =transactional() {
 		if (errors.hasErrors) {
 			showIframeForm(command, student)
-		}
-		else {
+		} else {
 			val modifiedMeeting = command.apply()
 			val meetingList = viewCommand match {
 				case None => Seq()

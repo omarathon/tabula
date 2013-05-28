@@ -75,11 +75,11 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingReco
 		cmd.description = "Lovely words"
 
 		// try adding a file
-		var uploadedFile =  new UploadedFile
-		var mpFile = mock[MultipartFile]
+		val uploadedFile =  new UploadedFile
+		val mpFile = mock[MultipartFile]
 		uploadedFile.upload.add(mpFile)
 
-		var fileAttach = new FileAttachment
+		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane"
 		uploadedFile.attached.add(fileAttach)
 

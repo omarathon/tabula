@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.web.views.JSONErrorView
 import uk.ac.warwick.tabula.profiles.commands.ApproveMeetingRecordCommand
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -32,22 +31,20 @@ class ApproveMeetingRecordController  extends ProfilesController {
 
 	@RequestMapping(method = Array(POST))
 	def approveMeetingRecord(@Valid @ModelAttribute("approveMeetingRecordCommand") command: ApproveMeetingRecordCommand,
-			errors: Errors): Mav = {
+		errors: Errors): Mav = {
 
-		transactional() {
-			val meetingRecordId = command.approval.meetingRecord.id
+		val meetingRecordId = command.approval.meetingRecord.id
 
-			if (!errors.hasErrors) {
-				val approval = command.apply()
-				val resultMap = Map(
-					"status" -> "successful"
-				)
-				Mav(new JSONView(resultMap))
-			}
-			else {
-				val additionalData = Map("formId" -> "meeting-%s".format(meetingRecordId))
-				Mav(new JSONErrorView(errors, additionalData))
-			}
+		if (!errors.hasErrors) {
+			val approval = command.apply()
+			val resultMap = Map(
+				"status" -> "successful"
+			)
+			Mav(new JSONView(resultMap))
+		} else {
+			val additionalData = Map("formId" -> "meeting-%s".format(meetingRecordId))
+			Mav(new JSONErrorView(errors, additionalData))
 		}
+
 	}
 }

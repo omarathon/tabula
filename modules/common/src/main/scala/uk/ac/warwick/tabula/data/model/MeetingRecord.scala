@@ -16,6 +16,12 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 
+object MeetingRecord {
+	val DefaultMeetingTimeOfDay = 12
+	val MeetingTooOldThresholdYears = 5
+	val MaxTitleLength = 140
+}
+
 @Entity
 class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
 
@@ -68,7 +74,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// true if the specified user needs to perform a workflow action on this meeting record
-	def pendingAction(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
+	def pendingActionBy(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
 
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))

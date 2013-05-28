@@ -27,7 +27,8 @@ class EditMeetingRecordCommandTest extends AppContextTestBase with MeetingRecord
 
 		// Here is a story about the meeting record workflow ...
 		// A student sees a meeting record with an inaccurate description. She tries to reject but forgets to add a comment
-		var approvalCmd = new ApproveMeetingRecordCommand(meeting, student)
+
+		var approvalCmd = new ApproveMeetingRecordCommand(meeting.approvals.get(0))
 		approvalCmd.approved = false
 		val errors = new BindException(approvalCmd, "command")
 		approvalCmd.validate(errors)
@@ -47,6 +48,8 @@ class EditMeetingRecordCommandTest extends AppContextTestBase with MeetingRecord
 
 		// The tutor sees the rejection. They add a description about herons to placate the student.
 		val editCmd = new EditMeetingRecordCommand(meeting)
+		editCmd.features.meetingRecordApproval = true
+
 		editCmd.copyToCommand(meeting)
 		editCmd.description = "The meeting room was full of angry herons. It was truly harrowing."
 		val meeting2 = transactional { tx => editCmd.apply() }
@@ -54,7 +57,7 @@ class EditMeetingRecordCommandTest extends AppContextTestBase with MeetingRecord
 		meeting2.pendingApprovalBy(student) should be (true)
 
 		// The student is now happy with the record and approves it
-		approvalCmd = new ApproveMeetingRecordCommand(meeting2, student)
+		approvalCmd = new ApproveMeetingRecordCommand(meeting2.approvals.get(0))
 		approvalCmd.approved = true
 		approvalCmd.rejectionComments = null
 		approval = transactional { tx => approvalCmd.apply() }

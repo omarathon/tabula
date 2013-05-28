@@ -8,10 +8,11 @@ import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
 
 import scala.Some
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{student}/create"))
-class CreateMeetingRecordController extends MeetingRecordModal {
+class CreateMeetingRecordController extends ProfilesController with MeetingRecordModal {
 
 	validatesSelf[CreateMeetingRecordCommand]
 

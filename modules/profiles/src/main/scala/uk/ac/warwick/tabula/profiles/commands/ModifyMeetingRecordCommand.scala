@@ -19,8 +19,6 @@ import org.joda.time.LocalDate
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
@@ -28,9 +26,6 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 	var features = Wire.auto[Features]
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
-
-	val HOUR = 12 // arbitrary meeting time
-	val PREHISTORIC_YEARS = 5 // number of years to consider as extremely old
 
 	var title: String = _
 	var description: String = _
@@ -71,19 +66,19 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		val meeting = getMeetingRecord
 		meeting.title = title
 		meeting.description = description
-		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(HOUR) // arbitrarily record as noon
+		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
 		meeting.format = format
 		persistAttachments(meeting)
 
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
-		//if (features.meetingRecordApproval){
+		if (features.meetingRecordApproval){
 			val meetingApprovals = updateMeetingApproval(meeting)
 			meetingApprovals.foreach(meetingApproval => {
 				//TODO-Ritchie notification
 			})
-		//}
+		}
 
 		meeting
 	}
@@ -112,7 +107,9 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	override def validate(errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		if (title.length > 500){errors.rejectValue("title", "meetingRecord.title.long")}
+		if (title.length > MeetingRecord.MaxTitleLength){
+			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
+		}
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
@@ -120,7 +117,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			case date:LocalDate => {
 				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				} else if (meetingDate.isBefore(DateTime.now.minusYears(PREHISTORIC_YEARS).toLocalDate)) {
+				} else if (meetingDate.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears).toLocalDate)) {
 					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
 				}
 			}

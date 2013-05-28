@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.Daoisms
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.Transactions._
 
 class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval)
 	extends Command[MeetingRecordApproval] with SelfValidating with Daoisms {
@@ -22,17 +23,15 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval)
 	def validate(errors: Errors) {
 		if (approved == null) {
 			errors.rejectValue("approved", "meetingRecordApproval.approved.isNull")
-		}
-		else if (!approved && !rejectionComments.hasText) {
+		} else if (!approved && !rejectionComments.hasText) {
 			errors.rejectValue("rejectionComments", "meetingRecordApproval.rejectionComments.isEmpty")
 		}
 	}
 
-	def applyInternal() = {
+	def applyInternal() = transactional() {
 		if (approved) {
 			approval.state = Approved
-		}
-		else {
+		} else {
 			approval.state = Rejected
 			approval.comments = rejectionComments
 		}
