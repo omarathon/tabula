@@ -25,7 +25,7 @@
 							<td>
 								<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand">
 									<span class="tutor-detail pull-right"><@fmt.p tutees?size "tutee" /></span>
-									<i class="icon-chevron-right"></i> 
+									<i class="icon-chevron-right icon-fixed-width"></i> 
 									<#if tutor?is_string>
 										${tutor}
 										<#if !tutor?string?starts_with("Not ")>

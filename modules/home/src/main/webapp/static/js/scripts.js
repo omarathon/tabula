@@ -63,6 +63,31 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
+	jQuery.fn.tabulaTimePicker = function() {
+		$(this).datetimepicker({
+			format: "hh:ii:ss",
+			weekStart: 1,
+			startView: 'day',
+			maxView: 'day',
+			autoclose: true
+		}).on('show', function(ev){
+			var d = new Date(ev.date.valueOf()),
+				  minutes = d.getUTCMinutes(),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+
+			if (seconds > 0 || millis > 0) {
+				d.setUTCSeconds(0);
+				d.setUTCMilliseconds(0);
+
+				var DPGlobal = $.fn.datetimepicker.DPGlobal;
+				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
+
+				$(this).datetimepicker('update');
+			}
+		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	};
+
 	// apply to a checkbox or radio button
 	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
 		var $this = $(this);
@@ -256,6 +281,7 @@
 		// form behavioural hooks
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
+		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
 
 		// prepare spinnable elements
@@ -266,6 +292,7 @@
 			var $m = $(this);
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
+			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
 			$m.tabulaPrepareSpinners();
 		});
@@ -353,15 +380,12 @@
 				return $section.hasClass('expanded');
 			};
 
-			var $icon = $('<i></i>');
+			var $icon = $('<i class="icon-fixed-width"></i>');
 			if (open()) $icon.addClass('icon-chevron-down');
 			else $icon.addClass('icon-chevron-right');
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
-
-			var buffer = $title.height() / 2 - 10;
-			$icon.css('margin-top', buffer + 'px');
 
 			$title.css('cursor', 'pointer').on('click', function() {
 				if (open()) {

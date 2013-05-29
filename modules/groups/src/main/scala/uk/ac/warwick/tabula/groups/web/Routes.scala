@@ -15,5 +15,9 @@ object Routes {
 
 	object admin {
 		def apply(department: Department) = "/admin/department/%s" format (encoded(department.code))
+		
+		object module {
+			def apply(module: Module) = admin(module.department) + "#module-" + encoded(module.code)
+		}
 	}
 }

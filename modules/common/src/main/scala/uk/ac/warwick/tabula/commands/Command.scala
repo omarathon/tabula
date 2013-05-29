@@ -16,6 +16,11 @@ import uk.ac.warwick.tabula.system.NoBind
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import uk.ac.warwick.tabula.events.{Event, EventDescription}
 import org.apache.log4j.Logger
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.helpers.Promise
+import uk.ac.warwick.tabula.helpers.Promises
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -85,6 +90,16 @@ abstract class Command[A] extends Describable[A] with JavaImports with EventHand
 
 	private def maintenanceCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled
+	}
+}
+
+abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
+	private var _promise = Promises.promise[A]
+	
+	final def get = _promise.get
+	final def setPromisedValue(value: => A) = {
+		_promise.set(value)
+		value
 	}
 }
 
@@ -214,6 +229,33 @@ abstract class Description {
 	def assignment(assignment: Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
+		this
+	}
+	
+	/**
+	 * Record small group set, plus its module and department if available.
+	 */
+	def smallGroupSet(smallGroupSet: SmallGroupSet) = {
+		property("smallGroupSet" -> smallGroupSet.id)
+		if (smallGroupSet.module != null) module(smallGroupSet.module)
+		this
+	}
+	
+	/**
+	 * Record small group, plus its set, module and department if available.
+	 */
+	def smallGroup(smallGroup: SmallGroup) = {
+		property("smallGroup" -> smallGroup.id)
+		if (smallGroup.groupSet != null) smallGroupSet(smallGroup.groupSet)
+		this
+	}
+	
+	/**
+	 * Record small group event, plus its group, set, module and department if available.
+	 */
+	def smallGroupEvent(smallGroupEvent: SmallGroupEvent) = {
+		property("smallGroupEvent" -> smallGroupEvent.id)
+		if (smallGroupEvent.group != null) smallGroup(smallGroupEvent.group)
 		this
 	}
 	

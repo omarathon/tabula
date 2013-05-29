@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.util.concurrency.promise.UnfulfilledPromiseException
+import uk.ac.warwick.tabula.commands.Command
 
 /**
  * A Promise is effectively a synchronous version of a Future. What

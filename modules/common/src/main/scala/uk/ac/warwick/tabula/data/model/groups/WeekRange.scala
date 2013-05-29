@@ -3,11 +3,18 @@ package uk.ac.warwick.tabula.data.model.groups
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.util.termdates.TermFactory
+import uk.ac.warwick.spring.Wire
+import org.joda.time.DateMidnight
+import org.joda.time.DateTimeConstants
+import uk.ac.warwick.util.termdates.Term
 
-case class WeekRange(val minWeek: Int, val maxWeek: Int) {
+case class WeekRange(val minWeek: WeekRange.Week, val maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
 	
 	def isSingleWeek = maxWeek == minWeek
+	def toWeeks: Seq[WeekRange.Week] = minWeek to maxWeek
 	
 	override def toString =
 		if (!isSingleWeek) "%d-%d" format (minWeek, maxWeek)
@@ -15,14 +22,47 @@ case class WeekRange(val minWeek: Int, val maxWeek: Int) {
 }
 
 object WeekRange {
-	def apply(singleWeek: Int): WeekRange = WeekRange(singleWeek, singleWeek)
+	type Week = Int
+	
+	var termFactory = Wire[TermFactory]
+	
+	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
 	def fromString(rep: String) = rep.split('-') match {
-		case Array(singleWeek) => WeekRange(singleWeek.toInt)
-		case Array(min, max) => WeekRange(min.toInt, max.toInt)
+		case Array(singleWeek) => WeekRange(singleWeek.trim.toInt)
+		case Array(min, max) => WeekRange(min.trim.toInt, max.trim.toInt)
 		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format (rep))
 	}
 	
-	implicit val defaultOrdering = Ordering.by[WeekRange, Int] ( _.minWeek )
+	/**
+	 * Combine weeks together into week ranges. For example:
+	 * 	3, 6, 9, 11, 4, 5, 1 -> 1, 3-6, 9, 11
+	 */
+	def combine(weeks: Seq[Week]): Seq[WeekRange] =
+		/*
+		 * Fold right starts at the right-most element of the sequence, and then folds the next element to the left
+		 * on top of it. We go through the sequence backwards, effectively, seeing whether the previous week is one
+		 * before the week we saw last.
+		 */
+		weeks.sorted.foldRight(List[WeekRange]()) { case (week, acc) =>
+			acc.headOption match {
+				case Some(range) if range.minWeek == week + 1 => WeekRange(week, range.maxWeek) :: acc.tail
+				case _ => WeekRange(week) :: acc
+			}
+		}
+	
+	def termWeekRanges(year: AcademicYear): Seq[WeekRange] = {
+		// We are confident that November 1st is always in term 1 of the year
+		val autumnTerm = termFactory.getTermFromDate(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
+		val springTerm = termFactory.getNextTerm(autumnTerm)
+		val summerTerm = termFactory.getNextTerm(springTerm)
+		
+		def toWeekRange(term: Term) =
+			WeekRange(term.getAcademicWeekNumber(term.getStartDate()), term.getAcademicWeekNumber(term.getEndDate()))
+			
+		Seq(autumnTerm, springTerm, summerTerm).map(toWeekRange)
+	}
+	
+	implicit val defaultOrdering = Ordering.by[WeekRange, Week] ( _.minWeek )
 	
 	object NumberingSystem {
 		val Term = "term" // 1-10, 1-10, 1-10

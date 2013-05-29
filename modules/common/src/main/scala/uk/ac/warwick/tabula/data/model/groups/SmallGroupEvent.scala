@@ -17,13 +17,11 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.roles.SmallGroupMemberRoleDefinition
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.groups.WeekRange._
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.roles.SmallGroupTutorRoleDefinition
 import javax.validation.constraints.NotNull
 
 @Entity
@@ -63,9 +61,10 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget {
 	var title: String = _
 	
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
-	
-	@transient
-	lazy val tutors = permissionsService.ensureUserGroupFor(this, SmallGroupTutorRoleDefinition)
+		
+	@OneToOne(cascade = Array(ALL))
+	@JoinColumn(name = "tutorsgroup_id")
+	var tutors: UserGroup = new UserGroup
 	
 	def permissionsParents = Option(group).toStream
 	
