@@ -95,7 +95,7 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 }
 
 @Controller
-@RequestMapping(Array("/tutor/{student}/edit"))
+@RequestMapping(Array("/tutor/{student}"))
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
@@ -107,15 +107,16 @@ class EditTutorController extends BaseController {
 	}
 
 	// initial form display
-	@RequestMapping(method=Array(GET))
+	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
 			"tutorToDisplay" -> cmd.currentTutor
 		).noLayout()
 	}
+	
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(value = Array("/edit", "/add"), method=Array(POST))
 	def saveTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 

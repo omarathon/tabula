@@ -1,18 +1,20 @@
 <#escape x as x?html>
+
 	<#if tutorToDisplay??>
 		<#assign pageAction="edit" >
 	<#else>
 		<#assign pageAction="add" >
 	</#if>
-
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3>${pageAction?capitalize} Personal Tutor</h3>
 	</div>
 
+
 	<#if user.staff>
-		<@f.form method="post" action="${url('/tutor/${student.universityId}/edit')}" commandName="editTutorCommand" cssClass="form-horizontal">
-			<div class="modal-body" id="edit-personal-tutor-modal">
+		<div id="edit-personal-tutor-modal" class="modal-body">
+		<@f.form method="post" commandName="editTutorCommand" action="" cssClass="form-horizontal">
+			
 
 				<h5 id="tuteeName">Personal Tutee: ${student.fullName}</h5>
 				<input id="student" name="student" type="hidden" value="${student.universityId}" />
@@ -52,6 +54,9 @@
 				</#if>
 
 				<div id="notify-tutor-change">
+				    <#if pageAction!="add">
+						<div id="notify-remove-tutor" class="alert hide"><strong>${tutorToDisplay.fullName}</strong> will no longer be ${student.firstName}'s personal tutor.</div>
+				  	</#if>
 					<p>Notify these people via email of this change</p>
 					<div class="control-group">
 						<div class="controls">
@@ -73,37 +78,50 @@
 					</div>
 				</div>
 
-			</div>
+			
 
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="save-tutor">Save</button>
-			</div>
+			
 		</@f.form>
+		</div>
+		<div class="modal-footer">
+				<div type="button" class="btn disabled" id="save-tutor">Save</div>
+			</div>
 	</#if>
-
+	
 	<script>
-		jQuery(function($) {
+		jQuery(document).ready(function($) {
 
 			$('#save-tutor').click(function() {
-				$.post($("#editTutorCommand").prop('action'), $("#editTutorCommand").serialize());
-				$('#modal').modal('hide');
-				var tutorId = $('#editTutorCommand input[name=tutor]').val();
-				var remove = $('#editTutorCommand input[name=remove]').val();
-				if(remove == "true") {
-					var action = "removed";
-				} else {
-					var action = "changed";
-				}
+				if ($(this).hasClass("disabled")) return;
+				$.post($("#editTutorCommand").prop('action'), $("#editTutorCommand").serialize(), function(){
+					$('#modal-change-tutor').modal('hide');
+					var tutorId = $('#editTutorCommand input[name=tutor]').val();
+					var remove = $('#editTutorCommand input[name=remove]').val();
+					if(remove == "true") {
+						var action = "removed";
+					} else {
+						var action = "changed";
+					}
 
-				var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-				window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId;
+					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
+					window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId;
+				});
 			});
 
 			function setStudent(memberString) {
 				var member = memberString.split("|");
+				
+				if($('#editTutorCommand input[name=currentTutor]').val() != member[1]) {
+					$('#remove-tutor').addClass("disabled");
+					$('#notify-tutor-change').show();
+				} else {
+					$('#remove-tutor').removeClass("disabled");
+				}
+				
 				$('#editTutorCommand input[name=tutor]').val(member[1]);
 				$("#tutorSearchResults").html("");
-				$('#notify-tutor-change').show();
+				
+				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
 				return member[0];
 			}
 
@@ -113,6 +131,7 @@
 			}
 
 			$('.inline-search-button').click(function() {
+			    if ($(this).hasClass("disabled")) return;
 				var container = $(this).parents("form");
 				var target = "../tutor/search.json";
 				var query = container.find('input[name="query"]').val();
@@ -129,6 +148,8 @@
 			});
 
 			$('#remove-tutor').click(function() {
+				if ($(this).hasClass("disabled")) return;
+				if ($('#notify-tutor-change').is(':visible')) $('#notify-tutor-change').hide();
 				$('#removeTutorMessage').show();
 			});
 
@@ -138,6 +159,11 @@
 				$('.notifyNewTutor').closest("label").addClass("muted");
 				$('#removeTutorMessage').hide();
 				$('#notify-tutor-change').show();
+				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
+				$('#editTutorCommand input[name="query"]').prop('disabled', true);;
+				$('#remove-tutor').addClass('disabled');
+				$('.inline-search-button').addClass('disabled');
+				$('#notify-remove-tutor').show();
 				$("#editTutorCommand input[name='remove']").val('true');
 			});
 
@@ -146,9 +172,10 @@
 			});
 
 			$('#tutorSearchResults').on('click', 'li', function() {
-				var queryInput = $(this).parents('#modal').find('.profile-search input[name="query"]');
+				var queryInput = $(this).parents('#edit-personal-tutor-modal').find('.profile-search input[name="query"]');
 				var memberName = setStudent($(this).attr('data-value'));
 				queryInput.val(memberName);
+				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
 			});
 
 			function flattenMemberData(data) {
@@ -209,7 +236,9 @@
 
 
 			profileSearch($('#edit-personal-tutor-modal .profile-search'), "../tutor/search.json", tutorHighlight, setStudent);
+			
 
-		});
+		}(jQuery));
 	</script>
+	
 </#escape>

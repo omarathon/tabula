@@ -18,9 +18,10 @@
 
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
+		
 
 		<#if profile.personalTutors?size != 0>
-			<a class="add-tutor-link" data-toggle="modal" data-target="#modal" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-plus"></i> Add another tutor</a>
+			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-plus"></i> Add another tutor</a>
 		</#if>
 
 		
@@ -28,7 +29,8 @@
 			<p>
 				Not recorded
 				<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-					<a class="edit-tutor-link" data-toggle="modal" data-target="#modal" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
+					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
+					
 				</#if>
 			</p>
 		</#if>
@@ -40,7 +42,7 @@
 				<#if !personalTutor??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
 					<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-						<a class="edit-tutor-link" data-toggle="modal" data-target="#modal"> href="<@routes.tutor_edit_no_tutor student=profile.universityId />"><i class="icon-edit"></i></a>
+						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"  data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
 					<div class="photo">
@@ -49,7 +51,7 @@
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
-							<a class="edit-tutor-link" data-toggle="modal" data-target="#modal" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>"><i class="icon-edit"></i></a>
+							<a class="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 						</#if>
 					</h5>
 					<#if personalTutor.universityId == viewer.universityId>
@@ -69,14 +71,15 @@
 		</#if>
 	
 		<div id="modal" class="modal hide fade" style="display:none;">
-			<div class="modal-header"></div>
-			<div class="modal-body"></div>
-			<div class="modal-footer"></div>
 		</div>
+		
+		<div id="modal-change-tutor" class="modal hide fade"></div>
+		
 	
 	
 		<script type="text/javascript">
 		jQuery(function($){
+		
 			var $m = $("#modal");
 	
 			var scrollToOpenDetails = function() {
@@ -166,7 +169,10 @@
 			$("#personal-development").on("click", ".edit-tutor-link, .add-tutor-link", function(e) {
 				e.preventDefault();
 				var url = $(this).attr('href');
-				$m.load(url);
+				$("#modal-change-tutor").load(url,function(){
+					$("#modal-change-tutor").modal('show');
+				});
+				
 			});
 		});
 		</script>
