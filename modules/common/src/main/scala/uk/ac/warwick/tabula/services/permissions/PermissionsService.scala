@@ -73,7 +73,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		}
 	}
 		
-	override def afterPropertiesSet = {
+	override def afterPropertiesSet() {
 		queue.addListener(classOf[PermissionsCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
 	

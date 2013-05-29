@@ -10,6 +10,6 @@ import uk.ac.warwick.tabula.dev.web.commands.FixturesCommand
 class FixturesController {
 	
 	@RequestMapping
-	def apply(cmd: FixturesCommand):Unit = cmd.apply() 
+	def apply(cmd: FixturesCommand) { cmd.apply() }
 
 }
