@@ -56,7 +56,7 @@
 						<@form.labelled_row "file.upload" "Files">
 							<input type="file" name="file.upload" multiple />
 						</@form.labelled_row>
-						<#if showErrors??>
+						<#if showErrors?? && showErrors>
 							<@f.errors path="*" cssClass="error" />
 						</#if>
 					</td>

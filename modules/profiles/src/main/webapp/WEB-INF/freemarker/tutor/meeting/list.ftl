@@ -24,7 +24,7 @@
 			<#if meetings??>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
-					<#assign pendingAction = meeting.pendingAction(viewer) />
+					<#assign pendingAction = meeting.pendingActionBy(viewer) />
 					<#assign pendingActionClasses><#if pendingAction>well</#if></#assign>
 
 					<#if (openMeeting?? && openMeeting.id == meeting.id) || pendingAction>

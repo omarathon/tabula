@@ -166,8 +166,8 @@ class EditExtensionController extends ExtensionController {
 			
 			for (extension <- extensions) 
 				if (extension.isManual) new ExtensionChangedMessage(extension, extension.userId).apply()
-				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId)
-				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId)
+				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId).apply()
+				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId).apply()
 			
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
