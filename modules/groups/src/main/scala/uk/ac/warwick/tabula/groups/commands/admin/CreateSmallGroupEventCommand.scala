@@ -28,6 +28,8 @@ class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) e
 		
 		event
 	}
+	
+	def isEmpty = weekRanges.isEmpty && day == null
 
 	override def describeResult(d: Description, smallGroupEvent: SmallGroupEvent) = d.smallGroupEvent(smallGroupEvent)
 

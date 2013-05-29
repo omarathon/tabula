@@ -33,6 +33,9 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	
 	var name: String = _
 	
+	// Used by parent command
+	var delete: Boolean = false
+	
 	// start complicated membership stuff
 	
 	/**
@@ -62,18 +65,21 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	///// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the events
-	@Valid var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
+	var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
 		new CreateSmallGroupEventCommand(this, module)
 	}
 	
 	def validate(errors: Errors) {
-		if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupName")
-		else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupName", Array[Object](200: JInteger), "")
-			
-		events.asScala.zipWithIndex foreach { case (cmd, index) =>
-			errors.pushNestedPath("groups[" + index + "]")
-			cmd.validate(errors)
-			errors.popNestedPath()
+		// Skip validation when this group is being deleted
+		if (!delete) {
+			if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupName")
+			else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupName", Array[Object](200: JInteger), "")
+				
+			events.asScala.zipWithIndex foreach { case (cmd, index) =>
+				errors.pushNestedPath("groups[" + index + "]")
+				cmd.validate(errors)
+				errors.popNestedPath()
+			}
 		}
 	}
 	
@@ -90,9 +96,8 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 		group.name = name
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		// CONSIDER How will deletions be handled?
 		group.events.clear()
-		group.events.addAll(events.asScala.map(_.apply()).asJava)
+		group.events.addAll(events.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
 		if (group.students == null) group.students = new UserGroup
 		group.students.copyFrom(students)
@@ -127,5 +132,18 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
+			
+		// If the last element of events is both a Creation and is empty, disregard it
+		if (!events.isEmpty()) {
+			val last = events.asScala.last
+			
+			last match {
+				case cmd: CreateSmallGroupEventCommand if cmd.isEmpty =>
+					events.remove(last)
+				case _ => // do nothing
+			}
+		}
+		
+		events.asScala.foreach(_.onBind(result))
 	}
 }

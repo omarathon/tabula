@@ -292,6 +292,7 @@
 			var $m = $(this);
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
+			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
 			$m.tabulaPrepareSpinners();
 		});

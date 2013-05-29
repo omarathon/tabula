@@ -18,6 +18,10 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupSetCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.groups.commands.admin.ModifySmallGroupSetCommand
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 trait SmallGroupSetsController extends GroupsController {
 	
@@ -30,13 +34,27 @@ trait SmallGroupSetsController extends GroupsController {
 		
 	@ModelAttribute("module") def module(@PathVariable("module") module: Module) = module 
 	
+	def allTermWeekRanges(cmd: ModifySmallGroupSetCommand) = {
+		WeekRange.termWeekRanges(Option(cmd.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
+		.map { TermWeekRange(_) }
+	}
+	
 	override final def binding[A](binder: WebDataBinder, cmd: A) {		
 		binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
 			override def fromString(code: String) = SmallGroupFormat.fromCode(code)			
 			override def toString(format: SmallGroupFormat) = format.code
 		})
+		binder.registerCustomEditor(classOf[SmallGroupAllocationMethod], new AbstractPropertyEditor[SmallGroupAllocationMethod] {
+			override def fromString(code: String) = SmallGroupAllocationMethod.fromDatabase(code)			
+			override def toString(method: SmallGroupAllocationMethod) = method.dbValue
+		})
 	}
 	
+}
+
+case class TermWeekRange(val weekRange: WeekRange) {
+	def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
+	def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
 }
 
 @RequestMapping(Array("/admin/module/{module}/groups/new"))
@@ -47,10 +65,12 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module) = 
 		new CreateSmallGroupSetCommand(module)
-	
+		
 	@RequestMapping
 	def form(cmd: CreateSmallGroupSetCommand) =
-		Mav("admin/groups/new").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/new",
+			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd: CreateSmallGroupSetCommand, errors: Errors) =
@@ -74,7 +94,9 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	
 	@RequestMapping
 	def form(cmd: EditSmallGroupSetCommand) =
-		Mav("admin/groups/edit").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/edit",
+			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) =

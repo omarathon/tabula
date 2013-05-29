@@ -38,7 +38,7 @@
 
 </fieldset>
 
-<fieldset>
+<fieldset id="students">
 	<legend>Students <small>Select which students should be in this set of groups</small></legend>
 	
 	<@spring.bind path="members">
@@ -51,7 +51,7 @@
 	<#include "_students.ftl" />
 </fieldset>
 
-<fieldset>
+<fieldset id="groups">
 	<legend>Groups <small>Create and name empty groups</small></legend>
 	
 	<@spring.bind path="groups">
@@ -63,7 +63,7 @@
 	<#include "_groups.ftl" />
 </fieldset>
 
-<fieldset>
+<fieldset id="events">
 	<legend>Events <small>Add weekly events for these groups</small></legend>
 	
 	<#if groups?size gt 0>
@@ -88,7 +88,7 @@
 	</#if>
 </fieldset>
 
-<fieldset>
+<fieldset id="allocation">
 	<legend>Allocation <small>Allocate students to these groups</small></legend>
 	
 	<#include "_allocation.ftl" />
@@ -97,13 +97,30 @@
 <script type="text/javascript">
 	jQuery(function($) {
 		<#-- controller detects action=refresh and does a bind without submit -->
-		$('.modal.refresh-form').on('hide', function() {
+		$('.modal.refresh-form').on('hide', function(e) {
+			// Ignore events that are something ELSE hiding and being propagated up!
+			if (!$(e.target).hasClass('modal')) return;
+		
+			// Which section are we targeting?
+			var section = $(this).closest('fieldset').attr('id') || '';
+			
+			if (section) {
+				var currentAction = $('#action-input').closest('form').attr('action');
+				$('#action-input').closest('form').attr('action', currentAction + '#' + section);
+			}
+		
 			$('#action-input').val('refresh');
       $('#action-input').closest('form').submit();
 		});
 		
 		// Open the first modal with an error in it
 		$('.modal .error').first().closest('.modal').modal('show');
+		
+		// repeat these hooks for modals when shown
+		$('body').on('shown', '.modal', function() {
+			var $m = $(this);
+			$m.find('input.lazy-time-picker').tabulaTimePicker();
+		});
 	});
 </script>
 </#escape>

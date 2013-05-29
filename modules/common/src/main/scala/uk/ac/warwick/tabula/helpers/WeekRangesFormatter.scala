@@ -81,7 +81,7 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				.flatMap { settings => Option(settings.weekNumberingSystem) }
 				.getOrElse(department.weekNumberingSystem)
 		}
-
+		
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
@@ -93,7 +93,7 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 			case Seq(event: SmallGroupEvent) => 
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 				
-			case _ => throw new IllegalArgumentException("Bad args: Seq(" + args.map(_.getClass().toString()).mkString(",") + ")")
+			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
 	}
 }

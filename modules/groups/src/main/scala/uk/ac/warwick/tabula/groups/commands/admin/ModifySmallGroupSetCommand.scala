@@ -25,6 +25,7 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -42,8 +43,9 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 	
-	@NotNull
 	var format: SmallGroupFormat = _
+	
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 	
 	// start complicated membership stuff
 	
@@ -87,6 +89,9 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupSetName")
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupSetName", Array[Object](200: JInteger), "")
 		
+		if (format == null) errors.rejectValue("format", "NotNull.format")
+		if (allocationMethod == null) errors.rejectValue("allocationMethod", "NotNull.allocationMethod")
+		
 		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
 			errors.pushNestedPath("groups[" + index + "]")
 			cmd.validate(errors)
@@ -98,6 +103,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		name = set.name
 		academicYear = set.academicYear
 		format = set.format
+		allocationMethod = set.allocationMethod
 		
 		// TODO AssessmentGroupItems
 		
@@ -111,13 +117,13 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.name = name
 		set.academicYear = academicYear
 		set.format = format
+		set.allocationMethod = allocationMethod
 		
 		// TODO AssessmentGroupItems
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		// CONSIDER How will deletions be handled?
 		set.groups.clear()
-		set.groups.addAll(groups.asScala.map(_.apply()).asJava)
+		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
 		if (set.members == null) set.members = new UserGroup
 		set.members.copyFrom(members)

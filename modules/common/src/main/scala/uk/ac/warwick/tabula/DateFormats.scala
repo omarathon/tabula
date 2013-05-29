@@ -15,6 +15,7 @@ object DateFormats {
 	/** String format as expected by Javascript date time picker */
 	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
 	final val DatePicker = "dd-MMM-yyyy"
+	final val TimePicker = "HH:mm:ss"
 
 	/**
 	 * ISO 8601 date format. Has date, hours, minutes, timezone, no millis.

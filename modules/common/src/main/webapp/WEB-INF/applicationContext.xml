@@ -128,12 +128,14 @@
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
 	    	<list>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalTimeConverter"/>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
