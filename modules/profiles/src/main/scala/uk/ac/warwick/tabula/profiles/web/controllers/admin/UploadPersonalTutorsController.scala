@@ -48,13 +48,8 @@ class UploadPersonalTutorsController extends ProfilesController {
 
 		val tutorCount = cmd.apply().size
 
-		if (foundErrorsToDisplay) {
-			Mav("tutors/upload_form",
-					"tutorCount" -> tutorCount,
-					"showErrors" -> true)
-		}
-		else {
-			Mav("tutors/upload_form", "tutorCount" -> tutorCount)
-		}
+		Mav("tutors/upload_form",
+			"tutorCount" -> tutorCount,
+			"showErrors" -> foundErrorsToDisplay)
 	}
 }
