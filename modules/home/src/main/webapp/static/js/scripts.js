@@ -67,7 +67,8 @@
 		$(this).datetimepicker({
 			format: "hh:ii:ss",
 			weekStart: 1,
-			startView: 'hour',
+			startView: 'day',
+			maxView: 'day',
 			autoclose: true
 		}).on('show', function(ev){
 			var d = new Date(ev.date.valueOf()),
@@ -75,8 +76,7 @@
 					seconds = d.getUTCSeconds(),
 					millis = d.getUTCMilliseconds();
 
-			if (minutes > 0 || seconds > 0 || millis > 0) {
-				d.setUTCMinutes(0);
+			if (seconds > 0 || millis > 0) {
 				d.setUTCSeconds(0);
 				d.setUTCMilliseconds(0);
 

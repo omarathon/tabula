@@ -36,10 +36,10 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 	var day: DayOfWeek = _
 	
 	@NotEmpty
-	var startTime: LocalTime = _
+	var startTime: LocalTime = CreateSmallGroupEventCommand.DefaultStartTime
 	
 	@NotEmpty
-	var endTime: LocalTime = _
+	var endTime: LocalTime = CreateSmallGroupEventCommand.DefaultEndTime
 	
 	var location: String = _
 	

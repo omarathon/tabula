@@ -32,7 +32,7 @@
 				
 				<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">
 					<@spring.bind path="weeks">
-						<#local allWeeks=status.actualValue />
+						<#local allWeeks=(status.actualValue)![] />
 					</@spring.bind>
 				
 					<#list allTermWeekRanges as term_week_range>
@@ -74,11 +74,11 @@
 				
 				<#-- The time-picker causes the entire page to become a submit button, can't work out why -->
 				<@form.labelled_row "startTime" "Start time">
-					<@f.input path="startTime" <#--cssClass="time-picker"--> />
+					<@f.input path="startTime" cssClass="time-picker" />
 				</@form.labelled_row>
 				
 				<@form.labelled_row "endTime" "End time">
-					<@f.input path="endTime" <#--cssClass="time-picker"--> />
+					<@f.input path="endTime" cssClass="time-picker" />
 				</@form.labelled_row>
 				
 				<@form.labelled_row "location" "Location">
@@ -261,4 +261,12 @@
 			});
 		});
 	</script>
+	
+	<style type="text/css">
+		<#-- Hide the confusing dates in the header of the time picker -->
+		.datetimepicker-hours thead i { display: none !important; }
+		.datetimepicker-hours thead .switch { visibility: hidden; }
+		.datetimepicker-hours thead th { height: 0px; }
+		.datetimepicker-minutes thead .switch { visibility: hidden; }
+	</style>
 </#escape>
