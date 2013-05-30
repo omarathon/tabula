@@ -72,11 +72,11 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	def validate(errors: Errors) {
 		// Skip validation when this group is being deleted
 		if (!delete) {
-			if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupName")
-			else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupName", Array[Object](200: JInteger), "")
-				
+			if (!name.hasText) errors.rejectValue("name", "smallGroup.name.NotEmpty")
+			else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
+
 			events.asScala.zipWithIndex foreach { case (cmd, index) =>
-				errors.pushNestedPath("groups[" + index + "]")
+				errors.pushNestedPath("events[" + index + "]")
 				cmd.validate(errors)
 				errors.popNestedPath()
 			}

@@ -6,7 +6,21 @@
 	background: @header-colour;
 }
 
-.events .deleted, .group.deleted {
+.events .deleted, .item-info.deleted, .item-info.deleted .name, .item-info.deleted .events li {
 	text-decoration: line-through;
 	color: @grayLight;
+}
+
+.tabula-page, #container {
+	/* Position dividing line ABOVE legends, not below */
+	legend {
+		border-bottom: 0;
+		border-top: 1px solid #e5e5e5;
+	}
+}
+
+input.deleted {
+	cursor: not-allowed;
+  background-color: @inputDisabledBackground !important;
+  text-decoration: line-through;
 }

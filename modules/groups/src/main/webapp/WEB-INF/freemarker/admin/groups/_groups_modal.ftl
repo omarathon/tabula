@@ -1,13 +1,7 @@
 <#escape x as x?html>
-
-	<button type="button" data-target="#groups-modal" class="btn" data-toggle="modal">
-		Add<#if groups?size gt 0>/edit</#if> groups
-	</button>
-
 	<div id="groups-modal" class="modal hide fade refresh-form" tabindex="-1" role="dialog" aria-labelledby="groups-modal-label" aria-hidden="true">
 		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    	<h3 id="groups-modal-label">Add<#if groups?size gt 0>/edit</#if> groups</h3>
+    	<h3 id="groups-modal-label"><#if groups?size gt 0>Edit<#else>Add</#if> groups</h3>
 		</div>	
 		<div class="modal-body">
 			<#list groups as group>
@@ -30,11 +24,15 @@
 			<@spring.nestedPath path="groups[${groups?size}]">
 				<@form.labelled_row "name" "Group name">
 					<@f.input path="name" cssClass="text" />
+						
+					<button type="button" class="btn" data-toggle="add" title="Add another group" disabled="disabled">
+						<i class="icon-plus"></i>
+					</button>
 				</@form.labelled_row>
 			</@spring.nestedPath>
 		</div>
 		<div class="modal-footer">
-			<button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Save</button>
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Done</button>
 		</div>
 	</div>
 
@@ -53,7 +51,7 @@
 					
 					if (value === "true") {
 						$controlGroup.addClass('deleted');
-						$controlGroup.find('input').attr('disabled', 'disabled');
+						$controlGroup.find('input').addClass('disabled deleted');
 					} 
 				}
 				
@@ -63,10 +61,10 @@
 						
 						if (value === "true") {
 							$controlGroup.addClass('deleted');
-							$controlGroup.find('input').attr('disabled', 'disabled');
+							$controlGroup.find('input').addClass('disabled deleted');
 						} else {
 							$controlGroup.removeClass('deleted');
-							$controlGroup.find('input').removeAttr('disabled');
+							$controlGroup.find('input').removeClass('disabled deleted');
 						}
 						
 						$button.hide();
@@ -78,6 +76,42 @@
 						}).show();
 					}
 				});
+			});
+			
+			$('#groups-modal button[data-toggle="add"]').each(function() {
+				var $button = $(this);
+				var $group = $button.closest('.control-group');
+				var $input = $group.find('input[type="text"]');
+				
+				$input.on('change keyup', function() {
+					if ($input.val().length > 0) {
+						$button.removeAttr('disabled');
+					} else {
+						$button.attr('disabled', 'disabled');
+					}
+				});
+			});
+			
+			$('#groups-modal button[data-toggle="add"]').on('click', function() {
+				var $button = $(this);
+				var $group = $button.closest('.control-group');
+				
+				var $clone = $group.clone();
+				$clone.find('button[data-toggle="add"]').remove();
+				
+				var index = parseInt(/\[(\d+)\]/.exec($clone.find('input[type="text"]').attr('name'))[1]);
+				$clone.find('label').text((index + 1) + ".");
+				
+				$clone.insertBefore($group);
+				
+				var nextIndex = index + 1;
+				var $input = $group.find('input[type="text"]');
+				$input.attr('name', 'groups[' + nextIndex + '].name');
+				$input.attr('id', 'groups' + nextIndex + '.name');
+				$group.find('label').attr('for', $input.attr('id'));
+				
+				$input.val('').focus();
+				$button.attr('disabled', 'disabled');
 			});
 		});
 	</script>

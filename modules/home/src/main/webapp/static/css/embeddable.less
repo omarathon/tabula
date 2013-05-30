@@ -31,6 +31,9 @@ ul.unstyled, ol.unstyled {
 	}
 }
 
+// Make WPopupBox appear above bootstrap modals
+.WPopupGlass, .WPopupBox, .WPopupBoxContent { z-index: @zindexModal + 10 !important; }
+
 .box-style() {
 	border: 1px solid @grayLight;
 	border-bottom: 1px solid @gray;
@@ -418,6 +421,9 @@ ul {
 	// TODO jQuery this
 	//&:not(.archived):nth-of-type(odd) { background-color: @zebra-pale; }
 	&.alt-row { background-color: @zebra-pale; }
+	&:last-child {
+		.border-radius(0px 0px @box-style-border-radius @box-style-border-radius);
+	}
 
 	.column1, .left {
 		width: 14.5em;

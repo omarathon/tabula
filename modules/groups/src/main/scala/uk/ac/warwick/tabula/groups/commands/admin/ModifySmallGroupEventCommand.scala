@@ -29,16 +29,12 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  */
 abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupEvent] with SelfValidating with BindListener {
 	
-	@NotEmpty
 	var weeks: JSet[JInteger] = JSet()
 	
-	@NotEmpty
 	var day: DayOfWeek = _
 	
-	@NotEmpty
 	var startTime: LocalTime = CreateSmallGroupEventCommand.DefaultStartTime
 	
-	@NotEmpty
 	var endTime: LocalTime = CreateSmallGroupEventCommand.DefaultEndTime
 	
 	var location: String = _
@@ -62,7 +58,15 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 	def validate(errors: Errors) {
 		// Skip validation when this event is being deleted
 		if (!delete) {
-			// TODO
+			if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
+			
+			if (day == null) errors.rejectValue("day", "smallGroupEvent.day.NotEmpty")
+
+			if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
+			
+			if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
+			
+			if (endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 		}
 	}
 	
