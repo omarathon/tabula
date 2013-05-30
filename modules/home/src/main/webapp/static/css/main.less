@@ -7,6 +7,13 @@
 	overflow: visible; /* Allow Tabula to break out of the container for popovers etc */
 }
 
+// with overflow:visible above, #content-wrapper did not match the height of #main-content without
+// a clear:both element, causing ugly BG flashes during load. We can disable the float since it was
+// only needed to support left hand nav in Sitebuilder in the face of user content.
+#content-wrapper #main-content {
+	float: none;
+}
+
 // Badass CSS transitions for the popup library
 .WPopupBox {
   top: 0;
@@ -184,4 +191,31 @@ body .full-width {
           transform-origin: 100% 100%;
 }
 
-// Sneaky include of bootstrap datepicker
+
+// Multi-select drag and drop widgets. Common styles.
+// Specific usages of the plugin may customise on top of this, e.g. #sortModulesCommand
+ul.drag-list {
+	.cloned { opacity: 0.5; }
+
+	li { 
+		display:inline-block; 
+		float: left; 
+		margin: 1px 3px; 
+		width: 62px;
+
+		background-color: @btnInfoBackground;
+		cursor: default;
+
+		.handle {
+			opacity: 0.5;
+			cursor: move;
+		}
+		&:hover {
+			background-color: @btnInfoBackgroundHighlight;
+			.handle { opacity: 1.0; }
+		}
+
+		&.ui-selecting { background: @btnPrimaryBackground !important; }
+		&.ui-selected { background: @btnPrimaryBackgroundHighlight !important; }
+	}
+}

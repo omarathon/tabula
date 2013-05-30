@@ -460,7 +460,7 @@
 	$('.students tbody tr').each(function() {
 		var $nameField = $(this).find('.student-col h6').first();
 		var $progressField = $(this).find('.progress-col').first();
-		var $icon = $('<i class="icon-chevron-right"></i>').css('margin-top', '2px');
+		var $icon = $('<i class="icon-chevron-right icon-fixed-width"></i>').css('margin-top', '2px');
 		
 		$nameField
 			.prepend(' ')

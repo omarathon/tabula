@@ -13,7 +13,7 @@
 		</ul>
 	</div>
 	
-	<div id="intro" class="span9">
+	<div id="intro" class="span6">
 		<h2>Tabula style guide</h2>
 		
 		<p>This page is a rendering, in Tabula itself, of the

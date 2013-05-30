@@ -60,7 +60,7 @@ class ImportSingleStaffCommandTest extends TestBase with Mockito {
 			userType				= Staff
 		)
 		
-		val mac = MembershipInformation(mm, Some(blobBytes))
+		val mac = MembershipInformation(mm, () => Some(blobBytes))
 	}
 	
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really

@@ -178,7 +178,6 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	    assignment.members = null
 	    assignment.id ="0000123"
 	    assignment.name = "My essay"
-	    assignment.occurrence = "A"
 	    assignment.commentField.get.value = "Instructions"	
 	    assignment.closeDate = 	new DateTime(2012, 7, 12, 12, 0)
 	    assignment

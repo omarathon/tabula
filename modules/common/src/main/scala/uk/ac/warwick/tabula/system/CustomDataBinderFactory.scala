@@ -20,12 +20,17 @@ class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initi
 		val securityService = Wire.auto[SecurityService]
 	}
 	
+	trait NoAutoGrownNestedPaths extends CustomDataBinder {
+		setAutoGrowNestedPaths(false)
+	}
+	
 	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= { 
 		new CustomDataBinder(target, objectName) 
 				with CustomDataBinderDependencies
 				with PermissionsBinding
 				with AllowedFieldsBinding
 				with BindListenerBinding
+				with NoAutoGrownNestedPaths
 	}
 	
 }

@@ -24,7 +24,7 @@
 	<import resource="persistence-context.xml" />
 	
 	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
-	<bean class="uk.ac.warwick.spring.SpringConfigurer" />
+	<bean class="uk.ac.warwick.spring.SpringConfigurer" lazy-init="false" />
 
 	<!-- fire up annotation driven everything -->
 	<context:annotation-config />
@@ -127,17 +127,22 @@
 							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
+                <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
 	    	<list>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalTimeConverter"/>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
 	        </list>
 	    </property>
 	</bean>
@@ -181,7 +186,8 @@
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer"
 		p:conversionService-ref="typeConverter"
 		p:validator-ref="validator"
-		p:propertyEditorRegistrar-ref="propertyEditorRegistrar" />
+		p:propertyEditorRegistrar-ref="propertyEditorRegistrar"
+		p:autoGrowNestedPaths="false" />
 	<bean id="requestMappingHandlerAdapter" class="uk.ac.warwick.tabula.system.HandlerAdapter" p:order="0"
 		p:webBindingInitializer-ref="webBindingInitializer">
 		<property name="customArgumentResolvers">
@@ -299,8 +305,10 @@
 					</bean>
 				</entry>
 				<entry key="dateBuilder"><bean class="uk.ac.warwick.tabula.helpers.DateBuilder" /></entry>
+				<entry key="timeBuilder"><bean class="uk.ac.warwick.tabula.helpers.TimeBuilder" /></entry>
 				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
+				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
 			</map>
 		</property>
 	</bean>
@@ -325,6 +333,7 @@
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 	
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
+	<bean class="uk.ac.warwick.util.termdates.TermFactoryImpl" />
 
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />

@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.services
 import org.apache.lucene.search.FieldDoc
 import org.joda.time.DateTime
 import org.mockito.Matchers._
-
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.AuditEvent
+import uk.ac.warwick.tabula.permissions.Permissions
 
 //scalastyle:off magic.number
 class ActivityServiceTest extends TestBase with Mockito {
@@ -34,12 +34,12 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val om1 = Fixtures.module("own1")
 		val om2 = Fixtures.module("own2")
 		
-		moduleService.modulesManagedBy(currentUser) returns (Set(om1, om2))
+		moduleService.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) returns (Set(om1, om2))
 		
 		val am1 = Fixtures.module("admin1")
 		val am2 = Fixtures.module("admin2")
 		
-		moduleService.modulesAdministratedBy(currentUser) returns (Set(am1, am2, om1))
+		moduleService.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) returns (Set(am1, am2, om1))
 		
 		val ae1 = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,
@@ -91,12 +91,12 @@ class ActivityServiceTest extends TestBase with Mockito {
 		val om1 = Fixtures.module("own1")
 		val om2 = Fixtures.module("own2")
 		
-		moduleService.modulesManagedBy(currentUser) returns (Set(om1, om2))
+		moduleService.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) returns (Set(om1, om2))
 		
 		val am1 = Fixtures.module("admin1")
 		val am2 = Fixtures.module("admin2")
 		
-		moduleService.modulesAdministratedBy(currentUser) returns (Set(am1, am2, om1))
+		moduleService.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) returns (Set(am1, am2, om1))
 		
 		val ae1 = AuditEvent(
 			eventId="event", eventType="SubmitAssignment", userId="cuscav", eventDate=DateTime.now,

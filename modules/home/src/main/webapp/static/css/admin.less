@@ -1,0 +1,55 @@
+@import "bootstrap/variables.less";
+
+@header-colour: @tabulaTurquoise;
+
+#header {
+	background: @header-colour;
+}
+
+.permissionTitle {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.use-popover {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 6px;
+}
+
+.permission-list {
+	margin:4px 0 20px 0;
+
+	.user-fullname {
+		width: 170px;
+	}
+
+	.user-fullname, .user-id, .actions {
+		padding:8px 8px 8px 4px;
+		vertical-align: middle;
+	}
+
+	.user-id {
+		width: 70px;
+	}
+
+	.highlight {
+		background-color: @grayLighter
+	}
+}
+
+#module-permissions-page, #department-permissions-page {
+	.actions form {
+    	margin:0;
+	}
+
+	.module-permissions, .department-permissions {
+		.form-inline {
+			margin-top: 13px;
+		}
+
+		.checkbox {
+			padding-left:6px;
+		}
+	}
+}

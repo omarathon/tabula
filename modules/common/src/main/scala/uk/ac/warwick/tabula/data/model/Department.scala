@@ -20,6 +20,7 @@ import org.hibernate.annotations.JoinFormula
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import org.hibernate.annotations.ForeignKey
 import scala.annotation.tailrec
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
 
 @Entity @AccessType("field")
 class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
@@ -72,6 +73,9 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
 	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
+	
+	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
+	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
@@ -113,14 +117,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@ForeignKey(name="none")
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
-	/**
-	  * Although a department may have a parent, we don't actually
-	  * want to inherit permissions from it. We can add users explicitly
-	  * to the child department if they need access there.
-	  *
-	  * This is open to discussion and change.
-	  */
-
 	def permissionsParents = Option(parent).toStream
 	
 	/** The 'top' ancestor of this department, or itself if
@@ -153,6 +149,8 @@ object Department {
 		val PlagiarismDetection = "plagiarismDetection"
 
 		val PersonalTutorSource = "personalTutorSource"
+			
+		val WeekNumberingSystem = "weekNumberSystem"
 
 		object PersonalTutorSourceValues {
 			val Local = "local"

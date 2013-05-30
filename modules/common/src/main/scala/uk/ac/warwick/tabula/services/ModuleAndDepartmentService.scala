@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.RouteDao
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
@@ -71,22 +71,22 @@ class ModuleAndDepartmentService extends Logging {
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
 	// as getting the role itself
 	
-	def departmentsOwnedBy(user: CurrentUser): Set[Department] = 
-		permissionsService.getAllPermissionDefinitionsFor[Department](user, Permissions.Module.ManageAssignments)
-			.filter { department => securityService.can(user, Permissions.Module.ManageAssignments, department) }
+	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] = 
+		permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
+			.filter { department => securityService.can(user, permission, department) }
 
-	def modulesManagedBy(user: CurrentUser): Set[Module] = 
-		permissionsService.getAllPermissionDefinitionsFor[Module](user, Permissions.Module.ManageAssignments)
-			.filter { module => securityService.can(user, Permissions.Module.ManageAssignments, module) }
+	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] = 
+		permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
+			.filter { module => securityService.can(user, permission, module) }
 	
-	def modulesManagedBy(user: CurrentUser, dept: Department): Set[Module] = 
-		modulesManagedBy(user).filter { _.department == dept }
+	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = 
+		modulesWithPermission(user, permission).filter { _.department == dept }
 	
-	def modulesAdministratedBy(user: CurrentUser) = {
-		departmentsOwnedBy(user) flatMap (dept => dept.modules.asScala)
+	def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
+		departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
 	}
-	def modulesAdministratedBy(user: CurrentUser, dept: Department): Set[Module] = {
-		if (departmentsOwnedBy(user) contains dept) dept.modules.asScala.toSet else Set()
+	def modulesinDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = {
+		if (departmentsWithPermission(user, permission) contains dept) dept.modules.asScala.toSet else Set()
 	}
 	
 	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) = 

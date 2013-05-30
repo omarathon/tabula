@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>36-SNAPSHOT</version>
+		<version>38-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -24,6 +24,22 @@
 	<scm>
 		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/functional-test</url>
 	</scm>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${surefire.version}</version>
+                    <configuration>
+                        <!-- Override multi-JVM default - functests expect fixture data not to get trodden on -->
+                        <forkCount>1</forkCount>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 	<profiles>
 		<profile>

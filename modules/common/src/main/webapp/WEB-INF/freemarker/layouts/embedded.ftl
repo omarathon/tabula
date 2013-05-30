@@ -1,4 +1,4 @@
-<#assign tiles=JspTaglibs["http://tiles.apache.org/tags-tiles"]>
+<#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
 <#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
 <!doctype html>
 <html lang="en-GB">

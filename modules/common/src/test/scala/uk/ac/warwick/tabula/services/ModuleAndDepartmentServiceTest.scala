@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.MockUserLookup
 import org.junit.Before
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 	
@@ -53,30 +54,30 @@ class ModuleAndDepartmentServiceTest extends AppContextTestBase {
 		service.getRouteByCode("g503") should be (Some(route))
 		service.getRouteByCode("wibble") should be (None)
 		
-		withUser("cusebr") { service.departmentsOwnedBy(currentUser) should be (Set(cs)) }
+		withUser("cusebr") { service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs)) }
 		withUser("cuscav") { 
-			service.departmentsOwnedBy(currentUser) should be (Set())
-			service.modulesAdministratedBy(currentUser) should be (Set())
-			service.modulesAdministratedBy(currentUser, cs) should be (Set())
-			service.modulesAdministratedBy(currentUser, ch) should be (Set())
+			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
+			service.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
+			service.modulesinDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
+			service.modulesinDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
 			
 			service.addOwner(cs, "cuscav")
-			service.departmentsOwnedBy(currentUser) should be (Set(cs))
-			service.modulesAdministratedBy(currentUser) should be (Set(cs108, cs240))
-			service.modulesAdministratedBy(currentUser, cs) should be (Set(cs108, cs240))
-			service.modulesAdministratedBy(currentUser, ch) should be (Set())
+			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs))
+			service.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs108, cs240))
+			service.modulesinDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set(cs108, cs240))
+			service.modulesinDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
 			
 			service.removeOwner(cs, "cuscav")
-			service.departmentsOwnedBy(currentUser) should be (Set())
+			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			
-			service.modulesManagedBy(currentUser) should be (Set())
-			service.modulesManagedBy(currentUser, cs) should be (Set())
-			service.modulesManagedBy(currentUser, ch) should be (Set())
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
 			
 			service.addManager(cs108, "cuscav")
-			service.modulesManagedBy(currentUser) should be (Set(cs108))
-			service.modulesManagedBy(currentUser, cs) should be (Set(cs108))
-			service.modulesManagedBy(currentUser, ch) should be (Set())
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs108))
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set(cs108))
+			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
 		}
 	}
 

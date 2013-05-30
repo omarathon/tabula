@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-
-import forms.AssessmentGroup
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}

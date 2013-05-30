@@ -1,23 +1,15 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import org.joda.time.LocalDate
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.MeetingRecordDao
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 
@@ -94,7 +86,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meetingFromSession.id should be (id)
 
 		val cmd = new PurgeMeetingRecordCommand(meeting, user)
-		cmd.apply();
+		cmd.apply()
 
 		val purgedMeeting = session.get(classOf[MeetingRecord], id)
 		purgedMeeting should be (null)

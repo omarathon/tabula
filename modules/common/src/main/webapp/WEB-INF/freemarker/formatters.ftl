@@ -30,6 +30,20 @@
 	--></#noescape><#--
 --></#macro>
 
+<#-- This macro assumes that time is a LocalTime -->
+<#macro time time twentyFourHour=true seconds=false><#--
+	--><#noescape><#--
+		-->${timeBuilder(time, twentyFourHour, seconds)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#-- Format week ranges for a SmallGroupEvent -->
+<#macro weekRanges event><#--
+	--><#noescape><#--
+		-->${weekRangesFormatter(event)}<#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
@@ -148,13 +162,7 @@
 </#macro>
 
 <#macro role_definition_description role_definition><#compress>
-	<#if role_definition.name == 'ModuleManagerRoleDefinition'>
-		module manager
-	<#elseif role_definition.name == 'ModuleAssistantRoleDefinition'>
-		module assistant
-	<#else>
-		${role_definition.name}
-	</#if>
+	${role_definition.description?lower_case}
 </#compress></#macro>
 
 </#escape>

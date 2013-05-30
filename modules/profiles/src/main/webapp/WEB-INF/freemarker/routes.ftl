@@ -8,7 +8,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 --><#compress>
 <#macro home><@url page="/" /></#macro>
 
-<#macro deptperms department><@url page="/admin/department/${department.code}/permissions" /></#macro>
+<#macro deptperms department><@url page="/department/${department.code}/permissions" context="/admin" /></#macro>
 
 <#macro search><@url page="/search" /></#macro>
 <#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
@@ -29,9 +29,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
 
+<#macro edit_meeting_record meeting_record>
+	<@url page="/tutor/meeting/${meeting_record.relationship.studentId}/edit/${meeting_record.id}" />
+</#macro>
 <#macro delete_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/delete" /></#macro>
 <#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
 <#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
 
+<#macro save_meeting_approval meeting_record><@url page="/tutor/meeting/${meeting_record.id}/approval" /></#macro>
 
 </#compress>

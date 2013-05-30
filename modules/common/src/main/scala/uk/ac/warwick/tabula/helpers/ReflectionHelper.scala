@@ -1,41 +1,39 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.util.jar.JarFile
-import org.reflections.vfs.Vfs
-import org.springframework.util.FileCopyUtils
-import org.reflections.vfs.SystemDir
-import org.reflections.vfs.ZipDir
-import org.reflections.ReflectionsException
 import java.io.IOException
-import java.util.regex.Pattern
-import java.net.URL
-import com.google.common.base.Predicate
 import java.io.File
 import java.io.FileOutputStream
-import org.reflections.Reflections
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.permissions.Permissions
-import scala.collection.JavaConverters._
+import java.net.URL
+import java.util.regex.Pattern
+import java.util.jar.JarFile
 
-// TODO review this class with the new Reflection API in 2.10
+import scala.collection.JavaConverters._
+import scala.reflect._
+
+import org.reflections.ReflectionsException
+import org.reflections.Reflections
+import org.reflections.vfs.Vfs
+import org.reflections.vfs.SystemDir
+import org.reflections.vfs.ZipDir
+import org.springframework.util.FileCopyUtils
+
+import com.google.common.base.Predicate
+
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+
 object ReflectionHelper {
 	
 	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType)
 	lazy val reflections = Reflections.collect()
 	
-	lazy val allPermissionTargets = {
-		def sortFn(clazz1: Class[_ <: PermissionsTarget], clazz2: Class[_ <: PermissionsTarget]) =
-			clazz1.getSimpleName < clazz2.getSimpleName
-		
-		reflections
-			.getSubTypesOf(classOf[PermissionsTarget])
+	private def subtypesOf[A : ClassTag] = reflections
+			.getSubTypesOf(classTag[A].runtimeClass.asInstanceOf[Class[A]])
 			.asScala.toList
-			.sortWith(sortFn)
-	}
+	
+	lazy val allPermissionTargets = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
 	
 	lazy val allPermissions = {
-		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {			
+		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {
 			// Remove prefix and strip trailing $, then change $ to .
 			val shortName1 = Permissions.shortName(clazz1)
 			val shortName2 = Permissions.shortName(clazz2)
@@ -48,17 +46,15 @@ object ReflectionHelper {
 			else shortName1 < shortName2
 		}
 		
-		reflections
-			.getSubTypesOf(classOf[Permission])
-			.asScala.toList
-			.filter {_.getName.substring(Permissions.getClass.getName.length).indexOf('$') != -1}
+		subtypesOf[Permission]
+			.filter {_.getName.substring(Permissions.getClass.getName.length).contains('$')}
 			.sortWith(sortFn)
 			.map { clz => clz.newInstance().asInstanceOf[Permission] }
 	}
 	
 	lazy val groupedPermissions = {
 		def groupFn(p: Permission) = {
-			val simpleName = p.getClass.getName.substring(Permissions.getClass.getName.length, p.getClass.getName.length -1).replace('$', '.')
+			val simpleName = Permissions.shortName(p.getClass) 
 			 
 			val parentName = 
 				if (simpleName.indexOf('.') == -1) ""
@@ -82,12 +78,12 @@ object ReflectionHelper {
 class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 	val ReplaceExtension = Set(".ear/", ".jar/", ".war/", ".sar/", ".har/", ".par/")
 
-    val VfsZipProtocol = "vfszip"
-    val VfsFileProtocol = "vfsfile"
-    	
-    def matches(url: URL) = VfsZipProtocol.equals(url.getProtocol) || VfsFileProtocol.equals(url.getProtocol)
-    
-    def getJar(file: String) = {
+	val VfsZipProtocol = "vfszip"
+	val VfsFileProtocol = "vfsfile"
+		
+	def matches(url: URL) = VfsZipProtocol.equals(url.getProtocol) || VfsFileProtocol.equals(url.getProtocol)
+	
+	def getJar(file: String) = {
 		def toJar(pieces: List[String], jarFile: JarFile = null): JarFile = {
 			pieces match {
 				case Nil => jarFile
@@ -108,8 +104,8 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 		
 		toJar(file.split('!').toList.filterNot(_ == "/"))
 	}
-    	
-    def createDir(url: URL) = {
+		
+	def createDir(url: URL) = {
 		try {
 			val adaptedUrl = adaptUrl(url)
 			
@@ -135,10 +131,10 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 	
 	def adaptUrl(url: URL) = 
 		if (VfsZipProtocol.equals(url.getProtocol)) replaceZipSeparators(url.getPath, new RealFilePredicate)
-    	else if (VfsFileProtocol.equals(url.getProtocol)) new URL(url.toString.replace(VfsFileProtocol, "file"))
-    	else url
-    	
-    def replaceZipSeparators(path: String, predicate: Predicate[File]): URL = {
+		else if (VfsFileProtocol.equals(url.getProtocol)) new URL(url.toString.replace(VfsFileProtocol, "file"))
+		else url
+		
+	def replaceZipSeparators(path: String, predicate: Predicate[File]): URL = {
 		var pos = 0
 		while (pos != -1) {
 			pos = findFirstMatchOfDeployableExtention(path, pos)
@@ -156,31 +152,27 @@ class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
 	val ExtensionLength = 4
 
 	private def findFirstMatchOfDeployableExtention(path: String, pos: Int) = {
-        val p = Pattern.compile("\\.[ejprw]ar/")
-        val m = p.matcher(path)
-        if (m.find(pos)) m.end()
-        else -1
-    }
+		val p = Pattern.compile("\\.[ejprw]ar/")
+		val m = p.matcher(path)
+		if (m.find(pos)) m.end()
+		else -1
+	}
 
-    private def replaceZipSeparatorStartingFrom(path: String, pos: Int) = {
-        val zipFile = path.substring(0, pos - 1)
-        var zipPath = path.substring(pos)
+	private def replaceZipSeparatorStartingFrom(path: String, pos: Int) = {
+		val zipFile = path.substring(0, pos - 1)
+		var zipPath = path.substring(pos)
 
-        var numSubs = 1
-        for (ext <- ReplaceExtension) {
-            while (zipPath.contains(ext)) {
-        		zipPath = zipPath.replace(ext, ext.substring(0, ExtensionLength) + "!")
-        		numSubs += 1
-            }
-        }
+		var numSubs = 0
+		for (ext <- ReplaceExtension) {
+			while (zipPath.contains(ext)) {
+				zipPath = zipPath.replace(ext, ext.substring(0, ExtensionLength) + "!")
+				numSubs += 1
+			}
+		}
 
-        var prefix = ""
-        for (i <- 1 until numSubs) {
-        	prefix += "zip:"
-        }
-
-        new URL(prefix + zipFile + "!" + zipPath)
-    }
+		val prefix = "zip:" * numSubs
+		new URL(prefix + zipFile + "!" + zipPath)
+	}
 
 }
 

@@ -5,11 +5,10 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 object RoleBuilder {
-	def build(definition: RoleDefinition, scope: Option[PermissionsTarget], name: String) = {
-		new GeneratedRole(scope, name).applyRoleDefinition(definition)
-	}
+	def build(definition: RoleDefinition, scope: Option[PermissionsTarget], name: String) =
+		new GeneratedRole(definition, scope, name)
 	
-	class GeneratedRole(scope: Option[PermissionsTarget], val name: String) extends Role(scope) {
+	class GeneratedRole(definition: RoleDefinition, scope: Option[PermissionsTarget], val name: String) extends Role(definition, scope) {
 		override def getName = name
 	}
 }

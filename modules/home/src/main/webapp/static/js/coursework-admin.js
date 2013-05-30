@@ -1,52 +1,34 @@
 /**
- * Scripts used only by the coursework admin section. 
+ * Scripts used only by the coursework admin section.
  */
 (function ($) { "use strict";
 
 var exports = {};
 
-var slideMoreOptions = function($checkbox, $slidingDiv, showWhenChecked) {
-	if (showWhenChecked) {
-	    $checkbox.change(function(){
-	        if ($checkbox.is(':checked'))
-	        	$slidingDiv.stop().slideDown('fast');
-	        else
-	        	$slidingDiv.stop().slideUp('fast');
-	    }).trigger('change');
-	} else {
-	    $checkbox.change(function(){
-	        if ($checkbox.is(':checked'))
-	        	$slidingDiv.stop().slideUp('fast');
-	        else
-	        	$slidingDiv.stop().slideDown('fast');
-	    }).trigger('change');
-	}
-};
-
 // export the stuff we do to the submissions form so we can re-run it on demand.
 var decorateSubmissionsForm = function() {
-    slideMoreOptions($('input#collectSubmissions'), $('#submission-options'), true);
+	$('input#collectSubmissions').slideMoreOptions($('#submission-options'), true);
 };
 exports.decorateSubmissionsForm = decorateSubmissionsForm;
 
 $(function(){
 
     decorateSubmissionsForm();
-    
+
     // hide stuff that makes no sense when open-ended
-    slideMoreOptions($('input#openEnded'), $('.has-close-date'), false);
-    slideMoreOptions($('input#modal-open-ended'), $('.has-close-date'), false);
+    $('input#openEnded').slideMoreOptions($('.has-close-date'), false);
+    $('input#modal-open-ended').slideMoreOptions($('.has-close-date'), false);
 
     // check that the extension UI elements are present
     if($('input#allowExtensionRequests').length > 0){
-        slideMoreOptions($('input#allowExtensionRequests'), $('#request-extension-fields'), true);
+        $('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);
     }
-    
+
     // Zebra striping on lists of modules/assignments
-    $('.module-info').each(function(i, module) { 
+    $('.module-info').each(function(i, module) {
         $(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
     });
-    
+
     $('.module-info.empty').css('opacity',0.66)
         .find('.module-info-contents').hide().end()
         .click(function(){
@@ -54,31 +36,31 @@ $(function(){
                 .find('.module-info-contents').show().end();
         })
         .hide();
-        
+
     $('.dept-show').click(function(event){
-    	event.preventDefault();   	
+    	event.preventDefault();
     	var hideButton = $(this).find("a");
-    	
+
         $('.module-info.empty').toggle('fast', function() {
         	if($('.module-info.empty').is(":visible")) {
         		hideButton.html('<i class="icon-eye-close"></i> Hide');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
-        		
-        	} else { 
+
+        	} else {
         		hideButton.html('<i class="icon-eye-open"></i> Show');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
         	}
         });
 
     });
-        
-    
+
+
     // code for tabs
     $('.nav.nav-tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });
-    
+
     // code for the marks web forms
     $('#marks-web-form').tableForm({
         addButtonClass: 'add-additional-marks',
@@ -92,7 +74,7 @@ $(function(){
             });
         }
     });
-    
+
     $('.show-archived-assignments').click(function(e){
         e.preventDefault();
         $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
@@ -105,17 +87,17 @@ $(function(){
 	if ($('.awaiting-submission').length == 0) {
 		$('.hide-awaiting-submission').hide();
 	}
-    
+
     // enable shift-click on multiple checkboxes in tables
     $('table').find('input[type="checkbox"]').shiftSelectable();
-    
+
     $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table').bigList({
         setup : function() {
             var $container = this;
             // #delete-selected-button won't work for >1 set of checkboxes on a page.
             $('#download-selected-button, #delete-selected-button').click(function(event){
                 event.preventDefault();
-    
+
                 var $checkedBoxes = $(".collection-checkbox:checked", $container);
                 if ($container.data('checked') != 'none') {
                     var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
@@ -125,21 +107,21 @@ $(function(){
                 }
                 return false;
             });
-            
+
             $('#mark-plagiarised-selected-button').click(function(event){
                 event.preventDefault();
-    
+
                 var $checkedBoxes = $(".collection-checkbox:checked", $container);
-                
+
                 if ($container.data('checked') != 'none') {
-        
+
                     var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
                     $form.append($checkedBoxes.clone());
-                    
+
                     if ($container.data("all-plagiarised") === true) {
                         $form.append("<input type='hidden' name='markPlagiarised' value='false'>");
                     }
-                    
+
                     $(document.body).append($form);
                     $form.submit();
                 }
@@ -148,24 +130,24 @@ $(function(){
 
             $('.form-post').click(function(event){
                 event.preventDefault();
-                
+
                 var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-                var doFormSubmit = false;                
-                
+                var doFormSubmit = false;
+
                 if ($container.data('checked') != 'none') {
                     var $checkedBoxes = $(".collection-checkbox:checked", $container);
                     $form.append($checkedBoxes.clone());
-                    
+
                     doFormSubmit = true;
                 }
-                                
+
                 if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
                 		var $inputs = $(':input', '.filter-form');
                 		$form.append($inputs.clone());
-                
+
                 		doFormSubmit = true;
                 }
-                               
+
                 if (doFormSubmit) {
                 	$(document.body).append($form);
                   $form.submit();
@@ -173,16 +155,16 @@ $(function(){
                 	return false;
                 }
             });
-            
+
         },
-    
+
         // rather than just toggling the class check the state of the checkbox to avoid silly errors
         onChange : function() {
             this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
             var $checkedBoxes = $(".collection-checkbox:checked");
-    
+
             var allPlagiarised = false;
-            
+
             if ($checkedBoxes.length > 0) {
                 allPlagiarised = true;
                 $checkedBoxes.each(function(index){
@@ -190,29 +172,29 @@ $(function(){
                     if ($checkBox.closest('tr').data('plagiarised') != true) {
                         allPlagiarised = false;
                     }
-                });                 
+                });
             }
             $('.submission-feedback-list,.submission-list,#coursework-progress-table').data("all-plagiarised", allPlagiarised);
             if (allPlagiarised) {
                 $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
             }
             else {
-                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');               
+                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');
             }
         },
-    
+
         onSomeChecked : function() {
             $('.must-have-selected').removeClass('disabled');
         },
-    
+
         onNoneChecked : function() {
             $('.must-have-selected').addClass('disabled');
         }
-    
+
     });
-    
-    
-    
+
+
+
 });
 
 // take anything we've attached to "exports" and add it to the global "Courses"
@@ -224,13 +206,13 @@ window.Courses = jQuery.extend(window.Courses, exports);
 $.fn.shiftSelectable = function() {
     var lastChecked,
         $boxes = this;
- 
+
     $boxes.click(function(evt) {
         if(!lastChecked) {
             lastChecked = this;
             return;
         }
- 
+
         if(evt.shiftKey) {
             var start = $boxes.index(this),
                 end = $boxes.index(lastChecked);
@@ -238,13 +220,26 @@ $.fn.shiftSelectable = function() {
                 .attr('checked', lastChecked.checked)
                 .trigger('change');
         }
- 
+
         lastChecked = this;
     });
 };
 
-// assign markers javascript
-$(function(){
+// assign markers
+$(function() {
+
+	$('#first-markers, #second-markers')
+		.dragAndDrop()
+		.each(function(i, container) {
+			var $container = $(container);
+			$container.find('a.random').on('click', function() {
+				$container.dragAndDrop('randomise');
+			})
+		});
+	
+});
+
+var DISABLED = function(){
 
 	var draggableOptions = {
 		containment: "#assign-markers",
@@ -362,7 +357,7 @@ $(function(){
 		e.preventDefault();
 		return false;
 	});
-});
+}
 
 // code for markingWorkflow add/edit
 $(function(){
@@ -445,55 +440,22 @@ $(function(){
         }
     });
 
-    //$('#feedback-report-modal, #extension-list')
-    var submitAjaxModal = function(selector, successCallback) {
-         $(selector).on('submit', 'form', function(e){
-                e.preventDefault();
-                var $form = $(this);
-                $.post($form.attr('action'), $form.serialize(), function(data){
-                    if(data.status == "error"){
-                        // delete any old errors
-                        $("span.error").remove();
-                        $('.error').removeClass('error');
-                        var error;
-                        for(error in data.result){
-                            addError(error, data.result[error]);
-                        }
-                    } else {
-                        successCallback(data)
-                        // hide the model
-                        jQuery("#extension-model").modal('hide');
-                    }
-                });
-            });
-
-    }
-
-    var addError = function(field, message){
-        var $field = $("input[name='"+field+"']");
-        $field.closest(".control-group").addClass("error");
-        // insert error message
-        $field.after('<span class="error help-inline">'+message+'</span>');
-    };
-
-
-// Ajax specific modal end
-
-
     // feedback report
-
-    submitAjaxModal("#feedback-report-modal", function(data) {
+	$("#feedback-report-modal").ajaxSubmit(function(data) {
     	window.location = data.result;
-    })
+    });
 
    // extensions admin
-
-   submitAjaxModal("#extension-list", function(data) {
+	$("#extension-list").ajaxSubmit(function(data) {
         var action = data.action;
         $.each(data.result, function() {
             modifyRow(this, action);
         });
+		// hide the model
+		jQuery("#extension-model").modal('hide');
     });
+
+	// Ajax specific modal end
 
     var highlightId = "${highlightId}";
     if (highlightId != "") {
@@ -560,91 +522,11 @@ $(function(){
 
 });
 
-
-// Dragging modules between departments ("modules/arrange/form")
-// TODO refactor to make as much as possible reusable for other pages that need multi-select dragndrop.
-jQuery(function($){
-
-	var first_rows = {};
-
-	$('.draggable-module-codes')
-		.sortable({
-			connectWith: '.draggable-module-codes',
-			handle: '.handle',
-			placeholder: 'ui-state-highlight',
-			forcePlaceholderSize: true,
-			
-			// helper returns the HTML item that follows the mouse
-			helper: function(event, element) {
-			  var $element = $(element)
-			  var multidrag = $element.hasClass('ui-selected');
-			  var msg = $element.text();
-			  if (multidrag) msg = $('.ui-selected').length + " items"
-			  return $('<div>').addClass('label').addClass('multiple-items-drag-placeholder').html(msg);
-			},
-
-			// we have just started dragging a dragger - add some classes to things
-			start : function(event, ui) {
-				if (ui.item.hasClass('ui-selected') && $('.ui-selected').length > 1) {
-					first_rows = $('.ui-selected').map(function(i, e) {
-						var $tr = $(e);
-						return {
-							tr : $tr.clone(true),
-							id : $tr.attr('id')
-						};
-					}).get();
-					$('.ui-selected').addClass('cloned');
-				}
-				//ui.placeholder.html('');
-			},
-			
-			// dropped items, put them where they want to be
-			stop : function(event, ui) {
-				if (first_rows.length > 1) {
-					$.each(first_rows, function(i, item) {
-						$(item.tr)
-							.removeAttr('style')
-							.removeClass('ui-selected')
-							.insertBefore(ui.item);
-					});
-					$('.cloned').remove();
-					first_rows = {};
-				}
-				renameAllFields();
-			}
-
-		})
-		.selectable({
-			filter: 'li',
-			cancel: '.handle'
-		})
-		.find('li')
-			.addClass('ui-corner-all')
-			.prepend("<span class='handle'><i class='icon-white icon-move'></i> </span>")
-			.end()
-		.find('.label')
-			.tooltip({ delay: {show:500, hide:0}, container: 'body' });
-
-	var renameAllFields = function() {
-		$('.draggable-module-codes').each(function(i, deptBox) {
-			var deptCode = $(deptBox).data('deptcode');
-			renameFields(deptCode, $(deptBox).find('input[type=hidden]'));
-		});
-	};
-	
-	// Rename all form input for this department to represent the ordered list
-	var renameFields = function(deptCode, $fields) {
-		$fields.each(function(i, field) {
-			field.name = fieldNameFor(deptCode, i);
-		});
-	}
-	// Get form field name for this item.
-	var fieldNameFor = function(deptCode, index) {
-		return "mapping["+deptCode+"]["+index+"]";
-	}
-
+$(function(){
+	// Dragging modules between departments ("modules/arrange/form")
+	$('#sortModulesCommand').dragAndDrop({});
+	// Dragging modules between departments end
 });
-
 
 }(jQuery));
 

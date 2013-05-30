@@ -6,6 +6,7 @@ html.iframe {
 @import "css3.less";
 .tabula-page, #container {
   @import "bootstrap/responsive.less";
+	@import "../libs/font-awesome/less/font-awesome.less";
 }
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
@@ -17,6 +18,18 @@ html.iframe {
 @very-subtle-font-size: 0.8em;
 
 @box-style-border-radius: 8px;
+
+@zebra-pale: #f5f5f5;
+@zebra-dark: #ebebeb;
+
+ul.unstyled, ol.unstyled {
+	margin-left: 0;
+	list-style: none;
+
+	li{
+		margin-left: 0;
+	}
+}
 
 .box-style() {
 	border: 1px solid @grayLight;
@@ -82,7 +95,16 @@ summary { .cursor-pointer(); }
 
 	list-style-type: none;
 
-	li { margin-top: 8px; }
+	li { 
+		margin-top: 8px;
+		
+		> * { 
+			display: inline-block;
+			margin: 0 5px; 
+		} 
+	}
+	
+	.hint { color: @tabulaGrayLight; }
 }
 
 #what-is-tabula {
@@ -130,14 +152,22 @@ tr.error, tr.warning {
 
 .module-info, .striped-section {
 	.box-style;
+	
+	&.empty { display: none; }
 
 	padding: 0.5em 0.5em 0 0.5em;
 	margin: 0.7em 0;
-	background-color: #ebebeb;
+	background-color: @zebra-dark;
 
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
 
-	.section-title { color: #606060 !important; }
+	.section-title { 
+		color: #606060 !important;
+		
+		&.with-button {
+			display: inline-block;
+		} 
+	}
 
 	.button-list .btn {
 		text-align: left !important;
@@ -153,17 +183,16 @@ tr.error, tr.warning {
 	}
 }
 
+.module-info .module-manage-button, .striped-section .section-manage-button {
+	display: inline-block;
+	margin-left: 8px;
+	top: 3px;
+	float:right;
+}
+
 .module-info {
 	// Position module title and its Manage dropdown on the same line.
 	.module-title { display: inline-block; }
-	.module-manage-button, .section-manage-button {
-		display: inline-block;
-		margin-left: 8px;
-		top: 3px;
-		float:right;
-	}
-
-	&.empty { display: none; }
 
 	.module-manage-button {
 		i { .opacity-one(1); }
@@ -387,8 +416,8 @@ ul {
 	// zebra-striping (but exclude archived items)
 	// doesn't work very well
 	// TODO jQuery this
-	//&:not(.archived):nth-of-type(odd) { background-color: #f5f5f5; }
-	&.alt-row { background-color: #f5f5f5; }
+	//&:not(.archived):nth-of-type(odd) { background-color: @zebra-pale; }
+	&.alt-row { background-color: @zebra-pale; }
 
 	.column1, .left {
 		width: 14.5em;
@@ -449,7 +478,7 @@ ul {
 }
 
 .striped-section-contents .item-info {
-	&:nth-of-type(odd) { background-color: #f5f5f5; }
+	&:nth-of-type(odd) { background-color: @zebra-pale; }
 }
 
 // fix for icons sitting a bit off the baseline
@@ -1215,11 +1244,47 @@ h1.with-settings {
 			section.meetings {
 				margin: 12px 0;
 
-				details.meeting > summary {
-					padding-top: 9px;
-					font-weight: bold;
-					border-bottom: dotted 1px lighten(@grayLight, 35%);
+				details.meeting {
+
+					padding-right: 15px;
+
+					&.well {
+						padding: 1px;
+						margin: 5px 0;
+					}
+
+					summary {
+						margin-left: 5px;
+						padding-top: 9px;
+						font-weight: bold;
+						border-bottom: dotted 1px lighten(@grayLight, 35%);
+					}
+
+					.meeting-body {
+						margin: 10px 0 0 20px;
+
+						small {
+							display: inline-block;
+						}
+
+						.description, .attachment, .muted, .alert {
+							margin-bottom: 5px;
+						}
+
+						div.rejection blockquote.reason{
+							margin: 7px 21px 21px 21px;
+							padding: 5px 5px 5px 14px;
+							border-left: 5px solid @errorBorder;
+							background-color: darken(@errorBackground, 5%);
+						}
+
+						.submit-buttons {
+							margin-top: 0;
+							padding: 0;
+						}
+					}
 				}
+
 
 				.new, .toggle-all-details {
 					margin: -20px 0 0 10px;
@@ -1243,7 +1308,7 @@ h1.with-settings {
 				}
 
 				summary:hover {
-					background-color: #ebebeb;
+					background-color: @zebra-dark;
 					.transition-duration(0.3s);
 				}
 
@@ -1577,6 +1642,17 @@ h1.with-settings {
 
 		z-index: @zindexPopover  + @zindexModal;
 	}
+
+	// Remove this if we ever include type.less in our Bootstrap build (i.e. we build ID6 on top of Bootstrap)
+	ul.unstyled,
+	ol.unstyled {
+	  margin-left: 0;
+	  padding-left: 0;
+	  list-style: none;
+	}
+	
+	// Make legends less shouty
+	legend {
+		font-weight: normal;
+	}
 }
-
-

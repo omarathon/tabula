@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.data.model.UserSettings.Settings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserSettingsService
@@ -18,12 +19,15 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	var service = Wire.auto[UserSettingsService]
 	
 	var alertsSubmission = settings.alertsSubmission
+	var weekNumberingSystem = settings.weekNumberingSystem
 		
-	override def applyInternal() {
-		transactional() {
-			settings.alertsSubmission = alertsSubmission
-			service.save(user, settings)
-		}
+	override def applyInternal() = transactional() {
+		settings ++= (
+			Settings.AlertsSubmission -> alertsSubmission,
+			Settings.WeekNumberingSystem -> (if (weekNumberingSystem.hasText) weekNumberingSystem else null)
+		)
+		
+		service.save(user, settings)
 	}
 	
 	override def describe(d:Description) {

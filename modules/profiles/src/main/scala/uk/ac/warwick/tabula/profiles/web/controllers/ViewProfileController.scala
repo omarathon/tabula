@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand

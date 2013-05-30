@@ -2,9 +2,11 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-case class Sysadmin() extends BuiltInRole(None, SysadminRoleDefinition)
+case class Sysadmin() extends BuiltInRole(SysadminRoleDefinition, None)
 
-case object SysadminRoleDefinition extends BuiltInRoleDefinition {
+case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
+	
+	override def description = "Tabula Administrator"
 	
 	/*
 	 * IMPORTANT

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.convert
 
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.forms.AssessmentGroup
+import uk.ac.warwick.tabula.data.model.AssessmentGroup
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 class AssessmentGroupIdConverterTest extends TestBase with Mockito {

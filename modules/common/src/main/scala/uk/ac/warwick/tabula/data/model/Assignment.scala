@@ -123,24 +123,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def permissionsParents = Option(module).toStream
 
-//	@ManyToMany(fetch = FetchType.LAZY)
-//	@JoinTable(name="assignment_assessmentgroup",
-//		joinColumns=Array(new JoinColumn(name="assignment_id")),
-//		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-//	var assessmentGroups :JList[UpstreamAssessmentGroup] = JArrayList()
-//
-//	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
-
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
-
-
-	//TODO - upstreamAssignment and occurrence superseded by assessmentGroups - remove
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "upstream_id")
-	var upstreamAssignment: UpstreamAssignment = _
-
-	var occurrence: String = _
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
@@ -333,9 +317,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	// scalastyle:off
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
-	
-	
-	def unreleaseddFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)

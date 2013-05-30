@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick.tabula</groupId>
+		<artifactId>tabula-project</artifactId>
+		<version>38-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>all</artifactId>
+	<packaging>ear</packaging>
+
+	<name>Tabula All</name>
+	<description>Packages skinny WARs into a single enormous EAR (for hearing better)</description>
+
+	<properties>
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+	</properties>
+
+	<scm>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/all</url>
+	</scm>
+
+	<!-- Don't do ANYTHING except in the 'skinny' profile -->
+	<profiles>
+		<profile>
+			<id>skinny</id>
+			<build>
+				<finalName>tabula</finalName>
+			
+				<plugins>
+					<plugin>
+						<artifactId>maven-ear-plugin</artifactId>
+						<configuration>
+							<displayName>Tabula</displayName>
+							<defaultJavaBundleDir>lib/</defaultJavaBundleDir>
+							<skinnyWars>true</skinnyWars>
+							<packagingExcludes>**/*.zip</packagingExcludes>
+							
+							<!-- We need to specify our modules explicitly (unfortunately) because otherwise they come out as courses-XX-SNAPSHOT.war -->
+							<modules>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>home</artifactId>
+									<bundleFileName>home.war</bundleFileName>
+									<contextRoot>/</contextRoot>
+								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>admin</artifactId>
+									<bundleFileName>admin.war</bundleFileName>
+									<contextRoot>/admin</contextRoot>
+								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>courses</artifactId>
+									<bundleFileName>courses.war</bundleFileName>
+									<contextRoot>/courses</contextRoot>
+								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>profiles</artifactId>
+									<bundleFileName>profiles.war</bundleFileName>
+									<contextRoot>/profiles</contextRoot>
+								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>groups</artifactId>
+									<bundleFileName>groups.war</bundleFileName>
+									<contextRoot>/groups</contextRoot>
+								</webModule>
+							</modules>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			
+			<dependencies>
+				<!-- For each module, include both the war type and the pom type - the pom type resolves dependencies into lib/ -->
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>home</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>home</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>
+				
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>admin</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>admin</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>
+				
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>courses</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>courses</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>
+				
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>profiles</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>profiles</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>
+				
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>groups</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>groups</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>				
+			</dependencies>
+		</profile>
+	</profiles>
+</project>

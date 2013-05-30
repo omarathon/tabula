@@ -31,8 +31,8 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 				if (!isIdentical){
 					// if an attachment with the same name as this one exists then delete it
 					val duplicateAttachment = feedback.attachments.find(_.name == attachment.name)
-					duplicateAttachment.foreach(session.delete(_))
-					feedback addAttachment attachment
+					duplicateAttachment.foreach(feedback.removeAttachment(_))
+					feedback.addAttachment(attachment)
 				}
 				!isIdentical
 			}

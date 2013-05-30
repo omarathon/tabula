@@ -1,48 +1,26 @@
 @import "bootstrap/variables.less";
 
-@header-colour: @tabulaTurquoise;
+@header-colour: @tabulaOrangeLight;
 
 #header {
 	background: @header-colour;
 }
 
 #assign-markers{
-	.member-list {
-		font-size: 18px;
-		line-height: 24px;
-		list-style: none outside none;
+	.student-list {
 		max-height: 330px;
 		overflow-y: auto;
 		overflow-x: hidden;
-		padding: 5px;
-
-		.marker, .student {
-			border-radius: 5px;
-			border-color: #BBBBBB #BBBBBB #AAAAAA;
-			border-image: none;
-			border-style: solid;
-			border-width: 1px;
-			padding: 5px;
-		}
-
-		i {
-			margin: 4px 0px;
-		}
-
-		span.count {
-			margin: 3px 0px;
-		}
-
-		.student-list {
-			font-size: 14px;
-			line-height: 24px;
-		}
 	}
 
 	.marker {
-		line-height: 55px;
-		width: 250px;
-		font-size: 22px;
+		margin-bottom: 1em;
+		padding: 1em;
+		background-color: @tableBackgroundNonAccent;
+		width: 350px;
+		.name {
+			font-size: 22px;
+		}
 		&.drop-hover{
 			background-color: #DFF0D8;
 			border-color: #C9DCB9;
@@ -50,8 +28,9 @@
 	}
 
 	.student {
-		cursor: move;
-		min-width: 155px;
+		min-width: 200px;
+		padding: 3px 5px;
+		color: white;
 	}
 }
 
@@ -67,80 +46,23 @@
 	color: @tabulaOrangeDark;
 }
 
-.permissionTitle {
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.use-popover {
-    display: inline-block;
-    vertical-align: top;
-    margin-top: 6px;
-}
-
-.permission-list {
-	margin:4px 0 20px 0;
-
-	.user-fullname {
-		width: 170px;
-	}
-
-	.user-fullname, .user-id, .actions {
-		padding:8px 8px 8px 4px;
-		vertical-align: middle;
-	}
-
-	.user-id {
-		width: 70px;
-	}
-
-	.highlight {
-		background-color: @grayLighter
-	}
-}
-
-#module-permissions-page {
-	.actions form {
-    	margin:0;
-	}
-
-	.module-permissions {
-		.form-inline {
-			margin-top: 13px;
-		}
-
-		.checkbox {
-			padding-left:6px;
-		}
-	}
-}
-
 // department sort-modules (modules/arrange/form.ftl)
 
-ul.draggable-module-codes { 
-	padding-top: 5px;
-	margin-top: 0;
-	margin-bottom: 1em; 
-	min-height: 2em; 
-	background-color: #ddd; 
-	overflow: auto;
-	margin-left: -16px;
-	margin-right: -16px;
+#sortModulesCommand {
 
-	li, .ui-state-highlight { 
-		display:inline-block; 
-		float: left; 
-		margin: 1px 3px; 
-		width: 62px;
+	// Builds on top of base styles for ul.drag-list and friends
+	ul.drag-list { 
+		padding-top: 5px;
+		padding-bottom: 5px;
+		margin-top: 0;
+		margin-bottom: 1em; 
+		min-height: 2em; 
+		background-color: @tableBackgroundAccent; 
+		overflow: auto; // expand to contain floated items
+		margin-left: -16px;
+		margin-right: -16px;
 	}
 
-	.cloned { opacity: 0.5; }
-
-	.multiple-items-drag-placeholder { margin-left: 16px; }
-
-	.ui-selecting { background: #333 !important; }
-	.ui-selected { background: #000 !important; }
-	.ui-state-highlight { background: gold !important; padding: 2px 4px; }
 }
 
 // end department sort-modules

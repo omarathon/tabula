@@ -18,6 +18,10 @@ class UserSettings extends GeneratedId with SettingsMap[UserSettings] with Permi
 	
 	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros) getOrElse(Nil)
 	def hiddenIntros_= (hiddenIntro: Seq[String]) = settings += (Settings.HiddenIntros -> hiddenIntro)
+	
+	// It's okay for this to be null - the null choice is to use the department's setting
+	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem).orNull
+	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 		
 	def this(userId: String) = {
 		this()
@@ -37,6 +41,7 @@ object UserSettings {
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
+		val WeekNumberingSystem = "weekNumberSystem"
 			
 		def hiddenIntroHash(mappedPage: String, setting: String) = {
 			val popover = mappedPage + ":" + setting

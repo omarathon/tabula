@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.forms.AssessmentGroup
+import uk.ac.warwick.tabula.data.model.AssessmentGroup
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.Fixtures
 
