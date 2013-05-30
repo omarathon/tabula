@@ -22,7 +22,7 @@ class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) e
 
 	def applyInternal() = transactional() {
 		// We set the promised value here so that sub-commands work
-		val event = setPromisedValue(new SmallGroupEvent(group.get))
+		val event = setPromisedValue(new SmallGroupEvent)
 		copyTo(event)
 		
 		// FIXME This is to avoid the un-saved transient Hibernate bug

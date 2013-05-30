@@ -26,7 +26,8 @@ class SmallGroupServiceImpl
 	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
-	def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet)
+	
+	def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet) 
 	def saveOrUpdate(smallGroup: SmallGroup) = session.saveOrUpdate(smallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
 

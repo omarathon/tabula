@@ -46,10 +46,11 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	var name: String = _
 
 	@ManyToOne
-	@JoinColumn(name = "set_id")
+	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
 	
-	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
+	@JoinColumn(name = "group_id")
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream
