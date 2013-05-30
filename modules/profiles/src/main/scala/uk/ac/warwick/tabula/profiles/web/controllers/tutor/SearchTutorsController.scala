@@ -25,9 +25,8 @@ class SearchTutorsController extends ProfilesController with SearchJSONHelpers {
 	}
 
 	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitTutorSearchJSON(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) =
+	def submitTutorSearchJSON(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) = {
 		submitJson(cmd, errors)
-
-
+	}
 
 }
