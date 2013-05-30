@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestParam
 import org.joda.time.DateTime
 
-class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val remove: Option[Boolean]) extends Command[Option[StudentRelationship]] with Promises {
+class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val remove: Boolean) extends Command[Option[StudentRelationship]] with Promises {
 	
 	var profileService = Wire[ProfileService]
 
@@ -75,7 +75,7 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 					Some(newRelationship)
 				}
 			}
-		} else if (currentTutor.get == tutor && remove.getOrElse(false)) {
+		} else if (currentTutor.get == tutor && remove) {
 				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
 				endTutorRelationship(currentRelationships)
 				None
@@ -102,7 +102,7 @@ class EditTutorController extends BaseController {
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member,
 	                     @RequestParam(value="remove", required=false) remove: Boolean) = student match {
-		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), Option(remove))
+		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), Option(remove).getOrElse(false))
 		case _ => throw new ItemNotFoundException
 	}
 

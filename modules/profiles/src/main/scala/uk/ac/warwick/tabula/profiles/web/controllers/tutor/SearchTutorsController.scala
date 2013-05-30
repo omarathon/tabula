@@ -3,60 +3,31 @@ package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.web.views.JSONView
-import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.profiles.helpers.SearchJSONHelpers
 
 
 @Controller
-class SearchTutorsController extends ProfilesController {
-	
+class SearchTutorsController extends ProfilesController with SearchJSONHelpers {
+
+	val formMav = Mav("tutor/edit/view", "displayOptionToSave" -> false)
+
 	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand = new SearchTutorsCommand(user)
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchTutorsCommand) = Mav("tutor/edit/view", "displayOptionToSave" -> false)
+	def form(@ModelAttribute cmd: SearchTutorsCommand) = formMav
 
 	@RequestMapping(value=Array("/tutor/search"), params=Array("query"))
-	def submit(@Valid @ModelAttribute("searchTutorsCommand") cmd: SearchTutorsCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			Mav("tutor/edit/results",
-				"results" -> cmd.apply())
-		}
+	def submitTutorSearch(@Valid @ModelAttribute("searchTutorsCommand") cmd: SearchTutorsCommand, errors: Errors) = {
+	 	submit(cmd, errors, "tutor/edit/results")
 	}
 
 	@RequestMapping(value=Array("/tutor/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			val profilesJson: JList[Map[String, Object]] = toJson(cmd.apply())
+	def submitTutorSearchJSON(@Valid @ModelAttribute cmd: SearchTutorsCommand, errors: Errors) =
+		submitJson(cmd, errors)
 
-			Mav(new JSONView(profilesJson))
-		}
-	}
-
-
-
-	def toJson(profiles: Seq[Member]) = {
-		def memberToJson(member: Member) = Map[String, String](
-			"name" -> {member.fullName match {
-				case None => "[Unknown user]"
-				case Some(name) => name
-			}},
-			"id" -> member.universityId,
-			"userId" -> member.userId,
-			"description" -> member.description)
-
-		profiles.map(memberToJson(_))
-	}
 
 
 }

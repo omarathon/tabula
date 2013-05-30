@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.data.model.Member
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.spring.Wire
 
 @Controller
 class SearchController extends ProfilesController {
