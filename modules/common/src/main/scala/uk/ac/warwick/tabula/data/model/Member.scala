@@ -164,7 +164,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
 	@Restricted(Array("Profiles.Read.StudyDetails"))
 	var studyDetails: StudyDetails = new StudyDetails
-	
+
 	studyDetails.student = this
 
 	def this(id: String) = {
@@ -179,7 +179,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 			statusString = studyDetails.sprStatus.fullName.toLowerCase()
 		if (studyDetails != null && studyDetails.enrolmentStatus != null)
 			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
-		statusString
+		statusString.capitalize
 	}
 
 	// Find out if the student has an SCE record for the current year (which will mean
@@ -209,7 +209,7 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	override def affiliatedDepartments =
 		(
 			Option(homeDepartment) #::
-			Option(studyDetails.studyDepartment) #:: 
+			Option(studyDetails.studyDepartment) #::
 			Option(studyDetails.route).map(_.department) #::
 			Stream.empty
 		).flatten.distinct
@@ -273,7 +273,7 @@ trait MemberProperties {
 	@Column(nullable = false)
 	@Restricted(Array("Profiles.Read.Usercode"))
 	var userId: String = _
-	
+
 	var firstName: String = _
 	var lastName: String = _
 	var email: String = _
@@ -312,13 +312,13 @@ trait MemberProperties {
 	var dateOfBirth: LocalDate = _
 
 	var jobTitle: String = _
-	
+
 	@Restricted(Array("Profiles.Read.TelephoneNumber"))
 	var phoneNumber: String = _
 
 	@Restricted(Array("Profiles.Read.Nationality"))
 	var nationality: String = _
-	
+
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
 }
