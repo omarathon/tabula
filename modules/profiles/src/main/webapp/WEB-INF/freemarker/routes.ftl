@@ -25,7 +25,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_edit student currentTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}" /></#macro>
 <#macro tutor_edit_set student newTutor><@url page="/tutor/${student}/edit?tutor=${newTutor.universityId}" /></#macro>
 <#macro tutor_edit_replace student currentTutor newTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" /></#macro>
-<#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/edit" /></#macro>
+<#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/add" /></#macro>
 
 <#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
 
