@@ -120,7 +120,7 @@
 	</p>
 	
 	<#include "_groups_modal.ftl" />
-
+	
 	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
 		<div class="clearfix">
 			<h2 class="section-title with-button">Groups</h2>

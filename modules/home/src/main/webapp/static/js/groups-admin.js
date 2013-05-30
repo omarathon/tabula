@@ -34,7 +34,11 @@ $(function(){
         });
 
     });
-
+    
+    $('.show-archived-small-groups').click(function(e){
+        e.preventDefault();
+        $(e.target).hide().closest('.striped-section').find('.item-info.archived').show();
+    });
 });
 
 }(jQuery));

@@ -22,6 +22,9 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.groups.commands.admin.ModifySmallGroupSetCommand
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
+import uk.ac.warwick.tabula.groups.commands.admin.DeleteSmallGroupSetCommand
+import org.springframework.validation.BeanPropertyBindingResult
+import uk.ac.warwick.tabula.groups.commands.admin.ArchiveSmallGroupSetCommand
 
 trait SmallGroupSetsController extends GroupsController {
 	
@@ -77,6 +80,8 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
+			
+			// TODO redirect to allocation instead of module
 			Redirect(Routes.admin.module(cmd.module))
 		}
 }
@@ -91,6 +96,13 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	
 	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet) = 
 		new EditSmallGroupSetCommand(set)
+
+	@ModelAttribute("canDelete") def canDelete(@PathVariable("set") set: SmallGroupSet) = {
+		val cmd = new DeleteSmallGroupSetCommand(set.module, set)
+		val errors = new BeanPropertyBindingResult(cmd, "cmd")
+		cmd.validateCanDelete(errors)
+		!errors.hasErrors
+	}
 	
 	@RequestMapping
 	def form(cmd: EditSmallGroupSetCommand) =
@@ -105,4 +117,51 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))
 		}
+}
+
+@RequestMapping(Array("/admin/module/{module}/groups/{set}/delete"))
+@Controller
+class DeleteSmallGroupSetController extends GroupsController {
+	
+	validatesSelf[DeleteSmallGroupSetCommand]
+	
+	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
+	
+	@ModelAttribute("deleteSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) = 
+		new DeleteSmallGroupSetCommand(module, set)
+
+	@RequestMapping
+	def form(cmd: DeleteSmallGroupSetCommand) =
+		Mav("admin/groups/delete")
+		.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid cmd: DeleteSmallGroupSetCommand, errors: Errors) =
+		if (errors.hasErrors) form(cmd)
+		else {
+			cmd.apply()
+			Redirect(Routes.admin.module(cmd.module))
+		}
+	
+}
+
+@RequestMapping(Array("/admin/module/{module}/groups/{set}/archive"))
+@Controller
+class ArchiveSmallGroupSetController extends GroupsController {
+		
+	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
+	
+	@ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) = 
+		new ArchiveSmallGroupSetCommand(module, set)
+
+	@RequestMapping
+	def form(cmd: ArchiveSmallGroupSetCommand) =
+		Mav("admin/groups/archive").noLayoutIf(ajax)
+
+	@RequestMapping(method = Array(POST))
+	def submit(cmd: ArchiveSmallGroupSetCommand) = {
+		cmd.apply()
+		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+	}
+	
 }

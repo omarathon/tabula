@@ -16,4 +16,15 @@
 
 </@f.form>
 
+<#if canDelete>
+	<p class="subtle">
+		Did you create these groups in error? 
+		You may <a href="<@routes.deleteset set />" class="btn btn-danger">delete</a> them if you definitely won't need them again.
+	</p>
+<#else>
+	<p class="subtle">
+		It's not possible to delete these groups, probably because the allocations for them have been released.
+	</p>
+</#if>
+
 </#escape>
