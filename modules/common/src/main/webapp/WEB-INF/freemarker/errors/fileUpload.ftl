@@ -12,7 +12,7 @@
 <p>If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a><#if token??>, quoting the token above and any additional details</#if>.</p>
 
 <#if exception??>
-	<p><button type="buttn" class="btn btn-danger" data-toggle="collapse" data-target="#dev">
+	<p><button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#dev">
 		Show technical details about this error
 	</button></p>
 	

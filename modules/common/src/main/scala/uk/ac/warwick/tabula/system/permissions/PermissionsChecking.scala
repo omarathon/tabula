@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -48,6 +49,12 @@ abstract trait PermissionsCheckingMethods extends Logging {
 		if (mandatory(assignment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assignment as it doesn't belong to specified module")
 			throw new ItemNotFoundException(assignment)
+		}
+	
+	def mustBeLinked(set: SmallGroupSet, module: Module) =
+		if (mandatory(set).module.id != mandatory(module).id) {
+			logger.info("Not displaying small group set as it doesn't belong to specified module")
+			throw new ItemNotFoundException(set)
 		}
 
 	def mustBeLinked(feedback: Feedback, assignment: Assignment) =

@@ -1,61 +1,30 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
-import uk.ac.warwick.tabula.data.model.Member
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.profiles.helpers.SearchJSONHelpers
 
 @Controller
-class SearchController extends ProfilesController {
-	
+class SearchController extends ProfilesController with SearchJSONHelpers {
+
+	val formMav = Mav("tutor/edit/view", "displayOptionToSave" -> false)
+
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember, user)
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchProfilesCommand) = Mav("profile/search/form")
+	def form(@ModelAttribute cmd: SearchProfilesCommand) = formMav
 	
 	@RequestMapping(value=Array("/search"), params=Array("query"))
-	def submit(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			Mav("profile/search/results",
-				"results" -> cmd.apply())
-		}
+	def submitSearch(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
+		submit(cmd, errors, "profile/search/results")
 	}
 	
 	@RequestMapping(value=Array("/search.json"), params=Array("query"))
-	def submitJson(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			val profilesJson: JList[Map[String, Object]] = toJson(cmd.apply())
-			
-			Mav(new JSONView(profilesJson))
-		}
-	}
-	
-	def toJson(profiles: Seq[Member]) = {
-		def memberToJson(member: Member) = Map[String, String](
-			"name" -> {member.fullName match {
-				case None => "[Unknown user]"
-				case Some(name) => name
-			}},
-			"id" -> member.universityId,
-			"userId" -> member.userId,
-			"description" -> member.description)
-			
-		profiles.map(memberToJson(_))
+	def submitSearchJSON(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
+		submitJson(cmd, errors)
 	}
 
 }

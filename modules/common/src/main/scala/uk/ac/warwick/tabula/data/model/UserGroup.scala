@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.User
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -88,6 +89,10 @@ class UserGroup extends GeneratedId {
 
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
+		
+	def users: Seq[User] =
+		if (universityIds) members map { userLookup.getUserByWarwickUniId(_) }
+		else userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
 
 	def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList

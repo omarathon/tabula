@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.SearchTutorsCommand
 import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -24,7 +23,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestParam
 import org.joda.time.DateTime
 
-class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member]) extends Command[Option[StudentRelationship]] with Promises {
+class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val remove: Boolean) extends Command[Option[StudentRelationship]] with Promises {
 	
 	var profileService = Wire[ProfileService]
 
@@ -63,14 +62,11 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 			currentRelationships.find(_.agent == tutor.universityId) match {
 				case Some(existingRelationship) => {
 					// Just return the existing relationship without any notification
-					Some(existingRelationship)
+						Some(existingRelationship)
 				}
 				case _ => {
 					// Find the relationship for the current tutor, and end it
-					currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel => 
-						rel.endDate = DateTime.now
-						profileService.saveOrUpdate(rel)
-					}
+					endTutorRelationship(currentRelationships)
 					
 					// Save the new relationship
 					val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
@@ -79,8 +75,19 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 					Some(newRelationship)
 				}
 			}
-		} else {
-			None
+		} else if (currentTutor.get == tutor && remove) {
+				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
+				endTutorRelationship(currentRelationships)
+				None
+			} else {
+				None
+			}
+	}
+
+	def endTutorRelationship(currentRelationships: Seq[StudentRelationship]) {
+		currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel =>
+			rel.endDate = DateTime.now
+			profileService.saveOrUpdate(rel)
 		}
 	}
 
@@ -88,45 +95,34 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 }
 
 @Controller
-@RequestMapping(Array("/tutor/{student}/edit"))
+@RequestMapping(Array("/tutor/{student}"))
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
-	@ModelAttribute("searchTutorsCommand") def searchTutorsCommand =
-		restricted(new SearchTutorsCommand(user)).orNull
-
 	@ModelAttribute("editTutorCommand")
-	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member) = student match {
-		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor))
+	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member,
+	                     @RequestParam(value="remove", required=false) remove: Boolean) = student match {
+		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), Option(remove).getOrElse(false))
 		case _ => throw new ItemNotFoundException
 	}
 
 	// initial form display
-	@RequestMapping(params = Array("!tutor"))
+	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false)
+			"tutorToDisplay" -> cmd.currentTutor
+		).noLayout()
 	}
+	
 
-	// now we've got a tutor id to display, but it's not time to save it yet
-	@RequestMapping(params = Array("tutor", "!storeTutor"))
-	def displayPickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
-		Mav("tutor/edit/view",
-			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.tutor,
-			"displayOptionToSave" -> (!cmd.currentTutor.isDefined || !cmd.currentTutor.get.equals(cmd.tutor)))	
-	}
-
-	@RequestMapping(params=Array("tutor", "storeTutor"), method=Array(POST))
-	def savePickedTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
+	@RequestMapping(value = Array("/edit", "/add"), method=Array(POST))
+	def saveTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 
 		Mav("tutor/edit/view",
 			"student" -> cmd.student,
-			"tutorToDisplay" -> cmd.currentTutor,
-			"displayOptionToSave" -> false
+			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}
 }

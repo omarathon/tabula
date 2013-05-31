@@ -20,6 +20,16 @@ object GroupsBreadcrumbs {
 	}
 
 	/**
+	 * Special case breadcrumb for a module admin page.
+	 * Text is the module code, showing the name as a tooltip on hover.
+	 */
+	case class Module(val module: model.Module) extends Abstract {
+		val title = module.code.toUpperCase
+		val url = Routes.admin.module(module)
+		override val tooltip = module.name
+	}
+
+	/**
 	 * Not current used: a breadcrumb without a link, to represent
 	 * the current page. We don't currently include the current page in crumbs.
 	 */

@@ -9,6 +9,10 @@ import uk.ac.warwick.tabula.JavaImports._
 sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) {
 	def name = toString()
 	def shortName = name.substring(0, 3)
+	
+	// For Spring, the silly bum
+	def getName = name
+	def getAsInt = jodaDayOfWeek
 }
 
 object DayOfWeek {
@@ -19,6 +23,9 @@ object DayOfWeek {
 	case object Friday extends DayOfWeek(DateTimeConstants.FRIDAY)
 	case object Saturday extends DayOfWeek(DateTimeConstants.SATURDAY)
 	case object Sunday extends DayOfWeek(DateTimeConstants.SUNDAY)
+
+	// lame manual collection. Keep in sync with the case objects above
+	val members = Seq(Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
 	
 	def unapply(i: Int): Option[DayOfWeek] = i match {
 		case DateTimeConstants.MONDAY => Some(Monday)
