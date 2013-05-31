@@ -10,8 +10,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.StaffMember
 
-class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Command[Unit] with Daoisms {
+class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Command[Unit] with Logging{
 	PermissionCheck(Permissions.ImportSystemData)
 
 	val supervisorImporter = Wire.auto[SupervisorImporter]
@@ -30,14 +35,12 @@ class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Co
 	def importSupervisors {
 		val prsCodes = supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode)
 		for (
-				supervisorPrsCode <- supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode);
-				supervisor <- profileService.getMemberByPrsCode(supervisorPrsCode)
+				supervisorPrsCode <- supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode)
 		) {
-			val supervisorId = supervisor.id
-			if (!profileService.getRelationships(Supervisor, member.studyDetails.sprCode).exists {
-				_.agent == supervisorId
-			}) {
-				profileService.saveStudentRelationship(Supervisor, member.studyDetails.sprCode, supervisorId)
+			val supervisor = profileService.getMemberByPrsCode(supervisorPrsCode)
+			supervisor match {
+				case Some(sup: StaffMember) => profileService.saveStudentRelationship(Supervisor, member.studyDetails.sprCode, sup.id)
+				case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + member.studyDetails.sprCode + " - not a member in Tabula db")
 			}
 		}
 	}

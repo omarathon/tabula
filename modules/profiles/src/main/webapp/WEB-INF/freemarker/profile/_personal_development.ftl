@@ -2,7 +2,7 @@
 <section id="personal-development" class="clearfix">
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
-		
+
 		<#if profile.personalTutors?size == 0>
 			<p>
 				Not recorded
@@ -11,7 +11,7 @@
 				</#if>
 			</p>
 		</#if>
-	
+
 		<div class="tutors clearfix row">
 		<#list profile.personalTutors as relationship>
 			<#assign personalTutor = relationship.agentMember />
@@ -42,11 +42,11 @@
 			</div>
 		</#list>
 		</div>
-		
+
 		<#if profile.hasAPersonalTutor>
 			<#include "../tutor/meeting/list.ftl" />
 		</#if>
-	
+
 		<div id="modal" class="modal hide fade" style="display:none;">
 			<div class="modal-header"></div>
 			<div class="modal-body"></div>

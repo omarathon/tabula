@@ -150,10 +150,16 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	@Restricted(Array("Profiles.PersonalTutor.Read"))
 	def personalTutors: Seq[StudentRelationship] = Nil
 
+	@Restricted(Array("Profiles.Supervisor.Read"))
+	def supervisors: Seq[StudentRelationship] = Nil
+
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
 	def hasAPersonalTutor = false
+
+	def isSupervisor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
+	def hasSupervisor = false
 }
 
 @Entity
@@ -219,6 +225,12 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
 
 	override def hasAPersonalTutor = !personalTutors.isEmpty
+
+	@Restricted(Array("Profiles.Supervisor.Read"))
+	override def supervisors =
+		profileService.findCurrentRelationships(RelationshipType.Supervisor, studyDetails.sprCode)
+
+	override def hasSupervisor = !supervisors.isEmpty
 
 	// If hibernate sets studyDetails to null, make a new empty studyDetails
 	override def postLoad {

@@ -21,7 +21,6 @@ class SupervisorImporter  {
 
 	def getSupervisorPrsCodes(scjCode: String): Seq[String] = {
 		val supervisorPrsCodes = supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
-		//supervisorPrsCodes.asScala
 
 		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
 	}
@@ -29,7 +28,7 @@ class SupervisorImporter  {
 
 object SupervisorImporter {
 
-	val GetSupervisorsSql = "select rdx_prsc from intuit.srs_rdx where rdx_scjc = ?"
+	val GetSupervisorsSql = "select rdx_prsc from intuit.srs_rdx where rdx_scjc = :scj_code"
 
 	class SupervisorMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[String](ds, GetSupervisorsSql) {
 		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))

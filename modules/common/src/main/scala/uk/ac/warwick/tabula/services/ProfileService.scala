@@ -118,7 +118,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
-		this.findCurrentRelationships(PersonalTutor, targetSprCode).find(_.agent == agent) match {
+		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
 			case Some(existingRelationship) => {
 				// the same relationship is already there in the db - don't save
 				existingRelationship
@@ -126,7 +126,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 			case _ => {
 				// TODO handle existing relationships?
 				// and then create the new one
-				val newRelationship = StudentRelationship(agent, PersonalTutor, targetSprCode)
+				val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 				newRelationship.startDate = new DateTime
 				memberDao.saveOrUpdate(newRelationship)
 				newRelationship

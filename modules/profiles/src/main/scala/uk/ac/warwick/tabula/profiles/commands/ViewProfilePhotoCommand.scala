@@ -16,12 +16,12 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.RelationshipType
 
 class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
-	
+
 	PermissionCheck(Permissions.Profiles.Read.Core, member)
-	
+
 	private val DefaultPhoto = new DefaultPhoto
 	private var fileFound: Boolean = _
-	
+
 	override def applyInternal() = {
 		val attachmentOption = Option(member.photo) map { a => new Photo(a) }
 		val attachment = attachmentOption match {
@@ -31,27 +31,28 @@ class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile
 			}
 			case None => DefaultPhoto
 		}
-		
+
 		if (callback != null) callback(attachment)
-		
+
 		attachment
 	}
-	
+
 	override def describe(d: Description) = d.member(member)
 	override def describeResult(d: Description) { d.property("fileFound", fileFound) }
 
 }
 
 class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited {
-	
+
 	relationship.relationshipType match {
-		case RelationshipType.PersonalTutor => PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member) 
+		case RelationshipType.PersonalTutor => PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member)
+		case RelationshipType.Supervisor => PermissionCheck(Permissions.Profiles.Supervisor.Read, member)
 		case _ => throw new IllegalStateException("Unsupported relationship type: " + relationship.relationshipType)
 	}
-	
+
 	private val DefaultPhoto = new DefaultPhoto
 	private var fileFound: Boolean = _
-	
+
 	override def applyInternal() = {
 		val attachment = relationship.agentMember match {
 			case Some(member) => Option(member.photo) map { a => new Photo(a) } match {
@@ -63,12 +64,12 @@ class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: 
 			}
 			case _ => DefaultPhoto
 		}
-		
+
 		if (callback != null) callback(attachment)
-		
+
 		attachment
 	}
-	
+
 	override def describe(d: Description) = d.member(member).property("relationship" -> relationship)
 	override def describeResult(d: Description) { d.property("fileFound", fileFound) }
 
@@ -82,14 +83,14 @@ class DefaultPhoto extends RenderableFile {
 	private def read() = {
 		val is = getClass.getResourceAsStream("/no-photo.png")
 		val os = new ByteArrayOutputStream
-		
+
 		FileCopyUtils.copy(is, os)
 		os.toByteArray
 	}
-	
+
 	// TODO is keeping this in memory the right thing to do? It's only 3kb
 	private val NoPhoto = read()
-	
+
 	override def inputStream = new ByteArrayInputStream(NoPhoto)
 	override def filename = "no-photo.png"
 	override def contentType = "image/png"
