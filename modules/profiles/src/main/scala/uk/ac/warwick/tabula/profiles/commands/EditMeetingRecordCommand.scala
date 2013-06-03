@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship) with FormattedHtml {
 
-	override def getMeetingRecord: MeetingRecord = meetingRecord
+	val meeting = meetingRecord
 
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)

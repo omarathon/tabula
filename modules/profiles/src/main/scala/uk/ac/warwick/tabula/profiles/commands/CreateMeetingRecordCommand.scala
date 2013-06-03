@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{NotificationSource, Description}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.profiles.web.Routes
 
 class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship)
 	extends ModifyMeetingRecordCommand(creator, relationship) {
 
 	meetingDate = DateTime.now.toLocalDate
 
-	override def getMeetingRecord: MeetingRecord = {
-		new MeetingRecord(creator, relationship)
-	}
+	val meeting = new MeetingRecord(creator, relationship)
 
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)
@@ -21,3 +21,5 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 
 	def describe(d: Description): Unit = {  }
 }
+
+

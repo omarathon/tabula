@@ -4,9 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.commands.{NotificationSource, Command, SelfValidating, UploadedFile}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model._
@@ -19,9 +17,13 @@ import org.joda.time.LocalDate
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.profiles.web.Routes
+import freemarker.template.Configuration
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
-	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
+	extends Command[MeetingRecord] with NotificationSource[MeetingRecord] with SelfValidating with FormattedHtml
+	with BindListener with Daoisms {
 
 	var features = Wire.auto[Features]
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
@@ -41,8 +43,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
 
-	// Gets the meeting record to be updated.
-	def getMeetingRecord: MeetingRecord
+	val meeting: MeetingRecord
 
 	override def applyInternal() = {
 
@@ -63,7 +64,6 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			})
 		}
 
-		val meeting = getMeetingRecord
 		meeting.title = title
 		meeting.description = description
 		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
@@ -123,6 +123,27 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			}
 			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
 		}
+	}
+
+	def emit = new MeetingRecordApprovalNotification(meeting)
+
+	class MeetingRecordApprovalNotification(meeting: MeetingRecord)
+		extends Notification[MeetingRecord] with FreemarkerRendering {
+
+		implicit var freemarker = Wire.auto[Configuration]
+
+		val actor = meeting.creator.asSsoUser
+		val verb = "create"
+		val target = Some(meeting.relationship)
+		val _object = meeting
+
+		def title = "Meeting record approval required"
+		def url = Routes.profile.view(meeting.relationship.studentMember, meeting)
+		def content = renderToString("/WEB-INF/freemarker/notifications/meeting_record_approval_notification.ftl", Map(
+			"meetingRecord" -> meeting,
+			"profileLink" -> url
+		))
+		def recipients = meeting.pendingApprovers.map(_.asSsoUser)
 	}
 
 }

@@ -5,7 +5,7 @@ import collection.mutable
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Configurable
@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.NoBind
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import uk.ac.warwick.tabula.events.{Event, EventDescription}
 import org.apache.log4j.Logger
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -38,6 +37,10 @@ trait Describable[A] {
 	val eventName: String
 }
 
+trait NotificationSource[A] {
+	def emit: Notification[A]
+}
+
 /**
  * Stateful instance of an action in the application.
  * It could be anything that we might want to keep track of,
@@ -53,14 +56,16 @@ trait Describable[A] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[A] extends Describable[A] with JavaImports with EventHandling with PermissionsChecking {
+abstract class Command[A] extends Describable[A]
+with JavaImports with EventHandling with NotificationHandling with PermissionsChecking {
 	var maintenanceMode = Wire[MaintenanceModeService]
 	
 	import uk.ac.warwick.tabula.system.NoBind
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {
-			if (maintenanceCheck(this)) recordEvent(this) { benchmarkTask(benchmarkDescription) { applyInternal() } }
+			if (maintenanceCheck(this))
+				recordEvent(this) { notify(this) { benchmarkTask(benchmarkDescription) { applyInternal() } } }
 			else throw maintenanceMode.exception()
 		} else {
 			benchmarkTask(benchmarkDescription) { applyInternal() }
