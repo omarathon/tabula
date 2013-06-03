@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.coursework.services.feedbackreport
 
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
-import org.apache.poi.ss.util.WorkbookUtil
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 import collection.immutable.TreeMap
-import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 
-class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime)
-	extends SpreadsheetHelpers {
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
+class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
 
 	val assignmentSheetSize = 13
 	val moduleSheetSize = 11
@@ -138,10 +138,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	def populateModuleSheet(sheet: XSSFSheet) {
 		val modules = assignmentData.groupBy(_.assignment.module.code)
 		val sortedModules = TreeMap(modules.toSeq:_*)
-		for (module <- sortedModules) {
+		for ((moduleCode, assignmentInfoList) <- sortedModules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
-			val moduleCode = module._1
-			val assignmentInfoList= module._2
 
 			addStringCell(assignmentInfoList(0).moduleName, row)
 			addStringCell(moduleCode.toUpperCase, row)
