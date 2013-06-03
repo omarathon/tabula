@@ -21,26 +21,12 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging{
 
-	@Transactional
-	@Test def testCaptureTutor {
+	trait Environment {
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"
 		val uniId = "1111111"
 		val prsCode = "IN0070790"
 		val supervisorUniId = "0070790"
-
-		// create and persist supervisor
-		val supervisorMember = new StaffMember(supervisorUniId)
-		supervisorMember.userId = "cusdx"
-		session.saveOrUpdate(supervisorMember)
-		val savedSup = session.get(classOf[StaffMember], supervisorUniId)
-		logger.info("saved supervisor is " + savedSup)
-
-		// setting up importer to return supervisor
-		val codes = Seq(prsCode)
-
-		val importer = smartMock[SupervisorImporter]
-		importer.getSupervisorPrsCodes(scjCode) returns codes
 
 		// set up and persist student
 		val supervisee = new StudentMember(uniId)
@@ -55,13 +41,56 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 
 		session.saveOrUpdate(supervisee)
 
-		// test command
-		val command = new ImportSupervisorsForSingleStudentCommand(supervisee)
-		command.supervisorImporter = importer
-		command.applyInternal
+		// create and persist supervisor
+		val supervisorMember = new StaffMember(supervisorUniId)
+		supervisorMember.userId = "cusdx"
+		session.saveOrUpdate(supervisorMember)
+		val savedSup = session.get(classOf[StaffMember], supervisorUniId)
+		logger.info("saved supervisor is " + savedSup)
 
-		// check results
-		val sups = supervisee.supervisors
-		sups.size should be (1)
+
+
+	}
+
+	@Transactional
+	@Test def testCaptureValidSupervisor {
+		new Environment {
+			// set up importer to return supervisor
+			val codes = Seq(prsCode)
+			val importer = smartMock[SupervisorImporter]
+			importer.getSupervisorPrsCodes(scjCode) returns codes
+
+			// test command
+			val command = new ImportSupervisorsForSingleStudentCommand(supervisee)
+			command.supervisorImporter = importer
+			command.applyInternal
+
+			// check results
+			val supRels = supervisee.supervisors
+			supRels.size should be (1)
+			val rel = supRels.head
+
+			rel.agent should be (supervisorUniId)
+			rel.targetSprCode should be (sprCode)
+			rel.relationshipType should be (Supervisor)
+		}
+	}
+
+	@Transactional
+	@Test def testCaptureInvalidSupervisor {
+		new Environment {
+			// set up importer to return supervisor
+			val importer = smartMock[SupervisorImporter]
+			importer.getSupervisorPrsCodes(scjCode) returns Seq()
+
+			// test command
+			val command = new ImportSupervisorsForSingleStudentCommand(supervisee)
+			command.supervisorImporter = importer
+			command.applyInternal
+
+			// check results
+			val supRels = supervisee.supervisors
+			supRels.size should be (0)
+		}
 	}
 }
