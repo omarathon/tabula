@@ -2,7 +2,7 @@
 <section id="supervision" class="clearfix">
 	<#if profile.supervisors??>
 		<h4>Supervisor<#if profile.supervisors?size gt 1>s</#if></h4>
-	
+
 		<div class="tutors clearfix row">
 		<#list profile.supervisors as relationship>
 			<#assign supervisor = relationship.agentMember />

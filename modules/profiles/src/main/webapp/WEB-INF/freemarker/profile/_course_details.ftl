@@ -1,5 +1,7 @@
 <section id="course-details">
+	<p>debug - in course details</p>
 	<#if profile.studyDetails??>
+		<p>debug - has study details</p>
 		<h4>Course details</h4>
 		<table class="course-info">
 			<tbody>
@@ -25,7 +27,7 @@
 						<#if profile.studyDetails.studyDepartment??>
 							${profile.studyDetails.studyDepartment.name} (${profile.studyDetails.studyDepartment.code?upper_case})
 						<#else>
-							<#if profile.studyDetails.route.department.name??>
+							<#if (profile.studyDetails.route.department.name)??>
 								${profile.studyDetails.route.department.name}
 							</#if>
 						</#if>
@@ -86,7 +88,7 @@
 				<tr>
 					<th>UG/PG</th>
 					<td>
-						<#if profile.studyDetails.route.degreeType??>
+						<#if (profile.studyDetails.route.degreeType)??>
 							${profile.studyDetails.route.degreeType.toString}
 						</#if>
 					</td>

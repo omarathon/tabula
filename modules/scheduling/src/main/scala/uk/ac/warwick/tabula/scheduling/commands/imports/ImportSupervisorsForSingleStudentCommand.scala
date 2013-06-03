@@ -19,11 +19,12 @@ import uk.ac.warwick.tabula.data.model.StaffMember
 class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Command[Unit] with Logging{
 	PermissionCheck(Permissions.ImportSystemData)
 
-	val supervisorImporter = Wire.auto[SupervisorImporter]
-	val profileService = Wire.auto[ProfileService]
+	var supervisorImporter = Wire.auto[SupervisorImporter]
+	var profileService = Wire.auto[ProfileService]
 
 	def applyInternal() {
-		if (member.studyDetails.route.degreeType == Postgraduate) {
+		logger.info("member is: " + member)
+		if (member.studyDetails.route != null && member.studyDetails.route.degreeType == Postgraduate) {
 			transactional() {
 				importSupervisors
 			}
@@ -34,13 +35,13 @@ class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Co
 
 	def importSupervisors {
 		val prsCodes = supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode)
-		for (
-				supervisorPrsCode <- supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode)
-		) {
-			val supervisor = profileService.getMemberByPrsCode(supervisorPrsCode)
-			supervisor match {
-				case Some(sup: StaffMember) => profileService.saveStudentRelationship(Supervisor, member.studyDetails.sprCode, sup.id)
-				case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + member.studyDetails.sprCode + " - not a member in Tabula db")
+
+		supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode).foreach {
+			supervisorPrsCode => {
+				profileService.getMemberByPrsCode(supervisorPrsCode) match {
+					case Some(sup: StaffMember) => profileService.saveStudentRelationship(Supervisor, member.studyDetails.sprCode, sup.id)
+					case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + member.studyDetails.sprCode + " - not a member in Tabula db")
+				}
 			}
 		}
 	}

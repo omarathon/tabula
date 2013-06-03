@@ -1,15 +1,18 @@
 package uk.ac.warwick.tabula.scheduling.services;
 
-import org.springframework.stereotype.Service
-import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import java.sql.ResultSet
-import org.springframework.jdbc.core.SqlParameter
-import javax.sql.DataSource
 import java.sql.Types
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
+
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import collection.JavaConversions._
+
+import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
+import org.springframework.jdbc.core.SqlParameter
+import org.springframework.stereotype.Service
+
+import javax.sql.DataSource
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 
 @Service
 class SupervisorImporter  {
@@ -28,7 +31,7 @@ class SupervisorImporter  {
 
 object SupervisorImporter {
 
-	val GetSupervisorsSql = "select rdx_prsc from intuit.srs_rdx where rdx_scjc = :scj_code"
+	val GetSupervisorsSql = "select rdx_prsc from intuit.srs_rdx where rdx_scjc = :scj_code and rdx_extc = 'SUP'"
 
 	class SupervisorMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[String](ds, GetSupervisorsSql) {
 		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))
