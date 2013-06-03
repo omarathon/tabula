@@ -22,7 +22,7 @@ class AllocateStudentsToGroupsController extends GroupsController {
 	validatesSelf[AllocateStudentsToGroupsCommand]
 	
 	@ModelAttribute
-	def command(@PathVariable module: Module, @PathVariable set: SmallGroupSet) = new AllocateStudentsToGroupsCommand(module, set)
+	def command(@PathVariable module: Module, @PathVariable set: SmallGroupSet) = new AllocateStudentsToGroupsCommand(module, set, user)
 
 	@RequestMapping
 	def showForm(cmd: AllocateStudentsToGroupsCommand) = {

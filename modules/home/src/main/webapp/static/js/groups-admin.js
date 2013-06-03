@@ -41,4 +41,26 @@ $(function(){
     });
 });
 
+// Drag and drop allocation
+$(function() {
+	$('#allocateStudentsToGroupsCommand')
+		.dragAndDrop({
+			itemName: 'student',
+			textSelector: '.name h6',
+			useHandle: false,
+			selectables: '.students .drag-target',
+			scroll: true
+		})
+		.each(function(i, container) {
+			var $container = $(container);
+			$container.find('a.random').on('click', function(e) {			
+				$container.dragAndDrop('randomise');
+				
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			});
+		});
+});
+
 }(jQuery));

@@ -1,10 +1,26 @@
 <#assign set=allocateStudentsToGroupsCommand.set />
+<#assign mappingById=allocateStudentsToGroupsCommand.mappingById />
+<#assign membersById=allocateStudentsToGroupsCommand.membersById />
 
 <#macro student_item student bindpath="">
-<li class="student">
-	<i class="icon-white icon-user"></i> ${student.fullName}
-	<input type="hidden" name="${bindpath}" value="${student.userCode}" />
-</li>
+	<#assign profile = membersById[student.warwickId]!{} />
+	<li class="student well well-small">
+		<div class="profile clearfix">
+			<div class="photo">
+				<#if profile.universityId??>
+					<img src="<@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" />" />
+				<#else>
+					<img src="<@url resource="/static/images/no-photo.png" />" />
+				</#if>
+			</div>
+			
+			<div class="name">
+				<h6>${profile.fullName!student.fullName}</h6>
+				${(profile.studyDetails.route.name)!student.shortDepartment}, ${(profile.studyDetails.modeOfAttendance.fullNameToDisplay)!student.userType}
+			</div>
+		</div>
+		<input type="hidden" name="${bindpath}" value="${student.userId}" />
+	</li>
 </#macro>
 
 <#escape x as x?html>
@@ -21,8 +37,8 @@
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
 	
-	<p>Drag students by their <i class="icon-th"></i> onto a group. To select multiple students,
-	drag a box from one module name to another. You can also hold the <kbd>Ctrl</kbd> key to add to a selection</p>
+	<p>Drag students onto a group to allocate them to it. To select multiple students,
+	drag a box from one student to another. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection</p>
 	
 	<@spring.hasBindErrors name="allocateStudentsToGroupsCommand">
 		<#if errors.hasErrors()>
@@ -51,50 +67,68 @@
 				<i class="icon-arrow-left"></i> Remove all
 			</a>
 		</div>
-		<div class="row-fluid">
-			<div class="students span4">
-				<h3>Students</h3>
-				<div class="student-list drag-target">
-					<ul class="drag-list return-list" data-bindpath="unallocated">
-						<@spring.bind path="unallocated">
-							<#list status.actualValue as student>
-								<@student_item student "${status.expression}[${student_index}]" />
-							</#list>
-						</@spring.bind>
-					</ul>
+		<div class="row-fluid fix-on-scroll-container">
+			<div class="span5">
+				<div class="students">
+					<h3>Students</h3>
+					<div class="well student-list drag-target">
+						<h4>Yet to be allocated</h4>
+					
+						<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
+							<@spring.bind path="unallocated">
+								<#list status.actualValue as student>
+									<@student_item student "${status.expression}[${student_index}]" />
+								</#list>
+							</@spring.bind>
+						</ul>
+					</div>
 				</div>
 			</div>
-			<div class="span8">
-				<#macro mods department modules>
-					<div class="drag-target">
-						<h1>${department.name}</h1>
-						<ul class="drag-list full-width" data-bindpath="mapping[${department.code}]">
-						<#list modules as module>
-							<li class="label" title="${module.name}">
-								${module.code?upper_case}
-								<input type="hidden" name="mapping[${department.code}][${module_index}]" value="${module.id}" />
-							</li>
-						</#list>
-						</ul>
-					</div>
-				</#macro>
-			
-				<#list set.groups as group>
-					<#assign existingStudents = allocateStudentsToGroupsCommand.mappingById[group.id]![] />
-					<div class="drag-target">
-						<span class="name">${group.name}</span>
-						<span class="drag-count badge badge-info">${existingStudents?size}</span>
-	
-						<ul class="drag-list hide" data-bindpath="mapping[${group.id}]">
-							<#list existingStudents as student>
-								<@student_item student "mapping[${group.id}][${student_index}]" />
-							</#list>
-						</ul>
-	
-						<a href="#" class="btn show-list" data-title="Students in ${group.name}"><i class="icon-list"></i> List</a>
-	
-					</div>
-				</#list>
+			<div class="span2">
+				<#-- I, for one, welcome our new jumbo icon overlords -->
+				<div class="direction-icon fix-on-scroll">
+					<i class="icon-circle-arrow-right"></i>
+				</div>
+			</div>
+			<div class="span5">
+				<div class="groups fix-on-scroll">
+					<h3>Groups</h3>			
+					<#list set.groups as group>
+						<#assign existingStudents = mappingById[group.id]![] />
+						<div class="drag-target well clearfix">
+							<div class="group-header">
+								<h4 class="name">${group.name}</h4>
+								
+								<div class="pull-right">
+									<span class="drag-count badge badge-info">${existingStudents?size}</span> students
+								</div>
+							</div>
+		
+							<ul class="drag-list hide" data-bindpath="mapping[${group.id}]">
+								<#list existingStudents as student>
+									<@student_item student "mapping[${group.id}][${student_index}]" />
+								</#list>
+							</ul>
+							
+							<#assign popoverHeader>Students in ${group.name}</#assign>
+							<#assign groupDetails>
+								<ul class="unstyled">
+									<#list group.events as event>
+										<li>
+											<#-- Tutor, weeks, day/time, location -->
+
+											<@fmt.weekRanges event />,
+											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+											${event.location}
+										</li>
+									</#list>
+								</ul>
+							</#assign>
+		
+							<a href="#" class="btn show-list" data-title="${popoverHeader}" data-prelude="${groupDetails}"><i class="icon-list"></i> List</a>
+						</div>
+					</#list>
+				</div>
 			</div>
 		</div>		
 		
@@ -103,4 +137,5 @@
 			<a href="<@routes.depthome module />" class="btn">Cancel</a>
 		</div>
 	</@f.form>
+	
 </#escape>

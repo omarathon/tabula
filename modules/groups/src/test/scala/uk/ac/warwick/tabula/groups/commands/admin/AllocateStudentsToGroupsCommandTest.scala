@@ -16,7 +16,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 	val membershipService = mock[AssignmentMembershipService]	
 	val userLookup = new MockUserLookup
 	
-	@Test def itWorks {
+	@Test def itWorks = withUser("boombastic") {
 		val module = Fixtures.module("in101", "Introduction to Scala")
 		val set = Fixtures.smallGroupSet("My small groups")
 		set.module = module
@@ -79,7 +79,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		
 		membershipService.determineMembershipUsers(Seq.empty, Some(set.members)) returns (Seq(user1, user2, user3, user4, user5))
 		
-		val cmd = new AllocateStudentsToGroupsCommand(module, set)
+		val cmd = new AllocateStudentsToGroupsCommand(module, set, currentUser)
 		cmd.service = service
 		
 		cmd.unallocated should be (JList())

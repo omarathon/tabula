@@ -24,3 +24,45 @@ input.deleted {
   background-color: @inputDisabledBackground !important;
   text-decoration: line-through;
 }
+
+// arrange students into groups (modules/arrange/form.ftl)
+
+#allocateStudentsToGroupsCommand {
+	
+	ul.drag-list li {
+		display: block;
+		float: none;
+	
+		background: white;
+		margin-bottom: 10px;
+
+		&:hover { background-color: darken(@wellBackground, 10%); }
+
+		&.ui-selecting { background: darken(@wellBackground, 10%) !important; }
+		&.ui-selected { background: darken(@wellBackground, 15%) !important; }
+		
+		.profile .photo {
+			float: left;
+			max-width: 50px;
+			padding-right: 10px;
+		}
+	}
+	
+	.well.drop-hover {
+		background-color: #dddddd;
+	}
+	
+	.group-header {
+		h4, .badge-info { display: inline-block; }
+		h4 { margin-right: 10px; }
+	}
+	
+	.direction-icon {
+		font-size: 8em;
+		text-align: center;
+		padding-top: 33px;
+	}
+
+}
+
+// end arrange students into groups

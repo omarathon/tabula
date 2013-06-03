@@ -25,6 +25,7 @@ trait ProfileService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
@@ -52,6 +53,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
+	}
+	
+	def getAllMembersWithUniversityIds(universityIds: Seq[String]) = transactional(readOnly = true) {
+		memberDao.getAllWithUniversityIds(universityIds)
 	}
 	
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {

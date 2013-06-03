@@ -16,8 +16,11 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.SecurityService
 
-class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet) 
+class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, viewer: CurrentUser) 
 	extends Command[SmallGroupSet] with SelfValidating {
 	
 	mustBeLinked(set, module)
@@ -27,6 +30,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
 	
 	var service = Wire[SmallGroupService]
+	var profileService = Wire[ProfileService]
+	var securityService = Wire[SecurityService]
 	
 	/** Mapping from departments to an ArrayList containing user IDs. */
 	var mapping = JMap[SmallGroup, JList[User]]()
@@ -47,6 +52,15 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	// Do not modify the returned value!
 	def mappingById = mapping.asScala.map {
 		case (group, users) => (group.id, users)
+	}
+	
+	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
+	def membersById = {
+		val allUsers = (unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten)
+		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
+		profileService.getAllMembersWithUniversityIds(allUniversityIds)
+			.filter(member => securityService.can(viewer, Permissions.Profiles.Read.Core, member))
+			.map(member => (member.universityId, member)).toMap
 	}
 	
 	// Sort all the lists of users by surname, firstname.
@@ -72,7 +86,10 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 
 	def validate(errors: Errors) {
-		// TODO
+		// Disallow submitting unrelated Groups
+		if (!mapping.asScala.keys.forall( g => set.groups.contains(g) )) {
+			errors.reject("smallGroup.allocation.groups.invalid")
+		}
 	}
 
 	private def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
