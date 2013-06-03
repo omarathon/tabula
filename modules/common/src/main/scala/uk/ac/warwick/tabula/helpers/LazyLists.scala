@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
-import uk.ac.warwick.tabula.JavaImports._
 import scala.reflect._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.collections.LazyList
 
 /**
@@ -15,7 +15,7 @@ import uk.ac.warwick.util.collections.LazyList
  */
 object LazyLists {
 	
-	implicit def ToLazyListFactory[A](fn: () => A) = new LazyList.Factory[A] {
+	class FuncFactory[A](fn: () => A) extends LazyList.Factory[A] {
 		override def create = fn()
 	}
 
@@ -30,7 +30,7 @@ object LazyLists {
 		withFactory[A](factory, list)
 	}
 	
-	def withFactory[A: ClassTag](factory: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
-		LazyList.decorate(list, factory).asInstanceOf[JList[A]]
+	def withFactory[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
+		LazyList.decorate(list, new FuncFactory(fn)).asInstanceOf[JList[A]]
 
 }
