@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.CurrentUser
 
 trait SmallGroupService {
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet]
@@ -13,31 +14,26 @@ trait SmallGroupService {
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
-	
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 }
 
-
-
-@Service(value = "smallGroupService")
+@Service("smallGroupService")
 class SmallGroupServiceImpl 
 	extends SmallGroupService
 		with Daoisms 
 		with Logging {
 
-  val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
+	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
+	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("event.tutors")
 
-  def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
-  def getSmallGroupById(id: String) = getById[SmallGroup](id)
-  def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
-  def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet)
-  def saveOrUpdate(smallGroup: SmallGroup) = session.saveOrUpdate(smallGroup)
-	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
+	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
+	def getSmallGroupById(id: String) = getById[SmallGroup](id)
+	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
+	def saveOrUpdate(smallGroupSet: SmallGroupSet) { session.saveOrUpdate(smallGroupSet) }
+	def saveOrUpdate(smallGroup: SmallGroup) { session.saveOrUpdate(smallGroup) }
+	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) { session.saveOrUpdate(smallGroupEvent) }
 
-	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = {
-    eventTutorsHelper.findGroups(user)
-	}
-	
-
-
+	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
 }

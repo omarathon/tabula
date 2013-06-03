@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull
 
 @Entity
 @AccessType("field")
-class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget {
+class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
 	
 	@transient var permissionsService = Wire[PermissionsService]
 

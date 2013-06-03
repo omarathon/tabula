@@ -1,5 +1,7 @@
 <#escape x as x?html>
 
+<#assign showMyStudents = isAPersonalTutor || smallGroups?has_content />
+
 <#if !user.loggedIn>
 	<p>
 		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
@@ -10,11 +12,18 @@
 		<div class="span6">
 			<#include "../profile/search/form.ftl" />
 	
-			<#if isAPersonalTutor>
+			<#if showMyStudents>
 				<h2>My students</h2>
 			
 				<ul>
+					<#if showMyStudents>
 					<li><a href="<@routes.tutees />">Personal tutees</a></li>
+					</#if>
+					<#list smallGroups as smallGroup>
+					<#assign _groupSet=smallGroup.groupSet />
+					<#assign _module=smallGroup.groupSet.module />
+					<li>${_module.code?upper_case} (${_module.name}) ${_groupSet.name}, ${smallGroup.name}</li>
+					</#list>
 				</ul>
 			</#if>
 		</div>
