@@ -48,10 +48,12 @@ trait CourseworkFixtures extends BrowserTest {
 		textField("name").value = assignmentName
 		settings(members)
 
-		submit
+		submit()
 
 		// Ensure that we've been redirected back
-		currentUrl should endWith ("/department/xxx/#module-" + moduleCode.toLowerCase)
+		withClue(pageSource) {
+			currentUrl should endWith ("/department/xxx/#module-" + moduleCode.toLowerCase)
+		}
 		
 		// NOTE: This assumes no duplicate assignment names!
 		val assignmentInfo = getAssignmentInfo(moduleCode, assignmentName)

@@ -15,9 +15,9 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 		// check that we can see some modules on the page.
 		findAll(className("module-info")).toList should not be (Nil)
 		
-		// But check that they're all hidden
-		for (info <- findAll(className("module-info")))
-			info.isDisplayed should be (false)
+		// But check that some are hidden
+		val allDisplayed = findAll(className("module-info")).forall(_.isDisplayed)
+		allDisplayed should be (false)
 		
 		click on (linkText("Show"))
 		
