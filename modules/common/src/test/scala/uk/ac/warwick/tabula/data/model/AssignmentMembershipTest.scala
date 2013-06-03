@@ -5,11 +5,12 @@ import uk.ac.warwick.tabula.Mockito
 import org.junit.Test
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
-
-
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.services.IncludeType
+import uk.ac.warwick.tabula.services.SitsType
+import uk.ac.warwick.tabula.services.ExcludeType
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 
@@ -83,16 +84,19 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		membership.size should be (3)
 		
 		membership(0).user.getFullName should be ("Roger Aaaaa")
-		membership(0).itemType should be ("include")
+		membership(0).itemType should be (IncludeType)
+		membership(0).itemTypeString should be ("include")
 		membership(0).extraneous should be (false)
 		
 		membership(1).user.getFullName should be ("Roger Aaaaf")
-        membership(1).itemType should be ("exclude")
-        membership(1).extraneous should be (false)
+		membership(1).itemType should be (ExcludeType)
+		membership(1).itemTypeString should be ("exclude")
+		membership(1).extraneous should be (false)
 		
 		membership(2).user.getFullName should be ("Roger Aaaag")
-        membership(2).itemType should be ("sits")
-        membership(2).extraneous should be (false)
+		membership(2).itemType should be (SitsType)
+		membership(2).itemTypeString should be ("sits")
+		membership(2).extraneous should be (false)
 
     // test the simpler methods that return a list of Users
 
@@ -116,15 +120,18 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         membership.size should be (3)
         
         membership(0).user.getFullName should be ("Roger Aaaaf")
-        membership(0).itemType should be ("include")
+        membership(0).itemType should be (IncludeType)
+        membership(0).itemTypeString should be ("include")
         membership(0).extraneous should be (true)
         
         membership(1).user.getFullName should be ("Roger Aaaah")
-        membership(1).itemType should be ("exclude")
+        membership(1).itemType should be (ExcludeType)
+        membership(1).itemTypeString should be ("exclude")
         membership(1).extraneous should be (true)
         
         membership(2).user.getFullName should be ("Roger Aaaag")
-        membership(2).itemType should be ("sits")
+        membership(2).itemType should be (SitsType)
+        membership(2).itemTypeString should be ("sits")
         membership(2).extraneous should be (false)
 	}
 	

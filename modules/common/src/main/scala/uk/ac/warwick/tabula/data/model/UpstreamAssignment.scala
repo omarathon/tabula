@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.Entity
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
-import uk.ac.warwick.tabula.data.model.forms.AssessmentGroup
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 
 /**

@@ -1,9 +1,9 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#-- 
+<#--
 HFC-166 Don't use #compress on this file because
-the comments textarea needs to maintain newlines. 
+the comments textarea needs to maintain newlines.
 -->
 <#assign commandName="editAssignmentCommand"/>
 <#assign command=editAssignmentCommand />
@@ -53,13 +53,12 @@ the comments textarea needs to maintain newlines.
 -->
 <div class="submit-buttons form-actions">
 	<input type="submit" value="Save" class="btn btn-primary">
-	<input type="submit" value="Save and stay on this page" class="btn" id="updateOnly">
 	<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 
 <#if canDelete>
-	<p class="alert alert-info">Did you create this assignment in error? 
+	<p class="alert alert-info">Did you create this assignment in error?
 	You may <a href="<@routes.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
 <#else>
 	<p class="alert alert-info">

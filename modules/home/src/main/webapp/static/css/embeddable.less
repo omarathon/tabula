@@ -95,15 +95,15 @@ summary { .cursor-pointer(); }
 
 	list-style-type: none;
 
-	li { 
+	li {
 		margin-top: 8px;
-		
-		> * { 
+
+		> * {
 			display: inline-block;
-			margin: 0 5px; 
-		} 
+			margin: 0 5px;
+		}
 	}
-	
+
 	.hint { color: @tabulaGrayLight; }
 }
 
@@ -152,7 +152,7 @@ tr.error, tr.warning {
 
 .module-info, .striped-section {
 	.box-style;
-	
+
 	&.empty { display: none; }
 
 	padding: 0.5em 0.5em 0 0.5em;
@@ -161,12 +161,12 @@ tr.error, tr.warning {
 
 	h2 small { font-size: 0.7em; color: @very-subtle-text-color; float:right; }
 
-	.section-title { 
+	.section-title {
 		color: #606060 !important;
-		
+
 		&.with-button {
 			display: inline-block;
-		} 
+		}
 	}
 
 	.button-list .btn {
@@ -210,7 +210,7 @@ h2.section {
 	h1 + .header-with-tooltip h2 {
 		margin-top: -8px;
 	}
-	
+
 	summary + p {
 		margin-top: 12px;
 	}
@@ -441,11 +441,6 @@ ul {
 
 		.btn-group {
 			float:right;
-		}
-
-		// darken the icons a bit
-		i {
-			opacity:1
 		}
 
 		a {
@@ -975,8 +970,17 @@ form.form-tiny {
 
 // Bootstrap fixes
 
-// button-style links don't also need underlining
+// button-style links/icons don't need underlining
 a.btn { text-decoration: none; }
+#container {
+    a [class^="icon-"],
+    a [class*=" icon-"],
+    a [class^="icon-"]:before,
+    a [class*=" icon-"]:before {
+      display: inline-block;
+      text-decoration: none;
+    }
+}
 
 // Icons + ID6 require some adjustment
 [class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
@@ -1020,12 +1024,12 @@ a.btn { text-decoration: none; }
 	.table {
 		margin-bottom: 12px;
 	}
-	
+
 	.scroller {
 		overflow-y: auto;
 		max-height: 18em;
 	}
-	
+
 	.item-type-include { color: @tabulaGreenDark; }
 	.item-type-exclude {
 		color: @tabulaGrayLight;
@@ -1649,7 +1653,7 @@ h1.with-settings {
 	  padding-left: 0;
 	  list-style: none;
 	}
-	
+
 	// Make legends less shouty
 	legend {
 		font-weight: normal;
