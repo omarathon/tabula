@@ -24,12 +24,9 @@
 </#macro>
 
 <#escape x as x?html>
-	<#if saved??>
-		<div class="alert alert-success">
-			<a class="close" data-dismiss="alert">&times;</a>
-			<p>Changes saved.</p>
-		</div>
-	</#if>
+	<a href="<@routes.depthome module />" class="btn pull-right">
+		<i class="icon-mail-reply"></i> Back to ${set.module.code?upper_case}
+	</a>
 
 	<h1>Assign students for ${set.name}</h1>
 	
@@ -39,6 +36,13 @@
 	
 	<p>Drag students onto a group to allocate them to it. To select multiple students,
 	drag a box from one student to another. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection</p>
+	
+	<#if saved??>
+		<div class="alert alert-success">
+			<a class="close" data-dismiss="alert">&times;</a>
+			<p>Changes saved.</p>
+		</div>
+	</#if>
 	
 	<@spring.hasBindErrors name="allocateStudentsToGroupsCommand">
 		<#if errors.hasErrors()>

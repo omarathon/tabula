@@ -79,10 +79,10 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	def submit(@Valid cmd: CreateSmallGroupSetCommand, errors: Errors) =
 		if (errors.hasErrors) form(cmd)
 		else {
-			cmd.apply()
+			val set = cmd.apply()
 			
-			// TODO redirect to allocation instead of module
-			Redirect(Routes.admin.module(cmd.module))
+			// Redirect straight to allocation
+			Redirect(Routes.admin.allocate(set))
 		}
 }
 
