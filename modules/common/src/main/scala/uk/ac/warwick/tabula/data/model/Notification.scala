@@ -29,4 +29,9 @@ trait Notification[A]{
 	def content: String
 	def url: String
 	def recipients: Seq[User]
+
+	override def toString = List(actor, verb, _object).mkString("notification {", ", ", "}")
+
+
+
 }

@@ -3,19 +3,24 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.notifications.EmailNotificationListener
 
 @Service
-class NotificationService extends Logging{
+class NotificationService extends Logging {
 
-	type NotificationListener = (Notification[_]) => Unit
+	type NotificationListener = Notification[_] => Unit
 
-	val listeners: List[NotificationListener] = Nil
+	val emailListener = new EmailNotificationListener
+	val listeners: List[NotificationListener] = List(emailListener.listen)
 
 	def push(notification: Notification[_]){
 		// TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
-		logger.error("Notification pushed" + notification)
+		logger.info("Notification pushed" + notification)
 		this.notify(notification) // for now we just hard call notify
 	}
 
-	def notify[A](notification: Notification[A]) { for (l <- listeners) l(notification) }
+	def notify[A](notification: Notification[A]) {
+		logger.info("Notify listeners" + notification)
+		for (l <- listeners) l(notification)
+	}
 }
