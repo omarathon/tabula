@@ -26,7 +26,7 @@ trait AssignmentService {
 	def save(assignment: Assignment)
 
 	def deleteFormField(field: FormField) : Unit
-	
+
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
@@ -73,7 +73,7 @@ trait AssignmentMembershipService {
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
-	
+
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
@@ -82,12 +82,12 @@ trait AssignmentMembershipService {
 }
 
 @Service(value = "assignmentService")
-class AssignmentServiceImpl 
-	extends AssignmentService 
-		with Daoisms 
+class AssignmentServiceImpl
+	extends AssignmentService
+		with Daoisms
 		with Logging {
 	import Restrictions._
-	
+
 	@Autowired var auditEventIndexService: AuditEventIndexService = _
 
 	def getAssignmentById(id: String) = getById[Assignment](id)
@@ -113,7 +113,7 @@ class AssignmentServiceImpl
 			.seq
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a 
+		session.newQuery[Assignment]("""select distinct a
 				from Assignment a
 				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
 					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
@@ -137,7 +137,7 @@ class AssignmentServiceImpl
 			.setMaxResults(1)
 			.uniqueResult
 	}
-	
+
 	val MaxAssignmentsByName = 15
 
 	def getAssignmentsByName(partialName: String, department: Department) = {
@@ -152,19 +152,19 @@ class AssignmentServiceImpl
 }
 
 @Service(value = "assignmentMembershipService")
-class AssignmentMembershipServiceImpl 
+class AssignmentMembershipServiceImpl
 	extends AssignmentMembershipService
 		with AssignmentMembershipMethods
-		with Daoisms 
+		with Daoisms
 		with Logging {
 
 	@Autowired var userLookup: UserLookupService = _
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a 
-				from Assignment a 
+		session.newQuery[Assignment]("""select distinct a
+				from Assignment a
 				left join fetch a.assessmentGroups ag
-				where 
+				where
 					(1 = (
 						select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
 						where uag.moduleCode = ag.upstreamAssignment.moduleCode
@@ -223,7 +223,7 @@ class AssignmentMembershipServiceImpl
 					existing.copyFrom(assignment)
 					session.update(existing)
 				}
-				
+
 				existing
 			}
 			.getOrElse { session.save(assignment); assignment }
@@ -248,7 +248,7 @@ class AssignmentMembershipServiceImpl
 	}
 
 	def getUpstreamAssignment(id: String) = getById[UpstreamAssignment](id)
-	
+
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = {
 		session.newCriteria[UpstreamAssignment]
 			.add(Restrictions.eq("moduleCode", group.moduleCode))
@@ -305,23 +305,25 @@ class AssignmentMembershipServiceImpl
 }
 
 class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
-	
-	def	sitsCount = items.filter(item => item.itemType == SitsType || item.extraneous).size
+
+	def	sitsCount = items.filter(_.itemType == SitsType).size
 	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
 	def includeCount = items.filter(_.itemType == IncludeType).size
 	def excludeCount = items.filter(_.itemType == ExcludeType).size
-		
+	def usedIncludeCount = items.filter(i => i.itemType == IncludeType && !i.extraneous).size
+	def usedExcludeCount = items.filter(i => i.itemType == ExcludeType && !i.extraneous).size
+
 }
 
 trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
-	
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo = {	
-		val sitsUsers = 
-			upstream.flatMap { _.members.members } 
-							.distinct 
-							.par.map { id =>
-								id -> userLookup.getUserByWarwickUniId(id)
-							}.seq
+
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo = {
+		val sitsUsers =
+			upstream.flatMap { _.members.members }
+				.distinct
+				.par.map { id =>
+					id -> userLookup.getUserByWarwickUniId(id)
+				}.seq
 
 		val includes = others map { _.includeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil
 		val excludes = others map { _.excludeUsers map { id => id -> userLookup.getUserByUserId(id) } } getOrElse Nil

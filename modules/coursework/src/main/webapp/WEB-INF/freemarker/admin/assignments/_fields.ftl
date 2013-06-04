@@ -1,6 +1,6 @@
-<#-- 
+<#--
 HFC-166 Don't use #compress on this file because
-the comments textarea needs to maintain newlines. 
+the comments textarea needs to maintain newlines.
 -->
 <#escape x as x?html>
 
@@ -24,12 +24,12 @@ the comments textarea needs to maintain newlines.
 <@form.labelled_row "openEnded" "Open-ended">
 	<label class="checkbox">
 		<@f.checkbox path="openEnded" id="openEnded" />
-		
+
 		<#assign popoverText>
 			<p>
 		   Check this box to mark the assignment as open-ended.
 		  </p>
-		  
+
 		  <ul>
 		   <li>Any close date previously entered will have no effect.</li>
 		   <li>Allowing extensions and submission after the close date will have no effect.</li>
@@ -38,10 +38,10 @@ the comments textarea needs to maintain newlines.
 		   <li>You will be able to publish feedback individually at any time.</li>
 		  </ul>
 		</#assign>
-		
+
 		<a href="#"
 		   title="What's this?"
-		   class="use-popover" 
+		   class="use-popover"
 		   data-title="Open-ended assignments"
 		   data-html="true"
 		   data-trigger="hover"
@@ -59,7 +59,7 @@ the comments textarea needs to maintain newlines.
 			<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 		</@f.select>
 	</@form.labelled_row>
-	
+
 <#else>
 
 	<@form.labelled_row "academicYear" "Academic year">
@@ -75,16 +75,16 @@ the comments textarea needs to maintain newlines.
 <#if newRecord>
 	<!-- <div id="assignment-picker" class="alert alert-success"> -->
 	<div class="span6 alert alert-success">
-		<p><i class="icon-lightbulb"></i> To find an assignment to pre-populate from, just start typing its name.  Assignments within your 
+		<p><i class="icon-lightbulb"></i> To find an assignment to pre-populate from, just start typing its name.  Assignments within your
 		department will be matched.  Click on an assignment to choose it.</p>
 		<@form.labelled_row "prefillAssignment" "Assignment to copy:">
 			<@f.hidden id="prefillAssignment" path="prefillAssignment" />
-			
+
 			<#if command.prefillAssignment??>
 				<#assign pHolder = "${command.prefillAssignment.name} - ${command.prefillAssignment.module.code}">
 			</#if>
-			
-			<input class="assignment-picker-input" type="text" 
+
+			<input class="assignment-picker-input" type="text"
 				placeholder="${pHolder!''}">
 		</@form.labelled_row>
 	</div> <!-- span6 -->
@@ -97,7 +97,7 @@ the comments textarea needs to maintain newlines.
 					$.get("${url('/admin/module/${module.code}/assignments/picker')}", { searchTerm : query}, function(data) {
 						var labels = []; // labels is the list of Strings representing assignments displayed on the screen
 						assignmentPickerMappings = {};
-						
+
 						$.each(data, function(i, assignment) {
 						    var mapKey = assignment.name + " - " + assignment.moduleCode;
 							assignmentPickerMappings[mapKey] = assignment.id;
@@ -132,7 +132,7 @@ the comments textarea needs to maintain newlines.
 
 <script>
 jQuery(function ($) {
-	$('#action-submit').closest('form').on('click', '#updateOnly', function() {
+	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');
 	});
 });

@@ -16,7 +16,8 @@
 		</@spring.bind>
 
 		<#assign includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span></#assign>
-		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Removed</span></#assign>
+		<#assign pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Pending deletion</span></#assign>
+		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#assign>
 		<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
 
 		<#assign assignmentMembership = command.assignmentMembership />
@@ -50,9 +51,9 @@
 					<span class="uneditable-value">
 						${assignmentMembership.totalCount} enrolled
 						<#if assignmentMembership.excludeCount gt 0 || assignmentMembership.includeCount gt 0>
-							(${assignmentMembership.sitsCount} <#if assignmentMembership.excludeCount gt 0>left</#if> from SITS<#if assignmentMembership.excludeCount gt 0> after <@fmt.p assignmentMembership.excludeCount "manual removal" /></#if><#if assignmentMembership.includeCount gt 0>, plus <@fmt.p assignmentMembership.includeCount "manual addition" /></#if>)
+							<span class="muted">(${assignmentMembership.sitsCount} <#if assignmentMembership.usedExcludeCount gt 0>left</#if> from SITS<#if assignmentMembership.usedExcludeCount gt 0> after <@fmt.p assignmentMembership.usedExcludeCount "relevant manual removal" /></#if><#if assignmentMembership.usedIncludeCount gt 0>, plus <@fmt.p assignmentMembership.usedIncludeCount "relevant manual addition" /></#if>)</span>
 						<#else>
-							from SITS
+							<span class="muted">from SITS</span>
 						</#if>
 					<@what_is_this /></span>
 				<#elseif hasMembers>
@@ -167,18 +168,12 @@
 							</#list>
 						</tbody>
 
-						<#-- includeUsers members -->
-						<#list command.members.includeUsers as _u>
-							<input type="hidden" name="includeUsers" value="${_u}">
+						<#list command.members.includeUsers as usercode>
+							<input type="hidden" name="includeUsers" value="${usercode}">
 						</#list>
 
-						<#-- existing includeUsers cmd -->
-						<#list command.includeUsers as _u>
-							<input type="hidden" name="includeUsers" value="${_u}">
-						</#list>
-
-						<#list command.members.excludeUsers as _u>
-							<input type="hidden" name="excludeUsers" value="${_u}">
+						<#list command.members.excludeUsers as usercode>
+							<input type="hidden" name="excludeUsers" value="${usercode}">
 						</#list>
 					</table>
 				</div>
@@ -196,11 +191,11 @@
 			</div>
 
 			<div class="modal-body">
-				<p class="muted">
+				<p>
 					Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
 				</p>
-				<p class="muted">
-					<i class="icon-lightbulb"></i><strong>Is your module in SITS?</strong> It may be better to fix the data there,
+				<p class="alert">
+					<i class="icon-lightbulb icon-large"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
 					as other University systems won't know about any changes you make here.
 				</p>
 				<#-- SOMETIME
@@ -226,7 +221,7 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p class="muted">Add students by linking this assignment to one or more of the following SITS assignments for
+					<p>Add students by linking this assignment to one or more of the following SITS assignments for
 					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
@@ -306,12 +301,12 @@
 		}
 
 		<#-- initialise the scripting for enrolment management -->
-		<#if RequestParameters.focusOn!false>
+		<#if RequestParameters.open?? || openDetails!false>
 			$enrolment.data('open', true);
 		</#if>
 		initEnrolment();
 
-		var $pendingAlert = $('<p class="alert alert-info hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-mini" id="updateOnly"></p>');
+		var $pendingAlert = $('<p class="alert alert-info hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-mini update-only"></p>');
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {
@@ -446,12 +441,15 @@
 				var usercode = $(this).val();
 				var $tr = $(this).closest('tr');
 
-				// update the hidden fields
+				// update both hidden fields and table
 				$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
-				$('#enrolment-table').append($('<input type=hidden name=excludeUsers />').val(usercode));
 
-				// update rendering
-				$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(usercode));
+				if ($tr.is('.item-type-sits')) {
+					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+				} else {
+					$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
+				}
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
 				}).addClass('item-type-exclude');
@@ -468,15 +466,14 @@
 				var usercode = $(this).val();
 				var $tr = $(this).closest('tr');
 
-				// update the hidden fields
+				// update both hidden fields and table
 				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
-				$('#enrolment-table').append($('<input type=hidden name=includeUsers />').val(usercode));
-
-				// update rendering
+				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(usercode));
 				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
+
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
-				}).addClass('item-type-include');
+				}).addClass('item-type-include pending');
 
 				this.checked = '';
 				alertPending();

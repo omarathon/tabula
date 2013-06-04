@@ -67,14 +67,14 @@ class AddAssignment extends CourseworkController {
 			showForm(form)
 		} else {
 			form.apply()
-			Redirect(Routes.admin.assignment.edit(form.assignment))
+			Redirect(Routes.admin.assignment.edit(form.assignment) + "?open")
 		}
-		
+
 	}
 
 	def showForm(form: AddAssignmentCommand) = {
 		val module = form.module
-		
+
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module,
@@ -84,7 +84,7 @@ class AddAssignment extends CourseworkController {
 			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
-	
+
 	@InitBinder
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
@@ -103,12 +103,12 @@ class EditAssignment extends CourseworkController {
 	}
 
 	@RequestMapping
-	def showForm(form: EditAssignmentCommand) = {
+	def showForm(form: EditAssignmentCommand, openDetails: Boolean = false) = {
 		form.afterBind()
 
 		val (module, assignment) = (form.module, form.assignment)
 		form.copyGroupsFrom(assignment)
-		
+
 		val couldDelete = canDelete(module, assignment)
 		Mav("admin/assignments/edit",
 			"department" -> module.department,
@@ -118,7 +118,8 @@ class EditAssignment extends CourseworkController {
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,
-			"maxWordCount" -> Assignment.MaximumWordCount)
+			"maxWordCount" -> Assignment.MaximumWordCount,
+			"openDetails" -> openDetails)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
@@ -133,17 +134,17 @@ class EditAssignment extends CourseworkController {
 		}
 
 	}
-	
+
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=update"))
 	def update(@Valid form: EditAssignmentCommand, errors: Errors) = {
 		form.afterBind()
 		if (!errors.hasErrors) {
 			form.apply()
 		}
-		
-		showForm(form)
+
+		showForm(form, true)
 	}
-	
+
 	@InitBinder
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
@@ -171,7 +172,7 @@ class DeleteAssignment extends CourseworkController {
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def showForm(form: DeleteAssignmentCommand) = {
 		val (module, assignment) = (form.module, form.assignment)
-		
+
 		Mav("admin/assignments/delete",
 			"department" -> module.department,
 			"module" -> module,
@@ -210,7 +211,7 @@ class AssignmentEnrolment extends CourseworkController {
 	}
 
 	@RequestMapping
-	def showForm(form: EditAssignmentEnrolmentCommand) = {
+	def showForm(form: EditAssignmentEnrolmentCommand, openDetails: Boolean = false) = {
 		form.afterBind()
 
 		Mav("admin/assignments/enrolment",
@@ -218,7 +219,8 @@ class AssignmentEnrolment extends CourseworkController {
 			"module" -> form.module,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> form.assessmentGroups)
+			"assessmentGroups" -> form.assessmentGroups,
+			"openDetails" -> openDetails)
 			.noLayout()
 	}
 

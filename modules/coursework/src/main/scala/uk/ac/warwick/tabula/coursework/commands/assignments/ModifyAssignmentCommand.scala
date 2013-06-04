@@ -115,16 +115,27 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 *
 	 * Called by controller after Spring has done its basic binding, to do more complex
 	 * stuff like resolving users into groups and putting them in the members UserGroup.
+	 *
+	 * Uses two lists in the UserGroup to manage a tristate: users can be explicitly
+	 * excluded, included, or unreferenced. If unreferenced, then implicit membership
+	 * may be inherited dynamically from one or more UpstreamGroup from SITS.
 	 */
 	def afterBind() {
+		updateMembership()
+		updateAssessmentGroups()
+	}
 
-		def addUserId(item: String) {
-			val user = userLookup.getUserByUserId(item)
-			if (user.isFoundUser && null != user.getWarwickId) {
-				includeUsers.add(user.getUserId)
-			}
+	private def addUserId(item: String) {
+		val user = userLookup.getUserByUserId(item)
+		if (user.isFoundUser && null != user.getWarwickId) {
+			includeUsers.add(user.getUserId)
 		}
+	}
 
+	/**
+	 * Convert Spring-bound user lists into an explicit UserGroup
+	 */
+	private def updateMembership() {
 		// parse items from textarea into includeUsers collection
 		for (item <- massAddUsersEntries) {
 			if (UniversityId.isValid(item)) {
@@ -139,19 +150,20 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 			}
 		}
 
+		// get implicit membership list from upstream
 		val membersUserIds = Option(assignment).map(membershipService.determineMembershipUsers(_).map(_.getUserId)).getOrElse(List())
 
-		// add includeUsers to members.includeUsers
+		// unexclude from previously excluded users, or explicitly include
 		((includeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.excludeUsers contains userId) {
 				members.unexcludeUser(userId)
 			} else if (!(membersUserIds contains userId)) {
-				// TAB-399 need to check if the user is already in the group before adding
+				// TAB-399 only add if not already a member of a linked UpstreamGroup
 				members.addUser(userId)
 			}
 		}
 
-		// for excludeUsers, either remove from previously-added users or add to excluded users
+		// uninclude from previously-added users, or explicitly exclude
 		((excludeUsers map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
 			if (members.includeUsers contains userId) members.removeUser(userId)
 			else members.excludeUser(userId)
@@ -159,9 +171,21 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
+		includeUsers = JArrayList()
+		excludeUsers = JArrayList()
+	}
 
-		// now deal with groups
-		updateAssessmentGroups()
+	/**
+	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
+	 */
+	private def updateAssessmentGroups() {
+		assessmentGroups = upstreamGroups.flatMap ( ug => {
+			val template = new AssessmentGroup
+			template.upstreamAssignment = ug.upstreamAssignment
+			template.occurrence = ug.occurrence
+			template.assignment = assignment
+			membershipService.getAssessmentGroup(template) orElse Some(template)
+		}).distinct
 	}
 
 	def copyTo(assignment: Assignment) {
@@ -181,20 +205,6 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 
 		if (assignment.members == null) assignment.members = new UserGroup
 		assignment.members copyFrom members
-	}
-
-	/**
-	 *  Convert Spring-bound upstream group references to an #AssessmentGroup buffer,
-	 *  and persist if required.
-	 */
-	def updateAssessmentGroups(persist: Boolean = false) {
-		assessmentGroups = upstreamGroups.flatMap ( ug => {
-			val template = new AssessmentGroup
-			template.upstreamAssignment = ug.upstreamAssignment
-			template.occurrence = ug.occurrence
-			template.assignment = assignment
-			membershipService.getAssessmentGroup(template) orElse Some(template)
-		})
 	}
 
 	def prefillFromRecentAssignment() {

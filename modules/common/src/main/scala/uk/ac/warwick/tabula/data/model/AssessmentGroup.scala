@@ -14,15 +14,14 @@ class AssessmentGroup extends GeneratedId {
 	var upstreamAssignment: UpstreamAssignment = _
 
 	var occurrence: String = _
-	
-	override def toString = {
-    if (assignment != null && upstreamAssignment != null && occurrence != null) {
-      "assessmentGroup: { assignment: " + assignment.id + " (" + assignment.name + "), upstreamAssignment: " +
-													upstreamAssignment.id + " (" + upstreamAssignment.name +
-													"), occurrence: " + occurrence + " }"
-    } else {
-      "assessmentGroup: (invalid, contains nulls)"
-    }
-  }
 
+	override def toString = {
+		if (assignment != null && upstreamAssignment != null && occurrence != null) {
+			"assessmentGroup: { assignment: " + assignment.id + " (" + assignment.name +
+			"), upstreamAssignment: " + upstreamAssignment.id + " (" + upstreamAssignment.name +
+			"), occurrence: " + occurrence + " }"
+		} else {
+			"assessmentGroup: (invalid, contains nulls)"
+		}
+	}
 }
