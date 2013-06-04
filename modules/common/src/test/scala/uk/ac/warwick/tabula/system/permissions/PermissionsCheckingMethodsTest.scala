@@ -1,12 +1,19 @@
 package uk.ac.warwick.tabula.system.permissions
 
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.services.permissions.{PermissionDefinition, RoleService}
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
+import scala.Some
+import uk.ac.warwick.tabula.system.CustomDataBinder
+import scala.Some
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
-class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
+class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {
 
 	val dept = Fixtures.department("in", "IT Services")
 	dept.id = "dept"
@@ -17,13 +24,19 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 	val mod2 = Fixtures.module("in102", "IN 2")
 	mod2.id = "mod2"
 
+	class Binder(obj:Any, name:String, val securityService:SecurityService)
+			extends CustomDataBinder(obj, name)
+			with PermissionsBinding
+
+	private def clearAnyChecks() { permissionsAnyChecks = permissionsAnyChecks.empty }
+
 	@Test def checks {
 		PermissionCheck(Permissions.Module.Create, dept)
 		PermissionCheck(Permissions.Module.Delete, dept)
 		PermissionCheckAll(Permissions.Module.ManageAssignments, Seq(mod1, mod2))
 		PermissionCheck(Permissions.UserPicker)
 
-		permissionChecks should be (Map(
+		permissionsAllChecks should be (Map(
 			Permissions.Module.Create -> Some(dept),
 			Permissions.Module.Delete -> Some(dept),
 			Permissions.Module.ManageAssignments -> Some(mod1),
@@ -31,30 +44,6 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			Permissions.UserPicker -> None
 		))
 	}
-
-  @Test def checkOneOf {
-    PermissionCheckOneOf(
-      Seq(CheckablePermission(Permissions.Assignment.Create, mod1),
-        CheckablePermission(Permissions.Assignment.Update, mod1))
-    )
-
-    permissionChecks should be (Map(
-      Permissions.Assignment.Create -> Some(mod1),
-      Permissions.Assignment.Update -> Some(mod1)
-    ))
-
-    permissionChecks = permissionChecks.empty
-
-    PermissionCheckOneOf(
-      Seq(CheckablePermission(Permissions.Profiles.Search),
-        CheckablePermission(Permissions.Assignment.Read, mod1))
-    )
-
-    permissionChecks should be (Map(
-      Permissions.Profiles.Search -> None,
-      Permissions.Assignment.Read -> Some(mod1)
-    ))
-  }
 
 	@Test def linkedAssignmentToModule {
 		val assignment = Fixtures.assignment("my assignment")
@@ -190,4 +179,79 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 		}
 	}
 
+	@Test def checkOneOf {
+		val user = new User("custard")
+		user.setIsLoggedIn(true)
+		user.setFoundUser(true)
+		val currentUser = new CurrentUser(user, user)
+
+		val securityService = new SecurityService
+		val roleService = mock[RoleService]
+		roleService.getExplicitPermissionsFor(currentUser, mod1) returns (Stream(
+			PermissionDefinition(Permissions.Assignment.Create, Some(mod1), true)
+		))
+		securityService.roleService = roleService
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Assignment.Create, mod1),
+				CheckablePermission(Permissions.Assignment.Update, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Assignment.Create -> Some(mod1),
+			Permissions.Assignment.Update -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "OneFromTwoScoped", securityService)
+		}} catch {
+			case e: PermissionDeniedException => fail("One of the two scoped permissions should be enough")
+		}
+
+		clearAnyChecks()
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Profiles.Search),
+				CheckablePermission(Permissions.Assignment.Create, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Profiles.Search -> None,
+			Permissions.Assignment.Create -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "OneFromOneScopedOneScopeless", securityService)
+		}} catch {
+			case e: PermissionDeniedException => fail("The matching scoped permission should be enough")
+		}
+
+		clearAnyChecks()
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Profiles.Search),
+				CheckablePermission(Permissions.Assignment.Read, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Profiles.Search -> None,
+			Permissions.Assignment.Read -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "NoneFromOneScopedOneScopeless", securityService)
+			fail ("Neither permission should match")
+		}} catch {
+			case e: Exception =>
+		}
+
+		clearAnyChecks()
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "NoneFromEmpty", securityService)
+			fail("No permissions to check, so should fail")
+		}} catch {
+			case e: Exception =>
+		}
+	}
 }

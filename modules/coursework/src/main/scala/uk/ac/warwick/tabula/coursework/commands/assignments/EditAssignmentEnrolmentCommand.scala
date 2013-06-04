@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.commands.Unaudited
  * via the ModifyAssignmentCommand to rebuild views within an existing form
  */
 class EditAssignmentEnrolmentCommand(module: Module = null) extends ModifyAssignmentCommand(module) with Unaudited {
-	
-	PermissionCheckOneOf(
+
+	PermissionCheckAny(
 		Seq(CheckablePermission(Permissions.Assignment.Create, module),
 			CheckablePermission(Permissions.Assignment.Update, module))
 	)
@@ -26,7 +26,7 @@ class EditAssignmentEnrolmentCommand(module: Module = null) extends ModifyAssign
 
 	// not required
 	def contextSpecificValidation(errors: Errors) {}
-		
+
 	// not required
 	override def applyInternal(): Assignment = null
 }

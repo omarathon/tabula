@@ -16,33 +16,37 @@ import uk.ac.warwick.tabula.roles.Role
 import scala.reflect.ClassTag
 
 /**
- * Trait that allows classes to call ActionCheck() in their inline definitions 
+ * Trait that allows classes to call ActionCheck() in their inline definitions
  * (i.e. on construction). These are then evaluated on bind.
  */
 trait PermissionsChecking extends PermissionsCheckingMethods {
-	
-	var permissionChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+
+	var permissionsAnyChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+	var permissionsAllChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+
+	def PermissionCheckAny(checkablePermissions: => Iterable[CheckablePermission]) {
+		for (p <- checkablePermissions) checkAny(p.permission, p.scope)
+	}
 
 	def PermissionCheckAll(permission: Permission, scopes: => Iterable[PermissionsTarget]) {
-		for (scope <- scopes) check(permission, Some(scope))
+		for (scope <- scopes) checkAll(permission, Some(scope))
 	}
-	
-	def PermissionCheckOneOf(checkablePermissions: => Iterable[CheckablePermission]) {
-		for (p <- checkablePermissions) check(p.permission, p.scope)
-	}
-	
+
 	def PermissionCheck(scopelessPermission: ScopelessPermission) {
-		check(scopelessPermission, None)
+		checkAll(scopelessPermission, None)
 	}
-	
+
 	def PermissionCheck(permission: Permission, scope: PermissionsTarget) {
-		check(permission, Some(scope))
+		checkAll(permission, Some(scope))
 	}
-	
-	private def check(permission: Permission, scope: Option[PermissionsTarget]) {
-		permissionChecks += (permission -> scope)
+
+	private def checkAny(permission: Permission, scope: Option[PermissionsTarget]) {
+		permissionsAnyChecks += (permission -> scope)
 	}
-	
+
+	private def checkAll(permission: Permission, scope: Option[PermissionsTarget]) {
+		permissionsAllChecks += (permission -> scope)
+	}
 }
 
 trait Public extends PermissionsChecking
@@ -59,13 +63,13 @@ abstract trait PermissionsCheckingMethods extends Logging {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 			throw new ItemNotFoundException(feedback)
 		}
-	
+
 	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department) =
 		if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
 			logger.info("Not displaying marking workflow as it doesn't belong to specified department")
 			throw new ItemNotFoundException(markingWorkflow)
 		}
-	
+
 	def mustBeLinked(template: FeedbackTemplate, department: Department) =
 		if (mandatory(template).department.id != mandatory(department.id)) {
 			logger.info("Not displaying feedback template as it doesn't belong to specified department")
@@ -76,8 +80,8 @@ abstract trait PermissionsCheckingMethods extends Logging {
     if (mandatory(submission).assignment.id != mandatory(assignment).id) {
       logger.info("Not displaying submission as it doesn't belong to specified assignment")
       throw new ItemNotFoundException(submission)
-    }	
-	
+    }
+
 	/**
 	 * Returns an object if it is non-null and not None. Otherwise
 	 * it throws an ItemNotFoundException, which should get picked
