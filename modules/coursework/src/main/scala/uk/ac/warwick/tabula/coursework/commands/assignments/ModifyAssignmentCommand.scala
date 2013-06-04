@@ -255,12 +255,10 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		val upstreamAssignments = membershipService.getUpstreamAssignments(module)
 
-		upstreamAssignments.flatMap { ua =>
-			val uags = membershipService.getUpstreamAssessmentGroups(ua, academicYear)
-			uags map { uag =>
-				new UpstreamGroup(ua, uag)
-			}
-		}
+		for {
+			ua <- membershipService.getUpstreamAssignments(module)
+			uag <- membershipService.getUpstreamAssessmentGroups(ua, academicYear)
+		} yield new UpstreamGroup(ua, uag)
 	}
 
 
@@ -272,14 +270,14 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 		else {
 			val validGroups = assessmentGroups.filterNot(group => group.upstreamAssignment == null || group.occurrence == null).toList
 
-			validGroups.map{group =>
+			validGroups.flatMap{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
 				membershipService.getUpstreamAssessmentGroup(template)
-			}.flatten
+			}
 		}
 	}
 
