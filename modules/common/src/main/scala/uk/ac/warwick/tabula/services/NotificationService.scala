@@ -15,12 +15,12 @@ class NotificationService extends Logging {
 
 	def push(notification: Notification[_]){
 		// TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
-		logger.info("Notification pushed" + notification)
+		logger.info("Notification pushed - " + notification)
 		this.notify(notification) // for now we just hard call notify
 	}
 
 	def notify[A](notification: Notification[A]) {
-		logger.info("Notify listeners" + notification)
+		logger.info("Notify listeners - " + notification)
 		for (l <- listeners) l(notification)
 	}
 }

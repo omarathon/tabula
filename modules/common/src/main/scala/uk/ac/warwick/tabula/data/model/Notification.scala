@@ -20,6 +20,7 @@ import uk.ac.warwick.userlookup.User
  * need this information
  */
 trait Notification[A]{
+
 	val actor: User
 	val verb: String
 	val _object: A
@@ -30,8 +31,6 @@ trait Notification[A]{
 	def url: String
 	def recipients: Seq[User]
 
-	override def toString = List(actor, verb, _object).mkString("notification {", ", ", "}")
-
-
+	override def toString = List(actor.getFullName, verb, _object.getClass.getSimpleName).mkString("notification{", ", ", "}")
 
 }
