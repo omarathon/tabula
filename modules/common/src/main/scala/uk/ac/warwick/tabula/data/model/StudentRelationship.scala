@@ -12,28 +12,29 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.dao.DataRetrievalFailureException
+import uk.ac.warwick.tabula.roles.Supervisor
 
 @Entity
 @AccessType("field")
 /*
- * The relationship is made up of an agent (e.g. tutor), a relationship type and 
- * the SPR code of the student - so <some agent> is <some relationship e.g. personal tutor> 
+ * The relationship is made up of an agent (e.g. tutor), a relationship type and
+ * the SPR code of the student - so <some agent> is <some relationship e.g. personal tutor>
  * to <some spr code>
  */
 class StudentRelationship extends GeneratedId {
-	
+
 	@transient var profileService = Wire.auto[ProfileService]
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	var agent: String = _
-	
+
 	@Column(name="relationship_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.RelationshipUserType")
 	var relationshipType: RelationshipType = RelationshipType.PersonalTutor
-	
+
 	@Column(name="target_sprcode")
 	var targetSprCode: String = new String("")
-	
+
 	@Column(name = "uploaded_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var uploadedDate: DateTime = new DateTime
@@ -41,39 +42,39 @@ class StudentRelationship extends GeneratedId {
 	@Column(name = "start_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var startDate: DateTime = _
-	
+
 	@Column(name = "end_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var endDate: DateTime = _
-	
+
 	// assume that all-numeric value is a member (not proven though)
 	def isAgentMember: Boolean = agent match {
 		case null => false
 		case a => a.forall(_.isDigit)
 	}
-	
+
 	def agentMember: Option[Member] = isAgentMember match {
 		case true => profileService.getMemberByUniversityId(agent)
 		case false => None
 	}
-	
+
 	/**
 	 * If the agent matches a University ID, the Member is returned.
 	 * Otherwise the agent string is returned.
-	 * 
+	 *
 	 * TODO wildcard return types are bad practice
 	 */
 	def agentParsed: Any = agentMember.getOrElse(agent)
-	
+
 	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
-	
+
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
-	
+
 	def studentMember = profileService.getStudentBySprCode(targetSprCode) match {
 		case None => throw new DataRetrievalFailureException("No matching Member for SprCode, " + targetSprCode)
 		case Some(student) => student
 	}
-	
+
 	def studentId = SprCode.getUniversityId(targetSprCode)
 }
 
@@ -81,14 +82,14 @@ object StudentRelationship {
 	@transient var profileService = Wire.auto[ProfileService]
 
 	def apply(agent: String, relType: RelationshipType, targetSprCode: String) = {
-		
+
 		val rel = new StudentRelationship
 		rel.agent = agent
 		rel.relationshipType = relType
 		rel.targetSprCode = targetSprCode
 		rel
 	}
-	
+
 	def getLastNameFromAgent(agent: String) = {
 		if (agent.forall(_.isDigit)) {
 			profileService.getMemberByUniversityId(agent) match {
@@ -107,9 +108,11 @@ sealed abstract class RelationshipType(val dbValue: String, val description: Str
 
 object RelationshipType {
 	case object PersonalTutor extends RelationshipType("personalTutor", "Personal Tutor")
-	
+	case object Supervisor extends RelationshipType("supervisor", "Supervisor")
+
 	def fromCode(code: String) = code match {
 	  	case PersonalTutor.dbValue => PersonalTutor
+	  	case Supervisor.dbValue => Supervisor
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
@@ -125,7 +128,7 @@ class RelationshipUserType extends AbstractBasicUserType[RelationshipType, Strin
 	val nullObject = null
 
 	override def convertToObject(string: String) = RelationshipType.fromCode(string)
-	
+
 	override def convertToValue(relType: RelationshipType) = relType.dbValue
 
 }

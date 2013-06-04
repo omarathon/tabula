@@ -65,7 +65,7 @@ object Permissions {
 		// We don't Read a module, we ManageAssignments on it
 		case object ManageAssignments extends Permission("Manage assignments")
 		case object ManageSmallGroups extends Permission("Manage small groups")
-		
+
 		case object Create extends Permission("Add a module")
 		case object Update extends Permission("Edit a module")
 		case object Delete extends Permission("Remove a module")
@@ -164,6 +164,11 @@ object Permissions {
 			case object Read extends Permission("View a personal tutor")
 			case object Update extends Permission("Edit a personal tutor")
 			case object Delete extends Permission("Remove a personal tutor")
+		}
+
+		// Person's own supervisor ('upward' relationship)
+		object Supervisor {
+			case object Read extends Permission("View a supervisor")
 		}
 
 		object MeetingRecord {
