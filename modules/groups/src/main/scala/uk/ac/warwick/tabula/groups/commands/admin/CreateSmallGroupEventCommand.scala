@@ -11,8 +11,10 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import org.joda.time.LocalTime
 
 class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) extends ModifySmallGroupEventCommand {
+	import CreateSmallGroupEventCommand._
 	
 	PermissionCheck(Permissions.SmallGroups.Create, module)
 
@@ -20,7 +22,7 @@ class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) e
 
 	def applyInternal() = transactional() {
 		// We set the promised value here so that sub-commands work
-		val event = setPromisedValue(new SmallGroupEvent(group.get))
+		val event = setPromisedValue(new SmallGroupEvent)
 		copyTo(event)
 		
 		// FIXME This is to avoid the un-saved transient Hibernate bug
@@ -28,9 +30,16 @@ class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) e
 		
 		event
 	}
+	
+	def isEmpty = weekRanges.isEmpty && day == null && startTime == DefaultStartTime && endTime == DefaultEndTime
 
 	override def describeResult(d: Description, smallGroupEvent: SmallGroupEvent) = d.smallGroupEvent(smallGroupEvent)
 
 	override def describe(d: Description) = d.smallGroup(group.get).properties()
 	
+}
+
+object CreateSmallGroupEventCommand {
+	val DefaultStartTime = new LocalTime(12, 0)
+	val DefaultEndTime = DefaultStartTime.plusHours(1)
 }

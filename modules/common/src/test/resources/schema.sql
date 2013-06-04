@@ -1,4 +1,5 @@
 drop table auditevent if exists;
+drop sequence auditevent_seq if exists;
 create table auditevent (
 	id integer,
 	eventid varchar(36),
@@ -10,3 +11,5 @@ create table auditevent (
 	data varchar(4000) not null
 );
 create sequence auditevent_seq increment by 1 minvalue 1 maxvalue 999999999 start with 1;
+
+SET DATABASE TRANSACTION CONTROL MVCC;

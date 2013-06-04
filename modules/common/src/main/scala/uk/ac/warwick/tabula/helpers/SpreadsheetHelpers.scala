@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.DateFormats
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.data.model.Department
 
-trait SpreadsheetHelpers {
+object SpreadsheetHelpers {
 	
 	val MaxDepartmentNameLength = 31 - 11
 

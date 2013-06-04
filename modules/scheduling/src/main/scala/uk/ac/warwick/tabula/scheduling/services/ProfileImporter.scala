@@ -58,14 +58,14 @@ class ProfileImporter extends Logging {
 			}
 		}
 	}
-	
+
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
 		def photo() = try {
 			Option(membershipInterface.getPhotoById(universityId))
 		} catch {
 			case e: MembershipInterfaceException => None
 		}
-		
+
 		photo
 	}
 
@@ -103,7 +103,6 @@ object ProfileImporter {
 
 			crs.crs_code as sits_course_code,
 			crs.crs_ylen as course_year_length,
-			decode(crs.crs_schc,'UW PG', 'postgraduate', 'undergraduate') as ug_pg,
 
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
@@ -114,6 +113,7 @@ object ProfileImporter {
 			spr.prs_code as spr_tutor1,
 			--spr.spr_prs2 as spr_tutor2,
 
+			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,

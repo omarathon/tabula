@@ -50,12 +50,12 @@ class FormFieldTest extends TestBase with Mockito {
 		field.min = 3
 		field.max = 10
 		
-		val string = new StringSubmissionValue(field)
-		string.value = null
+		val number = new IntegerSubmissionValue(field)
+		number.value = null
 		
-		val errors = new BindException(string, "string")
+		val errors = new BindException(number, "string")
 		
-		field.validate(string, errors)
+		field.validate(number, errors)
 	}
 	
 	@Test def wordCountField {
@@ -68,7 +68,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("wordcount")
 			
 		val value = field.blankSubmissionValue
-		value.value = "not a word count"
+		value.value = null
 		
 		var errors = new BindException(value, "value")
 		field.validate(value, errors)
@@ -77,7 +77,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("value")
 		errors.getFieldError.getCode should be ("assignment.submit.wordCount.missing")
 		
-		value.value = "1"
+		value.value = 1
 		errors = new BindException(value, "value")
 		field.validate(value, errors)
 		
@@ -85,7 +85,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("value")
 		errors.getFieldError.getCode should be ("assignment.submit.wordCount.outOfRange")
 		
-		value.value = "100"
+		value.value = 100
 		errors = new BindException(value, "value")
 		field.validate(value, errors)
 		
@@ -93,7 +93,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("value")
 		errors.getFieldError.getCode should be ("assignment.submit.wordCount.outOfRange")
 		
-		value.value = "5"
+		value.value = 5
 		errors = new BindException(value, "value")
 		field.validate(value, errors)
 		

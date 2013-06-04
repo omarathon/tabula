@@ -37,10 +37,11 @@ object WeekRangesFormatter {
 	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
 	  */
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
-		formatterMap(year) format (ranges, dayOfWeek, numberingSystem)
+		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
 
-	class WeekRangesFormatterCache extends mutable.HashMap[AcademicYear, WeekRangesFormatter] {
-		override def default(year: AcademicYear) = new WeekRangesFormatter(year)
+	class WeekRangesFormatterCache {
+		private val map = mutable.HashMap[AcademicYear, WeekRangesFormatter]()
+		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangesFormatter(year))
 	}
 	
 	/* Pimp the TermFactory to include Vacation "Terms"
@@ -81,16 +82,19 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				.flatMap { settings => Option(settings.weekNumberingSystem) }
 				.getOrElse(department.weekNumberingSystem)
 		}
-
+		
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
 				format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
+			
+			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+				format(ranges.asScala.toSeq.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
 				
 			case Seq(event: SmallGroupEvent) => 
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 				
-			case _ => throw new IllegalArgumentException("Bad args")
+			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
 	}
 }

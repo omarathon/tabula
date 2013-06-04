@@ -24,14 +24,14 @@ class ModeOfAttendance {
 	var fullName: String = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	var lastUpdatedDate = DateTime.now	
-	
+	var lastUpdatedDate = DateTime.now
+
 	override def toString = fullName.toLowerCase()
-	
+
 	def fullNameToDisplay = {
 		if (code.equals("F"))
 			"full time"
-		else fullName.toLowerCase
+		else fullName
 	}
 
 }

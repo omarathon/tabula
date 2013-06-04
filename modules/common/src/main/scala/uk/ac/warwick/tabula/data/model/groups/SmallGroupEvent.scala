@@ -36,7 +36,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	}
 	
 	@ManyToOne
-	@JoinColumn(name = "group_id")
+	@JoinColumn(name = "group_id", insertable = false, updatable = false)
 	var group: SmallGroup = _
 	
 	// Store Week Ranges as ACADEMIC week numbers - so week 1 is the first week of Autumn term, week 1 of spring term is 15 or 16, etc.

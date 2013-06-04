@@ -23,6 +23,9 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import org.hibernate.validator.Valid
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -36,14 +39,13 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	var userLookup = Wire[UserLookupService]
 	var membershipService = Wire[AssignmentMembershipService]
 	
-	@Length(max = 200)
-	@NotEmpty(message = "{NotEmpty.smallGroupSetName}")
 	var name: String = _
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 	
-	@NotNull
 	var format: SmallGroupFormat = _
+	
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 	
 	// start complicated membership stuff
 	
@@ -84,13 +86,24 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	}
 	
 	def validate(errors: Errors) {
-		// TODO
+		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
+		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
+		
+		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
+		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
+		
+		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
+			errors.pushNestedPath("groups[" + index + "]")
+			cmd.validate(errors)
+			errors.popNestedPath()
+		}
 	}
 	
 	def copyFrom(set: SmallGroupSet) {
 		name = set.name
 		academicYear = set.academicYear
 		format = set.format
+		allocationMethod = set.allocationMethod
 		
 		// TODO AssessmentGroupItems
 		
@@ -104,13 +117,13 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.name = name
 		set.academicYear = academicYear
 		set.format = format
+		set.allocationMethod = allocationMethod
 		
 		// TODO AssessmentGroupItems
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		// CONSIDER How will deletions be handled?
 		set.groups.clear()
-		set.groups.addAll(groups.asScala.map(_.apply()).asJava)
+		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
 		if (set.members == null) set.members = new UserGroup
 		set.members.copyFrom(members)
@@ -160,6 +173,17 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 
 		// empty these out to make it clear that we've "moved" the data into members
 		massAddUsers = ""
+			
+		// If the last element of groups is both a Creation and is empty, disregard it
+		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
+			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
+			case _ => false
+		}
+		
+		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
+			groups.remove(groups.asScala.last)
+		
+		groups.asScala.foreach(_.onBind(result))
 	}
 
 }

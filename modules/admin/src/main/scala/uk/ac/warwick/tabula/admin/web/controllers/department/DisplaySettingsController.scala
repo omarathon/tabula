@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam
 class DisplaySettingsController extends AdminController {
 
 	@ModelAttribute def displaySettingsCommand(@PathVariable("dept") dept:Department) = new DisplaySettingsCommand(dept)
-	@ModelAttribute("returnTo") def returnTo(@RequestParam(value="returnTo", required=false) returnTo: String) = returnTo
 	
 	validatesSelf[DisplaySettingsCommand]
 
@@ -32,7 +31,8 @@ class DisplaySettingsController extends AdminController {
 		user: CurrentUser,  
 		cmd:DisplaySettingsCommand, errors:Errors) =
 			crumbed(Mav("admin/display-settings",
-				"department" -> dept
+				"department" -> dept,
+				"returnTo" -> getReturnTo("")
 			), dept)
 
 	@RequestMapping(method=Array(POST))

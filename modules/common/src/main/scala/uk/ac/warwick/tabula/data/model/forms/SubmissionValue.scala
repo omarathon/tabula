@@ -27,6 +27,8 @@ abstract class SubmissionValue extends BindListener {
 	val field: FormField
 	override def onBind(result: BindingResult) {}
 	def persist(value: SavedSubmissionValue)
+	
+	protected def safeToString(value: Any) = Option(value).map { _.toString }.getOrElse("")
 }
 
 class StringSubmissionValue(val field: FormField) extends SubmissionValue {
@@ -34,9 +36,14 @@ class StringSubmissionValue(val field: FormField) extends SubmissionValue {
 	def persist(ssv: SavedSubmissionValue) { ssv.value = value }
 }
 
+class IntegerSubmissionValue(val field: FormField) extends SubmissionValue {
+	var value: JInteger = _
+	def persist(ssv: SavedSubmissionValue) { ssv.value = safeToString(value) }
+}
+
 class BooleanSubmissionValue(val field: FormField) extends SubmissionValue {
 	var value: JBoolean = null
-	def persist(ssv: SavedSubmissionValue) { ssv.value = Option(value).map { _.toString }.getOrElse("") }
+	def persist(ssv: SavedSubmissionValue) { ssv.value = safeToString(value) }
 }
 
 class FileSubmissionValue(val field: FormField) extends SubmissionValue {

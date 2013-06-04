@@ -44,7 +44,12 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			m
 		}
 
-		val student = mock[StudentMember]
+		val student = transactional { tx =>
+			val m = new StudentMember("1170836")
+			m.userId = "studentmember"
+			session.save(m)
+			m
+		}
 
 		val relationship = transactional { tx =>
 			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
@@ -62,11 +67,11 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		createMeetingRecordCommand.description = "Lovely words"
 
 		// add a file
-		var uploadedFile =  new UploadedFile
-		var mpFile = mock[MultipartFile]
+		val uploadedFile =  new UploadedFile
+		val mpFile = mock[MultipartFile]
 		uploadedFile.upload.add(mpFile)
 
-		var fileAttach = new FileAttachment
+		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane"
 		uploadedFile.attached.add(fileAttach)
 
@@ -79,11 +84,8 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		// normally for single files the filename is set in the command as it is a path variable (I think!)
 		downloadCommand.filename = "Beltane"
-		val retSingle = downloadCommand.apply();
+		val retSingle = downloadCommand.apply()
 		val rendFile = retSingle.get
 		rendFile.filename should be ("Beltane")
-
-
-
 	}}
 }

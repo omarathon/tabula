@@ -49,7 +49,10 @@ abstract class Features {
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
 	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
+	@Value("${features.meetingRecordApproval:false}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
+	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
+	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -93,7 +96,10 @@ class FeaturesMessage {
 	var assignmentProgressTable = true
 	var assignmentProgressTableByDefault = false
 	var summativeFilter = true
+	var meetingRecordApproval = false
 	var smallGroupTeaching = false
+	var smallGroupTeachingStudentSignUp = false
+	var smallGroupTeachingRandomAllocation = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

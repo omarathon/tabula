@@ -63,6 +63,91 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
+	jQuery.fn.tabulaTimePicker = function() {
+		$(this).datetimepicker({
+			format: "hh:ii:ss",
+			weekStart: 1,
+			startView: 'day',
+			maxView: 'day',
+			autoclose: true
+		}).on('show', function(ev){
+			var d = new Date(ev.date.valueOf()),
+				  minutes = d.getUTCMinutes(),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+
+			if (seconds > 0 || millis > 0) {
+				d.setUTCSeconds(0);
+				d.setUTCMilliseconds(0);
+
+				var DPGlobal = $.fn.datetimepicker.DPGlobal;
+				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
+
+				$(this).datetimepicker('update');
+			}
+		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	};
+
+	// apply to a checkbox or radio button
+	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
+		var $this = $(this);
+		var name = $this.attr("name");
+		var $form = $this.closest('form');
+
+		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
+		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
+		var $changeTargets = $("input[name='" + name + "']", $form);
+		if (showWhenChecked) {
+			$changeTargets.change(function(){
+				if ($this.is(':checked'))
+					$slidingDiv.stop().slideDown('fast');
+				else
+					$slidingDiv.stop().slideUp('fast');
+			});
+			$this.trigger('change');
+		} else {
+			$changeTargets.change(function(){
+				if ($this.is(':checked'))
+					$slidingDiv.stop().slideUp('fast');
+				else
+					$slidingDiv.stop().slideDown('fast');
+			});
+			$this.trigger('change');
+		}
+	};
+
+
+	// submit bootstrap form using Ajax
+	jQuery.fn.ajaxSubmit = function(successCallback) {
+		$(this).on('submit', 'form', function(e){
+			e.preventDefault();
+			var $form = $(this);
+			$.post($form.attr('action'), $form.serialize(), function(data){
+				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
+
+				if(data.status == "error"){
+					// delete any old errors
+					$(scopeSelector + "span.error").remove();
+					$(scopeSelector + '.error').removeClass('error');
+					var error;
+					for(error in data.result){
+						var message = data.result[error];
+						var inputSelector = scopeSelector + "input[name='" + error + "']";
+						var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
+
+						var $field = $(inputSelector + ", " + textareaSelector);
+						$field.closest(".control-group").addClass("error");
+
+						// insert error message
+						$field.last().after('<span class="error help-inline">'+message+'</span>');
+					}
+				} else {
+					successCallback(data)
+				}
+			});
+		});
+	}
+
 	/*
 	 * Prepare a spinner and store reference in data store.
 	 * Add spinner-* classes to control positioning and automatic spinning
@@ -196,8 +281,9 @@
 		// form behavioural hooks
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
+		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
-		
+
 		// prepare spinnable elements
 		$('body').tabulaPrepareSpinners();
 
@@ -206,6 +292,7 @@
 			var $m = $(this);
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
+			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
 			$m.tabulaPrepareSpinners();
 		});
@@ -238,18 +325,18 @@
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
 		$('.use-popover').popover().click(function(){ return false; });
-			
+
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
 		$('.use-introductory').popover({
 			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
 		});
-		
+
 		$('.use-introductory:not(.auto)').each(function() {
 			var template = $(this).data('popover').options.template;
 			$(this).data('popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
 		});
-		
+
 		// auto-show introductory popover on load, based on class
 		$('.use-introductory.auto').popover('show');
 
@@ -257,7 +344,7 @@
 		$('#container').on('click', '.introductory .close', function(e) {
 			$(e.target).parents('.introductory').prev().popover('hide');
 		});
-		
+
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
 			// If intro text is changed to reflect new features, change its id to ensure end users see the new version

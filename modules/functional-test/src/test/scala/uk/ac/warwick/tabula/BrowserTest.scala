@@ -54,8 +54,8 @@ abstract class BrowserTest
 	 * try a block of code until it works or we give up. eventuallyAjax {}
 	 * just calls that with some sensible default timeouts.
 	 */
-	def eventuallyAjax(fun: =>Unit) = {
-		eventually(timeout(10 seconds), interval(200 millis)) (fun)
+	def eventuallyAjax(fun: =>Unit) {
+		eventually(timeout(10.seconds), interval(200.millis)) (fun)
 	}
 
 }

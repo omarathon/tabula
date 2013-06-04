@@ -50,7 +50,7 @@
 				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu pull-right">
-				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
+				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
 			</ul>
 		</div>
 
@@ -85,15 +85,15 @@
 		  <ul class="dropdown-menu pull-right">
 		  	<#if can_manage>
 					<li><a href="<@routes.moduleperms module />">
-						<i class="icon-user"></i> Edit module permissions
+						<i class="icon-user icon-fixed-width"></i> Edit module permissions
 					</a></li>
 				</#if>
 				
-				<li><a href="<@url page="/admin/module/${module.code}/groups/new" />"><i class="icon-group"></i> Add small groups</a></li>
+				<li><a href="<@routes.createset module />"><i class="icon-group icon-fixed-width"></i> Add small groups</a></li>
 				
 				<#if has_archived_groups>
 					<li><a class="show-archived-small-groups" href="#">
-							<i class="icon-eye-open"></i> Show archived small groups
+							<i class="icon-eye-open icon-fixed-width"></i> Show archived small groups
 						</a>
 					</li>
 				</#if>
@@ -127,7 +127,7 @@
 						<#list groupSet.groups as group>
 							<div class="group">
 								<h4 class="name">
-									${group.name}
+									${group.name!""}
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</h4>
 								
@@ -148,7 +148,7 @@
 						<#assign unallocatedSize = groupSet.unallocatedStudents?size /> 
 						<#if unallocatedSize gt 0>
 							<div class="alert">
-								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student" "students" /> have not been allocated to a group
+								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
 							</div>
 						</#if>
 						
@@ -164,9 +164,9 @@
 							<div class="btn-group">
 							  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
 							  <ul class="dropdown-menu pull-right">
-								<li><a href="<@url page="/admin/module/${module.code}/groups/${groupSet.id}/edit" />"><i class="icon-wrench"></i> Edit properties</a></li>
-								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/groups/${groupSet.id}/archive" />">
-									<i class="icon-folder-close"></i>
+								<li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
+								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
+									<i class="icon-folder-close icon-fixed-width"></i>
 									<#if groupSet.archived>
 										Unarchive groups
 									<#else> 
