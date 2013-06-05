@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.DateFormats
 
 /**
  * Notifications have a similar structure to Open Social Activities
@@ -20,6 +21,8 @@ import uk.ac.warwick.userlookup.User
  * need this information
  */
 trait Notification[A]{
+
+	final val dateFormatter = DateFormats.NotificationDate
 
 	val actor: User
 	val verb: String

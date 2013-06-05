@@ -12,8 +12,6 @@ class MeetingRecordApprovalNotification(meeting: MeetingRecord, _verb: String)
 
 	implicit var freemarker = Wire.auto[Configuration]
 
-	final val dateFormatter = DateFormats.NotificationDate
-
 	val actor = meeting.creator.asSsoUser
 	val verb = _verb
 	val target = Some(meeting.relationship)
