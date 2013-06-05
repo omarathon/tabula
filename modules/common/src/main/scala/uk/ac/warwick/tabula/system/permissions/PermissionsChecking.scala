@@ -107,7 +107,7 @@ abstract trait PermissionsCheckingMethods extends Logging {
 		else entity
 
 	/**
-	 * Checks target.permissionsAllChecks for ANDed permission, then starget.permissionsAnyChecks for ORed permissions.
+	 * Checks target.permissionsAllChecks for ANDed permission, then target.permissionsAnyChecks for ORed permissions.
 	 * Throws PermissionDeniedException if permissions are unmet or ItemNotFoundException (-> 404) if scope is missing.
 	 */
 	def permittedByChecks(securityService: SecurityService, user: CurrentUser, target: PermissionsChecking) {
@@ -126,7 +126,7 @@ abstract trait PermissionsCheckingMethods extends Logging {
 		}
 
 		// securityService.can() wrapped in exists() only throws if no perms match
-		if (!target.permissionsAnyChecks.exists ( _ match {
+		if (!target.permissionsAnyChecks.isEmpty && !target.permissionsAnyChecks.exists ( _ match {
 			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
 			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
 			case _ => {
