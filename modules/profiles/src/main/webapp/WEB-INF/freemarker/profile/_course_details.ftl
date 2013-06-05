@@ -1,7 +1,5 @@
 <section id="course-details">
-	<p>debug - in course details</p>
 	<#if profile.studyDetails??>
-		<p>debug - has study details</p>
 		<h4>Course details</h4>
 		<table class="course-info">
 			<tbody>
