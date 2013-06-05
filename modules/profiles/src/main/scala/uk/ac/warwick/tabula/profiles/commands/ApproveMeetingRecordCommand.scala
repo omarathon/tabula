@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.Daoisms
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordRejectedNotification
+import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
 
 class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends Command[MeetingRecordApproval]
 	with NotificationSource[MeetingRecord] with SelfValidating with Daoisms {
@@ -45,11 +45,9 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 	def describe(d: Description) = d.properties(
 		"meetingRecord" -> approval.meetingRecord.id)
 
-	def emit = new MeetingRecordRejectedNotification(approval)
-//	TODO this ..
-// def emit = if (approved){
-//		???
-//	} else {
-//		new MeetingRecordRejectedNotification(approval)
-//	}
+	def emit = if (approved)
+		new MeetingRecordApprovedNotification(approval)
+	else
+		new MeetingRecordRejectedNotification(approval)
+
 }
