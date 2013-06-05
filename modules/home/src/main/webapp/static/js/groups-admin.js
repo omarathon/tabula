@@ -49,7 +49,8 @@ $(function() {
 			textSelector: '.name h6',
 			useHandle: false,
 			selectables: '.students .drag-target',
-			scroll: true
+			scroll: true,
+			removeTooltip: 'Remove this student from this group'
 		})
 		.each(function(i, container) {
 			var $container = $(container);
@@ -61,6 +62,30 @@ $(function() {
 				return false;
 			});
 		});
+	
+	if ($('#allocateStudentsToGroupsCommand .student-list').length) {
+		// Manage button disabled-ness when there are items in/out the source and target lists
+		var manageButtons = function() {
+			var stillToAllocate = $('#allocateStudentsToGroupsCommand .student-list .drag-list li').length;
+			
+			if (stillToAllocate > 0) {
+				$('#allocateStudentsToGroupsCommand a.random').removeClass('disabled');
+			} else {
+				$('#allocateStudentsToGroupsCommand a.random').addClass('disabled');
+			}
+			
+			var alreadyAllocated = $('#allocateStudentsToGroupsCommand .groups .drag-list li').length;
+			
+			if (alreadyAllocated > 0) {
+				$('#allocateStudentsToGroupsCommand a.return-items').removeClass('disabled');
+			} else {
+				$('#allocateStudentsToGroupsCommand a.return-items').addClass('disabled');
+			}
+		};
+		
+		$('#allocateStudentsToGroupsCommand .student-list').on('changed.tabula', manageButtons);
+		manageButtons();
+	}
 });
 
 }(jQuery));
