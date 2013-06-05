@@ -1,29 +1,32 @@
 package uk.ac.warwick.tabula.profiles.notifications
 
-import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord}
+import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecordApproval, MeetingRecord}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import freemarker.template.Configuration
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.DateFormats
 
-class MeetingRecordApprovalNotification(meeting: MeetingRecord, _verb: String)
-	extends Notification[MeetingRecord] with FreemarkerRendering  {
+
+class MeetingRecordRejectedNotification(approval: MeetingRecordApproval) extends Notification[MeetingRecord]
+	with FreemarkerRendering  {
 
 	implicit var freemarker = Wire.auto[Configuration]
 
-	val actor = meeting.creator.asSsoUser
-	val verb = _verb
+	val meeting = approval.meetingRecord
+
+	val actor = approval.approver.asSsoUser
+	val verb = "reject"
 	val target = Some(meeting.relationship)
 	val _object = meeting
 
-	def title = "Meeting record approval required"
+	def title = "Meeting record rejected"
 	def url = Routes.profile.view(meeting.relationship.studentMember, meeting)
 	def content = renderToString("/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl", Map(
 		"dateFormatter" -> dateFormatter,
-		"verbed" ->  (if (verb == "create") "created" else "edited"),
 		"meetingRecord" -> meeting,
+		"verbed" -> "rejected",
+		"reason" -> approval.comments,
 		"profileLink" -> url
 	))
-	def recipients = meeting.pendingApprovers.map(_.asSsoUser)
+	def recipients = Seq(meeting.creator.asSsoUser)
 }
