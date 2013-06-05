@@ -24,7 +24,7 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Assign students to ${set.name}</h1>
+	<h1>Allocate students to ${set.name}</h1>
 	
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
