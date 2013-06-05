@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.groups.commands.admin.CreateSmallGroupSetCommand;
 
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._

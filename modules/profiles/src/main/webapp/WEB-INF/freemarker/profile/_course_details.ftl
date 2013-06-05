@@ -1,5 +1,7 @@
 <section id="course-details">
+	<p>debug - in course details</p>
 	<#if profile.studyDetails??>
+		<p>debug - has study details</p>
 		<h4>Course details</h4>
 		<table class="course-info">
 			<tbody>
@@ -22,12 +24,12 @@
 				<tr>
 					<th>Department</th>
 					<td>
-						<#if profile.studyDetails.studyDepartment??>		
+						<#if profile.studyDetails.studyDepartment??>
 							${profile.studyDetails.studyDepartment.name} (${profile.studyDetails.studyDepartment.code?upper_case})
 						<#else>
-							<#if profile.studyDetails.route.department.name??>
+							<#if (profile.studyDetails.route.department.name)??>
 								${profile.studyDetails.route.department.name}
-							</#if>							
+							</#if>
 						</#if>
 					</td
 				</tr>
@@ -38,9 +40,9 @@
 							${profile.studyDetails.intendedAward}
 						</#if>
 					</td>
-				</tr>										
+				</tr>
 			</tbody>
-			<tbody>		
+			<tbody>
 				<tr>
 					<th>Year of study</th>
 					<td>
@@ -69,7 +71,7 @@
 							<@fmt.date date=profile.studyDetails.beginDate includeTime=false />
 						</#if>
 					</td>
-				</tr>					
+				</tr>
 				<tr>
 					<th>End date</th>
 					<td>
@@ -80,21 +82,21 @@
 							<@fmt.date date=profile.studyDetails.expectedEndDate includeTime=false/> (expected)
 						</#if>
 					</td>
-				</tr>	
+				</tr>
 			</tbody>
 			<tbody>
 				<tr>
 					<th>UG/PG</th>
 					<td>
-						<#if profile.studyDetails.ugPg??>						
-							${profile.studyDetails.ugPg}
+						<#if (profile.studyDetails.route.degreeType)??>
+							${profile.studyDetails.route.degreeType.toString}
 						</#if>
 					</td>
 				</tr>
 				<tr>
 					<th>Attendance</th>
 					<td>
-						<#if profile.studyDetails.modeOfAttendance??>						
+						<#if profile.studyDetails.modeOfAttendance??>
 							${profile.studyDetails.modeOfAttendance.fullNameToDisplay}
 						</#if>
 					</td>

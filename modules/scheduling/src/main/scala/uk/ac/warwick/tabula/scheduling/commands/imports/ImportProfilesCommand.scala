@@ -61,8 +61,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			session.flush
 			session.clear
 		}		
-	}	
-	
+	}
+
 	/** Import basic info about all members in ADS, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 	def doMemberDetails {
 		benchmark("Import all member details") {
