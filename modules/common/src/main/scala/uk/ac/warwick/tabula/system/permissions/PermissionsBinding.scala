@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.system.permissions
 
 import scala.collection.JavaConversions._
-import org.springframework.util.Assert
 import org.springframework.web.bind.support.WebBindingInitializer
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.InvocableHandlerMethod
@@ -24,6 +23,7 @@ import uk.ac.warwick.tabula.system.CustomDataBinder
  */
 trait PermissionsBinding
 		extends CustomDataBinder
+		with PermissionsCheckingMethods
 		with Logging {
 
 	val securityService: SecurityService // abstract dependency
@@ -33,30 +33,6 @@ trait PermissionsBinding
 
 	// Permissions checking
 	if (target.isInstanceOf[PermissionsChecking]) {
-		val checkThis = target.asInstanceOf[PermissionsChecking]
-
-		Assert.isTrue(
-			!checkThis.permissionsAnyChecks.isEmpty || !checkThis.permissionsAllChecks.isEmpty || target.isInstanceOf[Public],
-			"Bind target " + target.getClass + " must specify permissions or extend Public"
-		)
-
-		for (check <- checkThis.permissionsAllChecks) check match {
-			case (permission: Permission, Some(scope)) => securityService.check(user, permission, scope)
-			case (permission: ScopelessPermission, _) => securityService.check(user, permission)
-			case _ =>
-				// We're trying to do a permissions check against a non-existent scope - 404
-				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
-				throw new ItemNotFoundException()
-		}
-
-		if (!checkThis.permissionsAnyChecks.exists ( _ match {
-			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
-			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
-			case _ => {
-				// We're trying to do a permissions check against a non-existent scope - 404
-				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
-				false
-			}
-		})) throw new PermissionDeniedException(user, checkThis.permissionsAnyChecks.head._1, checkThis.permissionsAnyChecks.head._2)
+		permittedByChecks(securityService, user, target.asInstanceOf[PermissionsChecking])
 	}
 }

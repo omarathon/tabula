@@ -32,15 +32,12 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 	var securityService: SecurityService
 
 	def restricted[A <: PermissionsChecking](something: => A): Option[A] =
-		if (something.permissionsAllChecks forall(_ match {
-			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
-			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
-			case _ =>
-				// We're trying to do a permissions check against a non-existent scope - 404
-				logger.warn("Permissions check throwing item not found - this should be caught in check (restricted " + something + ")")
-				throw new ItemNotFoundException()
-		})) Some(something)
-		else None
+		try {
+			permittedByChecks(securityService, user, something)
+			Some(something)
+		} catch {
+			case e:Exception => None
+		}
 
 	def restrictedBy[A <: PermissionsChecking](fn: => Boolean)(something: => A): Option[A] =
 		if (fn) restricted(something)
