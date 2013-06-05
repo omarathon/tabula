@@ -19,11 +19,7 @@ import scala.reflect._
  * the nullObject and nullValue values to tell it what value to
  * use in the case of null coming from other direction
  */
-abstract class AbstractBasicUserType[A <: Object: ClassTag, B: ClassTag] extends UserType {
-
-	// Store information about what A is.
-	protected val tag: ClassTag[A] = classTag[A]
-	protected val vtag: ClassTag[B] = classTag[B]
+abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] extends UserType {
 
 	val basicType: AbstractSingleColumnStandardBasicType[B]
 	val nullObject: A // what to use when NULL comes out of the DB
@@ -34,20 +30,21 @@ abstract class AbstractBasicUserType[A <: Object: ClassTag, B: ClassTag] extends
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
 		basicType.nullSafeGet(resultSet, names(0)) match {
 			case s: Any if s == nullValue => nullObject
-			case s: Any if vtag.runtimeClass.isInstance(s) => convertToObject(s.asInstanceOf[B])
+			case b: B => convertToObject(b)
 			case null => nullObject
 		}
 	}
 
-	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) =
+	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) {
 		basicType.nullSafeSet(stmt, toValue(value), index)
+  }
 
 	private final def toValue(value: Any): B = value match {
-		case obj: Any if tag.runtimeClass.isInstance(value) => convertToValue(value.asInstanceOf[A])
+		case a: A => convertToValue(a)
 		case null => nullValue
 	}
 
-	override def returnedClass = tag.runtimeClass
+	override def returnedClass = classTag[A].runtimeClass
 
 	override def isMutable = false
 	override def equals(x: Object, y: Object) = x == y

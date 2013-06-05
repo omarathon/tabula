@@ -63,7 +63,19 @@ TODO: More options; Random allocation function.
     var DataName = "tabula-dnd";
 
     var DragAndDrop = function(element, options) {
+    		if (options && typeof(options) === 'object') this.options = options;
+    		else this.options = {};
+
+				var itemName = this.options.itemName || 'item';
+				var textSelector = this.options.textSelector;
+				
+				var useHandle = this.options.useHandle;
+				if (typeof(useHandle) === 'undefined') useHandle = true;
+				
+				var handleClass = this.options.handle || '.handle';
+    
         var sortables = '.drag-list';
+        var selectables = this.options.selectables || sortables;
         var $el = $(element);
         var self = this;
         var first_rows = {};
@@ -77,7 +89,7 @@ TODO: More options; Random allocation function.
             var $targets = $el.find(sortables).not('.return-list');
 
             // shuffle the items
-            var items = $sourceList.find(".student").sort(function(){
+            var items = $sourceList.find("li").sort(function(){
                 return Math.random() > 0.5 ? 1 : -1;
             });
 
@@ -155,14 +167,19 @@ TODO: More options; Random allocation function.
         };
 
         // Wire button to trigger returnItems
-        $el.find('.return-items').click(function() {
+        $el.find('.return-items').click(function(e) {
             self.returnItems();
+				
+						e.preventDefault();
+						e.stopPropagation();
+						return false;
         });
 
         var deleteLinkHtml = ' <a href=# class="delete btn btn-mini"><i class="icon-remove"></i> Remove</a>';
 
-		var popoverGenerator = function() {
+				var popoverGenerator = function() {
             var customHeader = $(this).data('pre') || ''; // data-pre attribute
+            var prelude = $(this).data('prelude') || '';
             var lis = $(this)
                 .closest('.drag-target')
                 .find(sortables)
@@ -170,11 +187,17 @@ TODO: More options; Random allocation function.
                 .map(function(i, li){
                     var $li = $(li);
                     var id = $li.find('input').val();
-                    var text = (hasReturnList)? ($li.text()+deleteLinkHtml) : ($li.text());
+                    
+                    var text;
+                    if (textSelector) text = $li.find(textSelector).text();
+                		else text = $li.text();
+                    
+                    if (hasReturnList) text += deleteLinkHtml;
+
                     return '<li data-item-id="'+id+'">'+text+'</li>';
                 })
                 .toArray();
-            return customHeader + '<ul>'+lis.join('')+'</ul>';
+            return customHeader + prelude + '<ul>'+lis.join('')+'</ul>';
         };
 
         // A button to show the list in a popover.
@@ -223,12 +246,13 @@ TODO: More options; Random allocation function.
         });
 
         var $sortables = $el.find(sortables);
-
+        var $selectables = $el.find(selectables);
+								
         var draggableOptions = {
-            scroll: false,
+            scroll: this.options.scroll || false,
             revert: 'invalid',
-            handle: '.handle',
             containment: $el,
+            cursorAt: { top: 15, left: 0 },
 
             start: function(event, ui) {
                 var $li = $(this);
@@ -253,8 +277,12 @@ TODO: More options; Random allocation function.
             helper: function(event) {
                 var $element = $(event.currentTarget);
                 var multidrag = $element.hasClass('ui-selected');
-                var msg = $element.text();
-                if (multidrag) msg = $element.closest('ul').find('.ui-selected').length + " items";
+                
+                var msg;
+                if (textSelector) msg = $element.find(textSelector).text();
+                else msg = $element.text();
+                
+                if (multidrag) msg = $element.closest('ul').find('.ui-selected').length + " " + itemName + "s";
                 return $('<div>')
                     .addClass('label')
                     .addClass('multiple-items-drag-placeholder')
@@ -267,17 +295,24 @@ TODO: More options; Random allocation function.
             }
 
         };
+        
+        if (useHandle) draggableOptions.handle = handleClass;
 
         // Drag any list item by its handle
-        $sortables.find('li')
-            .draggable(draggableOptions)
-            .prepend('<i class="icon-th icon-white handle"></i> ');
+        var draggables = 
+        	$sortables.find('li')
+            .draggable(draggableOptions);
+            
+        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass + '"></i> ');
 
         // Drag-select
-        $sortables.selectable({
-                filter: 'li',
-                cancel: '.handle'
-            });
+        var dragSelectOptions = {
+            filter: 'li'
+        };
+        if (useHandle) dragSelectOptions.cancel = handleClass;
+        else dragSelectOptions.cancel = 'li';
+        
+        $selectables.selectable(dragSelectOptions);
 
         var updateAllCounts = function() {
             $el.find('.drag-target').each(function(i, dragTarget){

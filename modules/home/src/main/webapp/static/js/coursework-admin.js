@@ -232,8 +232,12 @@ $(function() {
 		.dragAndDrop()
 		.each(function(i, container) {
 			var $container = $(container);
-			$container.find('a.random').on('click', function() {
+			$container.find('a.random').on('click', function(e) {
 				$container.dragAndDrop('randomise');
+				
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
 			})
 		});
 	

@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
 // scalastyle:off magic.number
 object Fixtures {
@@ -55,6 +57,16 @@ object Fixtures {
 	def assignment(name:String) = {
 		val a = new Assignment
 		a
+	}
+	
+	def smallGroupSet(name:String) = {
+		val s = new SmallGroupSet
+		s
+	}
+	
+	def smallGroup(name:String) = {
+		val s = new SmallGroup
+		s
 	}
 	
 	def upstreamAssignment(departmentCode:String, number:Int) = {

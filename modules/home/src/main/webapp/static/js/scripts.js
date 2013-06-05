@@ -411,5 +411,71 @@
 		//$('table.sticky-table-headers').stickyTableHeaders({
 		//	fixedOffset: $('#navigation')
 		//});
+		
+		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
+		if (navigator.platform.indexOf('Mac') != -1) {
+			$('kbd.keyboard-control-key').html('&#8984; Cmd');
+		}
+		
+		// Fixed to top on scroll
+		if ($('.fix-on-scroll').length) {
+			var gutter = $('#navigation').height();
+		
+			$(window).scroll(function() {
+				var scrollTop = $(this).scrollTop() + gutter;
+				
+				$('.fix-on-scroll').each(function() {
+					var $this = $(this);
+					
+					var $scrollContainer = $this.closest('.fix-on-scroll-container');
+					if ($scrollContainer.length == 0) $scrollContainer = $('body');
+					
+					var height = $this.height();
+					var maxHeight = $(window).height() - gutter;
+					var tooHigh = (height > maxHeight);
+					
+					var floor = $scrollContainer.offset().top + $scrollContainer.height();
+					
+					var isFixed = $this.data('is-fixed');
+					var pinnedToFloor = $this.data('is-pinned-to-floor');
+				
+					var offsetTop = (isFixed) ? $this.data('original-offset') : $this.offset().top;
+					var pinToFloor = (scrollTop + height) > floor;
+					
+					if (!tooHigh && scrollTop > offsetTop && !isFixed) {
+						// Fix it
+						$this.data('original-offset', offsetTop);
+						$this.data('original-width', $this.css('width'));
+						$this.data('original-position', $this.css('position'));
+						$this.data('original-top', $this.css('top'));
+						
+						$this.css({
+							width: $this.width(),
+							position: 'fixed',
+							top: gutter
+						});
+						
+						$this.data('is-fixed', true);
+					} else if (!tooHigh && isFixed && pinToFloor) {
+						// Pin to the floor
+						var diff = (scrollTop + height) - floor;
+						
+						$this.css('top', gutter - diff);
+						$this.data('is-pinned-to-floor', true);
+					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
+						// Un-pin from the floor
+						$this.css('top', gutter);
+						$this.data('is-pinned-to-floor', false);
+					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
+						// Un-fix it
+						$this.css('width', $this.data('original-width'));
+						$this.css('position', $this.data('original-position'));
+						$this.css('top', $this.data('original-top'));
+						
+						$this.data('is-fixed', false);
+					}
+				});
+			});
+		}
 	}); // on ready
 })(jQuery);

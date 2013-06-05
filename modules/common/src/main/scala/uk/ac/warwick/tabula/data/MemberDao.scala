@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
@@ -16,6 +16,7 @@ trait MemberDao {
 	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getBySprCode(sprCode: String): Option[StudentMember]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
@@ -57,6 +58,11 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		session.newCriteria[Member]
 			.add(is("universityId", universityId.trim))
 			.uniqueResult
+	
+	def getAllWithUniversityIds(universityIds: Seq[String]) = 
+		session.newCriteria[Member]
+			.add(in("universityId", universityIds map { _.trim }))
+			.seq
 	
 	def getBySprCode(sprCode: String) = 
 		session.newCriteria[StudentMember]

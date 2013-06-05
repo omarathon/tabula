@@ -73,6 +73,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 }
 
+// TODO DRY this out
 object GrantedRole {
 	def apply[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
 		(scope match {
@@ -96,16 +97,18 @@ object GrantedRole {
 	}
 	
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
-		case t if t <:< classTag[Department] => classOf[DepartmentGrantedRole]
-		case t if t <:< classTag[Module] => classOf[ModuleGrantedRole]
-		case t if t <:< classTag[Member] => classOf[MemberGrantedRole]
-		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedRole]
-		case t if t <:< classTag[SmallGroup] => classOf[SmallGroupGrantedRole]
-		case t if t <:< classTag[SmallGroupEvent] => classOf[SmallGroupEventGrantedRole]
+		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedRole]
+		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedRole]
+		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedRole]
+		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedRole]
+		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedRole]
+		case t if isSubtype(t, classTag[SmallGroupEvent]) => classOf[SmallGroupEventGrantedRole]
 		case _ => classOf[GrantedRole[_]]
 	}
-	
-	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
+
+  private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
+
+  def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
 	def discriminator[A <: PermissionsTarget : ClassTag] = 
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
