@@ -72,10 +72,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		meetingRecordDao.saveOrUpdate(meeting)
 
 		if (features.meetingRecordApproval){
-			val meetingApprovals = updateMeetingApproval(meeting)
-			meetingApprovals.foreach(meetingApproval => {
-				//TODO-Ritchie notification
-			})
+			updateMeetingApproval(meeting)
 		}
 
 		meeting
