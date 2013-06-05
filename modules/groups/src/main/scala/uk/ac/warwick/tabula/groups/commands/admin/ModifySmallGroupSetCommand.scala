@@ -86,11 +86,11 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	}
 	
 	def validate(errors: Errors) {
-		if (!name.hasText) errors.rejectValue("name", "NotEmpty.smallGroupSetName")
-		else if (name.orEmpty.length > 200) errors.rejectValue("name", "Length.smallGroupSetName", Array[Object](200: JInteger), "")
+		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
+		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 		
-		if (format == null) errors.rejectValue("format", "NotNull.format")
-		if (allocationMethod == null) errors.rejectValue("allocationMethod", "NotNull.allocationMethod")
+		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
+		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
 		
 		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
 			errors.pushNestedPath("groups[" + index + "]")
@@ -175,15 +175,13 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		massAddUsers = ""
 			
 		// If the last element of groups is both a Creation and is empty, disregard it
-		if (!groups.isEmpty()) {
-			val last = groups.asScala.last
-			
-			last match {
-				case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty =>
-					groups.remove(last)
-				case _ => // do nothing
-			}
+		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
+			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
+			case _ => false
 		}
+		
+		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
+			groups.remove(groups.asScala.last)
 		
 		groups.asScala.foreach(_.onBind(result))
 	}

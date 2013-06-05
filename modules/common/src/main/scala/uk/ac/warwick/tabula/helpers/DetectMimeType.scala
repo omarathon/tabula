@@ -6,7 +6,7 @@ import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MimeTypes
 import org.apache.tika.io.TikaInputStream;
 
-trait DetectMimeType {
+object DetectMimeType {
 	def detectMimeType(file: File): String = {
 			val detector = new DefaultDetector(MimeTypes.getDefaultMimeTypes())
 			var metadata = new Metadata

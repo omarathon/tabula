@@ -54,6 +54,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 
 }
 
+// TODO DRY this out
 object GrantedPermission {
 	type OverrideType = Boolean
 	val Allow: OverrideType = true
@@ -81,14 +82,16 @@ object GrantedPermission {
 	} 
 	
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
-		case t if t <:< classTag[Department] => classOf[DepartmentGrantedPermission]
-		case t if t <:< classTag[Module] => classOf[ModuleGrantedPermission]
-		case t if t <:< classTag[Member] => classOf[MemberGrantedPermission]
-		case t if t <:< classTag[Assignment] => classOf[AssignmentGrantedPermission]
-		case t if t <:< classTag[SmallGroup] => classOf[SmallGroupGrantedPermission]
-		case t if t <:< classTag[SmallGroupEvent] => classOf[SmallGroupEventGrantedPermission]
+		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedPermission]
+		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedPermission]
+		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedPermission]
+		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedPermission]
+		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedPermission]
+		case t if isSubtype(t, classTag[SmallGroupEvent]) => classOf[SmallGroupEventGrantedPermission]
 		case _ => classOf[GrantedPermission[_]]
 	}
+  
+  private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 	
 	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
 	def discriminator[A <: PermissionsTarget : ClassTag] = 

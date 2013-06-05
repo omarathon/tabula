@@ -51,9 +51,9 @@ trait ControllerViews {
 		case Some(returnTo :: tail) => returnTo
 		case _ => defaultUrl
 	}
-
-	def Redirect(path: String) = Mav("redirect:" + getReturnTo(path))
-
+	
+	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
+	
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
 
 	private def currentUri = requestInfo.get.requestedUri

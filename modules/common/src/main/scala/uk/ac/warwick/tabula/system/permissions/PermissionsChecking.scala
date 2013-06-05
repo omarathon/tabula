@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException, ItemNotFoundException}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -53,11 +54,17 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 
 trait Public extends PermissionsChecking
 
-abstract trait PermissionsCheckingMethods extends Logging {
+trait PermissionsCheckingMethods extends Logging {
 	def mustBeLinked(assignment: Assignment, module: Module) =
 		if (mandatory(assignment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assignment as it doesn't belong to specified module")
 			throw new ItemNotFoundException(assignment)
+		}
+	
+	def mustBeLinked(set: SmallGroupSet, module: Module) =
+		if (mandatory(set).module.id != mandatory(module).id) {
+			logger.info("Not displaying small group set as it doesn't belong to specified module")
+			throw new ItemNotFoundException(set)
 		}
 
 	def mustBeLinked(feedback: Feedback, assignment: Assignment) =
@@ -89,16 +96,16 @@ abstract trait PermissionsCheckingMethods extends Logging {
 	 * it throws an ItemNotFoundException, which should get picked
 	 * up by an exception handler to display a 404 page.
 	 */
-	def mandatory[A](something: A)(implicit tag: ClassTag[A]): A = something match {
-		case thing: Any if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A : ClassTag](something: A): A = something match {
+		case thing: A => thing
 		case _ => throw new ItemNotFoundException()
 	}
 	/**
 	 * Pass in an Option and receive either the actual value, or
 	 * an ItemNotFoundException is thrown.
 	 */
-	def mandatory[A](option: Option[A])(implicit tag: ClassTag[A]): A = option match {
-		case Some(thing: Any) if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A : ClassTag](option: Option[A]): A = option match {
+		case Some(thing: A) => thing
 		case _ => throw new ItemNotFoundException()
 	}
 

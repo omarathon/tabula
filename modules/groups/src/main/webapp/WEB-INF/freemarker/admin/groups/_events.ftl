@@ -11,23 +11,11 @@
 	<#macro modal group_index event_index>								
 		<div id="group${group_index}-event${event_index}-modal" class="modal hide fade refresh-form" tabindex="-1" role="dialog" aria-labelledby="group${group_index}-event${event_index}-modal-label" aria-hidden="true">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	    	<h3 id="group${group_index}-event${event_index}-modal-label"><#nested/></h3>
 			</div>	
 			<div class="modal-body">				
 				<@form.labelled_row "tutors" "Tutors">
-					<div id="group${group_index}-event${event_index}-tutor-list">
-						<@form.userpicker path="tutors" list=true multiple=true spanClass="span5" />
-					</div>
-					<script>
-						jQuery('#group${group_index}-event${event_index}-tutor-list').on('click', function(e){
-							e.preventDefault();
-							var name = jQuery(this).data('expression');
-							var newButton = jQuery('<div><input type="text" class="text" name="'+name+'" /></div>');
-							jQuery('#group${group_index}-event${event_index}-tutor-list button').before(newButton);
-							return false;
-						});
-					</script>
+					<@form.userpicker path="tutors" spanClass="span5" />
 				</@form.labelled_row>
 				
 				<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">
@@ -86,90 +74,103 @@
 				</@form.labelled_row>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Save</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Done</button>
 			</div>
 		</div>
 	</#macro>
 
-	<#list groups?chunk(2) as row>
-		<div class="row-fluid">
-			<#list row as group>
-				<#assign groupIndex=(row_index * 2) + group_index />
-				<@spring.nestedPath path="groups[${groupIndex}]">
-					<@spring.bind path="delete">
-						<#assign deleteGroup=status.actualValue />
-					</@spring.bind>
-				
-					<div class="span6 group<#if deleteGroup> deleted</#if>">
-						<h4 class="name">
-							${group.name!""}
-							<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
-						</h4>
+	<div class="striped-section-contents">
+		<#list groups as group>
+			<@spring.nestedPath path="groups[${group_index}]">
+				<@spring.bind path="delete">
+					<#assign deleteGroup=status.actualValue />
+				</@spring.bind>
+			
+				<div class="item-info<#if deleteGroup> deleted</#if>">
+					<div class="row-fluid">
+						<div class="span10">
+							<h3 class="name">
+								${group.name!""}
+								<#if !newRecord>
+									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+								</#if>	
+							</h3>
+						</div>
+						<div class="span2">
+							<#if !deleteGroup>
+								<@spring.nestedPath path="events[${group.events?size}]">
+									<@button group_index=group_index event_index=group.events?size extra_classes="pull-right">
+										Add event
+									</@button>
+									
+									<@modal group_index group.events?size>
+										Add event for ${group.name!""}
+									</@modal>
+								</@spring.nestedPath>
+							<#else>
+								<div><span class="label label-important pull-right" data-toggle="tooltip" title="This group, any events and any allocation will be deleted when you click Save">Marked for deletion</span></div>
+							</#if>
+						</div>
+					</div>
 					
-						<ul class="events unstyled">
-							<#list group.events as event>
-								<@spring.nestedPath path="events[${event_index}]">
-									<li>
-										<@f.hidden path="delete" id="group${groupIndex}_event${event_index}_delete" />
-									
-										<#-- TODO display tutors -->
-									
-										<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
-										<#if event.weekRanges?size gt 0 && event.day??>
-											<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
-										<#elseif event.weekRanges?size gt 0>
-											[no day of week selected]
-										<#else>
-											[no dates selected]
-										</#if>
+					<div class="row-fluid">
+						<div class="span12">
+							<ul class="events unstyled">
+								<#list group.events as event>
+									<@spring.nestedPath path="events[${event_index}]">
+										<li>
+											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 										
-										${(event.day.shortName)!"[no day selected]"} 
-										<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
-										- 
-										<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>,
-										${event.location!"[no location]"}
+											<#-- TODO display tutors -->
 										
-										<#if !deleteGroup>
-											<@button groupIndex event_index "btn-mini btn-info">
-												Edit
-											</@button>
-											<@modal groupIndex event_index>
+											<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
+											<#if event.weekRanges?size gt 0 && event.day??>
+												<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
+											<#elseif event.weekRanges?size gt 0>
+												[no day of week selected]
+											<#else>
+												[no dates selected]
+											</#if>
+											
+											${(event.day.shortName)!"[no day selected]"} 
+											<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
+											- 
+											<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>,
+											${event.location!"[no location]"}
+											
+											<@modal group_index event_index>
 												Edit event for ${group.name!""}
 											</@modal>
 											
-											<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${groupIndex}_event${event_index}_delete">
-												<i class="icon-remove"></i>
-											</button>
-											<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${groupIndex}_event${event_index}_delete">
-												<i class="icon-undo"></i>
-											</button>
-										</#if>
-									</li>
-								</@spring.nestedPath>
-							</#list>
-							
-							<#if !deleteGroup>
-								<@spring.nestedPath path="events[${group.events?size}]">
-									<li>
-										<@button groupIndex group.events?size>
-											Add event
-										</@button>
-										
-										<@modal groupIndex group.events?size>
-											Add event for ${group.name!""}
-										</@modal>
-									</li>
-								</@spring.nestedPath>
-							</#if>
-						</ul>
+											<#if !deleteGroup>
+												<div class="buttons pull-right">
+													<@button group_index event_index "btn-mini btn-info">
+														Edit
+													</@button>
+												
+													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="icon-remove"></i>
+													</button>
+													<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="icon-undo"></i>
+													</button>
+												</div>
+											</#if>
+										</li>
+									</@spring.nestedPath>
+								</#list>
+							</ul>
+						</div>
 					</div>
-				</@spring.nestedPath>
-			</#list>
-		</div>
-	</#list>
+				</div>
+			</@spring.nestedPath>
+		</#list>
+	</div>
 	
 	<script type="text/javascript">
 		jQuery(function($) {
+			$('span[data-toggle="tooltip"]').tooltip();
+		
 			$('button[data-toggle="elements"][data-target]').on('click', function() {
 				var $button = $(this);
 				var $target = $($button.data('target'));
@@ -227,7 +228,7 @@
 				}
 			});
 			
-			$('.group button[data-toggle="delete"]').each(function() {
+			$('.events button[data-toggle="delete"]').each(function() {
 				var $button = $(this);
 				var $li = $button.closest('li');
 				var $target = $($button.data('target'));
@@ -268,5 +269,9 @@
 		.datetimepicker-hours thead .switch { visibility: hidden; }
 		.datetimepicker-hours thead th { height: 0px; }
 		.datetimepicker-minutes thead .switch { visibility: hidden; }
+		
+		.item-info .events li { line-height: 30px; padding: 0 3px; }
+		.item-info .events li button { margin-top: 0; }
+		.item-info .events li:hover { background: #dddddd; }
 	</style>
 </#escape>
