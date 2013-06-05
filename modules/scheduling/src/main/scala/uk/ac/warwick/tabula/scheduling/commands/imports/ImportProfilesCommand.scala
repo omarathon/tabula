@@ -94,12 +94,12 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			val user = userLookup.getUserByUserId(usercode)
 
 			profileImporter.userIdAndCategory(member) match {
-				case membInfo: MembershipInformation => {
+				case Some(membInfo: MembershipInformation) => {
 					val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
 					session.flush
 					for (member <- members) session.evict(member)
 				}
-				case _ => logger.warn("Student is no longer in uow_current_members in membership - not updating")
+				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
 			}
 		}
 	}

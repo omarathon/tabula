@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.scheduling.services
 import java.sql.ResultSet
 import java.sql.Types
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.LocalDate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -75,14 +76,14 @@ class ProfileImporter extends Logging {
 		}
 
 	def userIdAndCategory(member: Member): Option[MembershipInformation] = {
-		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)) match {
-			case mem: MembershipMember => Some (
+		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
+			case Nil => None
+			case mem: List[MembershipMember] => Some (
 					MembershipInformation(
 						mem.head,
 						photoFor(member.universityId)
 					)
 				)
-			case _ => None
 		}
 	}
 }
