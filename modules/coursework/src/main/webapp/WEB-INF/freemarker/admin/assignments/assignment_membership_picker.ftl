@@ -275,6 +275,7 @@
 			<#-- sortable tables -->
 			$enrolment.find('.table-sortable').sortableTable();
 			$enrolment.tabulaPrepareSpinners();
+			$enrolment.details();
 
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
