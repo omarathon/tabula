@@ -276,6 +276,12 @@
 		return $items;
 	};
 
+	$(function(){
+		$('a.disabled').on('click', function(e){
+			e.preventDefault();
+		});
+	});
+
 	// on ready
 	$(function() {
 		// form behavioural hooks

@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.Mav
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.groups.web.Routes
 
 /**
  * Allocates students that are in the allocation list for groups to individual groups.
@@ -42,7 +43,7 @@ class AllocateStudentsToGroupsController extends GroupsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			form(cmd).addObjects("saved" -> true)
+			Redirect(Routes.admin.module(cmd.module), "allocated" -> cmd.set.id)
 		}
 	}
 

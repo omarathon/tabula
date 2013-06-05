@@ -124,6 +124,13 @@
 					</div>
 					
 					<div class="span7">
+						<#if allocated?? && allocated.id == groupSet.id>
+							<div class="alert alert-success">
+								<a class="close" data-dismiss="alert">&times;</a>
+								<p>Changes saved.</p>
+							</div>
+						</#if>
+					
 						<#list groupSet.groups as group>
 							<div class="group">
 								<h4 class="name">

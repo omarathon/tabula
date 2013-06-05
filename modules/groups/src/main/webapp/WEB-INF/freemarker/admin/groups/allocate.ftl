@@ -16,7 +16,7 @@
 			
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
-				${(profile.studyDetails.route.name)!student.shortDepartment}, ${(profile.studyDetails.modeOfAttendance.fullNameToDisplay)!student.userType}
+				${(profile.studyDetails.route.name)!student.shortDepartment}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -24,25 +24,14 @@
 </#macro>
 
 <#escape x as x?html>
-	<a href="<@routes.depthome module />" class="btn pull-right">
-		<i class="icon-mail-reply"></i> Back to ${set.module.code?upper_case}
-	</a>
-
-	<h1>Assign students for ${set.name}</h1>
+	<h1>Assign students to ${set.name}</h1>
 	
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
 	
-	<p>Drag students onto a group to allocate them to it. To select multiple students,
-	drag a box from one student to another. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection</p>
-	
-	<#if saved??>
-		<div class="alert alert-success">
-			<a class="close" data-dismiss="alert">&times;</a>
-			<p>Changes saved.</p>
-		</div>
-	</#if>
+	<p>Drag students onto a group to allocate them to it. Select multiple students by dragging a box around them.
+		 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
 	
 	<@spring.hasBindErrors name="allocateStudentsToGroupsCommand">
 		<#if errors.hasErrors()>
@@ -62,11 +51,11 @@
 	<#assign submitUrl><@routes.allocateset set /></#assign>
 	<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 		<div class="btn-toolbar">
-			<a class="random btn btn-mini"
+			<a class="random btn"
 			   href="#" >
 				<i class="icon-random"></i> Randomly allocate
 			</a>
-			<a class="return-items btn btn-mini"
+			<a class="return-items btn"
 			   href="#" >
 				<i class="icon-arrow-left"></i> Remove all
 			</a>
@@ -76,7 +65,7 @@
 				<div class="students">
 					<h3>Students</h3>
 					<div class="well student-list drag-target">
-						<h4>Yet to be allocated</h4>
+						<h4>Not allocated to a group</h4>
 					
 						<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 							<@spring.bind path="unallocated">
@@ -91,7 +80,7 @@
 			<div class="span2">
 				<#-- I, for one, welcome our new jumbo icon overlords -->
 				<div class="direction-icon fix-on-scroll">
-					<i class="icon-circle-arrow-right"></i>
+					<i class="icon-arrow-right"></i>
 				</div>
 			</div>
 			<div class="span5">
@@ -101,10 +90,32 @@
 						<#assign existingStudents = mappingById[group.id]![] />
 						<div class="drag-target well clearfix">
 							<div class="group-header">
-								<h4 class="name">${group.name}</h4>
+								<#assign popoverHeader>
+									Students in ${group.name}
+									<button type='button' onclick="jQuery('#show-list-${group.id}').popover('hide')" class='close'>&times;</button>
+								</#assign>
+								<#assign groupDetails>
+									<ul class="unstyled">
+										<#list group.events as event>
+											<li>
+												<#-- Tutor, weeks, day/time, location -->
+	
+												<@fmt.weekRanges event />,
+												${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+												${event.location}
+											</li>
+										</#list>
+									</ul>
+								</#assign>
+							
+								<h4 class="name">
+									${group.name}
+								</h4>
 								
-								<div class="pull-right">
-									<span class="drag-count badge badge-info">${existingStudents?size}</span> students
+								<div>
+									<span class="drag-count">${existingStudents?size}</span> students
+									
+									<a id="show-list-${group.id}" class="show-list" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
 								</div>
 							</div>
 		
@@ -113,23 +124,6 @@
 									<@student_item student "mapping[${group.id}][${student_index}]" />
 								</#list>
 							</ul>
-							
-							<#assign popoverHeader>Students in ${group.name}</#assign>
-							<#assign groupDetails>
-								<ul class="unstyled">
-									<#list group.events as event>
-										<li>
-											<#-- Tutor, weeks, day/time, location -->
-
-											<@fmt.weekRanges event />,
-											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-											${event.location}
-										</li>
-									</#list>
-								</ul>
-							</#assign>
-		
-							<a href="#" class="btn show-list" data-title="${popoverHeader}" data-prelude="${groupDetails}"><i class="icon-list"></i> List</a>
 						</div>
 					</#list>
 				</div>

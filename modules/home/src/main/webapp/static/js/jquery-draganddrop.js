@@ -175,7 +175,9 @@ TODO: More options; Random allocation function.
 						return false;
         });
 
-        var deleteLinkHtml = ' <a href=# class="delete btn btn-mini"><i class="icon-remove"></i> Remove</a>';
+				var deleteLinkHtml;
+				if (this.options.removeTooltip) deleteLinkHtml = ' <a href="#" class="delete btn btn-mini" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove"></i></a>'; 
+        else deleteLinkHtml = ' <a href="#" class="delete btn btn-mini"><i class="icon-remove"></i> Remove</a>';
 
 				var popoverGenerator = function() {
             var customHeader = $(this).data('pre') || ''; // data-pre attribute
@@ -201,32 +203,35 @@ TODO: More options; Random allocation function.
         };
 
         // A button to show the list in a popover.
-        $el.find('.show-list').tabulaPopover({
-            html: true,
-            content: popoverGenerator
-        }).click(function(e){
-            return false;
-        }).each(function(i, link) {
-            var $link = $(link);
-            var $sourceList = $link.closest('.drag-target').find(sortables);
-            // When the underlying list changes...
-            $sourceList.on('changed.tabula', function() {
-                // Update the popover contents, if it's visible.
-                if ($sourceList.find('li').length === 0) {
-                    $link.addClass('disabled');
-                    $link.popover('hide');
-                } else {
-                    $link.removeClass('disabled');
-                    var popover = $link.data('popover');
-                    if (popover.$tip) {
-                        var $content = popover.$tip.find('.popover-content');
-                        if ($content.is(':visible')) {
-                            $content.html( popoverGenerator.call( $link[0] ) );
-                        }
-                    }
-                }
-            });
-        });
+        $el.find('.show-list').each(function() {
+	        $(this).tabulaPopover({
+	            html: true,
+	            content: popoverGenerator,
+	            placement: $(this).data('placement') || 'right' 
+	        }).click(function(e){
+	            return false;
+	        }).each(function(i, link) {
+	            var $link = $(link);
+	            var $sourceList = $link.closest('.drag-target').find(sortables);
+	            // When the underlying list changes...
+	            $sourceList.on('changed.tabula', function() {
+	                // Update the popover contents, if it's visible.
+	                if ($sourceList.find('li').length === 0) {
+	                    $link.addClass('disabled');
+	                    $link.popover('hide');
+	                } else {
+	                    $link.removeClass('disabled');
+	                    var popover = $link.data('popover');
+	                    if (popover.$tip) {
+	                        var $content = popover.$tip.find('.popover-content');
+	                        if ($content.is(':visible')) {
+	                            $content.html( popoverGenerator.call( $link[0] ) );
+	                        }
+	                    }
+	                }
+	            });
+	        });
+				});
 
         // Handle buttons inside the .show-list popover by attaching it to .drag-target,
         // so we don't have to remember to bind events to popovers as they come and go.
