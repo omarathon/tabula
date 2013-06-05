@@ -26,11 +26,11 @@ class EmailNotificationListener extends UnicodeEmails {
 				message.setTo(recipient.getEmail)
 				message.setSubject(notification.title)
 
-				val body = new StringBuilder()
-				body ++= mailHeader.format(recipient.getFirstName)
-				body ++= notification.content
-				body ++= mailFooter
-				body ++= replyWarning
+				val body = new StringBuilder("")
+				body.append(mailHeader.format(recipient.getFirstName))
+				body.append(notification.content)
+				body.append(mailFooter)
+				body.append(replyWarning)
 				message.setText(body.toString())
 			}
 			mailSender.send(message)

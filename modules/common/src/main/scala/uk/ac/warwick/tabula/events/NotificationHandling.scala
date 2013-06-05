@@ -10,9 +10,9 @@ trait NotificationHandling {
 
 	def notify[A](cmd: Command[A])(f: => A) : A = cmd match {
 		case ns:NotificationSource[A] => {
-			val notification = ns.emit
-			notificationService.push(notification)
-			f
+			val result = f
+			notificationService.push(ns.emit)
+			result
 		}
 		case _ => f
 	}
