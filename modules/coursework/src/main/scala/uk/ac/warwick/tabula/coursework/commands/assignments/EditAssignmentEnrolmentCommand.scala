@@ -28,5 +28,5 @@ class EditAssignmentEnrolmentCommand(module: Module = null) extends ModifyAssign
 	def contextSpecificValidation(errors: Errors) {}
 
 	// not required
-	override def applyInternal(): Assignment = null
+	override def applyInternal(): Assignment = throw new UnsupportedOperationException
 }

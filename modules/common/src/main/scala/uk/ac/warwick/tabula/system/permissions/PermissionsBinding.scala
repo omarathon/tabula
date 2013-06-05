@@ -49,7 +49,7 @@ trait PermissionsBinding
 				throw new ItemNotFoundException()
 		}
 
-		val anyCheckPasses = (for (check <- checkThis.permissionsAnyChecks) yield check match {
+		if (!checkThis.permissionsAnyChecks.exists ( _ match {
 			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
 			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
 			case _ => {
@@ -57,10 +57,6 @@ trait PermissionsBinding
 				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
 				false
 			}
-		}).contains(true)
-
-		if (!anyCheckPasses) {
-			throw new PermissionDeniedException(user, null, null)
-		}
+		})) throw new PermissionDeniedException(user, checkThis.permissionsAnyChecks.head._1, checkThis.permissionsAnyChecks.head._2)
 	}
 }
