@@ -19,7 +19,7 @@ class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module) 
 
 	def applyInternal() = transactional() {
 		// We set the promised value here so that sub-commands work
-		val group = setPromisedValue(new SmallGroup)
+		val group = { promisedValue = new SmallGroup }
 		copyTo(group)
 		
 		// FIXME This is to avoid the un-saved transient Hibernate bug

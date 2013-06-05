@@ -15,7 +15,7 @@ class EditSmallGroupSetCommand(set: SmallGroupSet) extends ModifySmallGroupSetCo
 	PermissionCheck(Permissions.SmallGroups.Update, set)
 	
 	this.copyFrom(set)
-	this.setPromisedValue(set)
+	promisedValue = set
 	
 	var service = Wire[SmallGroupService]
 
