@@ -81,14 +81,14 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 
 	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
-	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.find(_.approver == member).isDefined
+	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.exists(_.approver == member)
 	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
 
 	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
-	def rejectedBy(member: Member): Boolean = rejectedApprovals.find(_.approver == member).isDefined
+	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
+	// people who have had a draft version rejected
 	def pendingRevisionBy(member: Member) = isRejected && member == creator
-
 
 	// End of workflow definitions
 
