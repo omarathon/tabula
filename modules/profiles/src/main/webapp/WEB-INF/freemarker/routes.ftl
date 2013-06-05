@@ -38,4 +38,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro save_meeting_approval meeting_record><@url page="/tutor/meeting/${meeting_record.id}/approval" /></#macro>
 
+<#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
+
 </#compress>

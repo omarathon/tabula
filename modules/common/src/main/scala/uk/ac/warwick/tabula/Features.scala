@@ -53,6 +53,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
+	@Value("${features.smallGroupTeaching.tutorView:false}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -100,27 +101,28 @@ class FeaturesMessage {
 	var smallGroupTeaching = false
 	var smallGroupTeachingStudentSignUp = false
 	var smallGroupTeachingRandomAllocation = false
+	var smallGroupTeachingTutorView = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
 	
-		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var features = Wire.auto[Features]
-		var context = Wire.property("${module.context}")
-		
-		override def isListeningToQueue = true
-		override def onReceive(item: Any) {
-				logger.info("Synchronising item " + item + " for " + context)
-				item match {
-						case copy: FeaturesMessage => features.update(copy)
-						case _ => // Should never happen
-				}
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var features = Wire.auto[Features]
+	var context = Wire.property("${module.context}")
+
+	override def isListeningToQueue = true
+	override def onReceive(item: Any) {
+		logger.info("Synchronising item " + item + " for " + context)
+		item match {
+			case copy: FeaturesMessage => features.update(copy)
+			case _ => // Should never happen
 		}
-		
-		override def afterPropertiesSet() {
-				logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
-				queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
-		}
+	}
+
+	override def afterPropertiesSet() {
+		logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
+		queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
 	
 }
 

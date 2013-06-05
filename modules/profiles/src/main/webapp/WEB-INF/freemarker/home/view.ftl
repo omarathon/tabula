@@ -22,7 +22,9 @@
 					<#list smallGroups as smallGroup>
 					<#assign _groupSet=smallGroup.groupSet />
 					<#assign _module=smallGroup.groupSet.module />
-					<li>${_module.code?upper_case} (${_module.name}) ${_groupSet.name}, ${smallGroup.name}</li>
+					<li><a href="<@routes.smallgroup smallGroup />">
+						${_module.code?upper_case} (${_module.name}) ${_groupSet.name}, ${smallGroup.name}
+					</a></li>
 					</#list>
 				</ul>
 			</#if>

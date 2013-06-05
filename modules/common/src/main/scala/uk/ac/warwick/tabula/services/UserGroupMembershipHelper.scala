@@ -9,6 +9,10 @@ import uk.ac.warwick.util.cache.{SingularCacheEntryFactory, Caches, CacheEntryFa
 import java.util
 import org.joda.time.Days
 
+trait UserGroupMembershipHelperMethods[A <: Serializable] {
+	def findBy(user: User): Seq[A]
+}
+
 /**
  * Experimental. Class for getting a collection of entities that contain
  * a UserGroup that holds a given user. For example, you could use
@@ -27,9 +31,10 @@ import org.joda.time.Days
  * FIXME needs cache dirtying (like PermissionsService)
  * TODO PermissionsService ought to use this when it is fully featured
  */
-private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag](
+private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] (
 		path: String,
-		checkUniversityIds:Boolean = true) extends Daoisms {
+		checkUniversityIds:Boolean = true)
+	extends UserGroupMembershipHelperMethods[A] with Daoisms {
 
 	val groupService = Wire[GroupService]
 	val userlookup = Wire[UserLookupService]
@@ -37,16 +42,20 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag](
 	val simpleEntityName = classTag[A].runtimeClass.getSimpleName
 
 	val cacheName = simpleEntityName + "-" + path.replace(".","-")
-	val cache = Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(), Days.ONE.toStandardSeconds.getSeconds)
+	//val cache = Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(), Days.ONE.toStandardSeconds.getSeconds)
 
+  // A series of confusing variables for building joined queries across paths split by.dots
 	private val pathParts = path.split("\\.").toList.reverse
 	if (pathParts.size > 2) throw new IllegalArgumentException("Only allowed one or two parts to the path")
-	val userProp = pathParts.head
+  // The actual name of the UserGroup
+	val usergroupName = pathParts.head
+  // A possible table to join through to get to userProp
+  val joinTable: Option[String] = pathParts.tail.headOption
+  // The overall property name, possibly including the joinTable
+  val prop: String = joinTable.fold("")(_ + ".") + usergroupName
 	
 	val groupsByUserSql = {
-		val joinTable = pathParts.tail.headOption
-		val leftJoin = joinTable.fold("")( table => s"left join r.$table as $table" )
-		val prop = joinTable.fold("")(_ + ".") + userProp
+    val leftJoin = joinTable.fold("")( table => s"left join r.$table as $table" )
 
 		// skip the university IDs check if we know we only ever use usercodes
 		val universityIdsClause =
@@ -72,13 +81,13 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag](
 		"""
 	}
 
+  // To override in tests
 	protected def getUser(usercode: String) = userlookup.getUserByUserId(usercode)
+	protected def getWebgroups(usercode: String): Seq[String] = groupService.getGroupsNamesForUser(usercode).asScala
 
 	def findBy(user: User): Seq[A] = {
-		// Pass just the user ID in even though it instantly gets resolved back
-		// to a User object - we don't want to cache a whole User as a key.
-		// Userlookup has its own cache so this shouldn't be expensive.
-		cache.get(user.getUserId)
+		// Caching disabled for the moment until we have a proper cache dirtying strategy
+		//cache.get(user.getUserId)
 		findByInternal(user)
 	}
 
@@ -88,12 +97,18 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag](
 			.setString("userId", user.getUserId)
 			.seq
 
-		val webgroupNames: Seq[String] = groupService.getGroupsNamesForUser(user.getUserId).asScala
+		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
 
 		val groupsByWebgroup = webgroupNames.flatMap { webgroupName =>
-			session.newCriteria[A]
-				.createAlias(path, path)
-				.add(is(s"$path.baseWebgroup", webgroupName))
+      val criteria = session.newCriteria[A]
+
+      for (table <- joinTable) {
+        criteria.createAlias(table, table)
+      }
+
+			criteria
+        .createAlias(prop, "usergroupAlias")
+        .add(is("usergroupAlias.baseWebgroup", webgroupName))
 				.seq
 		}
 

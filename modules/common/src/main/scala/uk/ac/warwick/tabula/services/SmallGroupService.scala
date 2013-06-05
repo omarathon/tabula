@@ -25,7 +25,7 @@ class SmallGroupServiceImpl
 		with Logging {
 
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
-	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("event.tutors")
+	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
 
 	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
