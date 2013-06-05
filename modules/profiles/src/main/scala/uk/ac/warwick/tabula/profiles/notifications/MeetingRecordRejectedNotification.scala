@@ -25,6 +25,7 @@ class MeetingRecordRejectedNotification(approval: MeetingRecordApproval) extends
 		"dateFormatter" -> dateFormatter,
 		"meetingRecord" -> meeting,
 		"verbed" -> "rejected",
+		"nextActionDescription" -> "edit the record and submit it for approval again",
 		"reason" -> approval.comments,
 		"profileLink" -> url
 	))

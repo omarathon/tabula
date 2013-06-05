@@ -7,4 +7,4 @@ Because: "${reason}"
 
 </#if>
 
-Please visit <@url page=profileLink context="/profiles" /> to approve or reject it.
+Please visit <@url page=profileLink context="/profiles" /> to ${nextActionDescription}.

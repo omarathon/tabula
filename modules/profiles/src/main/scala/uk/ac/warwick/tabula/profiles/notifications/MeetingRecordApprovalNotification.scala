@@ -22,6 +22,7 @@ class MeetingRecordApprovalNotification(meeting: MeetingRecord, _verb: String)
 	def content = renderToString("/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl", Map(
 		"dateFormatter" -> dateFormatter,
 		"verbed" ->  (if (verb == "create") "created" else "edited"),
+		"nextActionDescription" -> "approve or reject it",
 		"meetingRecord" -> meeting,
 		"profileLink" -> url
 	))
