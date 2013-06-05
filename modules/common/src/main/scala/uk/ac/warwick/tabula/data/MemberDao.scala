@@ -59,8 +59,9 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			.add(is("universityId", universityId.trim))
 			.uniqueResult
 	
-	def getAllWithUniversityIds(universityIds: Seq[String]) = 
-		session.newCriteria[Member]
+	def getAllWithUniversityIds(universityIds: Seq[String]) =
+		if (universityIds.isEmpty) Seq.empty
+		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.trim }))
 			.seq
 	
