@@ -3,10 +3,9 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.commands.{NotificationSource, Description}
+import uk.ac.warwick.tabula.commands.Description
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordApprovalNotification
 
 class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship)
 	extends ModifyMeetingRecordCommand(creator, relationship) {
@@ -19,7 +18,9 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		file.onBind(result)
 	}
 
-	def describe(d: Description): Unit = {  }
+	def describe(d: Description){}
+
+	def emit = new MeetingRecordApprovalNotification(meeting, "create")
 }
 
 
