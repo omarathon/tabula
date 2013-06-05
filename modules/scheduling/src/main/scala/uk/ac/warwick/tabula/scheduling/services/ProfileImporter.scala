@@ -74,11 +74,17 @@ class ProfileImporter extends Logging {
 			MembershipInformation(member, photoFor(member.universityId))
 		}
 
-	def userIdAndCategory(member: Member) =
-		MembershipInformation(
-			membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).head,
-			photoFor(member.universityId)
-		)
+	def userIdAndCategory(member: Member): Option[MembershipInformation] = {
+		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)) match {
+			case mem: MembershipMember => Some (
+					MembershipInformation(
+						mem.head,
+						photoFor(member.universityId)
+					)
+				)
+			case _ => None
+		}
+	}
 }
 
 object ProfileImporter {
