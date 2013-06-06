@@ -2,9 +2,11 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.util.LuceneTestCase
-import org.junit.{Ignore, Test, After, Before}
+import org.junit.Test
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
+import org.junit.After
+import org.junit.Before
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{Assignment, AuditEvent, Submission}
 import uk.ac.warwick.tabula.commands._
@@ -58,7 +60,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	 * by adminDownloadedSubmissions(Assignment).
 	 */
 	@Transactional
-	@Ignore @Test def downloadedSubmissions = withFakeTime(dateTime(2001, 6)) {
+	@Test def downloadedSubmissions = withFakeTime(dateTime(2001, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()
 			a.id = "12345"
@@ -88,7 +90,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 	
 	@Transactional
-	@Ignore @Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
+	@Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()
 			a.id = "54321"
@@ -132,7 +134,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Transactional
-	@Ignore @Test def createdDate = withFakeTime(dateTime(2000, 6)) {
+	@Test def createdDate = withFakeTime(dateTime(2000, 6)) {
 
 		val eventId = "a"
 		val eventType = "AddAssignment"
@@ -162,7 +164,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 	
 	@Transactional
-	@Ignore @Test def index = withFakeTime(dateTime(2000, 6)) {
+	@Test def index = withFakeTime(dateTime(2000, 6)) {
 		val stopwatch = new StopWatch
 		
 		val jsonData = Map(
@@ -242,7 +244,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 	
 	@Transactional
-	@Ignore @Test def pagingSearch = withFakeTime(dateTime(2010, 6)) {
+	@Test def pagingSearch = withFakeTime(dateTime(2010, 6)) {
 		val stopwatch = new StopWatch
 		
 		val dept = new Department

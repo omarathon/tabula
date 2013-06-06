@@ -65,13 +65,18 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 	final def apply(): A = {
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this))
-				recordEvent(this) { notify(this) { benchmarkTask(benchmarkDescription) { applyInternal() } } }
+				recordEvent(this) { notify() { benchmark() { applyInternal() } } }
 			else throw maintenanceMode.exception()
 		} else {
-			benchmarkTask(benchmarkDescription) { applyInternal() }
+			notify() { benchmark() { applyInternal() } }
 		}
 	}
-	
+
+	// send notifications from this command to the NotificationHandler
+	private def notify()(fn: => A) = 	notify(this) { fn }
+
+	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
+
 	protected final def benchmarkTask[A](description: String)(fn: => A): A = Command.timed { timer =>
 		benchmark(description, level=Warn, minMillis=Command.MillisToSlowlog, stopWatch=timer, logger=Command.slowLogger)(fn)
 	}

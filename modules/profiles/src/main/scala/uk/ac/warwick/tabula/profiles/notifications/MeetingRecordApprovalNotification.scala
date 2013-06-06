@@ -2,11 +2,10 @@ package uk.ac.warwick.tabula.profiles.notifications
 
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 
-class MeetingRecordApprovalNotification(meeting: MeetingRecord, _verb: String)
+class MeetingRecordApprovalNotification(meeting: MeetingRecord, val verb: String)
 	extends MeetingRecordNotification(meeting)  {
 
 	val actor = meeting.creator.asSsoUser
-	val verb = _verb
 
 	def title = "Meeting record approval required"
 	def content = renderToString(FreemarkerTemplate, Map(
