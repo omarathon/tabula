@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.Ordered
  */
 class RedirectViewResolver extends ViewResolver with Ordered {
 
-	val redirectPattern = new Regex("redirect:(/.+)")
+	val redirectPattern = new Regex("redirect:(/.*)")
 
 	@Required
 	var toplevelUrl: String = _
