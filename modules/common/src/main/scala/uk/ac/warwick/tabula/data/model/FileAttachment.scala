@@ -11,13 +11,10 @@ import forms.Extension
 import scala.util.matching.Regex
 import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
-import scala.Some
-import java.util
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.helpers.DetectMimeType
+import uk.ac.warwick.tabula.helpers.DetectMimeType._
 
 @Entity @AccessType("field")
-class FileAttachment extends GeneratedId with DetectMimeType {
+class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]

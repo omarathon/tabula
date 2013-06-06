@@ -21,7 +21,7 @@ class CreateSmallGroupSetCommand(module: Module) extends ModifySmallGroupSetComm
 
 	def applyInternal() = transactional() {
 		// We set the promised value here so that sub-commands work
-		val set = setPromisedValue(new SmallGroupSet(module))
+		val set = { promisedValue = new SmallGroupSet(module) }
 		copyTo(set)
 		service.saveOrUpdate(set)
 		set

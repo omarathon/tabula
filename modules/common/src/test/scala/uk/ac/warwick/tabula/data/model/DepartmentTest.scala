@@ -51,11 +51,11 @@ class DepartmentTest extends TestBase with Mockito {
 		
 		department.isOwnedBy("cuscav") should be (false)
 		
-		department.addOwner("cuscav")
-		department.addOwner("cusebr")
-		department.addOwner("curef")
+		department.owners.addUser("cuscav")
+		department.owners.addUser("cusebr")
+		department.owners.addUser("curef")
 		
-		department.removeOwner("cusebr")
+		department.owners.removeUser("cusebr")
 		
 		department.isOwnedBy("cuscav") should be (true)
 		department.isOwnedBy("curef") should be (true)

@@ -4,7 +4,6 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.RequestInfo
 
 trait RequestLevelCaching[A, B] extends Logging {
-	import RequestLevelCache._
 	
 	def cache = RequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
 	

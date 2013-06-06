@@ -124,6 +124,13 @@
 					</div>
 					
 					<div class="span7">
+						<#if allocated?? && allocated.id == groupSet.id>
+							<div class="alert alert-success">
+								<a class="close" data-dismiss="alert">&times;</a>
+								<p>Changes saved.</p>
+							</div>
+						</#if>
+					
 						<#list groupSet.groups as group>
 							<div class="group">
 								<h4 class="name">
@@ -165,6 +172,7 @@
 							  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
 							  <ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
+								<li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
 								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
 									<i class="icon-folder-close icon-fixed-width"></i>
 									<#if groupSet.archived>

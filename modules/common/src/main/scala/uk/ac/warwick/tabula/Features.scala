@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
+import scala.beans.BeanProperty
 
 
 /**
@@ -53,6 +54,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
+	@Value("${features.smallGroupTeaching.tutorView:false}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 	
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -80,47 +82,50 @@ class FeaturesMessage {
 		for (pd <- bean.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 	}
-	
-	var emailStudents = false
-	var collectRatings = true
-	var submissions = true
-	var privacyStatement = true
-	var collectMarks = true
-	var turnitin = true
-	var assignmentMembership = true
-	var extensions = true
-	var feedbackTemplates = true
-	var markingWorkflows = true
-	var markerFeedback = true
-	var profiles = true
-	var assignmentProgressTable = true
-	var assignmentProgressTableByDefault = false
-	var summativeFilter = true
-	var meetingRecordApproval = false
-	var smallGroupTeaching = false
-	var smallGroupTeachingStudentSignUp = false
-	var smallGroupTeachingRandomAllocation = false
+
+	// BeanProperty current required as Utils JsonMessageConverter uses Jackson
+	// without the Scala module.
+	@BeanProperty var emailStudents = false
+	@BeanProperty var collectRatings = true
+	@BeanProperty var submissions = true
+	@BeanProperty var privacyStatement = true
+	@BeanProperty var collectMarks = true
+	@BeanProperty var turnitin = true
+	@BeanProperty var assignmentMembership = true
+	@BeanProperty var extensions = true
+	@BeanProperty var feedbackTemplates = true
+	@BeanProperty var markingWorkflows = true
+	@BeanProperty var markerFeedback = true
+	@BeanProperty var profiles = true
+	@BeanProperty var assignmentProgressTable = true
+	@BeanProperty var assignmentProgressTableByDefault = false
+	@BeanProperty var summativeFilter = true
+	@BeanProperty var meetingRecordApproval = false
+	@BeanProperty var smallGroupTeaching = false
+	@BeanProperty var smallGroupTeachingStudentSignUp = false
+	@BeanProperty var smallGroupTeachingRandomAllocation = false
+	@BeanProperty var smallGroupTeachingTutorView = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
 	
-		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var features = Wire.auto[Features]
-		var context = Wire.property("${module.context}")
-		
-		override def isListeningToQueue = true
-		override def onReceive(item: Any) {
-				logger.info("Synchronising item " + item + " for " + context)
-				item match {
-						case copy: FeaturesMessage => features.update(copy)
-						case _ => // Should never happen
-				}
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var features = Wire.auto[Features]
+	var context = Wire.property("${module.context}")
+
+	override def isListeningToQueue = true
+	override def onReceive(item: Any) {
+		logger.info("Synchronising item " + item + " for " + context)
+		item match {
+			case copy: FeaturesMessage => features.update(copy)
+			case _ => // Should never happen
 		}
-		
-		override def afterPropertiesSet() {
-				logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
-				queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
-		}
+	}
+
+	override def afterPropertiesSet() {
+		logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
+		queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
 	
 }
 

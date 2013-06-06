@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.annotations.Type
-import javax.persistence.Basic
-import javax.persistence.Column
-import javax.persistence.JoinColumn
-import javax.persistence.OneToOne
-import javax.persistence.CascadeType
-import javax.persistence.Entity
+import javax.persistence.{Basic, Column, Entity, JoinColumn, OneToOne}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import javax.persistence.CascadeType
 
 
 /**
@@ -24,6 +20,7 @@ import uk.ac.warwick.tabula.data.PreSaveBehaviour
  */
 @Entity
 class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
+	
 	var moduleCode: String = _
 	var assessmentGroup: String = _
 	var occurrence: String = _
@@ -40,8 +37,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 		if (!members.universityIds) throw new IllegalStateException
 	}
 
-	/**
-	 * A short textual identifier for this group, useful for logging.
-	 */
-	def toText = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
+	override def toString = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
+	
+	def memberCount = members.members.size
 }

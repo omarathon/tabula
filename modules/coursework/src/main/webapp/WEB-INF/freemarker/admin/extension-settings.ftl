@@ -52,9 +52,9 @@
 		</@form.labelled_row>
 	</div>
 </#if>
-	<div class="submit-buttons">
+	<div class="submit-buttons form-actions">
 		<input type="submit" value="Save" class="btn btn-primary">
-		or <a class="btn" href="<@routes.departmenthome department=department />">Cancel</a>
+		<a class="btn" href="<@routes.departmenthome department=department />">Cancel</a>
 	</div>
 </@f.form>
 </#escape>

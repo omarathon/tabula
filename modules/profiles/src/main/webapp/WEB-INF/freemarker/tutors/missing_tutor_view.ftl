@@ -1,10 +1,10 @@
 <#escape x as x?html>
 <div id="tutors">
 	<h1>Students in ${department.name} with no personal tutor</h1>
-	
+
 	<#if studentCount gt 0>
 		<#if missingStudents?has_content>
-			<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
+			<table class="tutees table-bordered table-striped table-condensed tabula-purple">
 				<thead>
 					<tr>
 						<th class="tutee-col">First name</th>
@@ -15,7 +15,7 @@
 						<th class="course-col">Course</th>
 					</tr>
 				</thead>
-				
+
 				<tbody>
 					<#list missingStudents as student>
 						<tr class="tutee">
@@ -44,7 +44,7 @@
 		$(".tutees").tablesorter({
 			sortList: [[1,0], [3,0], [4,0]]
 		});
-		
+
 		$(".tutee").on("mouseover", function(e) {
 			$(this).find("td").addClass("hover");
 		}).on("mouseout", function(e) {

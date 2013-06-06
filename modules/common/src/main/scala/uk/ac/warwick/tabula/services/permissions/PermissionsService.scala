@@ -32,6 +32,7 @@ trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
@@ -73,7 +74,7 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		}
 	}
 		
-	override def afterPropertiesSet = {
+	override def afterPropertiesSet() {
 		queue.addListener(classOf[PermissionsCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
 	

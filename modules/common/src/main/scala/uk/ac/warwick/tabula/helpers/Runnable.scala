@@ -8,7 +8,7 @@ import language.implicitConversions
  * run, which is more concise.
  */
 final class Runnable(f: => Unit) extends JRunnable {
-	override def run = f
+	override def run() { f }
 }
 
 /**

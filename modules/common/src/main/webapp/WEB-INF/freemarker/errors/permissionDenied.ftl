@@ -7,26 +7,30 @@
 <#if user.sysadmin>
 	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		
+
 		<h4>Permissions helper</h4>
-		
+
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
-	
+
 		<@f.form method="post" action="${url('/sysadmin/permissions-helper', '/')}">
 			<input type="hidden" name="user" value="${originalException.user.userId}" />
-			
+
 			<#if originalException.scope??>
 				<input type="hidden" name="scopeType" value="${originalException.scope.class.name}" />
 				<input type="hidden" name="scope" value="${originalException.scope.id}" />
 			</#if>
-				
-			<input type="hidden" name="permission" value="${originalException.permission.name}" />
-		
+
+			<#if originalException.permission??>
+				<input type="hidden" name="permission" value="${originalException.permission.name}" />
+			<#else>
+				<input type="hidden" name="permission" value="[One of many]" />
+			</#if>
+
 			<button class="btn btn-large" type="submit">Why can't I see this?</button>
 		</@f.form>
-		
+
 		<p>Alternatively, harness unlimited power by entering God mode:</p>
-		
+
 		<@f.form method="post" action="${url('/sysadmin/god', '/')}">
 			<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 			<button class="btn btn-large btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
@@ -35,6 +39,6 @@
 </#if>
 <#else>
 <p>Sorry, you don't have permission to see that.
-Try <a class="sso-link" href="<@sso.loginlink />">signing in</a>. 
+Try <a class="sso-link" href="<@sso.loginlink />">signing in</a>.
 </p>
 </#if>

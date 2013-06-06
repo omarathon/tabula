@@ -130,9 +130,9 @@
 			
 			<input type="hidden" name="returnTo" value="${returnTo}" />
 
-			<div class="submit-buttons">
+			<div class="submit-buttons form-actions">
 				<input type="submit" class="btn btn-primary" value="Submit" />
-				or <a class="btn" href="${returnTo}">Cancel</a>
+				<a class="btn" href="${returnTo}">Cancel</a>
 			</div>
 		</@f.form>
 	</#if>

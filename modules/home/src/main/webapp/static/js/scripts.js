@@ -248,23 +248,23 @@
 			});
 		}
 	};
-	
-	
-	/* 
+
+
+	/*
 		Customised Popover wrapper. Implements click away to dismiss.
 	*/
 	$.fn.tabulaPopover = function(options) {
 		var $items = this;
-		
+
 		$items.on('click', function(e) {
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
 				e.preventDefault();
 			}
 		});
-		
+
 		$items.popover(options);
-		
+
 		// Click away to dismiss
 		$('html').on('click', function(e) {
 			// if clicking anywhere other than the popover itself
@@ -272,9 +272,15 @@
 				$items.popover('hide');
 			}
 		});
-		
+
 		return $items;
 	};
+
+	$(function(){
+		$('a.disabled').on('click', function(e) {
+			e.preventDefault();
+		});
+	});
 
 	// on ready
 	$(function() {
@@ -324,13 +330,17 @@
 
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
-		$('.use-popover').popover().click(function(){ return false; });
+		$('.use-popover').popover({
+			trigger: 'click',
+			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+		}).click(function(){ return false; });
 
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
 		$('.use-introductory').popover({
+			trigger: 'click',
 			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
-		});
+		}).click(function(){ return false; });
 
 		$('.use-introductory:not(.auto)').each(function() {
 			var template = $(this).data('popover').options.template;
@@ -340,18 +350,24 @@
 		// auto-show introductory popover on load, based on class
 		$('.use-introductory.auto').popover('show');
 
-		// make introductory popovers closable
-		$('#container').on('click', '.introductory .close', function(e) {
-			$(e.target).parents('.introductory').prev().popover('hide');
+		// make popovers (and introductorys) closable
+		$('#container').on('click', '.popover .close', function(e) {
+			$(e.target).parents('.popover').prev().popover('hide');
 		});
 
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
-			// If intro text is changed to reflect new features, change its id to ensure end users see the new version
-			var id = $(e.target).parents('.introductory').prev().prop('id');
+			// If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
 			var hash = $(e.target).parents('.introductory').prev().data('hash');
 			// use this hook to persist showOnLoad state with some ajax shizzle
 			$.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
+		});
+
+//		// ensure popovers/introductorys override title with data-title attribute where available
+		$('.use-popover, .use-introductory').each(function() {
+			if ($(this).attr('data-title')) {
+				$(this).attr('data-original-title', $(this).attr('data-title'));
+			}
 		});
 
 		// apply details/summary polyfill
@@ -408,8 +424,72 @@
 		});
 
 		// sticky table headers
-		//$('table.sticky-table-headers').stickyTableHeaders({
-		//	fixedOffset: $('#navigation')
-		//});
+		//$('table.sticky-table-headers').fixedHeaderTable('show');
+
+		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
+		if (navigator.platform.indexOf('Mac') != -1) {
+			$('kbd.keyboard-control-key').html('&#8984; Cmd');
+		}
+
+		// Fixed to top on scroll
+		if ($('.fix-on-scroll').length) {
+			var gutter = $('#navigation').height();
+
+			$(window).scroll(function() {
+				var scrollTop = $(this).scrollTop() + gutter;
+
+				$('.fix-on-scroll').each(function() {
+					var $this = $(this);
+
+					var $scrollContainer = $this.closest('.fix-on-scroll-container');
+					if ($scrollContainer.length == 0) $scrollContainer = $('body');
+
+					var height = $this.height();
+					var maxHeight = $(window).height() - gutter;
+					var tooHigh = (height > maxHeight);
+
+					var floor = $scrollContainer.offset().top + $scrollContainer.height();
+
+					var isFixed = $this.data('is-fixed');
+					var pinnedToFloor = $this.data('is-pinned-to-floor');
+
+					var offsetTop = (isFixed) ? $this.data('original-offset') : $this.offset().top;
+					var pinToFloor = (scrollTop + height) > floor;
+
+					if (!tooHigh && scrollTop > offsetTop && !isFixed) {
+						// Fix it
+						$this.data('original-offset', offsetTop);
+						$this.data('original-width', $this.css('width'));
+						$this.data('original-position', $this.css('position'));
+						$this.data('original-top', $this.css('top'));
+
+						$this.css({
+							width: $this.width(),
+							position: 'fixed',
+							top: gutter
+						});
+
+						$this.data('is-fixed', true);
+					} else if (!tooHigh && isFixed && pinToFloor) {
+						// Pin to the floor
+						var diff = (scrollTop + height) - floor;
+
+						$this.css('top', gutter - diff);
+						$this.data('is-pinned-to-floor', true);
+					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
+						// Un-pin from the floor
+						$this.css('top', gutter);
+						$this.data('is-pinned-to-floor', false);
+					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
+						// Un-fix it
+						$this.css('width', $this.data('original-width'));
+						$this.css('position', $this.data('original-position'));
+						$this.css('top', $this.data('original-top'));
+
+						$this.data('is-fixed', false);
+					}
+				});
+			});
+		}
 	}); // on ready
 })(jQuery);

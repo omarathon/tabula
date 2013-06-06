@@ -11,6 +11,13 @@ sealed abstract class ScopelessPermission(description: String) extends Permissio
 	override val isScoped = false
 }
 
+case class CheckablePermission(val permission: Permission, val scope: Option[PermissionsTarget])
+
+object CheckablePermission {
+	def apply(permission: ScopelessPermission): CheckablePermission = new CheckablePermission(permission, None)
+	def apply(permission: Permission, scope: PermissionsTarget): CheckablePermission = new CheckablePermission(permission, Some(scope))
+}
+
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
 object Permissions {
 
