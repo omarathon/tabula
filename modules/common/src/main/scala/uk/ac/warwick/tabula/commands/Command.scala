@@ -65,15 +65,12 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 	final def apply(): A = {
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this))
-				recordEvent(this) { notify() { benchmark() { applyInternal() } } }
+				recordEvent(this) { notify(this) { benchmark() { applyInternal() } } }
 			else throw maintenanceMode.exception()
 		} else {
-			notify() { benchmark() { applyInternal() } }
+			notify(this) { benchmark() { applyInternal() } }
 		}
 	}
-
-	// send notifications from this command to the NotificationHandler
-	private def notify()(fn: => A) = 	notify(this) { fn }
 
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
 
