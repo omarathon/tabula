@@ -56,7 +56,7 @@
 <#escape x as x?html>
 	<h1>Assign markers for ${assignment.name}</h1>
 	
-	<p>Drag students by their <i class="icon-th"></i> onto a marker.</p>
+	<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
 	
 	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
 	<div id="assign-markers">

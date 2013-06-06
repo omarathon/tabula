@@ -36,12 +36,9 @@ object TimeBuilder {
 		if (!twentyFourHour) pattern.append("a")
 
 		// We convert the output to lowercase because we don't want AM/PM, we want am/pm
-		(formatterMap(pattern.toString) print time).trim().toLowerCase()
+		(formatterMap.retrieve(pattern.toString()) print time).trim().toLowerCase
 	}
 
-	class DateTimeFormatterCache extends mutable.HashMap[String, DateTimeFormatter] {
-		override def default(pattern: String) = DateTimeFormat.forPattern(pattern)
-	}
 }
 
 class TimeBuilder extends TemplateMethodModelEx {

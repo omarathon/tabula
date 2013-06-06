@@ -13,7 +13,7 @@ class EditSmallGroupEventCommand(event: SmallGroupEvent) extends ModifySmallGrou
 	PermissionCheck(Permissions.SmallGroups.Update, event)
 	
 	this.copyFrom(event)
-	this.setPromisedValue(event)
+	promisedValue = event
 	
 	var service = Wire[SmallGroupService]
 

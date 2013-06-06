@@ -69,7 +69,6 @@ class ViewProfileController extends ProfilesController {
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
-			"hasCurrentEnrolment" -> profiledStudentMember.hasCurrentEnrolment,
 			"meetings" -> meetings,
 			"openMeeting" -> openMeeting,
 			"tutor" -> tutor)

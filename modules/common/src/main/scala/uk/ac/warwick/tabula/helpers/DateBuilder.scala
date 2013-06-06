@@ -50,17 +50,16 @@ object DateBuilder {
 			split: Boolean, 
 			shortMonth: Boolean,
 			includeTime: Boolean) = {
-				if (includeTime) {
-					val pattern = new StringBuilder
-					pattern.append("HH:mm")
-					if (includeSeconds) pattern.append(":ss")
-					if (includeTimezone) pattern.append(" (z)")
-					//if (includeAt) pattern.append(" 'at'")
-					(formatterMap(pattern.toString) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth)
-				}
-				else {
-					datePart(date, capitalise, relative, shortMonth)
-				}
+		if (includeTime) {
+			val pattern = new StringBuilder
+			pattern.append("HH:mm")
+			if (includeSeconds) pattern.append(":ss")
+			if (includeTimezone) pattern.append(" (z)")
+			//if (includeAt) pattern.append(" 'at'")
+			(formatterMap.retrieve(pattern.toString()) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth)
+		} else {
+			datePart(date, capitalise, relative, shortMonth)
+		}
 	}
 
 	def ordinal(day: Int) = day % 10 match {
@@ -85,10 +84,6 @@ object DateBuilder {
 		else if (today.minusDays(1) isEqual thatDay) relativeWords(capitalise)('yesterday)
 		else if (today.plusDays(1) isEqual thatDay) relativeWords(capitalise)('tomorrow)
 		else absoluteDate
-	}
-
-	class DateTimeFormatterCache extends mutable.HashMap[String, DateTimeFormatter] {
-		override def default(pattern: String) = DateTimeFormat.forPattern(pattern)
 	}
 }
 

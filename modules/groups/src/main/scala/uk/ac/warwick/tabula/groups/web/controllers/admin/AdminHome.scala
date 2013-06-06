@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
@@ -19,8 +18,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.web.Mav
-
 import scala.collection.JavaConverters._
+import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 
 
 /**
@@ -41,6 +41,8 @@ class AdminDepartmentHomeController extends GroupsController {
 	
 	@ModelAttribute def command(@PathVariable("department") dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
+	
+	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {

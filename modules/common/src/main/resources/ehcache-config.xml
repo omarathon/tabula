@@ -17,8 +17,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="ehcache.xsd" name="tabulaCache">
+<ehcache
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="ehcache.xsd"
+        name="tabulaCache"
+        updateCheck="false">
 
   <!--
     Mandatory Default Cache configuration. These settings will be applied to caches
@@ -79,6 +82,24 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
+
+  <cache name="SmallGroup-events-tutors"
+    maxElementsInMemory="500"
+    maxElementsOnDisk="2000"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+    />
+
+  <cache name="SmallGroupEvent-tutors"
+    maxElementsInMemory="500"
+    maxElementsOnDisk="2000"
+    overflowToDisk="true"
+    diskPersistent="true"
+    diskSpoolBufferSizeMB="20"
+    memoryStoreEvictionPolicy="LFU"
+    />
     
   <!-- Piggyback onto the userlookup property -->
   <diskStore path="${warwick.ehcache.disk.store.dir}/tabula"/>

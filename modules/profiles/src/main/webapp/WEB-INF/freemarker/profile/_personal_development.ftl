@@ -18,13 +18,11 @@
 
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
-		
 
 		<#if profile.personalTutors?size != 0>
 			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-plus"></i> Add another tutor</a>
 		</#if>
 
-		
 		<#if profile.personalTutors?size == 0>
 			<p>
 				Not recorded
@@ -65,7 +63,7 @@
 			</div>
 		</#list>
 		</div>
-		
+
 		<#if profile.hasAPersonalTutor>
 			<#include "../tutor/meeting/list.ftl" />
 		</#if>
@@ -74,7 +72,6 @@
 
 		<div id="modal-change-tutor" class="modal hide fade"></div>
 
-	
 		<script type="text/javascript">
 		jQuery(function($){
 

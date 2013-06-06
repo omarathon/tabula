@@ -44,7 +44,7 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
 
 trait Public extends PermissionsChecking
 
-abstract trait PermissionsCheckingMethods extends Logging {
+trait PermissionsCheckingMethods extends Logging {
 	def mustBeLinked(assignment: Assignment, module: Module) =
 		if (mandatory(assignment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assignment as it doesn't belong to specified module")
@@ -86,16 +86,16 @@ abstract trait PermissionsCheckingMethods extends Logging {
 	 * it throws an ItemNotFoundException, which should get picked
 	 * up by an exception handler to display a 404 page.
 	 */
-	def mandatory[A](something: A)(implicit tag: ClassTag[A]): A = something match {
-		case thing: Any if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A : ClassTag](something: A): A = something match {
+		case thing: A => thing
 		case _ => throw new ItemNotFoundException()
 	}
 	/**
 	 * Pass in an Option and receive either the actual value, or
 	 * an ItemNotFoundException is thrown.
 	 */
-	def mandatory[A](option: Option[A])(implicit tag: ClassTag[A]): A = option match {
-		case Some(thing: Any) if tag.runtimeClass.isInstance(thing) => thing.asInstanceOf[A]
+	def mandatory[A : ClassTag](option: Option[A]): A = option match {
+		case Some(thing: A) => thing
 		case _ => throw new ItemNotFoundException()
 	}
 

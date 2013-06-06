@@ -32,7 +32,7 @@ object SmallGroup {
 @Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
+class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with Serializable {
 	import SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]

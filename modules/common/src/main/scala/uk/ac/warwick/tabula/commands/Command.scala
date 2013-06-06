@@ -101,8 +101,9 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
 	private var _promise = Promises.promise[A]
 	
-	final def get = _promise.get
-	final def setPromisedValue(value: => A) = {
+	final def get = promisedValue
+	final def promisedValue = _promise.get
+	final def promisedValue_=(value: => A) = {
 		_promise.set(value)
 		value
 	}

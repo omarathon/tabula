@@ -2,25 +2,25 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
-import collection.JavaConversions._
+import javax.sql.DataSource
+import javax.annotation.Resource
+
+import scala.collection.JavaConversions._
+
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.stereotype.Service
 import org.springframework.jdbc.core.RowCallbackHandler
 import org.springframework.jdbc.core.SqlParameter
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
-import org.springframework.stereotype.Service
-import javax.annotation.Resource
-import javax.sql.DataSource
+
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.FunctionConversions._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import javax.annotation.Resource
-import org.springframework.stereotype.Service
 
 @Service
 class AssignmentImporter extends InitializingBean {
@@ -32,7 +32,7 @@ class AssignmentImporter extends InitializingBean {
 	var upstreamAssignmentQuery: UpstreamAssignmentQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
-	override def afterPropertiesSet {
+	override def afterPropertiesSet() {
 		assessmentGroupMemberQuery = new AssessmentGroupMembersQuery(ads)
 		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(ads)
 		upstreamAssignmentQuery = new UpstreamAssignmentQuery(ads)
@@ -63,7 +63,7 @@ class AssignmentImporter extends InitializingBean {
 		val params: JMap[String, Object] = Map(
 			"academic_year_code" -> yearsToImportArray)
 		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new RowCallbackHandler {
-			override def processRow(rs: ResultSet) = {
+			override def processRow(rs: ResultSet) {
 				callback(ModuleRegistration(
 					year = rs.getString("academic_year_code"),
 					sprCode = rs.getString("spr_code"),

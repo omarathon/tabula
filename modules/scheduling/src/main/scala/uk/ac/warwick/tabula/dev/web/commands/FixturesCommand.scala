@@ -57,8 +57,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val moduleInfos = Seq(Fixtures.TestModule1, Fixtures.TestModule2, Fixtures.TestModule3)
 
 		transactional() {
-			for (modInfo <- moduleInfos)
-				moduleAndDepartmentService.getModuleByCode(modInfo.code) map { session.delete(_) }
+			for (modInfo <- moduleInfos; module <- moduleAndDepartmentService.getModuleByCode(modInfo.code)) {
+				 session.delete(module)
+      }
 		}
 
 		transactional() {
