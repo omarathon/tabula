@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.system.permissions
 
+import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException, ItemNotFoundException}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -13,33 +14,42 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.FeedbackTemplate
-import uk.ac.warwick.tabula.roles.Role
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.services.SecurityService
+import scala.annotation.target
 
 /**
- * Trait that allows classes to call ActionCheck() in their inline definitions 
+ * Trait that allows classes to call ActionCheck() in their inline definitions
  * (i.e. on construction). These are then evaluated on bind.
  */
 trait PermissionsChecking extends PermissionsCheckingMethods {
-	
-	var permissionChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+
+	var permissionsAnyChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+	var permissionsAllChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+
+	def PermissionCheckAny(checkablePermissions: => Iterable[CheckablePermission]) {
+		for (p <- checkablePermissions) checkAny(p.permission, p.scope)
+	}
 
 	def PermissionCheckAll(permission: Permission, scopes: => Iterable[PermissionsTarget]) {
-		for (scope <- scopes) check(permission, Some(scope))
+		for (scope <- scopes) checkAll(permission, Some(scope))
 	}
-	
+
 	def PermissionCheck(scopelessPermission: ScopelessPermission) {
-		check(scopelessPermission, None)
+		checkAll(scopelessPermission, None)
 	}
-	
+
 	def PermissionCheck(permission: Permission, scope: PermissionsTarget) {
-		check(permission, Some(scope))
+		checkAll(permission, Some(scope))
 	}
-	
-	private def check(permission: Permission, scope: Option[PermissionsTarget]) {
-		permissionChecks += (permission -> scope)
+
+	private def checkAny(permission: Permission, scope: Option[PermissionsTarget]) {
+		permissionsAnyChecks += (permission -> scope)
 	}
-	
+
+	private def checkAll(permission: Permission, scope: Option[PermissionsTarget]) {
+		permissionsAllChecks += (permission -> scope)
+	}
 }
 
 trait Public extends PermissionsChecking
@@ -62,13 +72,13 @@ trait PermissionsCheckingMethods extends Logging {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 			throw new ItemNotFoundException(feedback)
 		}
-	
+
 	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department) =
 		if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
 			logger.info("Not displaying marking workflow as it doesn't belong to specified department")
 			throw new ItemNotFoundException(markingWorkflow)
 		}
-	
+
 	def mustBeLinked(template: FeedbackTemplate, department: Department) =
 		if (mandatory(template).department.id != mandatory(department.id)) {
 			logger.info("Not displaying feedback template as it doesn't belong to specified department")
@@ -79,8 +89,8 @@ trait PermissionsCheckingMethods extends Logging {
     if (mandatory(submission).assignment.id != mandatory(assignment).id) {
       logger.info("Not displaying submission as it doesn't belong to specified assignment")
       throw new ItemNotFoundException(submission)
-    }	
-	
+    }
+
 	/**
 	 * Returns an object if it is non-null and not None. Otherwise
 	 * it throws an ItemNotFoundException, which should get picked
@@ -102,4 +112,34 @@ trait PermissionsCheckingMethods extends Logging {
 	def notDeleted[A <: CanBeDeleted](entity: A): A =
 		if (entity.deleted) throw new ItemNotFoundException()
 		else entity
+
+	/**
+	 * Checks target.permissionsAllChecks for ANDed permission, then target.permissionsAnyChecks for ORed permissions.
+	 * Throws PermissionDeniedException if permissions are unmet or ItemNotFoundException (-> 404) if scope is missing.
+	 */
+	def permittedByChecks(securityService: SecurityService, user: CurrentUser, target: PermissionsChecking) {
+		Assert.isTrue(
+			!target.permissionsAnyChecks.isEmpty || !target.permissionsAllChecks.isEmpty || target.isInstanceOf[Public],
+			"Bind target " + target.getClass + " must specify permissions or extend Public"
+		)
+
+		// securityService.check() throws on *any* missing permission
+		for (check <- target.permissionsAllChecks) check match {
+			case (permission: Permission, Some(scope)) => securityService.check(user, permission, scope)
+			case (permission: ScopelessPermission, _) => securityService.check(user, permission)
+			case _ =>
+				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
+				throw new ItemNotFoundException()
+		}
+
+		// securityService.can() wrapped in exists() only throws if no perms match
+		if (!target.permissionsAnyChecks.isEmpty && !target.permissionsAnyChecks.exists ( _ match {
+			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
+			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
+			case _ => {
+				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
+				throw new ItemNotFoundException()
+			}
+		})) throw new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
+	}
 }

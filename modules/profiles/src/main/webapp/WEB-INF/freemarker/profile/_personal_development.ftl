@@ -74,7 +74,6 @@
 
 		<script type="text/javascript">
 		jQuery(function($){
-
 			// load edit personal tutor
 			$("#personal-development").on("click", ".edit-tutor-link, .add-tutor-link", function(e) {
 				e.preventDefault();
@@ -82,7 +81,6 @@
 				$("#modal-change-tutor").load(url,function(){
 					$("#modal-change-tutor").modal('show');
 				});
-				
 			});
 		});
 		</script>

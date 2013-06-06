@@ -1,15 +1,16 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#-- 
+<#--
 HFC-166 Don't use #compress on this file because
-the comments textarea needs to maintain newlines. 
+the comments textarea needs to maintain newlines.
 -->
 <#assign commandName="editAssignmentCommand"/>
 <#assign command=editAssignmentCommand />
 <#assign canUpdateMarkingWorkflow=command.canUpdateMarkingWorkflow/>
+<#assign route><@routes.assignmentedit assignment /></#assign>
 
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/edit')}" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action=route commandName=commandName cssClass="form-horizontal">
 
 <#--
 <div id="form-editor-sidebar">
@@ -50,19 +51,19 @@ the comments textarea needs to maintain newlines.
 
 </div>
 -->
-<div class="submit-buttons">
-<input type="submit" value="Save" class="btn btn-primary">
-or <a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
+<div class="submit-buttons form-actions">
+	<input type="submit" value="Save" class="btn btn-primary">
+	<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 </div>
 </@f.form>
 
 <#if canDelete>
-<p class="subtle">Did you create this assignment in error? 
-You may <a href="<@routes.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
+	<p class="alert alert-info">Did you create this assignment in error?
+	You may <a href="<@routes.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
 <#else>
-<p class="subtle">
-It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
-</p>
+	<p class="alert alert-info">
+	It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
+	</p>
 </#if>
 
 </#escape>

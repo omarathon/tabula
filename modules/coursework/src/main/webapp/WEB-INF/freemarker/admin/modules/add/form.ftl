@@ -19,9 +19,9 @@
 		<@f.input path="name" cssClass="text" />
 	</@form.labelled_row>
 
-<div class="submit-buttons">
+<div class="submit-buttons form-actions">
 <input type="submit" value="Create" class="btn btn-primary">
-or <a class="btn" href="<@routes.home />">Cancel</a>
+<a class="btn" href="<@routes.home />">Cancel</a>
 </div>
 
 </@f.form>

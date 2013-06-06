@@ -23,7 +23,7 @@ You can delete an assignment if it's been created in error.
 
 <div class="submit-buttons">
 <input type="submit" value="Delete" class="btn btn-danger">
-or <a href="<@routes.assignmentedit assignment=assignment />" class="btn">Cancel</a>
+<a href="<@routes.assignmentedit assignment=assignment />" class="btn">Cancel</a>
 </div>
 </@f.form>
 

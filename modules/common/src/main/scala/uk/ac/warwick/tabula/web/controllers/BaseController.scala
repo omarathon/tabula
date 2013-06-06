@@ -30,18 +30,15 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
 	var securityService: SecurityService
-	
-	def restricted[A <: PermissionsChecking](something: => A): Option[A] = 
-		if (something.permissionChecks forall(_ match {
-			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
-			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
-			case _ =>
-				// We're trying to do a permissions check against a non-existent scope - 404
-				logger.warn("Permissions check throwing item not found - this should be caught in check (restricted " + something + ")")
-				throw new ItemNotFoundException()
-		})) Some(something)
-		else None
-		
+
+	def restricted[A <: PermissionsChecking](something: => A): Option[A] =
+		try {
+			permittedByChecks(securityService, user, something)
+			Some(something)
+		} catch {
+			case e:Exception => None
+		}
+
 	def restrictedBy[A <: PermissionsChecking](fn: => Boolean)(something: => A): Option[A] =
 		if (fn) restricted(something)
 		else Some(something)
@@ -49,10 +46,10 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 
 trait ControllerViews {
 	val Mav = uk.ac.warwick.tabula.web.Mav
-	
+
 	def getReturnTo(defaultUrl:String) = requestInfo.flatMap { _.requestParameters.get("returnTo") } match {
 		case Some(returnTo :: tail) => returnTo
-		case _ => defaultUrl 
+		case _ => defaultUrl
 	}
 	
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
@@ -131,10 +128,10 @@ abstract class BaseController extends ControllerMethods
 		if (_hideDeletedItems) {
 			session.enableFilter("notDeleted")
 		}
-		
+
 		onPreRequest
 	}
-	
+
 	// Stub implementation that can be overridden for logic that goes before a request
 	def onPreRequest {}
 

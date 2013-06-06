@@ -277,7 +277,7 @@
 	};
 
 	$(function(){
-		$('a.disabled').on('click', function(e){
+		$('a.disabled').on('click', function(e) {
 			e.preventDefault();
 		});
 	});
@@ -353,8 +353,7 @@
 
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
-			// If intro text is changed to reflect new features, change its id to ensure end users see the new version
-			var id = $(e.target).parents('.introductory').prev().prop('id');
+			// If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
 			var hash = $(e.target).parents('.introductory').prev().data('hash');
 			// use this hook to persist showOnLoad state with some ajax shizzle
 			$.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
@@ -414,9 +413,7 @@
 		});
 
 		// sticky table headers
-		//$('table.sticky-table-headers').stickyTableHeaders({
-		//	fixedOffset: $('#navigation')
-		//});
+		//$('table.sticky-table-headers').fixedHeaderTable('show');
 		
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {

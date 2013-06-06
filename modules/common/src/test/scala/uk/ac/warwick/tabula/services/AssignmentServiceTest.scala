@@ -288,9 +288,9 @@ class AssignmentServiceTest extends AppContextTestBase {
 		
 		assignmentMembershipService.save(ua) should be (ua)
 		
-		assignmentMembershipService.getAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
-		assignmentMembershipService.getAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
-		assignmentMembershipService.getAssessmentGroups(new UpstreamAssignment, new AcademicYear(2010)) should be (Seq())
+		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
+		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
+		assignmentMembershipService.getUpstreamAssessmentGroups(new UpstreamAssignment, new AcademicYear(2010)) should be (Seq())
 		
 		session.clear
 		

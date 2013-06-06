@@ -13,6 +13,7 @@ the comments textarea needs to maintain newlines.
 
 <#if command.prefilled>
 <div class="alert alert-success">
+<i class="icon-info-sign"></i>
 Some fields have been pre-filled from another recently created assignment for convenience.
 <a href="?prefillFromRecent=false">Don't do this</a>
 </div>
@@ -20,6 +21,7 @@ Some fields have been pre-filled from another recently created assignment for co
 
 <#if command.prefillAssignment??>
 <div class="alert alert-success">
+<i class="icon-info-sign"></i>
 Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
 </div>
 </#if>
@@ -30,11 +32,10 @@ Some fields have been pre-filled from assignment ${command.prefillAssignment.nam
 
 <#include "_fields.ftl" />
 
-<div class="submit-buttons">
-<input type="submit" value="Create" class="btn btn-primary">
-or <a class="btn" href="<@routes.depthome module=module />">Cancel</a>
+<div class="submit-buttons form-actions">
+	<input type="submit" value="Create" class="btn btn-primary">
+	<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
 </div>
-
 </@f.form>
 
 </#escape>

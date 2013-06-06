@@ -79,7 +79,7 @@
 	<#else>
 		<#assign cancelDestination><@routes.departmenthome department=department /></#assign>
 	</#if>
-	or <a class="btn" href="${cancelDestination}">Cancel</a>
+	<a class="btn" href="${cancelDestination}">Cancel</a>
 </div>
 </@f.form>
 </#escape>

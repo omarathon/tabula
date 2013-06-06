@@ -123,7 +123,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def permissionsParents = Option(module).toStream
 
-	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
@@ -239,7 +239,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
-				assignmentMembershipService.getAssessmentGroup(template)
+				assignmentMembershipService.getUpstreamAssessmentGroup(template)
 			}
 		}
 	}

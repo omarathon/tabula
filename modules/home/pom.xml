@@ -235,7 +235,7 @@
 								<include>libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js</include>
 								<include>libs/jquery.delayedObserver.js</include>
 								<include>libs/jquery-caret/jquery.caret.1.02.js</include>
-								<include>libs/jquery-stickytableheaders/jquery.stickytableheaders.min.js</include>
+								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
 								<include>libs/jquery-rating/jquery.rating.pack.js</include>
 								<include>libs/popup/popup.js</include>
 								<include>libs/bootstrap/js/bootstrap.js</include>

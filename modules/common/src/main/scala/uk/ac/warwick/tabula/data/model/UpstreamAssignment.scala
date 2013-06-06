@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.Entity
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 
 /**
@@ -11,6 +14,9 @@ import uk.ac.warwick.tabula.data.PreSaveBehaviour
  */
 @Entity
 class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
+
+	@transient var membershipService = Wire.auto[AssignmentMembershipService]
+
 	/**
 	 * Lowercase module code, with CATS. e.g. in304-15
 	 */
@@ -64,6 +70,6 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 		departmentCode = other.departmentCode
 		name = other.name
 	}
-
+	
+	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)
 }
-
