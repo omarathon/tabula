@@ -29,7 +29,7 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
 		}
 	}
 
-  @Test def redirectPage {
+	@Test def redirectPage {
 		new Context {
 			resolve("redirect:/sysadmin/departments") should be (Some("https://tabula.warwick.ac.uk/sysadmin/departments"))
 			resolve("sysadmin/departments") should be (None)
