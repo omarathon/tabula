@@ -10,7 +10,7 @@ class NotificationService extends Logging {
 
 	type NotificationListener = Notification[_] => Unit
 
-	val emailListener = new EmailNotificationListener
+	final val emailListener = new EmailNotificationListener
 	val listeners: List[NotificationListener] = List(emailListener.listen)
 
 	def push(notification: Notification[_]){

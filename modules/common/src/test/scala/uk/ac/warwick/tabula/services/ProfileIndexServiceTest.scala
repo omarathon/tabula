@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.util.LuceneTestCase
-import org.junit.{Test, After, Before}
+import org.junit.{Ignore, Test, After, Before}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
@@ -57,8 +57,8 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.destroy()
 		FileUtils.deleteDirectory(TEMP_DIR)
 	}
-	
-	@Test def stripTitles {
+
+	@Ignore @Test def stripTitles {
 		indexer.stripTitles("Mathew Mannion") should be ("Mathew Mannion")
 		indexer.stripTitles("Mr Mathew Mannion") should be ("Mathew Mannion")
 		indexer.stripTitles("Mr. Mathew Mannion") should be ("Mathew Mannion")
@@ -66,7 +66,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Transactional
-	@Test def find = withFakeTime(dateTime(2000, 6)) {
+	@Ignore @Test def find = withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")
 		session.save(dept)
 		
@@ -100,7 +100,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 	
 	@Transactional
-	@Test def index = withFakeTime(dateTime(2000, 6)) {
+	@Ignore @Test def index = withFakeTime(dateTime(2000, 6)) {
 		val stopwatch = new StopWatch
 		stopwatch.start("creating items")
 		
@@ -165,8 +165,8 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		
 	}
-	
-	@Test def threading {
+
+	@Ignore @Test def threading {
 		val dept = Fixtures.department("CS", "Computer Science")
 		val callable = new Callable[Seq[Member]] {
 			override def call() = indexer.find("mathew james mannion", Seq(dept), Set(), false)
