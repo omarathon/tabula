@@ -25,8 +25,6 @@
 
 		<#macro what_is_this>
 			<#assign popoverText>
-				<p>Expand to view and choose which students see this assignment.</p>
-
 				<p>You can link to an assignment in SITS and the list of students will be updated automatically from there.
 				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
 
@@ -37,7 +35,7 @@
 			<a href="#"
 			   title="What's this?"
 			   class="use-popover"
-			   data-title="Student membership"
+			   data-title="Students"
 			   data-trigger="hover"
 	   		   data-html="true"
 			   data-content="${popoverText}"
@@ -51,7 +49,7 @@
 					<span class="uneditable-value">
 						${assignmentMembership.totalCount} enrolled
 						<#if assignmentMembership.excludeCount gt 0 || assignmentMembership.includeCount gt 0>
-							<span class="muted">(${assignmentMembership.sitsCount} <#if assignmentMembership.usedExcludeCount gt 0>left</#if> from SITS<#if assignmentMembership.usedExcludeCount gt 0> after <@fmt.p assignmentMembership.usedExcludeCount "relevant manual removal" /></#if><#if assignmentMembership.usedIncludeCount gt 0>, plus <@fmt.p assignmentMembership.usedIncludeCount "relevant manual addition" /></#if>)</span>
+							<span class="muted">(${assignmentMembership.sitsCount} from SITS<#if assignmentMembership.usedExcludeCount gt 0> after ${assignmentMembership.usedExcludeCount} removed manually</#if><#if assignmentMembership.usedIncludeCount gt 0>, plus ${assignmentMembership.usedIncludeCount} added manually</#if>)</span>
 						<#else>
 							<span class="muted">from SITS</span>
 						</#if>
@@ -91,19 +89,19 @@
 						Remove
 					</a>
 
-					<a class="btn restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
+					<a class="btn btn-success restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
 				</#if>
 
 				<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb"></i> Javascript is required for editing</small></span>
 			</p>
 
 			<#if hasMembers>
-				<div id="enrolment" class="scroller">
-					<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+				<div id="enrolment">
+					<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 						<thead>
 							<tr>
-								<th class="for-check-all" style="width: 25px;"></th>
-								<th class="sortable" style="width: 60px;">Source</th>
+								<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
+								<th class="sortable" style="width: 50px;">Source</th>
 								<th class="sortable">First name</th>
 								<th class="sortable">Last name</th>
 								<th class="sortable">ID</th>
@@ -224,10 +222,10 @@
 					<p>Add students by linking this assignment to one or more of the following SITS assignments for
 					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
 
-					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 						<thead>
 							<tr>
-								<th class="for-check-all"></th>
+								<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
 								<th class="sortable">Name</th>
 								<th class="sortable">Members</th>
 								<th class="sortable">CATS</th>
@@ -275,7 +273,7 @@
 			<#-- sortable tables -->
 			$enrolment.find('.table-sortable').sortableTable();
 			$enrolment.tabulaPrepareSpinners();
-			$enrolment.details();
+			$enrolment.find('details').details();
 
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
@@ -307,7 +305,7 @@
 		</#if>
 		initEnrolment();
 
-		var $pendingAlert = $('<p class="alert alert-info hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-mini update-only"></p>');
+		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {
