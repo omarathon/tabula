@@ -19,7 +19,7 @@
 <#-- Print out a table of tutees.
  is_relationship=true means each item is a StudentRelationship rather than a member-->
 <#macro table tutees is_relationship>
-<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
+<table class="tutees table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
 		<th class="photo-col">Photo</th>

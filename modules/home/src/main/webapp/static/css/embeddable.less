@@ -682,7 +682,7 @@ table {
 	table.tablesorter {
 		> thead > tr {
 			th {
-				background-color: lighten(@tabulaGrayLight, 35%);
+				background-color: lighten(@tabulaGrayLightTint, 5%);
 				padding-right: 20px;
 
 				&.header {
@@ -702,51 +702,62 @@ table {
 
 				&.headerSortDown,
 				&.headerSortUp {
-					background-color: lighten(@tabulaGrayLight, 25%);
+					background-color: @tabulaGrayLightTint;
 				}
 			}
 		}
 
-		&.tabula-greenLight {
+		&.tabula-green, &.tabula-greenLight {
 			> thead > tr > th {
-				background-color: lighten(@tabulaGreenLight, 35%);
+				background-color: lighten(@tabulaGreenLightTint, 5%);
 
 				&.headerSortDown,
 				&.headerSortUp {
-					background-color: lighten(@tabulaGreenLight, 25%);
+					background-color: @tabulaGreenLightTint;
 				}
 			}
 		}
 
-		&.tabula-blueLight {
+		&.tabula-purple, &.tabula-pink {
 			> thead > tr > th {
-				background-color: lighten(@tabulaBlueLight, 35%);
+				background-color: lighten(@tabulaPurpleTint, 5%);
 
 				&.headerSortDown,
 				&.headerSortUp {
-					background-color: lighten(@tabulaBlueLight, 25%);
+					background-color: @tabulaPurpleTint;
 				}
 			}
 		}
 
-		&.tabula-orangeLight {
+		&.tabula-blueDark, &.tabula-blue, &.tabula-blueLight {
 			> thead > tr > th {
-				background-color: lighten(@tabulaOrangeLight, 35%);
+				background-color: lighten(@tabulaBlueTint, 5%);
 
 				&.headerSortDown,
 				&.headerSortUp {
-					background-color: lighten(@tabulaOrangeLight, 25%);
+					background-color: @tabulaBlueTint;
 				}
 			}
 		}
 
-		&.tabula-turquoise {
+		&.tabula-orangeLight, &.tabula-red {
 			> thead > tr > th {
-				background-color: desaturate(lighten(@tabulaTurquoise, 35%), 20%);
+				background-color: lighten(@tabulaRedTint, 5%);
 
 				&.headerSortDown,
 				&.headerSortUp {
-					background-color: desaturate(lighten(@tabulaTurquoise, 25%), 20%);
+					background-color: @tabulaRedTint;
+				}
+			}
+		}
+
+		&.tabula-greenDark, &.tabula-turquoise {
+			> thead > tr > th {
+				background-color: lighten(@tabulaTurquoiseTint, 5%);
+
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: @tabulaTurquoiseTint;
 				}
 			}
 		}
@@ -1627,13 +1638,16 @@ h1.with-settings {
 
 	// Fix popovers to be on top of modals
 	.popover {
+		z-index: @zindexPopover  + @zindexModal;
+
+		.close {
+			margin-top: 3px;
+			margin-right: 8px;
+		}
+
 		&.introductory {
 			max-width: 600px;
 
-			.close {
-				margin-top: 3px;
-				margin-right: 8px;
-			}
 
 			.footer {
 				margin: 0; // reset heading margin
@@ -1652,8 +1666,6 @@ h1.with-settings {
 				}
 			}
 		}
-
-		z-index: @zindexPopover  + @zindexModal;
 	}
 
 	// Remove this if we ever include type.less in our Bootstrap build (i.e. we build ID6 on top of Bootstrap)
