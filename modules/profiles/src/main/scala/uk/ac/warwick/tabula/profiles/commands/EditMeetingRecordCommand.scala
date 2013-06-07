@@ -34,7 +34,5 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		}
 	}
 
-	def describe(d: Description){}
-
 	def emit = new MeetingRecordApprovalNotification(meeting, "edit")
 }

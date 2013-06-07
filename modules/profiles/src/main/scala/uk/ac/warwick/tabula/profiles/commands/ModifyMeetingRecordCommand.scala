@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{NotificationSource, Command, SelfValidating, UploadedFile}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model._
@@ -14,12 +14,12 @@ import uk.ac.warwick.tabula.system.BindListener
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
+import scala.Some
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
-	extends Command[MeetingRecord] with NotificationSource[MeetingRecord] with SelfValidating with FormattedHtml
+	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
 	var features = Wire.auto[Features]
@@ -118,5 +118,13 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			}
 			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
 		}
+	}
+
+	def describe(d: Description){
+		d.properties(
+			"creator" -> meeting.creator,
+			"relationship" -> meeting.relationship,
+			"pendingApprovers" -> meeting.pendingApprovers
+		)
 	}
 }

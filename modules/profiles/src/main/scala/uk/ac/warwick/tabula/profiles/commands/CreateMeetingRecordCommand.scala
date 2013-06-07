@@ -18,8 +18,6 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		file.onBind(result)
 	}
 
-	def describe(d: Description){}
-
 	def emit = new MeetingRecordApprovalNotification(meeting, "create")
 }
 
