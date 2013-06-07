@@ -37,7 +37,7 @@ trait Describable[A] {
 	val eventName: String
 }
 
-trait NotificationSource[A] {
+trait Notifies[A] {
 	def emit: Notification[A]
 }
 
