@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.DateFormats
  *
  * A notification could be generated when a student submits an assignment
  * in this case ....
- * actor = the student submitting the assignment
+ * agent = the student submitting the assignment
  * verb = submit
  * _object = the submission
  * target = the assignment that we are submitting to
@@ -24,7 +24,7 @@ trait Notification[A]{
 
 	final val dateFormatter = DateFormats.NotificationDate
 
-	val actor: User
+	val agent: User // the actor in open social activity speak
 	val verb: String
 	val _object: A
 	val target: Option[AnyRef]
@@ -34,6 +34,6 @@ trait Notification[A]{
 	def url: String
 	def recipients: Seq[User]
 
-	override def toString = List(actor.getFullName, verb, _object.getClass.getSimpleName).mkString("notification{", ", ", "}")
+	override def toString = List(agent.getFullName, verb, _object.getClass.getSimpleName).mkString("notification{", ", ", "}")
 
 }

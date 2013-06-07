@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.data.model.MeetingRecordApproval
 class MeetingRecordRejectedNotification(approval: MeetingRecordApproval)
 	extends MeetingRecordNotification(approval.meetingRecord){
 
-	val actor = approval.approver.asSsoUser
+	override val agent = approval.approver.asSsoUser
 	val verb = "reject"
 
 	def title = "Meeting record rejected"
 	def content = renderToString(FreemarkerTemplate, Map(
-		"actor" -> actor,
+		"actor" -> agent,
 		"dateFormatter" -> dateFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "rejected",
