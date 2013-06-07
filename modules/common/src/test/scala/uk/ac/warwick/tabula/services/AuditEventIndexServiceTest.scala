@@ -89,7 +89,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		
 	}
 	
-	@Transactional 
+	@Transactional
 	@Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()

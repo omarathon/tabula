@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula
 
-import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.DateTimeFieldType._
-import collection.JavaConversions._
 import org.joda.time.format.DateTimeFormat
 
 /**
@@ -16,6 +13,9 @@ object DateFormats {
 	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
 	final val DatePicker = "dd-MMM-yyyy"
 	final val TimePicker = "HH:mm:ss"
+	final val NotificationDatePattern = "d MMMM yyyy 'at' HH:mm:ss"
+	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
+	final val CSVDateTimePattern = "dd/MM/yyyy HH:mm"
 
 	/**
 	 * ISO 8601 date format. Has date, hours, minutes, timezone, no millis.
@@ -25,11 +25,13 @@ object DateFormats {
 	final val IsoDateTime = ISODateTimeFormat.dateTimeNoMillis
 	
 	/** Date-time format used in Formsbuilder-style CSV export */
-	final val CSVDateTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+	final val CSVDateTime = DateTimeFormat.forPattern(CSVDateTimePattern)
 
 	/** Date format used in spreadsheets */
 	final val CSVDate = DateTimeFormat.forPattern(CSVDatePattern)
-	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
+
+	/** Date format used in emails */
+	final val NotificationDate = DateTimeFormat.forPattern(NotificationDatePattern)
 
 }
 

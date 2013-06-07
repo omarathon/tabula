@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.MeetingRecordApproval
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.Daoisms
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
 
-class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval)
-	extends Command[MeetingRecordApproval] with SelfValidating with Daoisms {
+class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends Command[MeetingRecordApproval]
+	with Notifies[MeetingRecord] with SelfValidating with Daoisms {
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Update, approval.meetingRecord)
 
@@ -43,6 +42,13 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval)
 		approval
 	}
 
-	def describe(d: Description) = d.properties(
-		"meetingRecord" -> approval.meetingRecord.id)
+	def describe(d: Description) {
+		d.properties("meetingRecord" -> approval.meetingRecord.id)
+	}
+
+	def emit = if (approved)
+		new MeetingRecordApprovedNotification(approval)
+	else
+		new MeetingRecordRejectedNotification(approval)
+
 }

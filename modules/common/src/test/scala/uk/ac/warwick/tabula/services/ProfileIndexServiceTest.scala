@@ -57,7 +57,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.destroy()
 		FileUtils.deleteDirectory(TEMP_DIR)
 	}
-	
+
 	@Test def stripTitles {
 		indexer.stripTitles("Mathew Mannion") should be ("Mathew Mannion")
 		indexer.stripTitles("Mr Mathew Mannion") should be ("Mathew Mannion")
@@ -165,7 +165,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		
 	}
-	
+
 	@Test def threading {
 		val dept = Fixtures.department("CS", "Computer Science")
 		val callable = new Callable[Seq[Member]] {
