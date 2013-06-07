@@ -5,8 +5,11 @@ import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.NotificationListener
+import org.springframework.stereotype.Component
 
-class EmailNotificationListener extends UnicodeEmails {
+@Component
+class EmailNotificationListener extends NotificationListener with UnicodeEmails {
 
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")
 
