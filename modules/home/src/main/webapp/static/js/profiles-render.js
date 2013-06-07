@@ -100,7 +100,6 @@
 				$m.find('.modal-body').slideDown();
 				
 				// reset datepicker & submit protection
-				$f.find("input.date-picker").tabulaDatePicker();
 				var $form = $m.find('form.double-submit-protection');
 				$form.tabulaSubmitOnce();
 				$form.find(".btn").removeClass('disabled');

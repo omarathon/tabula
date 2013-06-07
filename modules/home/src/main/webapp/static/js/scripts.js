@@ -30,37 +30,45 @@
 
 	// Tabula-specific rendition of date and date-time pickers
 	jQuery.fn.tabulaDateTimePicker = function() {
-		$(this).datetimepicker({
-			format: "dd-M-yyyy hh:ii:ss",
-			weekStart: 1,
-			minView: 'day',
-			autoclose: true
-		}).on('show', function(ev){
-			var d = new Date(ev.date.valueOf()),
-				  minutes = d.getUTCMinutes(),
-					seconds = d.getUTCSeconds(),
-					millis = d.getUTCMilliseconds();
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					  minutes = d.getUTCMinutes(),
+						seconds = d.getUTCSeconds(),
+						millis = d.getUTCMilliseconds();
 
-			if (minutes > 0 || seconds > 0 || millis > 0) {
-				d.setUTCMinutes(0);
-				d.setUTCSeconds(0);
-				d.setUTCMilliseconds(0);
+				if (minutes > 0 || seconds > 0 || millis > 0) {
+					d.setUTCMinutes(0);
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
 
-				var DPGlobal = $.fn.datetimepicker.DPGlobal;
-				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
 
-				$(this).datetimepicker('update');
-			}
-		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+					$(this).datetimepicker('update');
+				}
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
 	};
 
 	jQuery.fn.tabulaDatePicker = function() {
-		$(this).datepicker({
-			format: "dd-M-yyyy",
-			weekStart: 1,
-			minView: 'day',
-			autoclose: true
-		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datepicker({
+				format: "dd-M-yyyy",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
