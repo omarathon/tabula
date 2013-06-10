@@ -98,6 +98,8 @@ trait CourseworkFixtures extends BrowserTest {
 		
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
+
+		click on cssSelector("#assignmentEnrolmentFields summary") // expand expander
 		click on linkText("Add users manually")
 		eventually { textArea("massAddUsers").isDisplayed should be (true) }
 		
