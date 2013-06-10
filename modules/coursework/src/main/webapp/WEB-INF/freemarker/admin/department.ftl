@@ -94,7 +94,6 @@
 <a id="${module_anchor(module)}"></a>
 <div class="module-info<#if can_manage_dept && !has_assignments> empty</#if>">
 	<div class="clearfix">
-		<h2 class="module-title"><@fmt.module_name module /></h2>
 		<div class="btn-group module-manage-button">
 		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
 		  <ul class="dropdown-menu pull-right">
@@ -116,6 +115,8 @@
 
 		  </ul>
 		</div>
+		
+		<h2 class="module-title"><@fmt.module_name module /></h2>
 	</div>
 
 
