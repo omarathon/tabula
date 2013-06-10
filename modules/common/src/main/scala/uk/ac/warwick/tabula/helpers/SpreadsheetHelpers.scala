@@ -75,7 +75,7 @@ object SpreadsheetHelpers {
 	}
 	
 	def addDateCell(value: DateTime, row: XSSFRow, style: XSSFCellStyle) {
-		addDateCell(value.toLocalDate, row, style)
+		addDateCell(Option(value).map { _.toLocalDate }.orNull, row, style)
 	}
 
 	def addDateCell(value: LocalDate, row: XSSFRow, style: XSSFCellStyle) {
