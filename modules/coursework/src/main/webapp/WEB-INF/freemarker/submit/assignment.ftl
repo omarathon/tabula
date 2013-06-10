@@ -22,7 +22,12 @@
 <#if feedback??>
 
 	<#include "assignment_feedbackdownload.ftl" />
-
+	<#if features.submissions>
+		<#if submission??>
+			<#include "assignment_submissionthanks.ftl" />
+	    </#if>
+	</#if>
+    
 <#else>
 
 	<#if features.submissions>
