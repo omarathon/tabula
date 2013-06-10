@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
+import org.joda.time.DateTime
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -62,6 +63,7 @@ class ProfileImporter extends Logging {
 
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
 		def photo() = try {
+			logger.info(s"Fetching photo for $universityId")
 			Option(membershipInterface.getPhotoById(universityId))
 		} catch {
 			case e: MembershipInterfaceException => None
@@ -241,7 +243,7 @@ object ProfileImporter {
 			usercode				= rs.getString("its_usercode"),
 			startDate				= sqlDateToLocalDate(rs.getDate("dt_start")),
 			endDate					= sqlDateToLocalDate(rs.getDate("dt_end")),
-			modified				= sqlDateToLocalDate(rs.getDate("dt_modified")),
+			modified				= sqlDateToDateTime(rs.getDate("dt_modified")),
 			phoneNumber				= rs.getString("tel_business"),
 			gender					= Gender.fromCode(rs.getString("gender")),
 			alternativeEmailAddress	= rs.getString("external_email"),
@@ -250,6 +252,9 @@ object ProfileImporter {
 
 	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
 		(Option(date) map { new LocalDate(_) }).orNull
+
+	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
+		(Option(date) map { new DateTime(_) }).orNull
 
 }
 
@@ -266,7 +271,7 @@ case class MembershipMember(
 	val usercode: String = null,
 	val startDate: LocalDate = null,
 	val endDate: LocalDate = null,
-	val modified: LocalDate = null,
+	val modified: DateTime = null,
 	val phoneNumber: String = null,
 	val gender: Gender = null,
 	val alternativeEmailAddress: String = null,
