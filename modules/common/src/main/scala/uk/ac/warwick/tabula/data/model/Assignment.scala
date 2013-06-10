@@ -149,7 +149,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@IndexColumn(name = "position")
 	var fields: JList[FormField] = JArrayList()
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
 	
@@ -225,6 +225,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
+	
+	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {

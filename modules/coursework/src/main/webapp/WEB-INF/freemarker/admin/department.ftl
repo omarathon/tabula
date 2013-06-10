@@ -148,18 +148,19 @@
 			</div>
 
 			<div class="stats">
+				<#assign membershipInfo = assignment.membershipInfo />
 				<#assign memberCount>
-					<#if assignment.members.members?size == 0>
+					<#if membershipInfo.totalCount == 0>
 						<span class="badge badge-mini<#if assignment.restrictSubmissions> badge-important</#if>" title="No enrolled students">0</span>
 					<#else>
-						<span class="badge badge-mini" title="<@fmt.p assignment.members.members?size "enrolled student"/>">${assignment.members.members?size}</span>
+						<span class="badge badge-mini" title="<@fmt.p membershipInfo.totalCount "enrolled student"/> (${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)">${membershipInfo.totalCount}</span>
 					</#if>
 				</#assign>
 
 				<#if assignment.openEnded>
 					<div class="dates">
 						<#noescape>${memberCount}</#noescape>
-                        <@fmt.interval assignment.openDate />, never closes
+            <@fmt.interval assignment.openDate />, never closes
 						(open-ended)
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
@@ -168,7 +169,7 @@
 				<#else>
 					<div class="dates">
 						<#noescape>${memberCount}</#noescape>
-                        <@fmt.interval assignment.openDate assignment.closeDate />
+            <@fmt.interval assignment.openDate assignment.closeDate />
 						<#if assignment.closed>
 							<span class="label label-warning">Closed</span>
 						</#if>
