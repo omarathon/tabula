@@ -327,8 +327,10 @@
 		}
 
 		var alertPending = function() {
-			$('#enrolment').before($pendingAlert);
-			$pendingAlert.delay(750).slideDown();
+			if (window.location.pathname.indexOf('/assignments/new') == -1) {
+				$('#enrolment').before($pendingAlert);
+				$pendingAlert.delay(750).slideDown();
+			}
 		}
 
 		<#-- make table rows clickable -->
