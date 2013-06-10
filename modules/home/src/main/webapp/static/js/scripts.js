@@ -467,7 +467,9 @@
 
 				$('.fix-on-scroll').each(function() {
 					var $this = $(this);
-
+					
+					if($this.is(':hidden')) return true;
+					
 					var $scrollContainer = $this.closest('.fix-on-scroll-container');
 					if ($scrollContainer.length == 0) $scrollContainer = $('body');
 

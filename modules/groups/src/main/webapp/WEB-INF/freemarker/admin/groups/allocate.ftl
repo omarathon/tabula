@@ -26,9 +26,25 @@
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
 	
+	
+	
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
+	
+	<div class="tabbable fix-on-scroll-container">
+	<ul class="nav nav-tabs">
+		<li class="active">
+			<a href="#allocategroups-tab1" data-toggle="tab">Drag and Drop</a>
+		</li>
+		<li >
+			<a href="#allocategroups-tab2" data-toggle="tab">Upload Spreadsheet</a>
+		</li>
+	</ul>
+	
+	<div class="tab-content" style="padding: 10px; border: 1px solid black;">
+	
+	<div class="tab-pane active" id="allocategroups-tab1">
 	
 	<p>Drag students onto a group to allocate them to it. Select multiple students by dragging a box around them.
 		 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
@@ -60,7 +76,7 @@
 				<i class="icon-arrow-left"></i> Remove all
 			</a>
 		</div>
-		<div class="row-fluid fix-on-scroll-container">
+		<div class="row-fluid"> <!-- fix-on-scroll-container -->
 			<div class="span5">
 				<div class="students">
 					<h3>Students</h3>
@@ -135,5 +151,32 @@
 			<a href="<@routes.depthome module />" class="btn">Cancel</a>
 		</div>
 	</@f.form>
+	</div><!-- end 1st tab -->
+	
+	<div class="tab-pane" id="allocategroups-tab2">
+		<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
+		<input name="isfile" value="true" type="hidden"/>
+		<table role="presentation" class="narrowed-form">
+			<tr>
+				<td id="multifile-column">
+					<h3>Select file</h3>
+					<p id="multifile-column-description">
+						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
+					</p>
+					<@form.labelled_row "file.upload" "Files">
+					<input type="file" name="file.upload" multiple />
+				</@form.labelled_row>
+			</td>
+		</tr>
+	</table>
+	<div class="submit-buttons">
+		<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
+	</div>
+</@f.form>
+	</div><!-- end 2nd tab-->
+	
+	</div><!-- end tab-content -->
+	
+	</div> <!-- end tabbable -->
 	
 </#escape>
