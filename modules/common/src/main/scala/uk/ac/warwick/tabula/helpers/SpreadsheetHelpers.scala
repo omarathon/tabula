@@ -2,10 +2,11 @@ package uk.ac.warwick.tabula.helpers
 
 import org.apache.poi.xssf.usermodel.{XSSFWorkbook, XSSFSheet, XSSFCellStyle, XSSFRow}
 import org.apache.poi.ss.usermodel.{Font, Cell}
-import java.util.Date
 import uk.ac.warwick.tabula.DateFormats
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.data.model.Department
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
 
 object SpreadsheetHelpers {
 	
@@ -72,11 +73,15 @@ object SpreadsheetHelpers {
 		cell.setCellStyle(style)
 		cell.setCellValue(value)
 	}
+	
+	def addDateCell(value: DateTime, row: XSSFRow, style: XSSFCellStyle) {
+		addDateCell(value.toLocalDate, row, style)
+	}
 
-	def addDateCell(value: Date, row: XSSFRow, style: XSSFCellStyle) {
+	def addDateCell(value: LocalDate, row: XSSFRow, style: XSSFCellStyle) {
 		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
 		cell.setCellStyle(style)
-		cell.setCellValue(value)
+		cell.setCellValue(Option(value).map { _.toDate }.orNull)
 	}
 
 	def addPercentageCell(num:Double, total:Double, row: XSSFRow, workbook: XSSFWorkbook) {
