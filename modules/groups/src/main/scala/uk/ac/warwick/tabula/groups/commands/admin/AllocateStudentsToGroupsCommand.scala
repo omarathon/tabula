@@ -19,9 +19,18 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.groups.services.docconversion.AllocateStudentItem
+import uk.ac.warwick.tabula.groups.services.docconversion.GroupsExtractor
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.services.UserLookupService
+
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, viewer: CurrentUser) 
-	extends Command[SmallGroupSet] with SelfValidating {
+	extends Command[SmallGroupSet] with SelfValidating with BindListener {
 	
 	mustBeLinked(set, module)
 	PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -32,8 +41,15 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	var service = Wire[SmallGroupService]
 	var profileService = Wire[ProfileService]
 	var securityService = Wire[SecurityService]
+	var groupsExtractor = Wire.auto[GroupsExtractor]
+	var userLookup = Wire[UserLookupService]
 	
-	/** Mapping from departments to an ArrayList containing user IDs. */
+	var file: UploadedFile = new UploadedFile
+	var allocateStudent: JList[AllocateStudentItem] = LazyLists.simpleFactory()
+
+	private def filenameOf(path: String) = new java.io.File(path).getName
+	
+	/** Mapping from small groups to an ArrayList containing users. */
 	var mapping = JMap[SmallGroup, JList[User]]()
 	var unallocated: JList[User] = JArrayList()
 	
@@ -47,6 +63,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		unallocated.clear()
 		unallocated.addAll(set.unallocatedStudents.asJavaCollection)
 	}
+	
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
@@ -81,7 +98,6 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 			group.students.copyFrom(userGroup)
 			service.saveOrUpdate(group)
 		}
-		
 		set
 	}
 
@@ -93,6 +109,31 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 
 	private def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
+	
+	override def onBind(result:BindingResult) {
+		transactional() {
+			file.onBind(result)
+			if (!file.attached.isEmpty()) {
+				processFiles(file.attached.asScala)
+			}
+
+			def processFiles(files: Seq[FileAttachment]) {
+				for (file <- files.filter(_.hasData)) {
+					allocateStudent addAll groupsExtractor.readXSSFExcelFile(file.dataStream)
+				}
+				//var allocateMap = allocateStudent.groupBy(_.groupId).mapValues(_.map(_.universityId))
+				val grouped = allocateStudent.asScala
+						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
+						.mapValues{ values => 
+							values.map(item => userLookup.getUserByWarwickUniId(item.universityId)).asJava
+						}
+				
+				mapping.clear()
+				mapping.putAll( (grouped - null).asJava )
+					  
+			}
+		}
+	}
 	
 	def describe(d: Description) = d.smallGroupSet(set)
 
