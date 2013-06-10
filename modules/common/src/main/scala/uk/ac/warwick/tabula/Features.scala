@@ -98,7 +98,7 @@ class FeaturesMessage {
 	@BeanProperty var markerFeedback = true
 	@BeanProperty var profiles = true
 	@BeanProperty var assignmentProgressTable = true
-	@BeanProperty var assignmentProgressTableByDefault = false
+	@BeanProperty var assignmentProgressTableByDefault = true
 	@BeanProperty var summativeFilter = true
 	@BeanProperty var meetingRecordApproval = false
 	@BeanProperty var smallGroupTeaching = false

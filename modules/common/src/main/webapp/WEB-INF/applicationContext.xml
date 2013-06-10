@@ -294,6 +294,7 @@
 			<map>
 				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
+				<entry key="componentName" value="${module.name}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>

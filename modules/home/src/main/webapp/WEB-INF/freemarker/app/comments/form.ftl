@@ -5,8 +5,10 @@
 	
 	<p>
 	Do you have a comment, complaint or suggestion related to this application? Let us know here.
-	Note that if you have a question about your course material or want to talk about some feedback/marks
-	you received, you should talk to the person setting your coursework.
+	<#if (appCommentCommand.componentName!"") == 'courses'>
+		Note that if you have a question about your course material or want to talk about some feedback/marks
+		you received, you should talk to the person setting your coursework.
+	</#if>
 	</p>
 	
 	<p>
