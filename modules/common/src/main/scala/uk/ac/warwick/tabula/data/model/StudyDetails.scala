@@ -31,6 +31,8 @@ class StudyDetails extends StudyDetailsProperties with ToString with HibernateVe
 }
 
 trait StudyDetailsProperties {
+	
+	// WARNING: if and when we @Restrict these properties, we should NOT @Restrict sprCode as it is an identifier
 
 	var sprCode: String = _
 	var scjCode: String = _
