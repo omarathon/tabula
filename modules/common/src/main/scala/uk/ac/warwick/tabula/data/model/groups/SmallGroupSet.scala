@@ -71,7 +71,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@JoinColumn(name = "set_id")
 	var groups: JList[SmallGroup] = JArrayList()
 
-	@OneToOne(cascade = Array(ALL), optional = false, fetch = FetchType.LAZY)
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
 	

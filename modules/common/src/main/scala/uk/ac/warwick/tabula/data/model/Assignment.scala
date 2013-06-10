@@ -149,7 +149,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@IndexColumn(name = "position")
 	var fields: JList[FormField] = JArrayList()
 
-	@OneToOne(cascade = Array(ALL), optional = false, fetch = FetchType.LAZY)
+	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
 	
