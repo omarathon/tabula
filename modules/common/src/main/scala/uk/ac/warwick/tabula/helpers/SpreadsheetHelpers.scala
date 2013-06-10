@@ -79,9 +79,11 @@ object SpreadsheetHelpers {
 	}
 
 	def addDateCell(value: LocalDate, row: XSSFRow, style: XSSFCellStyle) {
-		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
-		cell.setCellStyle(style)
-		cell.setCellValue(Option(value).map { _.toDate }.orNull)
+		if (value != null) {
+			val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+			cell.setCellStyle(style)
+			cell.setCellValue(Option(value).map { _.toDate }.orNull)
+		} else addCell(row, Cell.CELL_TYPE_BLANK)
 	}
 
 	def addPercentageCell(num:Double, total:Double, row: XSSFRow, workbook: XSSFWorkbook) {
