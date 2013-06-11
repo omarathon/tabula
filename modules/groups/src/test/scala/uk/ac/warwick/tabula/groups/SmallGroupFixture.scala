@@ -33,9 +33,17 @@ trait SmallGroupFixture extends Mockito {
   val student2 = new User
   student2.setWarwickId("student2")
 
+  val tutor1 = new User
+  tutor1.setWarwickId("tutor1")
+
+  val tutor2 = new User
+  tutor2.setWarwickId("tutor2")
+
   val userLookup = mock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
+  when(userLookup.getUserByWarwickUniId(tutor1.getWarwickId)).thenReturn(tutor1)
+  when(userLookup.getUserByWarwickUniId(tutor2.getWarwickId)).thenReturn(tutor2)
 
   val group1Users = new UserGroup
   group1Users.addUser(student1.getWarwickId)
@@ -46,6 +54,12 @@ trait SmallGroupFixture extends Mockito {
   group1.groupSet = groupSet
   group1.name = "small group 1"
 
+  val event = new SmallGroupEvent()
+  event.tutors = new UserGroup
+  event.tutors.addUser(tutor1.getWarwickId)
+  event.tutors.addUser(tutor2.getWarwickId)
+
+  group1.events.add(event)
 
   val actor = new User
   val recipient = new User

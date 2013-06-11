@@ -14,7 +14,9 @@ import uk.ac.warwick.userlookup.User
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
-
+  object tutor {
+    def mygroups(member:User) = "Route tutor.mygroups is undefined"
+  }
   // These are relative to the /profiles app, not the /groups app.
   object profile {
     def view(member: User) = "/view/%s" format (encoded(member.getWarwickId))
@@ -28,5 +30,6 @@ object Routes {
 		}
 		
 		def allocate(set: SmallGroupSet) = "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
-	}
+
+  }
 }

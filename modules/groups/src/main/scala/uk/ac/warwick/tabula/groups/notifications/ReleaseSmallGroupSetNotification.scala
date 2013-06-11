@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.views.{TextRenderer, FreemarkerRendering}
 import freemarker.template.Configuration
 
-class ReleaseSmallGroupSetStudentNotification(private val group:SmallGroup, val agent:User, private val recipient:User) extends Notification[SmallGroup] {
+class ReleaseSmallGroupSetNotification(private val group:SmallGroup, val agent:User, private val recipient:User, private val isStudent:Boolean ) extends Notification[SmallGroup] {
 
   this: TextRenderer=>
 
@@ -24,7 +24,13 @@ class ReleaseSmallGroupSetStudentNotification(private val group:SmallGroup, val 
   def content: String = {
     renderTemplate(templateLocation, Map("user"->recipient, "group"->group, "profileUrl"->url) )
   }
-  def url: String = Routes.profile.view(recipient)
+  def url: String = {
+    if (isStudent){
+      Routes.profile.view(recipient)
+    }else{
+      Routes.tutor.mygroups(recipient)
+    }
+  }
 
   def recipients: Seq[User] = {
     Seq(recipient)

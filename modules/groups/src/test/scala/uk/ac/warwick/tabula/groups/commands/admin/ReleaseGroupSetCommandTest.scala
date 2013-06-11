@@ -46,8 +46,29 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     val notifications = cmd.emit
 
-    notifications should be(Nil)
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (false)
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (false)
   }}
 
-	
+  @Test
+  def emitShouldCreateNotificationToAllTutors(){new SmallGroupFixture {
+    val cmd = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    cmd.notifyTutors = true
+    cmd.userLookup = userLookup
+    val notifications = cmd.emit
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor1"))  should be (true)
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor2"))  should be (true)
+  }}
+
+  @Test
+  def emitShouldNotCreateNotificationsIfNotifyTutorsIsFalse(){new SmallGroupFixture {
+    val cmd = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    cmd.notifyTutors = false
+    cmd.userLookup = userLookup
+    val notifications = cmd.emit
+
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor1"))  should be (false)
+    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor2"))  should be (false)
+  }}
+
 }

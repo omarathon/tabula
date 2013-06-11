@@ -9,12 +9,13 @@ import org.mockito.Mockito._
 
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import org.mockito.{ArgumentCaptor, Matchers}
+import uk.ac.warwick.tabula.groups.web.Routes
 
-class ReleaseSmallGroupSetStudentNotificationTest extends TestBase with Mockito{
+class ReleaseSmallGroupSetNotificationTest extends TestBase with Mockito{
 
   val TEST_CONTENT = "test"
-  def createNotification(group:SmallGroup, actor:User,recipient:User) = {
-    val n = new ReleaseSmallGroupSetStudentNotification(group, actor, recipient) with MockRenderer
+  def createNotification(group:SmallGroup, actor:User,recipient:User, isStudent:Boolean = true) = {
+    val n = new ReleaseSmallGroupSetNotification(group, actor, recipient, isStudent) with MockRenderer
     when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
     n
   }
@@ -26,10 +27,18 @@ class ReleaseSmallGroupSetStudentNotificationTest extends TestBase with Mockito{
   }}
 
   @Test
-  def urlIsProfilePage():Unit = new SmallGroupFixture{
+  def urlIsProfilePageForStudents():Unit = new SmallGroupFixture{
 
-    val n =  createNotification(group1, actor, recipient)
+    val n =  createNotification(group1, actor, recipient, isStudent = true)
     n.url should be("/view/recipient")
+
+  }
+
+  @Test
+  def urlIsMyGroupsPageForTutors():Unit = new SmallGroupFixture{
+
+    val n =  createNotification(group1, actor, recipient, isStudent = false)
+    n.url should be(Routes.tutor.mygroups(recipient))
 
   }
 
