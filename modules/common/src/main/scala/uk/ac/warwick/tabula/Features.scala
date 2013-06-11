@@ -104,7 +104,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeaching = false
 	@BeanProperty var smallGroupTeachingStudentSignUp = false
 	@BeanProperty var smallGroupTeachingRandomAllocation = false
-	@BeanProperty var smallGroupTeachingTutorView = true
+	@BeanProperty var smallGroupTeachingTutorView = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
