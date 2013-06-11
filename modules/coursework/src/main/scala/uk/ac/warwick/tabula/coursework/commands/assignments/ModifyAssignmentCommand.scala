@@ -80,7 +80,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =
 		if (massAddUsers == null) Nil
-		else massAddUsers split ("[\\s\\W]+") map (_.trim) filterNot (_.isEmpty)
+		else massAddUsers split ("(\\s|[^A-Za-z\\d\\-_\\.])+") map (_.trim) filterNot (_.isEmpty)
 
 	// can be set to false if that's not what you want.
 	var prefillFromRecent = true
@@ -137,7 +137,7 @@ abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assig
 	 */
 	private def updateMembership() {
 		// parse items from textarea into includeUsers collection
-		for (item <- massAddUsersEntries) {
+		for (item <- massAddUsersEntries) {		
 			if (UniversityId.isValid(item)) {
 				val user = userLookup.getUserByWarwickUniId(item)
 				if (user.isFoundUser) {

@@ -82,7 +82,7 @@ TextListController.prototype = {
 	},
 	
 	bindRemoveItemEvent: function(){
-		self = this;
+		var self = this;
 		this.container.on("click", ".item a.close", function(event){
 			var parent = jQuery(this).closest(".item");
 			parent.fadeOut(function(){

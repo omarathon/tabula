@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.LoginDetails
 import org.joda.time.format.DateTimeFormat
 import org.openqa.selenium.htmlunit.HtmlUnitWebElement
 import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.Keys
+import org.openqa.selenium.internal.seleniumemulation.FireEvent
 
 trait CourseworkFixtures extends BrowserTest {
 	
@@ -98,18 +100,22 @@ trait CourseworkFixtures extends BrowserTest {
 		
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
-
-		click on cssSelector("#assignmentEnrolmentFields summary") // expand expander
-		click on linkText("Add users manually")
+		executeScript("jQuery('#assignmentEnrolmentFields details > *:not(summary)').show();") // expand expander
+		className("show-adder").findElement map { _.underlying.isDisplayed } should be (Some(true))
+		
+		// Make sure JS is working
+		id("js-hint").findElement should be ('empty)
+		
+		click on linkText("Add students manually")	
 		eventually { textArea("massAddUsers").isDisplayed should be (true) }
 		
 		textArea("massAddUsers").value = members.mkString("\n")
-		click on id("add-members")
+		click on className("add-students")
 		
-		// This actually forces a page reload, but that's neither here nor there - we're just waiting for it to say "2 students enrolled"
-		eventually {
-			pageSource contains(members.size + " students enrolled") should be (true)
-		}
+		// Eventually, a Jax!
+		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
+		
+		pageSource contains(members.size + " manually enrolled") should be (true)
 		
 		checkbox("collectSubmissions").select()
 		
