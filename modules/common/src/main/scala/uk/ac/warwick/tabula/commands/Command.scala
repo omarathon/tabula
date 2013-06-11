@@ -38,7 +38,10 @@ trait Describable[A] {
 }
 
 trait Notifies[A] {
-	def emit: Notification[A]
+	def emit: Seq[Notification[A]]
+}
+trait Appliable[A]{
+  def apply():A
 }
 
 /**
@@ -56,7 +59,8 @@ trait Notifies[A] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[A] extends Describable[A]
+abstract class Command[A] extends Describable[A] with Appliable[A]
+
 with JavaImports with EventHandling with NotificationHandling with PermissionsChecking {
 	var maintenanceMode = Wire[MaintenanceModeService]
 	

@@ -1,5 +1,4 @@
 <#compress>
-<#assign warwick=JspTaglibs["/WEB-INF/tld/warwick.tld"]>
 <#escape x as x?html>
 
 <#macro module_name module>

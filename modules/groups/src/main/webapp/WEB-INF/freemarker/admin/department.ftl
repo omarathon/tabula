@@ -173,6 +173,10 @@
 							  <ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
 								<li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
+                                <li><a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">
+                                    <i class="icon-envelope-alt icon-fixed-width"></i>
+                                    Notify
+                                </a></li>
 								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
 									<i class="icon-folder-close icon-fixed-width"></i>
 									<#if groupSet.archived>
@@ -190,9 +194,9 @@
 		</#list>
 	</div>
 	</#if>
-	
 </div>
 </#list>
+<div id="modal-container" class="modal fade"></div>
 <#else>
 <p>No department.</p>
 </#if>

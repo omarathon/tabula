@@ -41,6 +41,18 @@ $(function(){
     });
 });
 
+
+// modals use ajax to retrieve their contents
+$(function() {
+    $('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
+        e.preventDefault();
+        var $this = $(this);
+        var target = $this.attr('data-target');
+        var url = $this.attr('href');
+        $(target).load(url);
+    });
+});
+
 // Drag and drop allocation
 $(function() {
 	$('#allocateStudentsToGroupsCommand')

@@ -11,7 +11,9 @@ trait NotificationHandling {
 	def notify[A](cmd: Command[A])(f: => A) : A = cmd match {
 		case ns:Notifies[A] => {
 			val result = f
-			notificationService.push(ns.emit)
+			for (notification<- ns.emit){
+				notificationService.push(notification)				
+			} 
 			result
 		}
 		case _ => f
