@@ -165,13 +165,26 @@ This will soon be refactored to use some components from group_components.ftl.
 							</div>
 						</#if>
 						
-						<#if groupSet.hasAllocated && !groupSet.released>
+						<#if groupSet.hasAllocated >
+                           <#-- not released at all -->
+                            <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 							<div class="alert">
 								<i class="icon-info-sign"></i> Notifications have not been sent for these groups
 							</div>
+                           <#-- only released to tutors-->
+                           <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
+                            <div class="alert">
+                                 <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+                             </div>
+                            <#-- only released to students-->
+                            <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+                                <div class="alert">
+                                    <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+                                </div>
+                           </#if>
 						</#if>
 					</div>
-					
+
 					<div class="span2">
 						<div class="btn-toolbar pull-right">
 							<div class="btn-group">
@@ -179,6 +192,14 @@ This will soon be refactored to use some components from group_components.ftl.
 							  <ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
 								<li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
+
+                                <li
+                                ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+                                    <a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">
+                                    <i class="icon-envelope-alt icon-fixed-width"></i>
+                                    Notify
+                                </a></li>
+
 								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
 									<i class="icon-folder-close icon-fixed-width"></i>
 									<#if groupSet.archived>
@@ -196,9 +217,9 @@ This will soon be refactored to use some components from group_components.ftl.
 		</#list>
 	</div>
 	</#if>
-	
 </div>
 </#list>
+<div id="modal-container" class="modal fade"></div>
 <#else>
 <p>No department.</p>
 </#if>

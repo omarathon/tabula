@@ -49,8 +49,13 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 
 	var archived: JBoolean = false
 
-	var released: JBoolean = false
-	
+  @Column(name="released_to_students")
+	var releasedToStudents: JBoolean = false
+  @Column(name="released_to_tutors")
+  var releasedToTutors:JBoolean = false
+
+  def fullyReleased= releasedToStudents && releasedToTutors
+
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
 	@NotNull

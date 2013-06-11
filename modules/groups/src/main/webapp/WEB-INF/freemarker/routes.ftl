@@ -18,5 +18,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro deleteset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/delete" /></#macro>
 <#macro archiveset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
 <#macro allocateset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
-
+<#macro releaseset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
 </#compress>

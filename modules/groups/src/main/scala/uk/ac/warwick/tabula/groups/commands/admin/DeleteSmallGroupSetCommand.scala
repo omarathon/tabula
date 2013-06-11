@@ -35,7 +35,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet) ext
 	def validateCanDelete(errors: Errors) {
 		if (set.deleted) {
 			errors.reject("smallGroupSet.delete.deleted")
-		} else if (set.released) {
+		} else if (set.releasedToStudents || set.releasedToTutors) {
 			errors.reject("smallGroupSet.delete.released")
 		}
 	}
