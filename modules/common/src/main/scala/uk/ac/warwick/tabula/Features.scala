@@ -48,7 +48,7 @@ abstract class Features {
 	@Value("${features.markerFeedback:true}") var markerFeedback = defaults.markerFeedback
 	@Value("${features.profiles:true}") var profiles = defaults.profiles
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
-	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
+	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
 	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
