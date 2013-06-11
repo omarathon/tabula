@@ -17,8 +17,8 @@ class ReleaseGroupSetCommandImpl(val groupToPublish:SmallGroupSet, private val c
 
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
 
-  var notifyStudents:JBoolean = true
-  var notifyTutors:JBoolean = true
+  var notifyStudents:JBoolean = !groupToPublish.releasedToStudents
+  var notifyTutors:JBoolean = !groupToPublish.releasedToTutors
 
   PermissionCheck(Permissions.SmallGroups.Update, groupToPublish)
 
@@ -50,7 +50,12 @@ class ReleaseGroupSetCommandImpl(val groupToPublish:SmallGroupSet, private val c
   }
 	
 	def applyInternal():SmallGroupSet = {
-    groupToPublish.released = true
+    if (notifyStudents){
+      groupToPublish.releasedToStudents = true
+    }
+    if (notifyTutors){
+      groupToPublish.releasedToTutors = true
+    }
     groupToPublish
   }
 

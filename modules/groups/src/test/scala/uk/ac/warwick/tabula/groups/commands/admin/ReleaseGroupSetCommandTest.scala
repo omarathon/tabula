@@ -13,11 +13,56 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def applyShouldSetReleasedFlag() {new SmallGroupFixture {
+  def applyShouldSetReleasedToStudentsFlag() {new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+      command.notifyStudents = true
       val updatedSet = command.applyInternal()
-      updatedSet.released.booleanValue should be(true)
+      updatedSet.releasedToStudents.booleanValue should be(true)
    }}
+
+  @Test
+  def applyShouldNotUnsetReleasedToStudentsFlag() {new SmallGroupFixture {
+    groupSet.releasedToStudents = true
+    val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    command.notifyStudents = false
+    val updatedSet = command.applyInternal()
+    updatedSet.releasedToStudents.booleanValue should be(true)
+  }}
+
+  @Test
+  def applyShouldNotSetReleasedToStudentsFlagIfNotifyStudentsIsFalse() {new SmallGroupFixture {
+    groupSet.releasedToStudents = false
+    val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    command.notifyStudents = false
+    val updatedSet = command.applyInternal()
+    updatedSet.releasedToStudents.booleanValue should be(false)
+  }}
+
+  @Test
+  def applyShouldSetReleasedToTutorsFlag() {new SmallGroupFixture {
+    val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    command.notifyTutors = true
+    val updatedSet = command.applyInternal()
+    updatedSet.releasedToTutors.booleanValue should be(true)
+  }}
+
+  @Test
+  def applyShouldNotUnsetReleasedToTutorsFlag() {new SmallGroupFixture {
+    groupSet.releasedToTutors = true
+    val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    command.notifyTutors = false
+    val updatedSet = command.applyInternal()
+    updatedSet.releasedToTutors.booleanValue should be(true)
+  }}
+
+  @Test
+  def applyShouldNotSetReleasedToTutorsFlagIfNotifyTutorsIsFalse() {new SmallGroupFixture {
+    groupSet.releasedToTutors = false
+    val command = new ReleaseGroupSetCommandImpl(groupSet, requestingUser)
+    command.notifyTutors = false
+    val updatedSet = command.applyInternal()
+    updatedSet.releasedToTutors.booleanValue should be(false)
+  }}
 
   @Test
   def describeShouldIncludeSmallGroupSet() { new SmallGroupFixture{
@@ -69,6 +114,26 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor2"))  should be (false)
+  }}
+
+  @Test
+  def notifyStudentsIsDefaultedFromGroupSet(){new SmallGroupFixture {
+    groupSet.releasedToStudents = false
+    new ReleaseGroupSetCommandImpl(groupSet, requestingUser).notifyStudents.booleanValue() should be(true)
+
+    groupSet.releasedToStudents = true
+    new ReleaseGroupSetCommandImpl(groupSet, requestingUser).notifyStudents.booleanValue() should be(false)
+
+  }}
+
+  @Test
+  def notifyTutorsIsDefaultedFromGroupSet(){new SmallGroupFixture {
+    groupSet.releasedToTutors = false
+    new ReleaseGroupSetCommandImpl(groupSet, requestingUser).notifyTutors.booleanValue() should be(true)
+
+    groupSet.releasedToTutors = true
+    new ReleaseGroupSetCommandImpl(groupSet, requestingUser).notifyTutors.booleanValue() should be(false)
+
   }}
 
 }
