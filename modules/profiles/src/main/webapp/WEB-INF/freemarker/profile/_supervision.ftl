@@ -1,6 +1,6 @@
 <#escape x as x?html>
 <section id="supervision" class="clearfix">
-	<#if profile.supervisors??>
+	<#if profile.supervisors?? && profile.supervisors?size gt 0>
 		<h4>Supervisor<#if profile.supervisors?size gt 1>s</#if></h4>
 
 		<div class="tutors clearfix row">
