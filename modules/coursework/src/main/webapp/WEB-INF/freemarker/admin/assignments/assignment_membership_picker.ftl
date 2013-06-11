@@ -4,391 +4,495 @@
 
 -->
 <#escape x as x?html>
-<@form.labelled_row "members" "Students">
+	<@form.labelled_row "members" "Students" "assignmentEnrolment">
+		<fieldset id="assignmentEnrolmentFields">
+
+		<#list command.upstreamGroups as item>
+			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
+		</#list>
+
 		<@spring.bind path="members">
 			<#assign membersGroup=status.actualValue />
 		</@spring.bind>
-		<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
+
+		<#assign includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span></#assign>
+		<#assign pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Pending deletion</span></#assign>
+		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#assign>
+		<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
+
+		<#assign assignmentMembership = command.assignmentMembership />
+		<#assign hasMembers = assignmentMembership.totalCount gt 0 />
 
 		<#macro what_is_this>
 			<#assign popoverText>
-				<p>
-					 Here you can specify where this assignment should get its list of enrolled students from.
-			     You can link to a central SITS assignment and a live list of students will be maintained.
-			     If you are not using SITS you can manually specify a list of users.
-			  </p>
-			     
-			  <p>
-			     It is also possible to tweak the membership even when using SITS data, but this is only to be used
-			     when necessary and you still need to ensure that the upstream SITS data gets fixed.
-		    </p>
+				<p>You can link to an assignment in SITS and the list of students will be updated automatically from there.
+				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
+
+				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
+				when necessary and you still need to ensure that the upstream SITS data gets fixed.</p>
 			</#assign>
-		
-			<a href="#" class="use-popover" 
-			   data-title="Student membership"
+
+			<a href="#"
+			   title="What's this?"
+			   class="use-popover"
+			   data-title="Students"
 			   data-trigger="hover"
 	   		   data-html="true"
 			   data-content="${popoverText}"
-			   >What's this?</a>
+			   ><i class="icon-question-sign"></i></a>
 		</#macro>
 
-		<#if upstreamAssessmentGroups?has_content>
-			<#assign total=0 />
-			<#list upstreamAssessmentGroups as group>
-				<#assign total=total+group.members.members?size />
-			</#list>
+		<details>
+			<summary>
+				<#-- enumerate current state -->
+				<#if linkedUpstreamAssessmentGroups?has_content>
+					<span class="uneditable-value">
+						${assignmentMembership.totalCount} enrolled
+						<#if assignmentMembership.excludeCount gt 0 || assignmentMembership.includeCount gt 0>
+							<span class="muted">(${assignmentMembership.sitsCount} from SITS<#if assignmentMembership.usedExcludeCount gt 0> after ${assignmentMembership.usedExcludeCount} removed manually</#if><#if assignmentMembership.usedIncludeCount gt 0>, plus ${assignmentMembership.usedIncludeCount} added manually</#if>)</span>
+						<#else>
+							<span class="muted">from SITS</span>
+						</#if>
+					<@what_is_this /></span>
+				<#elseif hasMembers>
+					<span class="uneditable-value">${assignmentMembership.includeCount} manually enrolled
+					<@what_is_this /></span>
+				<#else>
+					<span class="uneditable-value">No students enrolled
+					<@what_is_this /></span>
+				</#if>
+			</summary>
+
+			<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
+			<#-- <p class="alert alert-success"><i class="icon-ok"></i> This assignment is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
+
+			<p>
+				<#if linkedUpstreamAssessmentGroups?has_content>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Change the linked SITS assignment used for enrolment data">Change link to SITS</a>
+				<#elseif availableUpstreamGroups?has_content>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more assignments recorded in SITS">Add link to SITS</a>
+				<#else>
+					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
+				</#if>
+				</a>
+
+				<a class="btn use-tooltip disabled show-adder"
+						<#if availableUpstreamGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+						>
+					Add students manually
+				</a>
+
+				<#if hasMembers>
+					<a class="btn btn-warning disabled remove-users member-action use-tooltip"
+							<#if availableUpstreamGroups??>title="This will only remove enrolment for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+							>
+						Remove
+					</a>
+
+					<a class="btn btn-success restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
+				</#if>
+
+				<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb"></i> Javascript is required for editing</small></span>
+			</p>
+
 			<#if hasMembers>
-				<#assign total=total+membersGroup.includeUsers?size />
-			</#if>
+				<div id="enrolment">
+					<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
+						<thead>
+							<tr>
+								<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
+								<th class="sortable" style="width: 50px;">Source</th>
+								<th class="sortable">First name</th>
+								<th class="sortable">Last name</th>
+								<th class="sortable">ID</th>
+								<th class="sortable">User</th>
+							</tr>
+						</thead>
 
-			${total} students enrolled from SITS <@what_is_this />
-			<#if hasMembers>(with adjustments)</#if>
-			<a class="btn" id="show-sits-picker">Change link</a> or <a class="btn" id="show-membership-picker">Adjust membership</a>
+						<tbody>
+							<#list assignmentMembership.items as item>
+								<#assign _u = item.user>
 
-		<#elseif hasMembers>
+								<tr class="membership-item item-type-${item.itemTypeString}"> <#-- item-type-(sits|include|exclude) -->
+									<td>
+										<#if item.userId??>
+											<@form.selector_check_row "modifyEnrolment" item.userId />
+										<#else>
+											<i class="icon-ban-circle use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
+										</#if>
+									</td>
+									<td class="source">
+										<#noescape>
+											<#if item.itemTypeString='include'>
+												${includeIcon}
+											<#elseif item.itemTypeString='exclude'>
+												${excludeIcon}
+											<#else>
+												${sitsIcon}
+											</#if>
+										</#noescape>
+									</td>
+									<td>
+										<#if _u.foundUser>
+											${_u.firstName}
+										<#else>
+											<span class="muted">Unknown</span>
+										</#if>
+									</td>
+									<td>
+										<#if _u.foundUser>
+											${_u.lastName}
+										<#else>
+											<span class="muted">Unknown</span>
+										</#if>
+									</td>
+									<td>
+										<#if item.universityId??>
+											${item.universityId}
+										<#else>
+											<span class="muted">Unknown</span>
+										</#if>
+									</td>
+									<td>
+										<#if _u.foundUser>
+											${_u.userId}
+										<#elseif item.userId??>
+											${item.userId}
+										<#else><#-- Hmm this bit shouldn't ever happen -->
+											<span class="muted">Unknown</span>
+										</#if>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
 
-			${membersGroup.includeUsers?size} students enrolled. <@what_is_this />
-			<div><a class="btn" id="show-membership-picker">Adjust membership</a> or <a class="btn" id="show-sits-picker">Link to SITS</a></div>
+						<#list command.members.includeUsers as usercode>
+							<input type="hidden" name="includeUsers" value="${usercode}">
+						</#list>
 
-		<#else>
-
-			No students have been enrolled. <@what_is_this />
-			<div><a class="btn" id="show-sits-picker">Link to SITS</a> or <a class="btn" id="show-membership-picker">Add users manually</a></div>
-
-		</#if>
-
-		<div class="row-fluid">
-		<div class="span8">
-
-		<!-- Picker to select an upstream assessment group (upstreamassignment+occurrence) -->
-		<div class="ag-picker">
-			<a class="close" data-dismiss="ag-picker">&times;</a>
-			<#if linkedAssessmentGroups?has_content>
-				<#list linkedAssessmentGroups as group>
-					<input class="linked-group"
-						   type="hidden"
-						   name="assessmentGroups"
-						   value="${group.id}"
-						   data-id = "${group.upstreamAssignment.id}"
-						   data-occurrence = "${group.occurrence!""}" />
-				</#list>
-			<#else>
-				<@f.hidden class="empty-group group-id" name="assessmentGroups" value="" />
-			</#if>
-			Assessment groups for ${command.academicYear.label}
-			<#if command.upstreamGroupOptions?has_content>
-				<#assign showOccurrence=true>
-				<table>
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Members</th>
-							<th>CATS</th>
-							<th>Cohort</th>
-							<th>Sequence</th>
-						</tr>
-					</thead>
-					<tbody><#list command.upstreamGroupOptions as option>
-						<#assign isLinked = option.linked/>
-						<tr class="${isLinked?string('linked', '')}">
-							<td>
-								<a href="#"
-								   class="ag-picker-option"
-								   data-id="${option.assignmentId}"
-								   data-occurrence="${option.occurrence}">
-									${option.name}
-								</a>
-							</td>
-							<td>${option.memberCount}</td>
-							<td>${option.cats!'-'}</td>
-							<td>${option.occurrence}</td>
-							<td>${option.sequence}</td>
-						</tr>
-					</#list></tbody>
-				</table>
-			<#else>
-				No SITS options available.
-			</#if>
-		</div>
-
-
-		<div class="membership-picker">
-			<a class="close" data-dismiss="membership-picker">&times;</a>
-			<div>
-				<#assign membershipDetails=command.membershipDetails />
-
-				<div class="tabbable">
-
-					<#assign has_members=(membershipDetails?size gt 0) />
-					<#assign tab1class=""/>
-					<#assign tab2class=""/>
-					<#if has_members>
-						<#assign tab1class="active"/>
-					<#else>
-						<#assign tab2class="active"/>
-					</#if>
-
-					<!-- includeUsers members -->
-					<#list command.members.includeUsers as _u>
-						<input type="hidden" name="includeUsers" value="${_u}">
-					</#list>
-
-					<!-- includeUsers cmd -->
-					<#list command.includeUsers as _u>
-						<input type="hidden" name="includeUsers" value="${_u}">
-					</#list>
-
-					<#list command.members.excludeUsers as _u>
-						<input type="hidden" name="excludeUsers" value="${_u}">
-					</#list>
-
-					<ul class="nav nav-tabs">
-						<li class="${tab1class}"><a href="#membership-tab1" data-toggle="tab">Students</a></li>
-						<li class="${tab2class}"><a href="#membership-tab2" data-toggle="tab">Add more</a></li>
-					</ul>
-
-					<div class="tab-content">
-
-						<div class="tab-pane ${tab1class}" id="membership-tab1">
-							<#if membershipDetails?size gt 0>
-								<a href="#"
-										class="btn disabled hide-checked-users has-tooltip"
-										id="membership-remove-selected"
-										<#if upstreamAssessmentGroups??>title="This will only adjust membership for this assignment in this app. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
-										>
-									Remove selected
-								</a>
-
-								<div class="scroller">
-									<table class="table table-bordered table-striped">
-										<tr>
-											<th>
-												<#-- <@form.selector_check_all /> -->
-											</th>
-											<th>User</th>
-											<th>Name</th>
-										</tr>
-										<#list membershipDetails as item>
-											<#assign u=item.user>
-												<tr class="membership-item item-type-${item.itemType}"> <#-- item-type-(sits|include|exclude) -->
-													<td>
-														<#if item.userId??>
-															<#--
-																TODO checkboxes are currently all named "excludeUsers", relying on the fact that we only
-																use the checkboxes for removing users. If we add other options then this will need changing
-																and probably the script will need to generate hidden inputs instead. As it is, the checkboxes
-																generate the formdata that we want and so we can just submit it.
-															-->
-															<@form.selector_check_row "excludeUsers" item.userId />
-														</#if>
-													</td>
-													<td>
-														<#if item.itemType='include'><i class="icon-plus-sign"></i></#if>
-														<#if item.itemType='exclude'><i class="icon-minus-sign"></i></#if>
-
-														<#if item.itemType='exclude' && item.userId??><a class="btn btn-mini restore-user" data-usercode="${item.userId}">Restore</a></#if>
-
-														<#if u.foundUser>
-															${u.userId} <#if item.universityId??>(${item.universityId})</#if>
-														<#elseif item.universityId??>
-															Unknown (Uni ID ${item.universityId})
-														<#elseif item.userId??>
-															Unknown (Usercode ${item.userId})
-														<#else><#-- Hmm this bit shouldn't ever happen -->
-														</#if>
-
-													</td>
-													<td>
-														<#if u.foundUser>
-															${u.fullName}
-														</#if>
-													</td>
-												</tr>
-										</#list>
-									</table>
-								</div>
-								<#else>
-									<p>No students yet.</p>
-							</#if>
-						</div>
-
-						<div class="tab-pane ${tab2class}" id="membership-tab2">
-							<p>
-								Type or paste in a list of usercodes or University numbers here then click Add.
-								<strong>Is your module in SITS?</strong> It may be better to fix the data there,
-								as other University systems won't know about any changes you make here.
-							</p>
-							<#-- SOON
-							<div>
-								<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
-							</div>
-							-->
-							<textarea name="massAddUsers"></textarea>
-							<button id="add-members" class="btn refresh-form">Add</button>
-						</div>
-
-					</div>
+						<#list command.members.excludeUsers as usercode>
+							<input type="hidden" name="excludeUsers" value="${usercode}">
+						</#list>
+					</table>
 				</div>
+			<#else>
+				<#-- placeholder to allow new links to be appended via script -->
+				<span id="enrolment-table"></span>
+			</#if>
+		</details>
 
+		<#-- Modal to add students manually -->
+		<div class="modal fade hide adder">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
+				<h6>Add students manually</h6>
+			</div>
 
+			<div class="modal-body">
+				<p>
+					Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
+				</p>
+				<p class="alert">
+					<i class="icon-lightbulb icon-large"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
+					as other University systems won't know about any changes you make here.
+				</p>
+				<#-- SOMETIME
+				<div>
+					<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
+				</div>
+				-->
+				<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
+			</div>
+
+			<div class="modal-footer">
+				<a class="btn btn-success disabled spinnable spinner-auto add-students">Add</a>
 			</div>
 		</div>
 
+
+		<#-- Modal picker to select an upstream assessment group (upstreamassignment+occurrence) -->
+		<div class="modal fade hide sits-picker">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
+				<h6>SITS link</h6>
+			</div>
+
+			<#if command.availableUpstreamGroups?has_content>
+				<div class="modal-body">
+					<p>Add students by linking this assignment to one or more of the following SITS assignments for
+					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
+
+					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
+						<thead>
+							<tr>
+								<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
+								<th class="sortable">Name</th>
+								<th class="sortable">Members</th>
+								<th class="sortable">CATS</th>
+								<th class="sortable">Cohort</th>
+								<th class="sortable">Sequence</th>
+							</tr>
+						</thead>
+						<tbody><#list command.availableUpstreamGroups as available>
+							<#assign isLinked = available.isLinked(command.assessmentGroups) />
+							<tr>
+								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
+								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
+								<td>${available.memberCount}</td><#-- FIXME: <a/> popover (overflow-y: scroll) with member list -->
+								<td>${available.cats!'-'}</td>
+								<td>${available.occurrence}</td>
+								<td>${available.sequence}</td>
+							</tr>
+						</#list></tbody>
+					</table>
+				</div>
+
+				<div class="modal-footer">
+					<a class="btn btn-success disabled sits-picker-action spinnable spinner-auto" id="link-sits">Link</a>
+					<a class="btn btn-warning disabled sits-picker-action spinnable spinner-auto" id="unlink-sits">Unlink</a>
+				</div>
+			<#else>
+				<div class="modal-body">
+					<p class="alert alert-warning">No SITS assignments for ${command.module.code?upper_case} are available</p>
+				</div>
+			</#if>
 		</div>
-		</div>
+		</fieldset>
+	</@form.labelled_row>
 
-		<script>
-		jQuery(function($){
+	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript">
+	jQuery(function($) {
+		var $enrolment = $('.assignmentEnrolment');
 
-			var $assignmentGroupPicker = $('.ag-picker');
+		var initEnrolment = function() {
+			<#-- well, if we're here, JS must be available :) -->
+			$('#js-hint').remove();
+			$('.show-sits-picker, .show-adder').removeClass('disabled');
 
-			var redoIndices = function(){
-				$('.assessment-group-assignment').each(function(index){
-					$(this).attr('name', 'assessmentGroupItems['+index+'].upstreamAssignment')
-				});
-				$('.assessment-group-occurrence').each(function(index){
-					$(this).attr('name', 'assessmentGroupItems['+index+'].occurrence')
-				});
-			};
+			<#-- sortable tables -->
+			$enrolment.find('.table-sortable').sortableTable();
+			$enrolment.tabulaPrepareSpinners();
+			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
-			// need to put this empty element in the form when all have been removed
-			var emptyAssessmentGroups = '<input class="empty-group" type="hidden"  value="" name="assessmentGroups">';
-
-			// remove linked groups
-			$assignmentGroupPicker.on('click', 'tr.linked a', function(e){
-				e.preventDefault();
-				var $parentRow = $(this).closest("tr");
-				var $parentCell = $(this).closest("td");
-				var assignmentID = $(this).data("id");
-				var occurrence = $(this).data("occurrence");
-				$parentRow.removeClass("linked");
-				// remove the linked group if one exists
-				$('.linked-group[data-id='+assignmentID+'][data-occurrence='+occurrence+']').remove();
-				// remove any pending new groups
-				$('input', $parentRow).remove();
-				// add the empty group element
-				if($('.assessment-group-assignment,.linked-group').length == 0){
-					$assignmentGroupPicker.append($(emptyAssessmentGroups));
+			// TODO this is cribbed out of scripts.js - re-use would be better			
+			$enrolment.find('.use-popover').each(function() {
+				if ($(this).attr('data-title')) {
+					$(this).attr('data-original-title', $(this).attr('data-title'));
 				}
-				redoIndices();
+			});
+	
+			$enrolment.find('.use-popover').popover({
+				trigger: 'click',
+				container: '#container',
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+			}).click(function(){ return false; });
+
+			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
+			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
+
+			<#-- dynamically attach check-all checkbox -->
+			$('.for-check-all').append($('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' }));
+			$('.check-all').tooltip({ delay: 1500 });
+			$enrolment.on('click', '.table-checkable th .check-all', function(e) {
+				var $table = $(this).closest('table');
+				var checkStatus = this.checked;
+				$table.find('td input:checkbox').prop('checked', checkStatus);
+
+				updateCheckboxes($table);
+				enableActions($table);
 			});
 
-			// add un-linked groups
-			$assignmentGroupPicker.on('click', 'tr:not(.linked) a', function(e){
+			<#-- preset to open -->
+			if ($enrolment.data('open')) {
+				$('.assignmentEnrolment details').prop('open', 'open');
+				$("html, body").delay(200).animate({
+					scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
+				}, 300);
+			}
+		};
+
+		<#-- initialise the scripting for enrolment management -->
+		<#if RequestParameters.open?? || openDetails!false>
+			$enrolment.data('open', true);
+		</#if>
+		initEnrolment();
+
+		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
+
+		<#-- manage check-all state -->
+		var updateCheckboxes = function($table) {
+			var checked = $table.find('td input:checked').length;
+			if (checked == $table.find('td input').length) $table.find('.check-all').prop('checked', true);
+			if (checked == 0) $table.find('.check-all').prop('checked', false);
+		}
+
+		<#-- en/disable action buttons -->
+		var enableActions = function($table) {
+			var context = $table.prop('id');
+
+			if (context == 'sits-table') {
+				$('.sits-picker-action').toggleClass('disabled', $table.find('input:checked').length==0);
+			} else if (context == 'enrolment-table') {
+				$('.remove-users').toggleClass('disabled', $table.find('tr.item-type-include input:checked, tr.item-type-sits input:checked').length==0);
+				$('.restore-users').toggleClass('disabled', $table.find('tr.item-type-exclude input:checked').length==0);
+			}
+		}
+
+		var alertPending = function() {
+			if (window.location.pathname.indexOf('/assignments/new') == -1) {
+				$('#enrolment').before($pendingAlert);
+				$pendingAlert.delay(750).slideDown();
+			}
+		}
+
+		<#-- make table rows clickable -->
+		$enrolment.on('click', '.table-checkable tr', function(e) {
+			if ($(e.target).is(':not(input:checkbox)')) {
 				e.preventDefault();
-
-				// remove the empty group as one was added
-				$('.empty-group').remove();
-
-				var $parentRow = $(this).closest("tr");
-				var $parentCell = $(this).closest("td");
-				var index = $('.assessment-group-assignment').length
-				var assignmentID = $(this).data("id");
-				var occurrence = $(this).data("occurrence");
-				var $assignmentElement = $('<input class="assessment-group-assignment" type="hidden" name="assessmentGroupItems['+index+'].upstreamAssignment" value="'+assignmentID+'"/>');
-				var $occurrenceElement = $('<input class="assessment-group-occurrence" type="hidden" name="assessmentGroupItems['+index+'].occurrence" value="'+occurrence+'"/>');
-				$parentRow.addClass("linked");
-				$parentCell.append($assignmentElement);
-				$parentCell.append($occurrenceElement);
-			});
-
-			var $membershipPicker = $('.membership-picker');
-			var $form = $assignmentGroupPicker.closest('form');
-
-			$assignmentGroupPicker.hide();
-			$membershipPicker.hide();
-
-			//close buttons on pickers
-			$('.ag-picker, .membership-picker').find('.close').click(function(){
-				var $close = $(this);
-				$('.' + $close.data('dismiss')).hide();
-			});
-
-			$('#add-members, #membership-remove-selected').click(function(e){
-				$('#focusOn').val('member-list');
-			});
-
-			// button to unexclude excluded users
-			$membershipPicker.find('.restore').click(function(e){
-				var $this = $(this);
-				$('#focusOn').val('member-list');
-				$this.closest('form').append(
-					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
-				);
-			});
-			
-			var $removeSelected = $('#membership-remove-selected');
-			$membershipPicker.on('change', 'input.collection-checkbox', function() {
-				$removeSelected.toggleClass('disabled', $membershipPicker.find('input.collection-checkbox:checked').length == 0);
-			});
-
-			var refreshForm = function() {
-				$('#action-input').val('refresh');
-                $form.submit();
+				var $chk = $(this).find('input:checkbox');
+				if ($chk.length) {
+					$chk.prop('checked', !$chk.prop('checked'));
+				}
 			}
 
-			<#-- controller detects action=refresh and does a bind without submit -->
-			$('.refresh-form').click(function(e) {
-			    e.preventDefault();
-				refreshForm();
-			});
-						
-			$('.restore-user').click(function(e) {
-				e.preventDefault();
-				var $this = $(this);
-				$('#focusOn').val('member-list');
-				var $usercode = $this.data('usercode');
-				$membershipPicker.find('input:hidden[value='+ $usercode + '][name=excludeUsers]').remove();
-				$this.closest('form').append(
-					$('<input type=hidden name=includeUsers />').val($this.data('usercode'))
-				);
-				$(this).closest('tr').removeClass('item-type-exclude').addClass('item-type-sits');
-				$(this).closest('tr').find('i.icon-minus-sign').remove();
-				$(this).closest('tr').find('a.restore-user').remove();
-			});
-			
-			$('.hide-checked-users').click(function(e) {
-			    e.preventDefault();
-				var checkedToRemove = $membershipPicker.find('input.collection-checkbox:checked')
-				checkedToRemove.parents('.membership-item').hide();
-				checkedToRemove.map(function() {
-					$membershipPicker.find('input:hidden[value='+ this.value + '][name=includeUsers]').remove();
-				});
-			});
-
-			$('select#academicYear').change(function(e) {
-				refreshForm();
-			});
-
-			$('#show-sits-picker').click(function(){
-				$('.membership-picker').hide();
-				$('.ag-picker').toggle();
-			});
-			$('#show-membership-picker').click(function(){
-				$('.ag-picker').hide();
-				var $membershipPicker = $('.membership-picker');
-				$membershipPicker.toggle();
-				// switch straight to "Add more" tab if the group is empty
-				if ($membershipPicker.is(":visible") && $membershipPicker.find('.tab-content table').length == 0) {
-					$membershipPicker.find('a[href=#membership-tab2]').click();
-				}
-			});
-
-			$('.has-tooltip').tooltip();
-
+			var $table = $(this).closest('table');
+			updateCheckboxes($table);
+			enableActions($table);
 		});
-		</script>
 
-		<script>
-			jQuery(function($){
+		<#-- sits-picker click handler -->
+		$enrolment.on('click', '.sits-picker .btn', function(e) {
+			e.preventDefault();
+			var $m = $(this).closest('.modal');
+			if ($(this).is(':not(.disabled)')) {			
+				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
 
-			<#assign focusOn=RequestParameters.focusOn!'' />
-			<#if focusOn='member-list'>
-				// focusOn=member-list
-        		$('#show-membership-picker').click();
-			</#if>
+				<#-- get current list of values and remove and/or add changes -->
+				var current = $('.upstreamGroups').map(function(i, input) { return input.value }).toArray();
+				var changes = $m.find('td input:checked').map(function(i, input) { return input.value }).toArray();
+				// always remove even when adding, to dedupe
+				var data = $(current).not(changes).toArray();
+				if (this.id == 'link-sits') {
+					data = data.concat(changes);
+				}
+
+				var $newInputs = $(data).map(function(i, value) {
+					return $('<input>', { 'class': 'upstreamGroups', type: 'hidden', name: 'upstreamGroups['+i+']', value:value })[0];
+				});
+				$('.upstreamGroups').remove();
+				$('#enrolment-table').append($newInputs);
+
+				$.ajax({
+					type: 'POST',
+					url: '<@routes.assignmentenrolment module />',
+					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
+					error: function() {
+						$m.modal('hide');
+					},
+					success: function(data, status) {
+						$m.modal('hide');
+						$enrolment.html($(data).find('.assignmentEnrolment').contents());
+						$enrolment.data('open', true);
+						initEnrolment();
+						alertPending();
+					}
+				});
+			}
+		});
+
+		<#-- adder click handler -->
+		$enrolment.on('click', '.adder .btn', function(e) {		
+			e.preventDefault();
+			var $m = $(this).closest('.modal');		
+			if ($(this).is(':not(.disabled)')) {	
+				$(this).addClass('disabled').prop('disabled', 'disabled');
+				$.ajax({
+					type: 'POST',
+					url: '<@routes.assignmentenrolment module />',
+					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
+					error: function() {
+						$m.modal('hide');
+					},
+					success: function(data, status) {
+						$m.modal('hide');
+						$enrolment.html($(data).find('.assignmentEnrolment').contents());
+						$enrolment.data('open', true);
+						initEnrolment();
+						alertPending();
+					}
+				});
+			}
+		});
+
+		<#-- adder dis/enabled -->
+		$enrolment.on('input propertychange keyup', '.adder textarea', function(e) {
+			e.preventDefault();
+			var empty = ($.trim($(this).val()) == "");
+			$('.add-students').toggleClass('disabled', empty);
+		});
+
+		<#-- show modals -->
+		$enrolment.on('click', '.show-sits-picker', function() {
+			$('.sits-picker').modal('show');
+		});
+		$enrolment.on('click', '.show-adder', function() {
+			$('.adder').on('shown', function() {
+				$(this).find('textarea').focus();
+			}).modal('show');
+		});
+
+		<#-- reset on modal close -->
+		$enrolment.on('hidden', '.modal', function(e) {
+			$(this).find('input:checked').removeAttr('checked');
+			$(this).find('.spinnable').spin(false);
+		});
+
+		<#-- remove user from enrolment table -->
+		$enrolment.on('click', '.remove-users', function(e) {
+			e.preventDefault();
+			$('#enrolment-table').find('tr.item-type-include input:checked, tr.item-type-sits input:checked').each(function() {
+				var usercode = $(this).val();
+				var $tr = $(this).closest('tr');
+
+				// update both hidden fields and table
+				$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
+
+				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(usercode));
+				if ($tr.is('.item-type-sits')) {
+					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+				} else {
+					$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
+				}
+				$tr.removeClass(function(i, css) {
+					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+				}).addClass('item-type-exclude');
+
+				this.checked = '';
+				alertPending();
 			});
-		</script>
+		});
 
-	</@form.labelled_row>
+		<#-- restore excluded user -->
+		$enrolment.on('click', '.restore-users', function(e) {
+			e.preventDefault();
+			$('#enrolment-table').find('tr.item-type-exclude input:checked').each(function() {
+				var usercode = $(this).val();
+				var $tr = $(this).closest('tr');
+
+				// update both hidden fields and table
+				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
+				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(usercode));
+				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
+
+				$tr.removeClass(function(i, css) {
+					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+				}).addClass('item-type-include pending');
+
+				this.checked = '';
+				alertPending();
+			});
+		});
+	});
+	</script>
 </#escape>

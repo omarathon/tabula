@@ -25,13 +25,19 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_edit student currentTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}" /></#macro>
 <#macro tutor_edit_set student newTutor><@url page="/tutor/${student}/edit?tutor=${newTutor.universityId}" /></#macro>
 <#macro tutor_edit_replace student currentTutor newTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" /></#macro>
-<#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/edit" /></#macro>
+<#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/add" /></#macro>
 
 <#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
 
+<#macro edit_meeting_record meeting_record>
+	<@url page="/tutor/meeting/${meeting_record.relationship.studentId}/edit/${meeting_record.id}" />
+</#macro>
 <#macro delete_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/delete" /></#macro>
 <#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
 <#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
 
+<#macro save_meeting_approval meeting_record><@url page="/tutor/meeting/${meeting_record.id}/approval" /></#macro>
+
+<#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
 
 </#compress>

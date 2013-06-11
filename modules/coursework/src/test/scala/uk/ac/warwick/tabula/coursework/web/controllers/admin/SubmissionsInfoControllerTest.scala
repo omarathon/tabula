@@ -86,10 +86,10 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		))
 		
 		withUser("cusxad") {
-			val actual = controller.csv(command) getAsString
+			val actual = controller.csv(command).getAsString
 			val expected = """	|"submission-id","submission-time","university-id","assignment-id","downloaded","upload-name","upload-zip-path"
 								|"fakesubid","27/11/2012 15:44","0123456","fakeassid","false","Interesting helicopter.jpg","IN101 - 0123456 - Interesting helicopter.jpg"
-								|""" stripMargin
+								|""".stripMargin
 			
 			actual should be (expected)
 		}

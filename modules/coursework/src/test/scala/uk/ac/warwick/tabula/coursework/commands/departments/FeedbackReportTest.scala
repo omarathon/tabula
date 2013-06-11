@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import java.util.Date
-
 import scala.collection.JavaConverters._
-
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.joda.time.base.AbstractInstant
-
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off
 class FeedbackReportTest extends AppContextTestBase with ReportWorld {
+	import FeedbackReport._
+	
 	@Test
 	def simpleGetSubmissionTest() {
 		val userOne = new User(idFormat(1))
@@ -34,12 +33,12 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 	def feedbackCountsTest() {
 		val report = getTestFeedbackReport
 
-		report.getFeedbackCounts(assignmentOne) should be (10,0) // 10 on time
-		report.getFeedbackCounts(assignmentTwo) should be (0,29) // 29 late
-		report.getFeedbackCounts(assignmentThree) should be (4,9) // 4 on time - 9 late
-		report.getFeedbackCounts(assignmentFour) should be (7,28) // 7 on time - 28 late
-		report.getFeedbackCounts(assignmentFive) should be (2,98) // 2 on time - 98 late
-		report.getFeedbackCounts(assignmentSix) should be (65,8) // 65 on time - 8 late
+		report.getFeedbackCount(assignmentOne) should be (FeedbackCount(10,0, dateTime(2013, 3, 25), dateTime(2013, 3, 25))) // 10 on time
+		report.getFeedbackCount(assignmentTwo) should be (FeedbackCount(0,29, dateTime(2013, 5, 15), dateTime(2013, 5, 15))) // 29 late
+		report.getFeedbackCount(assignmentThree) should be (FeedbackCount(4,9, dateTime(2013, 5, 20), dateTime(2013, 6, 14))) // 4 on time - 9 late
+		report.getFeedbackCount(assignmentFour) should be (FeedbackCount(7,28, dateTime(2013, 7, 1), dateTime(2013, 7, 1))) // 7 on time - 28 late
+		report.getFeedbackCount(assignmentFive) should be (FeedbackCount(2,98, dateTime(2013, 9, 24), dateTime(2013, 9, 24))) // 2 on time - 98 late
+		report.getFeedbackCount(assignmentSix) should be (FeedbackCount(65,8, dateTime(2013, 7, 16), dateTime(2013, 8, 1))) // 65 on time - 8 late
 	}
 
 	/**
@@ -57,18 +56,18 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 		val report = getTestFeedbackReport
 		val assignmentSeven = addAssignment("1007", "test deadline day - 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
 		createPublishEvent(assignmentSeven, 31, studentData(0, 10))	// on-time
-		var feedbackCount = report.getFeedbackCounts(assignmentSeven)
-		feedbackCount should be (10,0) // 10 on time
+		var feedbackCount = report.getFeedbackCount(assignmentSeven)
+		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 4, 28), dateTime(2013, 4, 28))) // 10 on time
 
 		val assignmentEight = addAssignment("1008", "test deadline day", dateTime(2013, 3, 28), 10, 0, moduleOne)
 		createPublishEvent(assignmentEight, 32, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCounts(assignmentEight)
-		feedbackCount should be (10,0) // 10 on time
+		feedbackCount = report.getFeedbackCount(assignmentEight)
+		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 4, 29), dateTime(2013, 4, 29))) // 10 on time
 
 		val assignmentNine = addAssignment("1009", "test deadline day + 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
 		createPublishEvent(assignmentNine, 33, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCounts(assignmentNine)
-		feedbackCount should be (0,10) // 10 late
+		feedbackCount = report.getFeedbackCount(assignmentNine)
+		feedbackCount should be (FeedbackCount(0, 10, dateTime(2013, 4, 30), dateTime(2013, 4, 30))) // 10 late
 
 	}
 
@@ -77,18 +76,18 @@ class FeedbackReportTest extends AppContextTestBase with ReportWorld {
 		val report = getTestFeedbackReport
 		val assignmentTen = addAssignment("1010", "test deadline day - 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
 		createPublishEvent(assignmentTen, 27, studentData(0, 10))	// on time
-		var feedbackCount = report.getFeedbackCounts(assignmentTen)
-		feedbackCount should be (10,0) // 10 on time
+		var feedbackCount = report.getFeedbackCount(assignmentTen)
+		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 6, 25), dateTime(2013, 6, 25))) // 10 on time
 
 		val assignmentEleven = addAssignment("1010", "test deadline day", dateTime(2013, 5, 29), 10, 0, moduleOne)
 		createPublishEvent(assignmentEleven, 28, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCounts(assignmentEleven)
-		feedbackCount should be (10,0) // 10 on time
+		feedbackCount = report.getFeedbackCount(assignmentEleven)
+		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 6, 26), dateTime(2013, 6, 26))) // 10 on time
 
 		val assignmentTwelve = addAssignment("1011", "test deadline day + 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
 		createPublishEvent(assignmentTwelve, 29, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCounts(assignmentTwelve)
-		feedbackCount should be (0, 10) // late
+		feedbackCount = report.getFeedbackCount(assignmentTwelve)
+		feedbackCount should be (FeedbackCount(0, 10, dateTime(2013, 6, 27), dateTime(2013, 6, 27))) // 10 late
 	}
 
 

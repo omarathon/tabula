@@ -45,8 +45,13 @@ Include by default as "form", e.g.
 	</#if>
 </#macro>
 
-<#macro field>
-<div class="controls"><#nested/></div>
+<#macro field cssClass="">
+	<#if cssClass="">
+		<#assign baseClass="controls"/>
+	<#else>
+		<#assign baseClass="controls " + cssClass />
+	</#if>
+	<div class="${baseClass}"><#nested/></div>
 </#macro>
 
 <#macro label path="" for="" checkbox=false>
@@ -79,15 +84,15 @@ Include by default as "form", e.g.
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label cssClass="" help="">
+<#macro labelled_row path label cssClass="" help="" fieldCssClass="">
 <@row path=path cssClass=cssClass>
 	<@_label path=path>
-	${label}
+		${label}
 	</@_label>
-	<@field>
-	<#nested />
-	<@errors path=path />
-	<#if help?has_content><div class="help-block">${help}</div></#if>
+	<@field cssClass=fieldCssClass>
+		<#nested />
+		<@errors path=path />
+		<#if help?has_content><div class="help-block">${help}</div></#if>
 	</@field>
 </@row>
 </#macro>
@@ -103,7 +108,7 @@ To not bind:
 <@userpicker name="paramName" />
 
 -->
-<#macro userpicker path="" name="" list=false object=false multiple=false>
+<#macro userpicker path="" name="" list=false object=false multiple=false spanClass="span2">
 <#if name="">
 	<@spring.bind path=path>
 	<#-- This handles whether we're binding to a list or not but I think
@@ -118,21 +123,21 @@ To not bind:
 			<#assign ids=[status.actualValue] />
 		</#if>
 	</#if>
-	<@render_userpicker expression=status.expression value=ids multiple=multiple/>
+	<@render_userpicker expression=status.expression value=ids multiple=multiple spanClass=spanClass/>
 	</@spring.bind>
 <#else>
-	<@render_userpicker expression=name value=[] multiple=multiple/>
+	<@render_userpicker expression=name value=[] multiple=multiple spanClass=spanClass/>
 </#if>
 </#macro>
 
-<#macro render_userpicker expression value multiple>
+<#macro render_userpicker expression value multiple spanClass="span2">
 	<#if multiple><div class="user-picker-collection"></#if>
 
 	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 	<#list value as id>
 		<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-		--><input type="text" class="user-code-picker span2" name="${expression}" value="${id}">
+		--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" value="${id}">
 		</div>
 	</#list>
 	</#if>
@@ -140,7 +145,7 @@ To not bind:
 	<#if !value?has_content || multiple>
 	<#-- an empty field for entering new values in any case -->
 	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-	--><input type="text" class="user-code-picker span2" name="${expression}">
+	--><input type="text" class="user-code-picker ${spanClass}" name="${expression}">
 	</div>
 	</#if>
 

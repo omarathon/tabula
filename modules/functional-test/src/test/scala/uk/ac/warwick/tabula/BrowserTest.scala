@@ -18,6 +18,7 @@ import org.specs.matcher.EventuallyMatchers
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import org.openqa.selenium.internal.seleniumemulation.WaitForPageToLoad
+import com.gargoylesoftware.htmlunit.BrowserVersion
 
 /** Abstract base class for Selenium tests.
   *
@@ -43,7 +44,11 @@ abstract class BrowserTest
 	def Path(path: String) = P.SiteRoot + path
 
 	implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" => new HtmlUnitDriver(true) // JS enabled
+		case "htmlunit" => { new HtmlUnitDriver(true) // JS enabled
+//			val driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_8) // JS enabled
+//			driver.setJavascriptEnabled(true)
+//			driver
+		}
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
@@ -54,8 +59,8 @@ abstract class BrowserTest
 	 * try a block of code until it works or we give up. eventuallyAjax {}
 	 * just calls that with some sensible default timeouts.
 	 */
-	def eventuallyAjax(fun: =>Unit) = {
-		eventually(timeout(10 seconds), interval(200 millis)) (fun)
+	def eventuallyAjax(fun: =>Unit) {
+		eventually(timeout(10.seconds), interval(200.millis)) (fun)
 	}
 
 }

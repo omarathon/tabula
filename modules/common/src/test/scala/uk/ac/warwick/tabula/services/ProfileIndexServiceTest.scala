@@ -33,8 +33,12 @@ import uk.ac.warwick.tabula.Fixtures
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Callable
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
+import org.apache.commons.io.FileUtils
 
 // scalastyle:off magic.number
+@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@Autowired var indexer:ProfileIndexService = _
@@ -49,6 +53,11 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.afterPropertiesSet
 	}
 	
+	@After def tearDown {
+		indexer.destroy()
+		FileUtils.deleteDirectory(TEMP_DIR)
+	}
+
 	@Test def stripTitles {
 		indexer.stripTitles("Mathew Mannion") should be ("Mathew Mannion")
 		indexer.stripTitles("Mr Mathew Mannion") should be ("Mathew Mannion")
@@ -156,7 +165,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 		indexer.index
 		
 	}
-	
+
 	@Test def threading {
 		val dept = Fixtures.department("CS", "Computer Science")
 		val callable = new Callable[Seq[Member]] {

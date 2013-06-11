@@ -200,7 +200,7 @@
 			          			</li>
 		          			</ul>
 		          			
-		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}</#if>">Give feedback</a></div>
+		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Give feedback</a></div>
 		          				      					
 <#if user?? && (user.sysadmin || user.masquerader)>
 <div id="sysadmin-link">

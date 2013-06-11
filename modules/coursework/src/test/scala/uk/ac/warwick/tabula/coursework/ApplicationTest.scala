@@ -54,7 +54,7 @@ class ApplicationTest extends AppContextTestBase {
      * the root directory for many other directory locations.
      */
     @Test def defaultProperties = {
-    	auditIndexDir should be ("target/test-tmp/index/audit")
+    	auditIndexDir should fullyMatch regex ("target/test-[A-Z0-9]+-tmp/index/audit")
     }
     
     @Transactional @Test def hibernatePersistence = {

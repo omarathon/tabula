@@ -14,8 +14,8 @@
 <div class="alert">This page requires Javascript.</div>
 </noscript>
 
-<p>Drag modules by their <i class='icon-th'></i> handles to move them between departments. To select multiple departments,
-drag a box from one module name to another. You can also hold the <kbd>Ctrl</kbd> key to add to a selection.</p>
+<p>Drag modules by their <i class='icon-reorder'></i> handles to move them between departments. To select multiple departments,
+drag a box from one module name to another. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
 
 <@spring.hasBindErrors name="sortModulesCommand">
 <#if errors.hasErrors()>

@@ -1,56 +1,23 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import org.joda.time.LocalDate
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.BindException
 import org.springframework.transaction.annotation.Transactional
-import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
-import uk.ac.warwick.tabula.AppContextTestBase
+
 
 
 // scalastyle:off magic.number
-class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
+class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingRecordTests {
 
-	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
-	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
 	@Transactional
 	@Test
 	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
-
-		val ps = mock[ProfileService]
-
-		val creator = transactional { tx =>
-			val m = new StaffMember("9876543")
-			m.userId = "staffmember"
-			session.save(m)
-			m
-		}
-
-		val student = mock[StudentMember]
-
-		val relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
-			relationship.profileService = ps
-			ps.getStudentBySprCode("0123456/1") returns (Some(student))
-
-			session.save(relationship)
-			relationship
-		}
 
 		val cmd = new CreateMeetingRecordCommand(creator, relationship)
 		cmd.title = "A title"
@@ -108,11 +75,11 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		cmd.description = "Lovely words"
 
 		// try adding a file
-		var uploadedFile =  new UploadedFile
-		var mpFile = mock[MultipartFile]
+		val uploadedFile =  new UploadedFile
+		val mpFile = mock[MultipartFile]
 		uploadedFile.upload.add(mpFile)
 
-		var fileAttach = new FileAttachment
+		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane"
 		uploadedFile.attached.add(fileAttach)
 
@@ -124,7 +91,7 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)
 		meeting.title should be ("A good title")
-		meeting.description should be ("<p>Lovely words</p>")
+		meeting.description should be ("Lovely words")
 		meeting.meetingDate.toLocalDate should be (marchHare)
 		meeting.attachments.get(0).name should be ("Beltane")
 		meeting.format should be (Email)

@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
  * bootstrap-datetimepicker.js
  * =========================================================
  * Copyright 2012 Stefan Petre
@@ -1171,7 +1171,7 @@
 					// minute
 					i: date.getUTCMinutes(),
 					// second
-					s: date.getUTCSeconds(),
+					s: date.getUTCSeconds()
 				};
 				val.hh = (val.h < 10 ? '0' : '') + val.h;
 				val.ii = (val.i < 10 ? '0' : '') + val.i;

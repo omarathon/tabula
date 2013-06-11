@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.scheduling.services
 import java.sql.ResultSet
 import java.sql.Types
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.LocalDate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -23,6 +24,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
+import org.joda.time.DateTime
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -58,14 +60,15 @@ class ProfileImporter extends Logging {
 			}
 		}
 	}
-	
+
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
 		def photo() = try {
+			logger.info(s"Fetching photo for $universityId")
 			Option(membershipInterface.getPhotoById(universityId))
 		} catch {
 			case e: MembershipInterfaceException => None
 		}
-		
+
 		photo
 	}
 
@@ -74,11 +77,17 @@ class ProfileImporter extends Logging {
 			MembershipInformation(member, photoFor(member.universityId))
 		}
 
-	def userIdAndCategory(member: Member) =
-		MembershipInformation(
-			membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).head,
-			photoFor(member.universityId)
-		)
+	def userIdAndCategory(member: Member): Option[MembershipInformation] = {
+		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
+			case Nil => None
+			case mem: List[MembershipMember] => Some (
+					MembershipInformation(
+						mem.head,
+						photoFor(member.universityId)
+					)
+				)
+		}
+	}
 }
 
 object ProfileImporter {
@@ -103,7 +112,6 @@ object ProfileImporter {
 
 			crs.crs_code as sits_course_code,
 			crs.crs_ylen as course_year_length,
-			decode(crs.crs_schc,'UW PG', 'postgraduate', 'undergraduate') as ug_pg,
 
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
@@ -114,6 +122,7 @@ object ProfileImporter {
 			spr.prs_code as spr_tutor1,
 			--spr.spr_prs2 as spr_tutor2,
 
+			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
@@ -234,7 +243,7 @@ object ProfileImporter {
 			usercode				= rs.getString("its_usercode"),
 			startDate				= sqlDateToLocalDate(rs.getDate("dt_start")),
 			endDate					= sqlDateToLocalDate(rs.getDate("dt_end")),
-			modified				= sqlDateToLocalDate(rs.getDate("dt_modified")),
+			modified				= sqlDateToDateTime(rs.getDate("dt_modified")),
 			phoneNumber				= rs.getString("tel_business"),
 			gender					= Gender.fromCode(rs.getString("gender")),
 			alternativeEmailAddress	= rs.getString("external_email"),
@@ -243,6 +252,9 @@ object ProfileImporter {
 
 	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
 		(Option(date) map { new LocalDate(_) }).orNull
+
+	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
+		(Option(date) map { new DateTime(_) }).orNull
 
 }
 
@@ -259,7 +271,7 @@ case class MembershipMember(
 	val usercode: String = null,
 	val startDate: LocalDate = null,
 	val endDate: LocalDate = null,
-	val modified: LocalDate = null,
+	val modified: DateTime = null,
 	val phoneNumber: String = null,
 	val gender: Gender = null,
 	val alternativeEmailAddress: String = null,

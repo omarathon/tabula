@@ -25,6 +25,8 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] wit
 	var freemarker = Wire.auto[Configuration]
 	
 	lazy val template: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
+	
+	var componentName: String = _
 
 	var message: String = _
 	//	var pleaseRespond:Boolean =_

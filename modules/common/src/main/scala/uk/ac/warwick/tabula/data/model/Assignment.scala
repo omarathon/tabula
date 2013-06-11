@@ -24,7 +24,6 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.reflect._
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -124,15 +123,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def permissionsParents = Option(module).toStream
 
-//	@ManyToMany(fetch = FetchType.LAZY)
-//	@JoinTable(name="assignment_assessmentgroup",
-//		joinColumns=Array(new JoinColumn(name="assignment_id")),
-//		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-//	var assessmentGroups :JList[UpstreamAssessmentGroup] = JArrayList()
-//
-//	def upstreamAssignments: Seq[UpstreamAssignment] = assessmentGroups.flatMap(assignmentService.getUpstreamAssignment(_))
-
-	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
@@ -234,6 +225,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
+	
+	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
@@ -248,7 +241,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
 				template.moduleCode = group.upstreamAssignment.moduleCode
 				template.occurrence = group.occurrence
-				assignmentMembershipService.getAssessmentGroup(template)
+				assignmentMembershipService.getUpstreamAssessmentGroup(template)
 			}
 		}
 	}

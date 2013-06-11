@@ -5,27 +5,27 @@
 <#escape x as x?html>
 <div id="tutor-view">
 	<h1>Personal tutors for ${department.name}</h1>
-	
+
 	<#if studentCount gt 0>
 		<#if can.do("Profiles.PersonalTutor.Upload", department)>
 			<p>
 <!--				<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a> -->
 			</p>
 		</#if>
-		
+
 		<#if tutorRelationships?has_content>
 			<table id="tutors" class="table table-bordered">
 				<#list tutorRelationships?keys?sort as key>
 					<#assign tutor = tutorRelationships[key]?first.agentParsed />
 					<#assign tutees = tutorRelationships[key] />
 					<#assign tuteeKey = sanitise(key) + "-tutees" />
-					
+
 					<tbody>
 						<tr>
 							<td>
 								<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand">
 									<span class="tutor-detail pull-right"><@fmt.p tutees?size "tutee" /></span>
-									<i class="icon-chevron-right"></i> 
+									<i class="icon-chevron-right icon-fixed-width"></i>
 									<#if tutor?is_string>
 										${tutor}
 										<#if !tutor?string?starts_with("Not ")>
@@ -38,9 +38,9 @@
 										</#if>
 									</#if>
 								</h4>
-								
+
 								<div id="${tuteeKey}" class="collapse">
-									<table class="tutees table-bordered table-striped table-condensed tabula-greenLight">
+									<table class="tutees table-bordered table-striped table-condensed tabula-purple">
 										<thead>
 											<tr>
 												<th class="tutee-col">First name</th>
@@ -51,7 +51,7 @@
 												<th class="course-col">Course</th>
 											</tr>
 										</thead>
-										
+
 										<tbody>
 											<#list tutees as tuteeRelationship>
 												<#assign student = tuteeRelationship.studentMember />
@@ -75,7 +75,7 @@
 		<#else>
 			<p class="alert alert-warning"><i class="icon-warning-sign"></i> No personal tutors are currently visible for ${department.name} in Tabula.</p>
 		</#if>
-		
+
 		<#if missingCount == 0>
 			<h4 class="muted"><i class="icon-ok"></i> All students in ${department.name} have personal tutors recorded</h4>
 		<#else>
@@ -93,13 +93,13 @@
 		$(".tutees").tablesorter({
 			sortList: [[1,0], [3,0], [4,0]]
 		});
-		
+
 		$("#tutors").on("hidden", "div", function() {
 			$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").parent().prop("title", "Expand");
 		}).on("shown", "div", function() {
 			$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").parent().prop("title", "Collapse");
 		});
-		
+
 		$(".tutee").on("mouseover", function(e) {
 			$(this).find("td").addClass("hover");
 		}).on("mouseout", function(e) {

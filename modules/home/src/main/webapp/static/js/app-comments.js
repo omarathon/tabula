@@ -63,7 +63,7 @@ $('#app-feedback-link').click(function(event){
     if (popup.isShowing()) {
         popup.hide();
     } else {
-        popup.showUrl('/app/tell-us', {
+        popup.showUrl($(this).find('a[href]').attr('href'), {
             method:'GET', target: target, position:'right',
             onComplete: formFirstLoaded
         });

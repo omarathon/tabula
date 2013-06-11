@@ -1,31 +1,27 @@
 package uk.ac.warwick.tabula.coursework.services.feedbackreport
 
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
-import org.apache.poi.ss.util.WorkbookUtil
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 import collection.immutable.TreeMap
-import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 
-class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime)
-	extends SpreadsheetHelpers {
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-	val assignmentSheetSize = 13
-	val moduleSheetSize = 11
-	
-	val PUBLISH_DEADLINE_WORKING_DAYS = 20
+class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
+	import FeedbackReport._
 
-	var auditEventQueryMethods = Wire.auto[AuditEventQueryMethods]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-	var submissionService = Wire.auto[SubmissionService]
+	var auditEventQueryMethods = Wire[AuditEventQueryMethods]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var submissionService = Wire[SubmissionService]
 	val workbook = new XSSFWorkbook()
 	var workingDaysHelper = new WorkingDaysHelperImpl
 
-		var assignmentData : List[AssignmentInfo] = List()
+	var assignmentData : List[AssignmentInfo] = List()
 
 	def generateAssignmentSheet(dept: Department) = {
 		val sheet = workbook.createSheet("Report for " + safeDeptName(department))
@@ -49,36 +45,39 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		addStringCell("On-time feedback %", header, style)
 		addStringCell("Late feedback", header, style)
 		addStringCell("Late feedback %", header, style)
+		addStringCell("Earliest publish date", header, style)
+		addStringCell("Latest publish date", header, style)
 
 		sheet
 	}
 
 	def populateAssignmentSheet(sheet: XSSFSheet) {
 		for (assignmentInfo <- assignmentData) {
-
 			val assignment = assignmentInfo.assignment
 
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			addStringCell(assignment.name, row)
 			addStringCell(assignment.module.code.toUpperCase, row)
-			addDateCell(assignment.closeDate.toDate, row, dateCellStyle(workbook))
-			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PUBLISH_DEADLINE_WORKING_DAYS)
-			addDateCell(publishDeadline.toDate, row, dateCellStyle(workbook))
+			addDateCell(assignment.closeDate, row, dateCellStyle(workbook))
+			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PublishDeadlineInWorkingDays)
+			addDateCell(publishDeadline, row, dateCellStyle(workbook))
 			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
 			addNumericCell(assignment.submissions.filter(submission => submission.isAuthorisedLate).size, row)
 			addNumericCell(assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size, row)
-			val (onTime, late) = getFeedbackCounts(assignment)
-			val totalPublished = onTime + late
+			val feedbackCount = getFeedbackCount(assignment)
+			val totalPublished = feedbackCount.onTime + feedbackCount.late
 			val totalUnPublished = assignment.submissions.size - totalPublished
 			addNumericCell(totalUnPublished, row)
 			addNumericCell(totalPublished, row)
-			addNumericCell(onTime, row)
-			addPercentageCell(onTime, totalPublished, row, workbook)
-			addNumericCell(late, row)
-			addPercentageCell(late, totalPublished, row, workbook)
+			addNumericCell(feedbackCount.onTime, row)
+			addPercentageCell(feedbackCount.onTime, totalPublished, row, workbook)
+			addNumericCell(feedbackCount.late, row)
+			addPercentageCell(feedbackCount.late, totalPublished, row, workbook)
+			addDateCell(feedbackCount.earliest, row, dateCellStyle(workbook))
+			addDateCell(feedbackCount.latest, row, dateCellStyle(workbook))
 		}
 	}
 
@@ -92,9 +91,9 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		}
 
 		for (assignment <- sortedAssignments) {
-			val (onTime, late) = getFeedbackCounts(assignment)
-			val totalPublished = onTime + late
-			val assignmentInfo = new AssignmentInfo(
+			val feedbackCount = getFeedbackCount(assignment)
+			val totalPublished = feedbackCount.onTime + feedbackCount.late
+			val assignmentInfo = AssignmentInfo(
 				assignment.module.code,
 				assignment.module.name,
 				assignmentMembershipService.determineMembershipUsers(assignment).size,
@@ -102,9 +101,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.submissions.size,
 				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
 				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
-				onTime,
-				late,
-			  totalPublished,
+				feedbackCount,
+				totalPublished,
 				assignment
 			)
 
@@ -138,10 +136,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	def populateModuleSheet(sheet: XSSFSheet) {
 		val modules = assignmentData.groupBy(_.assignment.module.code)
 		val sortedModules = TreeMap(modules.toSeq:_*)
-		for (module <- sortedModules) {
+		for ((moduleCode, assignmentInfoList) <- sortedModules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
-			val moduleCode = module._1
-			val assignmentInfoList= module._2
 
 			addStringCell(assignmentInfoList(0).moduleName, row)
 			addStringCell(moduleCode.toUpperCase, row)
@@ -159,10 +155,10 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			val totalUnPublished = numberOfSubmissions - totalPublished
 			addNumericCell(totalUnPublished, row)
 			addNumericCell(totalPublished, row)
-			val ontime = assignmentInfoList.map(_.onTimeFeedback).sum
+			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
 			addNumericCell(ontime, row)
 			addPercentageCell(ontime, totalPublished, row, workbook)
-			val late = assignmentInfoList.map(_.lateFeedback).sum
+			val late = assignmentInfoList.map(_.feedbackCount.late).sum
 			addNumericCell(late, row)
 			addPercentageCell(late, totalPublished, row, workbook)
 		}
@@ -170,50 +166,81 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 
 	/**
-	 * Returns a pair - first is number of on time feedback, second is number of late
+	 * Returns a tuple:
+	 * - first is number of on time feedback
+	 * - second is number of late
+	 * - third is earliest publish date
+	 * - fourth is latest publish date
 	 */
-
-	def getFeedbackCounts(assignment: Assignment) : (Int, Int) =  {
-
-		val times:Seq[(Int, Int)] = for (
+	def getFeedbackCount(assignment: Assignment): FeedbackCount =  {
+		val times: Seq[FeedbackCount] = for (
 			student <- assignmentMembershipService.determineMembershipUsers(assignment);
 			//submissionEvent <- auditEventQueryMethods.submissionForStudent(assignment, student).headOption ;
-			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId) ;
+			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId);
 			publishEvent <- auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption;
 			submissionEventDate <- Option(submission.submittedDate);
 			publishEventDate <- Option(publishEvent.eventDate);
 			assignmentCloseDate <- Option(assignment.closeDate)
 			if (!(publishEventDate.isBefore(submissionEventDate) || publishEventDate.isBefore(assignmentCloseDate)))
 		) yield {
+			val submissionCandidateDate = 
+				if(submissionEventDate.isAfter(assignmentCloseDate)) submissionEventDate
+				else assignmentCloseDate
+			
 			// was feedback returned within 20 working days?
-			val numOfDays = if(submissionEventDate.toLocalDate.isAfter(assignmentCloseDate.toLocalDate)){
-				workingDaysHelper.getNumWorkingDays(submissionEventDate.toLocalDate, publishEventDate.toLocalDate)
-			} else {
-				workingDaysHelper.getNumWorkingDays(assignmentCloseDate.toLocalDate, publishEventDate.toLocalDate)
-			}
+			val numOfDays = workingDaysHelper.getNumWorkingDays(submissionCandidateDate.toLocalDate, publishEventDate.toLocalDate) 
+				
 			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
 			// we want n working days after the close date
-			if(numOfDays > (PUBLISH_DEADLINE_WORKING_DAYS + 1)) (0,1) // was late
-			else (1,0) // on time
+			if (numOfDays > (PublishDeadlineInWorkingDays + 1)) FeedbackCount(0, 1, publishEventDate, publishEventDate) // was late
+			else FeedbackCount(1, 0, publishEventDate, publishEventDate) // on time
 		}
+		
 		// merge our list of pairs into a single pair of (on time, late)
-		times.foldLeft(0,0)((a,b) => (a._1 + b._1 , a._2 + b._2))
+		times.foldLeft(FeedbackCount(0, 0, null, null)) { (a, b) =>
+			val onTime = a.onTime + b.onTime
+			val late = a.late + b.late
+			val earliest = 
+				if (a.earliest == null) b.earliest
+				else if (b.earliest == null) a.earliest
+				else if (a.earliest.isBefore(b.earliest)) a.earliest
+				else b.earliest
+			val latest = 
+				if (a.latest == null) b.latest
+				else if (b.latest == null) a.latest
+				else if (a.latest.isAfter(b.latest)) a.latest
+				else b.latest
+			
+			FeedbackCount(onTime, late, earliest, latest) 
+		}
 	}
-
-
-	case class AssignmentInfo (
-		var moduleCode: String,
-		var moduleName: String,
-		var membership: Int,
-		var summative: Boolean,
-		var numberOfSubmissions: Int,
-		var submissionsLateWithExt: Int,
-		var submissionsLateWithoutExt: Int,
-		var onTimeFeedback: Int,
-		var lateFeedback: Int,
-		var totalPublished: Int,
-		var assignment: Assignment
-	)
 }
 
+object FeedbackReport {
 
+	val AssignmentSheetSize = 15
+	val ModuleSheetSize = 11
+	
+	val PublishDeadlineInWorkingDays = 20
+	
+	case class FeedbackCount(
+		val onTime: Int,
+		val late: Int,
+		val earliest: DateTime,
+		val latest: DateTime
+	)
+
+	case class AssignmentInfo (
+		val moduleCode: String,
+		val moduleName: String,
+		val membership: Int,
+		val summative: Boolean,
+		val numberOfSubmissions: Int,
+		val submissionsLateWithExt: Int,
+		val submissionsLateWithoutExt: Int,
+		val feedbackCount: FeedbackCount,
+		val totalPublished: Int,
+		val assignment: Assignment
+	)
+	
+}

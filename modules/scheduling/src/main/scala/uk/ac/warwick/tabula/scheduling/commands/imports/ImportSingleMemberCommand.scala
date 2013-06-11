@@ -55,7 +55,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	var homeDepartmentCode: String = _
 	//var studyDepartmentCode: String = _
 	
-	var membershipLastUpdated: LocalDate = _
+	var membershipLastUpdated: DateTime = _
 
 	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
 		this()
@@ -163,9 +163,21 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		 * - There is no last updated date from Membership; or
 		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
 		 */
-		if (memberLastUpdated == null || membershipLastUpdated == null || memberLastUpdated.isBefore(membershipLastUpdated.toDateTimeAtStartOfDay().plusDays(1)))
+		val fetchPhoto = if (memberLastUpdated == null) {
+			logger.info(s"Fetching photo for $universityId as we have no last updated date stored")
+			true
+		} else if (membershipLastUpdated == null) {
+			logger.info(s"Fetching photo for $universityId as membership returned no last updated date")
+			true
+		} else if (memberLastUpdated.isBefore(membershipLastUpdated)) {
+			logger.info(s"Fetching photo for $universityId as our member last updated $memberLastUpdated is before membership last updated $membershipLastUpdated")
+			true
+		} else false
+		
+		if (fetchPhoto) {
 			copyPhoto("photo", photoOption(), memberBean)
-		else false
+			true // always ping the last updated date
+		} else false
 	}
 
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated

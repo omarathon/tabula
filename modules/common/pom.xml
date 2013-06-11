@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>37</version>
+		<version>38</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -215,7 +215,7 @@
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
-			<version>1.93</version>
+			<version>1.94</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-codec</artifactId>

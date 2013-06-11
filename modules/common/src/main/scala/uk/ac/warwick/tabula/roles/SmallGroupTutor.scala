@@ -1,12 +1,16 @@
 package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
-case class SmallGroupTutor(group: model.groups.SmallGroup) extends BuiltInRole(SmallGroupTutorRoleDefinition, group)
+case class SmallGroupTutor(smallGroup: SmallGroup) extends BuiltInRole(SmallGroupTutorRoleDefinition, smallGroup)
 
-object SmallGroupTutorRoleDefinition extends BuiltInRoleDefinition {
+case object SmallGroupTutorRoleDefinition extends BuiltInRoleDefinition {
 	
-	override def description = "Small Group Tutor"
+	override def description = "SmallGroupTutor"
+	
+	GrantsScopedPermission(
+		SmallGroups.Read
+	)
 
 }

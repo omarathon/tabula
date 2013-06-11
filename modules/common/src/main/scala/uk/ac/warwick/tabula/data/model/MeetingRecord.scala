@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
@@ -15,9 +14,17 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+
+object MeetingRecord {
+	val DefaultMeetingTimeOfDay = 12
+	val MeetingTooOldThresholdYears = 5
+	val MaxTitleLength = 140
+}
 
 @Entity
-class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted {
+class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
+
 	@Column(name="creation_date")
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
@@ -53,17 +60,37 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
 	var description: String = _
 
+	def escapedDescription:String = formattedHtml(description)
+
 	def this(creator: Member, relationship: StudentRelationship) {
 		this()
 		this.creator = creator
 		this.relationship = relationship
 	}
 
+	// Workflow definitions
+
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
+	// true if the specified user needs to perform a workflow action on this meeting record
+	def pendingActionBy(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
+
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
+
+	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
+	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
+	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.exists(_.approver == member)
+	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
+
+	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
+	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
+	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
+	// people who have had a draft version rejected
+	def pendingRevisionBy(member: Member) = isRejected && member == creator
+
+	// End of workflow definitions
 
 	def permissionsParents = Stream(relationship.studentMember)
 

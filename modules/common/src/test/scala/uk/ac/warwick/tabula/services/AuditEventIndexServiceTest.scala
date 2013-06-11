@@ -31,8 +31,10 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
 import uk.ac.warwick.tabula.Fixtures
+import org.springframework.test.annotation.DirtiesContext
 
 // scalastyle:off magic.number
+//@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	var indexer:AuditEventIndexService = _
@@ -48,8 +50,8 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	}
 	
 	@After def tearDown {
+		indexer.destroy()
 		session.createSQLQuery("delete from auditevent").executeUpdate()
-		
 		FileUtils.deleteDirectory(TEMP_DIR)
 	}
 
@@ -87,7 +89,7 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 		
 	}
 	
-	@Transactional 
+	@Transactional
 	@Test def individuallyDownloadedSubmissions = withFakeTime(dateTime(1999, 6)) {
 		val assignment = {
 			val a = newDeepAssignment()

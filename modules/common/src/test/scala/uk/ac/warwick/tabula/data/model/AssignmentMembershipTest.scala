@@ -5,11 +5,12 @@ import uk.ac.warwick.tabula.Mockito
 import org.junit.Test
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
-
-
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.services.IncludeType
+import uk.ac.warwick.tabula.services.SitsType
+import uk.ac.warwick.tabula.services.ExcludeType
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 
@@ -49,18 +50,18 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	}
 	
 	@Test def empty {
-		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody))
+		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody)).items
 		membership.size should be (0)
 	}
 	
 	@Test def emptyWithNone {
-		val membership = assignmentMembershipService.determineMembership(Nil, None)
+		val membership = assignmentMembershipService.determineMembership(Nil, None).items
 		membership.size should be (0)
 	}
 	
 	@Test def plainSits {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(nobody))
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(nobody)).items
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
@@ -68,7 +69,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	
 	@Test def plainSitsWithNone {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val membership = assignmentMembershipService.determineMembership(Seq(upstream), None)
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), None).items
 		membership.size should be (2)
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
@@ -79,20 +80,23 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		val others = new UserGroup
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
-		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others))
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
 		membership.size should be (3)
 		
 		membership(0).user.getFullName should be ("Roger Aaaaa")
-		membership(0).itemType should be ("include")
+		membership(0).itemType should be (IncludeType)
+		membership(0).itemTypeString should be ("include")
 		membership(0).extraneous should be (false)
 		
 		membership(1).user.getFullName should be ("Roger Aaaaf")
-        membership(1).itemType should be ("exclude")
-        membership(1).extraneous should be (false)
+		membership(1).itemType should be (ExcludeType)
+		membership(1).itemTypeString should be ("exclude")
+		membership(1).extraneous should be (false)
 		
 		membership(2).user.getFullName should be ("Roger Aaaag")
-        membership(2).itemType should be ("sits")
-        membership(2).extraneous should be (false)
+		membership(2).itemType should be (SitsType)
+		membership(2).itemTypeString should be ("sits")
+		membership(2).extraneous should be (false)
 
     // test the simpler methods that return a list of Users
 
@@ -112,19 +116,22 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         val others = new UserGroup
         others.includeUsers.add("aaaaf")
         others.excludeUsers.add("aaaah")
-        val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others))
+        val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
         membership.size should be (3)
         
         membership(0).user.getFullName should be ("Roger Aaaaf")
-        membership(0).itemType should be ("include")
+        membership(0).itemType should be (IncludeType)
+        membership(0).itemTypeString should be ("include")
         membership(0).extraneous should be (true)
         
         membership(1).user.getFullName should be ("Roger Aaaah")
-        membership(1).itemType should be ("exclude")
+        membership(1).itemType should be (ExcludeType)
+        membership(1).itemTypeString should be ("exclude")
         membership(1).extraneous should be (true)
         
         membership(2).user.getFullName should be ("Roger Aaaag")
-        membership(2).itemType should be ("sits")
+        membership(2).itemType should be (SitsType)
+        membership(2).itemTypeString should be ("sits")
         membership(2).extraneous should be (false)
 	}
 	

@@ -1,21 +1,21 @@
 // stuff to fix the mixups between ID6 and Bootstrap
 
 .mceContentBody, #main-content, #custom-header, #custom-footer {
-	
+
 	ul.nav {
 		margin: 0;
 		padding-left: 0;
 	}
 
-	ul.dropdown-menu { 
+	ul.dropdown-menu {
 		padding-left: 0;
-		li { margin-bottom: 0 } 
-		a { 
+		li { margin-bottom: 0 }
+		a {
 			.transition-none();
-			text-decoration: none !important; 
+			text-decoration: none !important;
 		}
 	}
-	
+
 	.nav-tabs > li {
 	  margin-bottom: -1px;
 	}
@@ -23,16 +23,31 @@
 }
 
 #container, .tabula-page {
+	.label {
+		cursor: pointer;
+	}
+
+	.badge-mini {
+		font-size: 11px;
+        line-height: 10px;
+		padding: 2px 6px;
+	}
+
+	p small {
+		display: block;
+		line-height: 18px;
+	}
+
 	.popover {
 		.popover-title {
 			letter-spacing: normal;
 		}
-		
+
 		.popover-content {
 			max-height: 350px;
 			overflow-y: auto;
 		}
-		
+
 		p {
 			line-height: 130%;
 			margin-bottom: 7px;
@@ -40,14 +55,14 @@
 
 		ul {
 			padding-left: 10px;
-			
+
 			li {
 				list-style: inherit;
 				margin-left: 10px;
 				margin-bottom: 6px;
 			}
 		}
-	}	
+	}
 }
 
 // TAB-558 override Bootstrap max-width on tables, so that Chrome will trigger the display the pop-out table link
@@ -58,11 +73,11 @@
 // TAB-358 ID6 headings and Bootstrap forms quarrel a bit
 #container {
 	h1 + h2, h1 + h3, h1 + h4, h1 + h5, h1 + h6  { margin: -18px 0 20px; }
-	
+
 	h2 + h3, h2 + h4, h2 + h5, h2 + h6,
 	h3 + h4, h3 + h5, h3 + h6,
 	h4 + h5, h4 + h6,
 	h5 + h6 { margin: -8px 0 12px; }
-	
+
 	h1 + form, h2 + form, h3 + form, h4 + form, h5 + form, h6 + form { margin-top: 20px; }
 }

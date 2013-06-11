@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 import collection.JavaConverters._
 import collection.mutable
 import language.implicitConversions
+import scala.collection.GenTraversableOnce
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -62,11 +63,48 @@ trait JavaImports {
 			if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
 			list
 		}
-		
+
+		def apply[A](orig: List[A]): java.util.ArrayList[A] = {
+			val list = new java.util.ArrayList[A]()
+			if (!orig.isEmpty) list.addAll(orig.asJavaCollection)
+			list
+		}
+
 		def apply[A](orig: JList[A]): java.util.ArrayList[A] = {
 			val list = new java.util.ArrayList[A]()
 			if (!orig.isEmpty) list.addAll(orig)
 			list
+		}
+		
+		def apply[A](orig: GenTraversableOnce[A]): java.util.ArrayList[A] = {
+			if (orig.isEmpty)
+				new java.util.ArrayList[A]
+			else
+				new java.util.ArrayList[A](orig.toIndexedSeq.asJavaCollection)
+		}
+	}
+	
+	/**
+	 * Allows you to create an empty Java HashSet, useful as an initial
+	 * value for a variable that needs a mutable JSet.
+	 */
+	object JHashSet {
+		def apply[A](elements: A*): java.util.HashSet[A] = {
+			val set = new java.util.HashSet[A]()
+			if (!elements.isEmpty) set.addAll(elements.asJavaCollection)
+			set
+		}
+
+		def apply[A](orig: Set[A]): java.util.HashSet[A] = {
+			val set = new java.util.HashSet[A]()
+			if (!orig.isEmpty) set.addAll(orig.asJavaCollection)
+			set
+		}
+
+		def apply[A](orig: JSet[A]): java.util.HashSet[A] = {
+			val set = new java.util.HashSet[A]()
+			if (!orig.isEmpty) set.addAll(orig)
+			set
 		}
 	}
 	

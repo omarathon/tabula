@@ -141,19 +141,21 @@ class TextField extends FormField with SimpleValue[String] {
 
 @Entity
 @DiscriminatorValue("wordcount")
-class WordCountField extends FormField with SimpleValue[Int] {
+class WordCountField extends FormField {
 	def min: JInteger = getProperty[JInteger]("min", null)
 	def min_=(limit: JInteger) = setProperty("min", limit)
 	def max: JInteger = getProperty[JInteger]("max", null)
 	def max_=(limit: JInteger) = setProperty("max", limit)
 	def conventions: String = getProperty[String]("conventions", null)
 	def conventions_=(conventions: String) = setProperty("conventions", conventions)
+	
+	def blankSubmissionValue = new IntegerSubmissionValue(this)
 
 	override def validate(value: SubmissionValue, errors: Errors) {
 		value match {
-			case i:StringSubmissionValue => {
-				 if (i.value == null || !i.value.matches("\\d+")) errors.rejectValue("value", "assignment.submit.wordCount.missing")
-				 else if (i.value.toInt < min || i.value.toInt > max) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
+			case i:IntegerSubmissionValue => {
+				 if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
+				 else if (i.value < min || i.value > max) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
 			}
 			case _ => errors.rejectValue("value", "assignment.submit.wordCount.missing") // value was null or wrong type
 		}

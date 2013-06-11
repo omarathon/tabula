@@ -17,7 +17,6 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.roles.SmallGroupMemberRoleDefinition
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
@@ -33,7 +32,7 @@ object SmallGroup {
 @Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
+class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with Serializable {
 	import SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
@@ -47,16 +46,18 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	var name: String = _
 
 	@ManyToOne
-	@JoinColumn(name = "set_id")
+	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
 	
-	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
+	@JoinColumn(name = "group_id")
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream
 		
-	@transient
-	lazy val students = permissionsService.ensureUserGroupFor(this, SmallGroupMemberRoleDefinition)
+	@OneToOne(cascade = Array(ALL))
+	@JoinColumn(name = "studentsgroup_id")
+	var students: UserGroup = new UserGroup
 
 	def toStringProps = Seq(
 		"id" -> id,

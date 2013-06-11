@@ -117,14 +117,6 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@ForeignKey(name="none")
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
-	/**
-	  * Although a department may have a parent, we don't actually
-	  * want to inherit permissions from it. We can add users explicitly
-	  * to the child department if they need access there.
-	  *
-	  * This is open to discussion and change.
-	  */
-
 	def permissionsParents = Option(parent).toStream
 	
 	/** The 'top' ancestor of this department, or itself if

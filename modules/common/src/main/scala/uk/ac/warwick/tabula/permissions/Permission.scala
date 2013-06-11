@@ -11,6 +11,13 @@ sealed abstract class ScopelessPermission(description: String) extends Permissio
 	override val isScoped = false
 }
 
+case class CheckablePermission(val permission: Permission, val scope: Option[PermissionsTarget])
+
+object CheckablePermission {
+	def apply(permission: ScopelessPermission): CheckablePermission = new CheckablePermission(permission, None)
+	def apply(permission: Permission, scope: PermissionsTarget): CheckablePermission = new CheckablePermission(permission, Some(scope))
+}
+
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
 object Permissions {
 
@@ -65,7 +72,7 @@ object Permissions {
 		// We don't Read a module, we ManageAssignments on it
 		case object ManageAssignments extends Permission("Manage assignments")
 		case object ManageSmallGroups extends Permission("Manage small groups")
-		
+
 		case object Create extends Permission("Add a module")
 		case object Update extends Permission("Edit a module")
 		case object Delete extends Permission("Remove a module")
@@ -166,6 +173,11 @@ object Permissions {
 			case object Delete extends Permission("Remove a personal tutor")
 		}
 
+		// Person's own supervisor ('upward' relationship)
+		object Supervisor {
+			case object Read extends Permission("View a supervisor")
+		}
+
 		object MeetingRecord {
 			case object Create extends Permission("Add a meeting record")
 			case object Read extends Permission("View a meeting record")
@@ -173,6 +185,17 @@ object Permissions {
 			case object Update extends Permission("Edit a meeting record")
 			case object Delete extends Permission("Remove a meeting record")
 		}
+	}
+	
+	object SmallGroups {
+		case object Archive extends Permission("Archive small groups")
+		
+		case object Create extends Permission("Create small groups")
+		case object Read extends Permission("View small groups")
+		case object Update extends Permission("Edit small groups")
+		case object Delete extends Permission("Delete small groups")
+		
+		case object Allocate extends Permission("Allocate students to small groups")
 	}
 
 	object UserSettings {

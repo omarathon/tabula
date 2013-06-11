@@ -25,6 +25,8 @@ trait ProfileService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
+	def getMemberByPrsCode(prsCode: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
@@ -46,42 +48,53 @@ trait ProfileService {
 
 @Service(value = "profileService")
 class ProfileServiceImpl extends ProfileService with Logging {
-	
+
 	var memberDao = Wire.auto[MemberDao]
 	var profileIndexService = Wire.auto[ProfileIndexService]
-	
+
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
+	}
+	
+	def getAllMembersWithUniversityIds(universityIds: Seq[String]) = transactional(readOnly = true) {
+		memberDao.getAllWithUniversityIds(universityIds)
 	}
 	
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getAllByUserId(userId, disableFilter)
 	}
-	
+
 	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUserId(userId, disableFilter)
 	}
-	
+
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
 		memberDao.getBySprCode(sprCode)
 	}
-	
+
+	def getMemberByPrsCode(prsCode: String) = transactional(readOnly = true) {
+		if (prsCode != null && prsCode.length() > 2) {
+			memberDao.getByUniversityId(prsCode.substring(2))
+		}
+		else None
+	}
+
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
 		profileIndexService.find(query, departments, userTypes, isGod)
-	} 
-	
+	}
+
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
 		profileIndexService.find(department, includeTouched, userTypes)
-	} 
-	
+	}
+
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {
 		memberDao.listUpdatedSince(startDate, max)
 	}
-	
+
 	def save(member: Member) = memberDao.saveOrUpdate(member)
-	
+
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
-	
+
 	def getRegisteredModules(universityId: String): Seq[Module] = transactional(readOnly = true) {
 		memberDao.getRegisteredModules(universityId)
 	}
@@ -89,15 +102,15 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	def findCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional() {
 		memberDao.getCurrentRelationships(relationshipType, targetSprCode)
 	}
-	
+
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
-	
+
 	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByStudent(relationshipType, student)
 	}
-	
+
 	def getPersonalTutors(student: Member): Seq[Member] = {
 		student match {
 			case student: StudentMember => {
@@ -108,9 +121,9 @@ class ProfileServiceImpl extends ProfileService with Logging {
 			case _ => Nil
 		}
 	}
-	
+
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
-		this.findCurrentRelationships(PersonalTutor, targetSprCode).find(_.agent == agent) match {
+		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
 			case Some(existingRelationship) => {
 				// the same relationship is already there in the db - don't save
 				existingRelationship
@@ -118,14 +131,14 @@ class ProfileServiceImpl extends ProfileService with Logging {
 			case _ => {
 				// TODO handle existing relationships?
 				// and then create the new one
-				val newRelationship = StudentRelationship(agent, PersonalTutor, targetSprCode)
+				val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 				newRelationship.startDate = new DateTime
 				memberDao.saveOrUpdate(newRelationship)
 				newRelationship
 			}
 		}
 	}
-	
+
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department) = transactional(readOnly=true) {
 		memberDao.getRelationshipsByDepartment(relationshipType, department)
 	}

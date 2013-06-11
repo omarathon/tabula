@@ -30,10 +30,53 @@
 
 	// Tabula-specific rendition of date and date-time pickers
 	jQuery.fn.tabulaDateTimePicker = function() {
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					  minutes = d.getUTCMinutes(),
+						seconds = d.getUTCSeconds(),
+						millis = d.getUTCMilliseconds();
+
+				if (minutes > 0 || seconds > 0 || millis > 0) {
+					d.setUTCMinutes(0);
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
+
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+
+					$(this).datetimepicker('update');
+				}
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
+	};
+
+	jQuery.fn.tabulaDatePicker = function() {
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datepicker({
+				format: "dd-M-yyyy",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
+	};
+
+	jQuery.fn.tabulaTimePicker = function() {
 		$(this).datetimepicker({
-			format: "dd-M-yyyy hh:ii:ss",
+			format: "hh:ii:ss",
 			weekStart: 1,
-			minView: 'day',
+			startView: 'day',
+			maxView: 'day',
 			autoclose: true
 		}).on('show', function(ev){
 			var d = new Date(ev.date.valueOf()),
@@ -41,27 +84,77 @@
 					seconds = d.getUTCSeconds(),
 					millis = d.getUTCMilliseconds();
 
-			if (minutes > 0 || seconds > 0 || millis > 0) {
-				d.setUTCMinutes(0);
+			if (seconds > 0 || millis > 0) {
 				d.setUTCSeconds(0);
 				d.setUTCMilliseconds(0);
 
 				var DPGlobal = $.fn.datetimepicker.DPGlobal;
-				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
 
 				$(this).datetimepicker('update');
 			}
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
-	jQuery.fn.tabulaDatePicker = function() {
-		$(this).datepicker({
-			format: "dd-M-yyyy",
-			weekStart: 1,
-			minView: 'day',
-			autoclose: true
-		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+	// apply to a checkbox or radio button
+	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
+		var $this = $(this);
+		var name = $this.attr("name");
+		var $form = $this.closest('form');
+
+		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
+		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
+		var $changeTargets = $("input[name='" + name + "']", $form);
+		if (showWhenChecked) {
+			$changeTargets.change(function(){
+				if ($this.is(':checked'))
+					$slidingDiv.stop().slideDown('fast');
+				else
+					$slidingDiv.stop().slideUp('fast');
+			});
+			$this.trigger('change');
+		} else {
+			$changeTargets.change(function(){
+				if ($this.is(':checked'))
+					$slidingDiv.stop().slideUp('fast');
+				else
+					$slidingDiv.stop().slideDown('fast');
+			});
+			$this.trigger('change');
+		}
 	};
+
+
+	// submit bootstrap form using Ajax
+	jQuery.fn.ajaxSubmit = function(successCallback) {
+		$(this).on('submit', 'form', function(e){
+			e.preventDefault();
+			var $form = $(this);
+			$.post($form.attr('action'), $form.serialize(), function(data){
+				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
+
+				if(data.status == "error"){
+					// delete any old errors
+					$(scopeSelector + "span.error").remove();
+					$(scopeSelector + '.error').removeClass('error');
+					var error;
+					for(error in data.result){
+						var message = data.result[error];
+						var inputSelector = scopeSelector + "input[name='" + error + "']";
+						var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
+
+						var $field = $(inputSelector + ", " + textareaSelector);
+						$field.closest(".control-group").addClass("error");
+
+						// insert error message
+						$field.last().after('<span class="error help-inline">'+message+'</span>');
+					}
+				} else {
+					successCallback(data)
+				}
+			});
+		});
+	}
 
 	/*
 	 * Prepare a spinner and store reference in data store.
@@ -163,23 +256,23 @@
 			});
 		}
 	};
-	
-	
-	/* 
+
+
+	/*
 		Customised Popover wrapper. Implements click away to dismiss.
 	*/
 	$.fn.tabulaPopover = function(options) {
 		var $items = this;
-		
+
 		$items.on('click', function(e) {
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
 				e.preventDefault();
 			}
 		});
-		
+
 		$items.popover(options);
-		
+
 		// Click away to dismiss
 		$('html').on('click', function(e) {
 			// if clicking anywhere other than the popover itself
@@ -187,17 +280,24 @@
 				$items.popover('hide');
 			}
 		});
-		
+
 		return $items;
 	};
+
+	$(function(){
+		$('a.disabled').on('click', function(e) {
+			e.preventDefault();
+		});
+	});
 
 	// on ready
 	$(function() {
 		// form behavioural hooks
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
+		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
-		
+
 		// prepare spinnable elements
 		$('body').tabulaPrepareSpinners();
 
@@ -206,6 +306,7 @@
 			var $m = $(this);
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
+			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
 			$m.tabulaPrepareSpinners();
 		});
@@ -235,40 +336,69 @@
 		// http://twitter.github.com/bootstrap/javascript.html#tooltips
 		$('.use-tooltip').tooltip();
 
+		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
+		 * (eg. hide) are *only* callable on *that original element*. So to close
+		 * a specific popover (or introductory) programmatically you need to jump hoops.
+		 * Lame.
+		 * Workaround is to handle the shown event on the calling element,
+		 * call its popover() method again to get an object reference and then go diving
+		 * for a reference to the new popover itself in the DOM.
+		 */
+		$('#container').on('shown', '.use-popover, .use-introductory', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.data('creator', $(e.target));
+		});
+		$('#container').on('click', '.popover .close', function(e) {
+			var $creator = $(e.target).parents('.popover').data('creator');
+			if ($creator) {
+				$creator.popover('hide');
+			}
+		});
+
+		// ensure popovers/introductorys override title with data-title attribute where available
+		$('.use-popover, .use-introductory').each(function() {
+			if ($(this).attr('data-title')) {
+				$(this).attr('data-original-title', $(this).attr('data-title'));
+			}
+		});
+
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
-		$('.use-popover').popover().click(function(){ return false; });
-			
+		$('.use-popover').popover({
+			trigger: 'click',
+			container: '#container',
+			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+		}).click(function(){ return false; });
+
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
 		$('.use-introductory').popover({
-			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
-		});
-		
+			trigger: 'click',
+			container: '#container',
+            template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
+		}).click(function(){ return false; });
+
 		$('.use-introductory:not(.auto)').each(function() {
 			var template = $(this).data('popover').options.template;
 			$(this).data('popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
 		});
-		
+
 		// auto-show introductory popover on load, based on class
 		$('.use-introductory.auto').popover('show');
 
-		// make introductory popovers closable
-		$('#container').on('click', '.introductory .close', function(e) {
-			$(e.target).parents('.introductory').prev().popover('hide');
-		});
-		
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
-			// If intro text is changed to reflect new features, change its id to ensure end users see the new version
-			var id = $(e.target).parents('.introductory').prev().prop('id');
-			var hash = $(e.target).parents('.introductory').prev().data('hash');
+			// If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
+			var hash = $(e.target).parents('.introductory').data('creator').data('hash');
 			// use this hook to persist showOnLoad state with some ajax shizzle
 			$.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
 		});
 
-		// apply details/summary polyfill
-		// https://github.com/mathiasbynens/jquery-details
+		/* details/summary polyfill
+		 * https://github.com/mathiasbynens/jquery-details
+		 * WARNING: apply method ONLY to details tags.
+		 * Call it on other elements for UI hilarity.
+		 */
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
 		$('details').details();
 
@@ -293,15 +423,12 @@
 				return $section.hasClass('expanded');
 			};
 
-			var $icon = $('<i></i>');
+			var $icon = $('<i class="icon-fixed-width"></i>');
 			if (open()) $icon.addClass('icon-chevron-down');
 			else $icon.addClass('icon-chevron-right');
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
-
-			var buffer = $title.height() / 2 - 10;
-			$icon.css('margin-top', buffer + 'px');
 
 			$title.css('cursor', 'pointer').on('click', function() {
 				if (open()) {
@@ -324,8 +451,72 @@
 		});
 
 		// sticky table headers
-		//$('table.sticky-table-headers').stickyTableHeaders({
-		//	fixedOffset: $('#navigation')
-		//});
+		//$('table.sticky-table-headers').fixedHeaderTable('show');
+
+		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
+		if (navigator.platform.indexOf('Mac') != -1) {
+			$('kbd.keyboard-control-key').html('&#8984; Cmd');
+		}
+
+		// Fixed to top on scroll
+		if ($('.fix-on-scroll').length) {
+			var gutter = $('#navigation').height();
+
+			$(window).scroll(function() {
+				var scrollTop = $(this).scrollTop() + gutter;
+
+				$('.fix-on-scroll').each(function() {
+					var $this = $(this);
+
+					var $scrollContainer = $this.closest('.fix-on-scroll-container');
+					if ($scrollContainer.length == 0) $scrollContainer = $('body');
+
+					var height = $this.height();
+					var maxHeight = $(window).height() - gutter;
+					var tooHigh = (height > maxHeight);
+
+					var floor = $scrollContainer.offset().top + $scrollContainer.height();
+
+					var isFixed = $this.data('is-fixed');
+					var pinnedToFloor = $this.data('is-pinned-to-floor');
+
+					var offsetTop = (isFixed) ? $this.data('original-offset') : $this.offset().top;
+					var pinToFloor = (scrollTop + height) > floor;
+
+					if (!tooHigh && scrollTop > offsetTop && !isFixed) {
+						// Fix it
+						$this.data('original-offset', offsetTop);
+						$this.data('original-width', $this.css('width'));
+						$this.data('original-position', $this.css('position'));
+						$this.data('original-top', $this.css('top'));
+
+						$this.css({
+							width: $this.width(),
+							position: 'fixed',
+							top: gutter
+						});
+
+						$this.data('is-fixed', true);
+					} else if (!tooHigh && isFixed && pinToFloor) {
+						// Pin to the floor
+						var diff = (scrollTop + height) - floor;
+
+						$this.css('top', gutter - diff);
+						$this.data('is-pinned-to-floor', true);
+					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
+						// Un-pin from the floor
+						$this.css('top', gutter);
+						$this.data('is-pinned-to-floor', false);
+					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
+						// Un-fix it
+						$this.css('width', $this.data('original-width'));
+						$this.css('position', $this.data('original-position'));
+						$this.css('top', $this.data('original-top'));
+
+						$this.data('is-fixed', false);
+					}
+				});
+			});
+		}
 	}); // on ready
 })(jQuery);

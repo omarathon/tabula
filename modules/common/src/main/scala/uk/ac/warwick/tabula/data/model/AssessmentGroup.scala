@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 
 @Entity
 class AssessmentGroup extends GeneratedId {
@@ -18,4 +15,13 @@ class AssessmentGroup extends GeneratedId {
 
 	var occurrence: String = _
 
+	override def toString = {
+		if (assignment != null && upstreamAssignment != null && occurrence != null) {
+			"assessmentGroup: { assignment: " + assignment.id + " (" + assignment.name +
+			"), upstreamAssignment: " + upstreamAssignment.id + " (" + upstreamAssignment.name +
+			"), occurrence: " + occurrence + " }"
+		} else {
+			"assessmentGroup: (invalid, contains nulls)"
+		}
+	}
 }

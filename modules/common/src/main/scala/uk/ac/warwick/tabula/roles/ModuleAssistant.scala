@@ -43,7 +43,12 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		Feedback.Create,
 		Feedback.Read,
 		Feedback.Update,
-		Feedback.Delete
+		Feedback.Delete,
+		
+		SmallGroups.Create,
+		SmallGroups.Read,
+		SmallGroups.Update,
+		SmallGroups.Allocate
 	)
 
 }

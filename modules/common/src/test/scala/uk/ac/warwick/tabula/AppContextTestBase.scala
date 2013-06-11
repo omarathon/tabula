@@ -21,11 +21,16 @@ import org.reflections.Reflections
 import uk.ac.warwick.tabula.commands.Command
 import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
+import uk.ac.warwick.spring.Wire
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.test.annotation.DirtiesContext
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
 @ActiveProfiles(Array("test"))
+@DirtiesContext
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
+	
 	protected def allCommandsInSystem(packageBase: String) = {
 		val reflections = new Reflections(packageBase)
 
@@ -40,6 +45,7 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
+@DirtiesContext
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
 	

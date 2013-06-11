@@ -1,29 +1,42 @@
 package uk.ac.warwick.tabula.system.permissions
 
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.services.permissions.{PermissionDefinition, RoleService}
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
+import scala.Some
+import uk.ac.warwick.tabula.system.CustomDataBinder
+import scala.Some
+import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
-class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
-	
+class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {
+
 	val dept = Fixtures.department("in", "IT Services")
 	dept.id = "dept"
-	
+
 	val mod1 = Fixtures.module("in101", "IN 1")
 	mod1.id = "mod1"
-	
+
 	val mod2 = Fixtures.module("in102", "IN 2")
 	mod2.id = "mod2"
-	
+
+	class Binder(obj:Any, name:String, val securityService:SecurityService)
+			extends CustomDataBinder(obj, name)
+			with PermissionsBinding
+
+	private def clearAnyChecks() { permissionsAnyChecks = permissionsAnyChecks.empty }
+
 	@Test def checks {
 		PermissionCheck(Permissions.Module.Create, dept)
 		PermissionCheck(Permissions.Module.Delete, dept)
 		PermissionCheckAll(Permissions.Module.ManageAssignments, Seq(mod1, mod2))
 		PermissionCheck(Permissions.UserPicker)
-		
-		permissionChecks should be (Map(
+
+		permissionsAllChecks should be (Map(
 			Permissions.Module.Create -> Some(dept),
 			Permissions.Module.Delete -> Some(dept),
 			Permissions.Module.ManageAssignments -> Some(mod1),
@@ -31,15 +44,15 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			Permissions.UserPicker -> None
 		))
 	}
-	
+
 	@Test def linkedAssignmentToModule {
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.module = mod1
-		
+
 		mustBeLinked(assignment, mod1)
-		
+
 		assignment.module = mod2
-		
+
 		try {
 			mustBeLinked(assignment, mod1)
 			fail("expected exception")
@@ -47,22 +60,22 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def linkedFeedbackToAssignment {
 		val ass1 = Fixtures.assignment("my assignment")
 		ass1.id = "ass1"
-			
+
 		val ass2 = Fixtures.assignment("my assignment2")
 		ass2.id = "ass2"
-		
+
 		val feedback = Fixtures.feedback()
-			
+
 		feedback.assignment = ass1
-		
+
 		mustBeLinked(feedback, ass1)
-		
+
 		feedback.assignment = ass2
-		
+
 		try {
 			mustBeLinked(feedback, ass1)
 			fail("expected exception")
@@ -70,22 +83,22 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def linkedSubmissionToAssignment {
 		val ass1 = Fixtures.assignment("my assignment")
 		ass1.id = "ass1"
-			
+
 		val ass2 = Fixtures.assignment("my assignment2")
 		ass2.id = "ass2"
-		
+
 		val submission = Fixtures.submission()
-			
+
 		submission.assignment = ass1
-		
+
 		mustBeLinked(submission, ass1)
-		
+
 		submission.assignment = ass2
-		
+
 		try {
 			mustBeLinked(submission, ass1)
 			fail("expected exception")
@@ -93,18 +106,18 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def linkedMarkingWorkflowToDepartment {
 		val markingWorkflow = Fixtures.markingWorkflow("my workflow")
 		markingWorkflow.department = dept
-		
+
 		mustBeLinked(markingWorkflow, dept)
-		
+
 		val dept2 = Fixtures.department("xx", "dept 2")
 		dept2.id = "dept2"
-		
+
 		markingWorkflow.department = dept2
-		
+
 		try {
 			mustBeLinked(markingWorkflow, dept)
 			fail("expected exception")
@@ -112,18 +125,18 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def linkedFeedbackTemplateToDepartment {
 		val template = Fixtures.feedbackTemplate("my template")
 		template.department = dept
-		
+
 		mustBeLinked(template, dept)
-		
+
 		val dept2 = Fixtures.department("xx", "dept 2")
 		dept2.id = "dept2"
-		
+
 		template.department = dept2
-		
+
 		try {
 			mustBeLinked(template, dept)
 			fail("expected exception")
@@ -131,20 +144,20 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def mandatory {
 		val assignment = Fixtures.assignment("my assignment")
 		mandatory(assignment) should be (assignment)
-		
+
 		try {
 			mandatory(null)
 			fail("expected exception")
 		} catch {
 			case e: ItemNotFoundException =>
 		}
-		
+
 		mandatory(Some("yes")) should be ("yes")
-		
+
 		try {
 			mandatory(None)
 			fail("expected exception")
@@ -152,11 +165,11 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 			case e: ItemNotFoundException =>
 		}
 	}
-	
+
 	@Test def notDeleted {
 		val assignment = Fixtures.assignment("my assignment")
 		notDeleted(assignment)
-		
+
 		try {
 			assignment.deleted = true
 			notDeleted(assignment)
@@ -166,4 +179,79 @@ class PermissionsCheckingMethodsTest extends TestBase with PermissionsChecking {
 		}
 	}
 
+	@Test def checkOneOf {
+		val user = new User("custard")
+		user.setIsLoggedIn(true)
+		user.setFoundUser(true)
+		val currentUser = new CurrentUser(user, user)
+
+		val securityService = new SecurityService
+		val roleService = mock[RoleService]
+		roleService.getExplicitPermissionsFor(currentUser, mod1) returns (Stream(
+			PermissionDefinition(Permissions.Assignment.Create, Some(mod1), true)
+		))
+		securityService.roleService = roleService
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Assignment.Create, mod1),
+				CheckablePermission(Permissions.Assignment.Update, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Assignment.Create -> Some(mod1),
+			Permissions.Assignment.Update -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "OneFromTwoScoped", securityService)
+		}} catch {
+			case e: PermissionDeniedException => fail("One of the two scoped permissions should be enough")
+		}
+
+		clearAnyChecks()
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Profiles.Search),
+				CheckablePermission(Permissions.Assignment.Create, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Profiles.Search -> None,
+			Permissions.Assignment.Create -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "OneFromOneScopedOneScopeless", securityService)
+		}} catch {
+			case e: PermissionDeniedException => fail("The matching scoped permission should be enough")
+		}
+
+		clearAnyChecks()
+
+		PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Profiles.Search),
+				CheckablePermission(Permissions.Assignment.Read, mod1))
+		)
+
+		permissionsAnyChecks should be (Map(
+			Permissions.Profiles.Search -> None,
+			Permissions.Assignment.Read -> Some(mod1)
+		))
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "NoneFromOneScopedOneScopeless", securityService)
+			fail ("Neither permission should match")
+		}} catch {
+			case e: Exception =>
+		}
+
+		clearAnyChecks()
+
+		try { withCurrentUser(currentUser) {
+			new Binder(this, "NoneFromEmpty", securityService)
+			fail("No permissions to check, so should fail")
+		}} catch {
+			case e: Exception =>
+		}
+	}
 }

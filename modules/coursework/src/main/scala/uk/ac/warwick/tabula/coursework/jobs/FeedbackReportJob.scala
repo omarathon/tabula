@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{SpreadsheetHelpers, Logging}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssignmentService}
@@ -125,8 +125,8 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			updateProgress(ProgressPopulatedModules)
 
 			updateStatus("Formatting worksheets")
-			report.formatWorksheet(assignmentSheet, report.assignmentSheetSize)
-			report.formatWorksheet(moduleSheet, report.moduleSheetSize)
+			SpreadsheetHelpers.formatWorksheet(assignmentSheet, FeedbackReport.AssignmentSheetSize)
+			SpreadsheetHelpers.formatWorksheet(moduleSheet, FeedbackReport.ModuleSheetSize)
 			updateProgress(ProgressFormattedSheets)
 
 			// Adapter stuff to go from XSSF to the writer without having to save the spreadsheet to disk

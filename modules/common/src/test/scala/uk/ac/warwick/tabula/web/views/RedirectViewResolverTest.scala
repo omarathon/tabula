@@ -12,23 +12,45 @@ import org.springframework.web.servlet.support.SessionFlashMapManager
 
 class RedirectViewResolverTest extends TestBase with HttpMocking {
 
-  @Test def redirectPage {
-    val request = mockRequest
-    request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
+	trait Context {
+		val request = mockRequest
+		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
+		val response = mockResponse
+		val resolver = new RedirectViewResolver
+		resolver.toplevelUrl = "https://tabula.warwick.ac.uk"
+		resolver.context = "/"
 
-    val response = mockResponse
-	val resolver = new RedirectViewResolver
-	resolver.toplevelUrl = "https://tabula.warwick.ac.uk"
-	resolver.context = "/"
-
-	resolver.resolveViewName("redirect:/sysadmin/departments", null) match {
-	  case redirect:RedirectView => {
-	    redirect.render(null, request, response)
-	    response.getRedirectedUrl() should be ("https://tabula.warwick.ac.uk/sysadmin/departments")
-	  }
+		def resolve(viewName: String) = resolver.resolveViewName(viewName, null) match {
+			case redirect:RedirectView => {
+				redirect.render(null, request, response)
+				Some(response.getRedirectedUrl())
+			}
+			case _ => None
+		}
 	}
 
-    resolver.resolveViewName("sysadmin/departments", null) should be (null)
-  }
+	@Test def redirectPage {
+		new Context {
+			resolve("redirect:/sysadmin/departments") should be (Some("https://tabula.warwick.ac.uk/sysadmin/departments"))
+			resolve("sysadmin/departments") should be (None)
+		}
+	}
+
+	@Test def context {
+		new Context {
+			resolver.context = "/coursework"
+			resolve("redirect:/admin") should be (Some("https://tabula.warwick.ac.uk/coursework/admin"))
+		}
+	}
+
+	@Test def redirectToRoot {
+		new Context {
+			resolve("redirect:/") should be (Some("https://tabula.warwick.ac.uk/"))
+		}
+		new Context {
+			resolver.context = "/coursework"
+			resolve("redirect:/") should be (Some("https://tabula.warwick.ac.uk/coursework/"))
+		}
+	}
 
 }

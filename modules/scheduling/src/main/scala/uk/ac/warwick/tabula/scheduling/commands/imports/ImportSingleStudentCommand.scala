@@ -7,7 +7,6 @@ import org.joda.time.LocalDate
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
@@ -16,29 +15,30 @@ import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.AlumniProperties
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberProperties
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
+import uk.ac.warwick.tabula.data.model.OtherMember
+import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
+import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.model.StaffProperties
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.StudentProperties
+import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
 import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.data.model.OtherMember
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.userlookup.User
 
 class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
   extends ImportSingleMemberCommand(member, ssoUser, resultSet)
@@ -66,6 +66,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	//var scjTutor2 = rs.getString("scj_tutor2")
 
 	this.sprCode = rs.getString("spr_code")
+	this.scjCode = rs.getString("scj_code")
 	this.sitsCourseCode = rs.getString("sits_course_code")
 	this.routeCode = rs.getString("route_code")
 	this.studyDepartmentCode = rs.getString("study_department")
@@ -86,8 +87,6 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 	this.sprStatusCode = rs.getString("spr_status_code")
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-
-	this.ugPg = rs.getString("ug_pg")
 
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
@@ -125,6 +124,8 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		if (member.studyDetails == null) logger.warn("Can't capture tutor for student " + sprCode + "; studyDetails is null")
 		else captureTutor(member.studyDetails.studyDepartment)
 
+		new ImportSupervisorsForSingleStudentCommand(member).apply
+
 		member
 	}
 
@@ -138,6 +139,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 
 	private val basicStudyDetailsProperties = Set(
 		"sprCode",
+		"scjCode",
 		"sitsCourseCode",
 		"yearOfStudy",
 		"intendedAward",
@@ -146,8 +148,7 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 		"expectedEndDate",
 		"fundingSource",
 		"courseYearLength",
-		"modeOfAttendance",
-		"ugPg"
+		"modeOfAttendance"
 		//,
 		//"levelCode"
 
@@ -223,9 +224,9 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 					val member = memberDao.getByUniversityId(tutorUniId) match {
 						case Some(mem: Member) => {
 							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
-							
+
 							val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, sprCode)
-			
+
 							// Does this relationship already exist?
 							currentRelationships.find(_.agent == tutorUniId) match {
 								case Some(existing) => existing
@@ -235,10 +236,10 @@ class ImportSingleStudentCommand(member: MembershipInformation, ssoUser: User, r
 										rel.endDate = DateTime.now
 										profileService.saveOrUpdate(rel)
 									}
-									
+
 									// Save the new one
 									val rel = profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
-							
+
 									rel
 								}
 							}
