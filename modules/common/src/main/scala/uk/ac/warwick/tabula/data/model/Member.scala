@@ -173,6 +173,9 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 
 	studyDetails.student = this
 
+	@OneToMany(mappedBy = "universityid", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+
 	def this(id: String) = {
 		this()
 		this.universityId = id
@@ -181,11 +184,17 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	// FIXME this belongs as a Freemarker macro or helper
 	def statusString: String = {
 		var statusString = ""
-		if (studyDetails != null && studyDetails.sprStatus!= null)
-			statusString = studyDetails.sprStatus.fullName.toLowerCase()
-		if (studyDetails != null && studyDetails.enrolmentStatus != null)
-			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
-		statusString.capitalize
+		if (studyDetails != null) {
+			if (studyDetails.sprStatus!= null) {
+				statusString = studyDetails.sprStatus.fullName.toLowerCase().capitalize
+
+				// if the enrolment status is not null and different to the SPR status, append it:
+				if (studyDetails.enrolmentStatus != null
+					&& studyDetails.enrolmentStatus.fullName != studyDetails.sprStatus.fullName)
+						statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
+			}
+		}
+		statusString
 	}
 
 	// Find out if the student has an SCE record for the current year (which will mean

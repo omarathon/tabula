@@ -34,42 +34,42 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.OtherMember
 
-class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberFromMembershipCommand(member, ssoUser, rs)
 	with Logging with Daoisms with AlumniProperties with Unaudited {
 	import ImportMemberHelpers._
-	
+
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
-	
+
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
-		
+
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
-		
+
 		val isTransient = !memberExisting.isDefined
 		val member = memberExisting getOrElse(new OtherMember(universityId))
-		
+
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
-		
+
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
 		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyAlumniProperties(commandBean, memberBean)
-			
+
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)
-			
+
 			member.lastUpdatedDate = DateTime.now
 			memberDao.saveOrUpdate(member)
 		}
-		
+
 		member
 	}
-		
+
 	private val basicAlumniProperties: Set[String] = Set()
-	
+
 	private def copyAlumniProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicAlumniProperties, commandBean, memberBean)
-		
-	
+
+
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "alumni")
 
 

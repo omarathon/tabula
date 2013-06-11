@@ -3,37 +3,37 @@ package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
-import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
+import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAssignmentsCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
+import uk.ac.warwick.tabula.scheduling.services.NonStudentProfileImporter
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileIndexService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
-import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
- * 
+ *
  * @deprecated Use version in home module instead
  */
 
@@ -48,14 +48,14 @@ abstract class BaseSysadminController extends BaseController {
 	}
 }
 
-@Controller 
+@Controller
 class HomeController extends BaseSysadminController {
 	@RequestMapping(Array("/")) def home = redirectToHome
 }
 
 class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
-	
+
 	var indexer = Wire.auto[AuditEventIndexService]
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -64,13 +64,13 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	def applyInternal() = {
 		indexer.indexFrom(from)
 	}
-	
+
 	def describe(d: Description) = d.property("from" -> from)
 }
 
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
-	
+
 	var indexer = Wire.auto[ProfileIndexService]
 	var mdService = Wire.auto[ModuleAndDepartmentService]
 
@@ -84,7 +84,7 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 			case Some(department) => indexer.indexByDateAndDepartment(from, department)
 		}
 	}
-	
+
 	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
 }
 
@@ -92,7 +92,7 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 @RequestMapping(Array("/sysadmin/index/run-audit"))
 class SysadminIndexAuditController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsCommand
-	
+
 	@RequestMapping(method = Array(POST))
 	def reindex(form: ReindexAuditEventsCommand) = {
 		form.apply
@@ -104,7 +104,7 @@ class SysadminIndexAuditController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/index/run-profiles"))
 class SysadminIndexProfilesController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesCommand
-	
+
 	@RequestMapping(method = Array(POST))
 	def reindex(form: ReindexProfilesCommand) = {
 		form.apply
@@ -140,8 +140,8 @@ class ImportSitsController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[ProfileImporter]
-	
+	var importer = Wire.auto[NonStudentProfileImporter]
+
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
 		val command = new ImportProfilesCommand
@@ -156,8 +156,12 @@ class ImportSingleProfileController extends BaseSysadminController {
 	@RequestMapping(method = Array(POST))
 	def reindex(@PathVariable("member") member: Member) = {
 		val command = new ImportProfilesCommand
-		command.refresh(member)
-		
+
+		member match {
+			case stu: StudentMember => command.refreshStudent(stu)
+			case _ => throw new IllegalStateException("Tried to refresh a non-student member - not implemented yet")
+		}
+
 		// Redirect cross-context
 		Redirect(urlRewriter.exec(JArrayList("/view/" + member.universityId, "/profiles", true)).toString())
 	}
@@ -167,11 +171,11 @@ class ImportSingleProfileController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/sync"))
 class SyncFilesystemController extends BaseSysadminController {
 	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
-	
+
 	@RequestMapping
 	def sync() = {
 		if (!fileSyncEnabled) throw new IllegalStateException("File syncing not enabled")
-		
+
 		new SyncReplicaFilesystemCommand().apply()
 		redirectToHome
 	}
@@ -179,7 +183,7 @@ class SyncFilesystemController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/filesystem-cleanup"))
-class CleanupFilesystemController extends BaseSysadminController {	
+class CleanupFilesystemController extends BaseSysadminController {
 	@RequestMapping
 	def cleanup() = {
 		new CleanupUnreferencedFilesCommand().apply()
@@ -189,7 +193,7 @@ class CleanupFilesystemController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/filesystem-sanity"))
-class SanityCheckFilesystemController extends BaseSysadminController {	
+class SanityCheckFilesystemController extends BaseSysadminController {
 	@RequestMapping
 	def sanityCheck() = {
 		new SanityCheckFilesystemCommand().apply()

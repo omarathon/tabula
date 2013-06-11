@@ -20,7 +20,9 @@ class Route extends GeneratedId {
 		this.department = department
 	}
 
+	@Column(unique=true)
 	var code: String = _
+	
 	var name: String = _
 
 	@ManyToOne

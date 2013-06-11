@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services
 
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.MemberDao
@@ -16,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.PrsCode
 
 /**
  * Service providing access to members and profiles.
@@ -74,7 +74,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 
 	def getMemberByPrsCode(prsCode: String) = transactional(readOnly = true) {
 		if (prsCode != null && prsCode.length() > 2) {
-			memberDao.getByUniversityId(prsCode.substring(2))
+			PrsCode.getUniversityId(prsCode) match {
+				case Some(uniId: String) => memberDao.getByUniversityId(uniId)
+				case None => None
+			}
 		}
 		else None
 	}
