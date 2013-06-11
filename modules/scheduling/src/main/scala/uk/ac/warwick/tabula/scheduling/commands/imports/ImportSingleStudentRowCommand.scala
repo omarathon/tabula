@@ -72,8 +72,9 @@ import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 
-class ImportSingleStudentRowCommand(resultSet: ResultSet)
-	extends ImportSingleMemberCommand[StudentMember] with Logging with Daoisms
+class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
+	extends ImportSingleMemberCommand(member, ssoUser, resultSet)
+	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
@@ -83,7 +84,6 @@ class ImportSingleStudentRowCommand(resultSet: ResultSet)
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
-	var memberDao = Wire.auto[MemberDao]
 
 	// A few intermediate properties that will be transformed later
 	var studyDepartmentCode: String = _
@@ -94,13 +94,6 @@ class ImportSingleStudentRowCommand(resultSet: ResultSet)
 
 	var scjCode: String = _
 
-	@Restricted(Array("Profiles.Read.Nationality"))
-	var nationality: String = _
-
-	@Restricted(Array("Profiles.Read.MobileNumber"))
-	var mobileNumber: String = _
-
-	var universityId = rs.getString("stu_code")
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	var sprTutor1 = rs.getString("spr_tutor1")
 	this.routeCode = rs.getString("route_code")

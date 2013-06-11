@@ -34,7 +34,7 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.OtherMember
 
-class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberFromMembershipCommand(member, ssoUser, rs)
+class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
 	with Logging with Daoisms with AlumniProperties with Unaudited {
 	import ImportMemberHelpers._
 

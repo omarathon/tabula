@@ -92,7 +92,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 
-			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -123,7 +123,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
 
-			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -161,7 +161,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			// if personalTutorSource is "local", there should be no update
 			department.personalTutorSource = "local"
 
-			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -195,7 +195,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			// if personalTutorSource is "SITS", there *should* an update
 			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
-			val command = new ImportSingleStudentCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds

@@ -39,10 +39,9 @@ import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
-import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 
-abstract class ImportSingleMemberCommand[Member] extends Command[Member] with Logging with Daoisms
-	with MemberProperties with Unaudited with PropertyCopying with SitsPropertyCopying {
+abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
+	with MemberProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -54,8 +53,45 @@ abstract class ImportSingleMemberCommand[Member] extends Command[Member] with Lo
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
 	var homeDepartmentCode: String = _
+	//var studyDepartmentCode: String = _
 
-	var membershipLastUpdated: LocalDate = _
+	var membershipLastUpdated: DateTime = _
+
+	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
+		this()
+
+		implicit val resultSet = rs
+		implicit val metadata = rs.getMetaData
+
+		val member = mac.member
+		this.membershipLastUpdated = member.modified
+
+		this.universityId = oneOf(member.universityId, optString("university_id")).get
+		this.userId = member.usercode
+
+		this.userType = member.userType
+
+		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
+		this.firstName = oneOf(member.preferredForenames, optString("preferred_forename"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
+
+		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail).orNull)
+		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
+
+		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }).orNull)
+		this.photoOption = mac.photo
+
+		this.jobTitle = member.position
+		this.phoneNumber = member.phoneNumber
+
+		this.inUseFlag = rs.getString("in_use_flag")
+		this.groupName = member.targetGroup
+		this.inactivationDate = member.endDate
+
+		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode).orNull)
+		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")).orNull)
+	}
 
 	private def copyPhoto(property: String, photoOption: Option[Array[Byte]], memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
@@ -90,7 +126,28 @@ abstract class ImportSingleMemberCommand[Member] extends Command[Member] with Lo
 		}
 	}
 
+	protected def copyDepartment(property: String, departmentCode: String, bean: BeanWrapper) = {
+		val oldValue = bean.getPropertyValue(property) match {
+			case null => null
+			case value: Department => value
+		}
 
+		if (oldValue == null && departmentCode == null) false
+		else if (oldValue == null) {
+			// From no department to having a department
+			bean.setPropertyValue(property, toDepartment(departmentCode))
+			true
+		} else if (departmentCode == null) {
+			// User had a department but now doesn't
+			bean.setPropertyValue(property, null)
+			true
+		} else if (oldValue.code == departmentCode.toLowerCase) {
+			false
+		}	else {
+			bean.setPropertyValue(property, toDepartment(departmentCode))
+			true
+		}
+	}
 
 	private val basicMemberProperties = Set(
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
@@ -106,9 +163,21 @@ abstract class ImportSingleMemberCommand[Member] extends Command[Member] with Lo
 		 * - There is no last updated date from Membership; or
 		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
 		 */
-		if (memberLastUpdated == null || membershipLastUpdated == null || memberLastUpdated.isBefore(membershipLastUpdated.toDateTimeAtStartOfDay().plusDays(1)))
+		val fetchPhoto = if (memberLastUpdated == null) {
+			logger.info(s"Fetching photo for $universityId as we have no last updated date stored")
+			true
+		} else if (membershipLastUpdated == null) {
+			logger.info(s"Fetching photo for $universityId as membership returned no last updated date")
+			true
+		} else if (memberLastUpdated.isBefore(membershipLastUpdated)) {
+			logger.info(s"Fetching photo for $universityId as our member last updated $memberLastUpdated is before membership last updated $membershipLastUpdated")
+			true
+		} else false
+
+		if (fetchPhoto) {
 			copyPhoto("photo", photoOption(), memberBean)
-		else false
+			true // always ping the last updated date
+		} else false
 	}
 
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
@@ -124,6 +193,14 @@ abstract class ImportSingleMemberCommand[Member] extends Command[Member] with Lo
 		photo.uploadedDataLength = bytes.length
 		fileDao.savePermanent(photo)
 		photo
+	}
+
+	private def toDepartment(departmentCode: String) = {
+		if (departmentCode == null || departmentCode == "") {
+			null
+		} else {
+			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
+		}
 	}
 
 	override def describe(d: Description) = d.property("universityId" -> universityId)

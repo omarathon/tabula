@@ -42,18 +42,16 @@ import uk.ac.warwick.tabula.services.ProfileService
 
 
 class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDetails, resultSet: ResultSet)
-	extends Command[StudentMember] with Logging with Daoisms
+	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying with SitsPropertyCopying {
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
 
-	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
-
 
 	// A few intermediate properties that will be transformed later
 	var enrolmentStatusCode: String = _

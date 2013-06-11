@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAssignmentsCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.scheduling.services.NonStudentProfileImporter
+import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileIndexService
@@ -140,7 +140,7 @@ class ImportSitsController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[NonStudentProfileImporter]
+	var importer = Wire.auto[ProfileImporter]
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
@@ -158,7 +158,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 		val command = new ImportProfilesCommand
 
 		member match {
-			case stu: StudentMember => command.refreshStudent(stu)
+			case stu: StudentMember => command.refresh(stu)
 			case _ => throw new IllegalStateException("Tried to refresh a non-student member - not implemented yet")
 		}
 

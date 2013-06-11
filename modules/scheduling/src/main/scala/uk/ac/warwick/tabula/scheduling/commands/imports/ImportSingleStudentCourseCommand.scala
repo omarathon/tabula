@@ -1,89 +1,37 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
-
-import java.sql.Date
 import java.sql.ResultSet
+
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
+
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.PrsCode
+import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.SitsStatusDao
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.AlumniProperties
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberProperties
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.OtherMember
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
 import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.model.StaffProperties
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.StudentCourseProperties
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
+import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.StudentCourseProperties
-import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
-import uk.ac.warwick.tabula.data.model.StudentCourseProperties
-import uk.ac.warwick.tabula.PrsCode
 
 class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultSet)
-	extends Command[StudentMember] with Logging with Daoisms
+	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying with SitsPropertyCopying{
 
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 	var memberDao = Wire.auto[MemberDao]
 
 	import ImportMemberHelpers._
@@ -91,7 +39,6 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 	implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
 
-	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var profileService = Wire.auto[ProfileService]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
