@@ -275,6 +275,19 @@
 			$enrolment.tabulaPrepareSpinners();
 			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
+			// TODO this is cribbed out of scripts.js - re-use would be better			
+			$enrolment.find('.use-popover').each(function() {
+				if ($(this).attr('data-title')) {
+					$(this).attr('data-original-title', $(this).attr('data-title'));
+				}
+			});
+	
+			$enrolment.find('.use-popover').popover({
+				trigger: 'click',
+				container: '#container',
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+			}).click(function(){ return false; });
+
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
 
