@@ -42,47 +42,47 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			}
 		}
 	}
-//	
-//	"Department admin" should "be able to archive an assignment" in {
-//		withAssignment("xxx101", "Fully featured assignment for archiving") { assignmentId =>
-//			val info = getAssignmentInfo("xxx101", "Fully featured assignment for archiving")
-//			
-//			click on (info.findElement(By.partialLinkText("Actions")))
-//			val archiveAssignment = info.findElement(By.partialLinkText("Archive assignment"))
-//			eventually {
-//				archiveAssignment.isDisplayed should be (true)
-//			}
-//			
-//			click on (archiveAssignment)
-//			
-//			// Wait for our Ajax popup to load
-//			eventuallyAjax {			
-//				id("command").webElement.findElement(By.className("btn")).isDisplayed() should be (true)
-//			}
-//			
-//			click on (id("command").webElement.findElement(By.className("btn")))
-//			
-//			// This works, but it doesn't reload the page automatically properly. Do it manually
-//			eventuallyAjax {
-//				find(className("ajax-response")) map { _.underlying.isDisplayed() } should be (Some(true))
-//			}
-//			
-//			reloadPage
-//			
-//			// Wait for the page reload...
-//			eventually {
-//				val minfo = getModuleInfo("xxx101")
-//				click on (minfo.findElement(By.partialLinkText("Manage")))
-//				
-//				eventually {
-//					minfo.findElement(By.partialLinkText("Show archived assignments")).isDisplayed should be (true)
-//				}
-//				
-//				click on (minfo.findElement(By.partialLinkText("Show archived assignments")))
-//			}
-//			
-//			getAssignmentInfo("xxx101", "Fully featured assignment for archiving (Archived)").isDisplayed() should be (true)
-//		}
-//	}
+	
+	"Department admin" should "be able to archive an assignment" in {
+		withAssignment("xxx101", "Fully featured assignment for archiving") { assignmentId =>
+			val info = getAssignmentInfo("xxx101", "Fully featured assignment for archiving")
+			
+			click on (info.findElement(By.partialLinkText("Actions")))
+			val archiveAssignment = info.findElement(By.partialLinkText("Archive assignment"))
+			eventually {
+				archiveAssignment.isDisplayed should be (true)
+			}
+			
+			click on (archiveAssignment)
+			
+			// Wait for our Ajax popup to load
+			eventuallyAjax {			
+				id("command").webElement.findElement(By.className("btn")).isDisplayed() should be (true)
+			}
+			
+			click on (id("command").webElement.findElement(By.className("btn")))
+			
+			// This works, but it doesn't reload the page automatically properly. Do it manually
+			eventuallyAjax {
+				find(className("ajax-response")) map { _.underlying.isDisplayed() } should be (Some(true))
+			}
+			
+			reloadPage
+			
+			// Wait for the page reload...
+			eventually {
+				val minfo = getModuleInfo("xxx101")
+				click on (minfo.findElement(By.partialLinkText("Manage")))
+				
+				eventually {
+					minfo.findElement(By.partialLinkText("Show archived assignments")).isDisplayed should be (true)
+				}
+				
+				click on (minfo.findElement(By.partialLinkText("Show archived assignments")))
+			}
+			
+			getAssignmentInfo("xxx101", "Fully featured assignment for archiving (Archived)").isDisplayed() should be (true)
+		}
+	}
 
 }
