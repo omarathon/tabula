@@ -24,7 +24,7 @@ import scala.beans.BeanProperty
  * ==Adding a new feature==
  *
  * Define a new boolean variable here and FeaturesMessages, and then to set it to a different value in
- * `tabula.properties` add a line such as 
+ * `tabula.properties` add a line such as
  *
  * {{{
  * features.yourFeatureName=false
@@ -32,9 +32,9 @@ import scala.beans.BeanProperty
  */
 abstract class Features {
 	private val defaults = new FeaturesMessage
-	
+
 	// FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
-	
+
 	@Value("${features.emailStudents:false}") var emailStudents = defaults.emailStudents
 	@Value("${features.collectRatings:true}") var collectRatings = defaults.collectRatings
 	@Value("${features.submissions:true}") var submissions = defaults.submissions
@@ -50,16 +50,16 @@ abstract class Features {
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
 	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
-	@Value("${features.meetingRecordApproval:false}") var meetingRecordApproval = defaults.meetingRecordApproval
+	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
 	@Value("${features.smallGroupTeaching.tutorView:false}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
-	
+
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
 		val values = new BeanWrapperImpl(message)
-		
+
 		for (pd <- values.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 		this
@@ -72,13 +72,13 @@ class FeaturesImpl extends Features
 @JsonAutoDetect
 class FeaturesMessage {
 	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the FeaturesController
-	
+
 	def this(features: Features) {
 		this()
-		
+
 		val bean = new BeanWrapperImpl(this)
 		val values = new BeanWrapperImpl(features)
-		
+
 		for (pd <- bean.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
 			bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
 	}
@@ -100,7 +100,7 @@ class FeaturesMessage {
 	@BeanProperty var assignmentProgressTable = true
 	@BeanProperty var assignmentProgressTableByDefault = true
 	@BeanProperty var summativeFilter = true
-	@BeanProperty var meetingRecordApproval = false
+	@BeanProperty var meetingRecordApproval = true
 	@BeanProperty var smallGroupTeaching = false
 	@BeanProperty var smallGroupTeachingStudentSignUp = false
 	@BeanProperty var smallGroupTeachingRandomAllocation = false
@@ -108,7 +108,7 @@ class FeaturesMessage {
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
-	
+
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	var features = Wire.auto[Features]
 	var context = Wire.property("${module.context}")
@@ -126,7 +126,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
 		logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
 		queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
-	
+
 }
 
 object Features {
