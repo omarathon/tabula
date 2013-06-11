@@ -18,15 +18,17 @@
 
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
+		
+		<#assign acceptsPersonalTutorChanges = (profile.studyDetails.sprCode)?? && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors />
 
-		<#if profile.personalTutors?size != 0>
+		<#if profile.personalTutors?size != 0 && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
 			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-plus"></i> Add another tutor</a>
 		</#if>
 
 		<#if profile.personalTutors?size == 0>
 			<p>
 				Not recorded
-				<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.sprCode)?? && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
+				<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					
 				</#if>
@@ -39,7 +41,7 @@
 			<div class="tutor clearfix span4">
 				<#if !personalTutor??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
-					<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.sprCode)?? && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
+					<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"  data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
@@ -48,7 +50,7 @@
 					</div>
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
-						<#if can.do("Profiles.PersonalTutor.Update", profile) && (profile.studyDetails.sprCode)?? && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors >
+						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 							<a class="edit-tutor-link" href="<@routes.tutor_edit student=profile.universityId currentTutor=personalTutor/>" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 						</#if>
 					</h5>
