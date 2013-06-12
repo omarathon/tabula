@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.reflect.Manifest
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
@@ -354,6 +355,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
+			// users can always submit to assignments if they have a submission or peice of feedback
+			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
+			fullFeedback.exists(_.universityId == user.getWarwickId) ||
 			assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
