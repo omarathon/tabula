@@ -36,10 +36,11 @@ import java.util.concurrent.Callable
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 import org.apache.commons.io.FileUtils
+import uk.ac.warwick.tabula.helpers.Logging
 
 // scalastyle:off magic.number
 @DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
+class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Logging{
 	
 	@Autowired var indexer:ProfileIndexService = _
 	@Autowired var dao:MemberDao = _
@@ -55,7 +56,12 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito {
 	
 	@After def tearDown {
 		indexer.destroy()
-		FileUtils.deleteDirectory(TEMP_DIR)
+		try {
+			FileUtils.deleteDirectory(TEMP_DIR)
+		} catch {
+			// windows holds onto a lock on some index files longer than it should. Don't fail over this
+			case e:java.io.IOException => logger.warn(e.getMessage)
+		}
 	}
 
 	@Test def stripTitles {
