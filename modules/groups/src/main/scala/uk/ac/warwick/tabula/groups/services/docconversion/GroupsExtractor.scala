@@ -24,7 +24,7 @@ class AllocateStudentItem {
 class GroupsExtractor {
 
 	/**
-	 * Method for reading in a xlsx spreadsheet and converting it into a list of MarkItems
+	 * Method for reading in a xlsx spreadsheet and converting it into a list of AllocateStudentItem
 	 */
 	def readXSSFExcelFile(file: InputStream): JList[AllocateStudentItem] = {
 		val pkg = OPCPackage.open(file)
@@ -34,6 +34,7 @@ class GroupsExtractor {
 		val allocateStudentItems: JList[AllocateStudentItem] = JArrayList()
 		val sheetHandler = new XslxSheetHandler(styles, sst, allocateStudentItems)
 		val parser = sheetHandler.fetchSheetParser
+
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)

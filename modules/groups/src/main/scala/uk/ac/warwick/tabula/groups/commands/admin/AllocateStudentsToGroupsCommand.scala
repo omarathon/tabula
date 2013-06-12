@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.UserLookupService
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, viewer: CurrentUser) 
@@ -121,8 +122,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 				for (file <- files.filter(_.hasData)) {
 					allocateStudent addAll groupsExtractor.readXSSFExcelFile(file.dataStream)
 				}
-				//var allocateMap = allocateStudent.groupBy(_.groupId).mapValues(_.map(_.universityId))
-				val grouped = allocateStudent.asScala
+
+				val grouped = allocateStudent.asScala.filter(_.groupId!=null)
 						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
 						.mapValues{ values => 
 							values.map(item => userLookup.getUserByWarwickUniId(item.universityId)).asJava

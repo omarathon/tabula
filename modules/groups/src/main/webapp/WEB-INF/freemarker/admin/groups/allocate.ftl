@@ -154,6 +154,9 @@
 	</div><!-- end 1st tab -->
 	
 	<div class="tab-pane" id="allocategroups-tab2">
+
+		<p>Download this <a href="allocate/template">Excel spreadsheet</a>, select the group for each user, save and upload below.</p>
+
 		<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 		<input name="isfile" value="true" type="hidden"/>
 		<table role="presentation" class="narrowed-form">
@@ -164,7 +167,7 @@
 						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 					</p>
 					<@form.labelled_row "file.upload" "Files">
-					<input type="file" name="file.upload" multiple />
+					<input type="file" name="file.upload" />
 				</@form.labelled_row>
 			</td>
 		</tr>
