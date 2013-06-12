@@ -48,7 +48,8 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 		} else if (columnMap.containsKey(col)) {
 			columnMap(col) match {
 				case "ID" => {
-					currentAllocateStudentItem.universityId = UniversityId.zeroPad(formattedValue)
+					if(formattedValue.hasText)
+						currentAllocateStudentItem.universityId = UniversityId.zeroPad(formattedValue)
 				}
 				case "GroupID" => {
 					if(formattedValue.hasText)
