@@ -8,7 +8,7 @@
 		</#if>
 
 		<#if can_create_meetings>
-			<a class="new" href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			<a class="btn-like new" href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			<#if isSelf!false>
 				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your personal tutor.">Who can see this information?</small>
 			<#else>
@@ -16,8 +16,8 @@
 			</#if>
 		</#if>
 		<#if can_read_meetings>
-			<a class="toggle-all-details open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-			<a class="toggle-all-details close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+			<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+			<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
 		</#if>
 
 		<#if can_read_meetings>
@@ -40,11 +40,11 @@
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.edit_meeting_record meeting />" class="edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="<@routes.delete_meeting_record meeting />" class="delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.restore_meeting_record meeting />" class="restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.purge_meeting_record meeting />" class="purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
-									<i class="icon-spinner"></i>
+									<a href="<@routes.edit_meeting_record meeting />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
+									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="<@routes.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="<@routes.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<i class="icon-spinner icon-spin"></i>
 								</div>
 							</#if>
 						</summary>
