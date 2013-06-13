@@ -106,9 +106,10 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		val allocateSheet = workbook.getSheet(cmd.allocateSheetName)
 
 		val headerRow = allocateSheet.getRow(0)
-		headerRow.getCell(0).toString should be ("ID")
+		headerRow.getCell(0).toString should be ("student_id")
 		headerRow.getCell(1).toString should be ("Student name")
 		headerRow.getCell(2).toString should be ("Group name")
+		headerRow.getCell(3).toString should be ("group_id")
 
 		var studentRow = allocateSheet.getRow(4)
 		studentRow.getCell(0).toString should be ("0672089")
