@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.web.controllers.admin
+package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav

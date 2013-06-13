@@ -63,6 +63,7 @@ class ProfileImporter extends Logging {
 
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
 		def photo() = try {
+			logger.info(s"Fetching photo for $universityId")
 			Option(membershipInterface.getPhotoById(universityId))
 		} catch {
 			case e: MembershipInterfaceException => None
@@ -270,7 +271,6 @@ case class MembershipMember(
 	val usercode: String = null,
 	val startDate: LocalDate = null,
 	val endDate: LocalDate = null,
-	//val modified: LocalDate = null,
 	val modified: DateTime = null,
 	val phoneNumber: String = null,
 	val gender: Gender = null,

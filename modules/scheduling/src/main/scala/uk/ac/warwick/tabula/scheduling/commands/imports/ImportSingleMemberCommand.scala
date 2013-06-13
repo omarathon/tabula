@@ -53,7 +53,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
 	var homeDepartmentCode: String = _
-	//var studyDepartmentCode: String = _
 
 	var membershipLastUpdated: DateTime = _
 

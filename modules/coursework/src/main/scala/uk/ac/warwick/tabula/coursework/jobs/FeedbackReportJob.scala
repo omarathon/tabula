@@ -125,8 +125,8 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			updateProgress(ProgressPopulatedModules)
 
 			updateStatus("Formatting worksheets")
-			SpreadsheetHelpers.formatWorksheet(assignmentSheet, report.assignmentSheetSize)
-      SpreadsheetHelpers.formatWorksheet(moduleSheet, report.moduleSheetSize)
+			SpreadsheetHelpers.formatWorksheet(assignmentSheet, FeedbackReport.AssignmentSheetSize)
+			SpreadsheetHelpers.formatWorksheet(moduleSheet, FeedbackReport.ModuleSheetSize)
 			updateProgress(ProgressFormattedSheets)
 
 			// Adapter stuff to go from XSSF to the writer without having to save the spreadsheet to disk

@@ -66,7 +66,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	/** Import basic info about all members, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
+	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
+
 	def doMemberDetails {
 		benchmark("Import all member details") {
 			for {
@@ -76,7 +77,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(userIdsAndCategories.map(x => x.member.usercode)).toMap
 
-				logger.info("Fetching member details for " + userIdsAndCategories.size + " members from ADS")
+				logger.info("Fetching member details for " + userIdsAndCategories.size + " members from Membership")
 
 				transactional() {
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }

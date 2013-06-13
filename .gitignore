@@ -31,6 +31,7 @@ ajcore*
 *.orig
 .*.swp
 .ctags
+/activemq-data
 
 # Eclipse IDE
 /.classpath
@@ -41,6 +42,7 @@ ajcore*
 /.idea/tasks.xml
 /.idea/artifacts
 /.idea/libraries
+/.idea/dictionaries
 .iws
 
 # Sublime Text IDE

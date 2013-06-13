@@ -79,7 +79,6 @@
 <a id="${module_anchor(module)}"></a>
 <div class="striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>" data-name="${module_anchor(module)}">
 	<div class="clearfix">
-		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
 		<div class="btn-group section-manage-button">
 		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
 		  <ul class="dropdown-menu pull-right">
@@ -100,6 +99,8 @@
 				
 		  </ul>
 		</div>
+	
+		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
 	</div>
 	
 	

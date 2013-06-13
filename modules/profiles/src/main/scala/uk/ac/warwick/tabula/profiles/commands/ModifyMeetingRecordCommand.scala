@@ -4,9 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model._
@@ -16,12 +14,13 @@ import uk.ac.warwick.tabula.system.BindListener
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
+import scala.Some
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
-	extends Command[MeetingRecord] with SelfValidating with FormattedHtml with BindListener with Daoisms {
+	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
+	with BindListener with Daoisms {
 
 	var features = Wire.auto[Features]
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
@@ -41,8 +40,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
 
-	// Gets the meeting record to be updated.
-	def getMeetingRecord: MeetingRecord
+	val meeting: MeetingRecord
 
 	override def applyInternal() = {
 
@@ -51,7 +49,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 			if (meeting.attachments != null){
 				val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-				val filesToRemove = (meeting.attachments.asScala -- filesToKeep)
+				val filesToRemove = meeting.attachments.asScala -- filesToKeep
 				meeting.attachments = JArrayList[FileAttachment](filesToKeep)
 				filesToRemove.foreach(session.delete(_))
 			}
@@ -63,21 +61,18 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			})
 		}
 
-		val meeting = getMeetingRecord
 		meeting.title = title
 		meeting.description = description
-		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay().withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
 		meeting.format = format
+		meeting.lastUpdatedDate = DateTime.now
 		persistAttachments(meeting)
 
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
 		if (features.meetingRecordApproval){
-			val meetingApprovals = updateMeetingApproval(meeting)
-			meetingApprovals.foreach(meetingApproval => {
-				//TODO-Ritchie notification
-			})
+			updateMeetingApproval(meeting)
 		}
 
 		meeting
@@ -125,4 +120,11 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		}
 	}
 
+	def describe(d: Description){
+		d.properties(
+			"creator" -> meeting.creator,
+			"relationship" -> meeting.relationship,
+			"pendingApprovers" -> meeting.pendingApprovers
+		)
+	}
 }

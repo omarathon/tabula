@@ -103,6 +103,7 @@
 				<bean class="org.springframework.remoting.rmi.RmiProxyFactoryBean" autowire-candidate="false">
 					<property name="serviceUrl" value="${membership.rmi.serviceUrl}" />
 					<property name="serviceInterface" value="uk.ac.warwick.membership.MemberInterface" />
+					<property name="lookupStubOnStartup" value="false" />
 				</bean>	
 			</property>
 			<property name="auth">

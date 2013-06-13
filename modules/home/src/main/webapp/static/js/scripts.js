@@ -30,37 +30,45 @@
 
 	// Tabula-specific rendition of date and date-time pickers
 	jQuery.fn.tabulaDateTimePicker = function() {
-		$(this).datetimepicker({
-			format: "dd-M-yyyy hh:ii:ss",
-			weekStart: 1,
-			minView: 'day',
-			autoclose: true
-		}).on('show', function(ev){
-			var d = new Date(ev.date.valueOf()),
-				  minutes = d.getUTCMinutes(),
-					seconds = d.getUTCSeconds(),
-					millis = d.getUTCMilliseconds();
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					  minutes = d.getUTCMinutes(),
+						seconds = d.getUTCSeconds(),
+						millis = d.getUTCMilliseconds();
 
-			if (minutes > 0 || seconds > 0 || millis > 0) {
-				d.setUTCMinutes(0);
-				d.setUTCSeconds(0);
-				d.setUTCMilliseconds(0);
+				if (minutes > 0 || seconds > 0 || millis > 0) {
+					d.setUTCMinutes(0);
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
 
-				var DPGlobal = $.fn.datetimepicker.DPGlobal;
-				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
 
-				$(this).datetimepicker('update');
-			}
-		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+					$(this).datetimepicker('update');
+				}
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
 	};
 
 	jQuery.fn.tabulaDatePicker = function() {
-		$(this).datepicker({
-			format: "dd-M-yyyy",
-			weekStart: 1,
-			minView: 'day',
-			autoclose: true
-		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+		var $this = $(this)
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datepicker({
+				format: "dd-M-yyyy",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
@@ -328,10 +336,37 @@
 		// http://twitter.github.com/bootstrap/javascript.html#tooltips
 		$('.use-tooltip').tooltip();
 
+		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
+		 * (eg. hide) are *only* callable on *that original element*. So to close
+		 * a specific popover (or introductory) programmatically you need to jump hoops.
+		 * Lame.
+		 * Workaround is to handle the shown event on the calling element,
+		 * call its popover() method again to get an object reference and then go diving
+		 * for a reference to the new popover itself in the DOM.
+		 */
+		$('#container').on('shown', '.use-popover, .use-introductory', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.data('creator', $(e.target));
+		});
+		$('#container').on('click', '.popover .close', function(e) {
+			var $creator = $(e.target).parents('.popover').data('creator');
+			if ($creator) {
+				$creator.popover('hide');
+			}
+		});
+
+		// ensure popovers/introductorys override title with data-title attribute where available
+		$('.use-popover, .use-introductory').each(function() {
+			if ($(this).attr('data-title')) {
+				$(this).attr('data-original-title', $(this).attr('data-title'));
+			}
+		});
+
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
 		$('.use-popover').popover({
 			trigger: 'click',
+			container: '#container',
 			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 		}).click(function(){ return false; });
 
@@ -339,7 +374,8 @@
 		// https://github.com/twitter/bootstrap/issues/2234
 		$('.use-introductory').popover({
 			trigger: 'click',
-			template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
+			container: '#container',
+            template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
 		}).click(function(){ return false; });
 
 		$('.use-introductory:not(.auto)').each(function() {
@@ -350,28 +386,19 @@
 		// auto-show introductory popover on load, based on class
 		$('.use-introductory.auto').popover('show');
 
-		// make popovers (and introductorys) closable
-		$('#container').on('click', '.popover .close', function(e) {
-			$(e.target).parents('.popover').prev().popover('hide');
-		});
-
 		// persist introductory popover auto-show state
 		$('#container').on('change', '.introductory .footer input', function(e) {
 			// If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
-			var hash = $(e.target).parents('.introductory').prev().data('hash');
+			var hash = $(e.target).parents('.introductory').data('creator').data('hash');
 			// use this hook to persist showOnLoad state with some ajax shizzle
 			$.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
 		});
 
-//		// ensure popovers/introductorys override title with data-title attribute where available
-		$('.use-popover, .use-introductory').each(function() {
-			if ($(this).attr('data-title')) {
-				$(this).attr('data-original-title', $(this).attr('data-title'));
-			}
-		});
-
-		// apply details/summary polyfill
-		// https://github.com/mathiasbynens/jquery-details
+		/* details/summary polyfill
+		 * https://github.com/mathiasbynens/jquery-details
+		 * WARNING: apply method ONLY to details tags.
+		 * Call it on other elements for UI hilarity.
+		 */
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
 		$('details').details();
 

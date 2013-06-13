@@ -6,18 +6,19 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import scala.language.implicitConversions
+import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordApprovalNotification
 
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship) with FormattedHtml {
 
-	override def getMeetingRecord: MeetingRecord = meetingRecord
+	val meeting = meetingRecord
 
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)
 		copyToCommand(meetingRecord)
 	}
 
-	def copyToCommand(meetingRecord: MeetingRecord) = {
+	def copyToCommand(meetingRecord: MeetingRecord){
 		implicit def toOption[T](x:T) : Option[T] = Option(x)
 
 		title = title.getOrElse(meetingRecord.title)
@@ -33,5 +34,5 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		}
 	}
 
-	def describe(d: Description): Unit = {  }
+	def emit = new MeetingRecordApprovalNotification(meeting, "edit")
 }

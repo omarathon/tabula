@@ -7,7 +7,8 @@ the comments textarea needs to maintain newlines.
 -->
 <#assign command=editAssignmentEnrolmentCommand />
 
-<@f.form method="post" action="<@routes.assignmentenrolment module />" commandName="editAssignmentEnrolmentCommand" cssClass="form-horizontal">
+<#assign submitUrl><@routes.assignmentenrolment module /></#assign>
+<@f.form method="post" action="${submitUrl}" commandName="editAssignmentEnrolmentCommand" cssClass="form-horizontal">
 
 <@f.errors cssClass="error form-errors" />
 

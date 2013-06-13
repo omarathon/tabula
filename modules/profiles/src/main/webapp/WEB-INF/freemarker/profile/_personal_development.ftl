@@ -18,15 +18,16 @@
 
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
-
-		<#if profile.personalTutors?size != 0>
+		
+		<#assign acceptsPersonalTutorChanges = (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors />
+		<#if studentCourseDetails.hasAPersonalTutor && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
 			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode />" data-target="#modal-change-tutor"><i class="icon-plus"></i> Add another tutor</a>
 		</#if>
 
 		<#if profile.personalTutors?size == 0>
 			<p>
 				Not recorded
-				<#if can.do("Profiles.PersonalTutor.Update", profile) && (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors >
+				<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode />" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 
 				</#if>
@@ -39,7 +40,7 @@
 			<div class="tutor clearfix span4">
 				<#if !personalTutor??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
-					<#if can.do("Profiles.PersonalTutor.Update", profile) && (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors >
+					<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode />"  data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
@@ -48,7 +49,7 @@
 					</div>
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
-						<#if can.do("Profiles.PersonalTutor.Update", profile) && (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors >
+						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 							<a class="edit-tutor-link" href="<@routes.tutor_edit scjCode=studentCourseDetails.scjCode currentTutor=personalTutor/>" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 						</#if>
 					</h5>

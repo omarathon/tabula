@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<div class="fixed-on-scroll">
+<div>
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 	
 	<#if assignment.openEnded>
@@ -421,7 +421,7 @@
 	
 	var repositionWorkflowBoxes = function() {
 		// These have to be positioned in the right order, so we loop through workflow-progress-container rather than directly on workflow
-		$('.workflow-progress-container').each(function() {
+		$('.workflow-progress-container').hide().each(function() {
 			var universityId = $(this).attr('data-profile');
 			var $workflow = $('#workflow-' + universityId);
 			
@@ -429,6 +429,7 @@
 				var isOpen = $workflow.data('open');
 			
 				if (isOpen) {
+					$(this).show();
 					var $progressField = $(this).closest('.progress-col');
 					
 					// Add bottom padding equivalent to the height of the workflow div to the progress field
@@ -437,7 +438,7 @@
 					$progressField.css('padding-bottom', '');
 					var fieldHeight = $progressField.outerHeight();
 					var workflowHeight = $workflow.outerHeight();
-					$progressField.css('padding-bottom', workflowHeight + 10 + 'px');
+					$progressField.css('padding-bottom', workflowHeight + 10);
 					
 					// Position the workflow div in the correct location
 					$workflow.css({
@@ -448,8 +449,6 @@
 			}
 		});
 	};
-		
-	$('#navigation').on('fixed', repositionWorkflowBoxes);
 	
 	$.tablesorter.addWidget({
 		id: 'repositionWorkflowBoxes',

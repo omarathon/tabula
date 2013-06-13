@@ -68,15 +68,15 @@
 
 			<p>
 				<#if linkedUpstreamAssessmentGroups?has_content>
-					<a class="btn use-tooltip disabled" id="show-sits-picker" title="Change the linked SITS assignment used for enrolment data">Change link to SITS</a>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Change the linked SITS assignment used for enrolment data">Change link to SITS</a>
 				<#elseif availableUpstreamGroups?has_content>
-					<a class="btn use-tooltip disabled" id="show-sits-picker" title="Use enrolment data from one or more assignments recorded in SITS">Add link to SITS</a>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more assignments recorded in SITS">Add link to SITS</a>
 				<#else>
 					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
 				</a>
 
-				<a class="btn use-tooltip disabled" id="show-adder"
+				<a class="btn use-tooltip disabled show-adder"
 						<#if availableUpstreamGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 						>
 					Add students manually
@@ -182,7 +182,7 @@
 		</details>
 
 		<#-- Modal to add students manually -->
-		<div id="adder" class="modal fade hide">
+		<div class="modal fade hide adder">
 			<div class="modal-header">
 				<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
 				<h6>Add students manually</h6>
@@ -205,13 +205,13 @@
 			</div>
 
 			<div class="modal-footer">
-				<a class="btn btn-success disabled spinnable spinner-auto" id="add-students">Add</a>
+				<a class="btn btn-success disabled spinnable spinner-auto add-students">Add</a>
 			</div>
 		</div>
 
 
 		<#-- Modal picker to select an upstream assessment group (upstreamassignment+occurrence) -->
-		<div id="sits-picker" class="modal fade hide">
+		<div class="modal fade hide sits-picker">
 			<div class="modal-header">
 				<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
 				<h6>SITS link</h6>
@@ -261,25 +261,38 @@
 	</@form.labelled_row>
 
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
-	<script>
+	<script type="text/javascript">
 	jQuery(function($) {
 		var $enrolment = $('.assignmentEnrolment');
 
 		var initEnrolment = function() {
 			<#-- well, if we're here, JS must be available :) -->
 			$('#js-hint').remove();
-			$('#show-sits-picker, #show-adder').removeClass('disabled');
+			$('.show-sits-picker, .show-adder').removeClass('disabled');
 
 			<#-- sortable tables -->
 			$enrolment.find('.table-sortable').sortableTable();
 			$enrolment.tabulaPrepareSpinners();
-			$enrolment.find('details').details();
+			$enrolment.find('summary:not([role="button"])').closest('details').details();
+
+			// TODO this is cribbed out of scripts.js - re-use would be better			
+			$enrolment.find('.use-popover').each(function() {
+				if ($(this).attr('data-title')) {
+					$(this).attr('data-original-title', $(this).attr('data-title'));
+				}
+			});
+	
+			$enrolment.find('.use-popover').popover({
+				trigger: 'click',
+				container: '#container',
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+			}).click(function(){ return false; });
 
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
 
 			<#-- dynamically attach check-all checkbox -->
-			$('.for-check-all').append($('<input />', { type: 'checkbox', class: 'check-all use-tooltip', title: 'Select all/none' }));
+			$('.for-check-all').append($('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' }));
 			$('.check-all').tooltip({ delay: 1500 });
 			$enrolment.on('click', '.table-checkable th .check-all', function(e) {
 				var $table = $(this).closest('table');
@@ -297,7 +310,7 @@
 					scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
 				}, 300);
 			}
-		}
+		};
 
 		<#-- initialise the scripting for enrolment management -->
 		<#if RequestParameters.open?? || openDetails!false>
@@ -327,8 +340,10 @@
 		}
 
 		var alertPending = function() {
-			$('#enrolment').before($pendingAlert);
-			$pendingAlert.delay(750).slideDown();
+			if (window.location.pathname.indexOf('/assignments/new') == -1) {
+				$('#enrolment').before($pendingAlert);
+				$pendingAlert.delay(750).slideDown();
+			}
 		}
 
 		<#-- make table rows clickable -->
@@ -347,11 +362,11 @@
 		});
 
 		<#-- sits-picker click handler -->
-		$enrolment.on('click', '#sits-picker .btn', function(e) {
+		$enrolment.on('click', '.sits-picker .btn', function(e) {
 			e.preventDefault();
 			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {
-				$('#sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
+			if ($(this).is(':not(.disabled)')) {			
+				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
 
 				<#-- get current list of values and remove and/or add changes -->
 				var current = $('.upstreamGroups').map(function(i, input) { return input.value }).toArray();
@@ -363,7 +378,7 @@
 				}
 
 				var $newInputs = $(data).map(function(i, value) {
-					return $('<input>', { class: 'upstreamGroups', type: 'hidden', name: 'upstreamGroups['+i+']', value:value })[0];
+					return $('<input>', { 'class': 'upstreamGroups', type: 'hidden', name: 'upstreamGroups['+i+']', value:value })[0];
 				});
 				$('.upstreamGroups').remove();
 				$('#enrolment-table').append($newInputs);
@@ -371,7 +386,7 @@
 				$.ajax({
 					type: 'POST',
 					url: '<@routes.assignmentenrolment module />',
-					data: $('#assignmentEnrolmentFields').serialize(),
+					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');
 					},
@@ -387,15 +402,15 @@
 		});
 
 		<#-- adder click handler -->
-		$enrolment.on('click', '#adder .btn', function(e) {
+		$enrolment.on('click', '.adder .btn', function(e) {		
 			e.preventDefault();
-			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {
+			var $m = $(this).closest('.modal');		
+			if ($(this).is(':not(.disabled)')) {	
 				$(this).addClass('disabled').prop('disabled', 'disabled');
 				$.ajax({
 					type: 'POST',
 					url: '<@routes.assignmentenrolment module />',
-					data: $('#assignmentEnrolmentFields').serialize(),
+					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');
 					},
@@ -411,18 +426,18 @@
 		});
 
 		<#-- adder dis/enabled -->
-		$enrolment.on('input propertychange', '#adder textarea', function(e) {
+		$enrolment.on('input propertychange keyup', '.adder textarea', function(e) {
 			e.preventDefault();
 			var empty = ($.trim($(this).val()) == "");
-			$('#add-students').toggleClass('disabled', empty);
+			$('.add-students').toggleClass('disabled', empty);
 		});
 
 		<#-- show modals -->
-		$enrolment.on('click', '#show-sits-picker', function() {
-			$('#sits-picker').modal('show');
+		$enrolment.on('click', '.show-sits-picker', function() {
+			$('.sits-picker').modal('show');
 		});
-		$enrolment.on('click', '#show-adder', function() {
-			$('#adder').on('shown', function() {
+		$enrolment.on('click', '.show-adder', function() {
+			$('.adder').on('shown', function() {
 				$(this).find('textarea').focus();
 			}).modal('show');
 		});
