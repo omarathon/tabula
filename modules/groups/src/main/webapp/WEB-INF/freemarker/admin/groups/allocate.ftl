@@ -43,7 +43,6 @@
 	</ul>
 	
 	<div class="tab-content">
-	
 	<div class="tab-pane active" id="allocategroups-tab1">
 	
 	<p>Drag students onto a group to allocate them to it. Select multiple students by dragging a box around them.
@@ -154,6 +153,7 @@
 	</div><!-- end 1st tab -->
 	
 	<div class="tab-pane" id="allocategroups-tab2">
+
 
 		<#assign introText>
 			<p>The spreadsheet must be in <samp>.xlsx</samp> format (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application). You can download a template spreadsheet which is correctly formatted, ready for completion.<p>

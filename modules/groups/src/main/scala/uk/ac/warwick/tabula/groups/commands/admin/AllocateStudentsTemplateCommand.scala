@@ -59,6 +59,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		sheet.addValidationData(validation)
 	}
 
+
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
 	def getDataValidation(dropdownChoices: Array[String], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
 		val dvHelper = new XSSFDataValidationHelper(sheet)
@@ -113,5 +114,4 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		sheet.setColumnWidth(3, 7000)
 
 	}
-
 }
