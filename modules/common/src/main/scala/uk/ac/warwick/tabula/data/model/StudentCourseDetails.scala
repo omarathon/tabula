@@ -9,9 +9,14 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.spring.Wire
 
 @Entity
 class StudentCourseDetails extends StudentCourseProperties with ToString with HibernateVersioned with PermissionsTarget {
+	var relationshipService = Wire.auto[RelationshipService]
 
 	def this(student: StudentMember, scjCode: String) {
 		this()
@@ -25,13 +30,56 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 	@ManyToOne
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
 	var student: StudentMember = _
-	def student_ = student
+
+	@OneToMany(mappedBy = "scjCode", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
 	def permissionsParents = Option(student).toStream
+
+	def hasCurrentEnrolment: Boolean = {
+		studentCourseYearDetailsForCurrentYear.map(_.enrolmentStatus).code.filter(!_.beginsWith("P")).size > 0
+	}
+
+	// FIXME this belongs as a Freemarker macro or helper
+	def statusString: String = {
+		var statusString = ""
+		if (sprStatus!= null) {
+			statusString = sprStatus.fullName.toLowerCase().capitalize
+
+			val enrolmentStatus = bestStudentCourseYearDetails.enrolmentStatus
+
+			// if the enrolment status is not null and different to the SPR status, append it:
+			if (enrolmentStatus != null
+				&& enrolmentStatus.fullName != sprStatus.fullName)
+					statusString += " (" + enrolmentStatus.fullName.toLowerCase() + ")"
+		}
+		statusString
+	}
+
+	def bestStudentCourseYearDetails: StudentCourseYearDetails = {
+		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear).map(_.sequenceNumber).sort(_ > _).head
+	}
+
+	def studentCourseYearDetailsForCurrentYear = {
+		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear)
+
+	}
+
+	@Restricted(Array("Profiles.PersonalTutor.Read"))
+	override def personalTutors =
+		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, this.sprCode)
+
+	@Restricted(Array("Profiles.Supervisor.Read"))
+	override def supervisors =
+		relationshipService.findCurrentRelationships(RelationshipType.Supervisor, this.sprCode)
+
+	override def hasAPersonalTutor = !personalTutors.isEmpty
+
+	override def hasSupervisor = !supervisors.isEmpty
 }
 
 trait StudentCourseProperties {

@@ -2,7 +2,7 @@
 <#include "form.ftl" />
 <section class="results">
 	<h2>Results</h2>
-	
+
 	<#if results?size = 0>
 		<p>No profiles were found.</p>
 	<#else>
@@ -11,9 +11,9 @@
 				<article class="result" data-id="${result.universityId}">
 					<h3><a href="<#compress>
 						<#if tutorToDisplay??>
-							<@routes.tutor_edit_replace student=student.universityId currentTutor=tutorToDisplay newTutor=result />
+							<@routes.tutor_edit_replace scjCode=studentCourseDetails.scjCode currentTutor=tutorToDisplay newTutor=result />
 						<#else>
-							<@routes.tutor_edit_set student=student.universityId newTutor=result />
+							<@routes.tutor_edit_set scjCode=studentCourseDetails.scjCode newTutor=result />
 						</#if>
 					</#compress>"><@fmt.profile_name result /></a></h3>
 					<@fmt.profile_description result />

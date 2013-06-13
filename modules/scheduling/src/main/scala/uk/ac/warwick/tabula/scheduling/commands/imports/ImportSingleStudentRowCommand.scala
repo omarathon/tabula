@@ -29,8 +29,6 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
@@ -122,10 +120,7 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 
-		val studyDetailsBean = new BeanWrapperImpl(member.studyDetails)
-
-		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
-		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean)
+		val hasChanged = copyMemberProperties(commandBean, memberBean)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)

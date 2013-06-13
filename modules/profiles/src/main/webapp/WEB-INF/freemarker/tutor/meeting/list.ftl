@@ -8,7 +8,7 @@
 		</#if>
 
 		<#if can_create_meetings>
-			<a class="new" href="<@routes.meeting_record profile.universityId />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			<a class="new" href="<@routes.meeting_record studentCourseDetails.scjCode />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			<#if isSelf!false>
 				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your personal tutor.">Who can see this information?</small>
 			<#else>

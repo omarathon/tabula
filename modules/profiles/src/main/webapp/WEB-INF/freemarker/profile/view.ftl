@@ -158,19 +158,21 @@
 	</section>
 
 	<#if profile.student>
-		<div class="untabbed">
-			<#include "_supervision.ftl" />
-		</div>
-		<div class="untabbed">
-			<#include "_personal_development.ftl" />
-		</div>
-		<div class="untabbed">
-			<#if profile.hasCurrentEnrolment>
-				<#include "_course_details.ftl" />
-			<#else>
-				This student has no enrolment record for the current year.
-			</#if>
-		</div>
+		<#list profile.studentCourseDetails as studentCourseDetails>
+			<div class="untabbed">
+				<#include "_supervision.ftl" />
+			</div>
+			<div class="untabbed">
+				<#include "_personal_development.ftl" />
+			</div>
+			<div class="untabbed">
+				<#if profile.studentCourseDetails.hasCurrentEnrolment>
+					<#include "_course_details.ftl" />
+				<#else>
+					This student has no enrolment record for this course in the current year.
+				</#if>
+			</div>
+		</#list>
 	<#else>
 	</#if>
 </article>

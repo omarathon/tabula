@@ -90,34 +90,6 @@ class ProfileImporter extends Logging {
 }
 
 object ProfileImporter {
-	val GetStaffInformation = """
-		select
-			prs.prs_udf1 as university_id,
-			prs.prs_ttlc as title,
-			prs.prs_fusd as preferred_forename,
-			trim(prs.prs_fnm1 || ' ' || prs.prs_fnm2 || ' ' || prs.prs_fnm3) as forenames,
-			prs.prs_surn as family_name,
-			prs.prs_gend as gender,
-			case prs.prs_iuse when 'Y' then 'Active' else 'Inactive' end as in_use_flag,
-			prs.prs_dptc as home_department_code,
-			prs.prs_emad as email_address,
-			prs.prs_exid as user_code,
-			prs.prs_dob as date_of_birth,
-
-			case when prs.prs_psac is null then 'N' else 'Y' end as teaching_staff
-		from intuit.ins_prs prs
-			where prs.prs_exid in (:usercodes)
-		"""
-
-
-
-	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
-		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)
-	}
-
 	val GetStudentInformation = """
 		select
 			stu.stu_code as university_id,
@@ -159,6 +131,7 @@ object ProfileImporter {
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
 			sce.sce_moac as mode_of_attendance_code
+			sce.sce_ayrc as sce_academic_year
 
 		from intuit.ins_stu stu
 
@@ -200,6 +173,31 @@ object ProfileImporter {
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentRowCommand(member, ssoUser, rs)
 	}
 
+	val GetStaffInformation = """
+		select
+			prs.prs_udf1 as university_id,
+			prs.prs_ttlc as title,
+			prs.prs_fusd as preferred_forename,
+			trim(prs.prs_fnm1 || ' ' || prs.prs_fnm2 || ' ' || prs.prs_fnm3) as forenames,
+			prs.prs_surn as family_name,
+			prs.prs_gend as gender,
+			case prs.prs_iuse when 'Y' then 'Active' else 'Inactive' end as in_use_flag,
+			prs.prs_dptc as home_department_code,
+			prs.prs_emad as email_address,
+			prs.prs_exid as user_code,
+			prs.prs_dob as date_of_birth,
+
+			case when prs.prs_psac is null then 'N' else 'Y' end as teaching_staff
+		from intuit.ins_prs prs
+			where prs.prs_exid in (:usercodes)
+		"""
+
+	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
+		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)
+	}
 
 	val GetCurrentAcademicYear = """
 		select UWTABS.GET_AYR() ayr from dual

@@ -29,7 +29,6 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.StudyDetailsProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -63,7 +62,7 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-
+	this.academicYear = rs.getString("sce_academic_year")
 
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getByScjCodeAndSequence(
@@ -95,13 +94,14 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	private val basicStudyDetailsYearProperties = Set(
 		"yearOfStudy",
 		//"fundingSource",
-		"modeOfAttendance"
+		"modeOfAttendance",
+		"academicYear"
 	)
 
-	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studyDetailsYearBean: BeanWrapper) = {
-		copyBasicProperties(basicStudyDetailsYearProperties, commandBean, studyDetailsYearBean) |
-		copyStatus("enrolmentStatus", enrolmentStatusCode, studyDetailsYearBean) |
-		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studyDetailsYearBean)
+	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
+		copyBasicProperties(basicStudyDetailsYearProperties, commandBean, studentCourseYearBean) |
+		copyStatus("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean) |
+		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studentCourseYearBean)
 	}
 
 	private def copyModeOfAttendance(property: String, code: String, memberBean: BeanWrapper) = {

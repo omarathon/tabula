@@ -11,17 +11,22 @@ import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.MeetingRecordDao
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
-class ViewMeetingRecordCommand(val student: StudentMember, val currentUser: CurrentUser) extends Command[Seq[MeetingRecord]] with Unaudited {
+class ViewMeetingRecordCommand(val studentCourseDetails: StudentCourseDetails, val currentUser: CurrentUser) extends Command[Seq[MeetingRecord]] with Unaudited {
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Read, student)
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Read, studentCourseDetails.student)
 
 	var dao = Wire.auto[MeetingRecordDao]
 	var profileService = Wire.auto[ProfileService]
 
 	def applyInternal() = {
-		val rels = profileService.getRelationships(PersonalTutor, student)
+		val rels = profileService.getRelationships(PersonalTutor, studentCourseDetails.sprCode)
 		val currentMember = profileService.getMemberByUniversityId(currentUser.universityId)
 
 		currentMember match {

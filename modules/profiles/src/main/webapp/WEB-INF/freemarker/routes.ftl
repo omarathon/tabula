@@ -22,12 +22,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro tutor_upload department><@url page="/department/${department.code}/tutors/upload" /></#macro>
 <#macro tutor_template department><@url page="/department/${department.code}/tutors/template" /></#macro>
-<#macro tutor_edit student currentTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}" /></#macro>
-<#macro tutor_edit_set student newTutor><@url page="/tutor/${student}/edit?tutor=${newTutor.universityId}" /></#macro>
-<#macro tutor_edit_replace student currentTutor newTutor><@url page="/tutor/${student}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" /></#macro>
-<#macro tutor_edit_no_tutor student><@url page="/tutor/${student}/add" /></#macro>
+<#macro tutor_edit scjCode currentTutor><@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}" /></#macro>
+<#macro tutor_edit_set scjCode newTutor><@url page="/tutor/${scjCode}/edit?tutor=${newTutor.universityId}" /></#macro>
+<#macro tutor_edit_replace scjCode currentTutor newTutor><@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" /></#macro>
+<#macro tutor_edit_no_tutor scjCode><@url page="/tutor/${scjCode}/add" /></#macro>
 
-<#macro meeting_record student_id><@url page="/tutor/meeting/${student_id}/create" /></#macro>
+<#macro meeting_record scjCode><@url page="/tutor/meeting/${scjCode}/create" /></#macro>
 
 <#macro edit_meeting_record meeting_record>
 	<@url page="/tutor/meeting/${meeting_record.relationship.studentId}/edit/${meeting_record.id}" />

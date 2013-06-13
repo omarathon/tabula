@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.services.RelationshipService
+import scala.collection.JavaConverters._
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -50,6 +52,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
+	var relationshipService = Wire.auto[RelationshipService]
 
 	def this(user: CurrentUser) = {
 		this()
@@ -92,8 +95,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	}
 
 	/**
-	 * Get all departments that this student is affiliated with at a departmental level.
-	 * This includes their home department, and the department running their course.
+	 * Get all departments that this member is affiliated to.
+	 * (Overriden by StudentMember).
 	 */
 	def affiliatedDepartments = Option(homeDepartment).toStream
 
@@ -155,10 +158,10 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
-	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+	def isAPersonalTutor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
 	def hasAPersonalTutor = false
 
-	def isSupervisor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
+	def isSupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasSupervisor = false
 }
 
@@ -167,13 +170,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 class StudentMember extends Member with StudentProperties with PostLoadBehaviour {
 	this.userType = MemberUserType.Student
 
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
-	@Restricted(Array("Profiles.Read.StudyDetails"))
-	var studyDetails: StudyDetails = new StudyDetails
-
-	studyDetails.student = this
-
 	@OneToMany(mappedBy = "universityid", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def this(id: String) = {
@@ -181,40 +179,8 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 		this.universityId = id
 	}
 
-	// FIXME this belongs as a Freemarker macro or helper
-	def statusString: String = {
-		var statusString = ""
-		if (studyDetails != null) {
-			if (studyDetails.sprStatus!= null) {
-				statusString = studyDetails.sprStatus.fullName.toLowerCase().capitalize
-
-				// if the enrolment status is not null and different to the SPR status, append it:
-				if (studyDetails.enrolmentStatus != null
-					&& studyDetails.enrolmentStatus.fullName != studyDetails.sprStatus.fullName)
-						statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
-			}
-		}
-		statusString
-	}
-
-	// Find out if the student has an SCE record for the current year (which will mean
-	// their study details will be filled in).
-	// Could just check that enrolment status is not null, but it's not impossible that
-	// on SITS an enrolment status which doesn't exist in the status table has been
-	// entered, in which case we wouldn't be able to populate that field - so checking
-	// that route is also not null for good measure.
-
-	def hasCurrentEnrolment: Boolean = {
-		studyDetails != null && studyDetails.enrolmentStatus != null && studyDetails.route != null
-	}
-
 	override def description = {
-		val userTypeString = Option(groupName).getOrElse("")
-
-		val courseName = Option(studyDetails.route).map(", " + _.name).getOrElse("")
-		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
-
-		userTypeString + courseName + deptName
+		Option(groupName).getOrElse("")
 	}
 
 	/**
@@ -224,30 +190,10 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	override def affiliatedDepartments =
 		(
 			Option(homeDepartment) #::
-			Option(studyDetails.studyDepartment) #::
-			Option(studyDetails.route).map(_.department) #::
+			Option(studentCourseDetails.asScala.map( _.department )) #::
+			Option(studentCourseDetails.route).map(_.department) #::
 			Stream.empty
 		).flatten.distinct
-
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	override def personalTutors =
-		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
-
-	override def hasAPersonalTutor = !personalTutors.isEmpty
-
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	override def supervisors =
-		profileService.findCurrentRelationships(RelationshipType.Supervisor, studyDetails.sprCode)
-
-	override def hasSupervisor = !supervisors.isEmpty
-
-	// If hibernate sets studyDetails to null, make a new empty studyDetails
-	override def postLoad {
-		if (studyDetails == null) {
-			studyDetails = new StudyDetails
-			studyDetails.student = this
-		}
-	}
 }
 
 @Entity

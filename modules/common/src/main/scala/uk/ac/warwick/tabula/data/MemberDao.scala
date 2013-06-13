@@ -64,13 +64,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.trim }))
 			.seq
-	
-	def getBySprCode(sprCode: String) = 
-		session.newCriteria[StudentMember]
-				.createAlias("studyDetails", "studyDetails")
-				.add(is("studyDetails.sprCode", sprCode.trim))
-				.uniqueResult
-	
+
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
@@ -132,25 +126,6 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.seq
 	}	
 	
-	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = {
-		session.newQuery[StudentRelationship]("""
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				Member m
-			where
-				sr.targetSprCode = m.studyDetails.sprCode
-			and
-				sr.relationshipType = :relationshipType
-			and
-				m = :student
-		""")
-			.setEntity("student", student)
-			.setParameter("relationshipType", relationshipType)
-			.seq
-	}	
-	
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
@@ -159,13 +134,13 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				distinct sr
 			from
 				StudentRelationship sr,
-				Member m
+				StudentCourseDetails scd
 			where
-				sr.targetSprCode = m.studyDetails.sprCode
+				sr.targetSprCode = scd.sprCode
 			and
 				sr.relationshipType = :relationshipType
 			and
-				m.homeDepartment = :department
+				sr.department = :department
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by

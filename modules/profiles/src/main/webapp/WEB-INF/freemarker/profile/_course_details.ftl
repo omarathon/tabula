@@ -1,113 +1,111 @@
 <section id="course-details">
-	<#if profile.studyDetails??>
-		<h4>Course details</h4>
-		<table class="course-info">
-			<tbody>
-				<tr>
-					<th>Route</th>
-					<td>
-						<#if profile.studyDetails.route??>
-							${profile.studyDetails.route.name} (${profile.studyDetails.route.code?upper_case})
+	<h4>Course details</h4>
+	<table class="course-info">
+		<tbody>
+			<tr>
+				<th>Route</th>
+				<td>
+					<#if studentCourseDetails.route??>
+						${studentCourseDetails.route.name} (${studentCourseDetails.route.code?upper_case})
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>Course code</th>
+				<td>
+					<#if studentCourseDetails.sitsCourseCode??>
+						${studentCourseDetails.sitsCourseCode?upper_case}
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>Department</th>
+				<td>
+					<#if studentCourseDetails.studyDepartment??>
+						${studentCourseDetails.department.name} (${studentCourseDetails.department.code?upper_case})
+					<#else>
+						<#if (studentCourseDetails.route.department.name)??>
+							${studentCourseDetails.route.department.name}
 						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Course code</th>
-					<td>
-						<#if profile.studyDetails.sitsCourseCode??>
-							${profile.studyDetails.sitsCourseCode?upper_case}
+					</#if>
+				</td
+			</tr>
+			<tr>
+				<th>Intended award</th>
+				<td>
+					<#if studentCourseDetails.intendedAward??>
+						${studentCourseDetails.intendedAward}
+					</#if>
+				</td>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr>
+				<th>Year of study</th>
+				<td>
+					<#if studentCourseDetails.yearOfStudy??>
+						${studentCourseDetails.bestStudentCourseYearDetails.yearOfStudy}
+					</#if>
+				</td>
+			</tr>
+	 		<tr>
+				<th>Length of course</th>
+				<td>
+					<#if studentCourseDetails.courseYearLength??>
+						${studentCourseDetails.courseYearLength} years
+					</#if>
+					<#if studentCourseDetails.modeOfAttendance??>
+						<#if studentCourseDetails.bestStudentCourseYearDetails.modeOfAttendance.code != "F">
+							(full-time equivalent)
 						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Department</th>
-					<td>
-						<#if profile.studyDetails.studyDepartment??>
-							${profile.studyDetails.studyDepartment.name} (${profile.studyDetails.studyDepartment.code?upper_case})
-						<#else>
-							<#if (profile.studyDetails.route.department.name)??>
-								${profile.studyDetails.route.department.name}
-							</#if>
-						</#if>
-					</td
-				</tr>
-				<tr>
-					<th>Intended award</th>
-					<td>
-						<#if profile.studyDetails.intendedAward??>
-							${profile.studyDetails.intendedAward}
-						</#if>
-					</td>
-				</tr>
-			</tbody>
-			<tbody>
-				<tr>
-					<th>Year of study</th>
-					<td>
-						<#if profile.studyDetails.yearOfStudy??>
-							${profile.studyDetails.yearOfStudy}
-						</#if>
-					</td>
-				</tr>
-		 		<tr>
-					<th>Length of course</th>
-					<td>
-						<#if profile.studyDetails.courseYearLength??>
-							${profile.studyDetails.courseYearLength} years
-						</#if>
-						<#if profile.studyDetails.modeOfAttendance??>
-							<#if profile.studyDetails.modeOfAttendance.code != "F">
-								(full-time equivalent)
-							</#if>
-						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Start date</th>
-					<td>
-						<#if profile.studyDetails.beginDate??>
-							<@fmt.date date=profile.studyDetails.beginDate includeTime=false />
-						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>End date</th>
-					<td>
-						<#if profile.studyDetails.endDate??>
-							<@fmt.date date=profile.studyDetails.endDate includeTime=false />
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>Start date</th>
+				<td>
+					<#if studentCourseDetails.beginDate??>
+						<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>End date</th>
+				<td>
+					<#if studentCourseDetails.endDate??>
+						<@fmt.date date=studentCourseDetails.endDate includeTime=false />
 
-						<#elseif profile.studyDetails.expectedEndDate??>
-							<@fmt.date date=profile.studyDetails.expectedEndDate includeTime=false/> (expected)
-						</#if>
-					</td>
-				</tr>
-			</tbody>
-			<tbody>
-				<tr>
-					<th>UG/PG</th>
-					<td>
-						<#if (profile.studyDetails.route.degreeType)??>
-							${profile.studyDetails.route.degreeType.toString}
-						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Attendance</th>
-					<td>
-						<#if profile.studyDetails.modeOfAttendance??>
-							${profile.studyDetails.modeOfAttendance.fullNameToDisplay}
-						</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Status</th>
-					<td>
-						<#if profile.statusString??>
-							${profile.statusString}
-						</#if>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</#if>
+					<#elseif studentCourseDetails.expectedEndDate??>
+						<@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/> (expected)
+					</#if>
+				</td>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr>
+				<th>UG/PG</th>
+				<td>
+					<#if (studentCourseDetails.route.degreeType)??>
+						${studentCourseDetails.route.degreeType.toString}
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>Attendance</th>
+				<td>
+					<#if studentCourseDetails.modeOfAttendance??>
+						${studentCourseDetails.bestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay}
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<th>Status</th>
+				<td>
+					<#if studentCourseDetails.statusString??>
+						${studentCourseDetails.statusString}
+					</#if>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </section>

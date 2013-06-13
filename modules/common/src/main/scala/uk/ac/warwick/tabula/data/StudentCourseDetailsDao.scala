@@ -15,6 +15,8 @@ trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
+	def getBySprCode(sprCode: String): Option[StudentCourseDetails]
+
 }
 
 @Repository
@@ -34,5 +36,10 @@ class StudentCourseDetailsDaoImpl extends Daoisms {
 	def getByScjCode(scjCode: String) =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
+				.uniqueResult
+
+	def getBySprCode(sprCode: String) =
+		session.newCriteria[StudentCourseDetails]
+				.add(is("sprCode", sprCode.trim))
 				.uniqueResult
 }

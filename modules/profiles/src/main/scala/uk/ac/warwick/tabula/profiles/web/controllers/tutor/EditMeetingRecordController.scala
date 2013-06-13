@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.profiles.commands.EditMeetingRecordCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
-@RequestMapping(value = Array("/tutor/meeting/{student}/edit/{meetingRecord}"))
+@RequestMapping(value = Array("/tutor/meeting/{studentCourseDetails}/edit/{meetingRecord}"))
 class EditMeetingRecordController extends ProfilesController with MeetingRecordModal {
 
 	validatesSelf[EditMeetingRecordCommand]

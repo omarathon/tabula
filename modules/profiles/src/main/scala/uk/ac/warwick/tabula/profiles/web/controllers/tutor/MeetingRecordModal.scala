@@ -30,16 +30,13 @@ trait MeetingRecordModal extends ProfilesController {
 	 *
 	 */
 
-	@ModelAttribute("allRelationships") def allRelationships(@PathVariable("student") member: Member) = member match {
-		case student: StudentMember =>
-			profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
-		case _ => throw new ItemNotFoundException
+	@ModelAttribute("allRelationships") def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
+		profileService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
-	def viewMeetingRecordCommand(@PathVariable("student") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
-		case _ => None
+	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
+		restricted(new ViewMeetingRecordCommand(studentCourseDetails, user))
 	}
 
 	// modal chrome

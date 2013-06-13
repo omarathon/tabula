@@ -109,11 +109,11 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 		"courseYearLength"
 	)
 
-	private def copyStudentCourseProperties(commandBean: BeanWrapper, studyDetailsBean: BeanWrapper) = {
-		copyBasicProperties(basicStudentCourseProperties, commandBean, studyDetailsBean) |
-		copyDepartment("department", departmentCode, studyDetailsBean) |
-		copyRoute("route", routeCode, studyDetailsBean) |
-		copyStatus("sprStatus", sprStatusCode, studyDetailsBean)
+	private def copyStudentCourseProperties(commandBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
+		copyBasicProperties(basicStudentCourseProperties, commandBean, studentCourseDetailsBean) |
+		copyDepartment("department", departmentCode, studentCourseDetailsBean) |
+		copyRoute("route", routeCode, studentCourseDetailsBean) |
+		copyStatus("sprStatus", sprStatusCode, studentCourseDetailsBean)
 	}
 
 

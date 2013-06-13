@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 class StudentCourseYearDetails extends  StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget {
-
+	
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
@@ -42,9 +43,13 @@ trait StudentCourseYearProperties {
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")
 	var modeOfAttendance: ModeOfAttendance = _
 
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	var academicYear: AcademicYear = _	
+	
 	var yearOfStudy: JInteger = _
-	
-	
+
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
+
 }

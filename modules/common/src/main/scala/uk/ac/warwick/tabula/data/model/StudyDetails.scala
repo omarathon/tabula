@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.data.model
+/*package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.{AccessType, Type}
 import org.hibernate.annotations.GenericGenerator
@@ -111,4 +111,4 @@ trait StudyDetailsProperties {
 //	var lastInstitute: String = _
 //	var lastSchool: String = _
 
-}
+}*/
