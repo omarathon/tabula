@@ -186,9 +186,9 @@
 			<tr>
 				<td id="multifile-column">
 					<h3>Select file</h3>
-					<p id="multifile-column-description">
+					<div id="multifile-column-description">
 						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
-					</p>
+					</div>
 					<@form.labelled_row "file.upload" "Files">
 					<input type="file" name="file.upload" multiple />
 				</@form.labelled_row>
