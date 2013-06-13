@@ -163,6 +163,9 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def isSupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasSupervisor = false
+
+
+	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
 }
 
 @Entity
@@ -189,11 +192,18 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 */
 	override def affiliatedDepartments =
 		(
-			Option(homeDepartment) #::
-			Option(studentCourseDetails.asScala.map( _.department )) #::
-			Option(studentCourseDetails.route).map(_.department) #::
+			Buffer(homeDepartment) #::
+			studentCourseDetails.asScala.map( _.department ) #::
+			studentCourseDetails.asScala.map(_.route).map(_.department) #::
 			Stream.empty
 		).flatten.distinct
+
+
+  override def mostSignificantCourseDetails = {
+		val mostSignifCourse = studentCourseDetails.asScala.filter(_.mostSignificant)
+		if (mostSignifCourse.size ==1) Some(mostSignifCourse.head)
+		else None
+	}
 }
 
 @Entity

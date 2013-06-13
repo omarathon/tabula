@@ -45,7 +45,7 @@
 					</#if>
 				<#else>
 					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
+						<img src="<@routes.relationshipPhoto relationship />" />
 					</div>
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}

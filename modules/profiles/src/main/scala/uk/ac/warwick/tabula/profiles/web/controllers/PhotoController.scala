@@ -19,9 +19,9 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
-	
+
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = new ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
@@ -33,24 +33,23 @@ class PhotoController extends ProfilesController {
 }
 
 @Controller
-@RequestMapping(value = Array("/view/photo/{member}/{relationshipType}/{agent}.jpg"))
+@RequestMapping(value = Array("/view/photo/{sprCode}/{relationshipType}/{agent}.jpg"))
 class StudentRelationshipPhotoController extends ProfilesController {
-	
+
 	var fileServer = Wire[FileServer]
-	
-	@ModelAttribute("viewStudentRelationshipPhotoCommand") 
+
+	@ModelAttribute("viewStudentRelationshipPhotoCommand")
+
 	def command(
-		@PathVariable("member") member: Member, 
-		@PathVariable("relationshipType") relationshipType: RelationshipType, 
+		@PathVariable("sprCode") sprCode: String,
+		@PathVariable("relationshipType") relationshipType: RelationshipType,
 		@PathVariable("agent") agent: String
-	) = member match {
-		case student: StudentMember => {
-			val relationships = profileService.findCurrentRelationships(relationshipType, student.studyDetails.sprCode)
+	) = {
+			val relationships = profileService.findCurrentRelationships(relationshipType, sprCode)
 			val relationship = relationships.find(_.agent == agent) getOrElse(throw new ItemNotFoundException)
-			
-			new ViewStudentRelationshipPhotoCommand(member, relationship)
+
+			new ViewStudentRelationshipPhotoCommand(profileService.getStudentBySprCode(sprCode), relationship)
 		}
-		case _ => throw new ItemNotFoundException
 	}
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

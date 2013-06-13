@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -31,12 +28,18 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
-
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
 import uk.ac.warwick.tabula.services.ProfileService
 
 
@@ -91,7 +94,7 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 		studentCourseYearDetails
 	}
 
-	private val basicStudyDetailsYearProperties = Set(
+	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy",
 		//"fundingSource",
 		"modeOfAttendance",
@@ -99,7 +102,7 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
-		copyBasicProperties(basicStudyDetailsYearProperties, commandBean, studentCourseYearBean) |
+		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
 		copyStatus("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean) |
 		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studentCourseYearBean)
 	}

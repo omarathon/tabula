@@ -33,6 +33,18 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.StudentMember
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.helpers.FoundUser
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.helpers.NoUser
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.helpers.LazyLists
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 
@@ -94,10 +106,13 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						}
 						case Some(targetMember: StudentMember) => {
 							rawStudentRelationship.targetMember = targetMember
-							if (targetMember.studyDetails.sprCode == null) {
-								errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
-								valid = false
+							targetMember.mostSignificantCourse match {
+								case None => {
+									errors.rejectValue("targetUniversityId", "member.course.noSignif")
+									valid = false
+								}
 							}
+
 							if (!targetMember.affiliatedDepartments.contains(department)) {
 								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.name), "")
 								valid = false
@@ -171,7 +186,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 			val targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
 				// should never be None as validation has already checked for this
 				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId)
-				case Some(mem: StudentMember) => mem.studyDetails.sprCode
+				case Some(mem: StudentMember) => mem.mostSignificantCourseDetails.getOrElse("Couldn't determine course for " + mem.universityID).sprCode
 				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
 

@@ -9,7 +9,7 @@
 			<div class="tutor clearfix span4">
 				<#if supervisor??>
 					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
+						<img src="<@routes.relationshipPhoto relationship />" />
 					</div>
 					<h5>
 						${supervisor.fullName!"Supervisor"}

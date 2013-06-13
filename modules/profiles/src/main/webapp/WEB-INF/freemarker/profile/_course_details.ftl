@@ -44,7 +44,7 @@
 				<th>Year of study</th>
 				<td>
 					<#if studentCourseDetails.yearOfStudy??>
-						${studentCourseDetails.bestStudentCourseYearDetails.yearOfStudy}
+						${studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy}
 					</#if>
 				</td>
 			</tr>
@@ -55,7 +55,7 @@
 						${studentCourseDetails.courseYearLength} years
 					</#if>
 					<#if studentCourseDetails.modeOfAttendance??>
-						<#if studentCourseDetails.bestStudentCourseYearDetails.modeOfAttendance.code != "F">
+						<#if studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.code != "F">
 							(full-time equivalent)
 						</#if>
 					</#if>
@@ -94,7 +94,7 @@
 				<th>Attendance</th>
 				<td>
 					<#if studentCourseDetails.modeOfAttendance??>
-						${studentCourseDetails.bestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay}
+						${studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay}
 					</#if>
 				</td>
 			</tr>

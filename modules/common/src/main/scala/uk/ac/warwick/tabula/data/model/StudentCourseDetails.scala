@@ -50,7 +50,7 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 		if (sprStatus!= null) {
 			statusString = sprStatus.fullName.toLowerCase().capitalize
 
-			val enrolmentStatus = bestStudentCourseYearDetails.enrolmentStatus
+			val enrolmentStatus = latestStudentCourseYearDetails.enrolmentStatus
 
 			// if the enrolment status is not null and different to the SPR status, append it:
 			if (enrolmentStatus != null
@@ -60,13 +60,12 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 		statusString
 	}
 
-	def bestStudentCourseYearDetails: StudentCourseYearDetails = {
+	def latestStudentCourseYearDetails: StudentCourseYearDetails = {
 		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear).map(_.sequenceNumber).sort(_ > _).head
 	}
 
 	def studentCourseYearDetailsForCurrentYear = {
 		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear)
-
 	}
 
 	@Restricted(Array("Profiles.PersonalTutor.Read"))
@@ -114,4 +113,6 @@ trait StudentCourseProperties {
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
+
+	var mostSignificant: JBoolean = _
 }

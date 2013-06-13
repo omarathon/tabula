@@ -125,13 +125,14 @@ object ProfileImporter {
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
+			scj.scj_udfa as most_signif_indicator,
 			--scj.scj_prsc as scj_tutor1,
 			--scj.scj_prs2 as scj_tutor2,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
-			sce.sce_moac as mode_of_attendance_code
+			sce.sce_moac as mode_of_attendance_code,
 			sce.sce_ayrc as sce_academic_year
 
 		from intuit.ins_stu stu

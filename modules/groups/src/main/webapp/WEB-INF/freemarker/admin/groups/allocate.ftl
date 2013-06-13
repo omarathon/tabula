@@ -13,10 +13,10 @@
 					<img src="<@url resource="/static/images/no-photo.png" />" />
 				</#if>
 			</div>
-			
+
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
-				${(profile.studyDetails.route.name)!student.shortDepartment}
+				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -25,14 +25,14 @@
 
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
-	
+
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
-	
+
 	<p>Drag students onto a group to allocate them to it. Select multiple students by dragging a box around them.
 		 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
-	
+
 	<@spring.hasBindErrors name="allocateStudentsToGroupsCommand">
 		<#if errors.hasErrors()>
 			<div class="alert alert-error">
@@ -47,7 +47,7 @@
 			</div>
 		</#if>
 	</@spring.hasBindErrors>
-	
+
 	<#assign submitUrl><@routes.allocateset set /></#assign>
 	<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 		<div class="btn-toolbar">
@@ -66,7 +66,7 @@
 					<h3>Students</h3>
 					<div class="well student-list drag-target">
 						<h4>Not allocated to a group</h4>
-					
+
 						<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 							<@spring.bind path="unallocated">
 								<#list status.actualValue as student>
@@ -85,7 +85,7 @@
 			</div>
 			<div class="span5">
 				<div class="groups fix-on-scroll">
-					<h3>Groups</h3>			
+					<h3>Groups</h3>
 					<#list set.groups as group>
 						<#assign existingStudents = mappingById[group.id]![] />
 						<div class="drag-target well clearfix">
@@ -99,7 +99,7 @@
 										<#list group.events as event>
 											<li>
 												<#-- Tutor, weeks, day/time, location -->
-	
+
 												<@fmt.weekRanges event />,
 												${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 												${event.location}
@@ -107,18 +107,18 @@
 										</#list>
 									</ul>
 								</#assign>
-							
+
 								<h4 class="name">
 									${group.name}
 								</h4>
-								
+
 								<div>
 									<span class="drag-count">${existingStudents?size}</span> students
-									
+
 									<a id="show-list-${group.id}" class="show-list" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
 								</div>
 							</div>
-		
+
 							<ul class="drag-list hide" data-bindpath="mapping[${group.id}]">
 								<#list existingStudents as student>
 									<@student_item student "mapping[${group.id}][${student_index}]" />
@@ -128,12 +128,12 @@
 					</#list>
 				</div>
 			</div>
-		</div>		
-		
+		</div>
+
 		<div class="submit-buttons">
 			<input type="submit" class="btn btn-primary" value="Save">
 			<a href="<@routes.depthome module />" class="btn">Cancel</a>
 		</div>
 	</@f.form>
-	
+
 </#escape>

@@ -33,14 +33,15 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 	with StudentCourseProperties with Unaudited with PropertyCopying with SitsPropertyCopying{
 
 	var memberDao = Wire.auto[MemberDao]
+	var profileService = Wire.auto[ProfileService]
+	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
 	import ImportMemberHelpers._
 
-	implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
+	this.mostSignificant = rs.getString("most_signif_indicator").upperCase == "Y"
 
-	var profileService = Wire.auto[ProfileService]
-	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
+		implicit val rs = resultSet
+	implicit val metadata = rs.getMetaData
 
 	var scjCode: String = rs.getString("scj_code")
 
@@ -48,6 +49,7 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 	var routeCode: String = _
 	var sprStatusCode: String = _
 	var departmentCode: String = _
+	var mostSignifIndicator: String = _
 
 	this.routeCode = rs.getString("route_code")
 	this.departmentCode = rs.getString("department_code")
@@ -62,6 +64,7 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	this.courseYearLength = rs.getString("course_year_length")
+	this.mostSignifIndicator = rs.getString("most_signif_indicator")
 
 	this.sprStatusCode = rs.getString("spr_status_code")
 
