@@ -42,7 +42,7 @@
 		</li>
 	</ul>
 	
-	<div class="tab-content" style="padding: 10px; border: 1px solid black;">
+	<div class="tab-content">
 	
 	<div class="tab-pane active" id="allocategroups-tab1">
 	
@@ -155,7 +155,30 @@
 	
 	<div class="tab-pane" id="allocategroups-tab2">
 
-		<p>Download this <a href="allocate/template">Excel spreadsheet</a>, select the group for each user, save and upload below.</p>
+		<#assign introText>
+			<p>The spreadsheet must be in <samp>.xlsx</samp> format (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application). You can download a template spreadsheet which is correctly formatted, ready for completion.<p>
+			<p>The spreadsheet must contain two columns, headed:<p>
+			<ul>
+				<li><b>student_id</b> - contains the student's University ID number (also known as the library card number)</li>
+				<li><b>group_id</b> - contains the small group ID</li>
+			</ul>
+			<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
+			<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
+		</#assign>
+
+		<p>You can set small groups for many students at once by uploading a spreadsheet.
+			<a href="#"
+			   id="smallgroup-intro"
+			   class="use-introductory"
+			data-hash="${introHash("smallgroup-intro")}"
+			data-title="Small groups spreadsheet"
+			data-trigger="click"
+			data-placement="bottom"
+			data-html="true"
+			data-content="${introText}"><i class="icon-question-sign"></i></a></p>
+
+
+		<p><a href="allocate/template">Download a template spreadsheet</a></p>
 
 		<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 		<input name="isfile" value="true" type="hidden"/>
@@ -167,7 +190,7 @@
 						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 					</p>
 					<@form.labelled_row "file.upload" "Files">
-					<input type="file" name="file.upload" />
+					<input type="file" name="file.upload" multiple />
 				</@form.labelled_row>
 			</td>
 		</tr>
