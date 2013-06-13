@@ -24,13 +24,19 @@ import freemarker.cache.MultiTemplateLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
+import uk.ac.warwick.tabula.web.views.{UrlMethodModel, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
 import org.junit.rules.Timeout
 import org.junit.Rule
+import uk.ac.warwick.tabula.helpers.{WeekRangesFormatterTag, WeekRangesFormatter}
+import uk.ac.warwick.tabula.services.UserSettingsService
+import org.mockito.Mockito._
+import scala.Some
+import org.specs.mock.JMocker.when
+import org.specs.mock.JMocker.mock
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -56,6 +62,19 @@ trait TestFixtures {
 			new ClassTemplateLoader(getClass, "/") // to match live templates
 			)))
 		setAutoIncludes(Nil) // don't use prelude
+
+    // include additional shared vars here when needed. Don't add anything that's not also set up
+    // in applicationContext.xml
+    val userSettingsService = org.mockito.Mockito.mock(classOf[UserSettingsService])
+    org.mockito.Mockito.when(userSettingsService.getByUserId(org.mockito.Matchers.any(classOf[String]))).thenReturn(Some(new UserSettings))
+    val weekRangeFormatter = new WeekRangesFormatterTag
+    weekRangeFormatter.userSettings = userSettingsService
+    val urlModel = new UrlMethodModel
+    urlModel.context = "http://test.ac.uk"
+
+    setSharedVariables(Map(
+      "url"->urlModel,
+      "weekRangesFormatter"->weekRangeFormatter))
 	}
 
 	def testRequest(uri: String = null) = {
