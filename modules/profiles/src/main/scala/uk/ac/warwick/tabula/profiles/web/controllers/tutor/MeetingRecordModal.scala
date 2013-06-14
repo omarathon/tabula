@@ -13,8 +13,12 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 trait MeetingRecordModal extends ProfilesController {
+	var relationshipService = Wire.auto[RelationshipService]
 
 	/**
 	 * Contains all of the request mappings needed to drive meeting record modals (including iframe stuff)
@@ -30,14 +34,13 @@ trait MeetingRecordModal extends ProfilesController {
 	 *
 	 */
 
-	@ModelAttribute("allRelationships") def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
-		profileService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
-	}
+	@ModelAttribute("allRelationships")
+	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
+		relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
 		restricted(new ViewMeetingRecordCommand(studentCourseDetails, user))
-	}
 
 	// modal chrome
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
@@ -125,9 +128,9 @@ trait MeetingRecordModal extends ProfilesController {
 	}
 
 	@InitBinder
-	def initRelationshipsEditor(binder: WebDataBinder, @PathVariable("student") student: Member) {
+	def initRelationshipsEditor(binder: WebDataBinder, @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) {
 		binder.registerCustomEditor(classOf[StudentRelationship], new AbstractPropertyEditor[StudentRelationship] {
-			override def fromString(agent: String) = allRelationships(student).find(_.agent == agent).orNull
+			override def fromString(agent: String) = allRelationships(studentCourseDetails).find(_.agent == agent).orNull
 			override def toString(rel: StudentRelationship) = rel.agent
 		})
 	}

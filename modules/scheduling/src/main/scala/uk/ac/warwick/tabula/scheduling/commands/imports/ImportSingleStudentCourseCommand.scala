@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 import java.sql.ResultSet
-
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.PrsCode
 import uk.ac.warwick.tabula.commands.Command
@@ -27,18 +25,19 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultSet)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying with SitsPropertyCopying{
 
 	var memberDao = Wire.auto[MemberDao]
-	var profileService = Wire.auto[ProfileService]
+	var relationshipService = Wire.auto[RelationshipService]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
 	import ImportMemberHelpers._
 
-	this.mostSignificant = rs.getString("most_signif_indicator").upperCase == "Y"
+	this.mostSignificant = rs.getString("most_signif_indicator").toUpperCase() == "Y"
 
 		implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
@@ -136,7 +135,7 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 						case Some(mem: Member) => {
 							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
 
-							val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, sprCode)
+							val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, sprCode)
 
 							// Does this relationship already exist?
 							currentRelationships.find(_.agent == tutorUniId) match {
@@ -145,11 +144,11 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 									// End all existing relationships
 									currentRelationships.foreach { rel =>
 										rel.endDate = DateTime.now
-										profileService.saveOrUpdate(rel)
+										relationshipService.saveOrUpdate(rel)
 									}
 
 									// Save the new one
-									val rel = profileService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
+									val rel = relationshipService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
 
 									rel
 								}

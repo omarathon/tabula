@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 
-class StudentCourseDetailsConverter extends TwoWayConverter[String, Feedback] {
+class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCourseDetails] {
 
 	@Autowired var service: StudentCourseDetailsDao = _
 

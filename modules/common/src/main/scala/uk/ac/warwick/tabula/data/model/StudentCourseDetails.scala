@@ -13,6 +13,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 class StudentCourseDetails extends StudentCourseProperties with ToString with HibernateVersioned with PermissionsTarget {
@@ -41,7 +42,7 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 	def permissionsParents = Option(student).toStream
 
 	def hasCurrentEnrolment: Boolean = {
-		studentCourseYearDetailsForCurrentYear.map(_.enrolmentStatus).code.filter(!_.beginsWith("P")).size > 0
+		!latestStudentCourseYearDetails.enrolmentStatus.code.startsWith("P")
 	}
 
 	// FIXME this belongs as a Freemarker macro or helper
@@ -61,24 +62,20 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 	}
 
 	def latestStudentCourseYearDetails: StudentCourseYearDetails = {
-		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear).map(_.sequenceNumber).sort(_ > _).head
-	}
-
-	def studentCourseYearDetailsForCurrentYear = {
-		studentCourseYearDetails.asScala.filter(_.academicYear == profileImporter.currentAcademicYear)
+		studentCourseYearDetails.asScala.max
 	}
 
 	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	override def personalTutors =
+	def personalTutors =
 		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, this.sprCode)
 
 	@Restricted(Array("Profiles.Supervisor.Read"))
-	override def supervisors =
+	def supervisors =
 		relationshipService.findCurrentRelationships(RelationshipType.Supervisor, this.sprCode)
 
-	override def hasAPersonalTutor = !personalTutors.isEmpty
+	def hasAPersonalTutor = !personalTutors.isEmpty
 
-	override def hasSupervisor = !supervisors.isEmpty
+	def hasSupervisor = !supervisors.isEmpty
 }
 
 trait StudentCourseProperties {

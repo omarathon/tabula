@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
@@ -25,7 +26,7 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 }
 
 @Controller
-@RequestMapping(Array("/view/{member}"))
+@RequestMapping(Array("/view/{studentCourseDetails}"))
 class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire.auto[UserLookupService]
@@ -35,9 +36,8 @@ class ViewProfileController extends ProfilesController {
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
 	@ModelAttribute("viewMeetingRecordCommand")
-	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
-		case _ => None
+	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
+		restricted(new ViewMeetingRecordCommand(studentCourseDetails, user))
 	}
 
 	@ModelAttribute("viewProfileCommand")

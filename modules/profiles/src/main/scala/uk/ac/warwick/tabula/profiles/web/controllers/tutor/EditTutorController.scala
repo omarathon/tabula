@@ -28,17 +28,18 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val currentTutor: Option[Member], val remove: Boolean) extends Command[Option[StudentRelationship]] with Promises {
 
-	var profileService = Wire[ProfileService]
+	var relationshipService = Wire[RelationshipService]
 
 	var tutor: Member = _
 
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, studentCourseDetails.student)
 
 	// throw this request out if personal tutors can't be edited in Tabula for this department
-	if (!studentCourseDetails.studyDepartment.canEditPersonalTutors) {
+	if (!studentCourseDetails.department.canEditPersonalTutors) {
 		logger.info("Denying access to EditTutorCommand since student "
 				+ studentCourseDetails.sprCode
 				+ " has a study department "
@@ -55,13 +56,13 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 	def applyInternal = {
 		if (!currentTutor.isDefined) {
 			// Brand new tutor
-			val newRelationship = profileService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
+			val newRelationship = relationshipService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
 
 			notifyCommand.apply()
 			Some(newRelationship)
 		} else if (currentTutor.get != tutor) {
 			// Replacing the current tutor with a new one
-			val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
+			val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
 
 			// Is there an existing relationship for this tutor?
 			// Could happen if a student has two tutors, and we're trying to replace the second with the first
@@ -75,14 +76,14 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 					endTutorRelationship(currentRelationships)
 
 					// Save the new relationship
-					val newRelationship = profileService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
+					val newRelationship = relationshipService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
 
 					notifyCommand.apply()
 					Some(newRelationship)
 				}
 			}
 		} else if (currentTutor.get == tutor && remove) {
-				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
+				val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
 				endTutorRelationship(currentRelationships)
 				None
 			} else {
@@ -93,11 +94,11 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 	def endTutorRelationship(currentRelationships: Seq[StudentRelationship]) {
 		currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel =>
 			rel.endDate = DateTime.now
-			profileService.saveOrUpdate(rel)
+			relationshipService.saveOrUpdate(rel)
 		}
 	}
 
-	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> tutor.universityId)
+	override def describe(d: Description) = d.property("student SPR code" -> studentCourseDetails.sprCode).property("new tutor ID" -> tutor.universityId)
 }
 
 @Controller
@@ -107,19 +108,17 @@ class EditTutorController extends BaseController {
 
 	@ModelAttribute("editTutorCommand")
 	def editTutorCommand(
-			@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails, 
+			@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 			@RequestParam(value="currentTutor", required=false) currentTutor: Member,
 			@RequestParam(value="remove", required=false) remove: Boolean
 			) =
 		new EditTutorCommand(studentCourseDetails, Option(currentTutor), Option(remove).getOrElse(false))
 
-	}
-
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
-			"student" -> cmd.student,
+			"studentCourseDetails" -> cmd.studentCourseDetails,
 			"tutorToDisplay" -> cmd.currentTutor
 		).noLayout()
 	}
@@ -130,7 +129,7 @@ class EditTutorController extends BaseController {
 		val rel = cmd.apply()
 
 		Mav("tutor/edit/view",
-			"student" -> cmd.student,
+			"student" -> cmd.studentCourseDetails.student,
 			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}

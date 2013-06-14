@@ -26,11 +26,9 @@ trait RelationshipService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: RelationshipType, targetUniversityId: String): Seq[StudentRelationship]
-	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: RelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsWithMember(relationshipType: RelationshipType, agent: Member): Seq[StudentRelationship]
-	def getPersonalTutors(student: Member): Seq[Member]
 	def listStudentRelationshipsWithUniversityId(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: RelationshipType, department: Department): Seq[Member]
 	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): (Int, Int)
@@ -57,10 +55,6 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def getRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
-	}
-
-	def getRelationships(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
-		memberDao.getRelationshipsByStudent(relationshipType, student)
 	}
 
 	def getPersonalTutors(studentCourseDetails: StudentCourseDetails): Seq[Member] = {

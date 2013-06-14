@@ -8,7 +8,7 @@ import java.beans.PropertyEditorSupport
  * "99/00" or "11/12" but we just store the first year as a 4-digit number.
  * toString() returns the traditional format.
  */
-case class AcademicYear(val startYear: Int) {
+case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
 	val endYear = startYear + 1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
 
@@ -38,6 +38,10 @@ case class AcademicYear(val startYear: Int) {
 		val length = 1 + yearsBefore + yearsAfter
 		val first = (this - yearsBefore)
 		Iterable.iterate(first, length) { y => y.next }.toSeq
+	}
+
+	def compare(that:AcademicYear): Int = {
+			this.startYear - that.startYear
 	}
 }
 

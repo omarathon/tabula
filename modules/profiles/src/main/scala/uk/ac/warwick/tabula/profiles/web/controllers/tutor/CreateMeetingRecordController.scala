@@ -9,6 +9,10 @@ import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
 import scala.Some
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.spring.Wire
+
 
 @Controller
 @RequestMapping(value = Array("/tutor/meeting/{studentCourseDetails}/create"))
@@ -18,7 +22,7 @@ class CreateMeetingRecordController extends ProfilesController with MeetingRecor
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
-		profileService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode) match {
+		relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Try and guess a default relationship

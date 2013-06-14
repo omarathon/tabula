@@ -17,7 +17,6 @@ trait MemberDao {
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
-	def getBySprCode(sprCode: String): Option[StudentMember]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
@@ -25,7 +24,6 @@ trait MemberDao {
 	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationshipsByStudent(relationshipType: RelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]

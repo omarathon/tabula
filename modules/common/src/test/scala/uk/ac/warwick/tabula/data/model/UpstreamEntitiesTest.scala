@@ -14,7 +14,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			val assignmentService = new AssignmentServiceImpl
 			assignmentService.sessionFactory = sessionFactory
-			
+
 			val assignmentMembershipService = new AssignmentMembershipServiceImpl
 			assignmentMembershipService.sessionFactory = sessionFactory
 
@@ -55,21 +55,21 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2012.assignmentMembershipService = assignmentMembershipService
 			law2012.name = "Cool Essay?"
 			law2012.academicYear = new AcademicYear(2011)
-			
+
 			val group2010 = new UpstreamAssessmentGroup
 			group2010.moduleCode = "la155-10"
 			group2010.occurrence = "A"
 			group2010.assessmentGroup = "A"
 			group2010.academicYear = new AcademicYear(2010)
 			group2010.members.staticIncludeUsers.addAll(Seq("rob","kev","bib"))
-			
+
 			val group2011 = new UpstreamAssessmentGroup
 			group2011.moduleCode = "la155-10"
 			group2011.occurrence = "A"
 			group2011.assessmentGroup = "A"
 			group2011.academicYear = new AcademicYear(2011)
 			group2011.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
-			
+
 			// similar group but doesn't match the occurence of any assignment above, so ignored.
 			val otherGroup = new UpstreamAssessmentGroup
 			otherGroup.moduleCode = "la155-10"
@@ -77,23 +77,25 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.assessmentGroup = "A"
 			otherGroup.academicYear = new AcademicYear(2011)
 			otherGroup.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
-			
+
 			val member = new StaffMember
 			member.universityId = "0672089"
-			member.userId = "cuscav"					
+			member.userId = "cuscav"
 			member.firstName = "Mathew"
 			member.lastName = "Mannion"
 			member.email = "M.Mannion@warwick.ac.uk"
-				
+
 			val student = new StudentMember
 			student.universityId = "0812345"
 			student.userId = "studen"
 			student.firstName = "My"
 			student.lastName = "Student"
 			student.email = "S.Tudent@warwick.ac.uk"
-			student.studyDetails.sprCode = "0812345/1"
-			
-			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member, student)) 
+
+			val studentCourseDetails = new StudentCourseDetails(student, "0812345/1")
+			student.studentCourseDetails.add(studentCourseDetails)
+
+			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member, student))
 				session.save(entity)
 			session.flush()
 			session.clear()
@@ -114,11 +116,11 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 				case loadedMember:Member => loadedMember.firstName should be ("Mathew")
 				case _ => fail("Member not found")
 			}
-			
+
 			session.load(classOf[StudentMember], "0812345") match {
 				case loadedMember:StudentMember => {
 					loadedMember.firstName should be ("My")
-					loadedMember.studyDetails.sprCode should be ("0812345/1")
+					loadedMember.mostSignificantCourseDetails.get.sprCode should be ("0812345/1")
 				}
 				case _ => fail("Student not found")
 			}

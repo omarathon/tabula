@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{AccessType, Type}
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Parameter
-import org.joda.time.LocalDate
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+
 import javax.persistence._
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 class StudentCourseYearDetails extends  StudentCourseYearProperties
-	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget {
-	
+	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
+	with Ordered[StudentCourseYearDetails]{
+
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
@@ -29,6 +28,15 @@ class StudentCourseYearDetails extends  StudentCourseYearProperties
 	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails)
 
 	def permissionsParents = Option(studentCourseDetails).toStream
+
+	def compare(that:StudentCourseYearDetails): Int = {
+		if (this.academicYear != that.academicYear) {
+			this.academicYear.compare(that.academicYear)
+		}
+		else {
+			this.sceSequenceNumber - that.sceSequenceNumber
+		}
+	}
 }
 
 trait StudentCourseYearProperties {
@@ -45,8 +53,8 @@ trait StudentCourseYearProperties {
 
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYear: AcademicYear = _	
-	
+	var academicYear: AcademicYear = _
+
 	var yearOfStudy: JInteger = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")

@@ -41,6 +41,7 @@ import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.AcademicYear
 
 
 class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDetails, resultSet: ResultSet)
@@ -58,6 +59,7 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	// A few intermediate properties that will be transformed later
 	var enrolmentStatusCode: String = _
 	var modeOfAttendanceCode: String = _
+	var academicYearString: String = _
 
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
@@ -65,7 +67,7 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-	this.academicYear = rs.getString("sce_academic_year")
+	this.academicYearString = rs.getString("sce_academic_year")
 
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getByScjCodeAndSequence(
@@ -97,14 +99,14 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy",
 		//"fundingSource",
-		"modeOfAttendance",
-		"academicYear"
+		"modeOfAttendance"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
 		copyStatus("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean) |
 		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studentCourseYearBean)
+		copyAcademicYear("academicYear", academicYearString, studentCourseYearBean)
 	}
 
 	private def copyModeOfAttendance(property: String, code: String, memberBean: BeanWrapper) = {
@@ -126,6 +128,31 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 			false
 		}	else {
 			memberBean.setPropertyValue(property, toModeOfAttendance(code))
+			true
+		}
+	}
+
+	private def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
+		val oldValue = memberBean.getPropertyValue(property) match {
+			case null => null
+			case value: AcademicYear => value
+		}
+
+		val newValue = AcademicYear.parse(acYearString)
+
+		if (oldValue == null && acYearString == null) false
+		else if (oldValue == null) {
+			// From no academic year to having an academic year
+			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
+			true
+		} else if (acYearString == null) {
+			// Record had an academic year but now doesn't
+			memberBean.setPropertyValue(property, null)
+			true
+		} else if (oldValue == newValue) {
+			false
+		} else {
+			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
 			true
 		}
 	}

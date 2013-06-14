@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -170,7 +169,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 @Entity
 @DiscriminatorValue("S")
-class StudentMember extends Member with StudentProperties with PostLoadBehaviour {
+class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
 	@OneToMany(mappedBy = "universityid", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -190,15 +189,24 @@ class StudentMember extends Member with StudentProperties with PostLoadBehaviour
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments =
+	override def affiliatedDepartments = {
+
+			val courseDepts = studentCourseDetails.asScala.map( _.department )
+			(
+			Option(homeDepartment).toStream #:::
+			studentCourseDetails.asScala.map( _.department ).toStream #:::
+			studentCourseDetails.asScala.map(_.route).map(_.department).toStream
+		).distinct
+	}
+
+/*	override def affiliatedDepartments =
 		(
-			Buffer(homeDepartment) #::
-			studentCourseDetails.asScala.map( _.department ) #::
-			studentCourseDetails.asScala.map(_.route).map(_.department) #::
+			Option(homeDepartment) #::
+			Option(studyDetails.studyDepartment) #::
+			Option(studyDetails.route).map(_.department) #::
 			Stream.empty
 		).flatten.distinct
-
-
+*/
   override def mostSignificantCourseDetails = {
 		val mostSignifCourse = studentCourseDetails.asScala.filter(_.mostSignificant)
 		if (mostSignifCourse.size ==1) Some(mostSignifCourse.head)

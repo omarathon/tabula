@@ -28,6 +28,9 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.RelationshipType
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.AppContextTestBase
 
 // scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -174,7 +177,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 			val studentMember = member.get
 
-			studentMember.studyDetails should not be (null)
+			studentMember.studentCourseDetails.size should not be (0)
 
 			there was no(profileService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
 		}
