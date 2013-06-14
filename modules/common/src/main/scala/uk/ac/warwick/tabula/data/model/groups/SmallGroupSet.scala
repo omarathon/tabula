@@ -1,24 +1,22 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import scala.collection.JavaConverters._
+
 import javax.persistence._
-import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
+import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.{AccessType, Filter, FilterDef, Type}
 import org.joda.time.DateTime
+
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import javax.validation.constraints.NotNull
-import scala.collection.JavaConverters._
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -32,7 +30,6 @@ object SmallGroupSet {
 @Entity
 @AccessType("field")
 class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
-	import SmallGroupSet._
 	
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]

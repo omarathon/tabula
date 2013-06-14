@@ -1,3 +1,8 @@
+<#--
+
+This will soon be refactored to use some components from group_components.ftl.
+
+-->
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 
