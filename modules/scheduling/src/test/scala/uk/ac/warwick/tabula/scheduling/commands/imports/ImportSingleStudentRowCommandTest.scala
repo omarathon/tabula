@@ -31,6 +31,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.services.RelationshipService
 
 // scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -156,6 +157,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 			val memberDao = mock[MemberDao]
+			val relationshipService = smartMock[RelationshipService]
 			val profileService = smartMock[ProfileService]
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
@@ -179,7 +181,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 			studentMember.studentCourseDetails.size should not be (0)
 
-			there was no(profileService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was no(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
 		}
 	}
 
@@ -191,9 +193,12 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 			val existingStaffMember = new StaffMember("0070790")
 			val memberDao = mock[MemberDao]
 			val profileService = smartMock[ProfileService]
+			val relationshipService = smartMock[RelationshipService]
+
+
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			profileService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
+			relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
@@ -212,9 +217,9 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 			val studentMember = member.get
 
-			studentMember.studyDetails should not be (null)
+			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(profileService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was one(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
 		}
 	}
 }
