@@ -1,5 +1,5 @@
 <#escape x as x?html>
-    <#assign smallGroupSet = releaseGroupSetCommand.groupToPublish/>
+    <#assign smallGroupSet = releaseGroupSetCommand.singleGroupToPublish()/>
     <#assign submitAction><@routes.releaseset smallGroupSet /></#assign>
     <#if smallGroupSet.releasedToStudents >
         <#assign studentReadonly="disabled"/>

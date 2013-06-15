@@ -56,6 +56,8 @@ This will soon be refactored to use some components from group_components.ftl.
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
+                <li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
+                    <a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
 			</ul>
 		</div>
 
@@ -82,7 +84,7 @@ This will soon be refactored to use some components from group_components.ftl.
 	</#list>
 
 <a id="${module_anchor(module)}"></a>
-<div class="striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>" data-name="${module_anchor(module)}">
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>" data-name="${module_anchor(module)}">
 	<div class="clearfix">
 		<div class="btn-group section-manage-button">
 		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>

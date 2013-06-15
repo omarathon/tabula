@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
 import scala.util.matching.Regex
 import org.hibernate.annotations.AccessType
 import javax.persistence._
@@ -14,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import scala.collection.JavaConverters._
 
 @Entity
 @NamedQueries(Array(
@@ -59,6 +59,13 @@ class Module extends GeneratedId with PermissionsTarget {
 	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
 
 	override def toString = "Module[" + code + "]"
+
+
+  // true if at least one of this module's SmallGroupSets has not been released to //both students and staff.
+  def hasUnreleasedGroupSets():Boolean = {
+    val allGroupSets = groupSets.asScala
+    allGroupSets.exists(!_.fullyReleased)
+  }
 }
 
 object Module {
@@ -90,4 +97,5 @@ object Module {
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of modules.
 	implicit val defaultOrdering = CodeOrdering
+
 }

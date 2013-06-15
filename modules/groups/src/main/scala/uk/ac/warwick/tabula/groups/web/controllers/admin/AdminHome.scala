@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{Appliable, Command, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.groups.web.Routes
@@ -39,13 +37,14 @@ class AdminDepartmentHomeController extends GroupsController {
 
 	hideDeletedItems
 	
-	@ModelAttribute def command(@PathVariable("department") dept: Department, user: CurrentUser) =
+	@ModelAttribute("adminDeptCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
 	
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 	
 	@RequestMapping(method=Array(GET, HEAD))
-	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
+	def adminDepartment(@ModelAttribute("adminDeptCommand") cmd: Appliable[Seq[Module]],
+                      @PathVariable("department") department: Department) = {
 		val modules = cmd.apply()
 		// mapping from module ID to the available group sets.
 		val setMapping: Map[String, Seq[SmallGroupSet]] = modules.map {
@@ -53,13 +52,14 @@ class AdminDepartmentHomeController extends GroupsController {
 		}.toMap
 
 		Mav("admin/department",
-			"department" -> cmd.department,
+			"department" -> department,
 			"modules" -> modules,
-			"setMapping" -> setMapping )
+			"setMapping" -> setMapping,
+      "hasUnreleasedGroupsets"->modules.exists(_.hasUnreleasedGroupSets()))
 	}
 }
 
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]] with ReadOnly with Unaudited {
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]] with ReadOnly with Appliable[Seq[Module]] with Unaudited {
 	
 	var securityService = Wire[SecurityService]
 	var moduleService = Wire[ModuleAndDepartmentService]

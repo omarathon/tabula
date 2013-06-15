@@ -11,11 +11,15 @@ import uk.ac.warwick.tabula.web.views.TextRenderer
 import org.mockito.{ArgumentCaptor, Matchers}
 import uk.ac.warwick.tabula.groups.web.Routes
 
-class ReleaseSmallGroupSetNotificationTest extends TestBase with Mockito{
+class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
 
   val TEST_CONTENT = "test"
-  def createNotification(group:SmallGroup, actor:User,recipient:User, isStudent:Boolean = true) = {
-    val n = new ReleaseSmallGroupSetNotification(group, actor, recipient, isStudent) with MockRenderer
+  def createNotification(group:SmallGroup, actor:User,recipient:User, isStudent:Boolean = true):ReleaseSmallGroupSetsNotification with MockRenderer = {
+    createMultiGroupNotification(Seq(group), actor, recipient, isStudent)
+  }
+
+  def createMultiGroupNotification(groups:Seq[SmallGroup], actor:User,recipient:User, isStudent:Boolean = true) = {
+    val n = new ReleaseSmallGroupSetsNotification(groups, actor, recipient, isStudent) with MockRenderer
     when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
     n
   }
@@ -23,7 +27,24 @@ class ReleaseSmallGroupSetNotificationTest extends TestBase with Mockito{
   @Test
   def titleIncludesGroupFormat(){new SmallGroupFixture {
     val n =  createNotification(group1, actor, recipient)
-    n.title should be("Seminar allocation")
+    n.title should be("Lab allocation")
+  }}
+
+  @Test
+  def titleJoinsMultipleGroupSetsNicely(){ new SmallGroupFixture{
+    val n = createMultiGroupNotification(Seq(group1,group2, group3),actor, recipient)
+    n.title should be ("Lab, Seminar and Tutorial allocation")
+  }}
+
+  @Test
+  def titleRemovesDuplicateFormats(){ new SmallGroupFixture{
+    val n = createMultiGroupNotification(Seq(group1,group2, group3, group4, group5),actor, recipient)
+    n.title should be ("Lab, Seminar and Tutorial allocation")
+  }}
+
+  @Test(expected = classOf[RuntimeException])
+  def cantCreateANotificationWithNoGroups(){new SmallGroupFixture{
+    val n = createMultiGroupNotification(Nil,actor, recipient)
   }}
 
   @Test
@@ -72,7 +93,7 @@ class ReleaseSmallGroupSetNotificationTest extends TestBase with Mockito{
 
     model.getValue.get("user") should be(Some(recipient))
     model.getValue.get("profileUrl") should be(Some("/view/recipient"))
-    model.getValue.get("group") should be(Some(group1))
+    model.getValue.get("groups") should be(Some(List(group1)))
   }
 
   trait MockRenderer extends TextRenderer{
