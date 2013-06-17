@@ -49,36 +49,20 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 
-	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
-	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
+	val collectFeedbackRatings = Setting[Boolean](key=Settings.CollectFeedbackRatings, default=false)
 
 	// settings for extension requests
-	def allowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse(false)
-	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
-
-	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
-	def extensionGuidelineSummary_= (summary: String) = settings += (Settings.ExtensionGuidelineSummary -> summary)
-
-	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink).orNull
-	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
-
-	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
-	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
-
-	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
-	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
-
-	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
-	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
-
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
-	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
-	
-	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
-	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
+	val allowExtensionRequests = Setting[Boolean](key=Settings.AllowExtensionRequests, default=false)
+	val extensionGuidelineSummary = OptionSetting[String](key=Settings.ExtensionGuidelineSummary)
+	val extensionGuidelineLink = OptionSetting[String](key=Settings.ExtensionGuidelineLink)
+	val showStudentName = Setting[Boolean](key=Settings.ShowStudentName, default=false)
+	val plagiarismDetectionEnabled = Setting[Boolean](key=Settings.PlagiarismDetection, default=true)
+	val assignmentInfoView = Setting[String](key=Settings.AssignmentInfoView, default=Assignment.Settings.InfoViewType.Default)
+	val personalTutorSource = Setting[String](key=Settings.PersonalTutorSource, default=Department.Settings.PersonalTutorSourceValues.Local)
+	val weekNumberingSystem = Setting[String](key=Settings.WeekNumberingSystem, default=WeekRange.NumberingSystem.Default)
 
 	// FIXME belongs in Freemarker
-	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
+	def formattedGuidelineSummary:String = extensionGuidelineSummary.value map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
 		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
 		(NodeSeq fromSeq nodes).toString()
@@ -105,7 +89,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
 	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
+		personalTutorSource.value == Settings.PersonalTutorSourceValues.Local
 	}
 
 	// If hibernate sets owners to null, make a new empty usergroup

@@ -13,30 +13,30 @@ class DepartmentTest extends TestBase with Mockito {
 	
 	@Test def settings {
 		val department = new Department
-		department.collectFeedbackRatings should be (false)
-		department.allowExtensionRequests should be (false)
-		department.canRequestExtension should be (false)
-		department.extensionGuidelineSummary should be (null)
+		department.collectFeedbackRatings.value should be (false)
+		department.allowExtensionRequests.value should be (false)
+		department.canRequestExtension.value should be (false)
+		department.extensionGuidelineSummary.value should be (None)
 		department.formattedGuidelineSummary should be ("")
-		department.extensionGuidelineLink should be (null)
-		department.showStudentName should be (false)
-		department.plagiarismDetectionEnabled should be (true)
+		department.extensionGuidelineLink.value should be (None)
+		department.showStudentName.value should be (false)
+		department.plagiarismDetectionEnabled.value should be (true)
 		
-		department.collectFeedbackRatings = true
-		department.allowExtensionRequests = true
-		department.extensionGuidelineSummary = "Here is my magic summary.\n\n    Do everything good!"
-		department.extensionGuidelineLink = "http://warwick.ac.uk"
-		department.showStudentName = true
-		department.plagiarismDetectionEnabled = false
+		department.collectFeedbackRatings.value = true
+		department.allowExtensionRequests.value = true
+		department.extensionGuidelineSummary.value = "Here is my magic summary.\n\n    Do everything good!"
+		department.extensionGuidelineLink.value = "http://warwick.ac.uk"
+		department.showStudentName.value = true
+		department.plagiarismDetectionEnabled.value = false
 		
-		department.collectFeedbackRatings should be (true)
-		department.allowExtensionRequests should be (true)
-		department.canRequestExtension should be (true)
-		department.extensionGuidelineSummary should be ("Here is my magic summary.\n\n    Do everything good!")
+		department.collectFeedbackRatings.value should be (true)
+		department.allowExtensionRequests.value should be (true)
+		department.canRequestExtension.value should be (true)
+		department.extensionGuidelineSummary.value should be ("Here is my magic summary.\n\n    Do everything good!")
 		department.formattedGuidelineSummary should be ("<p>Here is my magic summary.</p><p>Do everything good!</p>")
-		department.extensionGuidelineLink should be ("http://warwick.ac.uk")
-		department.showStudentName should be (true)
-		department.plagiarismDetectionEnabled should be (false)
+		department.extensionGuidelineLink.value should be ("http://warwick.ac.uk")
+		department.showStudentName.value should be (true)
+		department.plagiarismDetectionEnabled.value should be (false)
 	}
 	
 	@Test def groups {
