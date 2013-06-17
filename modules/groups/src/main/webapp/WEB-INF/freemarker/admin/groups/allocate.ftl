@@ -35,10 +35,10 @@
 	<div class="tabbable fix-on-scroll-container">
 	<ul class="nav nav-tabs">
 		<li class="active">
-			<a href="#allocategroups-tab1" data-toggle="tab">Drag and Drop</a>
+			<a href="#allocategroups-tab1" data-toggle="tab">Drag and drop</a>
 		</li>
 		<li >
-			<a href="#allocategroups-tab2" data-toggle="tab">Upload Spreadsheet</a>
+			<a href="#allocategroups-tab2" data-toggle="tab">Upload spreadsheet</a>
 		</li>
 	</ul>
 	
@@ -154,31 +154,16 @@
 	
 	<div class="tab-pane" id="allocategroups-tab2">
 
+		<p>You can allocate students to groups using a spreadsheet.</p>
 
-		<#assign introText>
-			<p>The spreadsheet must be in <samp>.xlsx</samp> format (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application). You can download a template spreadsheet which is correctly formatted, ready for completion.<p>
-			<p>The spreadsheet must contain two columns, headed:<p>
-			<ul>
-				<li><b>student_id</b> - contains the student's University ID number (also known as the library card number)</li>
-				<li><b>group_id</b> - contains the small group ID</li>
-			</ul>
-			<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
-			<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
-		</#assign>
-
-		<p>You can set small groups for many students at once by uploading a spreadsheet.
-			<a href="#"
-			   id="smallgroup-intro"
-			   class="use-introductory"
-			data-hash="${introHash("smallgroup-intro")}"
-			data-title="Small groups spreadsheet"
-			data-trigger="click"
-			data-placement="bottom"
-			data-html="true"
-			data-content="${introText}"><i class="icon-question-sign"></i></a></p>
-
-
-		<p><a href="allocate/template">Download a template spreadsheet</a></p>
+		<ol>
+			<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in Term 1 seminars. You may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+			</li>
+			<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for Term 1 seminars. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
+				You can select additional students to be in Term 1 seminars by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
+			<li><strong>Save</strong> your updated spreadsheet.</li>
+		    <li><strong>Choose your updated spreadsheet</strong>.</li>
+		</ol>
 
 		<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 		<input name="isfile" value="true" type="hidden"/>

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.SmallGroupService
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.JavaConverters._
@@ -123,15 +123,19 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 					allocateStudent addAll groupsExtractor.readXSSFExcelFile(file.dataStream)
 				}
 
-				val grouped = allocateStudent.asScala.filter(_.groupId!=null)
+				// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
+				val allocateUsers = allocateStudent.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
+				val usersToAddToSet = allocateUsers.filterNot(set.members.users.toSet)
+				usersToAddToSet.map(user => set.members.addUser(user.getUserId))
+
+				val grouped = allocateStudent.asScala.filter(_.groupId != null)
 						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
 						.mapValues{ values => 
-							values.map(item => userLookup.getUserByWarwickUniId(item.universityId)).asJava
+							values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
 						}
 				
 				mapping.clear()
-				mapping.putAll( (grouped - null).asJava )
-					  
+				mapping.putAll( grouped.asJava )
 			}
 		}
 	}

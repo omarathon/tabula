@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.ss.util.CellRangeAddressList
+import org.apache.poi.ss.usermodel.CellStyle
 
 class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSet, viewer: CurrentUser)
 		extends Command[ExcelView] with ReadOnly with Unaudited {
@@ -19,6 +20,8 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 
 	val groupLookupSheetName = "GroupLookup"
 	val allocateSheetName = "AllocateStudents"
+	val spreadsheetRows = 1000
+	val sheetPassword = "roygbiv"
 
 	def applyInternal() = {
 		val workbook = generateWorkbook()
@@ -31,18 +34,31 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 
 		val workbook = new XSSFWorkbook()
 		val sheet: XSSFSheet = generateAllocationSheet(workbook)
-
 		generateGroupLookupSheet(workbook)
 		generateGroupDropdowns(sheet, groups)
 
-		val groupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
+		val groupLookupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
+		val userIterator = set.members.users.iterator
 
-		for (user <- set.members.users) {
-			val currentRow = sheet.getLastRowNum() + 1
-			val row = sheet.createRow(currentRow)
-			row.createCell(0).setCellValue(user.getWarwickId)
-			row.createCell(1).setCellValue(user.getFullName)
-			row.createCell(3).setCellFormula("VLOOKUP($C" + (currentRow + 1) + ", " + groupRange + ", 2, FALSE)")
+		while (sheet.getLastRowNum < spreadsheetRows) {
+
+			val row = sheet.createRow(sheet.getLastRowNum + 1)
+
+			// put the student details into the cells
+			// otherwise create blank unprotected cells for the user to enter
+			if(userIterator.hasNext) {
+				val user = userIterator.next
+				val thisUser = user
+				row.createCell(0).setCellValue(thisUser.getWarwickId)
+				row.createCell(1).setCellValue(thisUser.getFullName)
+				createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
+			} else {
+				createUnprotectedCell(workbook, row, 0) // cell for student_id
+				createUnprotectedCell(workbook, row, 1) // cell for name (for the user's info only)
+				createUnprotectedCell(workbook, row, 2) // cell for the group name
+			}
+
+			row.createCell(3).setCellFormula("IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")")
 		}
 
 		formatWorkbook(workbook)
@@ -50,10 +66,20 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 	}
 
 
+	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") {
+		val lockedCellStyle = workbook.createCellStyle();
+		lockedCellStyle.setLocked(false);
+		val cell = row.createCell(col)
+		cell.setCellValue(value)
+		cell.setCellStyle(lockedCellStyle)
+	}
+
+
+
 	// attaches the data validation to the sheet
 	def generateGroupDropdowns(sheet: XSSFSheet, groups: List[SmallGroup]) {
 		val dropdownChoices = groups.map(_.name).toArray
-		val dropdownRange = new CellRangeAddressList(1, groups.length, 2, 2)
+		val dropdownRange = new CellRangeAddressList(1, spreadsheetRows, 2, 2)
 		val validation = getDataValidation(dropdownChoices, sheet, dropdownRange)
 
 		sheet.addValidationData(validation)
@@ -80,6 +106,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 			row.createCell(1).setCellValue(group.id)
 		}
 
+		groupSheet.protectSheet(sheetPassword)
 	}
 
 
@@ -92,6 +119,10 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		header.createCell(1).setCellValue("Student name")
 		header.createCell(2).setCellValue("Group name")
 		header.createCell(3).setCellValue("group_id")
+
+		// using apache-poi, we can't protect certain cells - rather we have to protect
+		// the entire sheet and then unprotect the ones we want to remain editable
+		sheet.protectSheet(sheetPassword)
 		sheet
 	}
 
