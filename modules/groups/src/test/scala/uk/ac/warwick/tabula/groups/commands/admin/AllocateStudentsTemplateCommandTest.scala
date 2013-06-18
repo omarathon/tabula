@@ -132,7 +132,9 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		studentRow.getCell(1).toString should be ("John Dale")
 
 		studentRow = allocateSheet.getRow(6)
-		studentRow should be (null)
+		studentRow.getCell(0).toString should be ("")
+		studentRow.getCell(1).toString should be ("")
+
 	}
 
 	@Test def groupLookupSheet() = withUser("satta") {
