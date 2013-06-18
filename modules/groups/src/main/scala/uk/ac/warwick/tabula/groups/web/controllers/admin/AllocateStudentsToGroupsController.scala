@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.web.controllers.BaseController
 
 /**
  * Allocates students that are in the allocation list for groups to individual groups.
@@ -49,6 +48,3 @@ class AllocateStudentsToGroupsController extends GroupsController {
 	}
 
 }
-
-
-
