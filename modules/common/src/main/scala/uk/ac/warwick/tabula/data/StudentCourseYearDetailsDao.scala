@@ -15,11 +15,11 @@ trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
-	def getByScjCodeAndSequence(scjCode: String, seq: Integer): Option[StudentCourseYearDetails]
+	def getByScjCodeAndSequenceNumber(scjCode: String, seq: Integer): Option[StudentCourseYearDetails]
 }
 
 @Repository
-class StudentCourseYearDetailsDaoImpl extends Daoisms {
+class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
 	import Restrictions._
 	import Order._
 

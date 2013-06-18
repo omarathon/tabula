@@ -23,7 +23,6 @@ class StudentCourseYearDetails extends  StudentCourseYearProperties
 	@ManyToOne
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
-	def studentCourseDetails_ = studentCourseDetails
 
 	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails)
 
@@ -44,7 +43,7 @@ trait StudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
 
 	@ManyToOne
-	@JoinColumn(name="code", referencedColumnName="enrolmentStatus")
+	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
 	var enrolmentStatus: SitsStatus = _
 
 	@ManyToOne

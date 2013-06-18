@@ -51,6 +51,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
+	
+	@transient
 	var relationshipService = Wire.auto[RelationshipService]
 
 	def this(user: CurrentUser) = {
@@ -172,7 +174,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
-	@OneToMany(mappedBy = "universityid", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 

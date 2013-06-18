@@ -17,6 +17,8 @@ import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 class StudentCourseDetails extends StudentCourseProperties with ToString with HibernateVersioned with PermissionsTarget {
+
+	@transient
 	var relationshipService = Wire.auto[RelationshipService]
 
 	def this(student: StudentMember, scjCode: String) {
@@ -32,7 +34,8 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
 	var student: StudentMember = _
 
-	@OneToMany(mappedBy = "scjCode", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
 	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
 
 	def toStringProps = Seq(
@@ -80,7 +83,9 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 
 trait StudentCourseProperties {
 
+	@Column(unique=true)
 	var sprCode: String = _
+	
 	var courseCode: String = _
 
 	@ManyToOne

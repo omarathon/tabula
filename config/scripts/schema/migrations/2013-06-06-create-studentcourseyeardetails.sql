@@ -6,6 +6,7 @@ create table studentcourseyeardetails (
 	enrolmentstatus nvarchar2(10),
 	modeofattendance nvarchar2(10),
 	yearofstudy nvarchar2(2),
+	lastupdateddate timestamp(6),
 	hib_version number,
 	constraint studentcourseyeardetails_pk primary key(id)
 );

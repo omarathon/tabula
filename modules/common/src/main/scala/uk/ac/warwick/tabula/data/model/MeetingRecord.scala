@@ -92,7 +92,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 
 	// End of workflow definitions
 
-	def permissionsParents = Stream(relationship.studentMember)
+	def permissionsParents = relationship.studentMember.toStream
 
 	def toStringProps = Seq(
 		"creator" -> creator,

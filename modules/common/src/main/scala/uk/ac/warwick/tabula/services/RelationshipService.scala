@@ -34,7 +34,7 @@ trait RelationshipService {
 	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): (Int, Int)
 }
 
-@Service(value = "profileService")
+@Service(value = "relationshipService")
 class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	var memberDao = Wire.auto[MemberDao]

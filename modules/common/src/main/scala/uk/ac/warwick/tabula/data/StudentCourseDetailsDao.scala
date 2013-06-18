@@ -16,11 +16,12 @@ trait StudentCourseDetailsDao {
 	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getBySprCode(sprCode: String): Option[StudentCourseDetails]
+	def getScjCodeBySprCode(sprCode: String): Option[String]
 
 }
 
 @Repository
-class StudentCourseDetailsDaoImpl extends Daoisms {
+class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	import Restrictions._
 	import Order._
 
@@ -42,4 +43,11 @@ class StudentCourseDetailsDaoImpl extends Daoisms {
 		session.newCriteria[StudentCourseDetails]
 				.add(is("sprCode", sprCode.trim))
 				.uniqueResult
+
+	def getScjCodeBySprCode(sprCode: String) = {
+		val stuCourseDetails = session.newCriteria[StudentCourseDetails]
+				.add(is("sprCode", sprCode.trim))
+				.uniqueResult
+		stuCourseDetails.map(_.scjCode)
+	}
 }

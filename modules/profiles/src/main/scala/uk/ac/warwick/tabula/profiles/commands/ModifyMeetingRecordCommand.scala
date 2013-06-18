@@ -38,7 +38,8 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Create,
+			relationship.studentMember.getOrElse(throw new IllegalStateException("Unable to discern member from " + relationship.targetSprCode)))
 
 	val meeting: MeetingRecord
 
@@ -95,7 +96,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			meetingRecordApproval
 		}
 
-		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ != creator)
+		val approver = Seq(relationship.agentMember, relationship.studentMember).flatten.find(_ != creator)
 		approver.map(getMeetingRecord(_))
 
 	}

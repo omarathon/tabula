@@ -3,22 +3,21 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
+import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
-import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
 
-class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
+class ViewProfileCommand(user: CurrentUser, profile: StudentMember) 
+	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 	if (user.isStudent && user.universityId != profile.universityId) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
 		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
@@ -26,7 +25,7 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 }
 
 @Controller
-@RequestMapping(Array("/view/{studentCourseDetails}"))
+@RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire.auto[UserLookupService]
@@ -35,10 +34,10 @@ class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	@ModelAttribute("viewMeetingRecordCommand")
+/*	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
 		restricted(new ViewMeetingRecordCommand(studentCourseDetails, user))
-	}
+	}*/
 
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
@@ -49,19 +48,19 @@ class ViewProfileController extends ProfilesController {
 	@RequestMapping
 	def viewProfile(
 			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
-			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
+			//@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
 			@RequestParam(value="meeting", required=false) openMeetingId: String,
 			@RequestParam(defaultValue="", required=false) tutorId: String) = {
 
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 
-		val meetings = meetingsCmd match {
+/*		val meetings = meetingsCmd match {
 			case None => Seq()
 			case Some(cmd) => cmd.apply
 		}
 
-		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
+		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)*/
 
 		val tutor = userLookup.getUserByWarwickUniId(tutorId)
 
@@ -69,8 +68,8 @@ class ViewProfileController extends ProfilesController {
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
-			"meetings" -> meetings,
-			"openMeeting" -> openMeeting,
+			//"meetings" -> meetings,
+			//"openMeeting" -> openMeeting,
 			"tutor" -> tutor)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
