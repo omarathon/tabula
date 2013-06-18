@@ -1676,12 +1676,37 @@ h1.with-settings {
 	}
 
 
-	// tabbed content extra styling
+	// tabbed content per style guide
 	.tab-content {
 		padding: 10px;
 		border-width: 0px 1px 1px 1px;
-		border-color:#ddd;
+		border-color: @tabBorder;
 		border-style:solid;
+	}
+
+	#container {
+		.nav-tabs {
+			li {
+				a {
+					border: 1px solid @tabBorder;
+					border-bottom-color: transparent;
+					margin-right:5px;
+				}
+
+				a:hover {
+					border-bottom-color: @tabBorder;
+				}
+			}
+
+			li.active a:hover {
+				border-bottom-color: transparent;
+			}
+		}
+
+		// Allocate students by spreadsheet specific
+		.step-action label {
+			font-weight:bold;
+		}
 	}
 
 }

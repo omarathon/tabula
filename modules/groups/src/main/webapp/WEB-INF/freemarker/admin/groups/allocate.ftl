@@ -154,36 +154,27 @@
 	
 	<div class="tab-pane" id="allocategroups-tab2">
 
-		<p>You can allocate students to groups using a spreadsheet.</p>
-
-		<ol>
-			<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in Term 1 seminars. You may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
-			</li>
-			<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for Term 1 seminars. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
-				You can select additional students to be in Term 1 seminars by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
-			<li><strong>Save</strong> your updated spreadsheet.</li>
-		    <li><strong>Choose your updated spreadsheet</strong>.</li>
-		</ol>
-
 		<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
-		<input name="isfile" value="true" type="hidden"/>
-		<table role="presentation" class="narrowed-form">
-			<tr>
-				<td id="multifile-column">
-					<h3>Select file</h3>
-					<div id="multifile-column-description">
-						<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
-					</div>
-					<@form.labelled_row "file.upload" "Files">
-					<input type="file" name="file.upload" multiple />
-				</@form.labelled_row>
-			</td>
-		</tr>
-	</table>
-	<div class="submit-buttons">
-		<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
-	</div>
-</@f.form>
+
+			<p>You can allocate students to groups using a spreadsheet.</p>
+
+			<ol>
+				<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in Term 1 seminars. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+				</li>
+				<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for Term 1 seminars. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
+					You can select additional students to be in Term 1 seminars by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
+				<li><strong>Save</strong> your updated spreadsheet.</li>
+			    <li><@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" ><input type="file" name="file.upload"  /> </@form.labelled_row></li>
+			</ol>
+
+			<input name="isfile" value="true" type="hidden"/>
+
+
+			<div class="submit-buttons">
+				<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
+			</div>
+		</@f.form>
+
 	</div><!-- end 2nd tab-->
 	
 	</div><!-- end tab-content -->
