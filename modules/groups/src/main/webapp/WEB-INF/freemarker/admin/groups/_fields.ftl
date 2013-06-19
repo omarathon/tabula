@@ -123,12 +123,12 @@
 	
 	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
 		<div class="clearfix">
-			<h2 class="section-title with-button">Groups</h2>
 			<div class="btn-group section-manage-button">
 			  <button type="button" data-target="#groups-modal" class="btn" data-toggle="modal">
 					<#if groups?size gt 0>Edit<#else>Add</#if> groups
 				</button>
 			</div>
+			<h2 class="section-title with-button">Groups</h2>
 		</div>
 		
 		<#if groups?size gt 0>

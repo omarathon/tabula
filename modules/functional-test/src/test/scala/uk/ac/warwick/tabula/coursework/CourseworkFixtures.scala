@@ -115,7 +115,7 @@ trait CourseworkFixtures extends BrowserTest {
 		// Eventually, a Jax!
 		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
 		
-		pageSource contains(members.size + " manually enrolled") should be (true)
+		pageSource should include(members.size + " manually enrolled")
 		
 		checkbox("collectSubmissions").select()
 		

@@ -612,7 +612,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
 					<configuration>
-						<forkCount>1C</forkCount>
+						<forkCount>0.75C</forkCount>
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
 								ensuring forks use separate data -->

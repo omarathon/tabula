@@ -47,10 +47,15 @@ class AdminDepartmentHomeController extends GroupsController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val modules = cmd.apply()
-		
+		// mapping from module ID to the available group sets.
+		val setMapping: Map[String, Seq[SmallGroupSet]] = modules.map {
+			module => module.id -> module.groupSets.asScala
+		}.toMap
+
 		Mav("admin/department",
 			"department" -> cmd.department,
-			"modules" -> modules)
+			"modules" -> modules,
+			"setMapping" -> setMapping )
 	}
 }
 
