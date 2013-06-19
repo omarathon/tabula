@@ -61,17 +61,17 @@
 					<div class="control-group">
 						<div class="controls">
 							<label class="checkbox">
-								<input type="checkbox" name="notifyCommand.notifyTutee" class="notifyTutee" checked />
+								<input type="checkbox" name="notifyTutee" class="notifyTutee" checked />
 								Tutee
 							</label>
 
 							<label class="checkbox <#if pageAction=="add">muted</#if>">
-								<input type="checkbox" name="notifyCommand.notifyOldTutor" class="notifyOldTutor" <#if pageAction!="add">checked <#else> disabled </#if> />
+								<input type="checkbox" name="notifyOldTutor" class="notifyOldTutor" <#if pageAction!="add">checked <#else> disabled </#if> />
 								Old tutor
 							</label>
 
 							<label class="checkbox">
-								<input type="checkbox" name="notifyCommand.notifyNewTutor" class="notifyNewTutor" checked />
+								<input type="checkbox" name="notifyNewTutor" class="notifyNewTutor" checked />
 								New tutor
 							</label>
 						</div>

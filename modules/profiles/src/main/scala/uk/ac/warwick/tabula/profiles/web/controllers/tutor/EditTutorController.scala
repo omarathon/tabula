@@ -7,23 +7,26 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.commands.{Notifies, Command, Description}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.TutorChangeNotifierCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.helpers.Promises
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import org.springframework.web.bind.annotation.RequestParam
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.profiles.notifications.TutorChangeNotification
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer, TextRenderer}
+import scala._
+import scala.Some
+import scala.Some
 
-class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val remove: Boolean) extends Command[Option[StudentRelationship]] with Promises {
+class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
+	extends Command[Option[StudentRelationship]] with Notifies[StudentRelationship] with Promises {
 	
 	var profileService = Wire[ProfileService]
 
@@ -44,14 +47,18 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 
 	val newTutor = promise { tutor }
 
-	val notifyCommand = new TutorChangeNotifierCommand(student, currentTutor, newTutor)
+	var notifyTutee: Boolean = false
+	var notifyOldTutor: Boolean = false
+	var notifyNewTutor: Boolean = false
+
+	var modifiedRelationships: Seq[StudentRelationship] = Nil
 
 	def applyInternal = {
 		if (!currentTutor.isDefined) {
 			// Brand new tutor
 			val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
 
-			notifyCommand.apply()
+			modifiedRelationships = Seq(newRelationship)
 			Some(newRelationship)
 		} else if (currentTutor.get != tutor) {
 			// Replacing the current tutor with a new one
@@ -71,17 +78,18 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 					// Save the new relationship
 					val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
 
-					notifyCommand.apply()
+					modifiedRelationships = Seq(newRelationship)
 					Some(newRelationship)
 				}
 			}
 		} else if (currentTutor.get == tutor && remove) {
 				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
 				endTutorRelationship(currentRelationships)
+				modifiedRelationships = currentRelationships
 				None
-			} else {
+		} else {
 				None
-			}
+		}
 	}
 
 	def endTutorRelationship(currentRelationships: Seq[StudentRelationship]) {
@@ -91,7 +99,45 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 		}
 	}
 
-	override def describe(d: Description) = d.property("student ID" -> student.universityId).property("new tutor ID" -> tutor.universityId)
+	override def describe(d: Description) = {
+		val desc = d
+		desc.property("student ID" -> student.universityId)
+		desc.property("new tutor ID" -> tutor.universityId)
+	}
+
+	def emit: Seq[Notification[StudentRelationship]] = {
+
+		val notifications = modifiedRelationships.flatMap(relationship => {
+
+			val tuteeNotification:List[Notification[StudentRelationship]] = if(notifyTutee){
+				val template = TutorChangeNotification.TuteeTemplate
+				val recepient = relationship.studentMember.asSsoUser
+				List(new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer)
+			} else Nil
+
+			val oldTutorNotification:List[Notification[StudentRelationship]] = if(notifyOldTutor){
+				val notifications = currentTutor.map(oldTutor => {
+					val template = TutorChangeNotification.OldTutorTemplate
+					val recepient =  oldTutor.asSsoUser
+					new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
+				})
+				List(notifications).flatten
+			} else Nil
+
+			val newTutorNotification:List[Notification[StudentRelationship]] = if(notifyNewTutor){
+				val notifications = relationship.agentMember.map(newTutor => {
+					val template = TutorChangeNotification.NewTutorTemplate
+					val recepient = newTutor.asSsoUser
+					new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
+				})
+				List(notifications).flatten
+			} else Nil
+
+			tuteeNotification ++ oldTutorNotification ++ newTutorNotification
+		})
+
+		notifications
+	}
 }
 
 @Controller
@@ -100,9 +146,12 @@ class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("editTutorCommand")
-	def editTutorCommand(@PathVariable("student") student: Member, @RequestParam(value="currentTutor", required=false) currentTutor: Member,
-	                     @RequestParam(value="remove", required=false) remove: Boolean) = student match {
-		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), Option(remove).getOrElse(false))
+	def editTutorCommand(@PathVariable("student") student: Member,
+	                     @RequestParam(value="currentTutor", required=false)
+	                     currentTutor: Member,
+	                     @RequestParam(value="remove", required=false) remove: Boolean,
+		                   user: CurrentUser) = student match {
+		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
 		case _ => throw new ItemNotFoundException
 	}
 
