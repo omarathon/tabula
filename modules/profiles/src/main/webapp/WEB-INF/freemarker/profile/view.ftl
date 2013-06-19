@@ -159,6 +159,8 @@
 
 	<#if profile.student>
 		<#list profile.studentCourseDetails as studentCourseDetails>
+			<hr>
+			<h3>Course: ${(studentCourseDetails.route.name)!}</h3>
 			<div class="untabbed">
 				<#include "_supervision.ftl" />
 			</div>

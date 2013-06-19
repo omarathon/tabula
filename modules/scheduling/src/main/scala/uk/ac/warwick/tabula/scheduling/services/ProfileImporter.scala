@@ -123,7 +123,7 @@ object ProfileImporter {
 			spr.spr_dptc as department_code,
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
-			--spr.spr_levc as level_code,
+			spr.spr_levc as level_code,
 			spr.prs_code as spr_tutor1,
 			--spr.spr_prs2 as spr_tutor2,
 
@@ -149,7 +149,6 @@ object ProfileImporter {
 
 			join intuit.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
-				and scj.scj_udfa = 'Y'
 
 			join intuit.srs_sce sce
 				on scj.scj_code = sce.sce_scjc

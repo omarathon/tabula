@@ -100,6 +100,7 @@ trait StudentCourseProperties {
 	var department: Department = _
 
 	var awardCode: String = _
+	var levelCode: String = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	var beginDate: LocalDate = _

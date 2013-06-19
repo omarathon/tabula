@@ -72,6 +72,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	this.courseYearLength = rs.getString("course_year_length")
+	this.levelCode = rs.getString("level_code")
 
 	this.sprStatusCode = rs.getString("spr_status_code")
 
@@ -118,7 +119,8 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 		"endDate",
 		"expectedEndDate",
 		"courseYearLength",
-		"mostSignificant"
+		"mostSignificant",
+		"levelCode"
 	)
 
 	private def copyStudentCourseProperties(commandBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {

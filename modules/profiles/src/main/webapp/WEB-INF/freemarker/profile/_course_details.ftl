@@ -13,8 +13,8 @@
 			<tr>
 				<th>Course code</th>
 				<td>
-					<#if studentCourseDetails.sitsCourseCode??>
-						${studentCourseDetails.sitsCourseCode?upper_case}
+					<#if studentCourseDetails.courseCode??>
+						${studentCourseDetails.courseCode?upper_case}
 					</#if>
 				</td>
 			</tr>
@@ -77,26 +77,17 @@
 		<tbody>
 			<tr>
 				<th>UG/PG</th>
-				<td>
-					<#if (studentCourseDetails.route.degreeType)??>
-						${studentCourseDetails.route.degreeType.toString}
-					</#if>
+				<td>${(studentCourseDetails.route.degreeType.toString)!}
 				</td>
 			</tr>
 			<tr>
 				<th>Attendance</th>
-				<td>
-					<#if studentCourseDetails.modeOfAttendance??>
-						${studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay}
-					</#if>
+				<td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}
 				</td>
 			</tr>
 			<tr>
 				<th>Status</th>
-				<td>
-					<#if studentCourseDetails.statusString??>
-						${studentCourseDetails.statusString}
-					</#if>
+				<td>${(studentCourseDetails.statusString)!}
 				</td>
 			</tr>
 		</tbody>
