@@ -85,13 +85,16 @@ trait StudentCourseProperties {
 
 	@Column(unique=true)
 	var sprCode: String = _
-	
+
 	var courseCode: String = _
 
 	@ManyToOne
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _
 
+	// this is the department from the SPR table in SITS (Student Programme Route).  It is likely to be the
+	// same as the department on the Route table, but in some cases, e.g. where routes change ownership in
+	// different years, the SPR code might contain a different department.
 	@ManyToOne
 	@JoinColumn(name = "deptCode", referencedColumnName="code")
 	var department: Department = _
@@ -110,7 +113,7 @@ trait StudentCourseProperties {
 	var courseYearLength: String = _
 
 	@ManyToOne
-	@JoinColumn(name="sprStatusCode", referencedColumnName="code")
+	@JoinColumn(name="sprStatusCode")
 	var sprStatus: SitsStatus = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")

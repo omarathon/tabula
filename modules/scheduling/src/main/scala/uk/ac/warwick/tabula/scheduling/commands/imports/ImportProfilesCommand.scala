@@ -95,7 +95,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 			profileImporter.userIdAndCategory(member) match {
 				case Some(membInfo: MembershipInformation) => {
-					val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
+					val commands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user))
+					val members = commands map { _.apply }
+
+					//val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
 					session.flush
 					for (member <- members) session.evict(member)
 				}

@@ -83,23 +83,10 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
 
-	// A few intermediate properties that will be transformed later
-	var studyDepartmentCode: String = _
-	var routeCode: String = _
-	var sprStatusCode: String = _
-	var enrolmentStatusCode: String = _
-	var modeOfAttendanceCode: String = _
-
-	var scjCode: String = _
-
-	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
-	var sprTutor1 = rs.getString("spr_tutor1")
-	this.routeCode = rs.getString("route_code")
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
-	this.sprStatusCode = rs.getString("spr_status_code")
-	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
-	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
+
+	val importSingleStudentCourseCommand = new ImportSingleStudentCourseCommand(rs)
 
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
@@ -129,7 +116,9 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 			memberDao.saveOrUpdate(member)
 		}
 
-		new ImportSingleStudentCourseCommand(member, resultSet).apply
+		importSingleStudentCourseCommand.stuMem = member
+		importSingleStudentCourseCommand.apply
+		//new ImportSingleStudentCourseCommand(member, rs).apply
 
 		member
 	}
@@ -150,53 +139,6 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 			val uniId = prsCode.substring(2)
 			if (uniId forall Character.isDigit ) Some(uniId)
 			else None
-		}
-	}
-
-	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case null => null
-			case value: Route => value
-		}
-
-		if (oldValue == null && code == null) false
-		else if (oldValue == null) {
-			// From no route to having a route
-			memberBean.setPropertyValue(property, toRoute(code))
-			true
-		} else if (code == null) {
-			// User had a route but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else if (oldValue.code == code.toLowerCase) {
-			false
-		}	else {
-			memberBean.setPropertyValue(property, toRoute(code))
-			true
-		}
-	}
-
-	private def toRoute(routeCode: String) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
-	}
-
-	private def toSitsStatus(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			sitsStatusesImporter.sitsStatusMap.get(code).getOrElse(null)
-		}
-	}
-
-	private def toModeOfAttendance(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			modeOfAttendanceImporter.modeOfAttendanceMap.get(code).getOrElse(null)
 		}
 	}
 

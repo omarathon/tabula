@@ -32,20 +32,13 @@
 			</tr>
 			<tr>
 				<th>Intended award</th>
-				<td>
-					<#if studentCourseDetails.intendedAward??>
-						${studentCourseDetails.intendedAward}
-					</#if>
-				</td>
+					<td>${(studentCourseDetails.awardCode)!}</td>
 			</tr>
 		</tbody>
 		<tbody>
 			<tr>
 				<th>Year of study</th>
-				<td>
-					<#if studentCourseDetails.yearOfStudy??>
-						${studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy}
-					</#if>
+				<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 				</td>
 			</tr>
 	 		<tr>

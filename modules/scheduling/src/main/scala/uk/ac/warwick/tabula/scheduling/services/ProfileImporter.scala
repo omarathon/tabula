@@ -41,7 +41,10 @@ class ProfileImporter extends Logging {
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(sits, member, ssoUser)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = {
+		val ret = new StudentInformationQuery(sits, member, ssoUser)
+		ret
+	}
 	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
 	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] = {
@@ -52,9 +55,12 @@ class ProfileImporter extends Logging {
 			val ssoUser = users(usercode)
 
 			mac.member.userType match {
-				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(
+				case Student 		   => {
+					val cmds = studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
 										  ).toSeq
+					cmds
+					}
 				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
@@ -109,12 +115,12 @@ object ProfileImporter {
 
 			nat.nat_name as nationality,
 
-			crs.crs_code as sits_course_code,
+			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
 
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
-			spr.spr_dptc as study_department,
+			spr.spr_dptc as department_code,
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
 			--spr.spr_levc as level_code,
@@ -133,7 +139,8 @@ object ProfileImporter {
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
 			sce.sce_moac as mode_of_attendance_code,
-			sce.sce_ayrc as sce_academic_year
+			sce.sce_ayrc as sce_academic_year,
+			sce.sce_seq2 as sce_sequence_number
 
 		from intuit.ins_stu stu
 
@@ -164,7 +171,7 @@ object ProfileImporter {
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			where stu.stu_code = (:uniId)
+		where stu.stu_udf3 in (:usercodes)
 		"""
 
 	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)

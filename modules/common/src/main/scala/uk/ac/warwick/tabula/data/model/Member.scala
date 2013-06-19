@@ -51,7 +51,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
-	
+
 	@transient
 	var relationshipService = Wire.auto[RelationshipService]
 
@@ -167,6 +167,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
+
+	def hasCurrentEnrolment = false
 }
 
 @Entity
@@ -191,14 +193,17 @@ class StudentMember extends Member with StudentProperties {
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments = {
+	override def affiliatedDepartments: Stream[Department] = {
+		val x = studentCourseDetails.asScala.map( _.department )
+		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
+		val routeDepartments = studentCourseDetails.asScala.map(_.route).map(_.department).toStream
 
-			val courseDepts = studentCourseDetails.asScala.map( _.department )
-			(
-			Option(homeDepartment).toStream #:::
-			studentCourseDetails.asScala.map( _.department ).toStream #:::
-			studentCourseDetails.asScala.map(_.route).map(_.department).toStream
+		(
+				Stream(homeDepartment) #:::
+				sprDepartments #:::
+				routeDepartments
 		).distinct
+
 	}
 
 /*	override def affiliatedDepartments =
@@ -214,6 +219,11 @@ class StudentMember extends Member with StudentProperties {
 		if (mostSignifCourse.size ==1) Some(mostSignifCourse.head)
 		else None
 	}
+
+	override def hasCurrentEnrolment: Boolean = {
+		studentCourseDetails.asScala.map(_.hasCurrentEnrolment).size > 0
+	}
+
 }
 
 @Entity

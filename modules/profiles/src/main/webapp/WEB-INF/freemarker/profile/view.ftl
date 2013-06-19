@@ -166,7 +166,7 @@
 				<#include "_personal_development.ftl" />
 			</div>
 			<div class="untabbed">
-				<#if profile.studentCourseDetails.hasCurrentEnrolment>
+				<#if (profile.hasCurrentEnrolment)??>
 					<#include "_course_details.ftl" />
 				<#else>
 					This student has no enrolment record for this course in the current year.

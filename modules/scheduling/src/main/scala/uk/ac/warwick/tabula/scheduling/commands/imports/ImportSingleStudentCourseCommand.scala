@@ -27,28 +27,37 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 
-class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultSet)
+class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying with SitsPropertyCopying{
+
+	import ImportMemberHelpers._
+
+	implicit val rs = resultSet
+	implicit val metadata = rs.getMetaData
 
 	var memberDao = Wire.auto[MemberDao]
 	var relationshipService = Wire.auto[RelationshipService]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
-	import ImportMemberHelpers._
-
-	this.mostSignificant = rs.getString("most_signif_indicator").toUpperCase() == "Y"
-
-		implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
-
-	var scjCode: String = rs.getString("scj_code")
-
 	// A few intermediate properties that will be transformed later
 	var routeCode: String = _
 	var sprStatusCode: String = _
 	var departmentCode: String = _
-	var mostSignifIndicator: String = _
+
+	// This needs to be assigned before apply is called.
+	// (can't be in the constructor because it's not yet created then)
+	// TODO - use promises to make sure it gets assigned
+	var stuMem: StudentMember = _
+
+	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
+	var scjCode: String = rs.getString("scj_code")
+
+	// now grab stuff from the result set
+	this.mostSignificant = rs.getString("most_signif_indicator") match {
+		case "Y" | "y" => true
+		case _ => false
+	}
 
 	this.routeCode = rs.getString("route_code")
 	this.departmentCode = rs.getString("department_code")
@@ -63,9 +72,10 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	this.courseYearLength = rs.getString("course_year_length")
-	this.mostSignifIndicator = rs.getString("most_signif_indicator")
 
 	this.sprStatusCode = rs.getString("spr_status_code")
+
+	val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
 
 	override def applyInternal(): StudentCourseDetails = transactional() {
 		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)
@@ -89,7 +99,8 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 			studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
 		}
 
-		new ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDetails, resultSet: ResultSet).apply
+		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
+		importSingleStudentCourseYearCommand.apply
 
 		captureTutor(department)
 
@@ -102,13 +113,12 @@ class ImportSingleStudentCourseCommand(stuMem: StudentMember, resultSet: ResultS
 		"sprCode",
 		"scjCode",
 		"courseCode",
-		"yearOfStudy",
-		"intendedAward",
+		"awardCode",
 		"beginDate",
 		"endDate",
 		"expectedEndDate",
-		"fundingSource",
-		"courseYearLength"
+		"courseYearLength",
+		"mostSignificant"
 	)
 
 	private def copyStudentCourseProperties(commandBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {

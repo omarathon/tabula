@@ -15,7 +15,7 @@ trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
-	def getByScjCodeAndSequenceNumber(scjCode: String, seq: Integer): Option[StudentCourseYearDetails]
+	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 }
 
 @Repository
@@ -34,9 +34,9 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 
 	def getStudentCourseYearDetails(id: String) = getById[StudentCourseYearDetails](id)
 
-	def getByScjCodeAndSequenceNumber(scjCode: String, seq: Integer): Option[StudentCourseYearDetails] =
+	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
 		session.newCriteria[StudentCourseYearDetails]
-			.add(is("scjCode", scjCode))
+			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
 }

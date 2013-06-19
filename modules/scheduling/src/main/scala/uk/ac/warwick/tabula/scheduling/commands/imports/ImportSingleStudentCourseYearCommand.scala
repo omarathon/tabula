@@ -44,7 +44,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.AcademicYear
 
 
-class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDetails, resultSet: ResultSet)
+class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying with SitsPropertyCopying {
 	import ImportMemberHelpers._
@@ -61,6 +61,11 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	var modeOfAttendanceCode: String = _
 	var academicYearString: String = _
 
+	// This needs to be assigned before apply is called.
+	// (can't be in the constructor because it's not yet created then)
+	// TODO - use promises to make sure it gets assigned
+	var studentCourseDetails: StudentCourseDetails = _
+
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
@@ -70,8 +75,8 @@ class ImportSingleStudentCourseYearCommand(studentCourseDetails: StudentCourseDe
 	this.academicYearString = rs.getString("sce_academic_year")
 
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
-		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getByScjCodeAndSequence(
-				studentCourseDetails.scjCode,
+		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
+				studentCourseDetails,
 				sceSequenceNumber)
 
 		logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
