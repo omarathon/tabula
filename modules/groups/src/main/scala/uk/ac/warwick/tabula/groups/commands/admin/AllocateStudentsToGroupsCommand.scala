@@ -126,7 +126,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 				// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
 				val allocateUsers = allocateStudent.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
 				val usersToAddToSet = allocateUsers.filterNot(set.members.users.toSet)
-				usersToAddToSet.map(user => set.members.addUser(user.getUserId))
+				for(user <- usersToAddToSet) set.members.addUser(user.getUserId)
 
 				val grouped = allocateStudent.asScala.filter(_.groupId != null)
 						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }

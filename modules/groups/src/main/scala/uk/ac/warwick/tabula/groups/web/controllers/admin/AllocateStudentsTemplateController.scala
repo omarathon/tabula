@@ -18,7 +18,7 @@ class AllocateStudentsTemplateController extends BaseController {
 
 	@RequestMapping
 	def getTemplate(@Valid cmd:AllocateStudentsTemplateCommand) = {
-		cmd.applyInternal()
+		cmd.apply()
 	}
 
 }
