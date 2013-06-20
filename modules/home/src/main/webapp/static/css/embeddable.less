@@ -1000,6 +1000,13 @@ a.btn { text-decoration: none; }
 // Icons + ID6 require some adjustment
 [class^="icon-"], [class*=" icon-"] { margin-top: 2px; }
 
+a.btn-like {
+	color: @textColor;
+	&:hover{
+	 color: @tabulaTurquoise;
+	}
+}
+
 .originality-report {
   text-align: right;
   .hyphenate-words();
@@ -1323,11 +1330,6 @@ h1.with-settings {
 				summary:hover {
 					background-color: @zebra-dark;
 					.transition-duration(0.3s);
-				}
-
-				i.icon-spinner {
-					background-image: url("../images/icon-spinner.gif");
-					background-position: 0px 0px;
 				}
 
 				details {
@@ -1669,4 +1671,39 @@ h1.with-settings {
 	legend {
 		font-weight: normal;
 	}
+
+
+	// tabbed content per style guide
+	.tab-content {
+		padding: 10px;
+		border-width: 0px 1px 1px 1px;
+		border-color: @tabBorder;
+		border-style:solid;
+	}
+
+	#container {
+		.nav-tabs {
+			li {
+				a {
+					border: 1px solid @tabBorder;
+					border-bottom-color: transparent;
+					margin-right:5px;
+				}
+
+				a:hover {
+					border-bottom-color: @tabBorder;
+				}
+			}
+
+			li.active a:hover {
+				border-bottom-color: transparent;
+			}
+		}
+
+		// Allocate students by spreadsheet specific
+		.step-action label {
+			font-weight:bold;
+		}
+	}
+
 }

@@ -465,7 +465,7 @@
 			$(window).scroll(function() {
 				var scrollTop = $(this).scrollTop() + gutter;
 
-				$('.fix-on-scroll').each(function() {
+				$('.fix-on-scroll:visible').each(function() {
 					var $this = $(this);
 
 					var $scrollContainer = $this.closest('.fix-on-scroll-container');
