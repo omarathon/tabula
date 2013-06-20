@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
@@ -29,6 +30,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var userLookup = Wire.auto[UserLookupService]
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
+	var courseImporter = Wire.auto[CourseImporter]
 
 	var features = Wire.auto[Features]
 
@@ -39,6 +41,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			benchmark("ImportMembers") {
 				importSitsStatuses
 				importModeOfAttendances
+				courseImporter.importCourses
 				doMemberDetails
 			}
 		}

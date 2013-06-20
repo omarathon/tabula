@@ -48,7 +48,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 
 	var memberDao = Wire.auto[MemberDao]
 	var fileDao = Wire.auto[FileDao]
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
@@ -192,14 +191,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		photo.uploadedDataLength = bytes.length
 		fileDao.savePermanent(photo)
 		photo
-	}
-
-	private def toDepartment(departmentCode: String) = {
-		if (departmentCode == null || departmentCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
-		}
 	}
 
 	override def describe(d: Description) = d.property("universityId" -> universityId)

@@ -86,8 +86,10 @@ trait StudentCourseProperties {
 	@Column(unique=true)
 	var sprCode: String = _
 
-	var courseCode: String = _
-
+	@ManyToOne
+	@JoinColumn(name = "courseCode", referencedColumnName="code")
+	var course: Course = _	
+	
 	@ManyToOne
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _

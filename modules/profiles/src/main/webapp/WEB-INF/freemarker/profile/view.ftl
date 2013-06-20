@@ -159,8 +159,10 @@
 
 	<#if profile.student>
 		<#list profile.studentCourseDetails as studentCourseDetails>
-			<hr>
-			<h3>Course: ${(studentCourseDetails.route.name)!}</h3>
+			<#if profile.studentCourseDetails?size gt 1>
+				<hr>
+				<h3>Course: ${(studentCourseDetails.course.name)!}</h3>
+			</#if>
 			<div class="untabbed">
 				<#include "_supervision.ftl" />
 			</div>

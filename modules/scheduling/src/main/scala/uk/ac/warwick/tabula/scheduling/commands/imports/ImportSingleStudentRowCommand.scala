@@ -79,7 +79,6 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 	implicit val rs = resultSet
 	implicit val metadata = rs.getMetaData
 
-	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
 

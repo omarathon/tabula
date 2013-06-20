@@ -29,7 +29,6 @@ import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
@@ -46,7 +45,7 @@ import uk.ac.warwick.tabula.AcademicYear
 
 class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
-	with StudentCourseYearProperties with Unaudited with PropertyCopying with SitsPropertyCopying {
+	with StudentCourseYearProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
@@ -109,7 +108,7 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
-		copyStatus("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean) |
+		copyObjectProperty("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean, toSitsStatus(enrolmentStatusCode)) |
 		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studentCourseYearBean)
 		copyAcademicYear("academicYear", academicYearString, studentCourseYearBean)
 	}

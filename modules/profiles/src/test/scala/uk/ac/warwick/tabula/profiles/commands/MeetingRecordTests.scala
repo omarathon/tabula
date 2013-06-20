@@ -59,7 +59,7 @@ trait MeetingRecordTests extends AppContextTestBase with Mockito {
 			mr.description = "Lovely words"
 
 			val approval = new MeetingRecordApproval
-			approval.approver = relationship.studentMember
+			approval.approver = relationship.studentMember.get
 			approval.creationDate = aprilFool
 			approval.state = Pending
 			approval.meetingRecord = mr

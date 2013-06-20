@@ -22,14 +22,15 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.scheduling.helpers.SitsPropertyCopying
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.Course
+import uk.ac.warwick.tabula.services.CourseAndRouteService
 
 class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
-	with StudentCourseProperties with Unaudited with PropertyCopying with SitsPropertyCopying{
+	with StudentCourseProperties with Unaudited with PropertyCopying {
 
 	import ImportMemberHelpers._
 
@@ -39,11 +40,16 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	var memberDao = Wire.auto[MemberDao]
 	var relationshipService = Wire.auto[RelationshipService]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
+	var courseAndRouteService = Wire.auto[CourseAndRouteService]
 
-	// A few intermediate properties that will be transformed later
-	var routeCode: String = _
-	var sprStatusCode: String = _
-	var departmentCode: String = _
+	// Grab various codes from the result set into local variables ready to persist as objects
+	var routeCode = rs.getString("route_code")
+	var courseCode = rs.getString("course_code")
+	var sprStatusCode = rs.getString("spr_status_code")
+	var departmentCode = rs.getString("department_code")
+
+	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
+	var sprTutor1 = rs.getString("spr_tutor1")
 
 	// This needs to be assigned before apply is called.
 	// (can't be in the constructor because it's not yet created then)
@@ -53,28 +59,19 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
 	var scjCode: String = rs.getString("scj_code")
 
-	// now grab stuff from the result set
+	// now grab data from the result set into properties
 	this.mostSignificant = rs.getString("most_signif_indicator") match {
 		case "Y" | "y" => true
 		case _ => false
 	}
 
-	this.routeCode = rs.getString("route_code")
-	this.departmentCode = rs.getString("department_code")
-
-	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
-	var sprTutor1 = rs.getString("spr_tutor1")
-
 	this.sprCode = rs.getString("spr_code")
-	this.courseCode = rs.getString("course_code")
 	this.awardCode = rs.getString("award_code")
 	this.beginDate = toLocalDate(rs.getDate("begin_date"))
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	this.courseYearLength = rs.getString("course_year_length")
 	this.levelCode = rs.getString("level_code")
-
-	this.sprStatusCode = rs.getString("spr_status_code")
 
 	val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
 
@@ -125,9 +122,26 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 
 	private def copyStudentCourseProperties(commandBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseProperties, commandBean, studentCourseDetailsBean) |
-		copyDepartment("department", departmentCode, studentCourseDetailsBean) |
-		copyRoute("route", routeCode, studentCourseDetailsBean) |
-		copyStatus("sprStatus", sprStatusCode, studentCourseDetailsBean)
+		copyObjectProperty("department", departmentCode, studentCourseDetailsBean, toDepartment(departmentCode)) |
+		copyObjectProperty("route", routeCode, studentCourseDetailsBean, toRoute(routeCode)) |
+		copyObjectProperty("course", courseCode, studentCourseDetailsBean, toCourse(courseCode)) |
+		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
+	}
+
+	private def toRoute(routeCode: String) = {
+		if (routeCode == null || routeCode == "") {
+			null
+		} else {
+			courseAndRouteService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
+		}
+	}
+
+	private def toCourse(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			courseAndRouteService.getCourseByCode(code.toLowerCase).getOrElse(null)
+		}
 	}
 
 
@@ -172,42 +186,9 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 					}
 				}
 				case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
-
 			}
 		}
 	}
-
-	private def copyRoute(property: String, code: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case null => null
-			case value: Route => value
-		}
-
-		if (oldValue == null && code == null) false
-		else if (oldValue == null) {
-			// From no route to having a route
-			memberBean.setPropertyValue(property, toRoute(code))
-			true
-		} else if (code == null) {
-			// User had a route but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else if (oldValue.code == code.toLowerCase) {
-			false
-		}	else {
-			memberBean.setPropertyValue(property, toRoute(code))
-			true
-		}
-	}
-
-	private def toRoute(routeCode: String) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
-	}
-
 	override def describe(d: Description) = d.property("scjCode" -> scjCode).property("category" -> "student")
 }
 

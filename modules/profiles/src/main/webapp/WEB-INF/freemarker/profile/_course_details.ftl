@@ -12,22 +12,12 @@
 			</tr>
 			<tr>
 				<th>Course code</th>
-				<td>
-					<#if studentCourseDetails.courseCode??>
-						${studentCourseDetails.courseCode?upper_case}
-					</#if>
+				<td>${(studentCourseDetails.course.code?upper_case)!}
 				</td>
 			</tr>
 			<tr>
 				<th>Department</th>
-				<td>
-					<#if studentCourseDetails.studyDepartment??>
-						${studentCourseDetails.department.name} (${studentCourseDetails.department.code?upper_case})
-					<#else>
-						<#if (studentCourseDetails.route.department.name)??>
-							${studentCourseDetails.route.department.name}
-						</#if>
-					</#if>
+				<td>${(studentCourseDetails.department.name)!} (${(studentCourseDetails.department.code?upper_case)})
 				</td
 			</tr>
 			<tr>

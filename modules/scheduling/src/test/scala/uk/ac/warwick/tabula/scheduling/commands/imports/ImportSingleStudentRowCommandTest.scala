@@ -32,6 +32,7 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.CourseAndRouteService
 
 // scalastyle:off magic.number
 class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -43,7 +44,8 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 		val route = new Route
 		val mds = mock[ModuleAndDepartmentService]
-		mds.getRouteByCode("c100") returns (Some(route))
+		val crService = mock[CourseAndRouteService]
+		crService.getRouteByCode("c100") returns (Some(route))
 
 		val department = new Department
 		department.code = "ph"

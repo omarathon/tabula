@@ -1,3 +1,4 @@
+-- TAB-579
 create table studentcoursedetails (
 	scjcode nvarchar2(20) not null,
 	universityid nvarchar2(20) not null,
