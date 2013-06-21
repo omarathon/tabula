@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.web.views
 import freemarker.template.Configuration
 import uk.ac.warwick.spring.Wire
 
-trait TextRenderer {
 
+trait TextRenderer {
   def renderTemplate(templateId:String, model:Any):String
 }
 
