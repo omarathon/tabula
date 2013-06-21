@@ -99,4 +99,22 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		"name" -> name,
 		"module" -> module)
 
+  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+    val newSet = new SmallGroupSet()
+    newSet.id = id
+    newSet.academicYear = academicYear
+    newSet.allocationMethod = allocationMethod
+    newSet.archived = archived
+    newSet.assessmentGroups = assessmentGroups
+    newSet.format = format
+    newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
+    newSet.members = members.duplicate()
+    newSet.membershipService= membershipService
+    newSet.module = module
+    newSet.name = name
+    newSet.permissionsService = permissionsService
+    newSet.releasedToStudents = releasedToStudents
+    newSet.releasedToTutors = releasedToTutors
+    newSet
+  }
 }

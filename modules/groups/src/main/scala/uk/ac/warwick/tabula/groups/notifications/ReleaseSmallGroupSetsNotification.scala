@@ -12,15 +12,19 @@ object ReleaseSmallGroupSetsNotification{
   val templateLocation  = "/WEB-INF/freemarker/notifications/release_small_group_student_notification.ftl"
 }
 
-class ReleaseSmallGroupSetsNotification(private val groups:Seq[SmallGroup], val agent:User, private val recipient:User, private val isStudent:Boolean ) extends Notification[Seq[SmallGroup]] {
+class ReleaseSmallGroupSetsNotification(private val groups:Seq[SmallGroup],
+                                        val agent:User,
+                                        val recipient:User,
+                                        private val isStudent:Boolean ) extends Notification[Seq[SmallGroup]] with SingleRecipientNotification {
 
   this: TextRenderer=>
   import ReleaseSmallGroupSetsNotification._
 
   val verb: String = "Release"
   val _object: Seq[SmallGroup] = groups
+
   if (groups.isEmpty){
-    throw new RuntimeException("Attempted to create a ReleaseSmallGroupSetsNotification with no SmallGroups!")
+    throw new IllegalArgumentException("Attempted to create a ReleaseSmallGroupSetsNotification with no SmallGroups!")
   }
   val target: Option[AnyRef] = None
 
@@ -49,7 +53,4 @@ class ReleaseSmallGroupSetsNotification(private val groups:Seq[SmallGroup], val 
     }
   }
 
-  def recipients: Seq[User] = {
-    Seq(recipient)
-  }
 }

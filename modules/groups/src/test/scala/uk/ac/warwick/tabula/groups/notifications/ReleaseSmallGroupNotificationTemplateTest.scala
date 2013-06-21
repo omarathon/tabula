@@ -14,17 +14,20 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
 
     val weekRangeFormatter = new StubFreemarkerMethodModel
     val urlModel = new StubFreemarkerDirectiveModel
+    val timeBuilder= new StubFreemarkerMethodModel
 
     implicit val config = newFreemarkerConfiguration(JHashMap(
       "url" -> urlModel,
-      "weekRangesFormatter" -> weekRangeFormatter))
+      "weekRangesFormatter" -> weekRangeFormatter,
+      "timeBuilder"->timeBuilder))
   }
 
   @Test
   def includesTheNameOfEachGroup{
     new NotificationFixture {
       val output =
-        renderToString(ReleaseSmallGroupSetsNotification.templateLocation, Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
+        renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
+          Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
     output should include(group1.name)
     output should include(group2.name)
   }}
@@ -32,14 +35,16 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   @Test
   def includesTheCountOfStudents{new NotificationFixture {
     val output =
-      renderToString(ReleaseSmallGroupSetsNotification.templateLocation, Map("user" -> recipient, "groups" -> List(group1), "profileUrl" -> "profileUrl"))
+      renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
+        Map("user" -> recipient, "groups" -> List(group1), "profileUrl" -> "profileUrl"))
       output should include("2 students")
   }}
 
   @Test
   def rendersProfileUrlOnceOnly{new NotificationFixture {
     val output =
-      renderToString(ReleaseSmallGroupSetsNotification.templateLocation, Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
+      renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
+        Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
     verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
   }}
 
@@ -47,7 +52,17 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   def callsWeekRangeFormatterOncePerEvent() {
     new NotificationFixture {
       val output =
-        renderToString(ReleaseSmallGroupSetsNotification.templateLocation, Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
+        renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
+          Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
       verify(weekRangeFormatter.mock, times(2)).exec(anyList())
+  }}
+
+  @Test
+  def formatsTimeNicely(){
+    new NotificationFixture {
+      val output =
+        renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
+          Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
+     verify(timeBuilder.mock, times(2)).exec(anyList())
   }}
 }

@@ -97,7 +97,13 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		group.events.clear()
-		group.events.addAll(events.asScala.filter(!_.delete).map(_.apply()).asJava)
+    for (event<-events.asScala.filter(!_.delete).map(_.apply())){
+      // make sure we set the back-reference from event->group here, else
+      // we won't be able to navigate back up the tree unless we reload the data from hiberate
+      event.group = group
+      group.events.add(event)
+    }
+
 		
 		if (group.students == null) group.students = new UserGroup
 		group.students.copyFrom(students)

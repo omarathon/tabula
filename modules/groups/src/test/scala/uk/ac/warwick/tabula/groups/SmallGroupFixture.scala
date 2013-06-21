@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.mockito.Mockito.when
+import java.util.UUID
 
 trait SmallGroupFixture extends Mockito {
 
@@ -46,36 +47,140 @@ trait SmallGroupFixture extends Mockito {
 
 
   def createGroupSet(groupSetName:String, groupName:String, format: SmallGroupFormat, moduleCode:String):(SmallGroup, SmallGroupSet) = {
-    val gs = new SmallGroupSet
-    gs.name =groupSetName
-    gs.format = format
 
     val mod = new Module
     mod.code=moduleCode
     mod.name="Test module " + moduleCode
     mod.department = department
-    mod.groupSets = Seq(gs).asJava
-    gs.module = mod
-
-
+    mod.groupSets = JArrayList()
 
     val groupUsers = new UserGroup
     groupUsers.addUser(student1.getWarwickId)
     groupUsers.addUser(student2.getWarwickId)
-    val smallGroup = new SmallGroup
-    smallGroup.students = groupUsers
-    gs.groups = JList(smallGroup)
-    smallGroup.groupSet = gs
-    smallGroup.name = groupName
 
-    val event = new SmallGroupEvent()
-    event.startTime = new LocalTime(12,0,0,0)
-    event.day = DayOfWeek.Monday
-    event.location = "CMR0.1"
-    event.tutors = new UserGroup
-    event.tutors.addUser(tutor1.getWarwickId)
-    event.tutors.addUser(tutor2.getWarwickId)
-    smallGroup.events.add(event)
+    val event = new SmallGroupEventBuilder()
+      .withTutorIds(Seq(tutor1.getWarwickId,tutor2.getWarwickId))
+      .withStartTime(new LocalTime(12,0,0,0))
+      .withDay(DayOfWeek.Monday)
+      .withLocation("CMR0.1")
+      .build
+
+    val smallGroup = new SmallGroupBuilder()
+      .withStudents(groupUsers)
+      .withEvents(Seq(event))
+      .withGroupName(groupName)
+      .build
+
+    val gs = new SmallGroupSetBuilder()
+      .withId(groupSetName)
+      .withName(groupSetName)
+      .withFormat(format)
+      .withModule(mod)
+      .withGroups(Seq(smallGroup))
+      .build
+
     (smallGroup, gs)
   }
+
+}
+
+class SmallGroupSetBuilder(){
+  val template = new SmallGroupSet
+
+  def build = {
+    val set = template.duplicateTo(template.module)
+    if (template.module != null){
+      template.module.groupSets.add(set)
+    }
+    set
+  }
+  def withGroups(groups:Seq[SmallGroup]):SmallGroupSetBuilder = {
+    template.groups = groups.asJava
+    groups.foreach(g=>g.groupSet = template)
+    this
+  }
+  def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {
+    template.releasedToStudents = b
+    this
+  }
+  def withId (id:String): SmallGroupSetBuilder  = {
+    template.id = id
+    this
+  }
+  def withName(name:String): SmallGroupSetBuilder = {
+    template.name = name
+    this
+  }
+  def withFormat(format:SmallGroupFormat): SmallGroupSetBuilder = {
+    template.format = format
+    this
+  }
+  def withModule(mod:Module): SmallGroupSetBuilder = {
+    template.module = mod
+    this
+  }
+}
+class SmallGroupBuilder(){
+
+  val template = new SmallGroup
+  template.id = UUID.randomUUID.toString
+  def build:SmallGroup = template.duplicateTo(template.groupSet)
+
+  def withEvents(events: Seq[SmallGroupEvent]):SmallGroupBuilder = {
+    template.events = events.asJava
+    events.foreach(_.group = template)
+    this
+  }
+  def withStudents(members:UserGroup):SmallGroupBuilder = {
+    template.students = members
+    this
+  }
+  def withStudentIds(ids:Seq[String]):SmallGroupBuilder = {
+    val users = UserGroup.emptyUniversityIds
+    users.includeUsers = ids.asJava
+    withStudents(users)
+  }
+  def withGroupName(s: String) = {
+    template.name = s
+    this
+  }
+
+}
+
+class SmallGroupEventBuilder(){
+
+  val template = new SmallGroupEvent
+  def build = template.duplicateTo(template.group)
+
+  def withTutors(members:UserGroup):SmallGroupEventBuilder = {
+    template.tutors = members
+    this
+  }
+
+  def withTutorIds(ids:Seq[String]):SmallGroupEventBuilder = {
+    val users = UserGroup.emptyUniversityIds
+    users.includeUsers = ids.asJava
+    withTutors(users)
+
+  }
+
+  def withStartTime(value: LocalTime):SmallGroupEventBuilder = {
+    template.startTime = value
+    this
+  }
+
+  def withDay(value: DayOfWeek):SmallGroupEventBuilder = {
+    template.day = value
+    this
+  }
+
+  def withLocation(s: String)  = {
+    template.location = s
+    this
+  }
+
+
+
+
+
 }

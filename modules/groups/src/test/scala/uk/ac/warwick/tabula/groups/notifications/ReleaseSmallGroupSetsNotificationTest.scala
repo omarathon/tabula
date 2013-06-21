@@ -95,12 +95,5 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
     model.getValue.get("profileUrl") should be(Some("/view/recipient"))
     model.getValue.get("groups") should be(Some(List(group1)))
   }
-
-  trait MockRenderer extends TextRenderer{
-    val mockRenderer = mock[TextRenderer]
-    def renderTemplate(id:String,model:Any ):String = {
-      mockRenderer.renderTemplate(id, model)
-    }
-  }
 }
 

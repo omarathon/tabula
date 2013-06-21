@@ -110,6 +110,12 @@ class UserGroup extends GeneratedId {
 		staticIncludeUsers.addAll(other.staticIncludeUsers)
 	}
 
+  def duplicate():UserGroup= {
+    val newGroup = new UserGroup
+    newGroup.copyFrom(this)
+    newGroup
+  }
+
 }
 
 object UserGroup {

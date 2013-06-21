@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
 import uk.ac.warwick.tabula.groups.commands.admin._
@@ -91,8 +91,8 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 		
 	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
 	
-	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet) = 
-		new EditSmallGroupSetCommand(set)
+	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet, user:CurrentUser) =
+		new EditSmallGroupSetCommand(set, user.apparentUser)
 
 	@ModelAttribute("canDelete") def canDelete(@PathVariable("set") set: SmallGroupSet) = {
 		val cmd = new DeleteSmallGroupSetCommand(set.module, set)
