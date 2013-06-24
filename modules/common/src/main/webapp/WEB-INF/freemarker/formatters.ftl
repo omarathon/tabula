@@ -165,6 +165,14 @@
 	${role_definition.description?lower_case}
 </#compress></#macro>
 
+<#macro course_description studentCourseDetails>
+	<#if (studentCourseDetails.route.name) != (studentCourseDetails.course.name)>
+		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
+	<#else>
+		${(studentCourseDetails.course.code?upper_case)!}
+	</#if>
+</#macro>
+
 </#escape>
 
 </#compress>

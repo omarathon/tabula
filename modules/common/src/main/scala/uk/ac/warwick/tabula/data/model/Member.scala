@@ -17,6 +17,7 @@ import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.services.RelationshipService
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -47,7 +48,7 @@ object Member {
 		name="userType",
 		discriminatorType=DiscriminatorType.STRING
 )
-abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget {
+abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging {
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
@@ -92,7 +93,11 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 
-		userTypeString + deptName
+		logger.info("userTypeString: " + userTypeString)
+		logger.info("deptName: " + deptName)
+		val ret = userTypeString + deptName
+		logger.info("description: " + ret)
+		ret
 	}
 
 	/**
@@ -150,13 +155,6 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
-
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	def personalTutors: Seq[StudentRelationship] = Nil
-
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	def supervisors: Seq[StudentRelationship] = Nil
-
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isAPersonalTutor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
@@ -185,28 +183,21 @@ class StudentMember extends Member with StudentProperties {
 		this.universityId = id
 	}
 
-	override def description = {
-		Option(groupName).getOrElse("")
-	}
-
 	/**
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
 	override def affiliatedDepartments: Stream[Department] = {
-		val x = studentCourseDetails.asScala.map( _.department )
 		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
-		val routeDepartments = studentCourseDetails.asScala.map(_.route).map(_.department).toStream
+		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
 
-		(
-				Stream(homeDepartment) #:::
+		(Stream(homeDepartment) #:::
 				sprDepartments #:::
 				routeDepartments
 		).distinct
-
 	}
 
-/*	override def affiliatedDepartments =
+	/*	override def affiliatedDepartments =
 		(
 			Option(homeDepartment) #::
 			Option(studyDetails.studyDepartment) #::
@@ -214,10 +205,16 @@ class StudentMember extends Member with StudentProperties {
 			Stream.empty
 		).flatten.distinct
 */
-  override def mostSignificantCourseDetails = {
-		val mostSignifCourse = studentCourseDetails.asScala.filter(_.mostSignificant)
-		if (mostSignifCourse.size ==1) Some(mostSignifCourse.head)
-		else None
+	override def mostSignificantCourseDetails = {
+		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
+		else {
+			val mostSignifCourse = studentCourseDetails.asScala.filter {
+				details => details.mostSignificant != null && details.mostSignificant
+			}
+			if (mostSignifCourse.size == 1)
+				Some(mostSignifCourse.head)
+			else None
+		}
 	}
 
 	override def hasCurrentEnrolment: Boolean = {

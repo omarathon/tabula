@@ -16,15 +16,15 @@
 		</#if>
 	</#if>
 
-	<#if profile.personalTutors??>
-		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
-		
+	<#if studentCourseDetails.personalTutors??>
+		<h4>Personal tutor<#if studentCourseDetails.personalTutors?size gt 1>s</#if></h4>
+
 		<#assign acceptsPersonalTutorChanges = (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors />
 		<#if studentCourseDetails.hasAPersonalTutor && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
 			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode />" data-target="#modal-change-tutor"><i class="icon-plus"></i> Add another tutor</a>
 		</#if>
 
-		<#if profile.personalTutors?size == 0>
+		<#if studentCourseDetails.personalTutors?size == 0>
 			<p>
 				Not recorded
 				<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
@@ -35,7 +35,7 @@
 		</#if>
 
 		<div class="tutors clearfix row">
-		<#list profile.personalTutors as relationship>
+		<#list studentCourseDetails.personalTutors as relationship>
 			<#assign personalTutor = relationship.agentMember />
 			<div class="tutor clearfix span4">
 				<#if !personalTutor??>
@@ -65,7 +65,7 @@
 		</#list>
 		</div>
 
-		<#if profile.hasAPersonalTutor>
+		<#if studentCourseDetails.hasAPersonalTutor>
 			<#include "../tutor/meeting/list.ftl" />
 		</#if>
 

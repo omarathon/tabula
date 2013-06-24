@@ -88,8 +88,8 @@ trait StudentCourseProperties {
 
 	@ManyToOne
 	@JoinColumn(name = "courseCode", referencedColumnName="code")
-	var course: Course = _	
-	
+	var course: Course = _
+
 	@ManyToOne
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _

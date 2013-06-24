@@ -110,7 +110,6 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	private val basicStudentCourseProperties = Set(
 		"sprCode",
 		"scjCode",
-		"courseCode",
 		"awardCode",
 		"beginDate",
 		"endDate",
@@ -140,7 +139,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 		if (code == null || code == "") {
 			null
 		} else {
-			courseAndRouteService.getCourseByCode(code.toLowerCase).getOrElse(null)
+			courseAndRouteService.getCourseByCode(code).getOrElse(null)
 		}
 	}
 

@@ -24,8 +24,10 @@ class CourseDaoImpl extends CourseDao with Daoisms {
 
 	def saveOrUpdate(course: Course) = session.saveOrUpdate(course)
 
-	def getByCode(code: String) =
-		session.newQuery[Course]("from Course course where code = :code").setString("code", code).uniqueResult
+	def getByCode(code: String) = {
+		val ret = session.newQuery[Course]("from Course course where code = :code").setString("code", code).uniqueResult
+		ret
+	}
 
 	def getAllCourseCodes: Seq[String] =
 		session.newQuery[String]("select distinct code from Course").seq

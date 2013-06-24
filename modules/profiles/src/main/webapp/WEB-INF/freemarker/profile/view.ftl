@@ -157,11 +157,11 @@
 		</#if>
 	</section>
 
-	<#if profile.student>
+	<#if (profile.studentCourseDetails)??>
 		<#list profile.studentCourseDetails as studentCourseDetails>
 			<#if profile.studentCourseDetails?size gt 1>
 				<hr>
-				<h3>Course: ${(studentCourseDetails.course.name)!}</h3>
+				<h3>Course: <@fmt.course_description studentCourseDetails /></h3>
 			</#if>
 			<div class="untabbed">
 				<#include "_supervision.ftl" />
@@ -170,7 +170,7 @@
 				<#include "_personal_development.ftl" />
 			</div>
 			<div class="untabbed">
-				<#if (profile.hasCurrentEnrolment)??>
+				<#if (profile.hasCurrentEnrolment)>
 					<#include "_course_details.ftl" />
 				<#else>
 					This student has no enrolment record for this course in the current year.

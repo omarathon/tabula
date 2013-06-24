@@ -4,17 +4,15 @@
 		<tbody>
 			<tr>
 				<th>Route</th>
-				<td>
-					<#if studentCourseDetails.route??>
-						${studentCourseDetails.route.name} (${studentCourseDetails.route.code?upper_case})
-					</#if>
+				<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
 				</td>
 			</tr>
-			<tr>
-				<th>Course code</th>
-				<td>${(studentCourseDetails.course.code?upper_case)!}
-				</td>
-			</tr>
+			<#if profile.studentCourseDetails?size lt 2>
+				<tr>
+					<th>Course</th>
+					<td><@fmt.course_description studentCourseDetails /></td>
+				</tr>
+			</#if>
 			<tr>
 				<th>Department</th>
 				<td>${(studentCourseDetails.department.name)!} (${(studentCourseDetails.department.code?upper_case)})

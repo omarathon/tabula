@@ -27,7 +27,7 @@ class CourseImporter extends Logging with Daoisms {
 
 	lazy val coursesQuery = new CoursesQuery(sits)
 
-	val courseMap = importCourses
+	var courseMap = slurpCourses
 
 	def importCourses = {
 		logger.info("Importing Courses")
@@ -38,7 +38,7 @@ class CourseImporter extends Logging with Daoisms {
 			session.clear
 		}
 
-		slurpCourses
+		courseMap = slurpCourses
 	}
 
 	def getCourses: Seq[ImportSingleCourseCommand] = {

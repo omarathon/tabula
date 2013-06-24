@@ -21,6 +21,7 @@ class CourseAndRouteService extends Logging {
 	}
 
 	def getCourseByCode(code: String) = transactional(readOnly = true) {
-		courseDao.getByCode(code)
+		val ret = courseDao.getByCode(code)
+		ret
 	}
 }

@@ -36,6 +36,7 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 
 		val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 		studentCourseDetails.sprCode = sprCode
+		supervisee.studentCourseDetails.add(studentCourseDetails)
 
 		val route = new Route
 		route.degreeType = Postgraduate
@@ -69,7 +70,7 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).supervisors
 			supRels.size should be (1)
 			val rel = supRels.head
 
@@ -92,7 +93,7 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).supervisors
 			supRels.size should be (0)
 		}
 	}

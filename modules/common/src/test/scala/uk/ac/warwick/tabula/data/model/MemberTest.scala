@@ -42,6 +42,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		val studentCourseDetails = new StudentCourseDetails(member, "2222222/2")
 		studentCourseDetails.department = courseDept
+		studentCourseDetails.mostSignificant = true
 
 		member.studentCourseDetails.add(studentCourseDetails)
 
@@ -97,7 +98,6 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.fullName should be (Some("Mat Mannion"))
 		member.email should be ("M.Mannion@warwick.ac.uk")
 		member.description should be ("")
-		member.personalTutors should be ('empty)
 		member.isStaff should be (true)
 		member.isStudent should be (false)
 
@@ -129,11 +129,12 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		val studentCourseDetails = new StudentCourseDetails(student, "1111111/1")
 		studentCourseDetails.route = route
+		studentCourseDetails.mostSignificant = true
 
 		student.studentCourseDetails.add(studentCourseDetails)
 		student.homeDepartment = dept
 
-		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")
+		student.description should be ("Undergraduate student, IT Services")
 	}
 
 	@Test def isPersonalTutor {
@@ -159,14 +160,14 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 
 		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Nil)
-		student.personalTutors should be ('empty)
+		student.studentCourseDetails.get(0).personalTutors should be ('empty)
 
 		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
 		rel.profileService = profileService
 
 		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.personalTutors map { _.agentParsed } should be (Seq("0672089"))
+		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq("0672089"))
 
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -174,7 +175,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 
-		student.personalTutors map { _.agentParsed } should be (Seq(staff))
+		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq(staff))
 	}
 
 	@Test def deleteFileAttachmentOnDelete {
