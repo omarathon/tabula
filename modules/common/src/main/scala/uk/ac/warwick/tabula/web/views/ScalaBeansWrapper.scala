@@ -34,6 +34,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	var securityService = Wire[SecurityService]
 
+	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
+	// won't know to clear this singleton variable.
+	ScalaHashModel.gettersCache.clear()
+
 	def superWrap(obj: Object): TemplateModel = {
 		super.wrap(obj)
 	}
@@ -164,7 +168,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
-		
+
 		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, Seq[Permission])]]
 	}
 

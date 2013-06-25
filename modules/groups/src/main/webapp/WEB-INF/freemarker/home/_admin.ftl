@@ -36,7 +36,7 @@
 <ul class="links">
 <li><a href="<@url page="/tutor" />">My small groups</a></li>
 </ul>
-
-</#if>
 </div>
+</#if>
+
 </div>

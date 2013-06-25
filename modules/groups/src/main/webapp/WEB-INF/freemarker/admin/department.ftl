@@ -1,6 +1,15 @@
 <#--
 
-This will soon be refactored to use some components from group_components.ftl.
+
+
+
+
+This will soon be refactored to use some components from group_components.ftl,
+in the same way that tutor_home.ftl and TutorHomeController are currently
+
+If you are doing any work on this, it would be good to do the above first.
+
+
 
 -->
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
