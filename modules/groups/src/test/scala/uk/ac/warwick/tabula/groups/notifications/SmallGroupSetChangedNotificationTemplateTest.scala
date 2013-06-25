@@ -39,7 +39,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient, "group" -> group1, "profileUrl" -> "profileUrl"))
+          Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       output should include(group1.name)
     }}
 
@@ -47,7 +47,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
   def includesTheCountOfStudents{new NotificationFixture {
     val output =
       renderToString(SmallGroupSetChangedNotification.templateLocation,
-        Map("student" -> recipient, "group" -> group1, "profileUrl" -> "profileUrl"))
+        Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
     output should include("2 students")
   }}
 
@@ -55,7 +55,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
   def rendersProfileUrlOnceOnly{new NotificationFixture {
     val output =
       renderToString(SmallGroupSetChangedNotification.templateLocation,
-        Map("student" -> recipient, "group" -> group1, "profileUrl" -> "profileUrl"))
+        Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
     verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
   }}
 
@@ -64,7 +64,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient, "group" -> group1, "profileUrl" -> "profileUrl"))
+          Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(weekRangeFormatter.mock, times(2)).exec(anyList())
     }}
 
@@ -73,7 +73,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient, "group" -> group1, "profileUrl" -> "profileUrl"))
+          Map("student" -> recipient,"groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(timeBuilder.mock, times(2)).exec(anyList())
     }}
 

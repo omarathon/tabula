@@ -15,6 +15,9 @@ trait SmallGroupFixture extends Mockito {
 
 
   val requestingUser = new User
+
+  // Note that, for mysterious reasons, SmallGroup.students is a group of users by warwick ID number, but
+  // SmallGroupEvent.tutors is a group of users by user code.
   val student1 = new User
   student1.setWarwickId("student1")
 
@@ -22,16 +25,18 @@ trait SmallGroupFixture extends Mockito {
   student2.setWarwickId("student2")
 
   val tutor1 = new User
-  tutor1.setWarwickId("tutor1")
+  tutor1.setUserId("tutor1")
 
   val tutor2 = new User
-  tutor2.setWarwickId("tutor2")
+  tutor2.setUserId("tutor2")
 
   val userLookup = mock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
-  when(userLookup.getUserByWarwickUniId(tutor1.getWarwickId)).thenReturn(tutor1)
-  when(userLookup.getUserByWarwickUniId(tutor2.getWarwickId)).thenReturn(tutor2)
+  when(userLookup.getUserByUserId(tutor1.getUserId)).thenReturn(tutor1)
+  when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
+  // UserGroup does batched lookups for users when resolving by UserId...
+  when(userLookup.getUsersByUserIds(Seq(tutor1.getUserId,tutor2.getUserId).asJava)).thenReturn(Map("tutor1"->tutor1, "tutor2"->tutor2).asJava)
 
   val actor = new User
   val recipient = new User
@@ -54,19 +59,20 @@ trait SmallGroupFixture extends Mockito {
     mod.department = department
     mod.groupSets = JArrayList()
 
-    val groupUsers = new UserGroup
-    groupUsers.addUser(student1.getWarwickId)
-    groupUsers.addUser(student2.getWarwickId)
+
+    val students = createUserGroup(Seq(student1.getWarwickId, student2.getWarwickId), identifierIsUniNumber = true)
+    val tutors = createUserGroup(Seq(tutor1.getUserId,tutor2.getUserId), identifierIsUniNumber = false)
+
 
     val event = new SmallGroupEventBuilder()
-      .withTutorIds(Seq(tutor1.getWarwickId,tutor2.getWarwickId))
+      .withTutors(tutors)
       .withStartTime(new LocalTime(12,0,0,0))
       .withDay(DayOfWeek.Monday)
       .withLocation("CMR0.1")
       .build
 
     val smallGroup = new SmallGroupBuilder()
-      .withStudents(groupUsers)
+      .withStudents(students)
       .withEvents(Seq(event))
       .withGroupName(groupName)
       .build
@@ -79,9 +85,16 @@ trait SmallGroupFixture extends Mockito {
       .withGroups(Seq(smallGroup))
       .build
 
-    (smallGroup, gs)
+    (gs.groups.asScala.head, gs)
   }
 
+  def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
+    val ug = new UserGroup
+    ug.userLookup = userLookup
+    ug.universityIds = identifierIsUniNumber
+    ug.includeUsers = userIds.asJava
+    ug
+  }
 }
 
 class SmallGroupSetBuilder(){
@@ -120,11 +133,14 @@ class SmallGroupSetBuilder(){
     this
   }
 }
-class SmallGroupBuilder(){
+class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
 
-  val template = new SmallGroup
   template.id = UUID.randomUUID.toString
   def build:SmallGroup = template.duplicateTo(template.groupSet)
+
+  def copyOf(group:SmallGroup):SmallGroupBuilder = {
+    new SmallGroupBuilder(group.duplicateTo(group.groupSet))
+  }
 
   def withEvents(events: Seq[SmallGroupEvent]):SmallGroupBuilder = {
     template.events = events.asJava
@@ -134,11 +150,6 @@ class SmallGroupBuilder(){
   def withStudents(members:UserGroup):SmallGroupBuilder = {
     template.students = members
     this
-  }
-  def withStudentIds(ids:Seq[String]):SmallGroupBuilder = {
-    val users = UserGroup.emptyUniversityIds
-    users.includeUsers = ids.asJava
-    withStudents(users)
   }
   def withGroupName(s: String) = {
     template.name = s
@@ -150,18 +161,12 @@ class SmallGroupBuilder(){
 class SmallGroupEventBuilder(){
 
   val template = new SmallGroupEvent
+
   def build = template.duplicateTo(template.group)
 
   def withTutors(members:UserGroup):SmallGroupEventBuilder = {
     template.tutors = members
     this
-  }
-
-  def withTutorIds(ids:Seq[String]):SmallGroupEventBuilder = {
-    val users = UserGroup.emptyUniversityIds
-    users.includeUsers = ids.asJava
-    withTutors(users)
-
   }
 
   def withStartTime(value: LocalTime):SmallGroupEventBuilder = {

@@ -15,7 +15,7 @@
 			</div>	
 			<div class="modal-body">				
 				<@form.labelled_row "tutors" "Tutors">
-					<@form.userpicker path="tutors" spanClass="span5" />
+					<@form.userpicker path="tutors" list=true multiple=true spanClass="span5" />
 				</@form.labelled_row>
 				
 				<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">

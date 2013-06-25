@@ -42,7 +42,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
     n.title should be ("Lab, Seminar and Tutorial allocation")
   }}
 
-  @Test(expected = classOf[RuntimeException])
+  @Test(expected = classOf[IllegalArgumentException])
   def cantCreateANotificationWithNoGroups(){new SmallGroupFixture{
     val n = createMultiGroupNotification(Nil,actor, recipient)
   }}
@@ -64,19 +64,13 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
   }
 
   @Test
-  def recipientsContainsSingleUser():Unit  = new SmallGroupFixture{
-    val n = createNotification(group1, actor, recipient)
-    n.recipients should be (Seq(recipient))
-  }
-
-  @Test
   def shouldCallTextRendererWithCorrectTemplate():Unit = new SmallGroupFixture {
     val n = createNotification(group1, actor, recipient)
 
     n.content should be (TEST_CONTENT)
 
     verify(n.mockRenderer, times(1)).renderTemplate(
-      Matchers.eq("/WEB-INF/freemarker/notifications/release_small_group_student_notification.ftl"),
+      Matchers.eq("/WEB-INF/freemarker/notifications/release_small_group_notification.ftl"),
       any[Map[String,Any]])
   }
 

@@ -92,7 +92,13 @@ class UserGroup extends GeneratedId {
 		
 	def users: Seq[User] =
 		if (universityIds) members map { userLookup.getUserByWarwickUniId(_) }
-		else userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+		else {
+      if (members.isEmpty){
+        Nil
+      }else{
+        userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+      }
+    }
 
 	def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
@@ -113,6 +119,7 @@ class UserGroup extends GeneratedId {
   def duplicate():UserGroup= {
     val newGroup = new UserGroup
     newGroup.copyFrom(this)
+    newGroup.userLookup = this.userLookup
     newGroup
   }
 

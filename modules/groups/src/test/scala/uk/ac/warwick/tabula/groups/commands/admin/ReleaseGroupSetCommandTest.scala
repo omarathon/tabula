@@ -119,8 +119,8 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     cmd.applyInternal()
     val notifications = cmd.emit
-    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor1"))  should be (true)
-    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor2"))  should be (true)
+    notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (true)
+    notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (true)
   }}
 
   @Test
@@ -130,8 +130,8 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     val notifications = cmd.emit
 
-    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor1"))  should be (false)
-    notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "tutor2"))  should be (false)
+    notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (false)
+    notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (false)
   }}
 
   @Test

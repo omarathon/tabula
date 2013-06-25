@@ -47,8 +47,8 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
       for (groupSet<-groupSetsReleasedToTutors;
            group<-groupSet.groups.asScala;
            event<-group.events.asScala;
-           tutorId<-event.tutors.members
-     )yield new ReleaseSmallGroupSetsNotification(List(group), currentUser,userLookup.getUserByWarwickUniId(tutorId), false) with FreemarkerTextRenderer
+           tutor<-event.tutors.users
+     )yield new ReleaseSmallGroupSetsNotification(List(group), currentUser,tutor, false) with FreemarkerTextRenderer
    } else {
      Nil
    }
@@ -56,8 +56,8 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
    val studentNotifications = if (notifyStudents){
      for(groupSet<-groupSetsReleasedToStudents;
          group<-groupSet.groups.asScala;
-         studentId<-group.students.members
-     ) yield new ReleaseSmallGroupSetsNotification(List(group),currentUser,userLookup.getUserByWarwickUniId(studentId), true) with FreemarkerTextRenderer
+         student<-group.students.users
+     ) yield new ReleaseSmallGroupSetsNotification(List(group),currentUser,student, true) with FreemarkerTextRenderer
     }else{
      Nil
    }

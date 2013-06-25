@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.views.{TextRenderer, FreemarkerRendering}
 import freemarker.template.Configuration
 object ReleaseSmallGroupSetsNotification{
-  val templateLocation  = "/WEB-INF/freemarker/notifications/release_small_group_student_notification.ftl"
+  val templateLocation  = "/WEB-INF/freemarker/notifications/release_small_group_notification.ftl"
 }
 
 class ReleaseSmallGroupSetsNotification(private val groups:Seq[SmallGroup],
