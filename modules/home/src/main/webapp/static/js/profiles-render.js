@@ -64,6 +64,27 @@
 				});
 			});
 		});
+
+		var $p = $("#profile-section-tabs");
+
+		$p.sortable({ handle: ".icon-move" });
+		$p.find("i").add("#layout-tools i").tooltip();
+
+		$p.on("click", ".icon-resize-small", function(e) {
+			e.stopPropagation();
+			var $a = $(this).parent();
+			var title = $a.data("title");
+			$(this).prop("title", "Expand " + title);
+			$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace(title, "").replace("resize-small", "resize-full")).addClass("disabled");
+		});
+
+		$p.on("click", ".icon-resize-full", function(e) {
+			e.stopPropagation();
+			var $a = $(this).parent();
+			var title = $a.data("title");
+			$(this).prop("title", "Collapse");
+			$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html(title + $a.html().replace("resize-full", "resize-small")).removeClass("disabled");
+		});
 	});
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"
@@ -72,11 +93,6 @@
 
 	// MEETING RECORD STUFF
 	$(function() {
-
-
-
-
-
 		function scrollToOpenDetails() {
 			// prevent js errors when getNavigationHeight is undefined
 			if(window.getNavigationHeight != undefined){
@@ -98,14 +114,14 @@
 			if ($f.find("#meeting-record-form").length == 1) {
 				// unhide the iframe
 				$m.find('.modal-body').slideDown();
-				
+
 				// reset datepicker & submit protection
 				var $form = $m.find('form.double-submit-protection');
 				$form.tabulaSubmitOnce();
 				$form.find(".btn").removeClass('disabled');
 				// wipe any existing state information for the submit protection
 				$form.removeData('submitOnceSubmitted');
-				
+
 				// firefox fix
 				var wait = setInterval(function() {
 					var h = $f.find("body").height();
@@ -114,7 +130,7 @@
 						$m.find(".modal-body").animate({ height: h });
 					}
 				}, 50);
-				
+
 				// show-time
 				$m.modal("show");
 				$m.on("shown", function() {

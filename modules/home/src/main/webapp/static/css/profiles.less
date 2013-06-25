@@ -7,6 +7,31 @@
 	background: @header-colour;
 }
 
+#layout-tools {
+	float: right;
+	margin-top: 5px;
+}
+
+#profile-section-tabs {
+	// room for layout-tools
+	padding-right: 70px;
+
+	.disabled { cursor: not-allowed; }
+	.icon-move { cursor: move; }
+	.icon-resize-small, .icon-resize-full { cursor: pointer; }
+
+	.icon-move, .icon-resize-small, .icon-resize-full {
+		color: @tabulaGrayLightTint;
+
+		&:hover {
+			color: @tabulaGrayLight;
+		}
+	}
+
+	li.active {
+		.icon-resize-small { display: none; }
+	}
+}
 
 #modal-change-tutor #edit-personal-tutor-modal {
 	overflow:visible;

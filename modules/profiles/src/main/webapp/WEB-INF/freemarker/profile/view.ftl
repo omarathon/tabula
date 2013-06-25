@@ -158,20 +158,30 @@
 	</section>
 
 	<#if profile.student>
-		<div class="untabbed">
-			<#include "_supervision.ftl" />
+		<div class="tabbable">
+    		<span id="layout-tools" class="pull-right"><i class="icon-folder-close" title="Switch to tabbed layout"></i> <i class="icon-th-large" title="Switch to gadget layout"></i> <i class="icon-ok" title="Save layout settings"></i></span>
+    		<div class="row-fluid">
+    			<ul class="nav nav-tabs" id="profile-section-tabs">
+    				<li class="active"><a href="#course-pane" data-toggle="tab" data-title="Course details">Course details <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
+    				<li><a href="#supervision-pane" data-toggle="tab" data-title="Supervision">Supervision <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
+    				<li><a href="#pd-pane" data-toggle="tab" data-title="Personal development">Personal development <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
+    			</ul>
+    		</div>
+
+    		<div class="tab-content">
+    			<div class="tab-pane active" id="course-pane">
+    				<#include "_course_details.ftl" />
+				</div>
+
+				<div class="tab-pane" id="supervision-pane">
+					<#include "_supervision.ftl" />
+				</div>
+
+				<div class="tab-pane" id="pd-pane">
+					<#include "_personal_development.ftl" />
+				</div>
+			</div>
 		</div>
-		<div class="untabbed">
-			<#include "_personal_development.ftl" />
-		</div>
-		<div class="untabbed">
-			<#if profile.hasCurrentEnrolment>
-				<#include "_course_details.ftl" />
-			<#else>
-				This student has no enrolment record for the current year.
-			</#if>
-		</div>
-	<#else>
 	</#if>
 </article>
 
