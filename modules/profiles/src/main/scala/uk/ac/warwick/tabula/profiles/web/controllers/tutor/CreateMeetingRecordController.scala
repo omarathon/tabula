@@ -25,11 +25,14 @@ class CreateMeetingRecordController extends ProfilesController with MeetingRecor
 		relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
-				// Try and guess a default relationship
+				// Go through the PersonalTutor relationships for this SPR code and find one where the current user is the agent.
+				// If there isn't one but there's only one relationship, pick it.  Otherwise don't try and guess.
 				val defaultRelationship =
 					relationships.find(rel => (rel.agentMember map { _.universityId }) == Some(user.universityId))
-					.getOrElse(relationships.head)
-
+					.getOrElse(
+							if (relationships.size == 1) relationships.head
+							else throw new IllegalStateException("Tabula doesn't yet know how to distinguish between multiple tutors to enable third parties to create a meeting record")
+					)
 				new CreateMeetingRecordCommand(currentMember, defaultRelationship)
 		}
 	}

@@ -121,8 +121,9 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Test def listMembersUpdatedSince = transactional { tx =>
-		val dept1 = Fixtures.department("in")
-		val dept2 = Fixtures.department("cs")
+		session.flush()
+		val dept1 = Fixtures.department("in", "IT Services")
+		val dept2 = Fixtures.department("cs", "Computing Science")
 
 		session.save(dept1)
 		session.save(dept2)

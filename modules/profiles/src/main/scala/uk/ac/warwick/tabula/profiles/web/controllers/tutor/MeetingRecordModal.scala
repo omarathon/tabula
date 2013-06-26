@@ -44,28 +44,28 @@ trait MeetingRecordModal extends ProfilesController {
 
 	// modal chrome
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
-	def showModalChrome(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("student") student: Member) = {
+	def showModalChrome(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
 		val formats = MeetingFormat.members
 
 		Mav("tutor/meeting/edit",
 			"modal" -> true,
 			"command" -> command,
-			"student" -> student,
-			"isStudent" -> (student == currentMember),
+			"studentCourseDetails" -> studentCourseDetails,
+			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"tutorName" -> command.relationship.agentName).noLayout()
 	}
 
 	// modal iframe form
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
-	def showIframeForm(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("student") student: Member) = {
+	def showIframeForm(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
 
 		val formats = MeetingFormat.members
 
 		Mav("tutor/meeting/edit",
 			"iframe" -> true,
 			"command" -> command,
-			"student" -> student,
-			"isStudent" -> (student == currentMember),
+			"studentCourseDetails" -> studentCourseDetails,
+			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"tutorName" -> command.relationship.agentName,
 			"creator" -> command.creator,
 			"formats" -> formats).noNavigation()
@@ -76,9 +76,9 @@ trait MeetingRecordModal extends ProfilesController {
 	def saveModalMeetingRecord(@Valid @ModelAttribute("command")command: ModifyMeetingRecordCommand,
 	                           errors: Errors,
 	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[ViewMeetingRecordCommand],
-	                           @PathVariable("student") student: Member) =transactional() {
+	                           @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =transactional() {
 		if (errors.hasErrors) {
-			showIframeForm(command, student)
+			showIframeForm(command, studentCourseDetails)
 		} else {
 			val modifiedMeeting = command.apply()
 			val meetingList = viewCommand match {
@@ -87,7 +87,7 @@ trait MeetingRecordModal extends ProfilesController {
 			}
 
 			Mav("tutor/meeting/list",
-				"profile" -> student,
+				"studentCourseDetails" -> studentCourseDetails,
 				"meetings" -> meetingList,
 				"viewer" -> currentMember,
 				"openMeeting" -> modifiedMeeting).noLayout()
@@ -96,13 +96,13 @@ trait MeetingRecordModal extends ProfilesController {
 
 	// blank sync form
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("student") student: Member) = {
+	def showForm(@ModelAttribute("command") command: ModifyMeetingRecordCommand, @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
 		val formats = MeetingFormat.members
 
 		Mav("tutor/meeting/edit",
 			"command" -> command,
-			"student" -> student,
-			"isStudent" -> (student == currentMember),
+			"studentCourseDetails" -> studentCourseDetails,
+			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"tutorName" -> command.relationship.agentName,
 			"creator" -> command.creator,
 			"formats" -> formats)
@@ -116,13 +116,13 @@ trait MeetingRecordModal extends ProfilesController {
 
 	// submit sync
 	@RequestMapping(method = Array(POST), params = Array("submit"))
-	def saveMeetingRecord(@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, errors: Errors, @PathVariable("student") student: Member) = {
+	def saveMeetingRecord(@Valid @ModelAttribute("createMeetingRecordCommand") createCommand: CreateMeetingRecordCommand, errors: Errors, @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
 		transactional() {
 			if (errors.hasErrors) {
-				showForm(createCommand, student)
+				showForm(createCommand, studentCourseDetails)
 			} else {
 				val meeting = createCommand.apply()
-				Redirect(Routes.profile.view(student, meeting))
+				Redirect(Routes.profile.view(studentCourseDetails.student, meeting))
 			}
 		}
 	}

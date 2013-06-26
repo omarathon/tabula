@@ -11,7 +11,8 @@ class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCours
 	@Autowired var service: StudentCourseDetailsDao = _
 
 	override def convertRight(scjCode: String) = {
-		service.getByScjCode(scjCode).orNull
+		val scjCodeDecoded = scjCode.replace("_","/")
+		service.getByScjCode(scjCodeDecoded).orNull
 	}
 	override def convertLeft(studentCourseDetails: StudentCourseDetails) = (Option(studentCourseDetails) map {_.scjCode}).orNull
 

@@ -110,11 +110,9 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						}
 						case Some(targetMember: StudentMember) => {
 							rawStudentRelationship.targetMember = targetMember
-							targetMember.mostSignificantCourseDetails match {
-								case None => {
-									errors.rejectValue("targetUniversityId", "member.course.noSignif")
-									valid = false
-								}
+							if (targetMember.mostSignificantCourseDetails.isEmpty) {
+								errors.rejectValue("targetUniversityId", "member.course.noSignif")
+								valid = false
 							}
 
 							if (!targetMember.affiliatedDepartments.contains(department)) {

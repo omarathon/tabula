@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.RelationshipServiceImpl
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
@@ -43,6 +44,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val studentCourseDetails = new StudentCourseDetails(member, "2222222/2")
 		studentCourseDetails.department = courseDept
 		studentCourseDetails.mostSignificant = true
+		studentCourseDetails.relationshipService = relationshipService
 
 		member.studentCourseDetails.add(studentCourseDetails)
 
@@ -134,12 +136,13 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		student.studentCourseDetails.add(studentCourseDetails)
 		student.homeDepartment = dept
 
-		student.description should be ("Undergraduate student, IT Services")
+		student.description should be ("Undergraduate studentMEng Computer Science, IT Services")
 	}
 
 	@Test def isPersonalTutor {
 		val staff = new StaffMember
 		staff.profileService = profileService
+		staff.relationshipService = relationshipService
 
 		relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, staff) returns (Seq())
 		staff.isAPersonalTutor should be (false)
@@ -153,7 +156,10 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		val studentCourseDetails = new StudentCourseDetails(student, "0205225/1")
 		studentCourseDetails.sprCode = "0205225/1"
+		studentCourseDetails.relationshipService = relationshipService
+		
 		student.studentCourseDetails.add(studentCourseDetails)
+		
 
 		student.profileService = profileService
 

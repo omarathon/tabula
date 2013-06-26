@@ -16,7 +16,7 @@
 			<tr>
 				<th>Department</th>
 				<td>${(studentCourseDetails.department.name)!} (${(studentCourseDetails.department.code?upper_case)})
-				</td
+				</td>
 			</tr>
 			<tr>
 				<th>Intended award</th>

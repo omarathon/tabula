@@ -14,7 +14,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
 <#macro profile_by_id student><@url page="/view/${student}"/></#macro>
 <#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg"/></#macro>
-<#macro relationshipPhoto relationship><@url page="/view/photo/${relationship.targetSprCode?url}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg"/></#macro>
+<#macro relationshipPhoto profile relationship><@url page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
 <#macro tutees><@url page="/tutees" /></#macro>
 <#macro tutors department><@url page="/department/${department.code}/tutors" /></#macro>
@@ -24,23 +24,23 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro tutor_template department><@url page="/department/${department.code}/tutors/template" /></#macro>
 
 <#macro tutor_edit scjCode currentTutor>
-	<@url page="/tutor/${scjCode?url}/edit?currentTutor=${currentTutor.universityId}" />
+	<@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}" />
 </#macro>
 
 <#macro tutor_edit_set scjCode newTutor>
-	<@url page="/tutor/${scjCode?url}/edit?tutor=${newTutor.universityId}" />
+	<@url page="/tutor/${scjCode}/edit?tutor=${newTutor.universityId}" />
 </#macro>
 
 <#macro tutor_edit_replace scjCode currentTutor newTutor>
-	<@url page="/tutor/${scjCode?url}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" />
+	<@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" />
 </#macro>
 
 <#macro tutor_edit_no_tutor scjCode>
-	<@url page="/tutor/${scjCode?url}/add" />
+	<@url page="/tutor/${scjCode}/add" />
 </#macro>
 
 <#macro meeting_record scjCode>
-	<@url page="/tutor/meeting/${scjCode?url}/create" />
+	<@url page="/tutor/meeting/${scjCode}/create" />
 </#macro>
 
 <#macro edit_meeting_record meeting_record>

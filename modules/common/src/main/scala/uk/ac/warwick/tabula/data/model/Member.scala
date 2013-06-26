@@ -86,6 +86,9 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	}
 
 	def officialName = title + " " + fullFirstName + " " + lastName
+
+	def routeName: String = ""
+
 	def description = {
 		val userTypeString =
 			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
@@ -93,18 +96,17 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 
-		logger.info("userTypeString: " + userTypeString)
-		logger.info("deptName: " + deptName)
-		val ret = userTypeString + deptName
-		logger.info("description: " + ret)
-		ret
+		userTypeString + routeName + deptName
 	}
 
 	/**
 	 * Get all departments that this member is affiliated to.
 	 * (Overriden by StudentMember).
 	 */
-	def affiliatedDepartments = Option(homeDepartment).toStream
+	def affiliatedDepartments = homeDepartment match {
+		case null => Stream()
+		case _ => Stream(homeDepartment)
+	}
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
@@ -157,7 +159,12 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
-	def isAPersonalTutor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+	def isAPersonalTutor = {
+		(userType == MemberUserType.Staff && 
+				!relationshipService.listStudentRelationshipsWithMember(
+						RelationshipType.PersonalTutor, this
+			).isEmpty)
+	}
 	def hasAPersonalTutor = false
 
 	def isSupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
@@ -190,8 +197,12 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
 		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
-
-		(Stream(homeDepartment) #:::
+		
+		val homeDeptStream = homeDepartment match {
+			case null => Stream()
+			case _ => Stream(homeDepartment)			
+		}
+		(homeDeptStream #:::
 				sprDepartments #:::
 				routeDepartments
 		).distinct
@@ -221,6 +232,12 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.asScala.map(_.hasCurrentEnrolment).size > 0
 	}
 
+	override def routeName: String = mostSignificantCourseDetails match {
+		case Some(details) =>
+			if (details != null && details.route != null) details.route.name
+			else ""
+		case _ => ""
+	}
 }
 
 @Entity

@@ -1,3 +1,4 @@
+<#assign student = studentCourseDetails.student/>
 <#assign heading>
 	<h2>Record a meeting</h2>
 	<h6>
