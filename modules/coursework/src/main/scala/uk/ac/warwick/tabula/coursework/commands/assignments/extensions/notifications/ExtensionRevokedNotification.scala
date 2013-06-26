@@ -12,14 +12,8 @@ class ExtensionRevokedNotification(assignment:Assignment, student: User, actor: 
 	val verb = "revoke"
 	def title: String = titleHeading + "Extension revoked"
 
+	val template = "/WEB-INF/freemarker/emails/revoke_manual_extension.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(
 		"originalAssignmentDate" -> dateFormatter.print(assignment.closeDate)
 	)
-
-	def content: String = {
-		renderTemplate("/WEB-INF/freemarker/emails/revoke_manual_extension.ftl", contentModel)
-	}
-
-	def recipients = Seq(student)
-
 }

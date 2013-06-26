@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications
 
-import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.web.views.TextRenderer
 
-class ExtensionChangedNotification(extension:Extension, student: User, actor: User)
+class ExtensionRequestRejectedNotification (extension:Extension, student: User, actor: User)
 	extends ExtensionStudentNotification(Some(extension), extension.assignment, student, actor){
 
 	this: TextRenderer =>
 
-	val verb = "updated"
-	def title: String = titleHeading + "Extension details have been changed"
+	val verb = "reject"
+	def title: String = titleHeading + "Extension request rejected"
 
-	val template = "/WEB-INF/freemarker/emails/modified_manual_extension.ftl"
+	val template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(
 		"extension" -> extension,
-		"newExpiryDate" -> dateFormatter.print(extension.expiryDate)
+		"originalAssignmentDate" -> dateFormatter.print(assignment.closeDate)
 	)
 }

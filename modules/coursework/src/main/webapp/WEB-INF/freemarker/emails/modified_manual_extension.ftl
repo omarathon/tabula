@@ -9,4 +9,4 @@ ${extension.approvalComments}
 </#if>
 The modified extension deadline is now displayed at the top of the submission page:
 
-<@url page=url context="/coursework" />
+<@url page=path context="/coursework" />
