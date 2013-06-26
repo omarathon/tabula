@@ -7,29 +7,43 @@
 	background: @header-colour;
 }
 
-#layout-tools {
-	float: right;
-	margin-top: 5px;
-}
+.tabbable {
+	.layout-tools {
+		float: right;
+		margin-top: 5px;
 
-#profile-section-tabs {
-	// room for layout-tools
-	padding-right: 70px;
-
-	.disabled { cursor: not-allowed; }
-	.icon-move { cursor: move; }
-	.icon-resize-small, .icon-resize-full { cursor: pointer; }
-
-	.icon-move, .icon-resize-small, .icon-resize-full {
-		color: @tabulaGrayLightTint;
-
-		&:hover {
-			color: @tabulaGrayLight;
+		i:hover {
+			color: @tabulaGray;
 		}
 	}
 
-	li.active {
-		.icon-resize-small { display: none; }
+	.nav-tabs {
+		// room for layout-tools
+		padding-right: 70px;
+
+		.disabled { cursor: not-allowed; }
+		.icon-move { cursor: move; }
+		.icon-resize-small, .icon-resize-full { cursor: pointer; }
+
+		.icon-move, .icon-resize-small, .icon-resize-full {
+			color: @tabulaGrayLightTint;
+
+			&:hover {
+				color: @tabulaGrayLight;
+			}
+		}
+
+		li.active {
+			.icon-resize-small { display: none; }
+		}
+	}
+
+	.panes > div {
+		margin-bottom: 18px;
+
+		&.tab-pane {
+			margin-bottom: 0;
+		}
 	}
 }
 

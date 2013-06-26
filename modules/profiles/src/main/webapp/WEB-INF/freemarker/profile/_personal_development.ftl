@@ -87,6 +87,7 @@
 		});
 		</script>
 	<#else>
+		<h4>Personal development</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No personal development details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>

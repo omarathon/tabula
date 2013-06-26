@@ -64,27 +64,6 @@
 				});
 			});
 		});
-
-		var $p = $("#profile-section-tabs");
-
-		$p.sortable({ handle: ".icon-move" });
-		$p.find("i").add("#layout-tools i").tooltip();
-
-		$p.on("click", ".icon-resize-small", function(e) {
-			e.stopPropagation();
-			var $a = $(this).parent();
-			var title = $a.data("title");
-			$(this).prop("title", "Expand " + title);
-			$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace(title, "").replace("resize-small", "resize-full")).addClass("disabled");
-		});
-
-		$p.on("click", ".icon-resize-full", function(e) {
-			e.stopPropagation();
-			var $a = $(this).parent();
-			var title = $a.data("title");
-			$(this).prop("title", "Collapse");
-			$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html(title + $a.html().replace("resize-full", "resize-small")).removeClass("disabled");
-		});
 	});
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"

@@ -26,6 +26,7 @@
 		</#list>
 		</div>
 	<#else>
+		<h4>Supervisors</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No supervision details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>

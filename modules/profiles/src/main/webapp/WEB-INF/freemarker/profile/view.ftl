@@ -159,25 +159,16 @@
 
 	<#if profile.student>
 		<div class="tabbable">
-    		<span id="layout-tools" class="pull-right"><i class="icon-folder-close" title="Switch to tabbed layout"></i> <i class="icon-th-large" title="Switch to gadget layout"></i> <i class="icon-ok" title="Save layout settings"></i></span>
-    		<div class="row-fluid">
-    			<ul class="nav nav-tabs" id="profile-section-tabs">
-    				<li class="active"><a href="#course-pane" data-toggle="tab" data-title="Course details">Course details <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
-    				<li><a href="#supervision-pane" data-toggle="tab" data-title="Supervision">Supervision <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
-    				<li><a href="#pd-pane" data-toggle="tab" data-title="Personal development">Personal development <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>
-    			</ul>
-    		</div>
-
-    		<div class="tab-content">
-    			<div class="tab-pane active" id="course-pane">
-    				<#include "_course_details.ftl" />
+			<div class="panes">
+				<div id="course-pane">
+					<#include "_course_details.ftl" />
 				</div>
 
-				<div class="tab-pane" id="supervision-pane">
+				<div id="supervision-pane">
 					<#include "_supervision.ftl" />
 				</div>
 
-				<div class="tab-pane" id="pd-pane">
+				<div id="pd-pane">
 					<#include "_personal_development.ftl" />
 				</div>
 			</div>
@@ -198,4 +189,126 @@
 		</@f.form>
 	</div>
 </#if>
+
+<script>
+jQuery(function($) {
+	// get basic containers
+	var $t = $('.tabbable');
+	var $panes = $t.find('.panes');
+
+	if ($t.length && $panes.length) {
+		// set up layout control
+		var $lt = $('<span class="layout-tools pull-right muted"><i class="icon-folder-close" title="Switch to tabbed layout"></i> <i class="icon-th-large" title="Switch to gadget layout"></i> <i class="icon-reorder" title="Switch to list layout"></i> <i class="icon-ok" title="Save layout settings"></i></span>');
+		$t.prepend($lt);
+		$lt.find('i').tooltip();
+
+		function reset() {
+			$t.hide();
+			$lt.removeClass('gadgeted');
+			$t.find('.tab-container').remove();
+			$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
+		}
+
+		// change layout
+		$t.on('click', '.layout-tools .icon-folder-close', function() {
+			// tabify
+			reset();
+			var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
+			var $tabs = $tabContainer.find('ul');
+			$panes.children('div').each(function() {
+				var title = $(this).find('h4').html();
+				var link = '#' + $(this).attr('id');
+				var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '">' + title + ' <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
+				$tabs.append($tab);
+			});
+			$lt.after($tabContainer);
+			$panes.addClass('tab-content').children('div').addClass('tab-pane').first().addClass('active');
+			$t.find('.nav-tabs').sortable({ handle: '.icon-move' }).show().find('li:first a').tab('show');
+			$t.show();
+		});
+
+		$t.on('click', '.layout-tools .icon-th-large', function() {
+			// gadgetify
+			reset();
+			$lt.addClass('gadgeted');
+			$panes.children('div').each(function() {
+				var $gadget = $(this).wrap('<div class="tab-content" />').parent().wrap('<div class="gadget" />').parent();
+				var title = $(this).find('h4').html();
+				var link = '#' + $(this).attr('id');
+				var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '">' + title + ' <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
+				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
+				$tabContainer.find('ul').append($tab);
+				$gadget.prepend($tabContainer);
+				$(this).addClass('tab-pane active');
+			});
+			$t.find('.panes').sortable({
+				handle: '.icon-move',
+				placeholder: 'sorting-target',
+				start: function(e, ui) {
+					$t.find('.gadget').not('ui-sortable-placeholder').addClass('sorting');
+				},
+				stop: function(e, ui) {
+					$t.find('.gadget').removeClass('sorting');
+				}
+			}).find('.tab-container li:first a').tab('show');
+			$t.show();
+		});
+
+		$t.on('click', '.layout-tools .icon-reorder', function() {
+			// reset
+			reset();
+			$t.show();
+		});
+
+		// tab controls
+		$t.on("click", ".tab-container .icon-resize-small", function(e) {
+			e.stopPropagation();
+			var $a = $(this).parent();
+			var title = $a.data("title");
+			$(this).prop("title", "Expand " + title);
+			$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace(title, "").replace("resize-small", "resize-full")).addClass("disabled");
+		});
+
+		$t.on("click", ".tab-container .icon-resize-full", function(e) {
+			e.stopPropagation();
+			var $a = $(this).parent();
+			var title = $a.data("title");
+			$(this).prop("title", "Collapse");
+			$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html(title + $a.html().replace("resize-full", "resize-small")).removeClass("disabled");
+		});
+
+		// default to tabs
+		$t.find('.layout-tools .icon-folder-close').click();
+	}
+});
+</script>
+
+<style type="text/css">
+#container .gadgeted {
+	display: block;
+	float: none;
+	text-align: right;
+}
+
+.panes {
+	padding-bottom: 16px;
+}
+
+.sorting {
+	max-height: 100px;
+	overflow-y: hidden;
+	border-bottom: dashed 1px #aaa;
+}
+
+.sorting-target {
+	height: 80px;
+	overflow-y: hidden;
+	border: dashed 1px #e01204;
+}
+
+.gadget .tab-content {
+	background: white;
+}
+</style>
+
 </#escape>

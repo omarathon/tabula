@@ -1,6 +1,7 @@
 <section id="course-details" class="clearfix">
+	<h4>Course details</h4>
+
 	<#if profile.hasCurrentEnrolment?? && profile.studyDetails??>
-		<h4>Course details</h4>
 		<table class="course-info">
 			<tbody>
 				<tr>
