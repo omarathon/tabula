@@ -1,5 +1,5 @@
 <#escape x as x?html>
-    <#assign smallGroupSet = releaseGroupSetCommand.singleGroupToPublish()/>
+    <#assign smallGroupSet = releaseGroupSetCommand.singleGroupToPublish/>
     <#assign submitAction><@routes.releaseset smallGroupSet /></#assign>
     <#if smallGroupSet.releasedToStudents >
         <#assign studentReadonly="disabled"/>
@@ -7,11 +7,11 @@
 
 
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
         <h3>Notify</h3>
     </div>
 
-    <@f.form method="post" action="${submitAction}" commandName="releaseGroupSetCommand" cssClass="form-horizonatal form-tiny">
+    <#-- Have to manually remove the 20px margin from the form (added by default bootstrap form styles)-->
+    <@f.form method="post" action="${submitAction}" commandName="releaseGroupSetCommand" cssClass="form-horizonatal form-tiny" style="margin-bottom:0">
 
     <div class="modal-body">
         <p>Notify these people via email that ${smallGroupSet.name} ${smallGroupSet.format.description}
@@ -27,6 +27,7 @@
                 <@f.checkbox path="notifyTutors" disabled="${smallGroupSet.releasedToTutors?string}"/>Tutors
             </label>
         </@form.row>
+        <p>They will automatically be notified of any further changes made to these groups</p>
     </div>
     <div class="modal-footer">
     <input class="btn btn-info" type="submit" value="Notify"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>

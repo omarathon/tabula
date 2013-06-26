@@ -15,7 +15,7 @@ object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
   object tutor {
-    def mygroups(member:User) = "Route tutor.mygroups is undefined"
+    def mygroups(member:User) = "/tutor"
   }
   // These are relative to the /profiles app, not the /groups app.
   object profile {
