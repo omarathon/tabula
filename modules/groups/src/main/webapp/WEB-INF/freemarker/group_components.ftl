@@ -4,11 +4,21 @@
 	<#return "module-${module.code}" />
 </#function>
 
+<#-- Output a menu list only if there is anything in it. -->
+<#macro dropdown_menu text icon>
+    <#local content><#nested /></#local>
+    <#if content?trim?has_content>
+    <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-${icon}"></i> ${text} <span class="caret"></span></a>
+    <ul class="dropdown-menu pull-right">
+    ${content}
+    </ul>
+    </#if>
+</#macro>
 
 <#-- module_info: currently being built for a tutor's view of small groups,
    but when finished will also be used in admin/department.ftl which has a very
    similar rendition of modules and small groups. -->
-<#macro module_info data can_manage_dept=false>
+<#macro module_info data>
 <#list data.moduleItems as moduleItem>
 
 <#assign module=moduleItem.module />
@@ -21,11 +31,12 @@
 	</#if>
 </#list>
 
+
 <a id="${module_anchor(module)}"></a>
-<div class="striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>"
+<div class="striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
      data-name="${module_anchor(module)}">
     <div class="clearfix">
-        <div class="btn-group section-manage-button">
+<#--        <div class="btn-group section-manage-button">
 
             <#if moduleItem.menu?? && moduleItem.menu.items?has_content>
             <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span
@@ -40,6 +51,23 @@
                 </#list>
             </ul>
             </#if>
+        </div>-->
+
+        <div class="btn-group section-manage-button">
+            <@dropdown_menu "Manage" "wrench">
+                <#if moduleItem.canManageGroups>
+                    <li><a href="<@routes.moduleperms module />">
+                        <i class="icon-user icon-fixed-width"></i> Edit module permissions
+                    </a></li>
+                    <li><a href="<@routes.createset module />"><i class="icon-group icon-fixed-width"></i> Add small groups</a></li>
+                </#if>
+                <#if has_archived_groups>
+                    <li><a class="show-archived-small-groups" href="#">
+                        <i class="icon-eye-open icon-fixed-width"></i> Show archived small groups
+                    </a>
+                    </li>
+                </#if>
+            </@dropdown_menu>
         </div>
 
         <h2 class="section-title with-button"><@fmt.module_name module /></h2>
@@ -73,7 +101,7 @@
                             </div>
                         </#if>
 
-                        <#list groupSet.groups as group>a
+                        <#list groupSet.groups as group>
                             <div class="group">
                                 <h4 class="name">
                                 ${group.name!""}
@@ -111,7 +139,7 @@
                     <div class="span2">
                         <div class="btn-toolbar pull-right">
                             <div class="btn-group">
-                                <#if setItem.menu?? && setItem.menu.items?has_content>
+                                <#--<#if setItem.menu?? && setItem.menu.items?has_content>
                                     <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
                                     <ul class="dropdown-menu pull-right">
                                         <#list setItem.menu.items as menuItem>
@@ -122,9 +150,9 @@
                                             </li>
                                         </#list>
                                     </ul>
-                                </#if>
-                                <#--
-                                <ul class="dropdown-menu pull-right">
+                                </#if>-->
+                                <@dropdown_menu "Actions" "cog">
+                                    <#if moduleItem.canManageGroups>
                                     <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
                                     <li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
                                     <li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
@@ -135,8 +163,8 @@
                                             Archive groups
                                         </#if>
                                     </a></li>
-                                </ul>
-                                -->
+                                    </#if>
+                                </@dropdown_menu>
                             </div>
                         </div>
                     </div>

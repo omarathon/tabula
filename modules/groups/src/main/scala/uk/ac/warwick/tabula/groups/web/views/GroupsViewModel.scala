@@ -15,11 +15,16 @@ import uk.ac.warwick.tabula.web.views.ViewModel._
  * those items.
  */
 object GroupsViewModel {
-	case class ViewModules(moduleItems: Seq[ViewModule])
+	case class ViewModules(
+		moduleItems: Seq[ViewModule],
+		canManageDepartment: Boolean
+	)
 	case class ViewModule(
 		module: Module,
 		setItems: Seq[ViewSet],
-		menu: Option[Menu]
+		canManageGroups: Boolean
 	)
-	case class ViewSet(set: SmallGroupSet, menu: Option[Menu])
+	case class ViewSet(
+		set: SmallGroupSet
+	)
 }

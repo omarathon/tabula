@@ -15,8 +15,7 @@ class TutorHomeControllerTest extends TestBase {
 		val controller = new TutorHomeController
 		val mav = controller.listModules(command)
 
-		mav.map("data") should be (GroupsViewModel.ViewModules(Nil))
+		mav.map("data") should be (GroupsViewModel.ViewModules(Nil, canManageDepartment=false))
 	}
-
 
 }

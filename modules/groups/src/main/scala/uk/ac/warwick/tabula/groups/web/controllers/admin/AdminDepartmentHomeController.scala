@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.commands.admin.AdminDepartmentHomeCommand
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModules, ViewSet, ViewModule}
+import uk.ac.warwick.tabula.permissions.Permissions
 
 
 @Controller
@@ -23,16 +25,27 @@ class AdminDepartmentHomeController extends GroupsController {
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
+	def adminDepartment(cmd: AdminDepartmentHomeCommand, user: CurrentUser) = {
 		val modules = cmd.apply()
-		// mapping from module ID to the available group sets.
-		val setMapping: Map[String, Seq[SmallGroupSet]] = modules.map {
-			module => module.id -> module.groupSets.asScala
-		}.toMap
+
+		// Build the view model
+		val moduleItems =
+			for (module <- modules) yield {
+				ViewModule(module,
+					module.groupSets.asScala map { ViewSet(_) },
+					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
+				)
+			}
+
+		val data = ViewModules(
+			moduleItems.toSeq,
+			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, cmd.department)
+		)
+
+
 
 		Mav("admin/department",
 			"department" -> cmd.department,
-			"modules" -> modules,
-			"setMapping" -> setMapping )
+			"data" -> data )
 	}
 }

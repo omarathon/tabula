@@ -24,11 +24,11 @@ class TutorHomeController extends GroupsController {
 		val moduleItems =
 			for ((module, sets) <- mapping) yield {
 				ViewModule(module,
-					sets map { ViewSet(_, None) },
-					None
+					sets map { ViewSet(_) },
+					canManageGroups=false
 				)
 			}
-		val data = ViewModules( moduleItems.toSeq )
+		val data = ViewModules( moduleItems.toSeq, canManageDepartment=false )
 
 		Mav("groups/tutor_home",
 			"data" -> data

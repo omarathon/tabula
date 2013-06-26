@@ -48,7 +48,6 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
 			case None => null
-			//      case long:Long => superWrap(long:JLong)
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
