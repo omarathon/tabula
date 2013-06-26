@@ -22,6 +22,7 @@
             <input class="btn btn-info" type="submit" value="Notify">
         </div>
 
+    <div id="scroll-container">
     <table id="modules-table" class="table table-bordered table-striped sortable-table">
 
         <thead>
@@ -30,7 +31,7 @@
             <th class="sortable">Module</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody >
             <#list modules as module>
             <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='All Small Group Sets for this module have already been released'")} >
                 <td>
@@ -50,6 +51,7 @@
 
         </tbody>
     </table>
+    </div>
     <br/>
 
 
