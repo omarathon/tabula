@@ -8,16 +8,16 @@
 			<#nested/>
 		</button>
 	</#macro>
-	<#macro modal group_index event_index>								
+	<#macro modal group_index event_index>
 		<div id="group${group_index}-event${event_index}-modal" class="modal hide fade refresh-form" tabindex="-1" role="dialog" aria-labelledby="group${group_index}-event${event_index}-modal-label" aria-hidden="true">
 			<div class="modal-header">
 	    	<h3 id="group${group_index}-event${event_index}-modal-label"><#nested/></h3>
 			</div>	
-			<div class="modal-body">				
+			<div class="modal-body">
 				<@form.labelled_row "tutors" "Tutors">
-					<@form.userpicker path="tutors" spanClass="span5" />
+					<@form.flexipicker path="tutors" placeholder="User name" includeEmail="false" includeGroups="false" includeUsers="true" htmlId="group${group_index}-event${event_index}-tutors" />
 				</@form.labelled_row>
-				
+
 				<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">
 					<@spring.bind path="weeks">
 						<#local allWeeks=(status.actualValue)![] />
