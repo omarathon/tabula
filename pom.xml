@@ -33,7 +33,8 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 		<warwickutils.version>20130514</warwickutils.version>
-        <surefire.version>2.14.1</surefire.version>
+	        <surefire.version>2.14.1</surefire.version>
+		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -452,7 +453,7 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<recompileMode>incremental</recompileMode>
+					<recompileMode>${recompileMode}</recompileMode>
 					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
