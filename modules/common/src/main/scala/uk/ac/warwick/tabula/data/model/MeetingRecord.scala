@@ -51,13 +51,13 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var creator: Member = _
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+	@Restricted(Array("Profiles.PersonalTutor.MeetingRecord.ReadDetails"))
 	var attachments: JList[FileAttachment] = JArrayList()
 
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+	@Restricted(Array("Profiles.PersonalTutor.MeetingRecord.ReadDetails"))
 	var title: String = _
 
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+	@Restricted(Array("Profiles.PersonalTutor.MeetingRecord.ReadDetails"))
 	var description: String = _
 
 	def escapedDescription:String = formattedHtml(description)

@@ -1,6 +1,6 @@
 <#escape x as x?html>
-	<#assign can_read_meetings = can.do("Profiles.MeetingRecord.Read", profile) />
-	<#assign can_create_meetings = can.do("Profiles.MeetingRecord.Create", profile) />
+	<#assign can_read_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Read", profile) />
+	<#assign can_create_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Create", profile) />
 
 	<section class="meetings">
 		<#if can_read_meetings>
