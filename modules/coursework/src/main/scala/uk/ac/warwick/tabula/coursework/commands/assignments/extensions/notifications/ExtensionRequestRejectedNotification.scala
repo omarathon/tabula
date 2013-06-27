@@ -10,7 +10,7 @@ class ExtensionRequestRejectedNotification (extension:Extension, student: User, 
 	this: TextRenderer =>
 
 	val verb = "reject"
-	def title: String = titleHeading + "Extension request rejected"
+	def title: String = titlePrefix + "Extension request rejected"
 
 	val template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(

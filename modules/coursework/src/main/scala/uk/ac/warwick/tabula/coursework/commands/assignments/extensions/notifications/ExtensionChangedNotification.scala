@@ -10,7 +10,7 @@ class ExtensionChangedNotification(extension:Extension, student: User, actor: Us
 	this: TextRenderer =>
 
 	val verb = "updated"
-	def title: String = titleHeading + "Extension details have been changed"
+	def title: String = titlePrefix + "Extension details have been changed"
 
 	val template = "/WEB-INF/freemarker/emails/modified_manual_extension.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(

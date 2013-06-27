@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.{ Assignment, Module }
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
@@ -208,13 +207,6 @@ class ReviewExtensionRequestController extends ExtensionController {
 			Mav(new JSONView(errorJson))
 		} else {
 			val extensions = cmd.apply()
-
-			for (extension <- extensions){
-				val approverId = user.apparentId
-				val recipients = extension.assignment.module.department.extensionManagers.includeUsers - approverId
-				recipients.foreach(new ExtensionRequestRespondedMessage(extension, _, approverId).apply())
-			}
-
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "edit", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))

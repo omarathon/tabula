@@ -16,7 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification, ExtensionGrantedNotification, ExtensionChangedNotification}
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications._
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 /*
@@ -41,15 +41,21 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	
 	copyExtensions(List(extension))
 
-	def emit = extensions.asScala.map({extension =>
+	def emit = extensions.asScala.flatMap({extension =>
 			val student = userLookup.getUserByWarwickUniId(extension.universityId)
-			if(extension.isManual){
-				new ExtensionChangedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+			val admin = submitter.apparentUser
+
+			val studentNotification = if(extension.isManual){
+				new ExtensionChangedNotification(extension, student, admin) with FreemarkerTextRenderer
 			} else if (extension.approved) {
-				new ExtensionRequestApprovedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+				new ExtensionRequestApprovedNotification(extension, student, admin) with FreemarkerTextRenderer
 			} else {
-				new ExtensionRequestRejectedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+				new ExtensionRequestRejectedNotification(extension, student, admin) with FreemarkerTextRenderer
 			}
+
+			val adminNotifications = new ExtensionRequestRespondedNotification(extension, student, admin) with FreemarkerTextRenderer
+
+		Seq(studentNotification, adminNotifications)
 	})
 }
 

@@ -11,7 +11,7 @@ class ExtensionGrantedNotification(extension:Extension, student: User, actor: Us
 
 	val verb = "grant"
 
-	def title: String = titleHeading + "Extension granted"
+	def title: String = titlePrefix + "Extension granted"
 
 	val template = "/WEB-INF/freemarker/emails/new_manual_extension.ftl"
 

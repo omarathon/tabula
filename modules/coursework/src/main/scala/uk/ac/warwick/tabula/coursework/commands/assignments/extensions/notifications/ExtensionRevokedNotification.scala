@@ -10,7 +10,7 @@ class ExtensionRevokedNotification(assignment:Assignment, student: User, actor: 
 	this: TextRenderer =>
 
 	val verb = "revoke"
-	def title: String = titleHeading + "Extension revoked"
+	def title: String = titlePrefix + "Extension revoked"
 
 	val template = "/WEB-INF/freemarker/emails/revoke_manual_extension.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(

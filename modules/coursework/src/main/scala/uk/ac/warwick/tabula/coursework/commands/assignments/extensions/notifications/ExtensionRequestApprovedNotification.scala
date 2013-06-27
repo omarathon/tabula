@@ -10,7 +10,7 @@ class ExtensionRequestApprovedNotification (extension:Extension, student: User, 
 	this: TextRenderer =>
 
 	val verb = "approve"
-	def title: String = titleHeading + "Extension request approved"
+	def title: String = titlePrefix + "Extension request approved"
 
 	val template = "/WEB-INF/freemarker/emails/extension_request_approved.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(

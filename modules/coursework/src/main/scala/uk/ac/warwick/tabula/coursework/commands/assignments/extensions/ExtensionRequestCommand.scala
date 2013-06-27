@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.commands.{Description, Command}
-import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
-import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.DateFormats
@@ -14,16 +12,16 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 
 class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
-	extends Command[Extension] with Daoisms with BindListener with SelfValidating {
+	extends Command[Extension]  with Notifies[Option[Extension]] with Daoisms with BindListener with SelfValidating {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
@@ -36,6 +34,8 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	var readGuidelines:JBoolean =_
 	// true if this command is modifying an existing extension. False otherwise
 	var modified:JBoolean = false
+
+	var extension:Extension =_
 
 	def validate(errors:Errors){
 		if(!submitter.apparentUser.getUserId.hasText){
@@ -69,7 +69,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	override def applyInternal() = transactional() {
 
 		val universityId = submitter.apparentUser.getWarwickId
-		val extension = assignment.findExtension(universityId).getOrElse({
+		extension = assignment.findExtension(universityId).getOrElse({
 			val newExtension = new Extension(universityId)
 			newExtension.userId = submitter.apparentUser.getUserId
 			newExtension
@@ -98,5 +98,13 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(assignment.module)
+	}
+
+	def emit = {
+		if (modified){
+			Seq(new ExtensionRequestModifiedNotification(extension, submitter.apparentUser) with FreemarkerTextRenderer)
+		} else {
+			Seq(new ExtensionRequestCreatedNotification(extension, submitter.apparentUser) with FreemarkerTextRenderer)
+		}
 	}
 }
