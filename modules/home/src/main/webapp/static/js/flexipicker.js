@@ -286,6 +286,62 @@ $.fn.flexiPicker = function (options) {
  */
 jQuery(function($){
   $('.flexi-picker').flexiPicker({});
+
+
+
+
+  	var emptyValue = function() {
+      	return (this.value||"").trim() == "";
+      };
+
+      /*
+       * Handle the multiple-flexi picker, by dynamically expanding to always
+       * have at least one empty picker field.
+       */
+      // Each set of pickers will be in a .flexi-picker-collection
+      var $collections = $('.flexi-picker-collection');
+      $collections.each(function(i, collection){
+      	var $collection = $(collection),
+      	    $blankInput = $collection.find('.flexi-picker-container').first().clone()
+      	    				.find('input').val('').end();
+      	$blankInput.find('a.btn').remove(); // this button is added by initFlexiPicker, so remove it now or we'll see double
+
+  		// check whenever field is changed or focused
+      	$collection.on('change focus', 'input', function(ev) {
+
+      		// remove empty pickers
+      		var $inputs = $collection.find('input');
+      		if ($inputs.length > 1) {
+      			var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.flexi-picker-container');
+      			toRemove.remove();
+      		};
+
+      		// if last picker is nonempty OR focused, append an blank picker.
+      		var $last = $inputs.last();
+      		var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
+      		if (lastFocused || $last.val().trim() != '') {
+  	    		var input = $blankInput.clone();
+  	    		$collection.append(input);
+  	    		input.find('input').first().flexiPicker({});
+      		};
+      	});
+      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 });
 
 // End of wrapping

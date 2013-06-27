@@ -15,7 +15,7 @@
 			</div>	
 			<div class="modal-body">
 				<@form.labelled_row "tutors" "Tutors">
-					<@form.flexipicker path="tutors" placeholder="User name" includeEmail="false" includeGroups="false" includeUsers="true" htmlId="group${group_index}-event${event_index}-tutors" />
+					<@form.flexipicker path="tutors" placeholder="User name" includeEmail="false" includeGroups="false" includeUsers="true" htmlId="group${group_index}-event${event_index}-tutors" list=true multiple=true />
 				</@form.labelled_row>
 
 				<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">

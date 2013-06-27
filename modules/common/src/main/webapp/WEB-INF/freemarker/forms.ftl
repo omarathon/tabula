@@ -160,53 +160,59 @@ To not bind:
 	flexipicker
 
 	A user/group picker using Bootstrap Typeahead
-	Jacked from a combination of the userpicker and
+	Combination of the userpicker and
 	the flexipicker in Sitebuilder
 -->
 
-<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true">
+<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" multiple=false>
 <#if name="">
 	<@spring.bind path=path>
 		<#-- This handles whether we're binding to a list or not but I think
 				it might still be more verbose than it needs to be. -->
 			<#assign ids=[] />
 			<#if status.value??>
-				<#if list && status.value?is_sequence>
-					<#assign ids=status.value />
+				<#if list && status.actualValue?is_sequence>
+					<#assign ids=status.actualValue />
 					<#elseif object>
 						<#assign ids=[status.value.userId] />
 					<#elseif status.value?is_string>
 						<#assign ids=[status.value] />
 				</#if>
 			</#if>
-		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers />
+		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
 	</@spring.bind>
 <#else>
-	<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers />
+	<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
 </#if>
 </#macro>
 
-<#macro render_flexipicker expression cssClass value placeholder includeEmail includeGroups includeUsers htmlId="">
+<#macro render_flexipicker expression cssClass value multiple placeholder includeEmail includeGroups includeUsers htmlId="">
+	<#if multiple><div class="flexi-picker-collection"></#if>
 
 	<#-- List existing values -->
 		<#if value?? && value?size gt 0>
 			<#list value as id>
-				<input type="text" class="text flexi-picker ${cssClass}"
+				<div class="flexi-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+			--><input type="text" class="text flexi-picker ${cssClass}"
 					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
 					   data-prefix-groups="webgroup:" value="${id}" data-type="" autocomplete="off"
 						/>
+				</div>
 			</#list>
 		</#if>
 
-		<#if !value?has_content>
-			<input  type="text" class="text flexi-picker ${cssClass}"
+		<#if !value?has_content || multiple>
+			<div class="flexi-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+		--><input   type="text" class="text flexi-picker ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
 					data-prefix-groups="webgroup:" data-type="" autocomplete="off"
 					/>
+			</div>
 		</#if>
 
+	<#if multiple></div></#if>
 </#macro>
 
 
