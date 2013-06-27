@@ -452,8 +452,8 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<!-- <recompileMode>incremental</recompileMode>
-					<useZincServer>true</useZincServer> -->
+					<recompileMode>incremental</recompileMode>
+					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
