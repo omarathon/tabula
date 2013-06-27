@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeUtils
@@ -11,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.JavaImports._
@@ -22,12 +20,16 @@ import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.Department
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends AppContextTestBase with Mockito {
 
 	@Autowired var relationshipService:RelationshipServiceImpl = _
 	@Autowired var profileService:ProfileServiceImpl = _
+
+	val dept1 = Fixtures.department("in", "IT Services")
+	val dept2 = Fixtures.department("cs", "Computing Science")
 
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
@@ -65,12 +67,21 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 
 	@Before def setup: Unit = transactional { tx =>
 		session.enableFilter(Member.ActiveOnlyFilter)
+		session.delete(dept1)
+		session.delete(dept2)
+		session.flush
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+		session.flush
 	}
 
 	@After def tidyUp: Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
+		session.delete(dept1)
+		session.delete(dept2)
+		session.flush
 	}
 
 	@Test def crud = transactional { tx =>
@@ -121,15 +132,6 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Test def listMembersUpdatedSince = transactional { tx =>
-		session.flush()
-		val dept1 = Fixtures.department("in", "IT Services")
-		val dept2 = Fixtures.department("cs", "Computing Science")
-
-		session.save(dept1)
-		session.save(dept2)
-
-		session.flush
-
 		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
@@ -198,13 +200,6 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Test def studentRelationships = transactional { tx =>
-		val dept1 = Fixtures.department("in")
-		val dept2 = Fixtures.department("cs")
-
-		session.save(dept1)
-		session.save(dept2)
-
-		session.flush
 
 		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)

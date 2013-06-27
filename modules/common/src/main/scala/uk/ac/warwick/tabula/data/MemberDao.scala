@@ -138,7 +138,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			and
 				sr.relationshipType = :relationshipType
 			and
-				sr.department = :department
+				scd.student.homeDepartment = :department
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by

@@ -136,6 +136,7 @@ object Fixtures {
 		val studentCourseDetails = new StudentCourseDetails(m, m.universityId + "/1")
 		studentCourseDetails.sprCode = m.universityId + "/1"
 		studentCourseDetails.department = courseDepartment
+		studentCourseDetails.mostSignificant = true
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
 	}
