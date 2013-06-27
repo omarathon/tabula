@@ -115,7 +115,7 @@
 
                                             <@fmt.weekRanges event />,
                                         ${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-                                        ${event.location}
+                                        ${event.location!"[no location]"}
                                         </li>
                                     </#list>
                                 </ul>
