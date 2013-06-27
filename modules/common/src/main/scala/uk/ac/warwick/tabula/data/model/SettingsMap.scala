@@ -1,28 +1,45 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.Type
-import javax.persistence._
+import scala.reflect.ClassTag
 
 trait SettingsMap[A <: SettingsMap[A]] { self: A =>
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	var settings: Map[String, Any] = Map()
-	
-	protected def -=(key: String) = {
-		settings -= key
-		self
+
+	/**
+	 * Provides access to a setting via a `value` property.
+	 *
+	 * @param key the key where the setting is stored in the map.
+	 * @param default default value if none is already set.
+	 * @tparam A
+	 */
+	case class Setting[A : ClassTag](key: String, default: A) {
+		def value: A = settings.get(key) map { _.asInstanceOf[A] } getOrElse(default)
+		def value_=(value: A) {
+			settings += (key -> value)
+		}
 	}
-	
+
+	case class OptionSetting[A : ClassTag](key: String) {
+		def value: Option[A] = settings.get(key) map { _.asInstanceOf[A] }
+		def value_=(value: A) {
+			settings += (key -> Option(value))
+		}
+	}
+
 	protected def +=(kv: (String, Any)) = {
 		settings += kv
 		self
 	}
-	
+
 	def ++=(sets: Pair[String, Any]*) = {
 		settings ++= sets
 		self
 	}
-	
+
 	def ++=(other: A) = {
 		settings ++= other.settings
 		self

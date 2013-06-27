@@ -134,7 +134,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	 * Doesn't take into account whether the ratings feature is enabled, so you
 	 * need to check that separately.
 	 */
-	def collectRatings: Boolean = assignment.module.department.collectFeedbackRatings
+	def collectRatings: Boolean = assignment.module.department.collectFeedbackRatings.value
 
 	/**
 	 * Whether marks are being collected for this feedback.
