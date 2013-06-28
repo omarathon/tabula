@@ -11,10 +11,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import scala.Some
 
 object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12
@@ -50,14 +51,21 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
+  def readPermissions():Seq[Permission]={
+    Seq(relationship.relationshipType match {
+      case RelationshipType.PersonalTutor =>Permissions.Profiles.PersonalTutor.MeetingRecord.ReadDetails
+      case RelationshipType.Supervisor => Permissions.Profiles.Supervisor.MeetingRecord.ReadDetails
+    })
+  }
+
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+  @RestrictionProvider("readPermissions")
 	var attachments: JList[FileAttachment] = JArrayList()
 
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+  @RestrictionProvider("readPermissions")
 	var title: String = _
 
-	@Restricted(Array("Profiles.MeetingRecord.ReadDetails"))
+  @RestrictionProvider("readPermissions")
 	var description: String = _
 
 	def escapedDescription:String = formattedHtml(description)
