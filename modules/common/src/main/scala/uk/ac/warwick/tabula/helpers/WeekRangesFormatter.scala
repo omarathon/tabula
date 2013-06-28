@@ -77,10 +77,10 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 	override def exec(list: JList[_]) = {
 		val user = RequestInfo.fromThread.get.user
 
-		def numberingSystem(department: Department): String = {
+		def numberingSystem(department: Department) = {
 			userSettings.getByUserId(user.apparentId)
 				.flatMap { settings => Option(settings.weekNumberingSystem) }
-				.getOrElse(department.weekNumberingSystem.value)
+				.getOrElse(department.weekNumberingSystem)
 		}
 		
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
