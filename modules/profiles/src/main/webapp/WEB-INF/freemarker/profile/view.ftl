@@ -157,25 +157,44 @@
 		</#if>
 	</section>
 
-	<#if (profile.studentCourseDetails)??>
-		<#list profile.studentCourseDetails as studentCourseDetails>
-			<#if profile.studentCourseDetails?size gt 1>
-				<hr>
-				<h3>Course: <@fmt.course_description studentCourseDetails /></h3>
+	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
+
+		<!-- most significant course first -->
+		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
+
+		<#if profile.studentCourseDetails?size gt 1>
+			<hr>
+			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+		</#if>
+		<div class="untabbed">
+			<#include "_supervision.ftl" />
+		</div>
+		<div class="untabbed">
+			<#include "_personal_development.ftl" />
+		</div>
+		<div class="untabbed">
+			<#if (profile.hasCurrentEnrolment)>
+				<#include "_course_details.ftl" />
+			<#else>
+				This student has no enrolment record for this course in the current year.
 			</#if>
-			<div class="untabbed">
-				<#include "_supervision.ftl" />
-			</div>
-			<div class="untabbed">
-				<#include "_personal_development.ftl" />
-			</div>
-			<div class="untabbed">
-				<#if (profile.hasCurrentEnrolment)>
-					<#include "_course_details.ftl" />
-				<#else>
-					This student has no enrolment record for this course in the current year.
+		</div>
+
+		<!-- and then the others -->
+		<#list profile.studentCourseDetails as studentCourseDetails>
+			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
+				<#if profile.studentCourseDetails?size gt 1>
+					<hr>
+					<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
 				</#if>
-			</div>
+				<div class="untabbed">
+					<#if (profile.hasCurrentEnrolment)>
+						<#include "_course_details.ftl" />
+					<#else>
+						This student has no enrolment record for this course in the current year.
+					</#if>
+				</div>
+			</#if>
 		</#list>
 	<#else>
 	</#if>

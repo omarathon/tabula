@@ -13,7 +13,8 @@ import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 
-class ImportSupervisorsForSingleStudentCommand(studentCourseDetails: StudentCourseDetails) extends Command[Unit] with Logging{
+class ImportSupervisorsForSingleStudentCommand(studentCourseDetails: StudentCourseDetails)
+	extends Command[Unit] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var supervisorImporter = Wire.auto[SupervisorImporter]

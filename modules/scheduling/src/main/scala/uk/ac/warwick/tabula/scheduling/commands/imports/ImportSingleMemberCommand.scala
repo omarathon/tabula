@@ -193,8 +193,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		photo
 	}
 
-	override def describe(d: Description) = d.property("universityId" -> universityId)
-
 }
 
 object ImportMemberHelpers {

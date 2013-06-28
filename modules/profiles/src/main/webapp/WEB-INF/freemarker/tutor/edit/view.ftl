@@ -98,7 +98,6 @@
 					$('#modal-change-tutor').modal('hide');
 					var tutorId = $('#editTutorCommand input[name=tutor]').val();
 					var remove = $('#editTutorCommand input[name=remove]').val();
-					var scj = $(this).closest('a').data('scj');
 					if(remove == "true") {
 						var action = "removed";
 					} else {
@@ -106,7 +105,7 @@
 					}
 
 					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-					window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId + "&scj=" + scj;
+					window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId;
 				});
 			});
 

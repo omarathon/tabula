@@ -136,7 +136,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		student.studentCourseDetails.add(studentCourseDetails)
 		student.homeDepartment = dept
 
-		student.description should be ("Undergraduate studentMEng Computer Science, IT Services")
+		val desc = student.description
+		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")
 	}
 
 	@Test def isPersonalTutor {
@@ -149,39 +150,6 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, staff) returns (Seq(StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")))
 		staff.isAPersonalTutor should be (true)
-	}
-
-	@Test def getPersonalTutor {
-		val student = new StudentMember
-
-		val studentCourseDetails = new StudentCourseDetails(student, "0205225/1")
-		studentCourseDetails.sprCode = "0205225/1"
-		studentCourseDetails.relationshipService = relationshipService
-		
-		student.studentCourseDetails.add(studentCourseDetails)
-		
-
-		student.profileService = profileService
-
-		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
-
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Nil)
-		student.studentCourseDetails.get(0).personalTutors should be ('empty)
-
-		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
-		rel.profileService = profileService
-
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Seq(rel))
-		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq("0672089"))
-
-		val staff = Fixtures.staff(universityId="0672089")
-		staff.firstName = "Steve"
-		staff.lastName = "Taff"
-
-		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
-
-		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq(staff))
 	}
 
 	@Test def deleteFileAttachmentOnDelete {

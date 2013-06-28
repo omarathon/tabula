@@ -100,7 +100,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
 		importSingleStudentCourseYearCommand.apply
 
-		captureTutor(department)
+		captureTutor(studentCourseDetails.department)
 
 		new ImportSupervisorsForSingleStudentCommand(studentCourseDetails).apply
 
@@ -188,6 +188,5 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 			}
 		}
 	}
-	override def describe(d: Description) = d.property("scjCode" -> scjCode).property("category" -> "student")
 }
 

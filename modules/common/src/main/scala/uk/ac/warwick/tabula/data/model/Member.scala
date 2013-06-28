@@ -160,7 +160,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isAPersonalTutor = {
-		(userType == MemberUserType.Staff && 
+		(userType == MemberUserType.Staff &&
 				!relationshipService.listStudentRelationshipsWithMember(
 						RelationshipType.PersonalTutor, this
 			).isEmpty)
@@ -197,10 +197,10 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
 		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
-		
+
 		val homeDeptStream = homeDepartment match {
 			case null => Stream()
-			case _ => Stream(homeDepartment)			
+			case _ => Stream(homeDepartment)
 		}
 		(homeDeptStream #:::
 				sprDepartments #:::
@@ -234,7 +234,7 @@ class StudentMember extends Member with StudentProperties {
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
-			if (details != null && details.route != null) details.route.name
+			if (details != null && details.route != null) ", " + details.route.name
 			else ""
 		case _ => ""
 	}
