@@ -52,10 +52,9 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var creator: Member = _
 
   def readPermissions():Seq[Permission]={
-    Seq(if (relationship.relationshipType == RelationshipType.PersonalTutor){
-      Permissions.Profiles.PersonalTutor.MeetingRecord.ReadDetails
-    }else{
-      Permissions.Profiles.Supervisor.MeetingRecord.ReadDetails
+    Seq(relationship.relationshipType match {
+      case RelationshipType.PersonalTutor =>Permissions.Profiles.PersonalTutor.MeetingRecord.ReadDetails
+      case RelationshipType.Supervisor => Permissions.Profiles.Supervisor.MeetingRecord.ReadDetails
     })
   }
 
