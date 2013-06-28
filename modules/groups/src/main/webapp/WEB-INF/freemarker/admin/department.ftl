@@ -1,9 +1,18 @@
 <#--
 
-This will soon be refactored to use some components from group_components.ftl.
+
+
+
+
+This will soon be refactored to use some components from group_components.ftl,
+in the same way that tutor_home.ftl and TutorHomeController are currently
+
+If you are doing any work on this, it would be good to do the above first.
+
+
 
 -->
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+<#import "../group_components.ftl" as components />
 <#escape x as x?html>
 
 <#macro longDateRange start end>
@@ -20,7 +29,7 @@ This will soon be refactored to use some components from group_components.ftl.
 </#function>
 
 <#if department??>
-	<#assign can_manage_dept=can.do("Module.ManageSmallGroups", department) />
+	<#assign can_manage_dept=data.canManageDepartment />
 
 	<h1 class="with-settings">
 		${department.name}
@@ -56,7 +65,7 @@ This will soon be refactored to use some components from group_components.ftl.
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
-                <li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
+                <li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
                     <a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
 			</ul>
 		</div>
@@ -69,11 +78,14 @@ This will soon be refactored to use some components from group_components.ftl.
 		</div>
 	</div>
 
-<#if !modules?has_content && department.children?has_content>
+<#if !data.moduleItems?has_content && department.children?has_content>
 <p>This department doesn't directly contain any modules. Check subdepartments.</p>
 </#if>
 
-<#list modules as module>
+    <#-- This is the big list of modules -->
+    <@components.module_info data />
+
+<#--<#list modules as module>
 	<#assign can_manage=can.do("Module.ManageSmallGroups", module) />
 	<#assign has_groups=(module.groupSets!?size gt 0) />
 	<#assign has_archived_groups=false />
@@ -149,7 +161,7 @@ This will soon be refactored to use some components from group_components.ftl.
 								<ul class="unstyled">
 									<#list group.events as event>
 										<li>
-											<#-- Tutor, weeks, day/time, location -->
+											&lt;#&ndash; Tutor, weeks, day/time, location &ndash;&gt;
 
 											<@fmt.weekRanges event />,
 											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
@@ -168,17 +180,14 @@ This will soon be refactored to use some components from group_components.ftl.
 						</#if>
 						
 						<#if groupSet.hasAllocated >
-                           <#-- not released at all -->
                             <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 							<div class="alert">
 								<i class="icon-info-sign"></i> Notifications have not been sent for these groups
 							</div>
-                           <#-- only released to tutors-->
                            <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
                             <div class="alert">
                                  <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
                              </div>
-                            <#-- only released to students-->
                             <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
                                 <div class="alert">
                                     <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
@@ -220,7 +229,7 @@ This will soon be refactored to use some components from group_components.ftl.
 	</div>
 	</#if>
 </div>
-</#list>
+</#list>-->
 <div id="modal-container" class="modal fade"></div>
 <#else>
 <p>No department.</p>

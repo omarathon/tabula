@@ -13,13 +13,13 @@ trait Applicable[A] {
 	def apply(): A
 }
 
+
 trait TutorHomeCommand extends Applicable[Map[Module, Seq[SmallGroupSet]]]
-/** Gets the data for a tutor's view of a department's small groups.
+
+/** Gets the data for a tutor's view of all small groups they're tutor of.
   *
   * Permission is Public because it doesn't rely on permission of any one thing -
-  * just at least one small group event in the department. And that's all the command
-  * returns so we're only showing them what they have access to anyway, which might be
-  * nothing.
+  * by definition it only returns data that is associated with you.
   */
 class TutorHomeCommandImpl(user: CurrentUser)
 	extends Command[Map[Module, Seq[SmallGroupSet]]]
