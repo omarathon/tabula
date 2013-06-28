@@ -5,7 +5,7 @@ import org.junit.Test
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.MeetingRecordApproval
 
-class ApproveMeetingRecordCommandPermisionsTests extends TestBase  with MeetingRecordCommandPermisionsTests {
+class ApproveMeetingRecordCommandPermissionsTests extends TestBase  with MeetingRecordCommandPermissionsTests {
 
 
   @Test

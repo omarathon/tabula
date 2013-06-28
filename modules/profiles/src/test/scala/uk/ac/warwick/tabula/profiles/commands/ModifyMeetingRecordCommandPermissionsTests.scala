@@ -5,7 +5,7 @@ import scala.Some
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.{StudentRelationship, Member}
 
-class ModifyMeetingRecordCommandPermissionsTests extends TestBase  with MeetingRecordCommandPermisionsTests {
+class ModifyMeetingRecordCommandPermissionsTests extends TestBase  with MeetingRecordCommandPermissionsTests {
 
 
   @Test
@@ -15,7 +15,7 @@ class ModifyMeetingRecordCommandPermissionsTests extends TestBase  with MeetingR
   }
 
   @Test
-  def requiresCreateSuperivisorMeetingRecordPermissionIfRelationIsTutor(){
+  def requiresCreateSuperivisorMeetingRecordPermissionIfRelationIsSupervisor(){
     val cmd =  new StubModifyMeetingRecordCommand(creator, supervisorRelationship)
     cmd.permissionsAllChecks.get(Permissions.Profiles.Supervisor.MeetingRecord.Create).get should be(Some(relationship.studentMember))
   }

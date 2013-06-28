@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.permissions.Permissions
 
-class DownloadMeetingRecordFileCommandPermisionsTest  extends TestBase with MeetingRecordCommandPermisionsTests{
+class DownloadMeetingRecordFileCommandPermissionsTest  extends TestBase with MeetingRecordCommandPermissionsTests{
 
   @Test
   def  requiresReadDetailsTutorMeetingRecordPermissionIfRelationIsTutor(){

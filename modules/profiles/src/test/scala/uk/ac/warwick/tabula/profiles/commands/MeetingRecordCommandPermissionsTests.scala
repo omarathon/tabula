@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.{Supervisor, PersonalTut
 import scala.Some
 import org.springframework.validation.BindingResult
 
-trait MeetingRecordCommandPermisionsTests extends Mockito{
+trait MeetingRecordCommandPermissionsTests extends Mockito{
   val ps = mock[ProfileService]
 
   var student:StudentMember = _

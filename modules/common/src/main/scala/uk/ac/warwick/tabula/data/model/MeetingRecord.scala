@@ -12,7 +12,7 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.system.permissions._
+import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import scala.Some
