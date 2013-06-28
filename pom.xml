@@ -27,13 +27,14 @@
 	<properties>
 		<scala.version>2.10.1</scala.version>
 		<scala.major.version>2.10</scala.major.version>
-		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
+		<org.springframework.version>3.2.3.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
 		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 		<warwickutils.version>20130514</warwickutils.version>
-        <surefire.version>2.14.1</surefire.version>
+	        <surefire.version>2.14.1</surefire.version>
+		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -452,7 +453,7 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<recompileMode>incremental</recompileMode>
+					<recompileMode>${recompileMode}</recompileMode>
 					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>

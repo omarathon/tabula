@@ -12,7 +12,6 @@ If you are doing any work on this, it would be good to do the above first.
 
 
 -->
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#import "../group_components.ftl" as components />
 <#escape x as x?html>
 
@@ -30,7 +29,7 @@ If you are doing any work on this, it would be good to do the above first.
 </#function>
 
 <#if department??>
-	<#assign can_manage_dept=can.do("Module.ManageSmallGroups", department) />
+	<#assign can_manage_dept=data.canManageDepartment />
 
 	<h1 class="with-settings">
 		${department.name}
