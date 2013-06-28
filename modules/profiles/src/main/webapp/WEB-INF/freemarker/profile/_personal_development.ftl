@@ -35,7 +35,7 @@
 			</p>
 		</#if>
 
-		<div class="tutors clearfix row">
+		<div class="tutors clearfix row-fluid">
 		<#list profile.personalTutors as relationship>
 			<#assign personalTutor = relationship.agentMember />
 			<div class="tutor clearfix span4">

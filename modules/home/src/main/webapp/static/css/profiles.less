@@ -7,46 +7,6 @@
 	background: @header-colour;
 }
 
-.tabbable {
-	.layout-tools {
-		float: right;
-		margin-top: 5px;
-
-		i:hover {
-			color: @tabulaGray;
-		}
-	}
-
-	.nav-tabs {
-		// room for layout-tools
-		padding-right: 70px;
-
-		.disabled { cursor: not-allowed; }
-		.icon-move { cursor: move; }
-		.icon-resize-small, .icon-resize-full { cursor: pointer; }
-
-		.icon-move, .icon-resize-small, .icon-resize-full {
-			color: @tabulaGrayLightTint;
-
-			&:hover {
-				color: @tabulaGrayLight;
-			}
-		}
-
-		li.active {
-			.icon-resize-small { display: none; }
-		}
-	}
-
-	.panes > div {
-		margin-bottom: 18px;
-
-		&.tab-pane {
-			margin-bottom: 0;
-		}
-	}
-}
-
 #modal-change-tutor #edit-personal-tutor-modal {
 	overflow:visible;
 
