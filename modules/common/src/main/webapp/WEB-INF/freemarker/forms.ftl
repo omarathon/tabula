@@ -162,8 +162,17 @@ To not bind:
 	A user/group picker using Bootstrap Typeahead
 	Combination of the userpicker and
 	the flexipicker in Sitebuilder
--->
 
+	Params
+	name: If set, use this as the form name and don't bind values from spring.
+	path: If set, bind to this Spring path and use its values.
+	list: whether we are binding to a List in Spring - ignored if using name instead of path
+	multiple: whether the UI element will grow to allow multiple items
+	object: True if binding to User objects, otherwise binds to strings.
+	    This might not actually work - better to register a property editor for the field
+	    if you are binding to and from Users.
+
+-->
 <#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" multiple=false>
 <#if name="">
 	<@spring.bind path=path>
@@ -173,10 +182,10 @@ To not bind:
 			<#if status.value??>
 				<#if list && status.actualValue?is_sequence>
 					<#assign ids=status.actualValue />
-					<#elseif object>
-						<#assign ids=[status.value.userId] />
-					<#elseif status.value?is_string>
-						<#assign ids=[status.value] />
+				<#elseif object>
+					<#assign ids=[status.value.userId] />
+				<#elseif status.value?is_string>
+					<#assign ids=[status.value] />
 				</#if>
 			</#if>
 		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
@@ -192,7 +201,7 @@ To not bind:
 	<#-- List existing values -->
 		<#if value?? && value?size gt 0>
 			<#list value as id>
-				<div class="flexi-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+				<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
 			--><input type="text" class="text flexi-picker ${cssClass}"
 					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
@@ -203,7 +212,7 @@ To not bind:
 		</#if>
 
 		<#if !value?has_content || multiple>
-			<div class="flexi-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+			<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
 		--><input   type="text" class="text flexi-picker ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"

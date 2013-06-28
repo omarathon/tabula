@@ -38,7 +38,7 @@
 		</@form.labelled_row>
 		<@form.labelled_row "extensionManagers" "Extension managers">
 			<div id="extension-manager-list">
-				<@form.flexipicker path="extensionManagers" placeholder="User name" includeEmail="false" includeGroups="false" includeUsers="true" multiple=true list=true />
+				<@form.flexipicker path="extensionManagers" placeholder="User name" multiple=true list=true />
 			</div>
 			<script>
 				jQuery('#extension-manager-list').on('click', function(e){
