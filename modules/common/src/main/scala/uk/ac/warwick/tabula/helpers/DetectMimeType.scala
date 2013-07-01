@@ -1,23 +1,18 @@
 package uk.ac.warwick.tabula.helpers
 
 import java.io.File
-import org.apache.tika.detect.{DefaultDetector,Detector}
+import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MimeTypes
-import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.io.TikaInputStream
+import uk.ac.warwick.tabula.helpers.Closeables._
 
 object DetectMimeType {
+	private val detector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
+
 	def detectMimeType(file: File): String = {
-			val detector = new DefaultDetector(MimeTypes.getDefaultMimeTypes())
-			var metadata = new Metadata
-			
-			var tikaIS: TikaInputStream = null
-			
-			try {
-				tikaIS = TikaInputStream.get(file)
-				detector.detect(tikaIS, metadata).toString
-			} finally {
-				if (tikaIS != null) tikaIS.close
-			}
+		closeThis(TikaInputStream.get(file)) { tikaIS =>
+			detector.detect(tikaIS, new Metadata).toString
+		}
 	}
 }
