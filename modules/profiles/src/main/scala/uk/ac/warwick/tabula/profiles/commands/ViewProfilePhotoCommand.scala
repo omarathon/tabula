@@ -146,7 +146,7 @@ class Photo(attachment: FileAttachment) extends RenderableAttachment(attachment:
 
 class DefaultPhoto extends RenderableFile {
 	private def read() = {
-		val is = getClass.getResourceAsStream("/no-photo.png")
+		val is = getClass.getResourceAsStream("/no-photo.jpg")
 		val os = new ByteArrayOutputStream
 
 		FileCopyUtils.copy(is, os)
@@ -157,8 +157,8 @@ class DefaultPhoto extends RenderableFile {
 	private val NoPhoto = read()
 
 	override def inputStream = new ByteArrayInputStream(NoPhoto)
-	override def filename = "no-photo.png"
-	override def contentType = "image/png"
+	override def filename = "no-photo.jpg"
+	override def contentType = "image/jpg"
 	override def contentLength = Some(NoPhoto.length)
 	override def file = None
 }

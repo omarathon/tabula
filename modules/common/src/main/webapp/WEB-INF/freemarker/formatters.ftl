@@ -181,7 +181,7 @@
 			<img src="<@routes.photo member />?size=${resize}"/>
 			</@lightbox_link>
 		<#else>
-			<img src="<@url resource="/static/images/no-photo.png" />" />
+			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />
 		</#if>
 	</div>
 </#macro>
@@ -196,7 +196,7 @@
 			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
 			</@lightbox_link>
 		<#else>
-			<img src="<@url resource="/static/images/no-photo.png" />" />
+			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />
 		</#if>
 	</div>
 </#macro>
