@@ -507,6 +507,7 @@
 							<files>
 								<file>${tabula.basedir}/local.properties</file>
 							</files>
+							<quiet>true</quiet><!-- keep quiet if file not found -->
 						</configuration>
 					</execution>
 				</executions>
