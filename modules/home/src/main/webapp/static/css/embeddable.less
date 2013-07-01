@@ -875,7 +875,7 @@ table {
   }
 }
 
-.user-picker-collection .user-picker-container {
+.user-picker-collection .user-picker-container, .flexi-picker-collection .flexi-picker-container {
   display: block !important;
 }
 
@@ -1148,7 +1148,7 @@ h1.with-settings {
  	}
 
 	// mixin
-	.tabula-photo (@width: 186px, @padding: 8px) {
+	.tabula-photo (@width, @padding) {
 		float: left;
 		width: @width;
 		margin-right: 16px;
@@ -1163,6 +1163,16 @@ h1.with-settings {
 			max-width: @width - (@padding * 2);
 		}
 	}
+	
+	.photo.size-tinythumbnail {
+		.tabula-photo(50px, 5px);
+	}
+	
+	.photo.size-thumbnail {
+		.tabula-photo(186px, 8px);
+	}
+	
+	
 
 	hr.full-width {
  		width: auto;
@@ -1175,10 +1185,6 @@ h1.with-settings {
 
 	#container .profile  {
 		#personal-details {
-			div.photo {
-				.tabula-photo;
-			}
-
 			div.col1 {
 				float: left;
 				width: 354px;
@@ -1555,6 +1561,74 @@ h1.with-settings {
 .datetimepicker {
 	line-height: 20px;
 }
+
+
+
+//---- Flexi Picker -----//
+
+@flexi-picker-vertical-align: middle;
+
+input.flexi-picker {
+	vertical-align: @flexi-picker-vertical-align;
+}
+
+.flexi-picker-result {
+	min-width:219px;
+
+	span.type {
+		font-size: 75%;
+		opacity: 0.5;
+		padding: 0.5em;
+	}
+
+	.description {
+		font-size: 75%;
+		opacity: 0.8;
+		padding-left: 3px;
+		margin-top: -8px;
+	}
+
+	i {
+		margin-left: -17px;
+		margin-right: 3px;
+	}
+
+	a {
+		text-decoration: none;
+	}
+}
+.rich-result-field {
+	color: green !important;
+	position: relative;
+	vertical-align: @flexi-picker-vertical-align;
+
+	.val {
+		display: block;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		padding-right: 13px;
+	}
+
+	a.clear-field {
+		position: absolute;
+		right: 0;
+		top: 4px;
+		padding: 0 5px 0 0;
+		color: #666;
+		font-size: 150%;
+		background-color: white;
+		text-decoration: none;
+	}
+}
+
+//---- END Flexi Picker -----//
+
+
+
+
+
+
+
 
 .tabula-page, #container {
 	.btn-toolbar {

@@ -19,7 +19,7 @@
 		<@form.row path="usercodes">
 			<input type="hidden" name="_command" value="add">
 			<input type="hidden" name="department" value="${department.code}">
-			Add user <@form.userpicker path="usercodes" />
+			Add user <@form.flexipicker path="usercodes" />
 			<input class="btn" type="submit" value="Add">
 			<@f.errors path="usercodes" cssClass="error help-inline" />
 		</@form.row>

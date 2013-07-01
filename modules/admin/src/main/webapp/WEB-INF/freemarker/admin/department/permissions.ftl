@@ -20,7 +20,7 @@
 	<@f.errors path="roleDefinition" cssClass="error help-inline" />
 
 	<div class="form-inline">
-		<@form.userpicker path="usercodes" />
+		<@form.flexipicker path="usercodes" />
 		<input class="btn" type="submit" value="Add">
 	</div>
 	<@f.errors path="usercodes" cssClass="error help-inline" />

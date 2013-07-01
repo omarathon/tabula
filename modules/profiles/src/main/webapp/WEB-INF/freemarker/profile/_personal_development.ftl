@@ -34,6 +34,7 @@
 				</#if>
 			</p>
 		</#if>
+		
 
 		<div class="tutors clearfix row">
 		<#list profile.personalTutors as relationship>
@@ -45,9 +46,9 @@
 						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"  data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
-					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
-					</div>
+					
+					<@fmt.relation_photo member relationship "tinythumbnail" />
+				
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>

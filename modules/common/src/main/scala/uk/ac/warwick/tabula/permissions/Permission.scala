@@ -171,19 +171,27 @@ object Permissions {
 			case object Read extends Permission("View a personal tutor")
 			case object Update extends Permission("Edit a personal tutor")
 			case object Delete extends Permission("Remove a personal tutor")
+
+      object MeetingRecord {
+        case object Create extends Permission("Add a tutor meeting record")
+        case object Read extends Permission("View a tutor meeting record")
+        case object ReadDetails extends Permission("View the contents of a tutor meeting record")
+        case object Update extends Permission("Edit a tutor meeting record")
+        case object Delete extends Permission("Remove a tutor meeting record")
+      }
+
 		}
 
 		// Person's own supervisor ('upward' relationship)
 		object Supervisor {
 			case object Read extends Permission("View a supervisor")
-		}
-
-		object MeetingRecord {
-			case object Create extends Permission("Add a meeting record")
-			case object Read extends Permission("View a meeting record")
-			case object ReadDetails extends Permission("View the contents of a meeting record")
-			case object Update extends Permission("Edit a meeting record")
-			case object Delete extends Permission("Remove a meeting record")
+      object MeetingRecord {
+        case object Create extends Permission("Add a supervisor meeting record")
+        case object Read extends Permission("View a supervisor meeting record")
+        case object ReadDetails extends Permission("View the contents of a supervisor meeting record")
+        case object Update extends Permission("Edit a supervisor meeting record")
+        case object Delete extends Permission("Remove a supervisor meeting record")
+      }
 		}
 	}
 	

@@ -127,7 +127,7 @@ trait TestHelpers extends TestFixtures {
 	/** Returns a new temporary directory that will get cleaned up
 	  * automatically at the end of the test.
 	  */
-	def createTemporaryDirectory: File = {
+	def createTemporaryDirectory(): File = {
 		// try 10 times to find an unused filename.
 		// Stream is lazy so it won't try making 10 files every time.
 		val dir = findTempFile
@@ -136,7 +136,7 @@ trait TestHelpers extends TestFixtures {
 		dir
 	}
 
-	def createTemporaryFile: File = {
+	def createTemporaryFile(): File = {
 		val file = findTempFile
 		if (!file.createNewFile()) throw new IllegalStateException("Couldn't create " + file)
 		temporaryFiles += file

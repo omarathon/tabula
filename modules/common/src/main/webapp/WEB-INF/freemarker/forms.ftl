@@ -108,7 +108,7 @@ To not bind:
 <@userpicker name="paramName" />
 
 -->
-<#macro userpicker path="" name="" list=false object=false multiple=false spanClass="span2">
+<#macro userpicker path="" name="" list=false object=false multiple=false spanClass="span2" htmlId="">
 <#if name="">
 	<@spring.bind path=path>
 	<#-- This handles whether we're binding to a list or not but I think
@@ -123,21 +123,23 @@ To not bind:
 			<#assign ids=[status.actualValue] />
 		</#if>
 	</#if>
-	<@render_userpicker expression=status.expression value=ids multiple=multiple spanClass=spanClass/>
+	<@render_userpicker expression=status.expression value=ids multiple=multiple spanClass=spanClass htmlId=htmlId/>
 	</@spring.bind>
 <#else>
-	<@render_userpicker expression=name value=[] multiple=multiple spanClass=spanClass/>
+	<@render_userpicker expression=name value=[] multiple=multiple spanClass=spanClass htmlId=htmlId/>
 </#if>
 </#macro>
 
-<#macro render_userpicker expression value multiple spanClass="span2">
+<#macro render_userpicker expression value multiple spanClass="span2" htmlId="">
 	<#if multiple><div class="user-picker-collection"></#if>
+
+
 
 	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 	<#list value as id>
 		<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-		--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" value="${id}">
+		--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" value="${id}" id="${htmlId}">
 		</div>
 	</#list>
 	</#if>
@@ -145,12 +147,84 @@ To not bind:
 	<#if !value?has_content || multiple>
 	<#-- an empty field for entering new values in any case -->
 	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
-	--><input type="text" class="user-code-picker ${spanClass}" name="${expression}">
+	--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" id="${htmlId}">
 	</div>
 	</#if>
 
 	<#if multiple></div></#if>
 </#macro>
+
+
+
+<#--
+	flexipicker
+
+	A user/group picker using Bootstrap Typeahead
+	Combination of the userpicker and
+	the flexipicker in Sitebuilder
+
+	Params
+	name: If set, use this as the form name and don't bind values from spring.
+	path: If set, bind to this Spring path and use its values.
+	list: whether we are binding to a List in Spring - ignored if using name instead of path
+	multiple: whether the UI element will grow to allow multiple items
+	object: True if binding to User objects, otherwise binds to strings.
+	    This might not actually work - better to register a property editor for the field
+	    if you are binding to and from Users.
+
+-->
+<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" multiple=false>
+<#if name="">
+	<@spring.bind path=path>
+		<#-- This handles whether we're binding to a list or not but I think
+				it might still be more verbose than it needs to be. -->
+			<#assign ids=[] />
+			<#if status.value??>
+				<#if list && status.actualValue?is_sequence>
+					<#assign ids=status.actualValue />
+				<#elseif object>
+					<#assign ids=[status.value.userId] />
+				<#elseif status.value?is_string>
+					<#assign ids=[status.value] />
+				</#if>
+			</#if>
+		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
+	</@spring.bind>
+<#else>
+	<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
+</#if>
+</#macro>
+
+<#macro render_flexipicker expression cssClass value multiple placeholder includeEmail includeGroups includeUsers htmlId="">
+	<#if multiple><div class="flexi-picker-collection"></#if>
+
+	<#-- List existing values -->
+		<#if value?? && value?size gt 0>
+			<#list value as id>
+				<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
+			--><input type="text" class="text flexi-picker ${cssClass}"
+					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
+					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
+					   data-prefix-groups="webgroup:" value="${id}" data-type="" autocomplete="off"
+						/>
+				</div>
+			</#list>
+		</#if>
+
+		<#if !value?has_content || multiple>
+			<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
+		--><input   type="text" class="text flexi-picker ${cssClass}"
+					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
+					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
+					data-prefix-groups="webgroup:" data-type="" autocomplete="off"
+					/>
+			</div>
+		</#if>
+
+	<#if multiple></div></#if>
+</#macro>
+
+
 
 <#--
 	Create a file(s) upload widget, binding to an UploadedFile object.
