@@ -52,7 +52,6 @@
         </tbody>
     </table>
     </div>
-    <br/>
 
 
     </@f.form>

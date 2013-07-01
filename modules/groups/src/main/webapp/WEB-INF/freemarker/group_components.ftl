@@ -132,19 +132,19 @@
                         <#if groupSet.hasAllocated >
                              <#-- not released at all -->
                               <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-                            <div class="alert">
+                            <p class="alert">
                                 <i class="icon-info-sign"></i> Notifications have not been sent for these groups
-                            </div>
+                            </p>
                              <#-- only released to tutors-->
                              <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
-                              <div class="alert">
+                              <p class="alert">
                                    <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
-                               </div>
+                               </p>
                               <#-- only released to students-->
                               <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-                                  <div class="alert">
+                                  <p class="alert">
                                       <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
-                                  </div>
+                                  </p>
                              </#if>
                         </#if>
                     </div>

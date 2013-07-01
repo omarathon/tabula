@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.groups.notifications.ReleaseSmallGroupSetsNotificati
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.Permissions
-import javax.swing.JList
 
 
 class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroup]]{
@@ -48,7 +47,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
            group<-groupSet.groups.asScala;
            event<-group.events.asScala;
            tutor<-event.tutors.users
-     )yield new ReleaseSmallGroupSetsNotification(List(group), currentUser,tutor, false) with FreemarkerTextRenderer
+     )yield new ReleaseSmallGroupSetsNotification(List(group), currentUser,tutor, isStudent = false) with FreemarkerTextRenderer
    } else {
      Nil
    }
@@ -57,7 +56,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
      for(groupSet<-groupSetsReleasedToStudents;
          group<-groupSet.groups.asScala;
          student<-group.students.users
-     ) yield new ReleaseSmallGroupSetsNotification(List(group),currentUser,student, true) with FreemarkerTextRenderer
+     ) yield new ReleaseSmallGroupSetsNotification(List(group),currentUser,student, isStudent = true) with FreemarkerTextRenderer
     }else{
      Nil
    }
