@@ -31,15 +31,12 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
 import org.junit.rules.Timeout
 import org.junit.Rule
-import uk.ac.warwick.tabula.services.UserSettingsService
-import org.mockito.Mockito._
-import scala.Some
-import org.specs.mock.JMocker.when
-import org.specs.mock.JMocker.mock
 import freemarker.template._
 import java.util
 import freemarker.core.Environment
 import scala.Some
+import org.apache.log4j.NDC
+import uk.ac.warwick.tabula.helpers.Logging
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -47,13 +44,17 @@ import scala.Some
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures {
+abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 	
 	// No test should take longer than a minute
 	val minuteTimeout = new Timeout(60000)
 	@Rule def timeoutRule = minuteTimeout
+
+  NDC.pop
+  NDC.push(System.getProperty("TestProcessId"))
+  logger.info("TestBase instantiated for " + this.getClass.getName)
 }
 
 /** Various test objects

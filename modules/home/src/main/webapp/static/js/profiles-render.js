@@ -72,11 +72,6 @@
 
 	// MEETING RECORD STUFF
 	$(function() {
-
-
-
-
-
 		function scrollToOpenDetails() {
 			// prevent js errors when getNavigationHeight is undefined
 			if(window.getNavigationHeight != undefined){
@@ -98,14 +93,14 @@
 			if ($f.find("#meeting-record-form").length == 1) {
 				// unhide the iframe
 				$m.find('.modal-body').slideDown();
-				
+
 				// reset datepicker & submit protection
 				var $form = $m.find('form.double-submit-protection');
 				$form.tabulaSubmitOnce();
 				$form.find(".btn").removeClass('disabled');
 				// wipe any existing state information for the submit protection
 				$form.removeData('submitOnceSubmitted');
-				
+
 				// firefox fix
 				var wait = setInterval(function() {
 					var h = $f.find("body").height();
@@ -114,7 +109,7 @@
 						$m.find(".modal-body").animate({ height: h });
 					}
 				}, 50);
-				
+
 				// show-time
 				$m.modal("show");
 				$m.on("shown", function() {

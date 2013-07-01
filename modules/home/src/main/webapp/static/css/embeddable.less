@@ -1184,18 +1184,18 @@ h1.with-settings {
 	}
 
 	#container .profile  {
-		#personal-details {
-			div.col1 {
-				float: left;
-				width: 354px;
-				margin-right: 16px;
-			}
-			div.col2 {
-				float: left;
-				width: 354px;
-				margin-right: 0;
-			}
+		.col1 {
+			float: left;
+			width: 354px;
+			margin-right: 16px;
+		}
+		.col2 {
+			float: left;
+			width: 354px;
+			margin-right: 0;
+		}
 
+		#personal-details {
 			header {
 				h1, h5 {
 					display: inline;
@@ -1254,10 +1254,6 @@ h1.with-settings {
 					border-bottom: 15px solid transparent;
 				}
 			}
-		}
-
-		.untabbed {
-			margin-top: 12px;
 		}
 
 		#personal-development, #supervision {
@@ -1751,7 +1747,6 @@ input.flexi-picker {
 		font-weight: normal;
 	}
 
-
 	// tabbed content per style guide
 	.tab-content {
 		padding: 10px;
@@ -1760,29 +1755,85 @@ input.flexi-picker {
 		border-style:solid;
 	}
 
-	#container {
-		.nav-tabs {
-			li {
-				a {
-					border: 1px solid @tabBorder;
-					border-bottom-color: transparent;
-					margin-right:5px;
-				}
+	.tabbable {
+		ol {
+			margin: 0;
+			padding-left: 0;
 
-				a:hover {
-					border-bottom-color: @tabBorder;
-				}
-			}
+			&.col1, &.col2 { min-height: 80px; }
 
-			li.active a:hover {
-				border-bottom-color: transparent;
+			&.tab-content { padding-left: 10px; }
+
+			li { list-style: none; }
+		}
+
+		.layout-tools {
+			float: right;
+			margin-top: 5px;
+
+			i {
+				cursor: pointer;
+
+				&:hover {
+					color: @tabulaGray;
+				}
 			}
 		}
 
-		// Allocate students by spreadsheet specific
-		.step-action label {
-			font-weight:bold;
+		.nav-tabs {
+			// room for layout-tools
+			padding-right: 70px;
+
+			.disabled { cursor: not-allowed; }
+			.icon-move { cursor: move; }
+			.icon-resize-small, .icon-resize-full, .icon-minus-sign-alt, .icon-plus-sign-alt { cursor: pointer; }
+
+			i {
+				margin-left: 3px;
+				color: @tabulaGrayLightTint;
+
+				&:hover {
+					color: @tabulaGrayLight;
+				}
+			}
+
+			li.active {
+				.icon-resize-small { display: none; }
+			}
+		}
+
+		.gadget {
+			margin-bottom: 12px;
+
+			.tab-container a {
+				cursor: move;
+			}
+
+			.tab-content {
+				background: white;
+			}
+		}
+
+		.panes {
+			padding-bottom: 16px;
+			min-height: 8px;
+
+			> li {
+				margin: 12px 0;
+
+				&.tab-pane {
+					margin: 0;
+				}
+			}
+		}
+
+		.sort-target {
+			border: 1px dashed @tabulaOrangeLight;
 		}
 	}
 
+	// Allocate students by spreadsheet specific
+	.step-action label {
+		font-weight:bold;
+	}
 }

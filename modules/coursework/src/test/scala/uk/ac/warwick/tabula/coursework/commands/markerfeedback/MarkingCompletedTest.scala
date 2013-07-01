@@ -7,11 +7,16 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
+import org.hibernate.Session
+import uk.ac.warwick.tabula.data.HasSession
 
 
-class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld {
+class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito{
 
-	@Autowired var stateService:StateService =_
+  val mockSession = mock[Session]
+	var stateService:StateService =new ComposableStateServiceImpl with HasSession{
+    def session = mockSession
+  }
 
 	@Transactional @Test
 	def firstMarkerFinished(){
