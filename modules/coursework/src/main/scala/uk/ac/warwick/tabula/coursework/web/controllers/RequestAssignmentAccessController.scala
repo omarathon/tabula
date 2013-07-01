@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
 import org.springframework.stereotype.Controller
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.coursework.commands.assignments.RequestAssignmentAccessCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -18,7 +17,7 @@ class RequestAssignmentAccessController extends CourseworkController {
 	// clumsy way to prevent a user spamming admins with emails.
 	var requestedAccess = mutable.Queue[Pair[String, String]]()
 
-	@ModelAttribute def cmd(user: CurrentUser) = new RequestAssignmentAccessCommand(user)
+	@ModelAttribute def cmd(user: CurrentUser) = new RequestAssignmentAccessCommand(user.apparentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def nope(form: RequestAssignmentAccessCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
