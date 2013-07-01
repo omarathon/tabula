@@ -5,10 +5,11 @@ import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.spring.Wire
 
 class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCourseDetails] {
 
-	@Autowired var service: StudentCourseDetailsDao = _
+	var service = Wire.auto[StudentCourseDetailsDao]
 
 	override def convertRight(scjCode: String) = {
 		val scjCodeDecoded = scjCode.replace("_","/")

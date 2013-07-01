@@ -183,10 +183,6 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexTokenised(doc, "fullFirstName", Option(item.fullFirstName))
 		indexTokenised(doc, "fullName", item.fullName)
 
-		val dpts = item.affiliatedDepartments
-
-		val dptCodes = dpts map {_.code }
-
 		indexSeq(doc, "department", item.affiliatedDepartments map { _.code })
 		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
 

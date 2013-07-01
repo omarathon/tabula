@@ -27,6 +27,17 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.services.CourseAndRouteService
+import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.PrsCode
+import uk.ac.warwick.tabula.data.model.StudentCourseProperties
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.CourseAndRouteService
+import java.sql.BatchUpdateException
+import org.hibernate.exception.ConstraintViolationException
 
 class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -91,10 +102,21 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 		val hasChanged = copyStudentCourseProperties(commandBean, studentCourseDetailsBean)
 
 		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + studentCourseDetails)
+			try {
+				logger.debug("Saving changes for " + studentCourseDetails)
 
-			studentCourseDetails.lastUpdatedDate = DateTime.now
-			studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
+				studentCourseDetails.lastUpdatedDate = DateTime.now
+				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
+			}
+			catch  {
+				case exception: ConstraintViolationException => {
+					logger.warn("Couldn't update course details for SCJ "
+							+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
+							+ ".  Might be invalid data in SITS - working on the assumption "
+							+ "there shouldn't be be multiple SPR codes for one current SCJ code")
+					exception.printStackTrace
+				}
+			}
 		}
 
 		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
