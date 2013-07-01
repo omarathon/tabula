@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Reques
  * Sends a message to one or more admins to let them know that the current
  * user thinks they should have access to an assignment.
  */
-class RequestAssignmentAccessCommand(user: User) extends Command[Unit]
+class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit]
 	with Notifies[Assignment] with FreemarkerRendering with UnicodeEmails with Public {
 
 	var userLookup = Wire.auto[UserLookupService]

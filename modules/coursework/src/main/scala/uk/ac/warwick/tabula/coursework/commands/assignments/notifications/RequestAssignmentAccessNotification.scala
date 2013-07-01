@@ -4,13 +4,14 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Notification}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.TextRenderer
+import uk.ac.warwick.tabula.CurrentUser
 
-class RequestAssignmentAccessNotification(assignment:Assignment, currentUser: User, admins: Seq[User])
+class RequestAssignmentAccessNotification(assignment:Assignment, currentUser: CurrentUser, admins: Seq[User])
 	extends Notification[Assignment] {
 
 	this: TextRenderer =>
 
-	val agent = currentUser
+	val agent = currentUser.apparentUser
 	val verb = "request"
 	val _object = assignment
 	val target = Some(assignment.module)

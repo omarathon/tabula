@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.RequestAssignmentAccessCommand
-import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, AppContextTestBase}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 class RequestAssignmentAccessCommandTest extends AppContextTestBase with Mockito with AssignmentFixture {
 
 	@Test def sendsNotification{
-		val cmd = new RequestAssignmentAccessCommand(student)
+		val cmd = new RequestAssignmentAccessCommand(new CurrentUser(student, student))
 		cmd.userLookup = userLookup
 		cmd.assignment = assignment
 		cmd.module = assignment.module
