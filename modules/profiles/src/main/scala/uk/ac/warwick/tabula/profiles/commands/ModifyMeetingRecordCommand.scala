@@ -38,7 +38,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Create, relationship.studentMember)
+  PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), relationship.studentMember)
 
 	val meeting: MeetingRecord
 

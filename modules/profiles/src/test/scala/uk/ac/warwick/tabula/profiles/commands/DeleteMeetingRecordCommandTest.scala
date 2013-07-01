@@ -46,6 +46,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting = transactional { tx =>
 			val mr = new MeetingRecord
 			mr.creator = creator
+      mr.relationship = relationship
 			session.save(mr)
 			mr
 		}

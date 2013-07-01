@@ -2,17 +2,13 @@
 <#assign mappingById=allocateStudentsToGroupsCommand.mappingById />
 <#assign membersById=allocateStudentsToGroupsCommand.membersById />
 
+
+
 <#macro student_item student bindpath="">
 	<#assign profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small">
 		<div class="profile clearfix">
-			<div class="photo">
-				<#if profile.universityId??>
-					<img src="<@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" />" />
-				<#else>
-					<img src="<@url resource="/static/images/no-photo.png" />" />
-				</#if>
-			</div>
+			<@fmt.member_photo profile "tinythumbnail" false />
 			
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
@@ -115,7 +111,7 @@
 
 														<@fmt.weekRanges event />,
 														${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-														${event.location}
+														${event.location!"[no location]"}
 													</li>
 												</#list>
 											</ul>

@@ -26,9 +26,9 @@
 
 <article class="profile">
 	<section id="personal-details" class="clearfix">
-		<div class="photo">
-			<img src="<@routes.photo profile />" />
-		</div>
+		
+		<@fmt.member_photo profile />
+		
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>

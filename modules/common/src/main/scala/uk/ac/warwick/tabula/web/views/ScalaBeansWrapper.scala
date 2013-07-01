@@ -19,12 +19,13 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{RequestInfo}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import java.lang.reflect.Method
+import scala.util.{Try,Success, Failure}
 
 /**
  * A implementation of BeansWrapper that support native Scala basic and collection types
@@ -33,6 +34,10 @@ import java.lang.reflect.Method
 class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	var securityService = Wire[SecurityService]
+
+	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
+	// won't know to clear this singleton variable.
+	ScalaHashModel.gettersCache.clear()
 
 	def superWrap(obj: Object): TemplateModel = {
 		super.wrap(obj)
@@ -44,7 +49,6 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
 			case None => null
-			//      case long:Long => superWrap(long:JLong)
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
@@ -92,9 +96,19 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			
 			def parse(m: Method, name: String) = {
 				val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
-				val perms: Seq[Permission] =
-					if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
-					else Nil			
+        val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
+				val perms: PermissionsFetcher =
+					if (restrictedAnnotation != null) {
+              (_)=>restrictedAnnotation.value map { name => Permissions.of(name) }
+          }
+          else if (restrictionProviderAnnotation != null){
+            Try(cls.getMethod(restrictionProviderAnnotation.value())) match{
+              case Success(method)=>(x)=>method.invoke(x).asInstanceOf[Seq[Permission]]
+              case Failure(e)=>throw new IllegalStateException(
+                "Couldn't find restriction provider method %s():Seq[Permission]".format(restrictionProviderAnnotation.value()),e)
+            }
+          }
+					else (_)=>Nil
 				
 				(name -> (m, perms))
 			}
@@ -136,7 +150,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			cachedResults.getOrElseUpdate(key, 
 				getters.get(key) match {
 					case Some((getter, permissions)) => 
-						if (canDo(permissions)) wrapper.wrap(getter.invoke(sobj))
+						if (canDo(permissions(sobj))) wrapper.wrap(getter.invoke(sobj))
 						else null
 					case None => checkInnerClasses(key) match {
 						case Some(method) => method
@@ -164,8 +178,8 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
-		
-		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, Seq[Permission])]]
+		type PermissionsFetcher = Any=>Seq[Permission]
+		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]
 	}
 
 }
