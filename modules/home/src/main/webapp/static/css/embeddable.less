@@ -1143,7 +1143,7 @@ h1.with-settings {
  	}
 
 	// mixin
-	.tabula-photo (@width: 186px, @padding: 8px) {
+	.tabula-photo (@width, @padding) {
 		float: left;
 		width: @width;
 		margin-right: 16px;
@@ -1158,6 +1158,16 @@ h1.with-settings {
 			max-width: @width - (@padding * 2);
 		}
 	}
+	
+	.photo.size-tinythumbnail {
+		.tabula-photo(50px, 5px);
+	}
+	
+	.photo.size-thumbnail {
+		.tabula-photo(186px, 8px);
+	}
+	
+	
 
 	hr.full-width {
  		width: auto;
@@ -1170,10 +1180,6 @@ h1.with-settings {
 
 	#container .profile  {
 		#personal-details {
-			div.photo {
-				.tabula-photo;
-			}
-
 			div.col1 {
 				float: left;
 				width: 354px;
