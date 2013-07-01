@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.web
 import uk.ac.warwick.tabula.data.model._
 import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.userlookup.User
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -13,6 +14,13 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
+  object tutor {
+    def mygroups(member:User) = "/tutor"
+  }
+  // These are relative to the /profiles app, not the /groups app.
+  object profile {
+    def view(member: User) = "/view/%s" format (encoded(member.getWarwickId))
+  }
 
 	object admin {
 		def apply(department: Department) = "/admin/department/%s" format (encoded(department.code))
@@ -22,5 +30,6 @@ object Routes {
 		}
 		
 		def allocate(set: SmallGroupSet) = "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
-	}
+
+  }
 }

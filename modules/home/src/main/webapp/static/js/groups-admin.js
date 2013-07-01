@@ -41,6 +41,30 @@ $(function(){
     });
 });
 
+
+// modals use ajax to retrieve their contents
+$(function() {
+    $('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
+        e.preventDefault();
+        var $this = $(this);
+        var target = $this.attr('data-target');
+        var url = $this.attr('href');
+        $(target).load(url);
+    });
+
+    $("#modal-container ").on("click","input[type='submit']", function(e){
+        e.preventDefault();
+        var $this = $(this);
+        var $form = $this.closest("form")
+
+        var randomNumber = Math.floor(Math.random() * 10000000);
+
+        jQuery.post($form.attr('action') + "?rand=" + randomNumber, $form.serialize(), function(data){
+            $("#modal-container ").modal('hide');
+            window.location.reload();
+        });
+    });
+});
 // Drag and drop allocation
 $(function() {
 	$('#allocateStudentsToGroupsCommand')

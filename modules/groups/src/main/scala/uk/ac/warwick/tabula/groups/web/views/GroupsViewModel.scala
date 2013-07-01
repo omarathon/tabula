@@ -15,16 +15,30 @@ import uk.ac.warwick.tabula.web.views.ViewModel._
  * those items.
  */
 object GroupsViewModel {
-	case class ViewModules(
-		moduleItems: Seq[ViewModule],
-		canManageDepartment: Boolean
-	)
-	case class ViewModule(
-		module: Module,
-		setItems: Seq[ViewSet],
-		canManageGroups: Boolean
-	)
-	case class ViewSet(
-		set: SmallGroupSet
-	)
+
+  case class ViewModules(
+                          moduleItems: Seq[ViewModule],
+                          canManageDepartment: Boolean
+                          ) {
+    def hasUnreleasedGroupsets() = {
+      moduleItems.exists(_.hasUnreleasedGroupsets())
+    }
+  }
+
+  case class ViewModule(
+                         module: Module,
+                         setItems: Seq[ViewSet],
+                         canManageGroups: Boolean
+                         ){
+    def hasUnreleasedGroupsets() = {
+      module.hasUnreleasedGroupSets()
+    }
+  }
+
+  case class ViewSet(
+                      set: SmallGroupSet
+                      )
+
+
+
 }

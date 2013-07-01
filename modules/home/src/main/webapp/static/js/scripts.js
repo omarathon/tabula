@@ -639,4 +639,18 @@
 			$t.find('.layout-tools .icon-th-large').click();
 		}
 	}); // on ready
+
+
+
 })(jQuery);
+
+jQuery(function($){
+// If there's an element with an id of 'scroll-container', max-size it to fit to the bottom of
+// the page, with scrollbars if needed
+    $('#scroll-container').each(function(){
+        var scrollable = $(this);
+        // window.height includes horizontal scrollbar on mozilla so add 20px of padding.
+        var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
+        scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
+    });
+});

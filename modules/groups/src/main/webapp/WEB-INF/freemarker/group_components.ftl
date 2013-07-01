@@ -33,7 +33,7 @@
 
 
 <a id="${module_anchor(module)}"></a>
-<div class="striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
      data-name="${module_anchor(module)}">
     <div class="clearfix">
 <#--        <div class="btn-group section-manage-button">
@@ -129,10 +129,23 @@
                             </div>
                         </#if>
 
-                        <#if groupSet.hasAllocated && !groupSet.released>
-                            <div class="alert">
+                        <#if groupSet.hasAllocated >
+                             <#-- not released at all -->
+                              <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+                            <p class="alert">
                                 <i class="icon-info-sign"></i> Notifications have not been sent for these groups
-                            </div>
+                            </p>
+                             <#-- only released to tutors-->
+                             <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
+                              <p class="alert">
+                                   <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+                               </p>
+                              <#-- only released to students-->
+                              <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+                                  <p class="alert">
+                                      <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+                                  </p>
+                             </#if>
                         </#if>
                     </div>
 
@@ -155,6 +168,11 @@
                                     <#if moduleItem.canManageGroups>
                                     <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
                                     <li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
+                                    <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+                                            <a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">
+                                            <i class="icon-envelope-alt icon-fixed-width"></i>
+                                            Notify
+                                        </a></li>
                                     <li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
                                         <i class="icon-folder-close icon-fixed-width"></i>
                                         <#if groupSet.archived>

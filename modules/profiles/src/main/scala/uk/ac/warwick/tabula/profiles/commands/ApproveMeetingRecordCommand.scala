@@ -48,8 +48,8 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 	}
 
 	def emit = if (approved)
-		new MeetingRecordApprovedNotification(approval)
+		Seq(new MeetingRecordApprovedNotification(approval))
 	else
-		new MeetingRecordRejectedNotification(approval)
+		Seq(new MeetingRecordRejectedNotification(approval))
 
 }

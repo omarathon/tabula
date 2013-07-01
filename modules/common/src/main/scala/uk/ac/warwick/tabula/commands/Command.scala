@@ -38,7 +38,10 @@ trait Describable[A] {
 }
 
 trait Notifies[A] {
-	def emit: Notification[A]
+	def emit: Seq[Notification[A]]
+}
+trait Appliable[A]{
+  def apply():A
 }
 
 /**
@@ -56,7 +59,8 @@ trait Notifies[A] {
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[A] extends Describable[A]
+abstract class Command[A] extends Describable[A] with Appliable[A]
+
 with JavaImports with EventHandling with NotificationHandling with PermissionsChecking {
 	var maintenanceMode = Wire[MaintenanceModeService]
 	
@@ -248,8 +252,16 @@ abstract class Description {
 		if (smallGroupSet.module != null) module(smallGroupSet.module)
 		this
 	}
-	
-	/**
+
+  /**
+   * Record a collection of SmallGroupSets
+   */
+  def smallGroupSetCollection(smallGroupSets: Seq[SmallGroupSet]) = {
+    property("smallGroupSets" -> smallGroupSets.map(_.id).mkString)
+    this
+  }
+
+  /**
 	 * Record small group, plus its set, module and department if available.
 	 */
 	def smallGroup(smallGroup: SmallGroup) = {
@@ -266,7 +278,7 @@ abstract class Description {
 		if (smallGroupEvent.group != null) smallGroup(smallGroupEvent.group)
 		this
 	}
-	
+
 	def markingWorkflow(scheme: MarkingWorkflow) = {
 		property("markingWorkflow" -> scheme.id)
 	}

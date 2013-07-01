@@ -49,5 +49,10 @@ class FreemarkerEngineTest extends TestBase {
 		))
 		output should be ("Robot=CERBERUS;")
 	}
+
+  @Test def usesMacros{
+    val output=render("uses_macros.ftl",Map("count"->3))
+    output should be ("First line\n3 wombats")
+  }
 	
 }

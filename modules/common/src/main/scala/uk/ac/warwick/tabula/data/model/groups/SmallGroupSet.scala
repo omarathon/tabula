@@ -49,8 +49,13 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 
 	var archived: JBoolean = false
 
-	var released: JBoolean = false
-	
+  @Column(name="released_to_students")
+	var releasedToStudents: JBoolean = false
+  @Column(name="released_to_tutors")
+  var releasedToTutors:JBoolean = false
+
+  def fullyReleased= releasedToStudents && releasedToTutors
+
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
 	@NotNull
@@ -94,4 +99,22 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		"name" -> name,
 		"module" -> module)
 
+  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+    val newSet = new SmallGroupSet()
+    newSet.id = id
+    newSet.academicYear = academicYear
+    newSet.allocationMethod = allocationMethod
+    newSet.archived = archived
+    newSet.assessmentGroups = assessmentGroups
+    newSet.format = format
+    newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
+    newSet.members = members.duplicate()
+    newSet.membershipService= membershipService
+    newSet.module = module
+    newSet.name = name
+    newSet.permissionsService = permissionsService
+    newSet.releasedToStudents = releasedToStudents
+    newSet.releasedToTutors = releasedToTutors
+    newSet
+  }
 }
