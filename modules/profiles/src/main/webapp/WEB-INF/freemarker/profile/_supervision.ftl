@@ -8,9 +8,9 @@
 			<#assign supervisor = relationship.agentMember />
 			<div class="tutor clearfix span4">
 				<#if supervisor??>
-					<div class="photo">
-						<img src="<@routes.relationshipPhoto relationship />" />
-					</div>
+
+					<@fmt.relation_photo member relationship "tinythumbnail" />
+
 					<h5>
 						${supervisor.fullName!"Supervisor"}
 					</h5>
@@ -25,6 +25,9 @@
 			</div>
 		</#list>
 		</div>
+	<#else>
+		<h4>Supervisors</h4>
+		<p class="text-warning"><i class="icon-warning-sign"></i> No supervision details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>
 </#escape>

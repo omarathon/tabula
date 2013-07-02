@@ -340,6 +340,18 @@
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
 	<bean class="uk.ac.warwick.util.termdates.TermFactoryImpl" />
 
+	<bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.CachingImageResizer">
+		<constructor-arg>
+			<bean class="uk.ac.warwick.util.files.imageresize.SingleThreadedImageResizer">
+				<constructor-arg>
+					<bean class="uk.ac.warwick.util.files.imageresize.JAIImageResizer"
+						p:useSubsampleAveraging="true" />
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+		<constructor-arg value="${filesystem.resizer.dir}" />
+	</bean>
+
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
 

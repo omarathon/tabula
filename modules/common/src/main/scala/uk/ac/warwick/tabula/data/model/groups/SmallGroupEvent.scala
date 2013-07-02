@@ -23,7 +23,6 @@ import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.groups.WeekRange._
 import org.joda.time.LocalTime
 import javax.validation.constraints.NotNull
-
 @Entity
 @AccessType("field")
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
@@ -74,5 +73,30 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		"day" -> day,
 		"startTime" -> startTime,
 		"endTime" -> endTime)
-	
+
+  def isEquivalentTo(other: SmallGroupEvent):Boolean = {
+    weekRanges == other.weekRanges &&
+    day == other.day &&
+    startTime == other.startTime &&
+    endTime == other.endTime &&
+    location == other.location &&
+    tutors.members == other.tutors.members
+  }
+
+  def duplicateTo(group:SmallGroup):SmallGroupEvent= {
+    val newEvent = new SmallGroupEvent
+    newEvent.id = id
+    newEvent.day = day
+    newEvent.endTime = endTime
+    newEvent.group = group
+    newEvent.location = location
+    newEvent.permissionsService = permissionsService
+    newEvent.startTime = startTime
+    newEvent.title = title
+    newEvent.tutors = tutors.duplicate()
+    newEvent.weekRanges = weekRanges
+
+    newEvent
+  }
+
 }

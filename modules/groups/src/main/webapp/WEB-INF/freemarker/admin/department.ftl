@@ -65,6 +65,8 @@ If you are doing any work on this, it would be good to do the above first.
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
+                <li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
+                    <a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
 			</ul>
 		</div>
 
@@ -94,7 +96,7 @@ If you are doing any work on this, it would be good to do the above first.
 	</#list>
 
 <a id="${module_anchor(module)}"></a>
-<div class="striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>" data-name="${module_anchor(module)}">
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if can_manage_dept && !has_groups> empty</#if>" data-name="${module_anchor(module)}">
 	<div class="clearfix">
 		<div class="btn-group section-manage-button">
 		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
@@ -177,13 +179,23 @@ If you are doing any work on this, it would be good to do the above first.
 							</div>
 						</#if>
 						
-						<#if groupSet.hasAllocated && !groupSet.released>
+						<#if groupSet.hasAllocated >
+                            <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 							<div class="alert">
 								<i class="icon-info-sign"></i> Notifications have not been sent for these groups
 							</div>
+                           <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
+                            <div class="alert">
+                                 <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+                             </div>
+                            <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+                                <div class="alert">
+                                    <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+                                </div>
+                           </#if>
 						</#if>
 					</div>
-					
+
 					<div class="span2">
 						<div class="btn-toolbar pull-right">
 							<div class="btn-group">
@@ -191,6 +203,14 @@ If you are doing any work on this, it would be good to do the above first.
 							  <ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
 								<li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
+
+                                <li
+                                ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+                                    <a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">
+                                    <i class="icon-envelope-alt icon-fixed-width"></i>
+                                    Notify
+                                </a></li>
+
 								<li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
 									<i class="icon-folder-close icon-fixed-width"></i>
 									<#if groupSet.archived>
@@ -208,9 +228,9 @@ If you are doing any work on this, it would be good to do the above first.
 		</#list>
 	</div>
 	</#if>
-	
 </div>
 </#list>-->
+<div id="modal-container" class="modal fade"></div>
 <#else>
 <p>No department.</p>
 </#if>

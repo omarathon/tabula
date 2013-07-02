@@ -32,7 +32,8 @@
 		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130514</warwickutils.version>
+
+		<warwickutils.version>20130628</warwickutils.version>
 	        <surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -94,26 +95,6 @@
 
 			<build>
 				<defaultGoal>install</defaultGoal>
-
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${tabula.basedir}/local.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
 			</build>
 		</profile>
 
@@ -512,6 +493,25 @@
 						</manifest>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${tabula.basedir}/local.properties</file>
+							</files>
+							<quiet>true</quiet><!-- keep quiet if file not found -->
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 

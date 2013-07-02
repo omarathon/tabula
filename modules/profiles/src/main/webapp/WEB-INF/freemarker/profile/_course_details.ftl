@@ -1,4 +1,4 @@
-<section id="course-details">
+<section id="course-details" class="clearfix">
 	<h4>Course details</h4>
 	<table class="course-info">
 		<tbody>
@@ -39,6 +39,7 @@
 						<#if studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.code != "F">
 							(full-time equivalent)
 						</#if>
+<<<<<<< HEAD
 					</#if>
 				</td>
 			</tr>

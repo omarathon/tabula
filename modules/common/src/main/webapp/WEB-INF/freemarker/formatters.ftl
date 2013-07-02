@@ -176,6 +176,39 @@
 	</#if>
 </#macro>
 
-</#escape>
+<#macro lightbox_link enabled url>
+	<#if enabled>
+		<a href="${url}" rel="lightbox"><#nested /></a>
+	<#else>
+		<#nested />
+	</#if>
+</#macro>
 
+<#macro member_photo member resize="thumbnail" lightbox=true >
+	<div class="photo size-${resize}">
+		<#if member.universityId??>
+			<#local fullsize_img><@routes.photo member /></#local>
+			<@lightbox_link lightbox fullsize_img>
+			<img src="<@routes.photo member />?size=${resize}"/>
+			</@lightbox_link>
+		<#else>
+			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />
+		</#if>
+	</div>
+</#macro>
+
+<#macro relation_photo member relationship resize="thumbnail" lightbox=true >
+	<div class="photo size-${resize}">
+		<#if member.universityId??>
+			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
+			<@lightbox_link lightbox fullsize_img>
+			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
+			</@lightbox_link>
+		<#else>
+			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />
+		</#if>
+	</div>
+</#macro>
+
+</#escape>
 </#compress>

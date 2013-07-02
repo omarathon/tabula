@@ -68,7 +68,7 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 			// Could happen if a student has two tutors, and we're trying to replace the second with the first
 			currentRelationships.find(_.agent == tutor.universityId) match {
 				case Some(existingRelationship) => {
-					// Just return the existing relationship without any notification
+					// Just return the existing relationship without any notifications
 						Some(existingRelationship)
 				}
 				case _ => {

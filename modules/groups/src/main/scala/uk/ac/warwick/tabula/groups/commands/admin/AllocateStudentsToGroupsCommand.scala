@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.services.{UserLookupService, SmallGroupService, ProfileService, SecurityService}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.commands.Description
@@ -30,21 +30,24 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 
 
-class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, viewer: CurrentUser) 
-	extends Command[SmallGroupSet] with SelfValidating with BindListener {
+
+class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
+	extends Command[SmallGroupSet] with SelfValidating with BindListener with SmallGroupSetCommand with NotifiesAffectedGroupMembers{
 	
 	mustBeLinked(set, module)
 	PermissionCheck(Permissions.SmallGroups.Allocate, set)
 	
 	// Sort users by last name, first name
 	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
-	
-	var service = Wire[SmallGroupService]
+
+  var userLookup = Wire[UserLookupService]
+  val apparentUser = viewer.apparentUser
+
+  var service = Wire[SmallGroupService]
 	var profileService = Wire[ProfileService]
 	var securityService = Wire[SecurityService]
 	var groupsExtractor = Wire.auto[GroupsExtractor]
-	var userLookup = Wire[UserLookupService]
-	
+
 	var file: UploadedFile = new UploadedFile
 	var allocateStudent: JList[AllocateStudentItem] = LazyLists.simpleFactory()
 

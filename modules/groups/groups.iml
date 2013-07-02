@@ -22,6 +22,14 @@
         </sourceRoots>
       </configuration>
     </facet>
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/filters-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/spring-component-scan-context.xml</file>
+        </fileset>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
@@ -213,7 +221,7 @@
     <orderEntry type="library" name="Maven: uk.ac.warwick.membership:membership-rmi:2.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.scala:spring-scala:1.0.0.M2" level="project" />
     <orderEntry type="module" module-name="common" scope="TEST" production-on-test="" />
-    <orderEntry type="library" scope="TEST" name="Maven: uk.ac.warwick.tabula:common:test-jar:tests:38-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: uk.ac.warwick.tabula:common:test-jar:tests:39-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-test:3.2.0.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hsqldb:hsqldb:2.2.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.lucene:lucene-test-framework:4.0.0" level="project" />

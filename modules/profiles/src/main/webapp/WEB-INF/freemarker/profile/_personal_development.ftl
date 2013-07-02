@@ -19,6 +19,8 @@
 	<#if studentCourseDetails.personalTutors??>
 		<h4>Personal tutor<#if studentCourseDetails.personalTutors?size gt 1>s</#if></h4>
 
+		<#assign acceptsPersonalTutorChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors />
+
 		<#assign acceptsPersonalTutorChanges = (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors />
 		<#if studentCourseDetails.hasAPersonalTutor && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
 			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode?replace("/","_") />"
@@ -45,8 +47,10 @@
 			</p>
 		</#if>
 
-		<div class="tutors clearfix row">
+
+		<div class="tutors clearfix row-fluid">
 		<#list studentCourseDetails.personalTutors as relationship>
+
 			<#assign personalTutor = relationship.agentMember />
 			<div class="tutor clearfix span4">
 				<#if !personalTutor??>
@@ -60,9 +64,9 @@
 						</a>
 					</#if>
 				<#else>
-					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
-					</div>
+
+					<@fmt.relation_photo member relationship "tinythumbnail" />
+
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
@@ -106,7 +110,9 @@
 			});
 		});
 		</script>
-
+	<#else>
+		<h4>Personal development</h4>
+		<p class="text-warning"><i class="icon-warning-sign"></i> No personal development details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>
 </#escape>
