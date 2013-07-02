@@ -1,43 +1,32 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import scala.collection.JavaConversions._
-import org.springframework.mail.MailException
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import freemarker.template.Configuration
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackPublishedNotification
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.CurrentUser
 
-class PublishFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with FreemarkerRendering with SelfValidating with UnicodeEmails {
+class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+	extends Command[Unit] with Notifies[Feedback] with SelfValidating {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Feedback.Publish, assignment)
-	
-	var studentMailSender = Wire[WarwickMailSender]("studentMailSender")
+
 	var feedbackService = Wire.auto[FeedbackService]
 	var userLookup = Wire.auto[UserLookupService]
-	implicit var freemarker = Wire.auto[Configuration]
 
-	var replyAddress = Wire.property("${mail.noreply.to}")
-	var fromAddress = Wire.property("${mail.exceptions.to}")
-	
 	var confirm: Boolean = false
 
 	case class MissingUser(universityId: String)
@@ -45,6 +34,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 
 	var missingUsers: JList[MissingUser] = JArrayList()
 	var badEmails: JList[BadEmail] = JArrayList()
+	var notifications: JList[Notification[Feedback]] = JArrayList()
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
@@ -70,55 +60,31 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment) ext
 				for (feedback <- feedbacks) {
 					feedback.released = true
 					feedback.releasedDate = new DateTime
+					generateNotification(studentId, user, feedback)
 				}
 			}
-			for (info <- users) email(info)
 		}
 	}
 
-	private def email(info: Pair[String, User]) {
-		val (id, user) = info
+	private def generateNotification(id:String, user:User, feedback:Feedback) {
 		if (user.isFoundUser) {
 			val email = user.getEmail
 			if (email.hasText) {
-				val message = messageFor(user)
-				try {
-					studentMailSender.send(message)
-				} catch {
-					case e: MailException => badEmails add BadEmail(user, exception = e)
-				}
+				notifications.add(new FeedbackPublishedNotification(feedback, submitter.apparentUser, user) with FreemarkerTextRenderer)
 			} else {
-				badEmails add BadEmail(user)
+				badEmails.add(BadEmail(user))
 			}
 		} else {
-			missingUsers add MissingUser(id)
+			missingUsers.add(MissingUser(id))
 		}
 	}
-	
-	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
 
-	private def messageFor(user: User) = createMessage(studentMailSender) { message =>
-		val moduleCode = assignment.module.code.toUpperCase
-		message.setFrom(fromAddress)
-		message.setReplyTo(replyAddress)
-		message.setTo(user.getEmail)
-		// TODO configurable subject
-		message.setSubject(encodeSubject(moduleCode + ": Your coursework feedback is ready"))
-		// TODO configurable body
-		message.setText(messageTextFor(user))
-	}
+	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
 
 	def describe(d: Description) = d 
 		.assignment(assignment)
 		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
 
-	def messageTextFor(user: User) =
-		renderToString("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
-			"name" -> user.getFirstName,
-			"assignmentName" -> assignment.name,
-			"moduleCode" -> assignment.module.code.toUpperCase,
-			"moduleName" -> assignment.module.name,
-			"path" -> Routes.assignment.receipt(assignment)
-		))
+	def emit: Seq[Notification[Feedback]] = notifications.asScala
 
 }

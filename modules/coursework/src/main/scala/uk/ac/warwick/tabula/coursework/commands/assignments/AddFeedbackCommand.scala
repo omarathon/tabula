@@ -3,16 +3,20 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment, Feedback, Module}
+import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
+import scala.Some
+import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackChangeNotification
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[Feedback]](module, assignment, submitter) {
+	extends UploadFeedbackCommand[List[Feedback]](module, assignment, submitter) with Notifies[Feedback] {
 
 	PermissionCheck(Permissions.Feedback.Create, assignment)
+
+	var updatedReleasedFeedback : List[Feedback] = _
 
 	override def applyInternal(): List[Feedback] = transactional() {
 
@@ -61,14 +65,8 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 			feedback.toList
 		}
 
-		updatedFeedback.filter(_.released).foreach {feedback =>
-			transactional() {
-				val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-				val notifyFeedbackChanged = new FeedbackChangeNotifyCommand(module, assignment, student)
-				notifyFeedbackChanged.apply()
-			}
-		}
-
+		// we need to keep a list of released feedback that was changed in order to notify students of the change
+		updatedReleasedFeedback = updatedFeedback.filter(_.released)
 		updatedFeedback
 	}
 	
@@ -104,5 +102,10 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		.assignment(assignment)
 		.studentIds(items.map { _.uniNumber })
 
-}
+	def emit: Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
+		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
+		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
+	})
 
+
+}
