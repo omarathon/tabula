@@ -49,8 +49,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.PersonalTutor.Read,
 		Profiles.PersonalTutor.Update,
 		Profiles.PersonalTutor.Delete,
-
-		Profiles.MeetingRecord.Read
+		Profiles.PersonalTutor.MeetingRecord.Read,
+    Profiles.Supervisor.MeetingRecord.Read
 	)
 
 }

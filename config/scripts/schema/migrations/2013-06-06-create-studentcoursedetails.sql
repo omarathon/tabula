@@ -16,7 +16,6 @@ create table studentcoursedetails (
 	mostsignificant number(1),
 	lastupdateddate timestamp(6),
 	hib_version number,
-	constraint studentcoursedetails_pk primary key (scjcode)
-	constraint sprcode UNIQUE (sprcode);
+	constraint studentcoursedetails_pk primary key (scjcode);
 );
 

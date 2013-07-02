@@ -1,6 +1,7 @@
 <#escape x as x?html>
-	<#assign can_read_meetings = can.do("Profiles.MeetingRecord.Read", profile) />
-	<#assign can_create_meetings = can.do("Profiles.MeetingRecord.Create", profile) />
+	<#assign profile=studentCourseDetails.student />
+	<#assign can_read_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Read", profile) />
+	<#assign can_create_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Create", profile) />
 
 	<section class="meetings">
 		<#if can_read_meetings>
@@ -10,9 +11,9 @@
 		<#if can_create_meetings>
 			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.scjCode?replace("/","_") />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			<#if isSelf!false>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your personal tutor.">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your personal tutor(s).">Who can see this information?</small>
 			<#else>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their personal tutor.">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their personal tutor(s).">Who can see this information?</small>
 			</#if>
 		</#if>
 		<#if can_read_meetings>
@@ -40,7 +41,7 @@
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.edit_meeting_record meeting />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
+									<a href="<@routes.edit_meeting_record studentCourseDetails.scjCode?replace("/","_") meeting />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
 									<a href="<@routes.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
 									<a href="<@routes.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>

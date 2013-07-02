@@ -38,8 +38,12 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Create,
-			relationship.studentMember.getOrElse(throw new IllegalStateException("Unable to discern member from " + relationship.targetSprCode)))
+	relationship.studentMember match {
+		case Some(stu: StudentMember) => {
+			PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), stu)
+		}
+	}
+
 
 	val meeting: MeetingRecord
 

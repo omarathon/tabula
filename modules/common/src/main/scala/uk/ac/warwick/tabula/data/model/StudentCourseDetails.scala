@@ -82,8 +82,6 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 }
 
 trait StudentCourseProperties {
-
-	@Column(unique=true)
 	var sprCode: String = _
 
 	@ManyToOne

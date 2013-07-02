@@ -41,6 +41,7 @@ import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.AcademicYear
+import org.hibernate.exception.ConstraintViolationException
 
 
 class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
@@ -75,8 +76,8 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
-				studentCourseDetails,
-				sceSequenceNumber)
+			studentCourseDetails,
+			sceSequenceNumber)
 
 		logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
 

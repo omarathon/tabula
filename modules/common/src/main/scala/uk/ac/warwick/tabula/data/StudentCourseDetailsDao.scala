@@ -15,9 +15,8 @@ trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
-	def getBySprCode(sprCode: String): Option[StudentCourseDetails]
+	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getScjCodeBySprCode(sprCode: String): Option[String]
-
 }
 
 @Repository
@@ -27,6 +26,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails) = {
 		session.saveOrUpdate(studentCourseDetails)
+		session.flush()
 	}
 
 	def delete(studentCourseDetails: StudentCourseDetails) =  {
@@ -39,10 +39,13 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
 
-	def getBySprCode(sprCode: String) =
-		session.newCriteria[StudentCourseDetails]
-				.add(is("sprCode", sprCode.trim))
-				.uniqueResult
+	def getStudentBySprCode(sprCode: String) = {
+		val scdList: Seq[StudentCourseDetails] = session.newCriteria[StudentCourseDetails]
+				.add(is("sprCode", sprCode.trim)).list
+
+		if (scdList.size > 0) Some(scdList.head.student)
+		else None
+	}
 
 	def getScjCodeBySprCode(sprCode: String) = {
 		val stuCourseDetails = session.newCriteria[StudentCourseDetails]

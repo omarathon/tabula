@@ -60,8 +60,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
-		val studentCourseDetails = studentCourseDetailsDao.getBySprCode(sprCode)
-		studentCourseDetails.map { _.student }
+		studentCourseDetailsDao.getStudentBySprCode(sprCode)
 	}
 
 	def getMemberByPrsCode(prsCode: String) = transactional(readOnly = true) {

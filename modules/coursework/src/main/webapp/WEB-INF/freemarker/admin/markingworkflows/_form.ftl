@@ -44,12 +44,12 @@ Common form fields.
 </@form.labelled_row>
 
 <@form.labelled_row "firstMarkers" "First markers">
-	<@form.userpicker path="firstMarkers" list=true multiple=true />
+	<@form.flexipicker path="firstMarkers" list=true multiple=true />
 </@form.labelled_row>
 
 <div class="second-markers-container hide">
 <@form.labelled_row "secondMarkers" "Second markers">
-	<@form.userpicker path="secondMarkers" list=true multiple=true />
+	<@form.flexipicker path="secondMarkers" list=true multiple=true />
 </@form.labelled_row>
 </div>
 

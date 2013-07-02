@@ -35,8 +35,9 @@ trait MeetingRecordModal extends ProfilesController {
 	 */
 
 	@ModelAttribute("allRelationships")
-	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
+	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
 		relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
+	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =
@@ -134,5 +135,4 @@ trait MeetingRecordModal extends ProfilesController {
 			override def toString(rel: StudentRelationship) = rel.agent
 		})
 	}
-
 }

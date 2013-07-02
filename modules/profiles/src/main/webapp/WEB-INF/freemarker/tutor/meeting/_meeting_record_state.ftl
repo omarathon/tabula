@@ -51,7 +51,7 @@
 		</#list>
 	</div>
 	<div class="submit-buttons">
-		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record meeting />">Edit</a>
+		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.scjCode?replace("/","_") meeting />">Edit</a>
 	</div>
 <#else>
 	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>

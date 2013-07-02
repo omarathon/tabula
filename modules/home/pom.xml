@@ -257,8 +257,9 @@
 								<include>jquery-biglist.js</include>
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
-                <include>jquery-draganddrop.js</include>
+								<include>jquery-draganddrop.js</include>
 								<include>userpicker.js</include>
+								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>
 								<include>app-comments.js</include>
 							</includes>
