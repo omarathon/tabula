@@ -201,7 +201,36 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
+          </plugin>
+          <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                         </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <prefix>git</prefix>
+                    <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+                    <verbose>true</verbose>
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <gitDescribe>
+                        <skip>false</skip>
+                        <always>false</always>
+                        <abbrev>7</abbrev>
+                        <dirty>-devel</dirty>
+                        <forceLongFormat>false</forceLongFormat>
+                    </gitDescribe>
+                </configuration>
+            </plugin>
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -221,7 +250,9 @@
 											<entry key="build.time" value="${build.time}" />
 											<entry key="module.name" value="${project.artifactId}" />
 											<entry key="module.context" value="${tabula.module.context}" />
-										</propertyfile>
+											<entry key="git.commit" value ="${git.commit.id}"/>
+											<entry key="git.describe" value = "${git.commit.id.describe}"/>
+  										</propertyfile>
 									</target>
 								</configuration>
 								<goals>
