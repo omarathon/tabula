@@ -40,7 +40,10 @@ class ViewProfileController extends ProfilesController {
 	def viewMeetingRecordCommand(@PathVariable("member") member: Member) =  {
 		member.mostSignificantCourseDetails match {
 			case Some(scd: StudentCourseDetails) => restricted(new ViewMeetingRecordCommand(scd, user))
-			case None => logger.warn("Member " + member.universityId + " has no most significant course details")
+			case None => {
+				logger.warn("Member " + member.universityId + " has no most significant course details")
+				None
+			}
 		}
 	}
 

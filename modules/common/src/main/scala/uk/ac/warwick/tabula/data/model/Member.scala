@@ -198,38 +198,24 @@ class StudentMember extends Member with StudentProperties {
 		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
 		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
 
-		val homeDeptStream = homeDepartment match {
-			case null => Stream()
-			case _ => Stream(homeDepartment)
-		}
-		(homeDeptStream #:::
+		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
 				routeDepartments
 		).distinct
 	}
 
-	/*	override def affiliatedDepartments =
-		(
-			Option(homeDepartment) #::
-			Option(studyDetails.studyDepartment) #::
-			Option(studyDetails.route).map(_.department) #::
-			Stream.empty
-		).flatten.distinct
-*/
 	override def mostSignificantCourseDetails = {
 		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
 		else {
 			val mostSignifCourse = studentCourseDetails.asScala.filter {
 				details => details.mostSignificant != null && details.mostSignificant
 			}
-			if (mostSignifCourse.size == 1)
-				Some(mostSignifCourse.head)
-			else None
+			mostSignifCourse.headOption
 		}
 	}
 
 	override def hasCurrentEnrolment: Boolean = {
-		studentCourseDetails.asScala.map(_.hasCurrentEnrolment).size > 0
+		!studentCourseDetails.asScala.map(_.hasCurrentEnrolment).isEmpty
 	}
 
 	override def routeName: String = mostSignificantCourseDetails match {

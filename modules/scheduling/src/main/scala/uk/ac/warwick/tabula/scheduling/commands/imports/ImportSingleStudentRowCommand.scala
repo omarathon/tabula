@@ -1,74 +1,26 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.Date
 import java.sql.ResultSet
+
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.SitsStatusDao
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.AlumniProperties
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberProperties
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.data.model.OtherMember
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.model.StaffProperties
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.system.permissions.Restricted
 
 class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
 	extends ImportSingleMemberCommand(member, ssoUser, resultSet)
@@ -129,17 +81,6 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
-
-	private def getUniIdFromPrsCode(prsCode: String): Option[String] = {
-		if (prsCode == null || prsCode.length() !=9) {
-			None
-		}
-		else {
-			val uniId = prsCode.substring(2)
-			if (uniId forall Character.isDigit ) Some(uniId)
-			else None
-		}
-	}
 
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "student")
 }

@@ -38,12 +38,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	relationship.studentMember match {
-		case Some(stu: StudentMember) => {
-			PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), stu)
-		}
-	}
-
+	PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), mandatory(relationship.studentMember))
 
 	val meeting: MeetingRecord
 

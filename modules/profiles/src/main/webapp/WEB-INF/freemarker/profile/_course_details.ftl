@@ -39,7 +39,6 @@
 						<#if studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.code != "F">
 							(full-time equivalent)
 						</#if>
-<<<<<<< HEAD
 					</#if>
 				</td>
 			</tr>

@@ -41,6 +41,14 @@ object Fixtures {
 		d
 	}
 
+	def departmentWithId(code:String, name:String = null, id: String) = {
+		val d = new Department
+		d.code = code
+		d.name = Option(name).getOrElse("Department " + code)
+		d.id = id
+		d
+	}
+
 	def module(code:String, name: String = null) = {
 		val m = new Module
 		m.code = code.toLowerCase

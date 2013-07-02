@@ -61,10 +61,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	def findWithQuery(
 		query: String,
 		departments: Seq[Department],
-		includeTouched:
-		Boolean,
-		userTypes:
-		Set[MemberUserType],
+		includeTouched: Boolean,
+		userTypes: Set[MemberUserType],
 		searchAcrossAllDepartments: Boolean
 	): Seq[Member] =
 		if (departments.isEmpty && !searchAcrossAllDepartments) Seq()

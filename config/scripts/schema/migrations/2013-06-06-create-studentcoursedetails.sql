@@ -19,3 +19,4 @@ create table studentcoursedetails (
 	constraint studentcoursedetails_pk primary key (scjcode);
 );
 
+create index idx_studentcourse_uniid on StudentCourseDetails(universityid);

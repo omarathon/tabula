@@ -9,6 +9,8 @@ create table studentcourseyeardetails (
 	yearofstudy nvarchar2(2),
 	lastupdateddate timestamp(6),
 	hib_version number,
-	constraint studentcourseyeardetails_pk primary key(id)
+	constraint studentcourseyeardetails_pk primary key(id),
 	constraint sce_key_unique unique (scjcode, scesequencenumber)
 );
+
+create index idx_studentcourseyear_sce_key on StudentCourseYearDetails(scjcode, scesequencenumber);

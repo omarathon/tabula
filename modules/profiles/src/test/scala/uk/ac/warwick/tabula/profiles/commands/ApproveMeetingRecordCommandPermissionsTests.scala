@@ -13,26 +13,25 @@ class ApproveMeetingRecordCommandPermissionsTests extends TestBase  with Meeting
   def requiresApproveTutorMeetingRecordPermissionIfRelationIsTutor{
     val approval = new MeetingRecordApproval
 
-    relationship.studentMember match {
-    	case Some(stu: StudentMember) => approval.approver = stu
+    approval.approver = relationship.studentMember match {
+    	case Some(stu: StudentMember) => stu
+    	case None => null
     }
     approval.meetingRecord = tutorMeeting
 
     val cmd = new ApproveMeetingRecordCommand(approval)
 
     cmd.permissionsAllChecks.get(Permissions.Profiles.PersonalTutor.MeetingRecord.Update).get should be(Some(tutorMeeting))
-
   }
 
   @Test
   def requiresApproveSupervisorMeetingRecordPermissionIfRelationIsSupervisor{
     val approval = new MeetingRecordApproval
 
-    relationship.studentMember match {
-    	case Some(stu: StudentMember) => approval.approver = stu
-    	approval.approver = stu
+    approval.approver = relationship.studentMember match {
+    	case Some(stu: StudentMember) => stu
+    	case None => null
     }
-
     approval.meetingRecord = supervisorMeeting
 
     val cmd = new ApproveMeetingRecordCommand(approval)

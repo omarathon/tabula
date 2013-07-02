@@ -139,8 +139,8 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 
 	private def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property) match {
-			case null => null
 			case value: AcademicYear => value
+			case _ => null
 		}
 
 		val newValue = AcademicYear.parse(acYearString)

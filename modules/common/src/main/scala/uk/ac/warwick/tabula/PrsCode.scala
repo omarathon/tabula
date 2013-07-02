@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula
 
 /**
- * SCJ (student course join) code is used in SITS to identify a student on a particular course of theirs.
- * it has the format UNIID/COURSENUM. Coursenum starts at 1 and is incremented whenever the student
- * starts a new course.
+ * PRS code is used in SITS to identify a member of staff.
+ * It has the format DEPT CODE + UNIID e.g. IN0070790.
  */
 object PrsCode {
 	def getUniversityId(prsCode: String) = {

@@ -36,9 +36,6 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 	@Autowired var relationshipService:RelationshipServiceImpl = _
 	@Autowired var profileService:ProfileServiceImpl = _
 
-	val dept1 = Fixtures.department("in", "IT Services")
-	val dept2 = Fixtures.department("cs", "Computing Science")
-
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
 		relationshipService.findCurrentRelationships(PersonalTutor, "1250148/1") should be ('empty)
@@ -75,24 +72,21 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 	@Before def setup: Unit = transactional { tx =>
 		session.enableFilter(Member.ActiveOnlyFilter)
-		session.delete(dept1)
-		session.delete(dept2)
-		session.flush
-		session.saveOrUpdate(dept1)
-		session.saveOrUpdate(dept2)
-		session.flush
 	}
 
 	@After def tidyUp: Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
-		session.delete(dept1)
-		session.delete(dept2)
-		session.flush
 	}
 
 	@Test def studentRelationships = transactional { tx =>
+
+		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
+		val dept2 = Fixtures.departmentWithId("cs", "Computing Science", "2")
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+		session.flush()
 
 		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
