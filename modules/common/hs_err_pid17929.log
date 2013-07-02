@@ -1,0 +1,919 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007fa6ee992692, pid=17929, tid=140354937087744
+#
+# JRE version: 6.0_45-b06
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (20.45-b01 mixed mode linux-amd64 compressed oops)
+# Problematic frame:
+# V  [libjvm.so+0x3de692]  constantPoolOopDesc::klass_at_impl(constantPoolHandle, int, Thread*)+0x42
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007fa6e8007000):  JavaThread "main" [_thread_in_vm, id=17942, stack(0x00007fa6ee1ae000,0x00007fa6ee2af000)]
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=0x0000000000000008
+
+Registers:
+RAX=0x00007fa6e8007708, RBX=0x0000000000000000, RCX=0xfffffffffffffff7, RDX=0x00007fa6ef03d7b0
+RSP=0x00007fa6ee2ac660, RBP=0x00007fa6ee2acaa0, RSI=0x00007fa6ef05a300, RDI=0x00007fa6e8007708
+R8 =0x0000000000007fa6, R9 =0x0000000000007fa6, R10=0x0000000000007fa6, R11=0x00007fa6e8007700
+R12=0x0000000000000000, R13=0x00007fa6e8007708, R14=0x00007fa6e8007000, R15=0x0000000000000000
+RIP=0x00007fa6ee992692, EFLAGS=0x0000000000010202, CSGSFS=0x0000000000000033, ERR=0x0000000000000004
+  TRAPNO=0x000000000000000e
+
+Top of Stack: (sp=0x00007fa6ee2ac660)
+0x00007fa6ee2ac660:   00007fa6e8003d20 00007fa6e8007728
+0x00007fa6ee2ac670:   0000000000000001 0000000000000000
+0x00007fa6ee2ac680:   00007fa6ee2ac730 00007fa6ee827d45
+0x00007fa6ee2ac690:   00007fa6e8007000 00007fa6e80076c8
+0x00007fa6ee2ac6a0:   00000015ded0fd31 00007fa6e8005901
+0x00007fa6ee2ac6b0:   00007fa6ee2ac6f0 00007fa6e80076d0
+0x00007fa6ee2ac6c0:   0000000000000000 00007fa6e8007000
+0x00007fa6ee2ac6d0:   00007fa6e80076e0 00007fa6e80076d8
+0x00007fa6ee2ac6e0:   00007fa6ee2ac720 00007fa6eed9f971
+0x00007fa6ee2ac6f0:   00007fa6e8007700 00007fa6e8005980
+0x00007fa6ee2ac700:   00007fa6e8005980 0000000000000000
+0x00007fa6ee2ac710:   00007fa6e8007000 00007fa6e80076c8
+0x00007fa6ee2ac720:   00007fa6e8007000 00007fa6ee2acb60
+0x00007fa6ee2ac730:   00007fa6ee2ac760 00007fa6eed9d0e4
+0x00007fa6ee2ac740:   0000000000000000 0000000700c03488
+0x00007fa6ee2ac750:   000000000000000c 0000000000000000
+0x00007fa6ee2ac760:   00007fa6ee2ac770 00007fa6eed9d587
+0x00007fa6ee2ac770:   00007fa6bc002a92 0000000000000000
+0x00007fa6ee2ac780:   00007fa6e8007f28 0000000000000000
+0x00007fa6ee2ac790:   00007fa6bc002a92 0000000000000000
+0x00007fa6ee2ac7a0:   00007fa6ee2ac850 00007fa6ee827d45
+0x00007fa6ee2ac7b0:   0000000000000000 00007fa6e8007720
+0x00007fa6ee2ac7c0:   0000000705fc5540 0000000705dfde28
+0x00007fa6ee2ac7d0:   00007fa6ee2acb70 00007fa6e809b300
+0x00007fa6ee2ac7e0:   00007fa6ee2ac810 00007fa6eecc67b8
+0x00007fa6ee2ac7f0:   0000000000000002 0000000000000000
+0x00007fa6ee2ac800:   00007fa6e45f4800 00007fa6ef0523e8
+0x00007fa6ee2ac810:   00007fa6ee2ac850 00007fa6eecb6a49
+0x00007fa6ee2ac820:   00007fa6e8007000 00007fa6e8007000
+0x00007fa6ee2ac830:   0000000705fa4f58 00007fa6ee2acab0
+0x00007fa6ee2ac840:   00007fa6ee2ac890 00007fa6e8007000
+0x00007fa6ee2ac850:   00007fa6ee2ac870 00007fa6eed9d135 
+
+Instructions: (pc=0x00007fa6ee992692)
+0x00007fa6ee992672:   17 48 83 c2 40 4a 8b 1c e2 48 8b 15 86 1a 7f 00
+0x00007fa6ee992682:   80 3a 00 0f 84 35 0e 00 00 48 8b 35 46 fe 7e 00
+0x00007fa6ee992692:   8b 53 08 8b 4e 08 48 d3 e2 48 03 16 48 8b 42 10
+0x00007fa6ee9926a2:   48 8d 7a 10 ff 90 10 01 00 00 48 89 da 84 c0 74 
+
+Register to memory mapping:
+
+RAX=0x00007fa6e8007708 is an unknown value
+RBX=0x0000000000000000 is an unknown value
+RCX=0xfffffffffffffff7 is an unknown value
+RDX=0x00007fa6ef03d7b0: <offset 0xa897b0> in /usr/lib/jvm/java-6-oracle/jre/lib/amd64/server/libjvm.so at 0x00007fa6ee5b4000
+RSP=0x00007fa6ee2ac660 is pointing into the stack for thread: 0x00007fa6e8007000
+RBP=0x00007fa6ee2acaa0 is pointing into the stack for thread: 0x00007fa6e8007000
+RSI=0x00007fa6ef05a300: <offset 0xaa6300> in /usr/lib/jvm/java-6-oracle/jre/lib/amd64/server/libjvm.so at 0x00007fa6ee5b4000
+RDI=0x00007fa6e8007708 is an unknown value
+R8 =0x0000000000007fa6 is an unknown value
+R9 =0x0000000000007fa6 is an unknown value
+R10=0x0000000000007fa6 is an unknown value
+R11=0x00007fa6e8007700 is an unknown value
+R12=0x0000000000000000 is an unknown value
+R13=0x00007fa6e8007708 is an unknown value
+R14=0x00007fa6e8007000 is a thread
+R15=0x0000000000000000 is an unknown value
+
+
+Stack: [0x00007fa6ee1ae000,0x00007fa6ee2af000],  sp=0x00007fa6ee2ac660,  free space=1017k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [libjvm.so+0x3de692]  constantPoolOopDesc::klass_at_impl(constantPoolHandle, int, Thread*)+0x42
+V  [libjvm.so+0x3dff7e]  constantPoolOopDesc::klass_ref_at(int, Thread*)+0x4e
+V  [libjvm.so+0x65332b]  LinkResolver::resolve_klass(KlassHandle&, constantPoolHandle, int, Thread*)+0x2b
+V  [libjvm.so+0x657935]  LinkResolver::resolve_pool(KlassHandle&, symbolHandle&, symbolHandle&, KlassHandle&, constantPoolHandle, int, Thread*)+0x35
+V  [libjvm.so+0x657bd5]  LinkResolver::resolve_invokespecial(CallInfo&, constantPoolHandle, int, Thread*)+0x55
+V  [libjvm.so+0x6578dd]  LinkResolver::resolve_invoke(CallInfo&, Handle, constantPoolHandle, int, Bytecodes::Code, Thread*)+0x5d
+V  [libjvm.so+0x4d99d2]  InterpreterRuntime::resolve_invoke(JavaThread*, Bytecodes::Code)+0x202
+j  java.lang.reflect.InvocationTargetException.<init>(Ljava/lang/Throwable;)V+5
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x4e14a0]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x1e0
+V  [libjvm.so+0x711a39]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x4e0ff6]  JavaCalls::call_special(JavaValue*, KlassHandle, symbolHandle, symbolHandle, JavaCallArguments*, Thread*)+0x86
+V  [libjvm.so+0x437d00]  Exceptions::new_exception(Thread*, symbolHandle, symbolHandle, JavaCallArguments*, Handle, Handle, Handle)+0x260
+V  [libjvm.so+0x437821]  Exceptions::_throw_args(Thread*, char const*, int, symbolHandle, symbolHandle, JavaCallArguments*)+0x71
+V  [libjvm.so+0x7700c2]  Reflection::invoke(instanceKlassHandle, methodHandle, Handle, bool, objArrayHandle, BasicType, objArrayHandle, bool, Thread*)+0x682
+V  [libjvm.so+0x77416f]  Reflection::invoke_method(oopDesc*, Handle, objArrayHandle, Thread*)+0x11f
+V  [libjvm.so+0x56f7ae]  JVM_InvokeMethod+0x21e
+C  [libjava.so+0x196d5]  Java_sun_reflect_NativeMethodAccessorImpl_invoke0+0x15
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+87
+j  sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+6
+j  java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+161
+j  org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray2(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+3
+j  org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(Ljava/lang/Object;)Lorg/apache/maven/surefire/suite/RunResult;+38
+j  org.apache.maven.surefire.booter.ProviderFactory.invokeProvider(Ljava/lang/Object;Ljava/lang/ClassLoader;Ljava/lang/ClassLoader;Ljava/lang/Object;Lorg/apache/maven/surefire/booter/ProviderConfiguration;ZLorg/apache/maven/surefire/booter/StartupConfiguration;Z)Lorg/apache/maven/surefire/suite/RunResult;+38
+j  org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(Ljava/lang/Object;Ljava/lang/ClassLoader;Lorg/apache/maven/surefire/booter/StartupConfiguration;Lorg/apache/maven/surefire/booter/ProviderConfiguration;Ljava/io/PrintStream;)Lorg/apache/maven/surefire/suite/RunResult;+45
+j  org.apache.maven.surefire.booter.ForkedBooter.main([Ljava/lang/String;)V+168
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x4e14a0]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x1e0
+V  [libjvm.so+0x711a39]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x4e12b5]  JavaCalls::call(JavaValue*, methodHandle, JavaCallArguments*, Thread*)+0x25
+V  [libjvm.so+0x51ce77]  jni_invoke_static(JNIEnv_*, JavaValue*, _jobject*, JNICallType, _jmethodID*, JNI_ArgumentPusher*, Thread*)+0x147
+V  [libjvm.so+0x50a60f]  unsigned+0x20f
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  java.lang.reflect.InvocationTargetException.<init>(Ljava/lang/Throwable;)V+5
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+87
+j  sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+6
+j  java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+161
+j  org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray2(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+3
+j  org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(Ljava/lang/Object;)Lorg/apache/maven/surefire/suite/RunResult;+38
+j  org.apache.maven.surefire.booter.ProviderFactory.invokeProvider(Ljava/lang/Object;Ljava/lang/ClassLoader;Ljava/lang/ClassLoader;Ljava/lang/Object;Lorg/apache/maven/surefire/booter/ProviderConfiguration;ZLorg/apache/maven/surefire/booter/StartupConfiguration;Z)Lorg/apache/maven/surefire/suite/RunResult;+38
+j  org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(Ljava/lang/Object;Ljava/lang/ClassLoader;Lorg/apache/maven/surefire/booter/StartupConfiguration;Lorg/apache/maven/surefire/booter/ProviderConfiguration;Ljava/io/PrintStream;)Lorg/apache/maven/surefire/suite/RunResult;+45
+j  org.apache.maven.surefire.booter.ForkedBooter.main([Ljava/lang/String;)V+168
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x00007fa6e8e0c000 JavaThread "filtersCache" daemon [_thread_blocked, id=18320, stack(0x00007fa6b611c000,0x00007fa6b621d000)]
+  0x00007fa6e8abb800 JavaThread "ActiveMQ Broker[embedded] Scheduler" daemon [_thread_blocked, id=18314, stack(0x00007fa6b5b16000,0x00007fa6b5c17000)]
+  0x00007fa6e8c28800 JavaThread "pool-18-thread-1" [_thread_blocked, id=18313, stack(0x00007fa6b6731000,0x00007fa6b6832000)]
+  0x00007fa6e91ce800 JavaThread "filtersCache" daemon [_thread_blocked, id=18240, stack(0x00007fa6b632d000,0x00007fa6b642e000)]
+  0x00007fa6e8b51800 JavaThread "filtersCache" daemon [_thread_blocked, id=18190, stack(0x00007fa6b642e000,0x00007fa6b652f000)]
+  0x00007fa6e8aa3000 JavaThread "filtersCache" daemon [_thread_blocked, id=18133, stack(0x00007fa6b5e19000,0x00007fa6b5f1a000)]
+  0x00007fa6e8a10000 JavaThread "filtersCache" daemon [_thread_blocked, id=18093, stack(0x00007fa6b621d000,0x00007fa6b631e000)]
+  0x00007fa6e8af9000 JavaThread "ForkJoinPool-1-worker-1" daemon [_thread_blocked, id=18053, stack(0x00007fa6b738f000,0x00007fa6b7490000)]
+  0x00007fa6e80c0000 JavaThread "Low Memory Detector" daemon [_thread_blocked, id=18032, stack(0x00007fa6b7cfd000,0x00007fa6b7dfe000)]
+  0x00007fa6e80bd800 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=18031, stack(0x00007fa6b7dfe000,0x00007fa6b7eff000)]
+  0x00007fa6e80bb000 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=18030, stack(0x00007fa6b7eff000,0x00007fa6b8000000)]
+  0x00007fa6e80b8800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=18021, stack(0x00007fa6e402a000,0x00007fa6e412b000)]
+  0x00007fa6e809c000 JavaThread "Finalizer" daemon [_thread_blocked, id=18007, stack(0x00007fa6e43f4000,0x00007fa6e44f5000)]
+  0x00007fa6e809a000 JavaThread "Reference Handler" daemon [_thread_blocked, id=18006, stack(0x00007fa6e44f5000,0x00007fa6e45f6000)]
+=>0x00007fa6e8007000 JavaThread "main" [_thread_in_vm, id=17942, stack(0x00007fa6ee1ae000,0x00007fa6ee2af000)]
+
+Other Threads:
+  0x00007fa6e8093800 VMThread [stack: 0x00007fa6e45f6000,0x00007fa6e46f7000] [id=18002]
+  0x00007fa6e80ca800 WatcherThread [stack: 0x00007fa6b7bfc000,0x00007fa6b7cfd000] [id=18038]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap
+ PSYoungGen      total 1365824K, used 26360K [0x00000007aca00000, 0x0000000800000000, 0x0000000800000000)
+  eden space 1365632K, 1% used [0x00000007aca00000,0x00000007ae3be100,0x00000007fffa0000)
+  from space 192K, 0% used [0x00000007fffd0000,0x00000007fffd0000,0x0000000800000000)
+  to   space 192K, 0% used [0x00000007fffa0000,0x00000007fffa0000,0x00000007fffd0000)
+ PSOldGen        total 2732032K, used 24299K [0x0000000705e00000, 0x00000007aca00000, 0x00000007aca00000)
+  object space 2732032K, 0% used [0x0000000705e00000,0x00000007075bada0,0x00000007aca00000)
+ PSPermGen       total 83968K, used 83964K [0x0000000700c00000, 0x0000000705e00000, 0x0000000705e00000)
+  object space 83968K, 99% used [0x0000000700c00000,0x0000000705dff2e8,0x0000000705e00000)
+
+Code Cache  [0x00007fa6e5000000, 0x00007fa6e5700000, 0x00007fa6e8000000)
+ total_blobs=2228 nmethods=1721 adapters=460 free_code_cache=43305408 largest_free_block=95168
+
+Dynamic libraries:
+40000000-40009000 r-xp 00000000 08:05 17963030                           /usr/lib/jvm/java-6-oracle/jre/bin/java
+40108000-4010a000 rwxp 00008000 08:05 17963030                           /usr/lib/jvm/java-6-oracle/jre/bin/java
+4110b000-4112c000 rwxp 00000000 00:00 0                                  [heap]
+700c00000-705e00000 rwxp 00000000 00:00 0 
+705e00000-7aca00000 rwxp 00000000 00:00 0 
+7aca00000-800000000 rwxp 00000000 00:00 0 
+7fa644000000-7fa644021000 rwxp 00000000 00:00 0 
+7fa644021000-7fa648000000 ---p 00000000 00:00 0 
+7fa64c000000-7fa64c021000 rwxp 00000000 00:00 0 
+7fa64c021000-7fa650000000 ---p 00000000 00:00 0 
+7fa650000000-7fa650021000 rwxp 00000000 00:00 0 
+7fa650021000-7fa654000000 ---p 00000000 00:00 0 
+7fa654000000-7fa654021000 rwxp 00000000 00:00 0 
+7fa654021000-7fa658000000 ---p 00000000 00:00 0 
+7fa658000000-7fa658021000 rwxp 00000000 00:00 0 
+7fa658021000-7fa65c000000 ---p 00000000 00:00 0 
+7fa65c000000-7fa65c021000 rwxp 00000000 00:00 0 
+7fa65c021000-7fa660000000 ---p 00000000 00:00 0 
+7fa660000000-7fa660021000 rwxp 00000000 00:00 0 
+7fa660021000-7fa664000000 ---p 00000000 00:00 0 
+7fa664000000-7fa664021000 rwxp 00000000 00:00 0 
+7fa664021000-7fa668000000 ---p 00000000 00:00 0 
+7fa668000000-7fa668021000 rwxp 00000000 00:00 0 
+7fa668021000-7fa66c000000 ---p 00000000 00:00 0 
+7fa66c000000-7fa66c021000 rwxp 00000000 00:00 0 
+7fa66c021000-7fa670000000 ---p 00000000 00:00 0 
+7fa670000000-7fa670021000 rwxp 00000000 00:00 0 
+7fa670021000-7fa674000000 ---p 00000000 00:00 0 
+7fa674000000-7fa67415d000 rwxp 00000000 00:00 0 
+7fa67415d000-7fa678000000 ---p 00000000 00:00 0 
+7fa678000000-7fa678021000 rwxp 00000000 00:00 0 
+7fa678021000-7fa67c000000 ---p 00000000 00:00 0 
+7fa67c000000-7fa67c021000 rwxp 00000000 00:00 0 
+7fa67c021000-7fa680000000 ---p 00000000 00:00 0 
+7fa680000000-7fa680021000 rwxp 00000000 00:00 0 
+7fa680021000-7fa684000000 ---p 00000000 00:00 0 
+7fa684000000-7fa6840a5000 rwxp 00000000 00:00 0 
+7fa6840a5000-7fa688000000 ---p 00000000 00:00 0 
+7fa688000000-7fa688021000 rwxp 00000000 00:00 0 
+7fa688021000-7fa68c000000 ---p 00000000 00:00 0 
+7fa68c000000-7fa68c083000 rwxp 00000000 00:00 0 
+7fa68c083000-7fa690000000 ---p 00000000 00:00 0 
+7fa690000000-7fa690021000 rwxp 00000000 00:00 0 
+7fa690021000-7fa694000000 ---p 00000000 00:00 0 
+7fa694000000-7fa694021000 rwxp 00000000 00:00 0 
+7fa694021000-7fa698000000 ---p 00000000 00:00 0 
+7fa698000000-7fa698021000 rwxp 00000000 00:00 0 
+7fa698021000-7fa69c000000 ---p 00000000 00:00 0 
+7fa69c000000-7fa69c021000 rwxp 00000000 00:00 0 
+7fa69c021000-7fa6a0000000 ---p 00000000 00:00 0 
+7fa6a0000000-7fa6a0021000 rwxp 00000000 00:00 0 
+7fa6a0021000-7fa6a4000000 ---p 00000000 00:00 0 
+7fa6a4000000-7fa6a6781000 rwxp 00000000 00:00 0 
+7fa6a6781000-7fa6a8000000 ---p 00000000 00:00 0 
+7fa6a8000000-7fa6a8021000 rwxp 00000000 00:00 0 
+7fa6a8021000-7fa6ac000000 ---p 00000000 00:00 0 
+7fa6ac000000-7fa6aebbf000 rwxp 00000000 00:00 0 
+7fa6aebbf000-7fa6b0000000 ---p 00000000 00:00 0 
+7fa6b0000000-7fa6b0021000 rwxp 00000000 00:00 0 
+7fa6b0021000-7fa6b4000000 ---p 00000000 00:00 0 
+7fa6b5705000-7fa6b570b000 r-xp 00000000 08:05 17845494                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libmanagement.so
+7fa6b570b000-7fa6b580a000 ---p 00006000 08:05 17845494                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libmanagement.so
+7fa6b580a000-7fa6b580c000 rwxp 00005000 08:05 17845494                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libmanagement.so
+7fa6b580c000-7fa6b5813000 r-xp 00000000 08:05 17844516                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnio.so
+7fa6b5813000-7fa6b5912000 ---p 00007000 08:05 17844516                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnio.so
+7fa6b5912000-7fa6b5914000 rwxp 00006000 08:05 17844516                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnio.so
+7fa6b5914000-7fa6b5917000 ---p 00000000 00:00 0 
+7fa6b5917000-7fa6b5a15000 rwxp 00000000 00:00 0 
+7fa6b5a15000-7fa6b5a18000 ---p 00000000 00:00 0 
+7fa6b5a18000-7fa6b5b16000 rwxp 00000000 00:00 0 
+7fa6b5b16000-7fa6b5b19000 ---p 00000000 00:00 0 
+7fa6b5b19000-7fa6b5c17000 rwxp 00000000 00:00 0                          [stack:18314]
+7fa6b5c17000-7fa6b5c1a000 ---p 00000000 00:00 0 
+7fa6b5c1a000-7fa6b5d18000 rwxp 00000000 00:00 0 
+7fa6b5d18000-7fa6b5d1b000 ---p 00000000 00:00 0 
+7fa6b5d1b000-7fa6b5e19000 rwxp 00000000 00:00 0 
+7fa6b5e19000-7fa6b5e1c000 ---p 00000000 00:00 0 
+7fa6b5e1c000-7fa6b5f1a000 rwxp 00000000 00:00 0                          [stack:18133]
+7fa6b5f1a000-7fa6b5f1d000 ---p 00000000 00:00 0 
+7fa6b5f1d000-7fa6b601b000 rwxp 00000000 00:00 0 
+7fa6b601b000-7fa6b601e000 ---p 00000000 00:00 0 
+7fa6b601e000-7fa6b611c000 rwxp 00000000 00:00 0 
+7fa6b611c000-7fa6b611f000 ---p 00000000 00:00 0 
+7fa6b611f000-7fa6b621d000 rwxp 00000000 00:00 0                          [stack:18320]
+7fa6b621d000-7fa6b6220000 ---p 00000000 00:00 0 
+7fa6b6220000-7fa6b631e000 rwxp 00000000 00:00 0                          [stack:18093]
+7fa6b631e000-7fa6b632d000 r-xs 00667000 08:05 17845530                   /usr/lib/jvm/java-6-oracle/jre/lib/charsets.jar
+7fa6b632d000-7fa6b6330000 ---p 00000000 00:00 0 
+7fa6b6330000-7fa6b642e000 rwxp 00000000 00:00 0                          [stack:18240]
+7fa6b642e000-7fa6b6431000 ---p 00000000 00:00 0 
+7fa6b6431000-7fa6b652f000 rwxp 00000000 00:00 0                          [stack:18190]
+7fa6b652f000-7fa6b6532000 ---p 00000000 00:00 0 
+7fa6b6532000-7fa6b6630000 rwxp 00000000 00:00 0 
+7fa6b6630000-7fa6b6633000 ---p 00000000 00:00 0 
+7fa6b6633000-7fa6b6731000 rwxp 00000000 00:00 0 
+7fa6b6731000-7fa6b6734000 ---p 00000000 00:00 0 
+7fa6b6734000-7fa6b6832000 rwxp 00000000 00:00 0                          [stack:18313]
+7fa6b6832000-7fa6b6835000 ---p 00000000 00:00 0 
+7fa6b6835000-7fa6b6933000 rwxp 00000000 00:00 0 
+7fa6b6933000-7fa6b6936000 ---p 00000000 00:00 0 
+7fa6b6936000-7fa6b6a34000 rwxp 00000000 00:00 0 
+7fa6b6a34000-7fa6b6a37000 ---p 00000000 00:00 0 
+7fa6b6a37000-7fa6b6b35000 rwxp 00000000 00:00 0 
+7fa6b6b35000-7fa6b6b38000 ---p 00000000 00:00 0 
+7fa6b6b38000-7fa6b6c36000 rwxp 00000000 00:00 0 
+7fa6b6c36000-7fa6b6c39000 ---p 00000000 00:00 0 
+7fa6b6c39000-7fa6b6d37000 rwxp 00000000 00:00 0 
+7fa6b6d37000-7fa6b6d4d000 r-xp 00000000 08:05 16122062                   /lib/x86_64-linux-gnu/libresolv-2.17.so
+7fa6b6d4d000-7fa6b6f4d000 ---p 00016000 08:05 16122062                   /lib/x86_64-linux-gnu/libresolv-2.17.so
+7fa6b6f4d000-7fa6b6f4e000 r-xp 00016000 08:05 16122062                   /lib/x86_64-linux-gnu/libresolv-2.17.so
+7fa6b6f4e000-7fa6b6f4f000 rwxp 00017000 08:05 16122062                   /lib/x86_64-linux-gnu/libresolv-2.17.so
+7fa6b6f4f000-7fa6b6f51000 rwxp 00000000 00:00 0 
+7fa6b6f51000-7fa6b6f57000 r-xp 00000000 08:05 16122056                   /lib/x86_64-linux-gnu/libnss_dns-2.17.so
+7fa6b6f57000-7fa6b7156000 ---p 00006000 08:05 16122056                   /lib/x86_64-linux-gnu/libnss_dns-2.17.so
+7fa6b7156000-7fa6b7157000 r-xp 00005000 08:05 16122056                   /lib/x86_64-linux-gnu/libnss_dns-2.17.so
+7fa6b7157000-7fa6b7158000 rwxp 00006000 08:05 16122056                   /lib/x86_64-linux-gnu/libnss_dns-2.17.so
+7fa6b7159000-7fa6b7168000 r-xs 00667000 08:05 17845530                   /usr/lib/jvm/java-6-oracle/jre/lib/charsets.jar
+7fa6b7168000-7fa6b716f000 r-xs 00096000 08:05 17845618                   /usr/lib/jvm/java-6-oracle/jre/lib/jsse.jar
+7fa6b716f000-7fa6b7182000 r-xp 00000000 08:05 17844501                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnet.so
+7fa6b7182000-7fa6b7283000 ---p 00013000 08:05 17844501                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnet.so
+7fa6b7283000-7fa6b7286000 rwxp 00014000 08:05 17844501                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libnet.so
+7fa6b7286000-7fa6b7289000 ---p 00000000 00:00 0 
+7fa6b7289000-7fa6b7387000 rwxp 00000000 00:00 0 
+7fa6b7387000-7fa6b738f000 r-xs 00115000 08:05 17845634                   /usr/lib/jvm/java-6-oracle/jre/lib/resources.jar
+7fa6b738f000-7fa6b7392000 ---p 00000000 00:00 0 
+7fa6b7392000-7fa6b7490000 rwxp 00000000 00:00 0                          [stack:18053]
+7fa6b7490000-7fa6b7493000 r-xs 00011000 08:05 13504039                   /home/zoe/.m2/repository/org/apache/maven/surefire/surefire-junit4/2.14.1/surefire-junit4-2.14.1.jar
+7fa6b7493000-7fa6b7496000 r-xs 00010000 08:05 13899052                   /home/zoe/.m2/repository/com/jsuereth/scala-arm_2.10/1.3/scala-arm_2.10-1.3.jar
+7fa6b7496000-7fa6b749a000 r-xs 0002c000 08:05 13768927                   /home/zoe/.m2/repository/github/com/ingoem/scala-react_2.10/0.9/scala-react_2.10-0.9.jar
+7fa6b749a000-7fa6b750c000 r-xs 0065d000 08:05 13374391                   /home/zoe/.m2/repository/org/scala-lang/scala-library/2.10.1/scala-library-2.10.1.jar
+7fa6b750c000-7fa6b752d000 r-xs 00162000 08:05 13108317                   /home/zoe/.m2/repository/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5.jar
+7fa6b752d000-7fa6b752f000 r-xs 00003000 08:05 13108316                   /home/zoe/.m2/repository/org/slf4j/jcl-over-slf4j/1.6.2/jcl-over-slf4j-1.6.2.jar
+7fa6b752f000-7fa6b7577000 r-xs 0047b000 08:05 13374390                   /home/zoe/.m2/repository/org/scalatest/scalatest_2.10/2.0.M6-SNAP8/scalatest_2.10-2.0.M6-SNAP8.jar
+7fa6b7577000-7fa6b75b1000 r-xs 0029e000 08:05 13109929                   /home/zoe/.m2/repository/org/scala-tools/testing/specs_2.10/1.6.9/specs_2.10-1.6.9.jar
+7fa6b75b1000-7fa6b75b8000 r-xs 00049000 08:05 13108312                   /home/zoe/.m2/repository/cglib/cglib-nodep/2.1_3/cglib-nodep-2.1_3.jar
+7fa6b75b8000-7fa6b75bc000 r-xs 00017000 08:05 13108311                   /home/zoe/.m2/repository/jmock/jmock/1.2.0/jmock-1.2.0.jar
+7fa6b75bc000-7fa6b75bd000 r-xs 00000000 08:05 13108310                   /home/zoe/.m2/repository/jmock/jmock-cglib/1.2.0/jmock-cglib-1.2.0.jar
+7fa6b75bd000-7fa6b75c1000 r-xs 0001f000 08:05 13108309                   /home/zoe/.m2/repository/junit/junit-dep/4.4/junit-dep-4.4.jar
+7fa6b75c1000-7fa6b75c4000 r-xs 00019000 08:05 13108308                   /home/zoe/.m2/repository/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1.jar
+7fa6b75c4000-7fa6b75c7000 r-xs 0001f000 08:05 13108305                   /home/zoe/.m2/repository/org/jmock/jmock/2.5.1/jmock-2.5.1.jar
+7fa6b75c7000-7fa6b75c9000 r-xs 00001000 08:05 13108303                   /home/zoe/.m2/repository/org/jmock/jmock-junit4/2.5.1/jmock-junit4-2.5.1.jar
+7fa6b75c9000-7fa6b75cb000 r-xs 00011000 08:05 13108301                   /home/zoe/.m2/repository/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar
+7fa6b75cb000-7fa6b75d2000 r-xs 00037000 08:05 13108299                   /home/zoe/.m2/repository/junit/junit/4.10/junit-4.10.jar
+7fa6b75d2000-7fa6b75d3000 r-xs 00002000 08:05 13108293                   /home/zoe/.m2/repository/org/slf4j/slf4j-log4j12/1.6.2/slf4j-log4j12-1.6.2.jar
+7fa6b75d3000-7fa6b75db000 r-xs 00028000 08:05 13108290                   /home/zoe/.m2/repository/xml-apis/xml-apis/1.3.04/xml-apis-1.3.04.jar
+7fa6b75db000-7fa6b75e1000 r-xs 00019000 08:05 13108288                   /home/zoe/.m2/repository/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar
+7fa6b75e1000-7fa6b75f9000 r-xs 00115000 08:05 13108285                   /home/zoe/.m2/repository/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar
+7fa6b75f9000-7fa6b75fb000 r-xs 00005000 08:05 13108283                   /home/zoe/.m2/repository/org/slf4j/slf4j-api/1.6.2/slf4j-api-1.6.2.jar
+7fa6b75fb000-7fa6b7604000 r-xs 0006f000 08:05 13108281                   /home/zoe/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+7fa6b7604000-7fa6b7606000 r-xs 0000b000 08:05 13108278                   /home/zoe/.m2/repository/javax/servlet/jsp/javax.servlet.jsp-api/2.2.1/javax.servlet.jsp-api-2.2.1.jar
+7fa6b7606000-7fa6b7608000 r-xs 00018000 08:05 13108275                   /home/zoe/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar
+7fa6b7608000-7fa6b760d000 r-xs 0002b000 08:05 13240360                   /home/zoe/.m2/repository/com/carrotsearch/randomizedtesting/randomizedtesting-runner/2.0.1/randomizedtesting-runner-2.0.1.jar
+7fa6b760d000-7fa6b7613000 r-xs 00047000 08:05 13240359                   /home/zoe/.m2/repository/org/apache/lucene/lucene-codecs/4.0.0/lucene-codecs-4.0.0.jar
+7fa6b7613000-7fa6b761a000 r-xs 005d2000 08:05 13240358                   /home/zoe/.m2/repository/org/apache/lucene/lucene-test-framework/4.0.0/lucene-test-framework-4.0.0.jar
+7fa6b761a000-7fa6b7628000 r-xs 0014e000 08:05 13240357                   /home/zoe/.m2/repository/org/hsqldb/hsqldb/2.2.9/hsqldb-2.2.9.jar
+7fa6b7628000-7fa6b7633000 r-xs 00065000 08:05 13242763                   /home/zoe/.m2/repository/org/springframework/spring-test/3.2.3.RELEASE/spring-test-3.2.3.RELEASE.jar
+7fa6b7633000-7fa6b7639000 r-xs 0002a000 08:05 15335738                   /home/zoe/.m2/repository/org/springframework/scala/spring-scala/1.0.0.M2/spring-scala-1.0.0.M2.jar
+7fa6b7639000-7fa6b763b000 r-xs 00005000 08:05 13240355                   /home/zoe/.m2/repository/uk/ac/warwick/membership/membership-rmi/2.7/membership-rmi-2.7.jar
+7fa6b763b000-7fa6b763e000 r-xs 00017000 08:05 13240354                   /home/zoe/.m2/repository/org/reflections/reflections/0.9.8/reflections-0.9.8.jar
+7fa6b763e000-7fa6b7644000 r-xs 0003c000 08:05 13239689                   /home/zoe/.m2/repository/net/sf/ehcache/ehcache-core/1.7.0/ehcache-core-1.7.0.jar
+7fa6b7644000-7fa6b7645000 r-xs 00005000 08:05 13240352                   /home/zoe/.m2/repository/org/apache/tiles/tiles-template/2.2.2/tiles-template-2.2.2.jar
+7fa6b7645000-7fa6b7646000 r-xs 00002000 08:05 13239713                   /home/zoe/.m2/repository/org/apache/tiles/tiles-servlet-wildcard/2.2.2/tiles-servlet-wildcard-2.2.2.jar
+7fa6b7646000-7fa6b7648000 r-xs 0000d000 08:05 13240351                   /home/zoe/.m2/repository/org/apache/tiles/tiles-servlet/2.2.2/tiles-servlet-2.2.2.jar
+7fa6b7648000-7fa6b764a000 r-xs 0000b000 08:05 13240349                   /home/zoe/.m2/repository/org/apache/tiles/tiles-jsp/2.2.2/tiles-jsp-2.2.2.jar
+7fa6b764a000-7fa6b764c000 r-xs 00007000 08:05 13239701                   /home/zoe/.m2/repository/org/apache/tiles/tiles-freemarker/2.2.2/tiles-freemarker-2.2.2.jar
+7fa6b764c000-7fa6b7653000 r-xs 0007e000 08:05 13240347                   /home/zoe/.m2/repository/jboss/javassist/3.7.ga/javassist-3.7.ga.jar
+7fa6b7653000-7fa6b7656000 r-xs 00038000 08:05 13239716                   /home/zoe/.m2/repository/ognl/ognl/2.7.3/ognl-2.7.3.jar
+7fa6b7656000-7fa6b7657000 r-xs 00003000 08:05 13240346                   /home/zoe/.m2/repository/org/apache/tiles/tiles-ognl/2.2.2/tiles-ognl-2.2.2.jar
+7fa6b7657000-7fa6b7661000 r-xs 0008b000 08:05 13240344                   /home/zoe/.m2/repository/org/mvel/mvel2/2.0.11/mvel2-2.0.11.jar
+7fa6b7661000-7fa6b7663000 r-xs 00003000 08:05 13239712                   /home/zoe/.m2/repository/org/apache/tiles/tiles-mvel/2.2.2/tiles-mvel-2.2.2.jar
+7fa6b7663000-7fa6b766b000 r-xs 0005f000 08:05 13239726                   /home/zoe/.m2/repository/org/apache/velocity/velocity/1.6.2/velocity-1.6.2.jar
+7fa6b766b000-7fa6b766d000 r-xs 0000e000 08:05 13240341                   /home/zoe/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar
+7fa6b766d000-7fa6b7673000 r-xs 0004f000 08:05 13239698                   /home/zoe/.m2/repository/org/apache/velocity/velocity-tools/2.0/velocity-tools-2.0.jar
+7fa6b7673000-7fa6b7676000 r-xs 00010000 08:05 13240339                   /home/zoe/.m2/repository/org/apache/tiles/tiles-velocity/2.2.2/tiles-velocity-2.2.2.jar
+7fa6b7676000-7fa6b7677000 r-xs 00005000 08:05 13240338                   /home/zoe/.m2/repository/org/apache/tiles/tiles-extras/2.2.2/tiles-extras-2.2.2.jar
+7fa6b7677000-7fa6b7679000 r-xs 00004000 08:05 13240337                   /home/zoe/.m2/repository/org/apache/tiles/tiles-el/2.2.2/tiles-el-2.2.2.jar
+7fa6b7679000-7fa6b767e000 r-xs 00023000 08:05 13240336                   /home/zoe/.m2/repository/org/apache/tiles/tiles-core/2.2.2/tiles-core-2.2.2.jar
+7fa6b767e000-7fa6b767f000 r-xs 00006000 08:05 13240335                   /home/zoe/.m2/repository/org/apache/tiles/tiles-compat/2.2.2/tiles-compat-2.2.2.jar
+7fa6b767f000-7fa6b7680000 r-xs 00008000 08:05 13240334                   /home/zoe/.m2/repository/org/apache/tiles/tiles-api/2.2.2/tiles-api-2.2.2.jar
+7fa6b7680000-7fa6b768f000 r-xs 00166000 08:05 13240333                   /home/zoe/.m2/repository/org/apache/lucene/lucene-analyzers-common/4.0.0/lucene-analyzers-common-4.0.0.jar
+7fa6b768f000-7fa6b7690000 r-xs 00006000 08:05 13240332                   /home/zoe/.m2/repository/jakarta-regexp/jakarta-regexp/1.4/jakarta-regexp-1.4.jar
+7fa6b7690000-7fa6b7692000 r-xs 0000a000 08:05 13240331                   /home/zoe/.m2/repository/org/apache/lucene/lucene-sandbox/4.0.0/lucene-sandbox-4.0.0.jar
+7fa6b7692000-7fa6b7697000 r-xs 0002b000 08:05 13240330                   /home/zoe/.m2/repository/org/apache/lucene/lucene-queries/4.0.0/lucene-queries-4.0.0.jar
+7fa6b7697000-7fa6b76a0000 r-xs 00055000 08:05 13240329                   /home/zoe/.m2/repository/org/apache/lucene/lucene-queryparser/4.0.0/lucene-queryparser-4.0.0.jar
+7fa6b76a0000-7fa6b76c2000 r-xs 001d0000 08:05 13240328                   /home/zoe/.m2/repository/org/apache/lucene/lucene-core/4.0.0/lucene-core-4.0.0.jar
+7fa6b76c2000-7fa6b76c4000 r-xs 0000d000 08:05 13240327                   /home/zoe/.m2/repository/commons-fileupload/commons-fileupload/1.2.2/commons-fileupload-1.2.2.jar
+7fa6b76c4000-7fa6b76c6000 r-xs 0000d000 08:05 13108951                   /home/zoe/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar
+7fa6b76c6000-7fa6b76c8000 r-xs 00005000 08:05 13240326                   /home/zoe/.m2/repository/commons-beanutils/commons-beanutils-bean-collections/1.7.0/commons-beanutils-bean-collections-1.7.0.jar
+7fa6b76c8000-7fa6b76cc000 r-xs 00026000 08:05 13240325                   /home/zoe/.m2/repository/commons-beanutils/commons-beanutils-core/1.7.0/commons-beanutils-core-1.7.0.jar
+7fa6b76cc000-7fa6b76cf000 r-xs 00018000 08:05 13240324                   /home/zoe/.m2/repository/commons-digester/commons-digester/1.5/commons-digester-1.5.jar
+7fa6b76cf000-7fa6b76d2000 r-xs 00027000 08:05 13242762                   /home/zoe/.m2/repository/commons-lang/commons-lang/2.0/commons-lang-2.0.jar
+7fa6b76d2000-7fa6b76d5000 r-xs 0001c000 08:05 13239609                   /home/zoe/.m2/repository/commons-configuration/commons-configuration/1.1/commons-configuration-1.1.jar
+7fa6b76d5000-7fa6b76db000 r-xs 00033000 08:05 13239571                   /home/zoe/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar
+7fa6b76db000-7fa6b76de000 r-xs 00025000 08:05 13240322                   /home/zoe/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1.jar
+7fa6b76de000-7fa6b76df000 r-xs 00025000 08:05 13240321                   /home/zoe/.m2/repository/org/apache/directory/studio/org.apache.commons.io/2.1/org.apache.commons.io-2.1.jar
+7fa6b76df000-7fa6b76e4000 r-xs 00032000 08:05 13240320                   /home/zoe/.m2/repository/org/apache/commons/commons-compress/1.3/commons-compress-1.3.jar
+7fa6b76e4000-7fa6b76e6000 r-xs 0000e000 08:05 13240319                   /home/zoe/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar
+7fa6b76e6000-7fa6b76ee000 r-xs 00075000 08:05 13239607                   /home/zoe/.m2/repository/javax/mail/mail/1.4.5/mail-1.4.5.jar
+7fa6b76ee000-7fa6b7721000 r-xs 002ce000 08:05 15335728                   /home/zoe/.m2/repository/org/scala-lang/scala-reflect/2.10.0/scala-reflect-2.10.0.jar
+7fa6b7721000-7fa6b7723000 r-xs 00006000 08:05 13240318                   /home/zoe/.m2/repository/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3.jar
+7fa6b7723000-7fa6b7733000 r-xs 000d2000 08:05 15335727                   /home/zoe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.2/jackson-databind-2.1.2.jar
+7fa6b7733000-7fa6b7735000 r-xs 00007000 08:05 15335726                   /home/zoe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.2/jackson-annotations-2.1.2.jar
+7fa6b7735000-7fa6b7739000 r-xs 0002f000 08:05 15335725                   /home/zoe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.2/jackson-core-2.1.2.jar
+7fa6b7739000-7fa6b7755000 r-xs 000e8000 08:05 15335724                   /home/zoe/.m2/repository/com/fasterxml/jackson/module/jackson-module-scala_2.10/2.1.3/jackson-module-scala_2.10-2.1.3.jar
+7fa6b7755000-7fa6b7757000 r-xs 00006000 08:05 13240314                   /home/zoe/.m2/repository/com/google/code/findbugs/jsr305/2.0.1/jsr305-2.0.1.jar
+7fa6b7757000-7fa6b777b000 r-xs 001aa000 08:05 13240313                   /home/zoe/.m2/repository/com/google/guava/guava/13.0.1/guava-13.0.1.jar
+7fa6b777b000-7fa6b777e000 r-xs 00007000 08:05 13240312                   /home/zoe/.m2/repository/org/joda/joda-convert/1.1/joda-convert-1.1.jar
+7fa6b777e000-7fa6b7780000 r-xs 00006000 08:05 13240311                   /home/zoe/.m2/repository/joda-time/joda-time-hibernate/1.3/joda-time-hibernate-1.3.jar
+7fa6b7780000-7fa6b778f000 r-xs 0007c000 08:05 13240310                   /home/zoe/.m2/repository/joda-time/joda-time/2.0/joda-time-2.0.jar
+7fa6b778f000-7fa6b7791000 r-xs 0000e000 08:05 13240309                   /home/zoe/.m2/repository/org/hibernate/hibernate-validator-legacy/4.0.2.GA/hibernate-validator-legacy-4.0.2.GA.jar
+7fa6b7791000-7fa6b7794000 r-xs 00009000 08:05 13240308                   /home/zoe/.m2/repository/javax/validation/validation-api/1.0.0.GA/validation-api-1.0.0.GA.jar
+7fa6b7794000-7fa6b7797000 r-xs 0000c000 08:05 13240307                   /home/zoe/.m2/repository/org/hibernate/hibernate-validator-annotation-processor/4.2.0.Final/hibernate-validator-annotation-processor-4.2.0.Final.jar
+7fa6b7797000-7fa6b77a0000 r-xs 00051000 08:05 13240306                   /home/zoe/.m2/repository/org/hibernate/hibernate-validator/4.2.0.Final/hibernate-validator-4.2.0.Final.jar
+7fa6b77a0000-7fa6b77a5000 r-xs 00015000 08:05 13240305                   /home/zoe/.m2/repository/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.1.Final/hibernate-jpa-2.0-api-1.0.1.Final.jar
+7fa6b77a5000-7fa6b77ae000 r-xs 00092000 08:05 13239651                   /home/zoe/.m2/repository/javassist/javassist/3.12.0.GA/javassist-3.12.0.GA.jar
+7fa6b77ae000-7fa6b77af000 r-xs 0000a000 08:05 13239593                   /home/zoe/.m2/repository/asm/asm/3.1/asm-3.1.jar
+7fa6b77af000-7fa6b77b6000 r-xs 0003e000 08:05 13240303                   /home/zoe/.m2/repository/cglib/cglib/2.2/cglib-2.2.jar
+7fa6b77b6000-7fa6b77c0000 r-xs 0005f000 08:05 13240302                   /home/zoe/.m2/repository/org/hibernate/hibernate-entitymanager/3.6.10.Final/hibernate-entitymanager-3.6.10.Final.jar
+7fa6b77c0000-7fa6b77c1000 r-xs 00003000 08:05 13240301                   /home/zoe/.m2/repository/javax/transaction/jta/1.1/jta-1.1.jar
+7fa6b77c1000-7fa6b77c4000 r-xs 0000f000 08:05 13240300                   /home/zoe/.m2/repository/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar
+7fa6b77c4000-7fa6b77d1000 r-xs 0007c000 08:05 13240299                   /home/zoe/.m2/repository/commons-collections/commons-collections/3.1/commons-collections-3.1.jar
+7fa6b77d1000-7fa6b77d7000 r-xs 00067000 08:05 13240298                   /home/zoe/.m2/repository/antlr/antlr/2.7.6/antlr-2.7.6.jar
+7fa6b77d7000-7fa6b7809000 r-xs 002c9000 08:05 13240297                   /home/zoe/.m2/repository/org/hibernate/hibernate-core/3.6.10.Final/hibernate-core-3.6.10.Final.jar
+7fa6b7809000-7fa6b7819000 r-xs 000d2000 08:05 13240296                   /home/zoe/.m2/repository/org/freemarker/freemarker/2.3.18/freemarker-2.3.18.jar
+7fa6b7819000-7fa6b781a000 r-xs 00001000 08:05 13239757                   /home/zoe/.m2/repository/net/oauth/core/oauth-consumer/20090617/oauth-consumer-20090617.jar
+7fa6b781a000-7fa6b781b000 r-xs 00001000 08:05 13239756                   /home/zoe/.m2/repository/net/oauth/core/oauth-httpclient3/20090617/oauth-httpclient3-20090617.jar
+7fa6b781b000-7fa6b781c000 r-xs 00001000 08:05 13239615                   /home/zoe/.m2/repository/net/oauth/core/oauth-provider/20090531/oauth-provider-20090531.jar
+7fa6b781c000-7fa6b781e000 r-xs 0000e000 08:05 13239582                   /home/zoe/.m2/repository/net/oauth/core/oauth/20090825/oauth-20090825.jar
+7fa6b781e000-7fa6b782e000 r-xs 00112000 08:05 13239600                   /home/zoe/.m2/repository/org/apache/poi/poi-scratchpad/3.8/poi-scratchpad-3.8.jar
+7fa6b782e000-7fa6b7a4d000 r-xs 00c09000 08:05 13239596                   /home/zoe/.m2/repository/org/apache/poi/ooxml-schemas/1.1/ooxml-schemas-1.1.jar
+7fa6b7a4d000-7fa6b7a4f000 r-xs 00005000 08:05 13239556                   /home/zoe/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar
+7fa6b7a4f000-7fa6b7a8c000 r-xs 0024f000 08:05 13239601                   /home/zoe/.m2/repository/org/apache/xmlbeans/xmlbeans/2.3.0/xmlbeans-2.3.0.jar
+7fa6b7a8c000-7fa6b7b1e000 r-xs 003ec000 08:05 13239587                   /home/zoe/.m2/repository/org/apache/poi/poi-ooxml-schemas/3.8/poi-ooxml-schemas-3.8.jar
+7fa6b7b1e000-7fa6b7b23000 r-xs 00048000 08:05 13239592                   /home/zoe/.m2/repository/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar
+7fa6b7b23000-7fa6b7b2f000 r-xs 000d8000 08:05 13239754                   /home/zoe/.m2/repository/org/apache/poi/poi-ooxml/3.8/poi-ooxml-3.8.jar
+7fa6b7b2f000-7fa6b7b4f000 r-xs 0019d000 08:05 13239586                   /home/zoe/.m2/repository/org/apache/poi/poi/3.8/poi-3.8.jar
+7fa6b7b4f000-7fa6b7b56000 r-xs 00066000 08:05 13239585                   /home/zoe/.m2/repository/org/apache/tika/tika-core/1.1/tika-core-1.1.jar
+7fa6b7b56000-7fa6b7b58000 r-xs 00004000 08:05 15335528                   /home/zoe/.m2/repository/uk/ac/warwick/spring-scala-glue_2.10/1.4/spring-scala-glue_2.10-1.4.jar
+7fa6b7b58000-7fa6b7b5e000 r-xs 00045000 08:05 13239581                   /home/zoe/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
+7fa6b7b5e000-7fa6b7b67000 r-xs 00058000 08:05 13239579                   /home/zoe/.m2/repository/taglibs/standard/1.1.2/standard-1.1.2.jar
+7fa6b7b67000-7fa6b7b72000 r-xs 00063000 08:05 13239577                   /home/zoe/.m2/repository/org/apache/santuario/xmlsec/1.4.3/xmlsec-1.4.3.jar
+7fa6b7b72000-7fa6b7b86000 r-xs 0016a000 08:05 14561734                   /home/zoe/.m2/repository/javax/media/jai/jai_core/1.1.3.patched/jai_core-1.1.3.patched.jar
+7fa6b7b86000-7fa6b7bbc000 r-xs 002f5000 08:05 13239543                   /home/zoe/.m2/repository/org/apache/activemq/activemq-core/5.4.2/activemq-core-5.4.2.jar
+7fa6b7bbc000-7fa6b7bfc000 r-xs 00368000 08:05 13239537                   /home/zoe/.m2/repository/org/apache/activemq/activemq-all/5.4.2/activemq-all-5.4.2.jar
+7fa6b7bfc000-7fa6b7bfd000 ---p 00000000 00:00 0 
+7fa6b7bfd000-7fa6b7cfd000 rwxp 00000000 00:00 0                          [stack:18038]
+7fa6b7cfd000-7fa6b7d00000 ---p 00000000 00:00 0 
+7fa6b7d00000-7fa6b7dfe000 rwxp 00000000 00:00 0                          [stack:18032]
+7fa6b7dfe000-7fa6b7e01000 ---p 00000000 00:00 0 
+7fa6b7e01000-7fa6b7eff000 rwxp 00000000 00:00 0                          [stack:18031]
+7fa6b7eff000-7fa6b7f02000 ---p 00000000 00:00 0 
+7fa6b7f02000-7fa6b8000000 rwxp 00000000 00:00 0                          [stack:18030]
+7fa6b8000000-7fa6b8021000 rwxp 00000000 00:00 0 
+7fa6b8021000-7fa6bc000000 ---p 00000000 00:00 0 
+7fa6bc000000-7fa6bc021000 rwxp 00000000 00:00 0 
+7fa6bc021000-7fa6c0000000 ---p 00000000 00:00 0 
+7fa6c0000000-7fa6c0021000 rwxp 00000000 00:00 0 
+7fa6c0021000-7fa6c4000000 ---p 00000000 00:00 0 
+7fa6c4000000-7fa6c486c000 rwxp 00000000 00:00 0 
+7fa6c486c000-7fa6c8000000 ---p 00000000 00:00 0 
+7fa6c8000000-7fa6c8021000 rwxp 00000000 00:00 0 
+7fa6c8021000-7fa6cc000000 ---p 00000000 00:00 0 
+7fa6cc000000-7fa6cc021000 rwxp 00000000 00:00 0 
+7fa6cc021000-7fa6d0000000 ---p 00000000 00:00 0 
+7fa6d0000000-7fa6d0021000 rwxp 00000000 00:00 0 
+7fa6d0021000-7fa6d4000000 ---p 00000000 00:00 0 
+7fa6d4000000-7fa6d4021000 rwxp 00000000 00:00 0 
+7fa6d4021000-7fa6d8000000 ---p 00000000 00:00 0 
+7fa6d8000000-7fa6d8021000 rwxp 00000000 00:00 0 
+7fa6d8021000-7fa6dc000000 ---p 00000000 00:00 0 
+7fa6dc000000-7fa6dc021000 rwxp 00000000 00:00 0 
+7fa6dc021000-7fa6e0000000 ---p 00000000 00:00 0 
+7fa6e0000000-7fa6e0021000 rwxp 00000000 00:00 0 
+7fa6e0021000-7fa6e4000000 ---p 00000000 00:00 0 
+7fa6e4000000-7fa6e4002000 r-xs 00018000 08:05 13239569                   /home/zoe/.m2/repository/xfire/opensaml/1.0.1/opensaml-1.0.1.jar
+7fa6e4002000-7fa6e4007000 r-xs 00039000 08:05 13371348                   /home/zoe/.m2/repository/uk/ac/warwick/sso/sso-client/1.94/sso-client-1.94.jar
+7fa6e4007000-7fa6e4009000 r-xs 0000a000 08:05 14561736                   /home/zoe/.m2/repository/javax/media/jai/mlibwrapper_jai/1.1.3.patched/mlibwrapper_jai-1.1.3.patched.jar
+7fa6e4009000-7fa6e400c000 r-xs 00033000 08:05 14561735                   /home/zoe/.m2/repository/javax/media/jai/jai_codec/1.1.3.patched/jai_codec-1.1.3.patched.jar
+7fa6e400c000-7fa6e402a000 r-xs 00546000 08:05 13239562                   /home/zoe/.m2/repository/com/ibm/icu/icu4j/4.0.1/icu4j-4.0.1.jar
+7fa6e402a000-7fa6e402d000 ---p 00000000 00:00 0 
+7fa6e402d000-7fa6e412b000 rwxp 00000000 00:00 0                          [stack:18021]
+7fa6e412b000-7fa6e43f4000 r-xp 00000000 08:05 16384300                   /usr/lib/locale/locale-archive
+7fa6e43f4000-7fa6e43f7000 ---p 00000000 00:00 0 
+7fa6e43f7000-7fa6e44f5000 rwxp 00000000 00:00 0                          [stack:18007]
+7fa6e44f5000-7fa6e44f8000 ---p 00000000 00:00 0 
+7fa6e44f8000-7fa6e45f6000 rwxp 00000000 00:00 0                          [stack:18006]
+7fa6e45f6000-7fa6e45f7000 ---p 00000000 00:00 0 
+7fa6e45f7000-7fa6e5700000 rwxp 00000000 00:00 0                          [stack:18002]
+7fa6e5700000-7fa6e9655000 rwxp 00000000 00:00 0 
+7fa6e9655000-7fa6ec000000 ---p 00000000 00:00 0 
+7fa6ec000000-7fa6ec001000 r-xs 00004000 08:05 14422298                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-hibernate/20130628/warwickutils-hibernate-20130628.jar
+7fa6ec001000-7fa6ec003000 r-xs 0000d000 08:05 14422297                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-files/20130628/warwickutils-files-20130628.jar
+7fa6ec003000-7fa6ec004000 r-xs 00006000 08:05 13239566                   /home/zoe/.m2/repository/org/codehaus/jackson/jackson-xc/1.9.4/jackson-xc-1.9.4.jar
+7fa6ec004000-7fa6ec012000 r-xs 000b0000 08:05 13239563                   /home/zoe/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.4/jackson-mapper-asl-1.9.4.jar
+7fa6ec012000-7fa6ec016000 r-xs 00034000 08:05 13239565                   /home/zoe/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.4/jackson-core-asl-1.9.4.jar
+7fa6ec016000-7fa6ec018000 r-xs 00002000 08:05 13239564                   /home/zoe/.m2/repository/org/apache/geronimo/specs/geronimo-jta_1.0.1B_spec/1.0.1/geronimo-jta_1.0.1B_spec-1.0.1.jar
+7fa6ec018000-7fa6ec01d000 r-xs 0001c000 08:05 13239560                   /home/zoe/.m2/repository/org/jasypt/jasypt/1.6/jasypt-1.6.jar
+7fa6ec01d000-7fa6ec022000 r-xs 0002c000 08:05 13239554                   /home/zoe/.m2/repository/commons-net/commons-net/2.0/commons-net-2.0.jar
+7fa6ec022000-7fa6ec024000 r-xs 00003000 08:05 13239555                   /home/zoe/.m2/repository/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/geronimo-j2ee-management_1.1_spec-1.0.1.jar
+7fa6ec024000-7fa6ec028000 r-xs 00024000 08:05 13239553                   /home/zoe/.m2/repository/org/osgi/org.osgi.core/4.1.0/org.osgi.core-4.1.0.jar
+7fa6ec028000-7fa6ec02b000 r-xs 00022000 08:05 13239548                   /home/zoe/.m2/repository/org/apache/activemq/protobuf/activemq-protobuf/1.1/activemq-protobuf-1.1.jar
+7fa6ec02b000-7fa6ec02e000 r-xs 00023000 08:05 13239546                   /home/zoe/.m2/repository/org/apache/activemq/kahadb/5.4.2/kahadb-5.4.2.jar
+7fa6ec02e000-7fa6ec032000 r-xs 00016000 08:05 13239547                   /home/zoe/.m2/repository/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2.jar
+7fa6ec032000-7fa6ec034000 r-xs 00006000 08:05 13239545                   /home/zoe/.m2/repository/org/apache/geronimo/specs/geronimo-jms_1.1_spec/1.1.1/geronimo-jms_1.1_spec-1.1.1.jar
+7fa6ec034000-7fa6ec035000 r-xs 0000a000 08:05 13239541                   /home/zoe/.m2/repository/commons-logging/commons-logging-api/1.1/commons-logging-api-1.1.jar
+7fa6ec035000-7fa6ec036000 r-xs 00008000 08:05 13239539                   /home/zoe/.m2/repository/org/apache/activemq/activemq-pool/5.4.2/activemq-pool-5.4.2.jar
+7fa6ec036000-7fa6ec037000 r-xs 00004000 08:05 14422296                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-queue/20130628/warwickutils-queue-20130628.jar
+7fa6ec037000-7fa6ec038000 r-xs 0002e000 08:05 13239533                   /home/zoe/.m2/repository/org/apache/directory/studio/org.apache.commons.codec/1.6/org.apache.commons.codec-1.6.jar
+7fa6ec038000-7fa6ec03e000 r-xs 00048000 08:05 13239531                   /home/zoe/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar
+7fa6ec03e000-7fa6ec040000 r-xs 0000a000 08:05 13239526                   /home/zoe/.m2/repository/org/json/json/20090211/json-20090211.jar
+7fa6ec040000-7fa6ec043000 r-xs 00016000 08:05 13239528                   /home/zoe/.m2/repository/commons-pool/commons-pool/1.5.5/commons-pool-1.5.5.jar
+7fa6ec043000-7fa6ec045000 r-xs 00005000 08:05 14422295                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-cache/20130628/warwickutils-cache-20130628.jar
+7fa6ec045000-7fa6ec048000 r-xs 00017000 08:05 14164002                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-web/20130628/warwickutils-web-20130628.jar
+7fa6ec048000-7fa6ec04f000 r-xs 00065000 08:05 13239522                   /home/zoe/.m2/repository/dnsjava/dnsjava/2.1.1/dnsjava-2.1.1.jar
+7fa6ec04f000-7fa6ec054000 r-xs 0002a000 08:05 13239520                   /home/zoe/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+7fa6ec054000-7fa6ec057000 r-xs 0001f000 08:05 13239518                   /home/zoe/.m2/repository/commons-validator/commons-validator/1.3.1/commons-validator-1.3.1.jar
+7fa6ec057000-7fa6ec059000 r-xs 00001000 08:05 14029889                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-mail/20130628/warwickutils-mail-20130628.jar
+7fa6ec059000-7fa6ec060000 r-xs 00037000 08:05 13239509                   /home/zoe/.m2/repository/rome/modules/0.3.2/modules-0.3.2.jar
+7fa6ec060000-7fa6ec063000 r-xs 00023000 08:05 13239512                   /home/zoe/.m2/repository/jdom/jdom/1.0/jdom-1.0.jar
+7fa6ec063000-7fa6ec067000 r-xs 00032000 08:05 13239510                   /home/zoe/.m2/repository/rome/rome/1.0/rome-1.0.jar
+7fa6ec067000-7fa6ec06b000 r-xs 0001e000 08:05 13109947                   /home/zoe/.m2/repository/uk/ac/warwick/util/warwickutils-core/20130628/warwickutils-core-20130628.jar
+7fa6ec06b000-7fa6ec06d000 r-xs 00015000 08:05 13108964                   /home/zoe/.m2/repository/org/ccil/cowan/tagsoup/tagsoup/1.2.1/tagsoup-1.2.1.jar
+7fa6ec06d000-7fa6ec06e000 r-xs 00001000 08:05 14944574                   /home/zoe/.m2/repository/net/databinder/dispatch-tagsoup_2.10/0.8.9/dispatch-tagsoup_2.10-0.8.9.jar
+7fa6ec06e000-7fa6ec071000 r-xs 00015000 08:05 13108962                   /home/zoe/.m2/repository/org/apache/james/apache-mime4j-core/0.7.2/apache-mime4j-core-0.7.2.jar
+7fa6ec071000-7fa6ec073000 r-xs 00005000 08:05 13108960                   /home/zoe/.m2/repository/org/apache/httpcomponents/httpmime/4.1.2/httpmime-4.1.2.jar
+7fa6ec073000-7fa6ec074000 r-xs 00007000 08:05 14816014                   /home/zoe/.m2/repository/net/databinder/dispatch-mime_2.10/0.8.9/dispatch-mime_2.10-0.8.9.jar
+7fa6ec074000-7fa6ec079000 r-xs 00040000 08:05 13108956                   /home/zoe/.m2/repository/org/jsoup/jsoup/1.6.1/jsoup-1.6.1.jar
+7fa6ec079000-7fa6ec07a000 r-xs 00001000 08:05 14683560                   /home/zoe/.m2/repository/net/databinder/dispatch-jsoup_2.10/0.8.9/dispatch-jsoup_2.10-0.8.9.jar
+7fa6ec07a000-7fa6ec07c000 r-xs 00007000 08:05 14561078                   /home/zoe/.m2/repository/net/databinder/dispatch-http_2.10/0.8.9/dispatch-http_2.10-0.8.9.jar
+7fa6ec07c000-7fa6ec085000 r-xs 00066000 08:05 14419736                   /home/zoe/.m2/repository/org/scala-lang/scala-actors/2.10.0/scala-actors-2.10.0.jar
+7fa6ec085000-7fa6ec087000 r-xs 00002000 08:05 14290348                   /home/zoe/.m2/repository/net/databinder/dispatch-futures_2.10/0.8.9/dispatch-futures_2.10-0.8.9.jar
+7fa6ec087000-7fa6ec08c000 r-xs 00028000 08:05 13108948                   /home/zoe/.m2/repository/org/apache/httpcomponents/httpcore/4.1.4/httpcore-4.1.4.jar
+7fa6ec08c000-7fa6ec095000 r-xs 0004e000 08:05 13108946                   /home/zoe/.m2/repository/org/apache/httpcomponents/httpclient/4.1.3/httpclient-4.1.3.jar
+7fa6ec095000-7fa6ec099000 r-xs 0001c000 08:05 14158059                   /home/zoe/.m2/repository/net/databinder/dispatch-core_2.10/0.8.9/dispatch-core_2.10-0.8.9.jar
+7fa6ec099000-7fa6ec09a000 r-xs 00000000 08:05 14028026                   /home/zoe/.m2/repository/net/databinder/dispatch_2.10/0.8.9/dispatch_2.10-0.8.9.jar
+7fa6ec09a000-7fa6ec0a6000 r-xs 00090000 08:05 13113307                   /home/zoe/.m2/repository/org/springframework/spring-webmvc/3.2.3.RELEASE/spring-webmvc-3.2.3.RELEASE.jar
+7fa6ec0a6000-7fa6ec0b4000 r-xs 0008b000 08:05 13113306                   /home/zoe/.m2/repository/org/springframework/spring-web/3.2.3.RELEASE/spring-web-3.2.3.RELEASE.jar
+7fa6ec0b4000-7fa6ec0bc000 r-xs 00034000 08:05 13113305                   /home/zoe/.m2/repository/org/springframework/spring-tx/3.2.3.RELEASE/spring-tx-3.2.3.RELEASE.jar
+7fa6ec0bc000-7fa6ec0be000 r-xs 00010000 08:05 13113304                   /home/zoe/.m2/repository/org/springframework/spring-oxm/3.2.3.RELEASE/spring-oxm-3.2.3.RELEASE.jar
+7fa6ec0be000-7fa6ec0c7000 r-xs 00056000 08:05 13113303                   /home/zoe/.m2/repository/org/springframework/spring-orm/3.2.3.RELEASE/spring-orm-3.2.3.RELEASE.jar
+7fa6ec0c7000-7fa6ec0cc000 r-xs 0002e000 08:05 13113302                   /home/zoe/.m2/repository/org/springframework/spring-jms/3.2.3.RELEASE/spring-jms-3.2.3.RELEASE.jar
+7fa6ec0cc000-7fa6ec0d5000 r-xs 0005a000 08:05 13113301                   /home/zoe/.m2/repository/org/springframework/spring-jdbc/3.2.3.RELEASE/spring-jdbc-3.2.3.RELEASE.jar
+7fa6ec0d5000-7fa6ec0d6000 r-xs 00002000 08:05 13113300                   /home/zoe/.m2/repository/org/springframework/spring-instrument-tomcat/3.2.3.RELEASE/spring-instrument-tomcat-3.2.3.RELEASE.jar
+7fa6ec0d6000-7fa6ec0d7000 r-xs 00001000 08:05 13113299                   /home/zoe/.m2/repository/org/springframework/spring-instrument/3.2.3.RELEASE/spring-instrument-3.2.3.RELEASE.jar
+7fa6ec0d7000-7fa6ec0e9000 r-xs 000c2000 08:05 13113297                   /home/zoe/.m2/repository/org/springframework/spring-core/3.2.3.RELEASE/spring-core-3.2.3.RELEASE.jar
+7fa6ec0e9000-7fa6ec0fe000 r-xs 000be000 08:05 13113295                   /home/zoe/.m2/repository/org/springframework/spring-context/3.2.3.RELEASE/spring-context-3.2.3.RELEASE.jar
+7fa6ec0fe000-7fa6ec132000 rwxp 00000000 00:00 0 
+7fa6ec132000-7fa6ec2cb000 r-xs 03087000 08:05 17845574                   /usr/lib/jvm/java-6-oracle/jre/lib/rt.jar
+7fa6ec2cb000-7fa6ec2cc000 ---p 00000000 00:00 0 
+7fa6ec2cc000-7fa6ec3cc000 rwxp 00000000 00:00 0                          [stack:17989]
+7fa6ec3cc000-7fa6ec3cd000 ---p 00000000 00:00 0 
+7fa6ec3cd000-7fa6ec4cd000 rwxp 00000000 00:00 0                          [stack:17988]
+7fa6ec4cd000-7fa6ec4ce000 ---p 00000000 00:00 0 
+7fa6ec4ce000-7fa6ec5ce000 rwxp 00000000 00:00 0                          [stack:17987]
+7fa6ec5ce000-7fa6ec5cf000 ---p 00000000 00:00 0 
+7fa6ec5cf000-7fa6ec6cf000 rwxp 00000000 00:00 0                          [stack:17984]
+7fa6ec6cf000-7fa6ec6d0000 ---p 00000000 00:00 0 
+7fa6ec6d0000-7fa6ec7d0000 rwxp 00000000 00:00 0                          [stack:17972]
+7fa6ec7d0000-7fa6ec7d1000 ---p 00000000 00:00 0 
+7fa6ec7d1000-7fa6ec8d1000 rwxp 00000000 00:00 0                          [stack:17966]
+7fa6ec8d1000-7fa6ec8d2000 ---p 00000000 00:00 0 
+7fa6ec8d2000-7fa6ec9d2000 rwxp 00000000 00:00 0                          [stack:17961]
+7fa6ec9d2000-7fa6ec9d3000 ---p 00000000 00:00 0 
+7fa6ec9d3000-7fa6ecafc000 rwxp 00000000 00:00 0                          [stack:17950]
+7fa6ecafc000-7fa6ed032000 rwxp 00000000 00:00 0 
+7fa6ed032000-7fa6ed05b000 rwxp 00000000 00:00 0 
+7fa6ed05b000-7fa6ed591000 rwxp 00000000 00:00 0 
+7fa6ed591000-7fa6ed82c000 rwxp 00000000 00:00 0 
+7fa6ed82c000-7fa6ed82d000 rwxp 00000000 00:00 0 
+7fa6ed82d000-7fa6ed83b000 r-xp 00000000 08:05 17845514                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libzip.so
+7fa6ed83b000-7fa6ed93d000 ---p 0000e000 08:05 17845514                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libzip.so
+7fa6ed93d000-7fa6ed940000 rwxp 00010000 08:05 17845514                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libzip.so
+7fa6ed940000-7fa6ed941000 rwxp 00000000 00:00 0 
+7fa6ed941000-7fa6ed94d000 r-xp 00000000 08:05 16122076                   /lib/x86_64-linux-gnu/libnss_files-2.17.so
+7fa6ed94d000-7fa6edb4c000 ---p 0000c000 08:05 16122076                   /lib/x86_64-linux-gnu/libnss_files-2.17.so
+7fa6edb4c000-7fa6edb4d000 r-xp 0000b000 08:05 16122076                   /lib/x86_64-linux-gnu/libnss_files-2.17.so
+7fa6edb4d000-7fa6edb4e000 rwxp 0000c000 08:05 16122076                   /lib/x86_64-linux-gnu/libnss_files-2.17.so
+7fa6edb4e000-7fa6edb65000 r-xp 00000000 08:05 16122057                   /lib/x86_64-linux-gnu/libnsl-2.17.so
+7fa6edb65000-7fa6edd64000 ---p 00017000 08:05 16122057                   /lib/x86_64-linux-gnu/libnsl-2.17.so
+7fa6edd64000-7fa6edd65000 r-xp 00016000 08:05 16122057                   /lib/x86_64-linux-gnu/libnsl-2.17.so
+7fa6edd65000-7fa6edd66000 rwxp 00017000 08:05 16122057                   /lib/x86_64-linux-gnu/libnsl-2.17.so
+7fa6edd66000-7fa6edd68000 rwxp 00000000 00:00 0 
+7fa6edd68000-7fa6edd91000 r-xp 00000000 08:05 17845492                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libjava.so
+7fa6edd91000-7fa6ede90000 ---p 00029000 08:05 17845492                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libjava.so
+7fa6ede90000-7fa6ede97000 rwxp 00028000 08:05 17845492                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libjava.so
+7fa6ede97000-7fa6edea4000 r-xp 00000000 08:05 17844511                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libverify.so
+7fa6edea4000-7fa6edfa3000 ---p 0000d000 08:05 17844511                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libverify.so
+7fa6edfa3000-7fa6edfa6000 rwxp 0000c000 08:05 17844511                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/libverify.so
+7fa6edfa6000-7fa6edfad000 r-xp 00000000 08:05 16121958                   /lib/x86_64-linux-gnu/librt-2.17.so
+7fa6edfad000-7fa6ee1ac000 ---p 00007000 08:05 16121958                   /lib/x86_64-linux-gnu/librt-2.17.so
+7fa6ee1ac000-7fa6ee1ad000 r-xp 00006000 08:05 16121958                   /lib/x86_64-linux-gnu/librt-2.17.so
+7fa6ee1ad000-7fa6ee1ae000 rwxp 00007000 08:05 16121958                   /lib/x86_64-linux-gnu/librt-2.17.so
+7fa6ee1ae000-7fa6ee1b1000 ---p 00000000 00:00 0 
+7fa6ee1b1000-7fa6ee2af000 rwxp 00000000 00:00 0                          [stack:17942]
+7fa6ee2af000-7fa6ee3b2000 r-xp 00000000 08:05 16122070                   /lib/x86_64-linux-gnu/libm-2.17.so
+7fa6ee3b2000-7fa6ee5b2000 ---p 00103000 08:05 16122070                   /lib/x86_64-linux-gnu/libm-2.17.so
+7fa6ee5b2000-7fa6ee5b3000 r-xp 00103000 08:05 16122070                   /lib/x86_64-linux-gnu/libm-2.17.so
+7fa6ee5b3000-7fa6ee5b4000 rwxp 00104000 08:05 16122070                   /lib/x86_64-linux-gnu/libm-2.17.so
+7fa6ee5b4000-7fa6eeed2000 r-xp 00000000 08:05 17845476                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/server/libjvm.so
+7fa6eeed2000-7fa6eefd4000 ---p 0091e000 08:05 17845476                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/server/libjvm.so
+7fa6eefd4000-7fa6ef18a000 rwxp 00920000 08:05 17845476                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/server/libjvm.so
+7fa6ef18a000-7fa6ef1c4000 rwxp 00000000 00:00 0 
+7fa6ef1c4000-7fa6ef382000 r-xp 00000000 08:05 16122064                   /lib/x86_64-linux-gnu/libc-2.17.so
+7fa6ef382000-7fa6ef581000 ---p 001be000 08:05 16122064                   /lib/x86_64-linux-gnu/libc-2.17.so
+7fa6ef581000-7fa6ef585000 r-xp 001bd000 08:05 16122064                   /lib/x86_64-linux-gnu/libc-2.17.so
+7fa6ef585000-7fa6ef587000 rwxp 001c1000 08:05 16122064                   /lib/x86_64-linux-gnu/libc-2.17.so
+7fa6ef587000-7fa6ef58c000 rwxp 00000000 00:00 0 
+7fa6ef58c000-7fa6ef58f000 r-xp 00000000 08:05 16122065                   /lib/x86_64-linux-gnu/libdl-2.17.so
+7fa6ef58f000-7fa6ef78e000 ---p 00003000 08:05 16122065                   /lib/x86_64-linux-gnu/libdl-2.17.so
+7fa6ef78e000-7fa6ef78f000 r-xp 00002000 08:05 16122065                   /lib/x86_64-linux-gnu/libdl-2.17.so
+7fa6ef78f000-7fa6ef790000 rwxp 00003000 08:05 16122065                   /lib/x86_64-linux-gnu/libdl-2.17.so
+7fa6ef790000-7fa6ef7a8000 r-xp 00000000 08:05 16122069                   /lib/x86_64-linux-gnu/libpthread-2.17.so
+7fa6ef7a8000-7fa6ef9a7000 ---p 00018000 08:05 16122069                   /lib/x86_64-linux-gnu/libpthread-2.17.so
+7fa6ef9a7000-7fa6ef9a8000 r-xp 00017000 08:05 16122069                   /lib/x86_64-linux-gnu/libpthread-2.17.so
+7fa6ef9a8000-7fa6ef9a9000 rwxp 00018000 08:05 16122069                   /lib/x86_64-linux-gnu/libpthread-2.17.so
+7fa6ef9a9000-7fa6ef9ad000 rwxp 00000000 00:00 0 
+7fa6ef9ad000-7fa6ef9d0000 r-xp 00000000 08:05 16122060                   /lib/x86_64-linux-gnu/ld-2.17.so
+7fa6ef9d0000-7fa6ef9d4000 r-xs 0002c000 08:05 13113298                   /home/zoe/.m2/repository/org/springframework/spring-expression/3.2.3.RELEASE/spring-expression-3.2.3.RELEASE.jar
+7fa6ef9d4000-7fa6ef9e0000 r-xs 00089000 08:05 13113294                   /home/zoe/.m2/repository/org/springframework/spring-beans/3.2.3.RELEASE/spring-beans-3.2.3.RELEASE.jar
+7fa6ef9e0000-7fa6ef9e8000 r-xs 0004a000 08:05 13113293                   /home/zoe/.m2/repository/org/springframework/spring-aop/3.2.3.RELEASE/spring-aop-3.2.3.RELEASE.jar
+7fa6ef9e8000-7fa6efa04000 rwxp 00000000 00:00 0 
+7fa6efa04000-7fa6efaa8000 rwxp 00000000 00:00 0 
+7fa6efaa8000-7fa6efaab000 rwxp 00000000 00:00 0 
+7fa6efaab000-7fa6efab2000 r-xp 00000000 08:05 17956892                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/jli/libjli.so
+7fa6efab2000-7fa6efbb3000 ---p 00007000 08:05 17956892                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/jli/libjli.so
+7fa6efbb3000-7fa6efbb5000 rwxp 00008000 08:05 17956892                   /usr/lib/jvm/java-6-oracle/jre/lib/amd64/jli/libjli.so
+7fa6efbb5000-7fa6efbb6000 rwxp 00000000 00:00 0 
+7fa6efbb6000-7fa6efbba000 r-xs 0001c000 08:05 13113296                   /home/zoe/.m2/repository/org/springframework/spring-context-support/3.2.3.RELEASE/spring-context-support-3.2.3.RELEASE.jar
+7fa6efbba000-7fa6efbbc000 r-xs 00000000 08:05 13108903                   /home/zoe/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar
+7fa6efbbc000-7fa6efbc1000 r-xs 00022000 08:05 13504842                   /home/zoe/.m2/repository/org/apache/maven/surefire/surefire-api/2.14.1/surefire-api-2.14.1.jar
+7fa6efbc1000-7fa6efbc2000 r-xs 00008000 08:05 13504841                   /home/zoe/.m2/repository/org/apache/maven/surefire/surefire-booter/2.14.1/surefire-booter-2.14.1.jar
+7fa6efbc2000-7fa6efbc3000 r-xs 00004000 08:05 15205559                   /home/zoe/git/tabula/modules/common/target/surefire/surefirebooter6465303229142691041.jar (deleted)
+7fa6efbc3000-7fa6efbcb000 rwxs 00000000 08:05 7996205                    /tmp/hsperfdata_zoe/17929
+7fa6efbcb000-7fa6efbcc000 rwxp 00000000 00:00 0 
+7fa6efbcc000-7fa6efbcd000 r-xp 00000000 00:00 0 
+7fa6efbcd000-7fa6efbcf000 rwxp 00000000 00:00 0 
+7fa6efbcf000-7fa6efbd0000 r-xp 00022000 08:05 16122060                   /lib/x86_64-linux-gnu/ld-2.17.so
+7fa6efbd0000-7fa6efbd2000 rwxp 00023000 08:05 16122060                   /lib/x86_64-linux-gnu/ld-2.17.so
+7fff0d895000-7fff0d8b6000 rwxp 00000000 00:00 0                          [stack]
+7fff0d933000-7fff0d935000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+VM Arguments:
+java_command: /home/zoe/git/tabula/modules/common/target/surefire/surefirebooter6465303229142691041.jar /home/zoe/git/tabula/modules/common/target/surefire/surefire4253414026319875270tmp /home/zoe/git/tabula/modules/common/target/surefire/surefire_06875492468922450908tmp
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/jvm:.
+LD_LIBRARY_PATH=/usr/lib/jvm/java-6-oracle/jre/lib/amd64/server:/usr/lib/jvm/java-6-oracle/jre/lib/amd64:/usr/lib/jvm/java-6-oracle/jre/../lib/amd64
+SHELL=/bin/bash
+DISPLAY=:0
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0x862a30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGBUS: [libjvm.so+0x862a30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGFPE: [libjvm.so+0x7106f0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGPIPE: [libjvm.so+0x7106f0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGXFSZ: [libjvm.so+0x7106f0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGILL: [libjvm.so+0x7106f0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGUSR1: SIG_DFL, sa_mask[0]=0x00000000, sa_flags=0x00000000
+SIGUSR2: [libjvm.so+0x713520], sa_mask[0]=0x00000004, sa_flags=0x10000004
+SIGHUP: [libjvm.so+0x713120], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGINT: [libjvm.so+0x713120], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGTERM: [libjvm.so+0x713120], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGQUIT: [libjvm.so+0x713120], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+
+
+---------------  S Y S T E M  ---------------
+
+OS:wheezy/sid
+
+uname:Linux 3.8.0-25-generic #37-Ubuntu SMP Thu Jun 6 20:47:07 UTC 2013 x86_64
+libc:glibc 2.17 NPTL 2.17 
+rlimit: STACK 8192k, CORE 0k, NPROC 127889, NOFILE 4096, AS infinity
+load average:1.09 2.98 3.14
+
+/proc/meminfo:
+MemTotal:       16388948 kB
+MemFree:         6467844 kB
+Buffers:           33240 kB
+Cached:          2035804 kB
+SwapCached:           12 kB
+Active:          6648852 kB
+Inactive:        2655724 kB
+Active(anon):    5632908 kB
+Inactive(anon):  1634288 kB
+Active(file):    1015944 kB
+Inactive(file):  1021436 kB
+Unevictable:          64 kB
+Mlocked:              64 kB
+SwapTotal:      16729084 kB
+SwapFree:       16728944 kB
+Dirty:               380 kB
+Writeback:             0 kB
+AnonPages:       7235476 kB
+Mapped:           164532 kB
+Shmem:             31536 kB
+Slab:             413600 kB
+SReclaimable:     366700 kB
+SUnreclaim:        46900 kB
+KernelStack:        7032 kB
+PageTables:        49164 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    24923556 kB
+Committed_AS:   15135692 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      135016 kB
+VmallocChunk:   34359589372 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      227328 kB
+DirectMap2M:    16508928 kB
+
+
+CPU:total 8 (4 cores per cpu, 2 threads per core) family 6 model 42 stepping 7, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, ht
+
+/proc/cpuinfo:
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 2801.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 4
+initial apicid	: 4
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 6
+initial apicid	: 6
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 4
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 5
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 6
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 5
+initial apicid	: 5
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 7
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i7-2600S CPU @ 2.80GHz
+stepping	: 7
+microcode	: 0x28
+cpu MHz		: 1600.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 7
+initial apicid	: 7
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 5587.26
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+
+
+Memory: 4k page, physical 16388948k(6467844k free), swap 16729084k(16728944k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (20.45-b01) for linux-amd64 JRE (1.6.0_45-b06), built on Mar 26 2013 14:07:02 by "java_re" with gcc 3.2.2 (SuSE Linux)
+
+time: Tue Jul  2 14:57:02 2013
+elapsed time: 786 seconds
+

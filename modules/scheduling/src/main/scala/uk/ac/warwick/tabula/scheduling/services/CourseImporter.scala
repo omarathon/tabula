@@ -27,9 +27,18 @@ class CourseImporter extends Logging with Daoisms {
 
 	lazy val coursesQuery = new CoursesQuery(sits)
 
-	var courseMap: Map[String, Course] = slurpCourses
+	private var courseMap: Map[String, Course] = _
 
-	def importCourses = {
+	private def updateCourseMap {
+		courseMap = slurpCourses
+	}
+
+	def getCourseForCode(code: String) = {
+		if (courseMap == null) updateCourseMap
+		courseMap(code)
+	}
+
+	def importCourses {
 		logger.info("Importing Courses")
 
 		transactional() {

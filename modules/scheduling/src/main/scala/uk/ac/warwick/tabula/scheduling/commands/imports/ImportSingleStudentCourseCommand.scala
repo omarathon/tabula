@@ -38,6 +38,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 import java.sql.BatchUpdateException
 import org.hibernate.exception.ConstraintViolationException
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 
 class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -52,6 +53,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	var relationshipService = Wire.auto[RelationshipService]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 	var courseAndRouteService = Wire.auto[CourseAndRouteService]
+	var courseImporter = Wire.auto[CourseImporter]
 
 	// Grab various codes from the result set into local variables ready to persist as objects
 	var routeCode = rs.getString("route_code")
@@ -157,14 +159,13 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 		}
 	}
 
-	private def toCourse(code: String) = {
+	def toCourse(code: String) = {
 		if (code == null || code == "") {
 			null
 		} else {
-			courseAndRouteService.getCourseByCode(code).getOrElse(null)
+			courseImporter.getCourseForCode(code).getOrElse(null)
 		}
 	}
-
 
 	def captureTutor(dept: Department) = {
 

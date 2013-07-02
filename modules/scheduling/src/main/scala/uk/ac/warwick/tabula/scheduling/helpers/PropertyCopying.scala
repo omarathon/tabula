@@ -39,10 +39,7 @@ trait PropertyCopying extends Logging {
 	}
 
 	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, obj: Object) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case null => null
-			case value => value
-		}
+		val oldValue = memberBean.getPropertyValue(property)
 
 		if (oldValue == null && code == null) false
 		else if (oldValue == null) {

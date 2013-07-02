@@ -16,7 +16,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
-class StudentCourseDetails extends StudentCourseProperties with ToString with HibernateVersioned with PermissionsTarget {
+class StudentCourseDetails
+	extends StudentCourseProperties
+	with ToString
+	with HibernateVersioned
+	with PermissionsTarget
+	with Ordered[StudentCourseDetails] {
 
 	@transient
 	var relationshipService = Wire.auto[RelationshipService]
@@ -79,6 +84,10 @@ class StudentCourseDetails extends StudentCourseProperties with ToString with Hi
 	def hasAPersonalTutor = !personalTutors.isEmpty
 
 	def hasSupervisor = !supervisors.isEmpty
+
+	def compare(that:StudentCourseDetails): Int = {
+		this.scjCode.compare(that.scjCode)
+	}
 }
 
 trait StudentCourseProperties {

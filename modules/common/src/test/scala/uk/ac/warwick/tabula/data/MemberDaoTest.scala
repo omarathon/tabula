@@ -91,8 +91,8 @@ class MemberDaoTest extends AppContextTestBase {
 	}
 
 	@Test def listUpdatedSince = transactional { tx =>
-		val dept1 = Fixtures.department("in")
-		val dept2 = Fixtures.department("cs")
+		val dept1 = Fixtures.departmentWithId("hi", "History", "3")
+		val dept2 = Fixtures.departmentWithId("fr", "French", "4")
 
 		session.save(dept1)
 		session.save(dept2)
@@ -173,8 +173,8 @@ class MemberDaoTest extends AppContextTestBase {
 	}
 
 	@Test def studentRelationships = transactional { tx =>
-		val dept1 = Fixtures.department("in")
-		val dept2 = Fixtures.department("cs")
+		val dept1 = Fixtures.departmentWithId("sp", "Spanish", "5")
+		val dept2 = Fixtures.departmentWithId("en", "English", "6")
 
 		session.save(dept1)
 		session.save(dept2)
@@ -204,27 +204,27 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.saveOrUpdate(m1)
 		dao.saveOrUpdate(m2)
 
-		val rel1 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000001/1")
-		val rel2 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000002/1")
+		val relBetweenM1AndM3 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000001/1")
+		val relBetweenM2AndM3 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000002/1")
 
-		dao.saveOrUpdate(rel1)
-		dao.saveOrUpdate(rel2)
+		dao.saveOrUpdate(relBetweenM1AndM3)
+		dao.saveOrUpdate(relBetweenM2AndM3)
 
-		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
-		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(relBetweenM1AndM3))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(relBetweenM2AndM3))
 		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Nil)
 		dao.getCurrentRelationships(null, "0000001/1") should be (Nil)
 
-		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
-		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
+		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(relBetweenM1AndM3))
+		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(relBetweenM2AndM3))
 		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000003/1") should be (Seq())
 		dao.getRelationshipsByTarget(null, "0000001/1") should be (Seq())
 
-		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(rel1))
-		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(rel2))
+		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(relBetweenM1AndM3))
+		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(relBetweenM2AndM3))
 		dao.getRelationshipsByDepartment(null, dept1) should be (Seq())
 
-		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2).toSet)
+		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(relBetweenM1AndM3, relBetweenM2AndM3).toSet)
 		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000004") should be (Seq())
 		dao.getRelationshipsByAgent(null, "0000003") should be (Seq())
 

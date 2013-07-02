@@ -35,12 +35,12 @@ trait MemberDao {
 class MemberDaoImpl extends MemberDao with Daoisms {
 	import Restrictions._
 	import Order._
-	
+
 	def saveOrUpdate(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ => session.saveOrUpdate(member)
 	}
-	
+
 	def delete(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ => {
@@ -49,14 +49,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			session.flush()
 		}
 	}
-	
+
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
-	
-	def getByUniversityId(universityId: String) = 
+
+	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
 			.add(is("universityId", universityId.trim))
 			.uniqueResult
-	
+
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
@@ -66,9 +66,9 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
-			if (disableFilter) 
+			if (disableFilter)
 				session.disableFilter(Member.StudentsOnlyFilter)
-				
+
 			session.newCriteria[Member]
 					.add(is("userId", userId.trim.toLowerCase))
 					.add(disjunction()
@@ -82,30 +82,30 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 				session.enableFilter(Member.StudentsOnlyFilter)
 		}
 	}
-	
+
 	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
-	
-	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = 
+
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) =
 		session.newCriteria[Member]
 				.add(gt("lastUpdatedDate", startDate))
 				.add(is("homeDepartment", department))
 				.setMaxResults(max)
 				.addOrder(asc("lastUpdatedDate"))
 				.list
-	
-	def listUpdatedSince(startDate: DateTime, max: Int) = 
+
+	def listUpdatedSince(startDate: DateTime, max: Int) =
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
-	
-	def getRegisteredModules(universityId: String): Seq[Module] =		
+
+	def getRegisteredModules(universityId: String): Seq[Module] =
 		session.newQuery[Module]("""
-				 select distinct m from Module m where code in 
+				 select distinct m from Module m where code in
 				(select distinct substring(lower(uag.moduleCode),1,5)
 					from UpstreamAssessmentGroup uag
 				  where :universityId in elements(uag.members.staticIncludeUsers))
 				""")
 					.setString("universityId", universityId)
 					.seq
-	
+
 	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
@@ -113,17 +113,17 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.add( Restrictions.or(
 							Restrictions.isNull("endDate"),
 							Restrictions.ge("endDate", new DateTime())
-							))				
+							))
 					.seq
 	}
-	
+
 	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
-	}	
-	
+	}
+
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
@@ -138,7 +138,7 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			and
 				sr.relationshipType = :relationshipType
 			and
-				scd.student.homeDepartment = :department
+				scd.department = :department
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by

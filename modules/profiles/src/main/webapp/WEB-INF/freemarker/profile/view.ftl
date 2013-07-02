@@ -178,11 +178,7 @@
 				</li>
 
 				<li id="pd-pane">
-					<#if (profile.hasCurrentEnrolment)>
-						<#include "_course_details.ftl" />
-					<#else>
-						This student has no enrolment record for this course in the current year.
-					</#if>
+					<#include "_personal_development.ftl" />
 				</li>
 			</ol>
 		</div>
@@ -196,25 +192,8 @@
 					<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
 				</#if>
 
-				<div class="tabbable">
-					<ol class="panes">
-						<li id="course-pane">
-							<#include "_course_details.ftl" />
-						</li>
+				<#include "_course_details.ftl" />
 
-						<li id="supervision-pane">
-							<#include "_supervision.ftl" />
-						</li>
-
-						<li id="pd-pane">
-							<#if (profile.hasCurrentEnrolment)>
-								<#include "_course_details.ftl" />
-							<#else>
-								This student has no enrolment record for this course in the current year.
-							</#if>
-						</li>
-					</ol>
-				</div>
 			</#if>
 		</#list>
 	</#if>
