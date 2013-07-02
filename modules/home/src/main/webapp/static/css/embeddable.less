@@ -22,6 +22,11 @@ html.iframe {
 @zebra-pale: #f5f5f5;
 @zebra-dark: #ebebeb;
 
+label.disabled {
+  color: @grayLight;
+  cursor: not-allowed;
+}
+
 ul.unstyled, ol.unstyled {
 	margin-left: 0;
 	list-style: none;
@@ -870,7 +875,7 @@ table {
   }
 }
 
-.user-picker-collection .user-picker-container {
+.user-picker-collection .user-picker-container, .flexi-picker-collection .flexi-picker-container {
   display: block !important;
 }
 
@@ -1127,11 +1132,6 @@ h1.with-settings {
 	margin-left: -(@modal-width/2);
 }
 
-// fix for disabled dropdown menu items icon flicker to white when hovering
-.tabula-page .dropdown-menu > li.disabled > a:hover > [class^="icon-"], #container .dropdown-menu > li.disabled > a:hover > [class^="icon-"] {
-	background-image: url("../libs/bootstrap/img/glyphicons-halflings.png");
-}
-
 // grey out disabled icons
 .tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
     opacity:.3;
@@ -1148,7 +1148,7 @@ h1.with-settings {
  	}
 
 	// mixin
-	.tabula-photo (@width: 186px, @padding: 8px) {
+	.tabula-photo (@width, @padding) {
 		float: left;
 		width: @width;
 		margin-right: 16px;
@@ -1163,6 +1163,16 @@ h1.with-settings {
 			max-width: @width - (@padding * 2);
 		}
 	}
+	
+	.photo.size-tinythumbnail {
+		.tabula-photo(50px, 5px);
+	}
+	
+	.photo.size-thumbnail {
+		.tabula-photo(186px, 8px);
+	}
+	
+	
 
 	hr.full-width {
  		width: auto;
@@ -1174,22 +1184,18 @@ h1.with-settings {
 	}
 
 	#container .profile  {
+		.col1 {
+			float: left;
+			width: 354px;
+			margin-right: 16px;
+		}
+		.col2 {
+			float: left;
+			width: 354px;
+			margin-right: 0;
+		}
+
 		#personal-details {
-			div.photo {
-				.tabula-photo;
-			}
-
-			div.col1 {
-				float: left;
-				width: 354px;
-				margin-right: 16px;
-			}
-			div.col2 {
-				float: left;
-				width: 354px;
-				margin-right: 0;
-			}
-
 			header {
 				h1, h5 {
 					display: inline;
@@ -1248,10 +1254,6 @@ h1.with-settings {
 					border-bottom: 15px solid transparent;
 				}
 			}
-		}
-
-		.untabbed {
-			margin-top: 12px;
 		}
 
 		#personal-development, #supervision {
@@ -1556,6 +1558,74 @@ h1.with-settings {
 	line-height: 20px;
 }
 
+
+
+//---- Flexi Picker -----//
+
+@flexi-picker-vertical-align: middle;
+
+input.flexi-picker {
+	vertical-align: @flexi-picker-vertical-align;
+}
+
+.flexi-picker-result {
+	min-width:219px;
+
+	span.type {
+		font-size: 75%;
+		opacity: 0.5;
+		padding: 0.5em;
+	}
+
+	.description {
+		font-size: 75%;
+		opacity: 0.8;
+		padding-left: 3px;
+		margin-top: -8px;
+	}
+
+	i {
+		margin-left: -17px;
+		margin-right: 3px;
+	}
+
+	a {
+		text-decoration: none;
+	}
+}
+.rich-result-field {
+	color: green !important;
+	position: relative;
+	vertical-align: @flexi-picker-vertical-align;
+
+	.val {
+		display: block;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		padding-right: 13px;
+	}
+
+	a.clear-field {
+		position: absolute;
+		right: 0;
+		top: 4px;
+		padding: 0 5px 0 0;
+		color: #666;
+		font-size: 150%;
+		background-color: white;
+		text-decoration: none;
+	}
+}
+
+//---- END Flexi Picker -----//
+
+
+
+
+
+
+
+
 .tabula-page, #container {
 	.btn-toolbar {
 		.btn.hover {
@@ -1675,5 +1745,95 @@ h1.with-settings {
 	// Make legends less shouty
 	legend {
 		font-weight: normal;
+	}
+
+	// tabbed content per style guide
+	.tab-content {
+		padding: 10px;
+		border-width: 0px 1px 1px 1px;
+		border-color: @tabBorder;
+		border-style:solid;
+	}
+
+	.tabbable {
+		ol {
+			margin: 0;
+			padding-left: 0;
+
+			&.col1, &.col2 { min-height: 80px; }
+
+			&.tab-content { padding-left: 10px; }
+
+			li { list-style: none; }
+		}
+
+		.layout-tools {
+			float: right;
+			margin-top: 5px;
+
+			i {
+				cursor: pointer;
+
+				&:hover {
+					color: @tabulaGray;
+				}
+			}
+		}
+
+		.nav-tabs {
+			// room for layout-tools
+			padding-right: 70px;
+
+			.disabled { cursor: not-allowed; }
+			.icon-move { cursor: move; }
+			.icon-resize-small, .icon-resize-full, .icon-minus-sign-alt, .icon-plus-sign-alt { cursor: pointer; }
+
+			i {
+				margin-left: 3px;
+				color: @tabulaGrayLightTint;
+
+				&:hover {
+					color: @tabulaGrayLight;
+				}
+			}
+
+			li.active {
+				.icon-resize-small { display: none; }
+			}
+		}
+
+		.gadget {
+			margin-bottom: 12px;
+
+			.tab-container a {
+				cursor: move;
+			}
+
+			.tab-content {
+				background: white;
+			}
+		}
+
+		.panes {
+			padding-bottom: 16px;
+			min-height: 8px;
+
+			> li {
+				margin: 12px 0;
+
+				&.tab-pane {
+					margin: 0;
+				}
+			}
+		}
+
+		.sort-target {
+			border: 1px dashed @tabulaOrangeLight;
+		}
+	}
+
+	// Allocate students by spreadsheet specific
+	.step-action label {
+		font-weight:bold;
 	}
 }

@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
+import scala.collection.JavaConverters._
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -63,5 +64,29 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 		"id" -> id,
 		"name" -> name,
 		"set" -> groupSet)
-	
+
+
+  def hasEquivalentEventsTo(other:SmallGroup) = {
+    (this eq other ) ||
+    {
+      val eventsSC = events.asScala
+      val otherEvents = other.events.asScala
+      val allMyEventsExistOnOther = eventsSC.forall(ev=>otherEvents.exists(oe=>oe.isEquivalentTo(ev)))
+      val allOthersEventsExistOnMe = otherEvents.forall(oe=>eventsSC.exists(ev=>ev.isEquivalentTo(oe)))
+      allMyEventsExistOnOther && allOthersEventsExistOnMe
+    }
+  }
+
+  def duplicateTo( groupSet:SmallGroupSet):SmallGroup = {
+    val newGroup=new SmallGroup()
+    newGroup.id = id
+    newGroup.events = events.asScala.map(_.duplicateTo(newGroup)).asJava
+    newGroup.groupSet = groupSet
+    newGroup.name = name
+    newGroup.permissionsService = permissionsService
+    newGroup.students = students.duplicate()
+    newGroup
+  }
+
+
 }

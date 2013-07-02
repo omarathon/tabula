@@ -31,12 +31,12 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
 import org.junit.rules.Timeout
 import org.junit.Rule
-import uk.ac.warwick.tabula.helpers.{WeekRangesFormatterTag, WeekRangesFormatter}
-import uk.ac.warwick.tabula.services.UserSettingsService
-import org.mockito.Mockito._
+import freemarker.template._
+import java.util
+import freemarker.core.Environment
 import scala.Some
-import org.specs.mock.JMocker.when
-import org.specs.mock.JMocker.mock
+import org.apache.log4j.NDC
+import uk.ac.warwick.tabula.helpers.Logging
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -44,38 +44,33 @@ import org.specs.mock.JMocker.mock
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures {
+abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 	
 	// No test should take longer than a minute
 	val minuteTimeout = new Timeout(60000)
 	@Rule def timeoutRule = minuteTimeout
+
+  NDC.pop
+  NDC.push(System.getProperty("TestProcessId"))
+  logger.info("TestBase instantiated for " + this.getClass.getName)
 }
 
 /** Various test objects
   */
 trait TestFixtures {
-	def newFreemarkerConfiguration = new ScalaFreemarkerConfiguration {
-		setTemplateLoader(new MultiTemplateLoader(Array(
-			new ClassTemplateLoader(getClass, "/freemarker/"), // to match test templates
-			new ClassTemplateLoader(getClass, "/") // to match live templates
-			)))
-		setAutoIncludes(Nil) // don't use prelude
+	def newFreemarkerConfiguration():ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap())
 
-    // include additional shared vars here when needed. Don't add anything that's not also set up
-    // in applicationContext.xml
-    val userSettingsService = org.mockito.Mockito.mock(classOf[UserSettingsService])
-    org.mockito.Mockito.when(userSettingsService.getByUserId(org.mockito.Matchers.any(classOf[String]))).thenReturn(Some(new UserSettings))
-    val weekRangeFormatter = new WeekRangesFormatterTag
-    weekRangeFormatter.userSettings = userSettingsService
-    val urlModel = new UrlMethodModel
-    urlModel.context = "http://test.ac.uk"
 
-    setSharedVariables(Map(
-      "url"->urlModel,
-      "weekRangesFormatter"->weekRangeFormatter))
-	}
+  def newFreemarkerConfiguration(sharedVariables: JMap[String,Any]) = new ScalaFreemarkerConfiguration {
+      setTemplateLoader(new MultiTemplateLoader(Array(
+        new ClassTemplateLoader(getClass, "/freemarker/"), // to match test templates
+        new ClassTemplateLoader(getClass, "/") // to match live templates
+      )))
+      setAutoIncludes(List("WEB-INF/freemarker/prelude.ftl"))
+      setSharedVariables(sharedVariables)
+    }
 
 	def testRequest(uri: String = null) = {
 		val req = new MockHttpServletRequest
@@ -133,7 +128,7 @@ trait TestHelpers extends TestFixtures {
 	/** Returns a new temporary directory that will get cleaned up
 	  * automatically at the end of the test.
 	  */
-	def createTemporaryDirectory: File = {
+	def createTemporaryDirectory(): File = {
 		// try 10 times to find an unused filename.
 		// Stream is lazy so it won't try making 10 files every time.
 		val dir = findTempFile
@@ -142,7 +137,7 @@ trait TestHelpers extends TestFixtures {
 		dir
 	}
 
-	def createTemporaryFile: File = {
+	def createTemporaryFile(): File = {
 		val file = findTempFile
 		if (!file.createNewFile()) throw new IllegalStateException("Couldn't create " + file)
 		temporaryFiles += file
@@ -240,5 +235,24 @@ trait TestHelpers extends TestFixtures {
     		"Contained no matching value"
 		)
 	}
+}
+trait FreemarkerTestHelpers{
+  class StubFreemarkerMethodModel extends TemplateMethodModelEx with Mockito {
+    val mock: TemplateMethodModelEx = mock[TemplateMethodModelEx]
 
+    def exec(arguments: util.List[_]): AnyRef = Option(mock.exec(arguments)).getOrElse("")
+  }
+
+  class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModel with Mockito{
+    val mockMethod: TemplateMethodModel = mock[TemplateMethodModel]
+    val mockDirective: TemplateDirectiveModel = mock[TemplateDirectiveModel]
+
+    def execute(env: Environment, params: util.Map[_, _], loopVars: Array[TemplateModel], body: TemplateDirectiveBody) {
+      mockDirective.execute(env, params, loopVars, body)
+    }
+
+    def exec(arguments: util.List[_]): AnyRef = {
+      Option(mockMethod.exec(arguments)).getOrElse("")
+    }
+  }
 }

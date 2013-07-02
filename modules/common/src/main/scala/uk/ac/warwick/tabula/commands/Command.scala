@@ -252,8 +252,16 @@ abstract class Description {
 		if (smallGroupSet.module != null) module(smallGroupSet.module)
 		this
 	}
-	
-	/**
+
+  /**
+   * Record a collection of SmallGroupSets
+   */
+  def smallGroupSetCollection(smallGroupSets: Seq[SmallGroupSet]) = {
+    property("smallGroupSets" -> smallGroupSets.map(_.id).mkString)
+    this
+  }
+
+  /**
 	 * Record small group, plus its set, module and department if available.
 	 */
 	def smallGroup(smallGroup: SmallGroup) = {
@@ -270,7 +278,7 @@ abstract class Description {
 		if (smallGroupEvent.group != null) smallGroup(smallGroupEvent.group)
 		this
 	}
-	
+
 	def markingWorkflow(scheme: MarkingWorkflow) = {
 		property("markingWorkflow" -> scheme.id)
 	}

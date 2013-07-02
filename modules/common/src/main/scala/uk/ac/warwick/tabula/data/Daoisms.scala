@@ -15,7 +15,9 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
-
+trait HasSession{
+  protected def session:Session
+}
 /**
  * A trait for DAO classes to mix in to get useful things
  * like the current session.
@@ -24,7 +26,7 @@ import scala.reflect._
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms {
+trait Daoisms extends HasSession {
 	import uk.ac.warwick.tabula.data.Transactions._
 
 	import org.hibernate.criterion.Restrictions._

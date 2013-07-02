@@ -57,9 +57,9 @@ $(function() {
         var $this = $(this);
         var $form = $this.closest("form")
 
-        var $randomNumber = Math.floor(Math.random() * 10000000);
+        var randomNumber = Math.floor(Math.random() * 10000000);
 
-        jQuery.post($form.attr('action') + "?rand=" + $randomNumber, $form.serialize(), function(data){
+        jQuery.post($form.attr('action') + "?rand=" + randomNumber, $form.serialize(), function(data){
             $("#modal-container ").modal('hide');
             window.location.reload();
         });

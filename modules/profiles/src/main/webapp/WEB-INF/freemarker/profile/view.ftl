@@ -26,9 +26,9 @@
 
 <article class="profile">
 	<section id="personal-details" class="clearfix">
-		<div class="photo">
-			<img src="<@routes.photo profile />" />
-		</div>
+		
+		<@fmt.member_photo profile />
+		
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
@@ -158,20 +158,21 @@
 	</section>
 
 	<#if profile.student>
-		<div class="untabbed">
-			<#include "_supervision.ftl" />
+		<div class="tabbable">
+			<ol class="panes">
+				<li id="course-pane">
+					<#include "_course_details.ftl" />
+				</li>
+
+				<li id="supervision-pane">
+					<#include "_supervision.ftl" />
+				</li>
+
+				<li id="pd-pane">
+					<#include "_personal_development.ftl" />
+				</li>
+			</ol>
 		</div>
-		<div class="untabbed">
-			<#include "_personal_development.ftl" />
-		</div>
-		<div class="untabbed">
-			<#if profile.hasCurrentEnrolment>
-				<#include "_course_details.ftl" />
-			<#else>
-				This student has no enrolment record for the current year.
-			</#if>
-		</div>
-	<#else>
 	</#if>
 </article>
 

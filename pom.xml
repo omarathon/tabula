@@ -27,13 +27,15 @@
 	<properties>
 		<scala.version>2.10.1</scala.version>
 		<scala.major.version>2.10</scala.major.version>
-		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
+		<org.springframework.version>3.2.3.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
 		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130514</warwickutils.version>
-        <surefire.version>2.14.1</surefire.version>
+
+		<warwickutils.version>20130628</warwickutils.version>
+	        <surefire.version>2.14.1</surefire.version>
+		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -93,26 +95,6 @@
 
 			<build>
 				<defaultGoal>install</defaultGoal>
-
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${tabula.basedir}/local.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
 			</build>
 		</profile>
 
@@ -452,8 +434,8 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<!-- <recompileMode>incremental</recompileMode>
-					<useZincServer>true</useZincServer> -->
+					<recompileMode>${recompileMode}</recompileMode>
+					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
@@ -511,6 +493,25 @@
 						</manifest>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${tabula.basedir}/local.properties</file>
+							</files>
+							<quiet>true</quiet><!-- keep quiet if file not found -->
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
@@ -612,7 +613,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
 					<configuration>
-						<forkCount>1C</forkCount>
+						<forkCount>0.75C</forkCount>
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
 								ensuring forks use separate data -->

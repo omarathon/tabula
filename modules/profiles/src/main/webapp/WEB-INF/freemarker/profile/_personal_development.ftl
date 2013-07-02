@@ -18,7 +18,7 @@
 
 	<#if profile.personalTutors??>
 		<h4>Personal tutor<#if profile.personalTutors?size gt 1>s</#if></h4>
-		
+
 		<#assign acceptsPersonalTutorChanges = (profile.studyDetails.sprCode)?? && (profile.studyDetails.studyDepartment)?? && profile.studyDetails.studyDepartment.canEditPersonalTutors />
 
 		<#if profile.personalTutors?size != 0 && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
@@ -30,12 +30,13 @@
 				Not recorded
 				<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
 					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />" data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
-					
+
 				</#if>
 			</p>
 		</#if>
+		
 
-		<div class="tutors clearfix row">
+		<div class="tutors clearfix row-fluid">
 		<#list profile.personalTutors as relationship>
 			<#assign personalTutor = relationship.agentMember />
 			<div class="tutor clearfix span4">
@@ -45,9 +46,9 @@
 						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor student=profile.universityId />"  data-target="#modal-change-tutor"><i class="icon-edit"></i></a>
 					</#if>
 				<#else>
-					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
-					</div>
+					
+					<@fmt.relation_photo member relationship "tinythumbnail" />
+				
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
@@ -69,7 +70,7 @@
 		<#if profile.hasAPersonalTutor>
 			<#include "../tutor/meeting/list.ftl" />
 		</#if>
-	
+
 		<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 		<div id="modal-change-tutor" class="modal hide fade"></div>
@@ -86,7 +87,9 @@
 			});
 		});
 		</script>
-
+	<#else>
+		<h4>Personal development</h4>
+		<p class="text-warning"><i class="icon-warning-sign"></i> No personal development details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>
 </#escape>

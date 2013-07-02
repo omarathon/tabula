@@ -12,6 +12,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro moduleperms module><@url page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
 <#macro displaysettings department><@url page="/department/${department.code}/settings/display" context="/admin" /></#macro>
+<#macro batchnotify department><@url page="/admin/department/${department.code}/groups/release"  /></#macro>
 
 <#macro createset module><@url page="/admin/module/${module.code}/groups/new" /></#macro>
 <#macro editset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/edit" /></#macro>
