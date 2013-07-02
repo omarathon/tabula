@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.notifications
 
-import uk.ac.warwick.tabula.data.model.{Notification, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, Notification, StudentRelationship, Member}
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.userlookup.User
@@ -8,10 +8,10 @@ import uk.ac.warwick.userlookup.User
 class TutorChangeNotification (
 	private val relationship:StudentRelationship,
 	val agent:User,
-	private val recepient:User,
+	private val _recipient:User,
 	private val oldTutor: Option[Member],
 	private val templateLocation: String
-) extends Notification[StudentRelationship]{
+) extends Notification[StudentRelationship] with SingleRecipientNotification {
 
 	this: TextRenderer =>
 
@@ -36,7 +36,7 @@ class TutorChangeNotification (
 	}
 	def url: String = Routes.profile.view(relationship.studentMember)
 
-	def recipients: Seq[User] = Seq(recepient)
+	def recipient = _recipient
 }
 
 object TutorChangeNotification {

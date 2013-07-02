@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.notifications
 
-import uk.ac.warwick.tabula.data.model.{Feedback, Notification}
+import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, Feedback, Notification}
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.userlookup.User
 
-class FeedbackChangeNotification(feedback: Feedback, currentUser: User, student: User) extends Notification[Feedback]{
+class FeedbackChangeNotification(feedback: Feedback, currentUser: User, student: User) extends Notification[Feedback]
+with SingleRecipientNotification {
 
 	this: TextRenderer =>
 
@@ -28,5 +29,5 @@ class FeedbackChangeNotification(feedback: Feedback, currentUser: User, student:
 
 	def url = Routes.assignment.receipt(assignment)
 
-	def recipients = Seq(student)
+	def recipient = student
 }

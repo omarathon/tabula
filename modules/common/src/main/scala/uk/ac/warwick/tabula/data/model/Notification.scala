@@ -37,3 +37,11 @@ trait Notification[A]{
 	override def toString = List(agent.getFullName, verb, _object.getClass.getSimpleName).mkString("notification{", ", ", "}")
 
 }
+
+trait SingleRecipientNotification {
+
+	val recipient:User
+	def recipients: Seq[User] = {
+		Seq(recipient)
+	}
+}
