@@ -1,18 +1,23 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{Module, Feedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{Notification, Module, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
+import uk.ac.warwick.tabula.commands.Notifies
+import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackChangeNotification
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
-	extends AddMarksCommand[List[Feedback]](module, assignment, submitter){
+	extends AddMarksCommand[List[Feedback]](module, assignment, submitter) with Notifies[Feedback] {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
+
+	var updatedReleasedFeedback : List[Feedback] = Nil
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
@@ -53,11 +58,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 			session.saveOrUpdate(feedback)
 
 			if (feedback.released && isModified){
-				transactional() {
-					val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-					val notifyMarkChanged = new FeedbackChangeNotifyCommand(module, assignment, student)
-					notifyMarkChanged.apply()
-				}
+				updatedReleasedFeedback =  feedback :: updatedReleasedFeedback
 			}
 
 			feedback
@@ -70,5 +71,10 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 
 		markList.toList
 	}
+
+	def emit: Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
+		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
+		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
+	})
 
 }

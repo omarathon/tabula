@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.{ Assignment, Module }
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import org.springframework.beans.factory.annotation.Autowired
@@ -115,8 +114,6 @@ class AddExtensionController extends ExtensionController {
 		} else {
 			val extensions = cmd.apply()
 			
-			for (extension <- extensions) new ExtensionGrantedMessage(extension, extension.userId).apply()
-			
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))
@@ -163,12 +160,6 @@ class EditExtensionController extends ExtensionController {
 			Mav(new JSONView(errorJson))
 		} else {
 			val extensions = cmd.apply()
-			
-			for (extension <- extensions) 
-				if (extension.isManual) new ExtensionChangedMessage(extension, extension.userId).apply()
-				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId).apply()
-				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId).apply()
-			
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))
@@ -216,17 +207,6 @@ class ReviewExtensionRequestController extends ExtensionController {
 			Mav(new JSONView(errorJson))
 		} else {
 			val extensions = cmd.apply()
-			
-			for (extension <- extensions){
-				if (extension.isManual) new ExtensionChangedMessage(extension, extension.userId).apply()
-				else if (extension.approved) new ExtensionRequestApprovedMessage(extension, extension.userId).apply()
-				else if (extension.rejected) new ExtensionRequestRejectedMessage(extension, extension.userId).apply()
-
-				val approverId = user.apparentId
-				val recipients = extension.assignment.module.department.extensionManagers.includeUsers - approverId
-				recipients.foreach(new ExtensionRequestRespondedMessage(extension, _, approverId).apply())
-			}
-
 			val extensionMap = toJson(extensions)
 			val extensionsJson = Map("status" -> "success", "action" -> "edit", "result" -> extensionMap)
 			Mav(new JSONView(extensionsJson))
@@ -262,12 +242,7 @@ class DeleteExtensionController extends ExtensionController {
 	def deleteExtension(@ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse,
 						errors: Errors):Mav = {
 		val universityIds = cmd.apply()
-		// send messages
-		universityIds.foreach(id => {
-			val user = userLookup.getUserByWarwickUniId(id)
-			val message = new ExtensionDeletedMessage(cmd.assignment, user.getUserId)
-			message.apply()
-		})
+
 		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit
 		val result = Map() ++ universityIds.map(id => id -> Map("id" -> id))
 		val deletedJson = Map("status" -> "success", "action" -> "delete", "result" -> result)

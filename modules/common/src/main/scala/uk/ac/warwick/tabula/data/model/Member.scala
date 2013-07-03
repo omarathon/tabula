@@ -80,7 +80,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		}
 	}
 
-	def officialName = title + " " + fullFirstName + " " + lastName
+	def officialName = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
+
 	def description = {
 		val userTypeString =
 			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
