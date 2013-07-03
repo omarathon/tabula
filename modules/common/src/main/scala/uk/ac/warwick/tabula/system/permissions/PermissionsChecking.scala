@@ -22,7 +22,7 @@ import scala.annotation.target
  * Trait that allows classes to call ActionCheck() in their inline definitions
  * (i.e. on construction). These are then evaluated on bind.
  */
-trait PermissionsChecking extends PermissionsCheckingMethods {
+trait PermissionsChecking extends PermissionsCheckingMethods  {
 
 	var permissionsAnyChecks: Map[Permission, Option[PermissionsTarget]] = Map()
 	var permissionsAllChecks: Map[Permission, Option[PermissionsTarget]] = Map()
@@ -142,4 +142,11 @@ trait PermissionsCheckingMethods extends Logging {
 			}
 		})) throw new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
 	}
+}
+trait RequiresPermissionsChecking{
+	def permissionsCheck(p:PermissionsChecking):Unit
+}
+trait PerformsPermissionsChecking extends PermissionsChecking{
+	this: RequiresPermissionsChecking=>
+	permissionsCheck(this)
 }
