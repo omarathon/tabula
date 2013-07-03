@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{CurrentUser, TestBase}
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class PublishFeedbackCommandTest extends TestBase {
@@ -44,8 +45,10 @@ class PublishFeedbackCommandTest extends TestBase {
 	
 	// reusable environment
 	trait World {
+		val user = new User("admin")
+		val currentUser = new CurrentUser(user, user)
 		val assignment = newDeepAssignment(moduleCode = "IN101")
-		val command = new PublishFeedbackCommand(assignment.module, assignment)
+		val command = new PublishFeedbackCommand(assignment.module, assignment, currentUser)
 		val errors = new BindException(command, "command")
 		val feedback = new Feedback()
 		feedback.actualMark = Some(41)

@@ -1,10 +1,8 @@
-Hello
-	          
 This email confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
 
 Submission date: ${submissionDate}
-Submission ID: ${submission.id}
-University ID: ${user.universityId}
+Submission ID: ${submission.userId}
+University ID: ${user.warwickId}
 <#if submission.allAttachments??>
 Uploaded attachments:		
 <#list submission.allAttachments as attachment>
@@ -15,6 +13,3 @@ Uploaded attachments:
 To review your submission, please visit:
 
 <@url page=path context="/coursework" />
-
-
-This email was sent from an automated system, and replies to it will not reach a real person.

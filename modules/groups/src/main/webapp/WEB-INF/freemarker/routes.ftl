@@ -20,4 +20,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro archiveset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
 <#macro allocateset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
 <#macro releaseset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
+
+<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /></#macro>
+<#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
+
 </#compress>

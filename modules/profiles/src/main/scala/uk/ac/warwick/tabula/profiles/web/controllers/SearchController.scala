@@ -6,20 +6,23 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
 import uk.ac.warwick.tabula.profiles.helpers.SearchJSONHelpers
+import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.util.core.StringUtils
 
 @Controller
 class SearchController extends ProfilesController with SearchJSONHelpers {
 
-	val formMav = Mav("tutor/edit/view", "displayOptionToSave" -> false)
+	val formMav = Mav("profiles/search/", "displayOptionToSave" -> false)
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand = new SearchProfilesCommand(currentMember, user)
 	
 	@RequestMapping(value=Array("/search"), params=Array("!query"))
-	def form(@ModelAttribute cmd: SearchProfilesCommand) = formMav
+	def home = Redirect(Routes.home)
 	
 	@RequestMapping(value=Array("/search"), params=Array("query"))
 	def submitSearch(@Valid @ModelAttribute cmd: SearchProfilesCommand, errors: Errors) = {
-		submit(cmd, errors, "profile/search/results")
+		if (!StringUtils.hasText(cmd.query)) home
+		else submit(cmd, errors, "profile/search/results")
 	}
 	
 	@RequestMapping(value=Array("/search.json"), params=Array("query"))

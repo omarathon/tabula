@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import junit.framework.Test
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.SingleRecipientNotification
 
 class SingleRecipientNotificationTest extends TestBase{
 
