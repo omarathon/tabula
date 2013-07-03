@@ -12,5 +12,5 @@ class SubmissionRecieptNotification(submission:Submission, student:User)
 
 	def title = moduleCode + ": Submission receipt"
 	val templateLocation = "/WEB-INF/freemarker/emails/submissionreceipt.ftl"
-	def recipient = student
+	val recipient = student
 }

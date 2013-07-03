@@ -29,5 +29,5 @@ with SingleRecipientNotification {
 
 	def url = Routes.assignment.receipt(assignment)
 
-	def recipient = student
+	val recipient = student
 }

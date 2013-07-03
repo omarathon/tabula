@@ -12,7 +12,7 @@ class ExtensionRequestRespondedNotification(extension: Extension, student: User,
 
 	val verb = "respond"
 
-	val verbed = if(extension.approved) "approved" else "rejected"
+	val verbed = if (extension.approved) "approved" else "rejected"
 
 	def title = "%sExtension request by %s was %s".format(titlePrefix, student.getFullName, verbed)
 	def url = Routes.admin.assignment.extension.review(assignment, extension.universityId)

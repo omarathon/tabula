@@ -20,7 +20,7 @@ abstract class ExtensionStudentNotification(extension: Option[Extension], assign
 
 
 	def url = Routes.assignment.apply(assignment)
-	def recipient = student
+	val recipient = student
 
 	val template: String
 	val contentModel: Map[String, Any]
