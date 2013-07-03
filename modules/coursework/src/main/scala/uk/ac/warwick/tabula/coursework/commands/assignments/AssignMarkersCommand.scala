@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Assignment}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{HasSession, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
@@ -13,8 +13,13 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
+class AssignMarkersCommand(module: Module, assignment:Assignment)
+	extends AbstractAssignMarkersCommand(module, assignment)
+	with Daoisms
 
-class AssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] with Daoisms{
+abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] {
+	// declare dependencies through self-type
+	self: HasSession =>
 
 	case class Marker(fullName:String, userCode:String, var students:JList[Student])
 	case class Student(displayValue: String, userCode: String)

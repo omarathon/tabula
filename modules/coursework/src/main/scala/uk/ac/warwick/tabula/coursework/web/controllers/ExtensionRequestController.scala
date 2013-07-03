@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.messages.{ModifiedExtensionRequestMessage, NewExtensionRequestMessage}
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -66,24 +65,11 @@ class ExtensionRequestController extends CourseworkController{
 			showForm(cmd)
 		} else {
 			val extension = cmd.apply()
-			sendExtensionRequestMessage(extension, cmd.modified)
 			val model = Mav("submit/extension_request_success",
 				"module" -> module,
 				"assignment" -> assignment
 			)
 			crumbed(model, module)
-		}
-	}
-	
-
-	def sendExtensionRequestMessage(extension: Extension, modified:Boolean){
-		val assignment = extension.assignment
-		val recipients = assignment.module.department.extensionManagers.includeUsers
-
-		if (modified){
-			recipients.foreach(new ModifiedExtensionRequestMessage(extension, _).apply())
-		} else {
-			recipients.foreach(new NewExtensionRequestMessage(extension, _).apply())
 		}
 	}
 }

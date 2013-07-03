@@ -1,0 +1,36 @@
+package uk.ac.warwick.tabula.commands
+
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.userlookup.User
+
+/**
+ * Wrapper that exposes properties from Member if available, with User
+ * as a fallback. Useful where we get some User objects from a UserGroup
+ * but want to look up profiles as preferred info where available.
+ *
+ * Currently only used in one place but feel free to expand this out to
+ * something more generally usable.
+ *
+ * TODO maybe Member could directly implement the trait
+ */
+object MemberOrUser {
+	def apply(member: Option[Member], user: User) = member map { WrappedMember(_) } getOrElse WrappedUser(user)
+}
+
+sealed trait MemberOrUser{
+	def fullName: Option[String]
+	def universityId: String
+	def shortDepartment: String
+}
+
+private case class WrappedUser(user: User) extends MemberOrUser {
+	def fullName = Some(user.getFullName)
+	def universityId = user.getWarwickId
+	def shortDepartment = user.getShortDepartment
+}
+
+private case class WrappedMember(member: Member) extends MemberOrUser {
+	def fullName = member.fullName
+	def universityId = member.universityId
+	def shortDepartment = member.homeDepartment.name
+}

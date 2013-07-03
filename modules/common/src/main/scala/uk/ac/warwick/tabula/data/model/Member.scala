@@ -85,9 +85,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		}
 	}
 
-	def officialName = title + " " + fullFirstName + " " + lastName
-
 	def routeName: String = ""
+	def officialName = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
 
 	def description = {
 		val userTypeString =

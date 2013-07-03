@@ -1,18 +1,34 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.coursework.commands.assignments.AssignMarkersCommand
 import java.util.HashMap
+
+import collection.JavaConversions._
+
+import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService, UserLookupService}
+import uk.ac.warwick.tabula.data.HasSession
+
 // scalastyle:off magic.number
-class AssignMarkersTest extends AppContextTestBase with MarkingWorkflowWorld {
+class AssignMarkersTest extends TestBase with Mockito {
 
 	@Transactional @Test
-	def assignMarkers(){
-		val command = new AssignMarkersCommand(assignment.module, assignment)
+	def assignMarkers() { new MarkingWorkflowWorld {
+		val command = new AbstractAssignMarkersCommand(assignment.module, assignment) with HasSession {
+			val session = smartMock[Session]
+		}
+		command.userLookup = smartMock[UserLookupService]
+		command.assignmentService = smartMock[AssignmentService]
+		command.assignmentMembershipService = smartMock[AssignmentMembershipService]
+
+		// mock expectations
+		command.assignmentMembershipService.determineMembershipUsers(assignment) returns (Nil)
+		// end expectations
+
 		command.onBind()
 
 		command.firstMarkers.size should be (2)
@@ -33,13 +49,13 @@ class AssignMarkersTest extends AppContextTestBase with MarkingWorkflowWorld {
 		command.markerMapping.put("cuscav", List("cusxad", "cuscao", "curef"))
 		command.markerMapping.put("cuslat", List("cusxad", "cuscao", "curef", "cusebr"))
 		command.markerMapping.put("cuday", List("cuscav"))
-		command.apply()
+		command.applyInternal()
 
 		assignment.markerMap.get("cuslaj").includeUsers.size should be(2)
 		assignment.markerMap.get("cuscav").includeUsers.size should be(3)
 		assignment.markerMap.get("cuslat").includeUsers.size should be(4)
 		assignment.markerMap.get("cuday").includeUsers.size should be(1)
 
-	}
+	} }
 
 }

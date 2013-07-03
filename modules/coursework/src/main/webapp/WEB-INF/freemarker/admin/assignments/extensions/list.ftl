@@ -24,7 +24,8 @@
                     <th>
 	                    Actions
 	                    <a class="use-popover" id="popover-actions-help" data-html="true" data-container="body"
-	                       data-original-title="<span class='text-info'><strong>Granting extensions</strong></span> <button type='button' onclick=&quot;jQuery('#popover-actions-help').popover('hide')&quot; class='close'>&times;</button></span>"
+						   data-placement="bottom"
+	                       data-original-title="Granting extensions"
 	                       data-content="<p>To grant an extension for a student, click on the 'Grant' button next to the student's name.</p>
 	                                     <p>If you wish to grant an extension to a student that is not listed below, please ensure that they appear in the students lists in
 	                                     <a href='../edit'>assignment properties</a></p>
@@ -92,7 +93,7 @@
 
 
 							<td>
-								<a class="hide new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
+								<a class="new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
 									<i class="icon-ok icon-white"></i> Grant
 								</a>
 								<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
@@ -109,20 +110,20 @@
 				<#if potentialExtensions??>
 					<#list potentialExtensions as universityId>
 						<tr id="row${universityId}" class="extension-row">
-	                        <#assign student = studentNameLookup[universityId]>
-	                        <td><h6>${student.firstName}</h6></td>
-	                        <td><h6>${student.lastName}</h6></td>
-							<td  class="status"></td>
+							<#assign student = studentNameLookup[universityId]>
+							<td><h6>${student.firstName}</h6></td>
+							<td><h6>${student.lastName}</h6></td>
 							<td class="expiryDate"></td>
+							<td  class="status"></td>
 							<td>
 								<a class="new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
 									<i class="icon-ok icon-white"></i> Grant
 								</a>
-								<a class="hide modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
+								<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
 									<i class="icon-edit icon-white"></i> Modify
 								</a>
 								&nbsp;
-								<a class="hide revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
+								<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
 									<i class="icon-remove icon-white"></i> Revoke
 								</a>
 							</td>

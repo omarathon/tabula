@@ -115,3 +115,10 @@ create table formfield (
     CONSTRAINT "formfield_pk" PRIMARY KEY ("ID")
 );
 create index idx_formfieldassignment on formfield(assignment_id);
+
+create table ObjectCache (
+	key nvarchar2(255) not null,
+	objectdata blob,
+	createddate date,
+	constraint "pk_objectcache_key" primary key (key)
+);

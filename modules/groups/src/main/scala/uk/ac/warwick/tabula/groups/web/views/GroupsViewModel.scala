@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups.web.views
 
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.web.views.ViewModel._
 
 /**
@@ -16,29 +16,24 @@ import uk.ac.warwick.tabula.web.views.ViewModel._
  */
 object GroupsViewModel {
 
-  case class ViewModules(
-                          moduleItems: Seq[ViewModule],
-                          canManageDepartment: Boolean
-                          ) {
-    def hasUnreleasedGroupsets() = {
-      moduleItems.exists(_.hasUnreleasedGroupsets())
-    }
-  }
+	case class ViewModules(
+		moduleItems: Seq[ViewModule],
+		canManageDepartment: Boolean
+	) {
+		def hasUnreleasedGroupsets = moduleItems.exists(_.hasUnreleasedGroupsets)
+	}
 
-  case class ViewModule(
-                         module: Module,
-                         setItems: Seq[ViewSet],
-                         canManageGroups: Boolean
-                         ){
-    def hasUnreleasedGroupsets() = {
-      module.hasUnreleasedGroupSets()
-    }
-  }
+	case class ViewModule(
+		module: Module,
+		setItems: Seq[ViewSet],
+		canManageGroups: Boolean
+	) {
+		def hasUnreleasedGroupsets = module.hasUnreleasedGroupSets
+	}
 
-  case class ViewSet(
-                      set: SmallGroupSet
-                      )
-
-
+	case class ViewSet(
+		set: SmallGroupSet,
+		groups: Seq[SmallGroup]
+	)
 
 }
