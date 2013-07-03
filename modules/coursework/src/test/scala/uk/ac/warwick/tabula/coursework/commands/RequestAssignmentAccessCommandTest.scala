@@ -4,26 +4,44 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.RequestAssignmentAccessCommand
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, AppContextTestBase}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services.{NotificationService, MaintenanceModeService, UserLookupService}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import freemarker.template.Configuration
+import uk.ac.warwick.tabula.events.EventListener
+import uk.ac.warwick.tabula.coursework.commands.RequestAssignmentAccessCommandTest.MinimalCommandContext
 
 
-class RequestAssignmentAccessCommandTest extends AppContextTestBase with Mockito with AssignmentFixture {
+class RequestAssignmentAccessCommandTest extends TestBase with FunctionalContextTesting with Mockito with AssignmentFixture {
 
-	@Test def sendsNotification{
-		val cmd = new RequestAssignmentAccessCommand(new CurrentUser(student, student))
-		cmd.userLookup = userLookup
-		cmd.assignment = assignment
-		cmd.module = assignment.module
-		cmd.apply()
-		val notifications = cmd.emit
-		notifications.size should be (1)
+	@Test def sendsNotification() {
+		inContext[MinimalCommandContext] {
+			val cmd = new RequestAssignmentAccessCommand(new CurrentUser(student, student))
+			cmd.userLookup = userLookup
+			cmd.assignment = assignment
+			cmd.module = assignment.module
+			cmd.apply()
+			val notifications = cmd.emit
+			notifications.size should be (1)
+		}
 	}
 }
+object RequestAssignmentAccessCommandTest {
 
+	class MinimalCommandContext extends FunctionalContext with Mockito {
+		bean() {
+			val maintenanceMode = mock[MaintenanceModeService]
+			when(maintenanceMode.enabled).thenReturn(false)
+			maintenanceMode
+		}
+		bean(){mock[EventListener]}
+		bean(){mock[NotificationService]}
+		bean(){mock[UserLookupService]}
+		bean(){mock[Configuration]}
+	}
+}
 
 trait AssignmentFixture extends Mockito{
 
@@ -46,7 +64,7 @@ trait AssignmentFixture extends Mockito{
 	val module = new Module
 	module.department = department
 	val assignment = new Assignment
-	assignment.addDefaultFields
+	assignment.addDefaultFields()
 	assignment.module = module
 	assignment.module.code = "AA001"
 	assignment.module.name = "Really difficult module"
