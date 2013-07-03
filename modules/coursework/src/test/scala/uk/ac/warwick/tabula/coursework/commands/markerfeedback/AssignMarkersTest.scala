@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService, UserLookupService}
-import uk.ac.warwick.tabula.data.HasSession
+import uk.ac.warwick.tabula.data.SessionComponent
 
 // scalastyle:off magic.number
 class AssignMarkersTest extends TestBase with Mockito {
 
 	@Transactional @Test
 	def assignMarkers() { new MarkingWorkflowWorld {
-		val command = new AbstractAssignMarkersCommand(assignment.module, assignment) with HasSession {
+		val command = new AbstractAssignMarkersCommand(assignment.module, assignment) with SessionComponent {
 			val session = smartMock[Session]
 		}
 		command.userLookup = smartMock[UserLookupService]
