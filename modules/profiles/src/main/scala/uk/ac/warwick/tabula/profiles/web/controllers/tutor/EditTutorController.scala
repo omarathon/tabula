@@ -10,7 +10,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Notifies, Command, Description}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
-import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -20,9 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.profiles.notifications.TutorChangeNotification
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer, TextRenderer}
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import scala._
-import scala.Some
 import scala.Some
 
 class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
@@ -100,9 +98,8 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 	}
 
 	override def describe(d: Description) = {
-		val desc = d
-		desc.property("student ID" -> student.universityId)
-		desc.property("new tutor ID" -> tutor.universityId)
+		d.studentIds(Seq(student.universityId))
+		.property("new tutor ID" -> tutor.universityId)
 	}
 
 	def emit: Seq[Notification[StudentRelationship]] = {

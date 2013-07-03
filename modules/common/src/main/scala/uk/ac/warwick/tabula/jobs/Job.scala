@@ -69,7 +69,7 @@ abstract class Job extends Logging {
 
 // Maintains an internal list of Notifications that are sent after the job has finished
 
-trait NotifyingJob[A] extends Notifies[A]{
+trait NotifyingJob[A] extends Notifies[A] {
 
 	this: Job =>
 

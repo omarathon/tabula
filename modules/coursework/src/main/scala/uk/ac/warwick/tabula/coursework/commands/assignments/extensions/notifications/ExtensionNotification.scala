@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.userlookup.User
 
-abstract class ExtensionNotification(val _object: Option[Extension], val assignment:Assignment, val agent:User)
+abstract class ExtensionNotification(val _object: Option[Extension], val assignment: Assignment, val agent :User)
 	extends Notification[Option[Extension]] {
 
 	this: TextRenderer =>

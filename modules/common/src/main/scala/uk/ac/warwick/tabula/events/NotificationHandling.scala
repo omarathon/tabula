@@ -25,9 +25,9 @@ trait JobNotificationHandling {
 
 	var notificationService = Wire.auto[NotificationService]
 
-	def notify[A](job: Job){
+	def notify[A](job: Job) {
 		job match {
-			case ns:NotifyingJob[A] => for (notification <- ns.emit){
+			case ns:NotifyingJob[A] => for (notification <- ns.emit) {
 				notificationService.push(notification)
 			}
 			case _ => // do nothing. This job doesn't notify

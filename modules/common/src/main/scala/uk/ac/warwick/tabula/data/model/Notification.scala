@@ -41,6 +41,7 @@ trait Notification[A]{
 trait SingleRecipientNotification {
 
 	val recipient:User
+
 	def recipients: Seq[User] = {
 		Seq(recipient)
 	}
