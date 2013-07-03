@@ -19,9 +19,9 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
-	
+
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = new ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

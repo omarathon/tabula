@@ -31,7 +31,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
       when(cmd.apply()).thenReturn(Seq(groupSet1.module))
       val mav = createController.adminDepartment(cmd,department, currentUser)
       mav.map.get("data") match{
-        case Some(v:ViewModules) => v.hasUnreleasedGroupsets() should be(true)
+        case Some(v:ViewModules) => v.hasUnreleasedGroupsets should be(true)
         case _ => fail()
       }
     }}
@@ -50,7 +50,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
       when(cmd.apply()).thenReturn(Seq(groupSet1.module))
       val mav = createController.adminDepartment(cmd, department, currentUser)
       mav.map.get("data") match{
-        case Some(v:ViewModules) => v.hasUnreleasedGroupsets() should be(false)
+        case Some(v:ViewModules) => v.hasUnreleasedGroupsets should be(false)
         case _ => fail()
       }
 

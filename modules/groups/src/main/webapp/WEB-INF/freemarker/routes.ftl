@@ -24,4 +24,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /></#macro>
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
+<#macro studentslist group><@url page="/group/${group.id}/studentspopup" /></#macro>
+
 </#compress>
