@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 class TutorChangeNotification (
 	private val relationship:StudentRelationship,
 	val agent:User,
-	private val _recipient:User,
+	val recipient:User,
 	private val oldTutor: Option[Member],
 	private val templateLocation: String
 ) extends Notification[StudentRelationship] with SingleRecipientNotification {
@@ -35,8 +35,6 @@ class TutorChangeNotification (
 		))
 	}
 	def url: String = Routes.profile.view(relationship.studentMember)
-
-	def recipient = _recipient
 }
 
 object TutorChangeNotification {
