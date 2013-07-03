@@ -3,16 +3,15 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.spring.Wire
 
-abstract class ProfilesController extends BaseController with ProfileBreadcrumbs {
+abstract class ProfilesController extends BaseController with ProfileBreadcrumbs with CurrentMemberComponent with AutowiringProfileServiceComponent with AutowiringRelationshipServiceComponent{
 	
 	hideDeletedItems
 	activeProfilesOnly
 	studentProfilesOnly
 	
-	var profileService = Wire.auto[ProfileService]
 
 	/**
 	 * Enables the Hibernate filter for this session to exclude
@@ -40,4 +39,8 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	final def optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, true)
 	final def currentMember = optionalCurrentMember getOrElse(new RuntimeMember(user))
 	
+}
+
+trait CurrentMemberComponent {
+	def currentMember:Member
 }

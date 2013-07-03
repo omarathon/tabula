@@ -152,6 +152,20 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		staff.isAPersonalTutor should be (true)
 	}
 
+	@Test def isSupervisor {
+		val staff = new StaffMember
+		staff.profileService = profileService
+		staff.relationshipService = relationshipService
+
+		relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, staff) returns (Nil)
+		staff.isASupervisor should be(false)
+
+		relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, staff) returns
+			(Seq(StudentRelationship("0672089", RelationshipType.Supervisor, "0205225/1")))
+		staff.isASupervisor should be(true)
+
+	}
+
 	@Test def deleteFileAttachmentOnDelete = transactional { tx =>
 		// TAB-667
 		val orphanAttachment =flushing(session){

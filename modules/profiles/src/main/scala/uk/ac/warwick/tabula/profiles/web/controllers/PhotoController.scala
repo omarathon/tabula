@@ -36,7 +36,6 @@ class PhotoController extends ProfilesController {
 @Controller
 @RequestMapping(value = Array("/view/photo/{sprCode}/{relationshipType}/{agent}.jpg"))
 class StudentRelationshipPhotoController extends ProfilesController {
-	var relationshipService = Wire.auto[RelationshipService]
 
 	var fileServer = Wire[FileServer]
 

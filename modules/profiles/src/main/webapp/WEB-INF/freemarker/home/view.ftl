@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#assign showMyStudents = isAPersonalTutor || smallGroups?has_content />
+<#assign showMyStudents = isAPersonalTutor || isASupervisor || smallGroups?has_content />
 
 <#if !user.loggedIn>
 	<p>
@@ -18,7 +18,9 @@
 				<ul>
 					<#if showMyStudents>
 					<li><a href="<@routes.tutees />">Personal tutees</a></li>
+				    <li><a href="<@routes.supervisees />">Supervisees</a></li>
 					</#if>
+
 					<#list smallGroups as smallGroup>
 					<#assign _groupSet=smallGroup.groupSet />
 					<#assign _module=smallGroup.groupSet.module />

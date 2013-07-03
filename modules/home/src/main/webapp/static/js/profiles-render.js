@@ -116,8 +116,11 @@
 					$f.find("[name='title']").focus();
 				});
 			} else if ($f.find("section.meetings").length == 1) {
+                var source =$f.find("section.meetings");
+                var targetClass = source.attr('data-target-container');
+                var target = $("section."+targetClass);
 				// bust the returned content out to the original page, and kill the modal
-				$("section.meetings").replaceWith($f.find("section.meetings"));
+				target.replaceWith(source);
 				$('details').details();
 				// rebind all of this stuff to the new UI
 				decorateMeetingRecords();

@@ -18,6 +18,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
 <#macro tutees><@url page="/tutees" /></#macro>
+<#macro supervisees><@url page="/supervisees" /></#macro>
 <#macro tutors department><@url page="/department/${department.code}/tutors" /></#macro>
 <#macro tutors_missing department><@url page="/department/${department.code}/tutors/missing" /></#macro>
 
@@ -40,19 +41,19 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<@url page="/tutor/${scjCode}/add" />
 </#macro>
 
-<#macro meeting_record scjCode>
-	<@url page="/tutor/meeting/${scjCode}/create" />
+<#macro meeting_record scjCode role>
+	<@url page="/${role}/meeting/${scjCode}/create" />
+</#macro>
+<#macro edit_meeting_record scjCode meeting_record role>
+	<@url page="/${role}/meeting/${scjCode}/edit/${meeting_record.id}" />
 </#macro>
 
-<#macro edit_meeting_record scjCode meeting_record>
-		<@url page="/tutor/meeting/${scjCode}/edit/${meeting_record.id}" />
-</#macro>
+<#macro delete_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/delete" /></#macro>
+<#macro restore_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/restore" /></#macro>
+<#macro purge_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/purge" /></#macro>
 
-<#macro delete_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/delete" /></#macro>
-<#macro restore_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/restore" /></#macro>
-<#macro purge_meeting_record meeting_record><@url page="/tutor/meeting/${meeting_record.id}/purge" /></#macro>
 
-<#macro save_meeting_approval meeting_record><@url page="/tutor/meeting/${meeting_record.id}/approval" /></#macro>
+<#macro save_meeting_approval meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/approval" /></#macro>
 
 <#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
 
