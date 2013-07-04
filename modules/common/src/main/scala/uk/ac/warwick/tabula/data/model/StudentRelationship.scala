@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.{ToString, SprCode}
 import org.springframework.dao.DataRetrievalFailureException
 import uk.ac.warwick.tabula.roles.Supervisor
 
@@ -73,6 +73,8 @@ class StudentRelationship extends GeneratedId {
 	def studentMember = profileService.getStudentBySprCode(targetSprCode) 
 
 	def studentId = SprCode.getUniversityId(targetSprCode)
+
+	override def toString = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> targetSprCode)
 }
 
 object StudentRelationship {

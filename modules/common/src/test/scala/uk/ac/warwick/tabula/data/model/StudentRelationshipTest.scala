@@ -53,4 +53,10 @@ class StudentRelationshipTest extends TestBase with Mockito {
 		t.convertToValue(RelationshipType.PersonalTutor) should be ("personalTutor")
 	}
 
+	@Test def toStringMethod() {
+		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
+		rel.id = "hibernateid"
+		rel.toString should be ("StudentRelationship[hibernateid][agent=0672089,relationshipType=PersonalTutor,student=0205225/1]")
+	}
+
 }
