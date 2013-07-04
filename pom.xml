@@ -208,6 +208,7 @@
                 <version>2.1.4</version>
                 <executions>
                     <execution>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>revision</goal>
                          </goals>
@@ -598,7 +599,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.3</version>
+					<version>3.1.5</version>
 				</plugin>
 
 				<plugin>
