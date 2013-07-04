@@ -17,10 +17,14 @@
 	</#if>
 </#macro>
 
-<#-- module_info: currently being built for a tutor's view of small groups,
-   but when finished will also be used in admin/department.ftl which has a very
-   similar rendition of modules and small groups. -->
+<#-- module_info: takes a GroupsViewModel.ViewModules and renders out
+ 	a collection of modules with group sets and groups.
+
+ 	How the data is organised (which modules/sets/groups) is up to
+ 	the command generating the view model. No user checks in here!
+ -->
 <#macro module_info data>
+<div class="small-group-modules-list">
 <#list data.moduleItems as moduleItem>
 
 <#assign module=moduleItem.module />
@@ -90,11 +94,12 @@
 						<#list setItem.groups as group>
 							<div class="group">
 								<h4 class="name">
-								<#-- modal not currently working
-								<a href="<@routes.studentslist group />" data-toggle="modal"  data-target="#students-list-modal">
-								-->
-								<a href="<@routes.studentslist group />">
 								${group.name!""}
+								<#-- modal not currently working
+								<a data-url="<@routes.studentslist group />" data-toggle="modal"  href="#students-list-modal">
+								-->
+
+								<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 								<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</a>
 								</h4>
@@ -187,7 +192,7 @@
 </#list>
 
 <#-- List of students modal -->
-<div id="students-list-modal" class="modal fade">
+<div id="students-list-modal" class="modal ">
 </div>
 
 </#macro>
