@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.system.NoBind
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import org.apache.log4j.Logger
@@ -59,7 +59,7 @@ trait Appliable[A]{
  * used as the event name in audit trails, so if you rename it the audit events will
  * change name too. Careful now!
  */
-abstract class Command[A] extends Describable[A] with Appliable[A]
+trait Command[A] extends Describable[A] with Appliable[A]
 
 with JavaImports with EventHandling with NotificationHandling with PermissionsChecking {
 	var maintenanceMode = Wire[MaintenanceModeService]
@@ -318,3 +318,18 @@ abstract class Description {
 class DescriptionImpl extends Description {
 	def allProperties = map
 }
+
+/**
+ * Shims for doing cake-style composition of the guts of a specific command implementation with the
+ *  frameworky stuff that Command itself implements
+ */
+trait CommandInternal[A] {
+	protected def applyInternal():A
+}
+
+
+trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking{
+	this:CommandInternal[A] with Describable[A] with RequiresPermissionsChecking=>
+
+}
+

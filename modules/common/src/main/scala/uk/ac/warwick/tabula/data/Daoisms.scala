@@ -15,7 +15,8 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
-trait HasSession{
+
+trait SessionComponent{
   protected def session:Session
 }
 /**
@@ -26,7 +27,7 @@ trait HasSession{
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends HasSession {
+trait Daoisms extends SessionComponent {
 	import uk.ac.warwick.tabula.data.Transactions._
 
 	import org.hibernate.criterion.Restrictions._
