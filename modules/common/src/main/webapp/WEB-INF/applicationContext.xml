@@ -295,6 +295,7 @@
 				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
 				<entry key="componentName" value="${module.name}" />
+				<entry key="activeSpringProfiles" value="${spring.profiles.active}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>
@@ -411,7 +412,7 @@
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
 
-	<beans profile="dev,production">
+	<beans profile="dev,sandbox,production">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 				p:ssosUrl="${ssoclient.ssos.url}"
 				p:groupServiceLocation="${ssoclient.webgroups.url}" />
@@ -438,14 +439,14 @@
 	<beans profile="dev">
 	</beans>
 
-	<beans profile="production">
+	<beans profile="sandbox,production">
 	</beans>
 
-	<beans profile="dev,production,console">
+	<beans profile="dev,sandbox,production,console">
 
 	</beans>
 
-	<beans profile="dev,production">
+	<beans profile="dev,sandbox,production">
 
 			<!-- JMX -->
 
