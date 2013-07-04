@@ -92,9 +92,6 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			student.lastName = "Student"
 			student.email = "S.Tudent@warwick.ac.uk"
 
-			val studentCourseDetails = new StudentCourseDetails(student, "0812345/1")
-			student.studentCourseDetails.add(studentCourseDetails)
-
 			for (entity <- Seq(law, law2010, law2011, law2012, group2010, group2011, otherGroup, member, student))
 				session.save(entity)
 			session.flush()
@@ -120,7 +117,6 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			session.load(classOf[StudentMember], "0812345") match {
 				case loadedMember:StudentMember => {
 					loadedMember.firstName should be ("My")
-					loadedMember.mostSignificantCourseDetails.get.sprCode should be ("0812345/1")
 				}
 				case _ => fail("Student not found")
 			}

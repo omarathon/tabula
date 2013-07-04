@@ -142,6 +142,7 @@ object Fixtures {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		val studentCourseDetails = new StudentCourseDetails(m, m.universityId + "/1")
+		studentCourseDetails.student = m
 		studentCourseDetails.sprCode = m.universityId + "/1"
 		studentCourseDetails.department = courseDepartment
 		studentCourseDetails.mostSignificant = true

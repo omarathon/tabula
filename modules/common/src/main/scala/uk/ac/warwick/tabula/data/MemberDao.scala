@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Logging
+import scala.collection.JavaConverters._
 
 trait MemberDao {
 	def saveOrUpdate(member: Member)
@@ -32,7 +34,7 @@ trait MemberDao {
 }
 
 @Repository
-class MemberDaoImpl extends MemberDao with Daoisms {
+class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
 
@@ -124,29 +126,40 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 					.seq
 	}
 
-	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] =
+	/* Had to change to SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
+	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
-		session.newQuery[StudentRelationship]("""
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				StudentCourseDetails scd
-			where
-				sr.targetSprCode = scd.sprCode
-			and
-				sr.relationshipType = :relationshipType
-			and
-				scd.department = :department
-			and
-				(sr.endDate is null or sr.endDate >= SYSDATE)
-			order by
-				sr.agent, sr.targetSprCode
-		""")
-			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
-			.seq
+
+		if (relationshipType == null) {
+			Seq()
+		}
+		else {
+			val getRelsByDeptSql = """
+				select sr.*
+				from
+					StudentRelationship sr,
+					StudentCourseDetails scd
+				where
+					sr.target_sprCode = scd.sprCode
+				and
+					sr.relationship_type = :relationshipType
+				and
+					scd.deptCode = :departmentCode
+				and
+					(sr.end_date is null or sr.end_date >= SYSDATE)
+				order by
+					sr.agent, sr.target_sprCode
+				"""
+
+			val query = session.createSQLQuery(getRelsByDeptSql).addEntity(classOf[StudentRelationship])
+			query.setString("relationshipType", relationshipType.dbValue)
+			query.setString("departmentCode", department.code)
+			query.list() map {
+				case rel: StudentRelationship => rel
+			}
+		}
+	}
 
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]
@@ -158,34 +171,44 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 			))
 			.seq
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] =
-		if (relationshipType == null) Seq()
-		else session.newQuery[Member]("""
-			select
-				distinct sm
-			from
-				StudentMember sm
-			where
-				sm.homeDepartment = :department
-			and
-				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
-		""")
-			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
-			.seq
+	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] = {
+		if (relationshipType == null) {
+			Seq()
+		}
+		else {
+			val sql = """
+				select distinct mem.*
+				from
+					Member mem,
+					StudentCourseDetails scd
+				where
+					mem.universityid = scd.universityid
+				and
+					scd.deptCode = :departmentCode
+				and
+					scd.sprcode not in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)
+			"""
+
+			val query = session.createSQLQuery(sql).addEntity(classOf[Member])
+			query.setString("relationshipType", relationshipType.dbValue)
+			query.setString("departmentCode", department.code)
+			query.list() map {
+				case rel: Member => rel
+			}
+		}
+	}
 
 	def countStudentsByDepartment(department: Department): Number =
 		if (department == null) 0
 		else session.newQuery[Number]("""
 			select
-				count(*)
+				count(distinct student)
 			from
-				StudentMember sm
+				StudentCourseDetails scd
 			where
-				sm.homeDepartment = :department
-			and
-				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
-		""")
+				scd.department = :department
+			""")
 			.setEntity("department", department)
 			.uniqueResult.getOrElse(0)
 
@@ -193,16 +216,14 @@ class MemberDaoImpl extends MemberDao with Daoisms {
 		if (relationshipType == null) 0
 		else session.newQuery[Number]("""
 			select
-				count(*)
+				count(distinct student)
 			from
-				StudentMember sm
+				StudentCourseDetails scd
 			where
-				sm.homeDepartment = :department
+				scd.department = :department
 			and
-				sm.studyDetails.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
-			and
-				(sm.studyDetails.enrolmentStatus is not null and sm.studyDetails.route is not null)
-		""")
+				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			""")
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)

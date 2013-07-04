@@ -29,9 +29,11 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 // scalastyle:off magic.number
-class MemberDaoTest extends AppContextTestBase {
+class MemberDaoTest extends AppContextTestBase with Logging {
 
 	@Autowired var dao:MemberDao =_
 
@@ -56,9 +58,6 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.saveOrUpdate(m2)
 		dao.saveOrUpdate(m3)
 		dao.saveOrUpdate(m4)
-
-		m1.mostSignificantCourseDetails.get.sprCode = "0000001/1"
-		m2.mostSignificantCourseDetails.get.sprCode = "0000002/1"
 
 		dao.saveOrUpdate(m1)
 		dao.saveOrUpdate(m2)
@@ -91,8 +90,8 @@ class MemberDaoTest extends AppContextTestBase {
 	}
 
 	@Test def listUpdatedSince = transactional { tx =>
-		val dept1 = Fixtures.departmentWithId("hi", "History", "3")
-		val dept2 = Fixtures.departmentWithId("fr", "French", "4")
+		val dept1 = Fixtures.department("hi", "History")
+		val dept2 = Fixtures.department("fr", "French")
 
 		session.save(dept1)
 		session.save(dept2)
@@ -172,67 +171,124 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.getRegisteredModules("0000004") should be (Seq())
 	}
 
-	@Test def studentRelationships = transactional { tx =>
-		val dept1 = Fixtures.departmentWithId("sp", "Spanish", "5")
-		val dept2 = Fixtures.departmentWithId("en", "English", "6")
+	@Test def studentRelationshipsCurrentAndByTarget = transactional { tx =>
+		val dept1 = Fixtures.department("sp", "Spanish")
+		val dept2 = Fixtures.department("en", "English")
 
 		session.save(dept1)
 		session.save(dept2)
 
 		session.flush
 
-		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
-		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
-		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2)
-		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept1)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
 
-		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
-		m3.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
 
-		val m4 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
-		m4.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+		val staff2 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		staff2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
 
-		dao.saveOrUpdate(m1)
-		dao.saveOrUpdate(m2)
-		dao.saveOrUpdate(m3)
-		dao.saveOrUpdate(m4)
+		dao.saveOrUpdate(stu1)
+		dao.saveOrUpdate(stu2)
+		dao.saveOrUpdate(staff1)
+		dao.saveOrUpdate(staff2)
 
-		m1.mostSignificantCourseDetails.get.sprCode = "1000001/1"
-		m2.mostSignificantCourseDetails.get.sprCode = "1000002/1"
+		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000002/1")
 
-		dao.saveOrUpdate(m1)
-		dao.saveOrUpdate(m2)
+		dao.saveOrUpdate(relBetweenStaff1AndStu1)
+		dao.saveOrUpdate(relBetweenStaff1AndStu2)
+		session.flush()
 
-		val relBetweenM1AndM3 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000001/1")
-		val relBetweenM2AndM3 = StudentRelationship("0000003", RelationshipType.PersonalTutor, "0000002/1")
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "1000001/1") should be (Seq(relBetweenStaff1AndStu1))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "1000002/1") should be (Seq(relBetweenStaff1AndStu2))
+		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "1000003/1") should be (Nil)
+		dao.getCurrentRelationships(null, "1000001/1") should be (Nil)
 
-		dao.saveOrUpdate(relBetweenM1AndM3)
-		dao.saveOrUpdate(relBetweenM2AndM3)
+		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "1000001/1") should be (Seq(relBetweenStaff1AndStu1))
+		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "1000002/1") should be (Seq(relBetweenStaff1AndStu2))
+		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "1000003/1") should be (Seq())
+		dao.getRelationshipsByTarget(null, "1000001/1") should be (Seq())
 
-		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(relBetweenM1AndM3))
-		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(relBetweenM2AndM3))
-		dao.getCurrentRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Nil)
-		dao.getCurrentRelationships(null, "0000001/1") should be (Nil)
+		session.delete(relBetweenStaff1AndStu1)
+		session.delete(relBetweenStaff1AndStu2)
+		session.flush()
+	}
 
-		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(relBetweenM1AndM3))
-		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(relBetweenM2AndM3))
-		dao.getRelationshipsByTarget(RelationshipType.PersonalTutor, "0000003/1") should be (Seq())
-		dao.getRelationshipsByTarget(null, "0000001/1") should be (Seq())
+	@Test def studentRelationshipsByDepartmentAndAgent = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
 
-		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(relBetweenM1AndM3))
-		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(relBetweenM2AndM3))
+		session.save(dept1)
+		session.save(dept2)
+
+		session.flush
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		val staff2 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		staff2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		dao.saveOrUpdate(stu1)
+		dao.saveOrUpdate(stu2)
+		dao.saveOrUpdate(staff1)
+		dao.saveOrUpdate(staff2)
+
+		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000002/1")
+
+		dao.saveOrUpdate(relBetweenStaff1AndStu1)
+		dao.saveOrUpdate(relBetweenStaff1AndStu2)
+		session.flush()
+
+
+		val ret = dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1)
+		ret(0).studentMember.get.universityId should be ("1000001")
+		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
+
+		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(relBetweenStaff1AndStu1))
+		dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(relBetweenStaff1AndStu2))
 		dao.getRelationshipsByDepartment(null, dept1) should be (Seq())
 
-		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(relBetweenM1AndM3, relBetweenM2AndM3).toSet)
-		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "0000004") should be (Seq())
-		dao.getRelationshipsByAgent(null, "0000003") should be (Seq())
+		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
+		dao.getRelationshipsByAgent(RelationshipType.PersonalTutor, "1000004") should be (Seq())
+		dao.getRelationshipsByAgent(null, "1000003") should be (Seq())
 
-		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1)
-		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2)
+		session.delete(relBetweenStaff1AndStu1)
+		session.delete(relBetweenStaff1AndStu2)
+		session.flush()
 
-		m5.mostSignificantCourseDetails.get.sprCode = "1000005/1"
-		m6.mostSignificantCourseDetails.get.sprCode = "1000006/1"
+	}
+
+	@Test def studentsWithoutRelationships = transactional { tx =>
+		val dept1 = Fixtures.department("af", "Art of Foraging")
+		val dept2 = Fixtures.department("tm", "Traditional Music")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		session.flush
+
+		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000002/1")
+
+		dao.saveOrUpdate(relBetweenStaff1AndStu1)
+		dao.saveOrUpdate(relBetweenStaff1AndStu2)
+		session.flush()
+
+		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1, courseDepartment=dept1)
+		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2, courseDepartment=dept2)
 
 		dao.saveOrUpdate(m5)
 		dao.saveOrUpdate(m6)
@@ -241,5 +297,4 @@ class MemberDaoTest extends AppContextTestBase {
 		dao.getStudentsWithoutRelationshipByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(m6))
 		dao.getStudentsWithoutRelationshipByDepartment(null, dept1) should be (Seq())
 	}
-
 }

@@ -22,15 +22,18 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import scala._
 import scala.Some
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
 	extends Command[Option[StudentRelationship]] with Notifies[StudentRelationship] with Promises {
+
+	val studentCourseDetails: StudentCourseDetails = student.mostSignificantCourseDetails.get
 
 	var relationshipService = Wire[RelationshipService]
 
 	var tutor: Member = _
 
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, studentCourseDetails.student)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
 	// throw this request out if personal tutors can't be edited in Tabula for this department
 	if (!studentCourseDetails.department.canEditPersonalTutors) {
@@ -105,7 +108,7 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 
 			val tuteeNotification:List[Notification[StudentRelationship]] = if(notifyTutee){
 				val template = TutorChangeNotification.TuteeTemplate
-				val recepient = relationship.studentMember.asSsoUser
+				val recepient = relationship.studentMember.get.asSsoUser
 				List(new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer)
 			} else Nil
 
@@ -143,10 +146,10 @@ class EditTutorController extends BaseController {
 	def editTutorCommand(
 			@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 			@RequestParam(value="currentTutor", required=false) currentTutor: Member,
-			@RequestParam(value="remove", required=false) remove: Boolean
-
+			@RequestParam(value="remove", required=false) remove: Boolean,
+			user: CurrentUser
 			) =
-		new EditTutorCommand(studentCourseDetails, Option(currentTutor), Option(remove).getOrElse(false))
+		new EditTutorCommand(studentCourseDetails.student, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))

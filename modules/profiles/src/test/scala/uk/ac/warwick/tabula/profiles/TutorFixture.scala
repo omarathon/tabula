@@ -12,16 +12,12 @@ trait TutorFixture extends Mockito {
 	val department = new Department
 	department.settings = Map(Department.Settings.PersonalTutorSource -> Department.Settings.PersonalTutorSourceValues.Local)
 
-	val studyDetails = mock[StudyDetails]
-	when(studyDetails.studyDepartment).thenReturn(department)
-
 	val actor = new User
 	val recipient = new User
 	recipient.setWarwickId("recipient")
 
 	val student = new StudentMember
 	student.universityId = "student"
-	student.studyDetails = studyDetails
 	val newTutor = new StaffMember
 	newTutor.universityId = "0000001"
 	val oldTutor = new StaffMember

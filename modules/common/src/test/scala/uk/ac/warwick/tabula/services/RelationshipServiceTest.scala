@@ -80,10 +80,10 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
 
-	@Test def studentRelationships = transactional { tx =>
+	@Test def saveFindGetStudentRelationships = transactional { tx =>
 
-		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
-		val dept2 = Fixtures.departmentWithId("cs", "Computing Science", "2")
+		val dept1 = Fixtures.department("el", "Equatorial Life")
+		val dept2 = Fixtures.department("nr", "Northern Regions")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
 		session.flush()
@@ -105,12 +105,6 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 
-		m1.mostSignificantCourseDetails.get.sprCode = "1000001/1"
-		m2.mostSignificantCourseDetails.get.sprCode = "1000002/1"
-
-		profileService.save(m1)
-		profileService.save(m2)
-
 		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "0000001/1", "0000003")
 		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "0000002/1", "0000003")
 
@@ -126,20 +120,90 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.getRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
 		relationshipService.getRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Seq())
 		relationshipService.getRelationships(null, "0000001/1") should be (Seq())
+	}
+
+	@Test def listStudentRelationships = transactional { tx =>
+
+		val dept1 = Fixtures.department("pe", "Polar Exploration")
+		val dept2 = Fixtures.department("mi", "Micrology")
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+		session.flush()
+
+		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		m3.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		val m4 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		m4.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		profileService.save(m1)
+		profileService.save(m2)
+		profileService.save(m3)
+		profileService.save(m4)
+
+		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000001/1", "1000003")
+		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000002/1", "1000003")
+
+		session.save(rel1)
+		session.save(rel2)
 
 		relationshipService.listStudentRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(rel1))
 		relationshipService.listStudentRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(rel2))
 		relationshipService.listStudentRelationshipsByDepartment(null, dept1) should be (Seq())
 
-		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "0000003").toSet should be (Seq(rel1, rel2).toSet)
-		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "0000004") should be (Seq())
-		relationshipService.listStudentRelationshipsWithUniversityId(null, "0000003") should be (Seq())
+		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000003").toSet should be (Seq(rel1, rel2).toSet)
+		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000004") should be (Seq())
+		relationshipService.listStudentRelationshipsWithUniversityId(null, "1000003") should be (Seq())
 
-		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1)
-		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2)
+		session.delete(m1)
+		session.delete(m2)
+		session.delete(m3)
+		session.delete(m4)
+		session.delete(rel1)
+		session.delete(rel2)
 
-		m5.mostSignificantCourseDetails.get.sprCode = "1000005/1"
-		m6.mostSignificantCourseDetails.get.sprCode = "1000006/1"
+		session.flush
+	}
+
+	@Test def listStudentsWithoutRelationship = transactional { tx =>
+
+		val dept1 = Fixtures.department("mm", "Mumbling Modularity")
+		val dept2 = Fixtures.department("dd", "Departmental Diagnostics")
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+		session.flush()
+
+/*		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		m3.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		val m4 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		m4.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		profileService.save(m1)
+		profileService.save(m2)
+		profileService.save(m3)
+		profileService.save(m4)
+
+		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000001/1", "1000003")
+		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000002/1", "1000003")
+
+		session.save(rel1)
+		session.save(rel2)*/
+
+		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1, courseDepartment=dept1)
+		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2, courseDepartment=dept2)
 
 		profileService.save(m5)
 		profileService.save(m6)
