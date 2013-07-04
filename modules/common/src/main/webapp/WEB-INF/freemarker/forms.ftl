@@ -1,3 +1,4 @@
+<#ftl strip_text=true />
 <#--
 
 Macros for customised form elements, containers and more complex pickers.

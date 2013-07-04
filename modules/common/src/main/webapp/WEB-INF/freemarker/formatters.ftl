@@ -1,4 +1,4 @@
-<#compress>
+<#ftl strip_text=true />
 <#escape x as x?html>
 
 <#macro module_name module>
@@ -201,7 +201,4 @@
 	</div>
 </#macro>
 
-
-
 </#escape>
-</#compress>
