@@ -19,7 +19,7 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	)
 
 	GrantsScopedPermission(
-		Profiles.Read.StudyDetails,
+		Profiles.Read.StudentCourseDetails,
 		Profiles.PersonalTutor.Read,
 		Profiles.Supervisor.Read
 	)

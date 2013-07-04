@@ -3,21 +3,23 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
+import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
-import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
-class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
+class ViewProfileCommand(user: CurrentUser, profile: StudentMember)
+	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 	if (user.isStudent && user.universityId != profile.universityId) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
 		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
@@ -35,9 +37,14 @@ class ViewProfileController extends ProfilesController {
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
 	@ModelAttribute("viewMeetingRecordCommand")
-	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
-		case _ => None
+	def viewMeetingRecordCommand(@PathVariable("member") member: Member) =  {
+		member.mostSignificantCourseDetails match {
+			case Some(scd: StudentCourseDetails) => restricted(new ViewMeetingRecordCommand(scd, user))
+			case None => {
+				logger.warn("Member " + member.universityId + " has no most significant course details")
+				None
+			}
+		}
 	}
 
 	@ModelAttribute("viewProfileCommand")

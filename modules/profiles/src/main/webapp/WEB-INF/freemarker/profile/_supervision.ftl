@@ -8,7 +8,9 @@
 			<#assign supervisor = relationship.agentMember />
 			<div class="tutor clearfix span4">
 				<#if supervisor??>
+
 					<@fmt.relation_photo member relationship "tinythumbnail" />
+
 					<h5>
 						${supervisor.fullName!"Supervisor"}
 					</h5>

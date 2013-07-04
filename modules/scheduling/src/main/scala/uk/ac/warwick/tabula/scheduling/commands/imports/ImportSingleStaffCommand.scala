@@ -19,44 +19,44 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 class ImportSingleStaffCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
 	with Logging with Daoisms with StaffProperties with Unaudited {
 	import ImportMemberHelpers._
-		
+
 	this.teachingStaff = rs.getString("teaching_staff") == "Y"
-		
+
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
-		
+
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
-		
+
 		val isTransient = !memberExisting.isDefined
 		val member = memberExisting getOrElse {
 			if (this.userType == MemberUserType.Emeritus) new EmeritusMember(universityId)
 			else new StaffMember(universityId)
 		}
-		
+
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
-		
+
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
 		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStaffProperties(commandBean, memberBean)
-		
-			
+
+
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)
-			
+
 			member.lastUpdatedDate = DateTime.now
 			memberDao.saveOrUpdate(member)
 		}
-		
+
 		member
 	}
-		
+
 	private val basicStaffProperties = Set(
 		"teachingStaff"
 	)
-	
+
 	private def copyStaffProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStaffProperties, commandBean, memberBean)
-	
+
 
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "staff")
 

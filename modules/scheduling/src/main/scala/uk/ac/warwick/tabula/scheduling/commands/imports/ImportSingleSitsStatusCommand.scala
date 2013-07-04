@@ -25,14 +25,9 @@ class ImportSingleSitsStatusCommand(resultSet: ResultSet) extends Command[SitsSt
 	
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 
-	// A couple of intermediate properties that will be transformed later
-	var code: String = _
-	var shortName: String = _
-	var fullName: String = _
-	
-	this.code = resultSet.getString("sta_code")
-	this.shortName = resultSet.getString("sta_snam")
-	this.fullName = resultSet.getString("sta_name")
+	var code = resultSet.getString("sta_code")
+	var shortName = resultSet.getString("sta_snam")
+	var fullName = resultSet.getString("sta_name")
 	
 	override def applyInternal(): SitsStatus = transactional() {
 		val sitsStatusExisting = sitsStatusDao.getByCode(code)

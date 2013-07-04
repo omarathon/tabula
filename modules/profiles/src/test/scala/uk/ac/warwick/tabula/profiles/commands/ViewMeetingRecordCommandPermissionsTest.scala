@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class ViewMeetingRecordCommandPermissionsTest extends TestBase with MeetingRecordCommandPermissionsTests{
 
   @Test
-  def  requiresReadTutorMeetingRecordPermissionIfRelationIsTutor(){
+  def requiresReadTutorMeetingRecordPermissionIfRelationIsTutor(){
     withUser("test"){
-    val cmd =  new ViewMeetingRecordCommand(student, currentUser)
+    val cmd =  new ViewMeetingRecordCommand(studentCourseDetails, currentUser)
     cmd.permissionsAllChecks.get(Permissions.Profiles.PersonalTutor.MeetingRecord.Read).get should be(Some(student))
   }}
   // View record does not currently support supervisor meetings. Add an extra test here when it does...

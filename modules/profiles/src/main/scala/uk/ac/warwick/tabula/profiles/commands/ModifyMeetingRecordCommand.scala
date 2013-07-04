@@ -38,7 +38,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-  PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), relationship.studentMember)
+	PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), mandatory(relationship.studentMember))
 
 	val meeting: MeetingRecord
 
@@ -95,7 +95,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			meetingRecordApproval
 		}
 
-		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ != creator)
+		val approver = Seq(relationship.agentMember, relationship.studentMember).flatten.find(_ != creator)
 		approver.map(getMeetingRecord(_))
 
 	}
