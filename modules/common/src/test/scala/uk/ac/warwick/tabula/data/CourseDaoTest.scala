@@ -4,15 +4,15 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.Fixtures
 
-class RouteDaoTest extends AppContextTestBase {
+class CourseDaoTest extends AppContextTestBase {
 
-	@Autowired var dao:RouteDao =_
+	@Autowired var dao:CourseDao =_
 
 	@Test def crud = transactional { tx =>
-		val route = Fixtures.route("g503")
-		dao.saveOrUpdate(route)
+		val course = Fixtures.course("TPOS-M9P0")
+		dao.saveOrUpdate(course)
 
-		dao.getByCode("g503") should be (Some(route))
+		dao.getByCode("TPOS-M9P0") should be (Some(course))
 		dao.getByCode("wibble") should be (None)
 	}
 

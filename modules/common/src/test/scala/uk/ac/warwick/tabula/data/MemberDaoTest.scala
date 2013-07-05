@@ -336,7 +336,13 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 
 		session.delete(relBetweenStaff1AndStu1)
 		session.delete(relBetweenStaff1AndStu2)
+		session.delete(dept1)
+		session.delete(dept2)
+		session.delete(stu1)
+		session.delete(stu2)
+		session.delete(staff1)
+		session.delete(staff2)
 		session.flush()
-
 	}
+
 }

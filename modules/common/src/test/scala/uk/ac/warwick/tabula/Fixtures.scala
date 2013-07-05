@@ -63,6 +63,13 @@ object Fixtures {
 		r
 	}
 
+	def course(code:String, name: String = null) = {
+		val c = new Course
+		c.code = code
+		c.name = Option(name).getOrElse("Course " + code)
+		c
+	}
+
 	def assignment(name:String) = {
 		val a = new Assignment
 		a
