@@ -74,7 +74,7 @@ trait AssignmentMembershipService {
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): MembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
 
@@ -304,7 +304,7 @@ class AssignmentMembershipServiceImpl
 	}
 }
 
-class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
+class MembershipInfo(val items: Seq[MembershipItem]) {
 
 	def	sitsCount = items.filter(_.itemType == SitsType).size
 	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
@@ -317,7 +317,7 @@ class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo = {
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): MembershipInfo = {
 		val sitsUsers =
 			upstream.flatMap { _.members.members }
 				.distinct
@@ -334,7 +334,7 @@ trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
 		val excludeItems = makeExcludeItems(excludes, sitsUsers)
 		val sitsItems = makeSitsItems(includes, excludes, sitsUsers)
 
-		new AssignmentMembershipInfo(includeItems ++ excludeItems ++ sitsItems)
+		new MembershipInfo(includeItems ++ excludeItems ++ sitsItems)
 	}
 
 	/**

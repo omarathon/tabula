@@ -18,7 +18,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#compress></#macro>
 <#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
-<#macro assignmentenrolment module><@url page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
+<#macro enrolment module><@url page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
 
 <#macro listmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 <#macro downloadmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/submissions.zip"/></#macro>

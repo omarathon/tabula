@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 
 
-class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null) extends ModifyAssignmentCommand(module) {
+class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null)
+	extends ModifyAssignmentCommand(module) {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Update, assignment)

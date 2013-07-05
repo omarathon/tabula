@@ -76,15 +76,34 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
-	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
-	@JoinTable(name="smallgroupset_assessmentgroup",
-		joinColumns=Array(new JoinColumn(name="smallgroupset_id")),
-		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
+
+
+
+	// Cannot link directly to upstream assessment groups data model in sits is silly ...
+	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+
+	// converts the assessmentGroups to upstream assessment groups
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+		if(academicYear == null){
+			Seq()
+		}
+		else {
+			val validGroups = assessmentGroups.asScala.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			validGroups.flatMap { group =>
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = academicYear
+				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
+				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.occurrence = group.occurrence
+				membershipService.getUpstreamAssessmentGroup(template)
+			}
+		}
+	}
+
 	
 	def unallocatedStudents = {
-		val allStudents = membershipService.determineMembershipUsers(assessmentGroups.asScala, Some(members))
+		val allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
 		val allocatedStudents = groups.asScala flatMap { _.students.users }
 		
 		allStudents diff allocatedStudents
@@ -99,7 +118,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		"name" -> name,
 		"module" -> module)
 
-  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+  def duplicateTo( module:Module, assessmentGroups:JList[AssessmentGroup] = JArrayList()):SmallGroupSet = {
     val newSet = new SmallGroupSet()
     newSet.id = id
     newSet.academicYear = academicYear

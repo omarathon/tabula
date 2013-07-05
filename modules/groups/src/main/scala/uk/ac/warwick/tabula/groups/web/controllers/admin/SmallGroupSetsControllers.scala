@@ -69,7 +69,8 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	@RequestMapping
 	def form(cmd: CreateSmallGroupSetCommand) =
 		Mav("admin/groups/new",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+			"allTermWeekRanges" -> allTermWeekRanges(cmd),
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
@@ -104,7 +105,9 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	@RequestMapping
 	def form(cmd: EditSmallGroupSetCommand) =
 		Mav("admin/groups/edit",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+			"allTermWeekRanges" -> allTermWeekRanges(cmd),
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups
+
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))

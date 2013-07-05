@@ -83,6 +83,10 @@
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:13.0.1" level="project" />
     <orderEntry type="library" name="Maven: net.sourceforge.javacsv:javacsv:2.0" level="project" />
+    <orderEntry type="module" module-name="profiles" />
+    <orderEntry type="library" name="Maven: uk.ac.warwick.tabula:profiles:jar:39-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.libphonenumber:libphonenumber:5.2" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.libphonenumber:geocoder:2.3" level="project" />
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context-support:3.2.3.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-instrument:3.2.3.RELEASE" level="project" />
@@ -229,10 +233,6 @@
     <orderEntry type="library" name="Maven: org.reflections:reflections:0.9.8" level="project" />
     <orderEntry type="library" name="Maven: uk.ac.warwick.membership:membership-rmi:2.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.scala:spring-scala:1.0.0.M2" level="project" />
-    <orderEntry type="module" module-name="profiles" />
-    <orderEntry type="library" name="Maven: uk.ac.warwick.tabula:profiles:jar:39-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.libphonenumber:libphonenumber:5.2" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.libphonenumber:geocoder:2.3" level="project" />
     <orderEntry type="module" module-name="home" />
     <orderEntry type="library" name="Maven: uk.ac.warwick.tabula:home:jar:39-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="courses" />

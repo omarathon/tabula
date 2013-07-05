@@ -154,7 +154,7 @@
 			}
 		
 			$('#action-input').val('refresh');
-      $('#action-input').closest('form').submit();
+			$('#action-input').closest('form').submit();
 		});
 		
 		// Open the first modal with an error in it

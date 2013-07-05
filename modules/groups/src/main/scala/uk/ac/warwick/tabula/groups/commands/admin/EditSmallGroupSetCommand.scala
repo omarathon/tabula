@@ -14,7 +14,9 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User) extends  ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers{
-	
+
+	val setOption = Some(set)
+
 	PermissionCheck(Permissions.SmallGroups.Update, set)
 	
 	this.copyFrom(set)
