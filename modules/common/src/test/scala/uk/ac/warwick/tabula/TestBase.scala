@@ -54,7 +54,7 @@ abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with Test
 
   NDC.pop
   NDC.push(System.getProperty("TestProcessId"))
-  logger.info("TestBase instantiated for " + this.getClass.getName)
+  logger.trace("TestBase instantiated for " + this.getClass.getName)
 }
 
 /** Various test objects

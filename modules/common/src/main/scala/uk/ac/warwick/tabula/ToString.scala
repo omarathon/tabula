@@ -8,7 +8,18 @@ package uk.ac.warwick.tabula
  */
 trait ToString {
 	def toStringProps: Seq[Pair[String, Any]]
-	override def toString() = {
-		getClass.getSimpleName + toStringProps.map { case (k, v) => k + "=" + v }.mkString("[", ",", "]")
-	}
+	override def toString() = ToString.forObject(this, toStringProps : _*)
+}
+
+/** Alternative to the trait that avoids polluting the class's interface.
+	* Just use ToString() to implement your toString method.
+	*/
+object ToString {
+
+	def forProps(props: Pair[String, Any]*) =
+		props.map { case (k, v) => k + "=" + v }.mkString("[", ",", "]")
+
+	def forObject(self: AnyRef, props: Pair[String, Any]*) =
+		self.getClass.getSimpleName + forProps(props: _*)
+
 }
