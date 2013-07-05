@@ -99,10 +99,7 @@
 								<#assign existingStudents = mappingById[group.id]![] />
 								<div class="drag-target well clearfix">
 									<div class="group-header">
-										<#assign popoverHeader>
-											Students in ${group.name}
-											<button type='button' onclick="jQuery('#show-list-${group.id}').popover('hide')" class='close'>&times;</button>
-										</#assign>
+										<#assign popoverHeader>Students in ${group.name}</#assign>
 										<#assign groupDetails>
 											<ul class="unstyled">
 												<#list group.events as event>
@@ -122,9 +119,10 @@
 										</h4>
 
 										<div>
-											<span class="drag-count">${existingStudents?size}</span> students
+											<#assign count = existingStudents?size />
+											<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-											<a id="show-list-${group.id}" class="show-list" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
+											<a id="show-list-${group.id}" class="show-list" title="View students" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
 										</div>
 									</div>
 

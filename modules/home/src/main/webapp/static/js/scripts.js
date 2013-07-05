@@ -264,14 +264,19 @@
 	$.fn.tabulaPopover = function(options) {
 		var $items = this;
 
+		// set options, with defaults
+		var defaults = {
+			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+		};
+		var options = $.extend({}, defaults, options);
+
+		// don't popover disabled
 		$items.on('click', function(e) {
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
 				e.preventDefault();
 			}
 		});
-
-		$items.popover(options);
 
 		// Click away to dismiss
 		$('html').on('click', function(e) {
@@ -281,10 +286,39 @@
 			}
 		});
 
+		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
+		 * (eg. hide) are *only* callable on *that original element*. So to close
+		 * a specific popover (or introductory) programmatically you need to jump hoops.
+		 * Lame.
+		 * Workaround is to handle the shown event on the calling element,
+		 * call its popover() method again to get an object reference and then go diving
+		 * for a reference to the new popover itself in the DOM.
+		 */
+		$items.on('shown', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.data('creator', $(e.target));
+		});
+		$('#container').on('click', '.popover .close', function(e) {
+			var $creator = $(e.target).parents('.popover').data('creator');
+			if ($creator) {
+				$creator.popover('hide');
+			}
+		});
+
+		// now that's all done, bind the popover
+		$items.popover(options);
+
+		// ensure popovers/introductorys override title with data-title attribute where available
+		$items.each(function() {
+			if ($(this).attr('data-title')) {
+				$(this).attr('data-original-title', $(this).attr('data-title'));
+			}
+		});
+
 		return $items;
 	};
 
-	$(function(){
+	$(function() {
 		$('a.disabled').on('click', function(e) {
 			e.preventDefault();
 		});
@@ -336,47 +370,20 @@
 		// http://twitter.github.com/bootstrap/javascript.html#tooltips
 		$('.use-tooltip').tooltip();
 
-		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
-		 * (eg. hide) are *only* callable on *that original element*. So to close
-		 * a specific popover (or introductory) programmatically you need to jump hoops.
-		 * Lame.
-		 * Workaround is to handle the shown event on the calling element,
-		 * call its popover() method again to get an object reference and then go diving
-		 * for a reference to the new popover itself in the DOM.
-		 */
-		$('#container').on('shown', '.use-popover, .use-introductory', function(e) {
-			var $po = $(e.target).popover().data('popover').tip();
-			$po.data('creator', $(e.target));
-		});
-		$('#container').on('click', '.popover .close', function(e) {
-			var $creator = $(e.target).parents('.popover').data('creator');
-			if ($creator) {
-				$creator.popover('hide');
-			}
-		});
-
-		// ensure popovers/introductorys override title with data-title attribute where available
-		$('.use-popover, .use-introductory').each(function() {
-			if ($(this).attr('data-title')) {
-				$(this).attr('data-original-title', $(this).attr('data-title'));
-			}
-		});
-
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
-		$('.use-popover').popover({
+		$('.use-popover').tabulaPopover({
 			trigger: 'click',
-			container: '#container',
-			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-		}).click(function(){ return false; });
+			container: '#container'
+		});
 
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
-		$('.use-introductory').popover({
+		$('.use-introductory').tabulaPopover({
 			trigger: 'click',
 			container: '#container',
             template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
-		}).click(function(){ return false; });
+		});
 
 		$('.use-introductory:not(.auto)').each(function() {
 			var template = $(this).data('popover').options.template;
@@ -455,7 +462,7 @@
 
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {
-			$('kbd.keyboard-control-key').html('&#8984; Cmd');
+			$('kbd.keyboard-control-key').html('<span class="mac-cmd">&#8984;</span> cmd');
 		}
 
 		// Fixed to top on scroll
