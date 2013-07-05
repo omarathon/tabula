@@ -60,7 +60,7 @@
             }).on("mouseout", function(e) {
                         $(this).find("td").removeClass("hover");
                     }).on("click", function(e) {
-                        if (! $(e.target).is("a") && ! $(e.target).is("img")) $(this).find("a.profile-link")[0].click();
+                        if (! $(e.target).is("a") && ! $(e.target).is("img")) window.location = $(this).find("a.profile-link")[0].href;
                     });
         });
     })(jQuery);
