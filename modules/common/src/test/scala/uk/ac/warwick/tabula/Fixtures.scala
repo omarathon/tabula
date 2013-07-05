@@ -149,5 +149,4 @@ object Fixtures {
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
 	}
-
 }
