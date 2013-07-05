@@ -11,17 +11,17 @@ class EditTutorCommandTest extends TestBase with Mockito {
 
 	@Test
 	def describeShouldIncludeNewTutorAndStudent { new TutorFixture {
-		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		val desc = mock[Description]
 		command.describe(desc)
-		verify(desc, atLeastOnce()).property("student ID" -> student.universityId)
+		verify(desc, atLeastOnce()).property("student SPR code" -> studentCourseDetails.sprCode)
 		verify(desc, atLeastOnce()).property("new tutor ID" -> newTutor.universityId)
 	}}
 
 	@Test
 	def emitShouldCreateNotificationToTutee() { new TutorFixture{
-		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		command.notifyTutee = true
 		command.modifiedRelationships = Seq(relationship)
@@ -33,7 +33,7 @@ class EditTutorCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToOldTutor() { new TutorFixture{
-		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		command.notifyOldTutor = true
 		command.modifiedRelationships = Seq(relationship)
@@ -45,7 +45,7 @@ class EditTutorCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToNewTutor() { new TutorFixture{
-		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		command.notifyNewTutor = true
 		command.modifiedRelationships = Seq(relationship)
@@ -57,7 +57,7 @@ class EditTutorCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldNotNotifyOldTutorIfTheyDontExist() { new TutorFixture{
-		val command = new EditTutorCommand(student, None, new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, None, new User, false)
 		command.tutor = newTutor
 		command.notifyNewTutor = true
 		command.notifyOldTutor = true
@@ -72,7 +72,7 @@ class EditTutorCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldNotifyOnRemove() { new TutorFixture{
-		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
+		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		command.notifyOldTutor = true
 		command.notifyTutee = true
