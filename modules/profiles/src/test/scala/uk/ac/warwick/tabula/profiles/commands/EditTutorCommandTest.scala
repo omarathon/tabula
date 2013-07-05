@@ -14,8 +14,10 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		val command = new EditTutorCommand(student, Some(oldTutor), new User, false)
 		command.tutor = newTutor
 		val desc = mock[Description]
+		// calls to desc.property are chained, so we need to set up the return
+		desc.studentIds(Seq(student.universityId)) returns desc
 		command.describe(desc)
-		verify(desc, atLeastOnce()).property("student ID" -> student.universityId)
+		verify(desc, atLeastOnce()).studentIds(Seq( student.universityId))
 		verify(desc, atLeastOnce()).property("new tutor ID" -> newTutor.universityId)
 	}}
 
