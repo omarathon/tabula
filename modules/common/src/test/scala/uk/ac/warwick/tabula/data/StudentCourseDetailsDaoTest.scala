@@ -1,36 +1,29 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.junit.Test
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.ByteArrayInputStream
-import org.joda.time.DateTime
-import javax.persistence.Entity
+import scala.collection.JavaConverters.asScalaBufferConverter
+
 import org.hibernate.annotations.AccessType
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import java.io.File
-import org.springframework.util.FileCopyUtils
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.Member
-import org.junit.Before
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StaffMember
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.Filters
+import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.After
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.RelationshipType
-import uk.ac.warwick.tabula.JavaImports._
+import org.junit.Before
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+
+import javax.persistence.DiscriminatorColumn
+import javax.persistence.DiscriminatorValue
+import javax.persistence.Entity
+import javax.persistence.Inheritance
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 class StudentCourseDetailsDaoTest extends AppContextTestBase with Logging {
 	@Autowired var memberDao:MemberDao =_
