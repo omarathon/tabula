@@ -83,7 +83,7 @@
 			</@form.labelled_row>
 
 			<@form.labelled_row "file.upload" "Upload supporting documentation relevant to your request">
-				<input type="file" name="file.upload" />
+				<input type="file" name="file.upload" multiple />
 				<div id="multifile-column-description" class="help-block">
 					<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 				</div>
