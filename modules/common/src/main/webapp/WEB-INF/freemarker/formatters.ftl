@@ -209,5 +209,27 @@
 		</#if>
 	</div>
 </#macro>
+
+<#macro permission_button permission scope contents type action_descr classes href tooltip data_attr>
+	<#local class></#local>
+	<#local title></#local>
+	
+	<#if tooltip != "">
+		<#local title>title='${tooltip}.'</#local>
+		<#local classes='${classes} use-tooltip'?trim >
+	</#if>
+    <#if href != ""><#local href>href=${href}</#local></#if>
+    
+	<#if !can.do(permission,scope)>
+		<#local classes='${classes} disabled use-tooltip'?trim > 
+		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+	</#if>
+	
+	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
+	
+	<#if classes != ""><#local class>class='${classes}'</#local></#if>
+	<${type} ${href} ${class} ${title} ${attr}><#noescape>${contents}</#noescape></${type}>
+</#macro>
+
 </#escape>
 

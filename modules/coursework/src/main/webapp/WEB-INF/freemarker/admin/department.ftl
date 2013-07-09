@@ -18,7 +18,7 @@
 
 
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
-<#if (features.extensions || features.feedbackTemplates) && can_manage_dept>
+<#if (features.extensions || features.feedbackTemplates)>
 	<h1 class="with-settings">
 		${department.name}
 	</h1>
@@ -52,6 +52,33 @@
 				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu pull-right">
+			
+			<li>
+				<#assign extensions_url><@routes.extensionsettings department /></#assign>
+				<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department contents='<i class="icon-calendar"></i> Extensions' 
+                  					type='a' action_descr='manage extension settings' classes='' href=extensions_url 
+                               		tooltip='' data_attr='data-container=body' />
+           </li>
+			
+			<li>
+				<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
+				<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department contents='<i class="icon-comment"></i> Feedback templates' 
+                  					type='a' action_descr='create feedback template' classes='' href=feedback_url tooltip='' data_attr='data-container=body' />
+           </li>
+            
+            <li>                   		
+           		<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
+				<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department contents='<i class="icon-check"></i> Marking workflows' 
+                  					type='a' action_descr='manage marking workflows' classes='' href=markingflow_url tooltip='' data_attr='data-container=body' /></li>
+            
+            <li id="feedback-report-button">                   		
+				<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
+				<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department contents='<i class="icon-book"></i> Feedback report' 
+                  					type='a' action_descr='generate a feedback report' classes='' href=feedbackrep_url 
+                               		tooltip='' data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal' /></li>
+			
+			
+			<#--
 				<#if features.extensions>
 					<li><a href="<@routes.extensionsettings department />"><i class="icon-calendar"></i> Extensions</a></li>
 				</#if>
@@ -62,16 +89,26 @@
 					<li><a href="<@routes.markingworkflowlist department />"><i class="icon-check"></i> Marking workflows</a></li>
 				</#if>
 				<li id="feedback-report-button"><a href="<@routes.feedbackreport department />"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
-				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
+				
+				
+				-->
+				
+				<#if can_manage_dept>
+					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
+				</#if>
+				
+				
 			</ul>
 		</div>
 
+		<#if can_manage_dept>
 		<div class="btn-group dept-show">
 			<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
 				<i class="icon-eye-open"></i>
 				Show
 			</a>
 		</div>
+		</#if>
 	</div>
 <#else>
 	<h1>${department.name}</h1>
@@ -222,13 +259,16 @@
 				  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
 				  <ul class="dropdown-menu pull-right">
 					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />"><i class="icon-wrench"></i> Edit properties</a></li>
-					<li><a class="archive-assignment-link ajax-popup" data-popup-target=".btn-group" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" />">
-						<i class="icon-folder-close"></i>
+					<li>
+						<#assign archive_url><@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
 						<#if assignment.archived>
-							Unarchive assignment
+							<#assign archive_caption>Unarchive assignment</#assign>
 						<#else>
-							Archive assignment
+							<#assign archive_caption>Archive assignment</#assign>
 						</#if>
+                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module contents='<i class="icon-folder-close"></i> ${archive_caption}' 
+                            					type='a' action_descr='${archive_caption}'?lower_case classes='archive-assignment-link ajax-popup' href=archive_url 
+                                        		tooltip='' data_attr='data-popup-target=.btn-group data-container=body' /> 	
 					</a></li>
 
 
@@ -259,9 +299,14 @@
 
 
 					<#if assignment.canPublishFeedback>
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />"><i class="icon-envelope"></i> Publish feedback </a></li>
+						<li>
+							<#assign publishfeedbackurl><@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
+							<@fmt.permission_button permission='Feedback.Publish' scope=module contents='<i class="icon-envelope"></i> Publish feedback'	
+													type='a' action_descr='release feedback to students' classes="" href=publishfeedbackurl	
+													tooltip='' data_attr='data-container=body' />
+						</li>
 					<#else>
-						<li class="disabled"><a><i class="icon-envelope"></i> Publish feedback </a></li>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish."><i class="icon-envelope"></i> Publish feedback </a></li>
 					</#if>
 
 
@@ -284,5 +329,4 @@
 <#else>
 <p>No department.</p>
 </#if>
-
 </#escape>

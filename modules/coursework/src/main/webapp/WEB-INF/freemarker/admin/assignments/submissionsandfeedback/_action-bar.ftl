@@ -1,3 +1,24 @@
+<#escape x as x?html>
+<#macro permission_button permission scope contents type action_descr classes href tooltip data_attr>
+	<#local class></#local>
+	<#local title></#local>
+	
+	<#if tooltip != "">
+		<#local title>title='${tooltip}.'</#local>
+		<#local classes='${classes} use-tooltip'?trim >
+	</#if>
+    <#if href != ""><#local href>href=${href}</#local></#if>
+    
+	<#if !can.do(permission,scope)>
+		<#local classes='${classes} disabled use-tooltip'?trim > 
+		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+	</#if>
+	
+	<#if classes != ""><#local class>class='${classes}'</#local></#if>
+	<${type} ${href} ${class} ${title} ${data_attr}><#noescape>${contents}</#noescape></${type}>
+</#macro>
+</#escape>
+
 <#if students??>
 	<div class="btn-toolbar">
 		<div class="pull-right view-selector">
@@ -52,7 +73,10 @@
 							</a>
 						</li>
 						<li class="must-have-selected">
-							<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete submission</a>
+							<#assign deletesubmissionurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+							<@fmt.permission_button permission='Submission.Delete' scope=module contents='<i class="icon-remove"></i> Delete submission'	
+												type='a' action_descr='delete submission' classes="form-post" href=deletesubmissionurl	
+												tooltip='Delete submission' data_attr='data-container=body' />
 						</li>
 					</ul>
 				</div>
@@ -155,7 +179,10 @@
 						</a>
 					</li>
 					<li>
-						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" />"><i class="icon-share"></i> Publish feedback</a>
+						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/> </#assign>
+						<@fmt.permission_button permission='Feedback.Publish' scope=module contents='<i class="icon-share"></i> Publish feedback'	
+												type='a' action_descr='release feedback to students' classes="" href=publishfeedbackurl	
+												tooltip='Release feedback to students' data_attr='data-container=body' />
 					</li>
 					<li class="must-have-selected">
 						<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete feedback</a>
