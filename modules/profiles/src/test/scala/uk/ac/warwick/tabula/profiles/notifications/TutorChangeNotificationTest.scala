@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import org.mockito.{Matchers, ArgumentCaptor}
-import uk.ac.warwick.tabula.profiles.notifications.TutorChangeNotification
 
 class TutorChangeNotificationTest extends TestBase with Mockito {
 

@@ -15,9 +15,8 @@ class ResizesPhotoTest extends TestBase {
 	trait Context {
 		val directory = createTemporaryDirectory
 		val resizer = new CachingImageResizer(new JAIImageResizer, directory);
-		val command = new ResizesPhoto {
-			override val imageResizer = resizer
-		}
+		val command = new ResizesPhoto {}
+		command.imageResizer = resizer
 		
 		val member = new StudentMember
 		val photoAttachment = new FileAttachment
