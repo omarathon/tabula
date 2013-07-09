@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import org.mockito.{Matchers, ArgumentCaptor}
-import uk.ac.warwick.tabula.profiles.notifications.TutorChangeNotification
 
 class TutorChangeNotificationTest extends TestBase with Mockito {
 
@@ -54,7 +53,7 @@ class TutorChangeNotificationTest extends TestBase with Mockito {
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new TutorFixture {
-		val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
+		val modelCaptor = ArgumentCaptor.forClass(classOf[Map[String,Any]])
 
 		val n = createNewTutorNotification(relationship, actor, recipient, Some(oldTutor))
 
@@ -62,12 +61,14 @@ class TutorChangeNotificationTest extends TestBase with Mockito {
 
 		verify(n.mockRenderer, times(1)).renderTemplate(
 			any[String],
-			model.capture())
+			modelCaptor.capture())
 
-		model.getValue.get("tutee").get should be(Some(student))
-		model.getValue.get("oldTutor").get should be(Some(oldTutor))
-		model.getValue.get("newTutor").get should be(Some(newTutor))
-		model.getValue.get("path").get should be("/view/student")
+		val model = modelCaptor.getValue
+
+		model("tutee")should be(Some(student))
+		model("oldTutor") should be(Some(oldTutor))
+		model("newTutor") should be(Some(newTutor))
+		model("path") should be("/view/student")
 	}
 
 	trait MockRenderer extends TextRenderer {
