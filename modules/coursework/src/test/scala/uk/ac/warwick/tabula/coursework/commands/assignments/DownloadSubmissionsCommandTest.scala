@@ -40,7 +40,7 @@ class DownloadSubmissionsCommandTest extends AppContextTestBase with Mockito {
 	}
 	
 	
-	@Test def test {
+	@Test def test():Unit = transactional{ts=>
 		val assignment = new Assignment
 		assignment.module = new Module(code="ph105", department=new Department)
 		
