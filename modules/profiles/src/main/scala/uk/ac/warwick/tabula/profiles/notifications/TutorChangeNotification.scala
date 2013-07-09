@@ -28,7 +28,7 @@ class TutorChangeNotification (
 	def title: String = "Personal tutor change"
 	def content: String = {
 		renderTemplate(templateLocation, Map(
-			"tutee" -> relationship.studentMember.get,
+			"tutee" -> relationship.studentMember,
 			"oldTutor" -> oldTutor,
 			"newTutor" -> newTutor,
 			"path" -> url

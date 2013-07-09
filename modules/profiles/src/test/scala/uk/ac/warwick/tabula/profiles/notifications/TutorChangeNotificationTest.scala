@@ -64,7 +64,7 @@ class TutorChangeNotificationTest extends TestBase with Mockito {
 			any[String],
 			model.capture())
 
-		model.getValue.get("tutee").get should be(student)
+		model.getValue.get("tutee").get should be(Some(student))
 		model.getValue.get("oldTutor").get should be(Some(oldTutor))
 		model.getValue.get("newTutor").get should be(Some(newTutor))
 		model.getValue.get("path").get should be("/view/student")
