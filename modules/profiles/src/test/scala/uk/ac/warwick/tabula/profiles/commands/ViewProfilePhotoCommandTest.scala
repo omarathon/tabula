@@ -17,7 +17,7 @@ class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 		val command = new ViewProfilePhotoCommand(member)
 		val renderable = command.applyInternal()
 
-		renderable should be (command.DefaultPhoto)
+		renderable should be (DefaultPhoto)
 	}
 
 	@Test
@@ -27,7 +27,7 @@ class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 		val command = new ViewProfilePhotoCommand(member)
 		val renderable = command.applyInternal()
 
-		renderable should be (command.DefaultPhoto)
+		renderable should be (DefaultPhoto)
 		there was one(member.photo).dataStream
 	}
 

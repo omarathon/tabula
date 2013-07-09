@@ -38,7 +38,7 @@ class ResizesPhotoTest extends TestBase {
 			member.photo = null
 			command.size = "actual"
 			val renderable = command.render(Some(member))
-			renderable should be (command.DefaultPhoto)
+			renderable should be (DefaultPhoto)
 		}
 	}
 	

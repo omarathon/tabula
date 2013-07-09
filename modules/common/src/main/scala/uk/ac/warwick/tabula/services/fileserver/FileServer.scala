@@ -4,6 +4,7 @@ import java.io.InputStream
 import javax.servlet.http.HttpServletResponse
 import org.springframework.util.FileCopyUtils
 import javax.servlet.http.HttpServletRequest
+import org.joda.time.DateTime
 
 @Service
 class FileServer {
@@ -15,7 +16,9 @@ class FileServer {
 		file.contentLength.map { length =>
 			out.addHeader("Content-Length", length.toString)
 		}
-		
+
+		handleCaching(file, request, out)
+
 		if (request.getMethod.toUpperCase != "HEAD")
 			Option(inStream) map { FileCopyUtils.copy(_, out.getOutputStream) }
 	}
@@ -33,5 +36,12 @@ class FileServer {
 		out.addHeader("Content-Disposition", "attachment")
 		
 		stream(file)
+	}
+
+	// Very simplistic cache headers - needs turbocharging with TAB-929
+	private def handleCaching(file: RenderableFile, request: HttpServletRequest, out: HttpServletResponse) {
+		for (expires <- file.cachePolicy.expires) {
+			out.setDateHeader("Expires", (DateTime.now plus expires).getMillis)
+		}
 	}
 }
