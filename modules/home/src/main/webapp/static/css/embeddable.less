@@ -1133,10 +1133,33 @@ h1.with-settings {
 }
 
 // grey out disabled icons
-.tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
-    opacity:.3;
-    filter: alpha(opacity=30);
+.tabula-page, #container {
+	.dropdown-menu {
+	 	li.disabled > a > [class^="icon-"], li > a.disabled > [class^="icon-"] {
+	    	opacity:.3;
+    		filter: alpha(opacity=30);
+    	}
+    }
 }
+
+
+//Grey out links to actions that are not permitted and remove state changes
+.tabula-page, #container {
+	 .dropdown-menu > li > a.disabled {
+		
+		color: @grayLight;
+	
+		&:hover, &:focus {
+			text-decoration: none;
+  			background-color: transparent;
+  			background-image: none; // Remove CSS gradient
+  			.reset-filter();
+  			cursor: default;
+  		}
+	}
+}
+
+
 
 } // .tabula-page
 
